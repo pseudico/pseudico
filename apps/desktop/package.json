@@ -1,0 +1,17 @@
+{
+  "name": "@local-work-os/desktop",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node -e \"console.log('Desktop shell will be implemented in LWO-M1-001.')\"",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run tests --passWithNoTests",
+    "build": "tsc -p tsconfig.json",
+    "package": "pnpm build"
+  },
+  "dependencies": {
+    "@local-work-os/core": "workspace:*"
+  }
+}
