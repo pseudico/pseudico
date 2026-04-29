@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+out/
+coverage/
+playwright-report/
+test-results/
+
+# Local runtime data
+*.log
+*.tmp
+*.db
+*.db-shm
+*.db-wal
+
+# Planning source bundles kept locally outside the normalized repo docs
+*.zip
+local-work-os-*.md
+local-work-os-codex-agentic-supervision-pack/
+local-work-os-instruction-set-bundle/
+local-work-os-m0-m1-individual-ticket-md-files/
+local-work-os-m2-m8-individual-ticket-md-files/
+local-work-os-m9-m14-individual-ticket-md-files/
+local-work-os-missing-aggregate-docs-fix/
