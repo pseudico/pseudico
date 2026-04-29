@@ -42,3 +42,27 @@ Out of scope unless explicitly approved:
 The first implementation wave is M0/M1: repository governance, Electron shell,
 local workspace creation, SQLite/Drizzle foundation, migrations, seed data,
 activity logging, search foundation, health UI, and smoke tests.
+
+## Monorepo
+
+This repo is a pnpm TypeScript workspace:
+
+- `apps/desktop` - future Electron/Vite/React desktop app.
+- `packages/core` - shared core types, constants, and guardrails.
+- `packages/db` - future SQLite/Drizzle database layer.
+- `packages/features` - future feature services and module boundaries.
+- `packages/ui` - future shared UI primitives.
+- `packages/test-utils` - future shared test utilities.
+
+Install and verify:
+
+```bash
+pnpm install
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+`pnpm dev` and `pnpm package` are wired to the desktop package. They are
+placeholders until the Electron shell is implemented in `LWO-M1-001`.

@@ -7,6 +7,9 @@ dist/
 build/
 out/
 coverage/
+.turbo/
+.vite/
+*.tsbuildinfo
 playwright-report/
 test-results/
 
