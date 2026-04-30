@@ -5,11 +5,12 @@ import {
   type CreateWorkspaceInput,
   type OpenWorkspaceInput,
   type RecentWorkspace,
-  type WorkspaceSummary
+  type ValidateWorkspaceInput,
+  type WorkspaceSummary,
+  type WorkspaceValidationResult
 } from "../../preload/api";
-
-const workspaceImplementationMessage =
-  "Workspace filesystem operations are reserved for LWO-M1-003.";
+import { WorkspaceFileSystemError } from "../services/workspace/WorkspaceFileSystemError";
+import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -33,36 +34,99 @@ function validateOpenWorkspaceInput(input: unknown): input is OpenWorkspaceInput
   return isRecord(input) && isNonEmptyString(input.rootPath);
 }
 
-export function handleCreateWorkspace(
+function validateValidateWorkspaceInput(
   input: unknown
-): ApiResult<WorkspaceSummary> {
-  if (!validateCreateWorkspaceInput(input)) {
+): input is ValidateWorkspaceInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.rootPath) &&
+    (input.repair === undefined || typeof input.repair === "boolean")
+  );
+}
+
+function workspaceError<T>(error: unknown): ApiResult<T> {
+  if (error instanceof WorkspaceFileSystemError) {
     return apiError(
-      "INVALID_INPUT",
-      "createWorkspace requires non-empty name and rootPath fields."
+      error.code === "INVALID_INPUT" || error.code === "INVALID_PATH"
+        ? "INVALID_INPUT"
+        : "WORKSPACE_ERROR",
+      error.message
     );
   }
 
-  return apiError("NOT_IMPLEMENTED", workspaceImplementationMessage);
+  return apiError(
+    "WORKSPACE_ERROR",
+    error instanceof Error ? error.message : "Workspace operation failed."
+  );
 }
 
-export function handleOpenWorkspace(
-  input: unknown
-): ApiResult<WorkspaceSummary> {
-  if (!validateOpenWorkspaceInput(input)) {
-    return apiError(
-      "INVALID_INPUT",
-      "openWorkspace requires a non-empty rootPath field."
-    );
-  }
+export type WorkspaceIpcHandlers = {
+  handleCreateWorkspace: (
+    input: unknown
+  ) => Promise<ApiResult<WorkspaceSummary>>;
+  handleOpenWorkspace: (input: unknown) => Promise<ApiResult<WorkspaceSummary>>;
+  handleValidateWorkspace: (
+    input: unknown
+  ) => Promise<ApiResult<WorkspaceValidationResult>>;
+  handleGetCurrentWorkspace: () => ApiResult<WorkspaceSummary | null>;
+  handleListRecentWorkspaces: () => Promise<ApiResult<RecentWorkspace[]>>;
+};
 
-  return apiError("NOT_IMPLEMENTED", workspaceImplementationMessage);
-}
+export function createWorkspaceIpcHandlers(
+  workspaceService: WorkspaceFileSystemService
+): WorkspaceIpcHandlers {
+  return {
+    async handleCreateWorkspace(input) {
+      if (!validateCreateWorkspaceInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "createWorkspace requires non-empty name and rootPath fields."
+        );
+      }
 
-export function handleGetCurrentWorkspace(): ApiResult<WorkspaceSummary | null> {
-  return apiOk(null);
-}
+      try {
+        return apiOk(await workspaceService.createWorkspace(input));
+      } catch (error) {
+        return workspaceError(error);
+      }
+    },
 
-export function handleListRecentWorkspaces(): ApiResult<RecentWorkspace[]> {
-  return apiOk([]);
+    async handleOpenWorkspace(input) {
+      if (!validateOpenWorkspaceInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "openWorkspace requires a non-empty rootPath field."
+        );
+      }
+
+      try {
+        return apiOk(await workspaceService.openWorkspace(input));
+      } catch (error) {
+        return workspaceError(error);
+      }
+    },
+
+    async handleValidateWorkspace(input) {
+      if (!validateValidateWorkspaceInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "validateWorkspace requires a non-empty rootPath field and optional repair boolean."
+        );
+      }
+
+      try {
+        return apiOk(await workspaceService.validateWorkspace(input));
+      } catch (error) {
+        return workspaceError(error);
+      }
+    },
+
+    handleGetCurrentWorkspace() {
+      return apiOk(workspaceService.getCurrentWorkspace());
+    },
+
+    async handleListRecentWorkspaces() {
+      return apiOk(await workspaceService.listRecentWorkspaces());
+    }
+  };
 }

@@ -40,6 +40,22 @@ function createMockApi(
           openedAt: "2026-04-30T00:00:00.000Z",
           schemaVersion: null
         }),
+      validateWorkspace: async () =>
+        apiOk({
+          ok: true,
+          workspaceRootPath: "C:\\work",
+          paths: {
+            workspaceRootPath: "C:\\work",
+            manifestPath: "C:\\work\\workspace.json",
+            dataPath: "C:\\work\\data",
+            databasePath: "C:\\work\\data\\local-work-os.sqlite",
+            attachmentsPath: "C:\\work\\attachments",
+            backupsPath: "C:\\work\\backups",
+            exportsPath: "C:\\work\\exports",
+            logsPath: "C:\\work\\logs"
+          },
+          problems: []
+        }),
       getCurrentWorkspace: async (): Promise<
         ApiResult<WorkspaceSummary | null>
       > => apiOk(null),

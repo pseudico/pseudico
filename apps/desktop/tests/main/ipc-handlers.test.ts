@@ -1,30 +1,66 @@
 import { describe, expect, it } from "vitest";
 import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandlers";
 import { handleGetModuleStatus } from "../../src/main/ipc/moduleStatusHandlers";
-import {
-  handleCreateWorkspace,
-  handleGetCurrentWorkspace,
-  handleListRecentWorkspaces,
-  handleOpenWorkspace
-} from "../../src/main/ipc/workspaceHandlers";
+import { createWorkspaceIpcHandlers } from "../../src/main/ipc/workspaceHandlers";
+import type { WorkspaceFileSystemService } from "../../src/main/services/workspace/WorkspaceFileSystemService";
+
+function createMockWorkspaceService(): WorkspaceFileSystemService {
+  return {
+    createWorkspace: async () => ({
+      id: "workspace_1",
+      name: "Personal",
+      rootPath: "C:\\work",
+      openedAt: "2026-04-30T00:00:00.000Z",
+      schemaVersion: 1
+    }),
+    openWorkspace: async () => ({
+      id: "workspace_1",
+      name: "Personal",
+      rootPath: "C:\\work",
+      openedAt: "2026-04-30T00:00:00.000Z",
+      schemaVersion: 1
+    }),
+    validateWorkspace: async () => ({
+      ok: true,
+      workspaceRootPath: "C:\\work",
+      paths: {
+        workspaceRootPath: "C:\\work",
+        manifestPath: "C:\\work\\workspace.json",
+        dataPath: "C:\\work\\data",
+        databasePath: "C:\\work\\data\\local-work-os.sqlite",
+        attachmentsPath: "C:\\work\\attachments",
+        backupsPath: "C:\\work\\backups",
+        exportsPath: "C:\\work\\exports",
+        logsPath: "C:\\work\\logs"
+      },
+      problems: []
+    }),
+    getCurrentWorkspace: () => null,
+    listRecentWorkspaces: async () => []
+  } as unknown as WorkspaceFileSystemService;
+}
 
 describe("workspace IPC handlers", () => {
-  it("returns an empty current workspace placeholder", () => {
-    expect(handleGetCurrentWorkspace()).toEqual({
+  const handlers = createWorkspaceIpcHandlers(createMockWorkspaceService());
+
+  it("returns the current workspace through the service", () => {
+    expect(handlers.handleGetCurrentWorkspace()).toEqual({
       ok: true,
       data: null
     });
   });
 
-  it("returns an empty recent workspace placeholder", () => {
-    expect(handleListRecentWorkspaces()).toEqual({
+  it("returns recent workspaces through the service", async () => {
+    await expect(handlers.handleListRecentWorkspaces()).resolves.toEqual({
       ok: true,
       data: []
     });
   });
 
-  it("validates create workspace input before placeholder behavior", () => {
-    expect(handleCreateWorkspace({ name: "", rootPath: "C:\\work" })).toEqual({
+  it("validates create workspace input before service calls", async () => {
+    await expect(
+      handlers.handleCreateWorkspace({ name: "", rootPath: "C:\\work" })
+    ).resolves.toEqual({
       ok: false,
       error: {
         code: "INVALID_INPUT",
@@ -32,19 +68,18 @@ describe("workspace IPC handlers", () => {
       }
     });
 
-    expect(
-      handleCreateWorkspace({ name: "Personal", rootPath: "C:\\work" })
-    ).toEqual({
-      ok: false,
-      error: {
-        code: "NOT_IMPLEMENTED",
-        message: "Workspace filesystem operations are reserved for LWO-M1-003."
+    await expect(
+      handlers.handleCreateWorkspace({ name: "Personal", rootPath: "C:\\work" })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: "workspace_1"
       }
     });
   });
 
-  it("validates open workspace input before placeholder behavior", () => {
-    expect(handleOpenWorkspace({ rootPath: "" })).toEqual({
+  it("validates open and validate workspace input before service calls", async () => {
+    await expect(handlers.handleOpenWorkspace({ rootPath: "" })).resolves.toEqual({
       ok: false,
       error: {
         code: "INVALID_INPUT",
@@ -52,11 +87,23 @@ describe("workspace IPC handlers", () => {
       }
     });
 
-    expect(handleOpenWorkspace({ rootPath: "C:\\work" })).toEqual({
+    await expect(
+      handlers.handleValidateWorkspace({ rootPath: "", repair: true })
+    ).resolves.toEqual({
       ok: false,
       error: {
-        code: "NOT_IMPLEMENTED",
-        message: "Workspace filesystem operations are reserved for LWO-M1-003."
+        code: "INVALID_INPUT",
+        message:
+          "validateWorkspace requires a non-empty rootPath field and optional repair boolean."
+      }
+    });
+
+    await expect(
+      handlers.handleOpenWorkspace({ rootPath: "C:\\work" })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: "workspace_1"
       }
     });
   });
