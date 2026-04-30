@@ -11,10 +11,18 @@ export {
 export {
   ContainerRepository,
   type ContainerRecord,
-  type ContainerTabRecord,
-  type CreateDefaultContainerTabInput,
+  type CreateContainerInput,
+  type ListContainersFilter,
+  type UpdateContainerPatch,
   type CreateSystemInboxInput
 } from "./ContainerRepository";
+export {
+  ContainerTabRepository,
+  type ContainerTabRecord,
+  type CreateContainerTabInput,
+  type CreateDefaultContainerTabInput,
+  type EnsureDefaultContainerTabInput
+} from "./ContainerTabRepository";
 export {
   DashboardRepository,
   type CreateDashboardWidgetInput,
@@ -25,5 +33,21 @@ export {
 export {
   WorkspaceRepository,
   type CreateWorkspaceRecordInput,
+  type UpdateWorkspaceLastOpenedInput,
   type WorkspaceRecord
 } from "./WorkspaceRepository";
+export {
+  ItemRepository,
+  type CreateItemInput,
+  type ItemRecord,
+  type ListItemsFilter,
+  type MoveItemInput,
+  type UpdateItemPatch
+} from "./ItemRepository";
+export {
+  SearchIndexRepository,
+  type RemoveSearchIndexInput,
+  type SearchIndexOptions,
+  type SearchIndexRecord,
+  type UpsertSearchIndexInput
+} from "./SearchIndexRepository";
