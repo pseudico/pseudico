@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "electron-vite dev",
     "lint": "eslint src tests --ext .ts,.tsx",
-    "typecheck": "tsc -b tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --config vitest.config.ts --passWithNoTests",
     "build": "electron-vite build",
     "package": "pnpm build"

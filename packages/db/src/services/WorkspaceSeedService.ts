@@ -1,4 +1,3 @@
-import { createLocalId, createIsoTimestamp } from "@local-work-os/core";
 import type { DatabaseConnection } from "../connection/createDatabaseConnection";
 import {
   ActivityLogRepository,
@@ -78,7 +77,7 @@ export class WorkspaceSeedService {
   }) {
     this.connection = input.connection;
     this.now = input.now ?? (() => new Date());
-    this.idFactory = input.idFactory ?? ((prefix) => createLocalId(prefix));
+    this.idFactory = input.idFactory ?? ((prefix) => createSeedId(prefix));
     this.activityLogRepository = new ActivityLogRepository(input.connection);
     this.appSettingsRepository = new AppSettingsRepository(input.connection);
     this.containerRepository = new ContainerRepository(input.connection);
@@ -342,4 +341,23 @@ function dashboardWidgetTitle(
     case "recent_activity":
       return "Recent Activity";
   }
+}
+
+function createIsoTimestamp(date: Date): string {
+  return date.toISOString();
+}
+
+function createSeedId(
+  prefix: string,
+  date: Date = new Date(),
+  random: () => number = Math.random
+): string {
+  const safePrefix = prefix.trim().replace(/[^a-zA-Z0-9_-]/g, "_");
+  const timestamp = date.getTime().toString(36);
+  const entropy = Math.floor(random() * Number.MAX_SAFE_INTEGER)
+    .toString(36)
+    .padStart(11, "0")
+    .slice(0, 11);
+
+  return `${safePrefix}_${timestamp}_${entropy}`;
 }
