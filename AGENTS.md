@@ -1,65 +1,72 @@
 # AGENTS.md
 
-## Project mission
+## Project Mission
 
-Build Local Work OS: an original local-only desktop productivity app for projects, contacts, Inbox, tasks, lists, notes, files, links, tags, categories, relationships, search, saved views, collections, dashboards, Today planning, timeline/calendar, templates, workflows, backup/export/import, and local maintenance tools.
+Build Local Work OS: an original local-only desktop productivity app for
+projects, contacts, Inbox, tasks, lists, notes, files, links, tags, categories,
+relationships, search, saved views, collections, dashboards, Today planning,
+timeline/calendar, templates, workflows, backup/export/import, and local
+maintenance tools.
 
-The app is inspired by the broad category of local-first productivity/work-management tools. Do not copy proprietary branding, screenshots, wording, icons, visual design, source code, or assets from any reference product.
+The app is inspired by the broad category of local-first productivity and work
+management tools. Do not copy proprietary branding, screenshots, wording,
+icons, visual design, source code, or assets from any reference product.
 
 ## Scope
 
 In scope:
 
-- Desktop app
-- Local workspace folder
-- SQLite database
-- Local attachment storage
-- Local search
-- Local backup/export/import
-- Single-user workflows
-- Local browser capture later
-- Local automation later
+- Desktop app.
+- Local workspace folder.
+- SQLite database.
+- Local attachment storage.
+- Local search.
+- Local backup/export/import.
+- Single-user workflows.
+- Local browser capture later.
+- Local automation later.
 
-Out of scope:
+Out of scope unless explicitly approved:
 
-- Cloud sync
-- Mobile apps
-- Team collaboration
-- Hosted accounts
-- Billing/licensing systems
-- Public sharing
-- Remote file storage
-- Telemetry/analytics unless explicitly approved
+- Cloud sync.
+- Mobile apps.
+- Team collaboration.
+- Hosted accounts.
+- Billing or licensing systems.
+- Public sharing.
+- Remote file storage.
+- Telemetry or analytics.
 
-## Tech stack
+## Tech Stack
 
-- TypeScript
-- Electron
-- React
-- Vite
-- SQLite
-- Drizzle ORM
-- pnpm workspaces
-- Vitest
-- React Testing Library
-- Playwright
-- electron-builder
+- TypeScript.
+- Electron.
+- React.
+- Vite.
+- SQLite.
+- Drizzle ORM.
+- pnpm workspaces.
+- Vitest.
+- React Testing Library.
+- Playwright.
+- electron-builder.
 
-## Architecture rules
+## Architecture Rules
 
 - Business logic belongs in `packages/core` or `packages/features`.
-- Database access must go through repositories/services.
+- Database access must go through repositories or services.
 - React components must not call SQLite directly.
 - Renderer code must not access Node filesystem APIs directly.
 - Filesystem actions must go through Electron main/preload IPC.
 - All data-changing operations must create activity log entries.
-- Searchable content changes must update the search index.
-- Prefer soft delete over hard delete.
+- Searchable content changes must update the search index when the search
+  service exists.
+- Prefer soft delete over hard delete for user data.
 - Keep file paths workspace-relative where possible.
 - Do not introduce cloud dependencies.
 - Keep feature work scoped to the linked Linear issue.
 
-## Dependency direction
+## Dependency Direction
 
 ```text
 apps/desktop
@@ -78,21 +85,35 @@ packages/core
   must not depend on React, Electron, SQLite, or UI packages
 ```
 
-## Standard write flow
+## Standard Write Flow
 
 Every data-changing feature should follow this pattern:
 
 ```text
 validate input
-  → start transaction
-  → write domain data
-  → write activity_log event
-  → update search index if relevant
-  → commit transaction
-  → notify UI/query cache
+  -> start transaction
+  -> write domain data
+  -> write activity_log event
+  -> update search index if relevant
+  -> commit transaction
+  -> notify UI/query cache
 ```
 
-## Development workflow
+## Documentation Sources
+
+Read these before implementing related work:
+
+- `docs/README.md` for the documentation map.
+- `docs/PRODUCT_SPEC.md` for product scope and feature expectations.
+- `docs/ARCHITECTURE.md` for system boundaries.
+- `docs/DATA_MODEL.md` for workspace and domain model direction.
+- `docs/OPERATING_PLAN.md` for Linear/GitHub/Codex operating rules.
+- `docs/TESTING.md` for verification expectations.
+- `docs/SECURITY.md` for Electron, local filesystem, and privacy guardrails.
+- `docs/MODULE_REGISTRY.md` for planned module responsibilities.
+- `docs/DECISIONS/` for accepted architecture decisions.
+
+## Development Workflow
 
 Before implementation:
 
@@ -101,7 +122,7 @@ Before implementation:
 3. Produce a short plan.
 4. Identify files likely to change.
 5. Identify risks and assumptions.
-6. Identify tests to add/update.
+6. Identify tests to add or update.
 
 During implementation:
 
@@ -118,10 +139,10 @@ Before opening a PR:
 - Run `pnpm typecheck`.
 - Run `pnpm test`.
 - Run `pnpm build` where relevant.
-- Update docs if behaviour, architecture, or schema changed.
+- Update docs if behavior, architecture, or schema changed.
 - Fill the PR template.
 
-## Review guidelines
+## Review Guidelines
 
 Flag as high priority:
 
@@ -137,7 +158,7 @@ Flag as high priority:
 - Missing tests for new domain logic.
 - Scope creep beyond the Linear issue.
 
-## Done means
+## Done Means
 
 A task is done only when:
 
@@ -147,4 +168,3 @@ A task is done only when:
 - PR template is completed.
 - Known limitations are documented.
 - Human reviewer approves.
-```
