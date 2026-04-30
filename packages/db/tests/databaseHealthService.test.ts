@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createDatabaseConnection,
   DatabaseHealthService,
+  MigrationService,
   resolveWorkspaceDatabasePath,
   type DatabaseConnection
 } from "../src";
@@ -34,7 +35,7 @@ describe("DatabaseHealthService", () => {
     });
   });
 
-  it("reports connected health and schema version for a valid connection", async () => {
+  it("reports pending migration health for a valid un-migrated connection", async () => {
     connection = await createDatabaseConnection({
       databasePath: resolveWorkspaceDatabasePath(tempRoot)
     });
@@ -45,6 +46,24 @@ describe("DatabaseHealthService", () => {
       connected: true,
       databasePath: connection.databasePath,
       schemaVersion: 0,
+      migrationTableAvailable: true,
+      pendingMigrationCount: 1,
+      error: null
+    });
+  });
+
+  it("reports schema version after migrations run", async () => {
+    connection = await createDatabaseConnection({
+      databasePath: resolveWorkspaceDatabasePath(tempRoot)
+    });
+    new MigrationService({ connection }).runPendingMigrations();
+
+    await expect(
+      new DatabaseHealthService({ connection }).getHealthReport()
+    ).resolves.toEqual({
+      connected: true,
+      databasePath: connection.databasePath,
+      schemaVersion: 1,
       migrationTableAvailable: true,
       pendingMigrationCount: 0,
       error: null

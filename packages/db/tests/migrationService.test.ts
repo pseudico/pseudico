@@ -32,7 +32,7 @@ describe("MigrationService", () => {
 
   it("reports version zero and no pending migrations on an empty DB", () => {
     expect(connection).not.toBeNull();
-    const service = new MigrationService({ connection: connection! });
+    const service = new MigrationService({ connection: connection!, migrations: [] });
 
     expect(service.getCurrentSchemaVersion()).toBe(0);
     expect(service.getMigrationStatus()).toEqual({
