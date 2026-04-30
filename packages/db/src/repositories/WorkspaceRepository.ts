@@ -23,6 +23,11 @@ export type CreateWorkspaceRecordInput = {
   timestamp: string;
 };
 
+export type UpdateWorkspaceLastOpenedInput = {
+  workspaceId: string;
+  timestamp: string;
+};
+
 export class WorkspaceRepository {
   private readonly connection: DatabaseConnection;
 
@@ -40,6 +45,10 @@ export class WorkspaceRepository {
       .get(id);
 
     return row === undefined ? null : toWorkspaceRecord(row);
+  }
+
+  getById(id: string): WorkspaceRecord | null {
+    return this.findById(id);
   }
 
   create(input: CreateWorkspaceRecordInput): WorkspaceRecord {
@@ -63,6 +72,24 @@ export class WorkspaceRepository {
     }
 
     return created;
+  }
+
+  updateLastOpened(input: UpdateWorkspaceLastOpenedInput): WorkspaceRecord {
+    this.connection.sqlite
+      .prepare(
+        `update workspaces
+         set updated_at = ?
+         where id = ?`
+      )
+      .run(input.timestamp, input.workspaceId);
+
+    const updated = this.findById(input.workspaceId);
+
+    if (updated === null) {
+      throw new Error(`Workspace row was not found: ${input.workspaceId}.`);
+    }
+
+    return updated;
   }
 }
 

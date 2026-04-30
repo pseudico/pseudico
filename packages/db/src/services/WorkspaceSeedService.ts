@@ -3,6 +3,7 @@ import {
   ActivityLogRepository,
   AppSettingsRepository,
   ContainerRepository,
+  ContainerTabRepository,
   DashboardRepository,
   WorkspaceRepository,
   type ActivityLogRecord,
@@ -65,6 +66,7 @@ export class WorkspaceSeedService {
   private readonly appSettingsRepository: AppSettingsRepository;
   private readonly connection: DatabaseConnection;
   private readonly containerRepository: ContainerRepository;
+  private readonly containerTabRepository: ContainerTabRepository;
   private readonly dashboardRepository: DashboardRepository;
   private readonly idFactory: IdFactory;
   private readonly now: () => Date;
@@ -81,6 +83,7 @@ export class WorkspaceSeedService {
     this.activityLogRepository = new ActivityLogRepository(input.connection);
     this.appSettingsRepository = new AppSettingsRepository(input.connection);
     this.containerRepository = new ContainerRepository(input.connection);
+    this.containerTabRepository = new ContainerTabRepository(input.connection);
     this.dashboardRepository = new DashboardRepository(input.connection);
     this.workspaceRepository = new WorkspaceRepository(input.connection);
   }
@@ -181,7 +184,7 @@ export class WorkspaceSeedService {
     containerId: string,
     timestamp: string
   ): SeedRowStatus<ContainerTabRecord> {
-    const existing = this.containerRepository.findDefaultTab(containerId);
+    const existing = this.containerTabRepository.findDefaultTab(containerId);
 
     if (existing !== null) {
       return {
@@ -191,7 +194,7 @@ export class WorkspaceSeedService {
     }
 
     return {
-      record: this.containerRepository.createDefaultTab({
+      record: this.containerTabRepository.createDefaultTab({
         id: this.idFactory("container_tab"),
         workspaceId,
         containerId,

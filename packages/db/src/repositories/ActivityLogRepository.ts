@@ -100,6 +100,34 @@ export class ActivityLogRepository {
 
     return toActivityLogRecord(created);
   }
+
+  listRecent(workspaceId: string, limit = 20): ActivityLogRecord[] {
+    const rows = this.connection.sqlite
+      .prepare<[string, number], ActivityLogRow>(
+        `select *
+         from activity_log
+         where workspace_id = ?
+         order by created_at desc
+         limit ?`
+      )
+      .all(workspaceId, limit);
+
+    return rows.map(toActivityLogRecord);
+  }
+
+  listForTarget(targetType: string, targetId: string): ActivityLogRecord[] {
+    const rows = this.connection.sqlite
+      .prepare<[string, string], ActivityLogRow>(
+        `select *
+         from activity_log
+         where target_type = ?
+           and target_id = ?
+         order by created_at desc`
+      )
+      .all(targetType, targetId);
+
+    return rows.map(toActivityLogRecord);
+  }
 }
 
 function toActivityLogRecord(row: ActivityLogRow): ActivityLogRecord {
