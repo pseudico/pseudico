@@ -25,6 +25,12 @@ export type { FeatureModuleContract, FeatureModulePriority } from "./featureModu
 export { backupModuleContract } from "./backup";
 export { calendarModuleContract } from "./calendar";
 export { contactsModuleContract } from "./contacts";
+export { CreateContainerCommand } from "./containers";
+export type {
+  CreateContainerCommandIdFactory,
+  CreateContainerCommandInput,
+  CreateContainerCommandResult
+} from "./containers";
 export { dashboardModuleContract } from "./dashboard";
 export { exportModuleContract } from "./export";
 export { filesModuleContract } from "./files";

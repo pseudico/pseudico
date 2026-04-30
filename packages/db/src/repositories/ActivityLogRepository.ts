@@ -7,6 +7,7 @@ type ActivityLogRow = {
   action: string;
   target_type: string;
   target_id: string;
+  summary: string | null;
   before_json: string | null;
   after_json: string | null;
   created_at: string;
@@ -19,6 +20,7 @@ export type ActivityLogRecord = {
   action: string;
   targetType: string;
   targetId: string;
+  summary: string | null;
   beforeJson: string | null;
   afterJson: string | null;
   createdAt: string;
@@ -31,6 +33,7 @@ export type CreateActivityLogInput = {
   action: string;
   targetType: string;
   targetId: string;
+  summary?: string | null;
   beforeJson?: string | null;
   afterJson?: string | null;
   timestamp: string;
@@ -69,10 +72,11 @@ export class ActivityLogRepository {
           action,
           target_type,
           target_id,
+          summary,
           before_json,
           after_json,
           created_at
-        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
         input.id,
@@ -81,6 +85,7 @@ export class ActivityLogRepository {
         input.action,
         input.targetType,
         input.targetId,
+        input.summary ?? null,
         input.beforeJson ?? null,
         input.afterJson ?? null,
         input.timestamp
@@ -138,6 +143,7 @@ function toActivityLogRecord(row: ActivityLogRow): ActivityLogRecord {
     action: row.action,
     targetType: row.target_type,
     targetId: row.target_id,
+    summary: row.summary,
     beforeJson: row.before_json,
     afterJson: row.after_json,
     createdAt: row.created_at

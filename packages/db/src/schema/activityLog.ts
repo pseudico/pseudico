@@ -13,6 +13,7 @@ export const activityLog = sqliteTable(
     action: text("action").notNull(),
     targetType: text("target_type").notNull(),
     targetId: text("target_id").notNull(),
+    summary: text("summary"),
     beforeJson: text("before_json"),
     afterJson: text("after_json"),
     createdAt: text("created_at").notNull()
