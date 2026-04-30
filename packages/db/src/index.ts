@@ -20,5 +20,20 @@ export {
   DatabaseHealthService,
   type DatabaseHealthReport
 } from "./services/DatabaseHealthService";
+export {
+  DatabaseBootstrapService,
+  type BootstrapWorkspaceDatabaseInput,
+  type DatabaseBootstrapResult
+} from "./services/DatabaseBootstrapService";
 export { migrations } from "./migrations";
+export * from "./repositories";
 export * as schema from "./schema";
+export {
+  DEFAULT_APP_SETTINGS,
+  DEFAULT_DASHBOARD_WIDGET_TYPES,
+  WorkspaceSeedService,
+  type IdFactory,
+  type SeedRowStatus,
+  type WorkspaceSeedInput,
+  type WorkspaceSeedResult
+} from "./services/WorkspaceSeedService";
