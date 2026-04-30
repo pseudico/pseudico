@@ -87,6 +87,62 @@ describe("WorkspaceFileSystemService", () => {
     }
   });
 
+  it("runs database bootstrap during workspace create and open", async () => {
+    const bootstrapCalls: Array<{
+      databasePath: string;
+      workspaceId: string;
+      workspaceName: string;
+    }> = [];
+    const service = new WorkspaceFileSystemService({
+      recentWorkspacesService: new RecentWorkspacesService(
+        join(tempRoot, "app-user-data", "recent-workspaces.json")
+      ),
+      databaseBootstrapService: {
+        async bootstrapWorkspaceDatabase(input) {
+          bootstrapCalls.push(input);
+
+          return {
+            workspaceId: input.workspaceId,
+            schemaVersion: 1
+          };
+        }
+      },
+      now: () => now
+    });
+    const workspaceRootPath = join(tempRoot, "Bootstrap");
+
+    const created = await service.createWorkspace({
+      name: "Bootstrap",
+      rootPath: workspaceRootPath
+    });
+
+    expect(bootstrapCalls).toEqual([
+      {
+        databasePath: join(workspaceRootPath, "data", "local-work-os.sqlite"),
+        workspaceId: created.id,
+        workspaceName: "Bootstrap"
+      }
+    ]);
+
+    now = new Date("2026-04-30T02:00:00.000Z");
+    const opened = await service.openWorkspace({
+      rootPath: workspaceRootPath
+    });
+
+    expect(bootstrapCalls).toEqual([
+      {
+        databasePath: join(workspaceRootPath, "data", "local-work-os.sqlite"),
+        workspaceId: created.id,
+        workspaceName: "Bootstrap"
+      },
+      {
+        databasePath: join(workspaceRootPath, "data", "local-work-os.sqlite"),
+        workspaceId: opened.id,
+        workspaceName: "Bootstrap"
+      }
+    ]);
+  });
+
   it("validates, repairs, and opens an existing workspace", async () => {
     const service = createService();
     const workspaceRootPath = join(tempRoot, "Existing");

@@ -17,5 +17,6 @@
     "src/**/*.tsx",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-  ]
+  ],
+  "references": [{ "path": "../../packages/core" }, { "path": "../../packages/db" }]
 }

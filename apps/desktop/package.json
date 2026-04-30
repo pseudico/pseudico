@@ -7,13 +7,14 @@
   "scripts": {
     "dev": "electron-vite dev",
     "lint": "eslint src tests --ext .ts,.tsx",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -b tsconfig.json --noEmit",
     "test": "vitest run --config vitest.config.ts --passWithNoTests",
     "build": "electron-vite build",
     "package": "pnpm build"
   },
   "dependencies": {
     "@local-work-os/core": "workspace:*",
+    "@local-work-os/db": "workspace:*",
     "lucide-react": "^1.14.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",

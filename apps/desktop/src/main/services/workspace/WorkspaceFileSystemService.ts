@@ -41,16 +41,36 @@ export type ValidateWorkspaceServiceInput = {
   repair?: boolean;
 };
 
+export type WorkspaceDatabaseBootstrapInput = {
+  databasePath: string;
+  workspaceId: string;
+  workspaceName: string;
+};
+
+export type WorkspaceDatabaseBootstrapResult = {
+  workspaceId: string;
+  schemaVersion: number;
+};
+
+export type WorkspaceDatabaseBootstrapService = {
+  bootstrapWorkspaceDatabase: (
+    input: WorkspaceDatabaseBootstrapInput
+  ) => Promise<WorkspaceDatabaseBootstrapResult>;
+};
+
 export class WorkspaceFileSystemService {
+  private readonly databaseBootstrapService: WorkspaceDatabaseBootstrapService | null;
   private readonly recentWorkspacesService: RecentWorkspacesService;
   private readonly now: () => Date;
   private currentWorkspace: WorkspaceSummary | null = null;
 
   constructor(input: {
     recentWorkspacesService: RecentWorkspacesService;
+    databaseBootstrapService?: WorkspaceDatabaseBootstrapService | null;
     now?: () => Date;
   }) {
     this.recentWorkspacesService = input.recentWorkspacesService;
+    this.databaseBootstrapService = input.databaseBootstrapService ?? null;
     this.now = input.now ?? (() => new Date());
   }
 
@@ -80,7 +100,9 @@ export class WorkspaceFileSystemService {
     });
 
     await this.writeWorkspaceManifest(workspaceRootPath, manifest);
-    const summary = workspaceSummaryFromManifest(workspaceRootPath, manifest);
+    const summary = await this.bootstrapDatabaseForSummary(
+      workspaceSummaryFromManifest(workspaceRootPath, manifest)
+    );
     await this.rememberWorkspace(summary);
     this.currentWorkspace = summary;
 
@@ -109,9 +131,8 @@ export class WorkspaceFileSystemService {
     };
 
     await this.writeWorkspaceManifest(validation.workspaceRootPath, manifest);
-    const summary = workspaceSummaryFromManifest(
-      validation.workspaceRootPath,
-      manifest
+    const summary = await this.bootstrapDatabaseForSummary(
+      workspaceSummaryFromManifest(validation.workspaceRootPath, manifest)
     );
     await this.rememberWorkspace(summary);
     this.currentWorkspace = summary;
@@ -263,6 +284,26 @@ export class WorkspaceFileSystemService {
         )
       )
     );
+  }
+
+  private async bootstrapDatabaseForSummary(
+    summary: WorkspaceSummary
+  ): Promise<WorkspaceSummary> {
+    if (this.databaseBootstrapService === null) {
+      return summary;
+    }
+
+    const result =
+      await this.databaseBootstrapService.bootstrapWorkspaceDatabase({
+        databasePath: createWorkspacePaths(summary.rootPath).databasePath,
+        workspaceId: summary.id,
+        workspaceName: summary.name
+      });
+
+    return {
+      ...summary,
+      schemaVersion: result.schemaVersion
+    };
   }
 
   private async validateRequiredDirectories(
