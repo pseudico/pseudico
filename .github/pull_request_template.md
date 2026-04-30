@@ -4,14 +4,7 @@ Briefly describe what changed.
 
 ## Linear issue
 
-Closes: LWO-___
-
-## Strategic source documents
-
-- docs/PRODUCT_SPEC.md:
-- docs/OPERATING_PLAN.md:
-- docs/tickets/MASTER_TICKET_INVENTORY.md:
-- Relevant ticket pack:
+Closes: PSE-___
 
 ## Scope
 
@@ -26,6 +19,15 @@ What is intentionally not included?
 
 - 
 - 
+
+## Product spec references
+
+- docs/PRODUCT_SPEC.md:
+- docs/OPERATING_PLAN.md:
+- docs/ARCHITECTURE.md:
+- docs/DATA_MODEL.md:
+- docs/tickets/MASTER_TICKET_INVENTORY.md:
+- Relevant ticket pack:
 
 ## Implementation notes
 
@@ -80,6 +82,11 @@ Steps performed:
 ## Screenshots / recordings
 
 Add if UI changed.
+
+## Codex notes
+
+- Scope checked against the linked Linear issue:
+- Review concerns for humans/Codex:
 
 ## Known limitations / follow-up tickets
 
