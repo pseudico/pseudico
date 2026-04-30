@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "pnpm --filter @local-work-os/desktop dev",
     "lint": "eslint .",
-    "typecheck": "pnpm -r --workspace-concurrency=1 typecheck",
+    "typecheck": "pnpm --filter @local-work-os/core build && pnpm --filter @local-work-os/db build && pnpm -r --workspace-concurrency=1 typecheck",
     "test": "vitest run",
     "build": "pnpm -r --workspace-concurrency=1 build",
     "package": "pnpm --filter @local-work-os/desktop package"

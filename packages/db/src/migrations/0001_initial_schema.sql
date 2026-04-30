@@ -273,6 +273,7 @@ create table activity_log (
   action text not null,
   target_type text not null,
   target_id text not null,
+  summary text,
   before_json text,
   after_json text,
   created_at text not null

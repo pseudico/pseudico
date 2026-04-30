@@ -96,6 +96,9 @@ importers:
       '@local-work-os/core':
         specifier: workspace:*
         version: link:../core
+      '@local-work-os/db':
+        specifier: workspace:*
+        version: link:../db
 
   packages/test-utils:
     dependencies:

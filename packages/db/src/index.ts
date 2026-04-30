@@ -25,6 +25,15 @@ export {
   type BootstrapWorkspaceDatabaseInput,
   type DatabaseBootstrapResult
 } from "./services/DatabaseBootstrapService";
+export {
+  ActivityLogService,
+  type ActivityLogIdFactory,
+  type LogActivityEventInput
+} from "./services/ActivityLogService";
+export {
+  TransactionService,
+  type TransactionHandle
+} from "./services/TransactionService";
 export { migrations } from "./migrations";
 export * from "./repositories";
 export * as schema from "./schema";
