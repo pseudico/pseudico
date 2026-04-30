@@ -36,6 +36,11 @@ Database tickets should verify:
   exists.
 - Soft delete behavior is used where expected.
 
+Use `createTestDatabase` from `@local-work-os/test-utils` for tests that need a
+temporary workspace database path. The helper creates a disposable
+workspace-style `data/local-work-os.sqlite` location and cleans up the temp
+folder after the test.
+
 ## Electron IPC
 
 IPC tests should cover allowed calls, invalid inputs, and failure behavior.
