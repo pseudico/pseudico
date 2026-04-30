@@ -31,6 +31,8 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       createWorkspace: (input) =>
         callApi(() => api.workspace.createWorkspace(input)),
       openWorkspace: (input) => callApi(() => api.workspace.openWorkspace(input)),
+      validateWorkspace: (input) =>
+        callApi(() => api.workspace.validateWorkspace(input)),
       getCurrentWorkspace: () =>
         callApi(() => api.workspace.getCurrentWorkspace()),
       listRecentWorkspaces: () =>
@@ -61,6 +63,8 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().workspace.createWorkspace(input),
     openWorkspace: (input) =>
       getDesktopApiClient().workspace.openWorkspace(input),
+    validateWorkspace: (input) =>
+      getDesktopApiClient().workspace.validateWorkspace(input),
     getCurrentWorkspace: () =>
       getDesktopApiClient().workspace.getCurrentWorkspace(),
     listRecentWorkspaces: () =>

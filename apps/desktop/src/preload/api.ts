@@ -2,6 +2,7 @@ export type ApiErrorCode =
   | "INVALID_INPUT"
   | "IPC_ERROR"
   | "NOT_IMPLEMENTED"
+  | "WORKSPACE_ERROR"
   | "UNKNOWN_ERROR";
 
 export type ApiError = {
@@ -33,6 +34,45 @@ export type RecentWorkspace = {
   lastOpenedAt: string;
 };
 
+export type WorkspaceManifest = {
+  id: string;
+  name: string;
+  schemaVersion: number;
+  createdAt: string;
+  lastOpenedAt: string;
+  app: {
+    name: "Local Work OS";
+    workspaceFormat: 1;
+  };
+};
+
+export type WorkspacePaths = {
+  workspaceRootPath: string;
+  manifestPath: string;
+  dataPath: string;
+  databasePath: string;
+  attachmentsPath: string;
+  backupsPath: string;
+  exportsPath: string;
+  logsPath: string;
+};
+
+export type WorkspaceValidationProblem = {
+  code: string;
+  message: string;
+  severity: "error" | "warning";
+  repairable: boolean;
+  path?: string;
+};
+
+export type WorkspaceValidationResult = {
+  ok: boolean;
+  workspaceRootPath: string;
+  paths: WorkspacePaths;
+  problems: WorkspaceValidationProblem[];
+  manifest?: WorkspaceManifest;
+};
+
 export type CreateWorkspaceInput = {
   name: string;
   rootPath: string;
@@ -40,6 +80,11 @@ export type CreateWorkspaceInput = {
 
 export type OpenWorkspaceInput = {
   rootPath: string;
+};
+
+export type ValidateWorkspaceInput = {
+  rootPath: string;
+  repair?: boolean;
 };
 
 export type DatabaseHealthStatus = {
@@ -68,6 +113,7 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   workspace: {
     createWorkspace: "local-work-os:workspace:create-workspace",
     openWorkspace: "local-work-os:workspace:open-workspace",
+    validateWorkspace: "local-work-os:workspace:validate-workspace",
     getCurrentWorkspace: "local-work-os:workspace:get-current-workspace",
     listRecentWorkspaces: "local-work-os:workspace:list-recent-workspaces"
   },
@@ -93,6 +139,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.workspace.openWorkspace]: {
     input: OpenWorkspaceInput;
     result: ApiResult<WorkspaceSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.workspace.validateWorkspace]: {
+    input: ValidateWorkspaceInput;
+    result: ApiResult<WorkspaceValidationResult>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.workspace.getCurrentWorkspace]: {
     input: undefined;
@@ -141,6 +191,9 @@ export type LocalWorkOsApi = {
     openWorkspace: (
       input: OpenWorkspaceInput
     ) => Promise<ApiResult<WorkspaceSummary>>;
+    validateWorkspace: (
+      input: ValidateWorkspaceInput
+    ) => Promise<ApiResult<WorkspaceValidationResult>>;
     getCurrentWorkspace: () => Promise<ApiResult<WorkspaceSummary | null>>;
     listRecentWorkspaces: () => Promise<ApiResult<RecentWorkspace[]>>;
   };
@@ -187,6 +240,8 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.workspace.createWorkspace, input),
       openWorkspace: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.workspace.openWorkspace, input),
+      validateWorkspace: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.workspace.validateWorkspace, input),
       getCurrentWorkspace: () =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.workspace.getCurrentWorkspace,
