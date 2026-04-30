@@ -9,9 +9,17 @@ This repository is intentionally governed by scoped Linear tickets and small
 pull requests. The source planning artifacts have been normalized into stable
 repository docs:
 
+- `docs/README.md`
 - `docs/PRODUCT_SPEC.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DATA_MODEL.md`
 - `docs/OPERATING_PLAN.md`
+- `docs/TESTING.md`
+- `docs/SECURITY.md`
+- `docs/ROADMAP.md`
+- `docs/MODULE_REGISTRY.md`
 - `docs/COVERAGE_MATRIX.md`
+- `docs/DECISIONS/`
 - `docs/tickets/MASTER_TICKET_INVENTORY.md`
 - `docs/tickets/M0_M1_TICKET_PACK.md`
 - `docs/tickets/M2_M8_TICKET_PACK.md`

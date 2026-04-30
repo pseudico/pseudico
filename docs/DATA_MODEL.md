@@ -1,0 +1,83 @@
+# Data Model
+
+This document summarizes the planned local data model direction. It is not a
+schema migration. Concrete tables and columns should be introduced only through
+scoped database tickets.
+
+## Workspace
+
+A workspace is the local root for a user's data. It owns the SQLite database,
+workspace metadata, attachment storage, backup/export files, and local
+maintenance outputs.
+
+Planned responsibilities:
+
+- Store workspace identity and version metadata.
+- Track local folder layout and relative paths.
+- Support health checks and maintenance tasks.
+- Remain portable across local folders when possible.
+
+## Universal Containers
+
+Projects, contacts, Inbox, collections, and future organizational surfaces are
+modeled as containers where practical. Containers provide a common way to group
+items, show activity, attach files, display tabs, and participate in search.
+
+Expected container capabilities:
+
+- Stable local identity.
+- Title, description, status, and metadata.
+- Soft delete and archive behavior.
+- Relationships to other containers and items.
+- Searchable text projection.
+- Activity log coverage for data-changing operations.
+
+## Universal Items
+
+Tasks, notes, files, links, checklist entries, and similar records are modeled
+as items where practical. Items may belong to containers, appear in saved views,
+carry tags/categories, and participate in activity/search.
+
+Expected item capabilities:
+
+- Type-specific payloads with shared metadata.
+- Dates, status, and ordering where relevant.
+- Soft delete by default.
+- Attachment or link references where relevant.
+- Activity log coverage for create, update, move, complete, archive, restore,
+  and delete operations.
+
+## Relationships
+
+Relationships and backlinks connect containers and items without requiring a
+cloud graph service. They support cross-object navigation, project/contact
+context, related work, and future graph views.
+
+## Tags And Categories
+
+Tags and categories are local metadata systems. Tags support flexible labeling
+and saved views. Categories support more deliberate classification, color, and
+workflow grouping. Neither implies team assignment or cloud taxonomy.
+
+## Activity Log
+
+The activity log records meaningful data-changing operations. New write paths
+must include activity events in the same transaction as the domain write unless
+a ticket explicitly documents a different approach.
+
+## Search Index
+
+Searchable content should be projected into the local search index when the
+search service exists. Search updates must stay transactionally aligned with
+domain writes where practical.
+
+## Attachments
+
+Attachments are local files stored inside the workspace or referenced through
+workspace-relative paths where possible. Remote file storage is out of scope.
+
+## Source Documents
+
+This direction is derived from `docs/PRODUCT_SPEC.md`,
+`docs/COVERAGE_MATRIX.md`, and
+`docs/DECISIONS/ADR-0003-universal-container-item-model.md`.
