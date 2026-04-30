@@ -1,3 +1,24 @@
-// LWO-M1-004 only creates database infrastructure. Product tables are added by
-// later schema migration tickets.
-export const schemaVersion = 0;
+export { activityLog } from "./activityLog";
+export { appSettings } from "./appSettings";
+export { attachments } from "./attachments";
+export { categories } from "./categories";
+export { containerTabs } from "./containerTabs";
+export { containers } from "./containers";
+export { dailyPlanItems } from "./dailyPlanItems";
+export { dailyPlans } from "./dailyPlans";
+export { dashboardWidgets } from "./dashboardWidgets";
+export { dashboards } from "./dashboards";
+export { items } from "./items";
+export { links } from "./links";
+export { listDetails } from "./listDetails";
+export { listItems } from "./listItems";
+export { noteDetails } from "./noteDetails";
+export { relationships } from "./relationships";
+export { savedViews } from "./savedViews";
+export { searchIndex } from "./searchIndex";
+export { tags } from "./tags";
+export { taggings } from "./taggings";
+export { taskDetails } from "./taskDetails";
+export { workspaces } from "./workspaces";
+
+export const schemaVersion = 1;
