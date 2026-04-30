@@ -15,14 +15,21 @@ export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ["apps/**/*.ts", "packages/**/*.ts", "*.ts"],
+    files: ["apps/**/*.ts", "apps/**/*.tsx", "packages/**/*.ts", "*.ts"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module"
     },
     rules: {
+      "no-undef": "off",
       "no-console": "off",
       "@typescript-eslint/consistent-type-definitions": ["error", "type"]
+    }
+  },
+  {
+    files: ["**/*.d.ts"],
+    rules: {
+      "@typescript-eslint/consistent-type-definitions": "off"
     }
   }
 ];

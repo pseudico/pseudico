@@ -3,15 +3,29 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "dist/main/index.js",
   "scripts": {
-    "dev": "node -e \"console.log('Desktop shell will be implemented in LWO-M1-001.')\"",
-    "lint": "eslint src --ext .ts",
+    "dev": "electron-vite dev",
+    "lint": "eslint src tests --ext .ts,.tsx",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run tests --passWithNoTests",
-    "build": "tsc -p tsconfig.json",
+    "test": "vitest run --config vitest.config.ts --passWithNoTests",
+    "build": "electron-vite build",
     "package": "pnpm build"
   },
   "dependencies": {
-    "@local-work-os/core": "workspace:*"
+    "@local-work-os/core": "workspace:*",
+    "lucide-react": "^1.14.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.14.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^41.3.0",
+    "electron-vite": "^5.0.0",
+    "vite": "^7.3.2"
   }
 }
