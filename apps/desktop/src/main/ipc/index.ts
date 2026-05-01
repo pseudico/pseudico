@@ -1,12 +1,34 @@
+import { DatabaseBootstrapService } from "@local-work-os/db";
+import { app } from "electron";
+import { join } from "node:path";
 import { registerContainerIpc } from "./registerContainerIpc";
 import { registerDatabaseIpc } from "./registerDatabaseIpc";
 import { registerFileIpc } from "./registerFileIpc";
 import { registerItemIpc } from "./registerItemIpc";
 import { registerWorkspaceIpc } from "./registerWorkspaceIpc";
+import { RecentWorkspacesService } from "../services/workspace/RecentWorkspacesService";
+import { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
 
-export function registerDesktopIpc(): void {
-  registerWorkspaceIpc();
-  registerDatabaseIpc();
+export type DesktopIpcServices = {
+  workspaceService: WorkspaceFileSystemService;
+};
+
+export function createDesktopIpcServices(): DesktopIpcServices {
+  return {
+    workspaceService: new WorkspaceFileSystemService({
+      databaseBootstrapService: new DatabaseBootstrapService(),
+      recentWorkspacesService: new RecentWorkspacesService(
+        join(app.getPath("userData"), "recent-workspaces.json")
+      )
+    })
+  };
+}
+
+export function registerDesktopIpc(
+  services: DesktopIpcServices = createDesktopIpcServices()
+): void {
+  registerWorkspaceIpc(services.workspaceService);
+  registerDatabaseIpc(services.workspaceService);
   registerContainerIpc();
   registerItemIpc();
   registerFileIpc();

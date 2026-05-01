@@ -92,9 +92,11 @@ export type DatabaseHealthStatus = {
   schemaVersion: number | null;
   workspaceExists: boolean;
   inboxExists: boolean;
+  defaultDashboardExists: boolean;
   activityLogAvailable: boolean;
   searchIndexAvailable: boolean;
   databasePath: string | null;
+  error: string | null;
 };
 
 export type LocalWorkOsModuleName =

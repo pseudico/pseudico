@@ -1,15 +1,31 @@
 import { ShieldCheck } from "lucide-react";
-import { ModulePlaceholder } from "./ModulePlaceholder";
+import { useEffect } from "react";
+import { WorkspaceHealthPanel } from "./WorkspaceHealthPanel";
+import {
+  refreshCurrentWorkspace,
+  useWorkspaceStore
+} from "../state/workspaceStore";
+import { desktopApiClient } from "../api/desktopApiClient";
 
 export function SettingsPage(): React.JSX.Element {
+  const { currentWorkspace } = useWorkspaceStore();
+
+  useEffect(() => {
+    void refreshCurrentWorkspace(desktopApiClient);
+  }, []);
+
   return (
     <section className="settings-layout">
-      <ModulePlaceholder
-        eyebrow="Settings"
-        title="Settings"
-        summary="Workspace, appearance, database health, and local maintenance settings will appear here."
-        highlights={["Workspace details", "Database status", "Backup settings"]}
-      />
+      <div className="page-heading">
+        <p className="top-eyebrow">Settings</p>
+        <h2>Workspace settings</h2>
+        <p>
+          {currentWorkspace === null
+            ? "Open a workspace to view local database details."
+            : currentWorkspace.rootPath}
+        </p>
+      </div>
+      <WorkspaceHealthPanel workspace={currentWorkspace} />
       <aside className="local-only-panel" aria-label="Local-only status">
         <ShieldCheck size={20} aria-hidden="true" />
         <div>

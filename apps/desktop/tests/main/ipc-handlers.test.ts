@@ -1,3 +1,11 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import {
+  DatabaseBootstrapService,
+  resolveWorkspaceDatabasePath
+} from "@local-work-os/db";
+import { afterEach } from "vitest";
 import { describe, expect, it } from "vitest";
 import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandlers";
 import { handleGetModuleStatus } from "../../src/main/ipc/moduleStatusHandlers";
@@ -110,17 +118,67 @@ describe("workspace IPC handlers", () => {
 });
 
 describe("database IPC handlers", () => {
-  it("returns a disconnected health placeholder", () => {
-    expect(handleGetDatabaseHealthStatus()).toEqual({
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns disconnected health when no workspace is open", async () => {
+    await expect(
+      handleGetDatabaseHealthStatus({
+        getCurrentWorkspace: () => null
+      })
+    ).resolves.toEqual({
       ok: true,
       data: {
         connected: false,
         schemaVersion: null,
         workspaceExists: false,
         inboxExists: false,
+        defaultDashboardExists: false,
         activityLogAvailable: false,
         searchIndexAvailable: false,
-        databasePath: null
+        databasePath: null,
+        error: "No workspace is open."
+      }
+    });
+  });
+
+  it("returns real health for the current bootstrapped workspace", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-health-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    await expect(
+      handleGetDatabaseHealthStatus({
+        getCurrentWorkspace: () => ({
+          id: "workspace_1",
+          name: "Personal",
+          rootPath: tempRoot!,
+          openedAt: "2026-05-01T00:00:00.000Z",
+          schemaVersion: 1
+        })
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        connected: true,
+        schemaVersion: 1,
+        workspaceExists: true,
+        inboxExists: true,
+        defaultDashboardExists: true,
+        activityLogAvailable: true,
+        searchIndexAvailable: true,
+        databasePath,
+        error: null
       }
     });
   });
