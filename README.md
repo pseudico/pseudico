@@ -72,5 +72,38 @@ pnpm test
 pnpm build
 ```
 
-`pnpm dev` and `pnpm package` are wired to the desktop package. They are
-placeholders until the Electron shell is implemented in `LWO-M1-001`.
+Run the desktop app during development:
+
+```bash
+pnpm dev
+```
+
+## Packaging
+
+The desktop package has an initial `electron-builder` configuration at
+`apps/desktop/electron-builder.yml`. Development packaging uses the unpacked
+directory target so the scaffold can be verified without code signing,
+notarisation, auto-update, release CI, or installer polish:
+
+```bash
+pnpm package
+```
+
+The packaged output is written under `apps/desktop/dist-packaged/`. The current
+configuration packages the built Electron app from `apps/desktop/dist` and does
+not bundle any user workspace, SQLite database, attachment folder, backup, or
+export output. Workspace paths remain user-selected folders, workspace SQLite
+files live under each workspace `data/` directory, attachments live under each
+workspace `attachments/` directory, and the recent-workspace list remains in
+Electron user data.
+
+Known limitations:
+
+- Code signing and notarisation are not configured.
+- Windows executable metadata editing is disabled for the development package
+  because it uses the same helper path as code-signing tooling.
+- Native dependencies are rebuilt for the packaged app, then the local
+  development install is rebuilt back for Node/Vitest.
+- Installer targets are intentionally deferred.
+- Release CI and multi-platform packaging matrix are not configured.
+- Packaged-app smoke coverage is manual until a later packaging smoke ticket.
