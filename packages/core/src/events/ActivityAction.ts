@@ -4,6 +4,7 @@ export const ActivityAction = {
   containerCreated: "container_created",
   containerUpdated: "container_updated",
   containerArchived: "container_archived",
+  containerDeleted: "container_deleted",
   itemCreated: "item_created",
   itemUpdated: "item_updated",
   itemMoved: "item_moved",

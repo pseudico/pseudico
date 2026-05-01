@@ -72,6 +72,85 @@ function createMockApi(
     database: {
       getHealthStatus: async () => apiOk(healthyDatabase)
     },
+    projects: {
+      createProject: async () =>
+        apiOk({
+          project: {
+            id: "container_1",
+            workspaceId: "workspace_1",
+            type: "project",
+            name: "Launch Plan",
+            slug: "launch-plan",
+            description: null,
+            status: "active",
+            categoryId: null,
+            color: null,
+            isFavorite: false,
+            sortOrder: 0,
+            createdAt: "2026-05-01T00:00:00.000Z",
+            updatedAt: "2026-05-01T00:00:00.000Z",
+            archivedAt: null,
+            deletedAt: null
+          },
+          defaultTabId: "container_tab_1"
+        }),
+      updateProject: async () =>
+        apiOk({
+          id: "container_1",
+          workspaceId: "workspace_1",
+          type: "project",
+          name: "Launch Plan",
+          slug: "launch-plan",
+          description: null,
+          status: "active",
+          categoryId: null,
+          color: null,
+          isFavorite: false,
+          sortOrder: 0,
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z",
+          archivedAt: null,
+          deletedAt: null
+        }),
+      archiveProject: async () =>
+        apiOk({
+          id: "container_1",
+          workspaceId: "workspace_1",
+          type: "project",
+          name: "Launch Plan",
+          slug: "launch-plan",
+          description: null,
+          status: "archived",
+          categoryId: null,
+          color: null,
+          isFavorite: false,
+          sortOrder: 0,
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z",
+          archivedAt: "2026-05-01T01:00:00.000Z",
+          deletedAt: null
+        }),
+      softDeleteProject: async () =>
+        apiOk({
+          id: "container_1",
+          workspaceId: "workspace_1",
+          type: "project",
+          name: "Launch Plan",
+          slug: "launch-plan",
+          description: null,
+          status: "active",
+          categoryId: null,
+          color: null,
+          isFavorite: false,
+          sortOrder: 0,
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z",
+          archivedAt: null,
+          deletedAt: "2026-05-01T01:00:00.000Z"
+        }),
+      listProjects: async () => apiOk([]),
+      getProject: async () => apiOk(null)
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },

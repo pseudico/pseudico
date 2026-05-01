@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(9);
+    expect(channels).toHaveLength(15);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -45,6 +45,7 @@ describe("typed preload API", () => {
     expect(Object.keys(api)).toEqual([
       "workspace",
       "database",
+      "projects",
       "containers",
       "items",
       "files"
@@ -102,6 +103,40 @@ describe("typed preload API", () => {
           rootPath: "C:\\work",
           repair: true
         }
+      }
+    ]);
+  });
+
+  it("routes project calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.projects.createProject({
+      workspaceId: "workspace_1",
+      name: "Launch Plan"
+    });
+    await api.projects.archiveProject("container_1");
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject,
+        input: {
+          workspaceId: "workspace_1",
+          name: "Launch Plan"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.projects.archiveProject,
+        input: "container_1"
       }
     ]);
   });
