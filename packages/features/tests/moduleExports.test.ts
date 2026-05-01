@@ -9,6 +9,7 @@ import {
   exportModuleContract,
   filesModuleContract,
   inboxModuleContract,
+  itemsModuleContract,
   linksModuleContract,
   listsModuleContract,
   notesModuleContract,
@@ -28,6 +29,7 @@ describe("feature module exports", () => {
     expect(plannedFeatureAreas).toEqual([
       "workspace",
       "inbox",
+      "items",
       "projects",
       "contacts",
       "tasks",
@@ -51,6 +53,7 @@ describe("feature module exports", () => {
     const exportedModules = [
       workspaceModuleContract.module,
       inboxModuleContract.module,
+      itemsModuleContract.module,
       projectsModuleContract.module,
       contactsModuleContract.module,
       tasksModuleContract.module,
@@ -73,6 +76,7 @@ describe("feature module exports", () => {
     expect(exportedModules).toEqual([
       "workspace",
       "inbox",
+      "items",
       "projects",
       "contacts",
       "tasks",
