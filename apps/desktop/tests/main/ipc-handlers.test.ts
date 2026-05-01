@@ -9,6 +9,7 @@ import { afterEach } from "vitest";
 import { describe, expect, it } from "vitest";
 import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandlers";
 import { handleGetModuleStatus } from "../../src/main/ipc/moduleStatusHandlers";
+import { createProjectIpcHandlers } from "../../src/main/ipc/projectHandlers";
 import { createWorkspaceIpcHandlers } from "../../src/main/ipc/workspaceHandlers";
 import type { WorkspaceFileSystemService } from "../../src/main/services/workspace/WorkspaceFileSystemService";
 
@@ -195,6 +196,82 @@ describe("placeholder module IPC handlers", () => {
         message:
           "File IPC is typed but awaits workspace filesystem service tickets."
       }
+    });
+  });
+});
+
+describe("project IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createProjectIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(
+      handlers.handleListProjects(undefined)
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("creates and lists projects through the current workspace database", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-projects-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+    const handlers = createProjectIpcHandlers({
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    });
+
+    await expect(
+      handlers.handleCreateProject({
+        name: "Launch Plan",
+        description: "Supplier checklist"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        project: {
+          type: "project",
+          name: "Launch Plan",
+          slug: "launch-plan",
+          status: "active"
+        },
+        defaultTabId: expect.any(String)
+      }
+    });
+    await expect(
+      handlers.handleListProjects(undefined)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          type: "project",
+          name: "Launch Plan",
+          description: "Supplier checklist"
+        }
+      ]
     });
   });
 });

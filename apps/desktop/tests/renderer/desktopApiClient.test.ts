@@ -5,6 +5,7 @@ import {
   type DatabaseHealthStatus,
   type IpcModuleStatus,
   type LocalWorkOsApi,
+  type ProjectSummary,
   type RecentWorkspace,
   type WorkspaceSummary
 } from "../../src/preload/api";
@@ -76,6 +77,27 @@ function createMockApi(
           error: null
         })
     },
+    projects: {
+      createProject: async () =>
+        apiOk({
+          project: projectSummary(),
+          defaultTabId: "container_tab_1"
+        }),
+      updateProject: async () => apiOk(projectSummary()),
+      archiveProject: async () =>
+        apiOk({
+          ...projectSummary(),
+          status: "archived",
+          archivedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      softDeleteProject: async () =>
+        apiOk({
+          ...projectSummary(),
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      listProjects: async () => apiOk([projectSummary()]),
+      getProject: async () => apiOk(projectSummary())
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
@@ -93,6 +115,26 @@ function createMockApi(
   };
 }
 
+function projectSummary(): ProjectSummary {
+  return {
+    id: "container_1",
+    workspaceId: "workspace_1",
+    type: "project",
+    name: "Launch Plan",
+    slug: "launch-plan",
+    description: null,
+    status: "active",
+    categoryId: null,
+    color: null,
+    isFavorite: false,
+    sortOrder: 0,
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z",
+    archivedAt: null,
+    deletedAt: null
+  };
+}
+
 describe("desktop API client", () => {
   it("passes typed preload results through to renderer callers", async () => {
     const client = createDesktopApiClient(createMockApi());
@@ -107,6 +149,15 @@ describe("desktop API client", () => {
         connected: false,
         databasePath: null
       }
+    });
+    await expect(client.projects.listProjects()).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: "container_1",
+          type: "project"
+        }
+      ]
     });
   });
 

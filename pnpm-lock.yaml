@@ -32,6 +32,9 @@ importers:
       '@local-work-os/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@local-work-os/features':
+        specifier: workspace:*
+        version: link:../../packages/features
       lucide-react:
         specifier: ^1.14.0
         version: 1.14.0(react@19.2.5)

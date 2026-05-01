@@ -5,6 +5,7 @@ import { registerContainerIpc } from "./registerContainerIpc";
 import { registerDatabaseIpc } from "./registerDatabaseIpc";
 import { registerFileIpc } from "./registerFileIpc";
 import { registerItemIpc } from "./registerItemIpc";
+import { registerProjectIpc } from "./registerProjectIpc";
 import { registerWorkspaceIpc } from "./registerWorkspaceIpc";
 import { RecentWorkspacesService } from "../services/workspace/RecentWorkspacesService";
 import { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
@@ -29,6 +30,7 @@ export function registerDesktopIpc(
 ): void {
   registerWorkspaceIpc(services.workspaceService);
   registerDatabaseIpc(services.workspaceService);
+  registerProjectIpc(services.workspaceService);
   registerContainerIpc();
   registerItemIpc();
   registerFileIpc();

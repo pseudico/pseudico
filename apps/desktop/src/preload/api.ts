@@ -99,6 +99,55 @@ export type DatabaseHealthStatus = {
   error: string | null;
 };
 
+export type ProjectStatus = "active" | "waiting" | "completed" | "archived";
+export type ProjectMutableStatus = Exclude<ProjectStatus, "archived">;
+
+export type ProjectSummary = {
+  id: string;
+  workspaceId: string;
+  type: "project";
+  name: string;
+  slug: string;
+  description: string | null;
+  status: ProjectStatus;
+  categoryId: string | null;
+  color: string | null;
+  isFavorite: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  archivedAt: string | null;
+  deletedAt: string | null;
+};
+
+export type CreateProjectInput = {
+  workspaceId?: string;
+  name: string;
+  categoryId?: string | null;
+  color?: string | null;
+  description?: string | null;
+  isFavorite?: boolean;
+  slug?: string;
+  sortOrder?: number;
+};
+
+export type CreateProjectResult = {
+  project: ProjectSummary;
+  defaultTabId: string;
+};
+
+export type UpdateProjectInput = {
+  projectId: string;
+  categoryId?: string | null;
+  color?: string | null;
+  description?: string | null;
+  isFavorite?: boolean;
+  name?: string;
+  slug?: string;
+  sortOrder?: number;
+  status?: ProjectMutableStatus;
+};
+
 export type LocalWorkOsModuleName =
   | "containers"
   | "items"
@@ -121,6 +170,14 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   },
   database: {
     getHealthStatus: "local-work-os:database:get-health-status"
+  },
+  projects: {
+    createProject: "local-work-os:projects:create-project",
+    updateProject: "local-work-os:projects:update-project",
+    archiveProject: "local-work-os:projects:archive-project",
+    softDeleteProject: "local-work-os:projects:soft-delete-project",
+    listProjects: "local-work-os:projects:list-projects",
+    getProject: "local-work-os:projects:get-project"
   },
   containers: {
     getStatus: "local-work-os:containers:get-status"
@@ -157,6 +214,30 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.database.getHealthStatus]: {
     input: undefined;
     result: ApiResult<DatabaseHealthStatus>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject]: {
+    input: CreateProjectInput;
+    result: ApiResult<CreateProjectResult>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.projects.updateProject]: {
+    input: UpdateProjectInput;
+    result: ApiResult<ProjectSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.projects.archiveProject]: {
+    input: string;
+    result: ApiResult<ProjectSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.projects.softDeleteProject]: {
+    input: string;
+    result: ApiResult<ProjectSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.projects.listProjects]: {
+    input: string | undefined;
+    result: ApiResult<ProjectSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.projects.getProject]: {
+    input: string;
+    result: ApiResult<ProjectSummary | null>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.containers.getStatus]: {
     input: undefined;
@@ -201,6 +282,20 @@ export type LocalWorkOsApi = {
   };
   database: {
     getHealthStatus: () => Promise<ApiResult<DatabaseHealthStatus>>;
+  };
+  projects: {
+    createProject: (
+      input: CreateProjectInput
+    ) => Promise<ApiResult<CreateProjectResult>>;
+    updateProject: (
+      input: UpdateProjectInput
+    ) => Promise<ApiResult<ProjectSummary>>;
+    archiveProject: (projectId: string) => Promise<ApiResult<ProjectSummary>>;
+    softDeleteProject: (projectId: string) => Promise<ApiResult<ProjectSummary>>;
+    listProjects: (
+      workspaceId?: string
+    ) => Promise<ApiResult<ProjectSummary[]>>;
+    getProject: (projectId: string) => Promise<ApiResult<ProjectSummary | null>>;
   };
   containers: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
@@ -258,6 +353,23 @@ export function createLocalWorkOsApi(
     database: {
       getHealthStatus: () =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.database.getHealthStatus, undefined)
+    },
+    projects: {
+      createProject: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject, input),
+      updateProject: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.updateProject, input),
+      archiveProject: (projectId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.archiveProject, projectId),
+      softDeleteProject: (projectId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.projects.softDeleteProject,
+          projectId
+        ),
+      listProjects: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.listProjects, workspaceId),
+      getProject: (projectId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.getProject, projectId)
     },
     containers: {
       getStatus: () =>

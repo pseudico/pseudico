@@ -39,7 +39,7 @@ export { linksModuleContract } from "./links";
 export { listsModuleContract } from "./lists";
 export { categoriesModuleContract, tagsModuleContract } from "./metadata";
 export { notesModuleContract } from "./notes";
-export { projectsModuleContract } from "./projects";
+export { ProjectService, projectsModuleContract } from "./projects";
 export { savedViewsModuleContract } from "./savedViews";
 export { SearchService, searchModuleContract } from "./search";
 export { tasksModuleContract } from "./tasks";
@@ -57,7 +57,15 @@ export type { LinkService } from "./links";
 export type { ListService } from "./lists";
 export type { CategoryService, TagService } from "./metadata";
 export type { NoteService } from "./notes";
-export type { ProjectService } from "./projects";
+export type {
+  CreateProjectInput,
+  CreateProjectResult,
+  ProjectMutableStatus,
+  ProjectRecord,
+  ProjectServiceIdFactory,
+  ProjectStatus,
+  UpdateProjectInput
+} from "./projects";
 export type { SavedViewService } from "./savedViews";
 export type { TaskService } from "./tasks";
 export type { TimelineService } from "./timeline";
