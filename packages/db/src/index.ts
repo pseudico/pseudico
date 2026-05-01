@@ -42,6 +42,10 @@ export {
   type SearchProjectionInput,
   type SearchWorkspaceInput
 } from "./services/SearchIndexService";
+export {
+  DEFAULT_SORT_ORDER_STEP,
+  SortOrderService
+} from "./services/SortOrderService";
 export { migrations } from "./migrations";
 export * from "./repositories";
 export * as schema from "./schema";

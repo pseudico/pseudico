@@ -1,3 +1,4 @@
+import type { ItemType } from "@local-work-os/core";
 import type { DatabaseConnection } from "../connection/createDatabaseConnection";
 
 type ItemRow = {
@@ -42,7 +43,7 @@ export type CreateItemInput = {
   id: string;
   workspaceId: string;
   containerId: string;
-  type: "task" | "list" | "note" | "file" | "link" | "heading" | "location" | "comment";
+  type: ItemType;
   title: string;
   timestamp: string;
   containerTabId?: string | null;
@@ -77,6 +78,7 @@ export type MoveItemInput = {
   targetContainerId: string;
   timestamp: string;
   targetTabId?: string | null;
+  sortOrder?: number;
 };
 
 export class ItemRepository {
@@ -105,6 +107,44 @@ export class ItemRepository {
   ): ItemRecord[] {
     const where = ["container_id = ?"];
     const values: unknown[] = [containerId];
+
+    if (filters.type !== undefined) {
+      where.push("type = ?");
+      values.push(filters.type);
+    }
+
+    if (filters.status !== undefined) {
+      where.push("status = ?");
+      values.push(filters.status);
+    }
+
+    if (filters.includeArchived !== true) {
+      where.push("archived_at is null");
+    }
+
+    if (filters.includeDeleted !== true) {
+      where.push("deleted_at is null");
+    }
+
+    const rows = this.connection.sqlite
+      .prepare<unknown[], ItemRow>(
+        `select *
+         from items
+         where ${where.join(" and ")}
+         order by pinned desc, sort_order asc, created_at asc`
+      )
+      .all(...values);
+
+    return rows.map(toItemRecord);
+  }
+
+  listByContainerTab(
+    containerId: string,
+    containerTabId: string,
+    filters: ListItemsFilter = {}
+  ): ItemRecord[] {
+    const where = ["container_id = ?", "container_tab_id = ?"];
+    const values: unknown[] = [containerId, containerTabId];
 
     if (filters.type !== undefined) {
       where.push("type = ?");
@@ -283,21 +323,31 @@ export class ItemRepository {
   }
 
   move(input: MoveItemInput): ItemRecord {
+    const assignments = [
+      "container_id = ?",
+      "container_tab_id = ?"
+    ];
+    const values: unknown[] = [
+      input.targetContainerId,
+      input.targetTabId ?? null
+    ];
+
+    if (input.sortOrder !== undefined) {
+      assignments.push("sort_order = ?");
+      values.push(input.sortOrder);
+    }
+
+    assignments.push("updated_at = ?");
+    values.push(input.timestamp, input.id);
+
     this.connection.sqlite
       .prepare(
         `update items
-         set container_id = ?,
-             container_tab_id = ?,
-             updated_at = ?
+         set ${assignments.join(", ")}
          where id = ?
            and deleted_at is null`
       )
-      .run(
-        input.targetContainerId,
-        input.targetTabId ?? null,
-        input.timestamp,
-        input.id
-      );
+      .run(...values);
 
     const moved = this.getById(input.id);
 
@@ -306,6 +356,33 @@ export class ItemRepository {
     }
 
     return moved;
+  }
+
+  getMaxSortOrder(input: {
+    containerId: string;
+    containerTabId?: string | null;
+  }): number | null {
+    const tabFilter =
+      input.containerTabId === undefined
+        ? ""
+        : input.containerTabId === null
+          ? "and container_tab_id is null"
+          : "and container_tab_id = ?";
+    const values: unknown[] =
+      input.containerTabId === undefined || input.containerTabId === null
+        ? [input.containerId]
+        : [input.containerId, input.containerTabId];
+    const row = this.connection.sqlite
+      .prepare<unknown[], { max_sort_order: number | null }>(
+        `select max(sort_order) as max_sort_order
+         from items
+         where container_id = ?
+           ${tabFilter}
+           and deleted_at is null`
+      )
+      .get(...values);
+
+    return row?.max_sort_order ?? null;
   }
 
   archive(id: string, timestamp: string): ItemRecord {

@@ -3,6 +3,7 @@ export const featuresPackageName = "@local-work-os/features";
 export const plannedFeatureAreas = [
   "workspace",
   "inbox",
+  "items",
   "projects",
   "contacts",
   "tasks",
@@ -35,6 +36,7 @@ export { dashboardModuleContract } from "./dashboard";
 export { exportModuleContract } from "./export";
 export { filesModuleContract } from "./files";
 export { inboxModuleContract } from "./inbox";
+export { ItemService, itemsModuleContract } from "./items";
 export { linksModuleContract } from "./links";
 export { listsModuleContract } from "./lists";
 export { categoriesModuleContract, tagsModuleContract } from "./metadata";
@@ -53,6 +55,15 @@ export type { DashboardService } from "./dashboard";
 export type { ExportService } from "./export";
 export type { FileAttachmentService } from "./files";
 export type { InboxService } from "./inbox";
+export type {
+  CreateItemInput,
+  ItemMutationResult,
+  ItemServiceIdFactory,
+  ListItemsByContainerInput,
+  ListItemsByContainerTabInput,
+  MoveItemInput,
+  UpdateItemInput
+} from "./items";
 export type { LinkService } from "./links";
 export type { ListService } from "./lists";
 export type { CategoryService, TagService } from "./metadata";

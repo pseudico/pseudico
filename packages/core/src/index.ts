@@ -9,6 +9,13 @@ export type {
   ActivityTargetType,
   DomainEvent
 } from "./events/DomainEvent";
+export {
+  ITEM_STATUSES,
+  ITEM_TYPES,
+  isItemStatus,
+  isItemType
+} from "./entities/Item";
+export type { ItemStatus, ItemType } from "./entities/Item";
 export { createLocalId } from "./ids";
 export { createIsoTimestamp } from "./time";
 

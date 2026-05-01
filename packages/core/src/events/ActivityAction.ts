@@ -9,6 +9,7 @@ export const ActivityAction = {
   itemUpdated: "item_updated",
   itemMoved: "item_moved",
   itemArchived: "item_archived",
+  itemDeleted: "item_deleted",
   taskCompleted: "task_completed",
   tagAdded: "tag_added",
   tagRemoved: "tag_removed",
