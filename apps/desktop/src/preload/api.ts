@@ -284,6 +284,18 @@ export type LocalWorkOsApi = {
     getHealthStatus: () => Promise<ApiResult<DatabaseHealthStatus>>;
   };
   projects: {
+    create: (
+      input: CreateProjectInput
+    ) => Promise<ApiResult<CreateProjectResult>>;
+    update: (
+      input: UpdateProjectInput
+    ) => Promise<ApiResult<ProjectSummary>>;
+    archive: (projectId: string) => Promise<ApiResult<ProjectSummary>>;
+    softDelete: (projectId: string) => Promise<ApiResult<ProjectSummary>>;
+    list: (
+      workspaceId?: string
+    ) => Promise<ApiResult<ProjectSummary[]>>;
+    get: (projectId: string) => Promise<ApiResult<ProjectSummary | null>>;
     createProject: (
       input: CreateProjectInput
     ) => Promise<ApiResult<CreateProjectResult>>;
@@ -355,6 +367,21 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.database.getHealthStatus, undefined)
     },
     projects: {
+      create: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject, input),
+      update: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.updateProject, input),
+      archive: (projectId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.archiveProject, projectId),
+      softDelete: (projectId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.projects.softDeleteProject,
+          projectId
+        ),
+      list: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.listProjects, workspaceId),
+      get: (projectId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.getProject, projectId),
       createProject: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject, input),
       updateProject: (input) =>

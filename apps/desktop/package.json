@@ -16,6 +16,7 @@
     "@local-work-os/core": "workspace:*",
     "@local-work-os/db": "workspace:*",
     "@local-work-os/features": "workspace:*",
+    "@local-work-os/ui": "workspace:*",
     "lucide-react": "^1.14.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",

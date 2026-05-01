@@ -35,6 +35,9 @@ importers:
       '@local-work-os/features':
         specifier: workspace:*
         version: link:../../packages/features
+      '@local-work-os/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       lucide-react:
         specifier: ^1.14.0
         version: 1.14.0(react@19.2.5)
@@ -124,6 +127,13 @@ importers:
       '@local-work-os/core':
         specifier: workspace:*
         version: link:../core
+      react:
+        specifier: ^19.2.5
+        version: 19.2.5
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
 
 packages:
 

@@ -116,6 +116,9 @@ export const navRoutes = appRoutes.filter((route) => route.nav);
 export function getRouteByPath(pathname: string): AppRoute {
   return (
     appRoutes.find((route) => route.path === pathname) ??
+    (pathname.startsWith("/projects/")
+      ? appRoutes.find((route) => route.path === "/projects")
+      : undefined) ??
     appRoutes.find((route) => route.path === "/welcome")!
   );
 }

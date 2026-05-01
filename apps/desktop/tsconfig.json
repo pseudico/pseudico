@@ -19,6 +19,8 @@
     "tests/**/*.tsx",
     "../../packages/core/src/**/*.ts",
     "../../packages/db/src/**/*.ts",
-    "../../packages/features/src/**/*.ts"
+    "../../packages/features/src/**/*.ts",
+    "../../packages/ui/src/**/*.ts",
+    "../../packages/ui/src/**/*.tsx"
   ]
 }
