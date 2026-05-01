@@ -10,12 +10,16 @@
     }
   },
   "scripts": {
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run tests --passWithNoTests",
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@local-work-os/core": "workspace:*"
+    "@local-work-os/core": "workspace:*",
+    "react": "^19.2.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14"
   }
 }

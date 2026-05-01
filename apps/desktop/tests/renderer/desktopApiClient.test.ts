@@ -78,6 +78,25 @@ function createMockApi(
         })
     },
     projects: {
+      create: async () =>
+        apiOk({
+          project: projectSummary(),
+          defaultTabId: "container_tab_1"
+        }),
+      update: async () => apiOk(projectSummary()),
+      archive: async () =>
+        apiOk({
+          ...projectSummary(),
+          status: "archived",
+          archivedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      softDelete: async () =>
+        apiOk({
+          ...projectSummary(),
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      list: async () => apiOk([projectSummary()]),
+      get: async () => apiOk(projectSummary()),
       createProject: async () =>
         apiOk({
           project: projectSummary(),
@@ -151,6 +170,15 @@ describe("desktop API client", () => {
       }
     });
     await expect(client.projects.listProjects()).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: "container_1",
+          type: "project"
+        }
+      ]
+    });
+    await expect(client.projects.list()).resolves.toMatchObject({
       ok: true,
       data: [
         {

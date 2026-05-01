@@ -31,6 +31,11 @@ export default defineConfig({
   renderer: {
     root: ".",
     plugins: [react()],
+    resolve: {
+      alias: {
+        "@local-work-os/ui": resolve(currentDir, "../../packages/ui/src/index.ts")
+      }
+    },
     build: {
       outDir: "dist/renderer",
       rollupOptions: {

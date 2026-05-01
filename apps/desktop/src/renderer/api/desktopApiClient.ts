@@ -42,6 +42,13 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       getHealthStatus: () => callApi(() => api.database.getHealthStatus())
     },
     projects: {
+      create: (input) => callApi(() => api.projects.create(input)),
+      update: (input) => callApi(() => api.projects.update(input)),
+      archive: (projectId) => callApi(() => api.projects.archive(projectId)),
+      softDelete: (projectId) =>
+        callApi(() => api.projects.softDelete(projectId)),
+      list: (workspaceId) => callApi(() => api.projects.list(workspaceId)),
+      get: (projectId) => callApi(() => api.projects.get(projectId)),
       createProject: (input) => callApi(() => api.projects.createProject(input)),
       updateProject: (input) => callApi(() => api.projects.updateProject(input)),
       archiveProject: (projectId) =>
@@ -85,6 +92,13 @@ export const desktopApiClient: LocalWorkOsApi = {
     getHealthStatus: () => getDesktopApiClient().database.getHealthStatus()
   },
   projects: {
+    create: (input) => getDesktopApiClient().projects.create(input),
+    update: (input) => getDesktopApiClient().projects.update(input),
+    archive: (projectId) => getDesktopApiClient().projects.archive(projectId),
+    softDelete: (projectId) =>
+      getDesktopApiClient().projects.softDelete(projectId),
+    list: (workspaceId) => getDesktopApiClient().projects.list(workspaceId),
+    get: (projectId) => getDesktopApiClient().projects.get(projectId),
     createProject: (input) =>
       getDesktopApiClient().projects.createProject(input),
     updateProject: (input) =>
