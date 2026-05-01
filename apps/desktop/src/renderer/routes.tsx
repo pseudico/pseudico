@@ -26,7 +26,7 @@ export const appRoutes = [
     path: "/welcome",
     label: "Welcome",
     title: "Welcome",
-    summary: "Open or create a local workspace in a future ticket.",
+    summary: "Create or open a local workspace.",
     nav: false
   },
   {
@@ -34,7 +34,7 @@ export const appRoutes = [
     path: "/workspace",
     label: "Workspace",
     title: "Workspace Home",
-    summary: "Local workspace overview and health will appear here.",
+    summary: "Local workspace overview and health.",
     nav: false
   },
   {

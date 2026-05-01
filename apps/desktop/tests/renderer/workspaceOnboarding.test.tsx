@@ -1,0 +1,131 @@
+import { renderToString } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
+import { describe, expect, it } from "vitest";
+import {
+  apiOk,
+  type DatabaseHealthStatus,
+  type IpcModuleStatus,
+  type LocalWorkOsApi,
+  type RecentWorkspace,
+  type WorkspaceSummary
+} from "../../src/preload/api";
+import { WelcomePage } from "../../src/renderer/pages/WelcomePage";
+import {
+  WorkspaceHealthSummary
+} from "../../src/renderer/pages/WorkspaceHealthPanel";
+
+const workspace: WorkspaceSummary = {
+  id: "workspace_1",
+  name: "Personal Work",
+  rootPath: "C:\\Work\\Personal",
+  openedAt: "2026-05-01T00:00:00.000Z",
+  schemaVersion: 1
+};
+
+const healthyDatabase: DatabaseHealthStatus = {
+  connected: true,
+  schemaVersion: 1,
+  workspaceExists: true,
+  inboxExists: true,
+  defaultDashboardExists: true,
+  activityLogAvailable: true,
+  searchIndexAvailable: true,
+  databasePath: "C:\\Work\\Personal\\data\\local-work-os.sqlite",
+  error: null
+};
+
+function moduleStatus(module: IpcModuleStatus["module"]): IpcModuleStatus {
+  return {
+    module,
+    available: true,
+    implemented: false,
+    message: `${module} placeholder`
+  };
+}
+
+function createMockApi(
+  recentWorkspaces: RecentWorkspace[] = []
+): LocalWorkOsApi {
+  return {
+    workspace: {
+      createWorkspace: async () => apiOk(workspace),
+      openWorkspace: async () => apiOk(workspace),
+      validateWorkspace: async () =>
+        apiOk({
+          ok: true,
+          workspaceRootPath: workspace.rootPath,
+          paths: {
+            workspaceRootPath: workspace.rootPath,
+            manifestPath: `${workspace.rootPath}\\workspace.json`,
+            dataPath: `${workspace.rootPath}\\data`,
+            databasePath: healthyDatabase.databasePath!,
+            attachmentsPath: `${workspace.rootPath}\\attachments`,
+            backupsPath: `${workspace.rootPath}\\backups`,
+            exportsPath: `${workspace.rootPath}\\exports`,
+            logsPath: `${workspace.rootPath}\\logs`
+          },
+          problems: []
+        }),
+      getCurrentWorkspace: async () => apiOk(null),
+      listRecentWorkspaces: async () => apiOk(recentWorkspaces)
+    },
+    database: {
+      getHealthStatus: async () => apiOk(healthyDatabase)
+    },
+    containers: {
+      getStatus: async () => apiOk(moduleStatus("containers"))
+    },
+    items: {
+      getStatus: async () => apiOk(moduleStatus("items"))
+    },
+    files: {
+      getStatus: async () => apiOk(moduleStatus("files"))
+    }
+  };
+}
+
+describe("workspace onboarding renderer", () => {
+  it("renders the welcome page empty state", () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <WelcomePage apiClient={createMockApi()} />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Create workspace");
+    expect(html).toContain("Open workspace");
+    expect(html).toContain("No recent workspaces yet.");
+  });
+
+  it("renders workspace health from mocked API data", () => {
+    const html = renderToString(
+      <WorkspaceHealthSummary
+        error={null}
+        health={healthyDatabase}
+        loading={false}
+        workspace={workspace}
+      />
+    );
+
+    expect(html).toContain("Workspace health");
+    expect(html).toContain("Schema version");
+    expect(html).toContain("Inbox");
+    expect(html).toContain("Activity log");
+    expect(html).toContain("Search index");
+    expect(html).toContain("C:\\Work\\Personal\\data\\local-work-os.sqlite");
+  });
+
+  it("renders create or open failure state", () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <WelcomePage
+          apiClient={createMockApi()}
+          initialError="Workspace operation failed."
+        />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Workspace operation failed.");
+    expect(html).toContain("form-message-error");
+  });
+});

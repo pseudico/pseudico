@@ -69,9 +69,11 @@ function createMockApi(
           schemaVersion: null,
           workspaceExists: false,
           inboxExists: false,
+          defaultDashboardExists: false,
           activityLogAvailable: false,
           searchIndexAvailable: false,
-          databasePath: null
+          databasePath: null,
+          error: null
         })
     },
     containers: {

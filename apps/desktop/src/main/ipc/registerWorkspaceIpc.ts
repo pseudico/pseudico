@@ -1,19 +1,11 @@
-import { DatabaseBootstrapService } from "@local-work-os/db";
 import { LOCAL_WORK_OS_IPC_CHANNELS } from "../../preload/api";
 import { registerTypedIpcHandler } from "./registerTypedIpcHandler";
-import { app } from "electron";
-import { join } from "node:path";
-import { RecentWorkspacesService } from "../services/workspace/RecentWorkspacesService";
-import { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
+import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
 import { createWorkspaceIpcHandlers } from "./workspaceHandlers";
 
-export function registerWorkspaceIpc(): void {
-  const workspaceService = new WorkspaceFileSystemService({
-    databaseBootstrapService: new DatabaseBootstrapService(),
-    recentWorkspacesService: new RecentWorkspacesService(
-      join(app.getPath("userData"), "recent-workspaces.json")
-    )
-  });
+export function registerWorkspaceIpc(
+  workspaceService: WorkspaceFileSystemService
+): void {
   const handlers = createWorkspaceIpcHandlers(workspaceService);
 
   registerTypedIpcHandler(

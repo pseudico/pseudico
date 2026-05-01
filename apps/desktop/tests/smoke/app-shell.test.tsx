@@ -45,7 +45,7 @@ describe("desktop shell routes", () => {
     );
 
     expect(html).toContain("Local Work OS");
-    expect(html).toContain("Local shell ready");
+    expect(html).toContain("Waiting for workspace");
     expect(html).toContain("Network");
   });
 

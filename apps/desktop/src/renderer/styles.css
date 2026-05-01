@@ -264,6 +264,10 @@ a {
   background: #2c7a4b;
 }
 
+.status-dot-warning {
+  background: #b55a3a;
+}
+
 .placeholder-list {
   display: grid;
 }
@@ -334,6 +338,51 @@ a {
   line-height: 1.55;
 }
 
+.workspace-form {
+  display: grid;
+  max-width: 620px;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.workspace-form label {
+  display: grid;
+  gap: 6px;
+  color: #514e49;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.workspace-form input {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid #d5d0c3;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #262624;
+}
+
+.form-message {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.form-message-error {
+  border: 1px solid #dba58f;
+  background: #fff5ef;
+  color: #8b3219;
+}
+
+.form-message-ok {
+  border: 1px solid #9fc7af;
+  background: #f0faf3;
+  color: #1f633b;
+}
+
 .welcome-actions {
   display: flex;
   flex-wrap: wrap;
@@ -356,6 +405,17 @@ a {
   border: 1px solid #d5d0c3;
   background: #ffffff;
   color: #262624;
+}
+
+.compact-button {
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+.page-action-link {
+  width: fit-content;
+  margin: 12px 0 22px;
+  text-decoration: none;
 }
 
 .text-link {
@@ -400,6 +460,136 @@ a {
 .welcome-system dd {
   margin: 0;
   color: #262624;
+}
+
+.recent-workspaces,
+.health-panel {
+  max-width: 760px;
+  border: 1px solid #dedbd1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(38, 38, 36, 0.06);
+}
+
+.recent-workspaces {
+  margin-top: 20px;
+  padding: 14px;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #514e49;
+}
+
+.panel-heading h2 {
+  margin: 0;
+  color: #262624;
+  font-size: 16px;
+}
+
+.panel-heading-actions {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panel-heading-actions > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.muted-text {
+  margin: 10px 0 0;
+  color: #6d6a62;
+}
+
+.recent-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.recent-workspace-button {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ece8dc;
+  border-radius: 8px;
+  background: #fbfaf7;
+  color: #262624;
+  text-align: left;
+}
+
+.recent-workspace-button span {
+  overflow-wrap: anywhere;
+  color: #6d6a62;
+  font-size: 13px;
+}
+
+.workspace-page {
+  display: grid;
+  gap: 22px;
+}
+
+.health-panel {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.health-row {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #ece8dc;
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
+.health-row dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6d6a62;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.health-row dd {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  margin: 0;
+}
+
+.health-row dd strong,
+.health-row dd span {
+  overflow-wrap: anywhere;
+}
+
+.health-row dd span {
+  color: #6d6a62;
+  font-size: 13px;
+}
+
+.health-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #245c55;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .settings-layout {
@@ -461,7 +651,8 @@ a {
 
   .top-bar,
   .welcome-content,
-  .page-grid {
+  .page-grid,
+  .health-grid {
     grid-template-columns: 1fr;
   }
 
