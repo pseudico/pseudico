@@ -1,25 +1,31 @@
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import {
+  createTestWorkspace,
+  type CreateTestWorkspaceInput,
+  type TestWorkspaceManifest,
+  type TestWorkspacePaths
+} from "./createTestWorkspace";
 
 export type TestDatabaseHandle = {
+  manifest: TestWorkspaceManifest;
+  paths: TestWorkspacePaths;
   workspaceRootPath: string;
   databasePath: string;
   cleanup: () => Promise<void>;
 };
 
-export async function createTestDatabase(): Promise<TestDatabaseHandle> {
-  const workspaceRootPath = await mkdtemp(join(tmpdir(), "local-work-os-db-"));
-  const dataPath = join(workspaceRootPath, "data");
-  const databasePath = join(dataPath, "local-work-os.sqlite");
-
-  await mkdir(dataPath, { recursive: true });
+export async function createTestDatabase(
+  input: CreateTestWorkspaceInput = {}
+): Promise<TestDatabaseHandle> {
+  const workspace = await createTestWorkspace({
+    ...input,
+    rootPrefix: input.rootPrefix ?? "local-work-os-db-"
+  });
 
   return {
-    workspaceRootPath,
-    databasePath,
-    cleanup: async () => {
-      await rm(workspaceRootPath, { force: true, recursive: true });
-    }
+    manifest: workspace.manifest,
+    paths: workspace.paths,
+    workspaceRootPath: workspace.workspaceRootPath,
+    databasePath: workspace.paths.databasePath,
+    cleanup: workspace.cleanup
   };
 }
