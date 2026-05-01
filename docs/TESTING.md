@@ -16,6 +16,23 @@ pnpm test
 pnpm build
 ```
 
+Packaging-related tickets should also run the desktop packaging command when
+the current OS supports it:
+
+```bash
+pnpm package
+```
+
+The current package command builds the Electron app and runs
+`electron-builder --dir`, producing an unpacked development package under
+`apps/desktop/dist-packaged/`. This verifies the app bundle shape without code
+signing, Windows executable metadata editing, installer generation, auto-update,
+or release CI. It allows `electron-builder` to rebuild native dependencies for
+the packaged Electron runtime, then rebuilds the local development install back
+for Node/Vitest. Manual QA should confirm that workspace paths are still
+user-selected and that workspace databases, attachments, backups, and exports
+are not bundled into the app.
+
 For docs-only changes, `pnpm build` is still useful because it proves workspace
 packages remain buildable after repository edits.
 
