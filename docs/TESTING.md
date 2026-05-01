@@ -19,6 +19,14 @@ pnpm build
 For docs-only changes, `pnpm build` is still useful because it proves workspace
 packages remain buildable after repository edits.
 
+Targeted package checks are useful while working on test infrastructure:
+
+```bash
+pnpm --filter @local-work-os/test-utils test
+pnpm --filter @local-work-os/db test
+pnpm --filter @local-work-os/desktop test
+```
+
 ## Domain Logic
 
 Domain logic belongs in `packages/core` or `packages/features` and should be
@@ -41,6 +49,11 @@ temporary workspace database path. The helper creates a disposable
 workspace-style `data/local-work-os.sqlite` location and cleans up the temp
 folder after the test.
 
+Use `createTestWorkspace` when a test needs the full local workspace fixture:
+`workspace.json`, `data/`, `attachments/`, `backups/`, `exports/`, and `logs/`.
+Use `makeTestIds` and `seedTestData` for deterministic seed inputs rather than
+hand-rolled counters in each test file.
+
 ## Electron IPC
 
 IPC tests should cover allowed calls, invalid inputs, and failure behavior.
@@ -52,6 +65,11 @@ access.
 Renderer changes should use React Testing Library for component behavior and
 Playwright when a user workflow, routing behavior, or desktop integration needs
 browser-level verification.
+
+Current desktop smoke coverage uses Vitest server rendering for the app launch
+route and renderer health surface. A true Playwright/Electron launch smoke test
+is intentionally deferred until Playwright is added to the workspace; do not add
+an ad hoc browser dependency inside feature tickets.
 
 ## Manual QA
 
