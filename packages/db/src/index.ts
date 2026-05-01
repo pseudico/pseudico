@@ -34,6 +34,14 @@ export {
   TransactionService,
   type TransactionHandle
 } from "./services/TransactionService";
+export {
+  SearchIndexService,
+  type RebuildWorkspaceIndexResult,
+  type SearchIndexIdFactory,
+  type SearchIndexTargetType,
+  type SearchProjectionInput,
+  type SearchWorkspaceInput
+} from "./services/SearchIndexService";
 export { migrations } from "./migrations";
 export * from "./repositories";
 export * as schema from "./schema";
