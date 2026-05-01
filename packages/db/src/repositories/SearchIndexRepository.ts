@@ -48,6 +48,11 @@ export type RemoveSearchIndexInput = {
   targetId: string;
 };
 
+export type RemoveWorkspaceSearchTargetsInput = {
+  workspaceId: string;
+  targetTypes: string[];
+};
+
 export type SearchIndexOptions = {
   limit?: number;
   targetTypes?: string[];
@@ -135,6 +140,22 @@ export class SearchIndexRepository {
            and target_id = ?`
       )
       .run(input.workspaceId, input.targetType, input.targetId);
+  }
+
+  removeWorkspaceTargets(input: RemoveWorkspaceSearchTargetsInput): void {
+    if (input.targetTypes.length === 0) {
+      return;
+    }
+
+    const placeholders = input.targetTypes.map(() => "?").join(", ");
+
+    this.connection.sqlite
+      .prepare(
+        `delete from search_index
+         where workspace_id = ?
+           and target_type in (${placeholders})`
+      )
+      .run(input.workspaceId, ...input.targetTypes);
   }
 
   search(

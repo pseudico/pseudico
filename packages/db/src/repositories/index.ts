@@ -46,6 +46,7 @@ export {
 } from "./ItemRepository";
 export {
   SearchIndexRepository,
+  type RemoveWorkspaceSearchTargetsInput,
   type RemoveSearchIndexInput,
   type SearchIndexOptions,
   type SearchIndexRecord,

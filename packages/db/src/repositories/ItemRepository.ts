@@ -136,6 +136,43 @@ export class ItemRepository {
     return rows.map(toItemRecord);
   }
 
+  listByWorkspace(
+    workspaceId: string,
+    filters: ListItemsFilter = {}
+  ): ItemRecord[] {
+    const where = ["workspace_id = ?"];
+    const values: unknown[] = [workspaceId];
+
+    if (filters.type !== undefined) {
+      where.push("type = ?");
+      values.push(filters.type);
+    }
+
+    if (filters.status !== undefined) {
+      where.push("status = ?");
+      values.push(filters.status);
+    }
+
+    if (filters.includeArchived !== true) {
+      where.push("archived_at is null");
+    }
+
+    if (filters.includeDeleted !== true) {
+      where.push("deleted_at is null");
+    }
+
+    const rows = this.connection.sqlite
+      .prepare<unknown[], ItemRow>(
+        `select *
+         from items
+         where ${where.join(" and ")}
+         order by container_id asc, pinned desc, sort_order asc, created_at asc`
+      )
+      .all(...values);
+
+    return rows.map(toItemRecord);
+  }
+
   create(input: CreateItemInput): ItemRecord {
     this.connection.sqlite
       .prepare(
