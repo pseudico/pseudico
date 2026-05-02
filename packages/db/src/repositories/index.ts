@@ -45,6 +45,16 @@ export {
   type UpdateItemPatch
 } from "./ItemRepository";
 export {
+  ListRepository,
+  type CreateListDetailsInput,
+  type CreateListItemInput,
+  type ListDetailsRecord,
+  type ListItemRecord,
+  type ListItemsFilter as ListRowItemsFilter,
+  type ListWithItemRecord,
+  type UpdateListItemPatch
+} from "./ListRepository";
+export {
   SearchIndexRepository,
   type RemoveWorkspaceSearchTargetsInput,
   type RemoveSearchIndexInput,

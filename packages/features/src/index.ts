@@ -38,7 +38,7 @@ export { filesModuleContract } from "./files";
 export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
 export { linksModuleContract } from "./links";
-export { listsModuleContract } from "./lists";
+export { ListService, listsModuleContract, parseBulkListItems } from "./lists";
 export { categoriesModuleContract, tagsModuleContract } from "./metadata";
 export { notesModuleContract } from "./notes";
 export { ProjectService, projectsModuleContract } from "./projects";
@@ -68,7 +68,17 @@ export type {
   UpdateItemInput
 } from "./items";
 export type { LinkService } from "./links";
-export type { ListService } from "./lists";
+export type {
+  AddListItemInput,
+  BulkCreateListItemsInput,
+  CreateListInput,
+  ListItemMutationResult,
+  ListMutationResult,
+  ListServiceIdFactory,
+  ParsedBulkListItem,
+  ReorderListItemsInput,
+  UpdateListItemInput
+} from "./lists";
 export type { CategoryService, TagService } from "./metadata";
 export type { NoteService } from "./notes";
 export type {

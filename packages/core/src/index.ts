@@ -22,6 +22,19 @@ export {
   taskStatusToItemStatus
 } from "./entities/Task";
 export type { TaskDateRange, TaskStatus } from "./entities/Task";
+export {
+  LIST_DISPLAY_MODES,
+  LIST_ITEM_STATUSES,
+  LIST_PROGRESS_MODES,
+  isListDisplayMode,
+  isListItemStatus,
+  isListProgressMode
+} from "./entities/List";
+export type {
+  ListDisplayMode,
+  ListItemStatus,
+  ListProgressMode
+} from "./entities/List";
 export { createLocalId } from "./ids";
 export { createIsoTimestamp } from "./time";
 
