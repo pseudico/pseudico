@@ -72,6 +72,46 @@ function createMockApi(
     database: {
       getHealthStatus: async () => apiOk(healthyDatabase)
     },
+    inbox: {
+      getInbox: async () =>
+        apiOk({
+          id: "container_inbox",
+          workspaceId: "workspace_1",
+          type: "inbox",
+          name: "Inbox",
+          slug: "inbox",
+          description: null,
+          status: "active",
+          categoryId: null,
+          color: null,
+          isFavorite: true,
+          sortOrder: 0,
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z",
+          archivedAt: null,
+          deletedAt: null
+        }),
+      listItems: async () => apiOk([]),
+      moveItemToProject: async () =>
+        apiOk({
+          id: "item_1",
+          workspaceId: "workspace_1",
+          containerId: "container_1",
+          containerTabId: null,
+          type: "task",
+          title: "Call supplier",
+          body: null,
+          categoryId: null,
+          status: "active",
+          sortOrder: 1024,
+          pinned: false,
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z",
+          completedAt: null,
+          archivedAt: null,
+          deletedAt: null
+        })
+    },
     projects: {
       create: async () =>
         apiOk({

@@ -120,6 +120,43 @@ export type ProjectSummary = {
   deletedAt: string | null;
 };
 
+export type InboxSummary = {
+  id: string;
+  workspaceId: string;
+  type: "inbox";
+  name: string;
+  slug: string;
+  description: string | null;
+  status: ProjectStatus;
+  categoryId: string | null;
+  color: string | null;
+  isFavorite: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  archivedAt: string | null;
+  deletedAt: string | null;
+};
+
+export type ItemSummary = {
+  id: string;
+  workspaceId: string;
+  containerId: string;
+  containerTabId: string | null;
+  type: string;
+  title: string;
+  body: string | null;
+  categoryId: string | null;
+  status: string;
+  sortOrder: number;
+  pinned: boolean;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+  archivedAt: string | null;
+  deletedAt: string | null;
+};
+
 export type CreateProjectInput = {
   workspaceId?: string;
   name: string;
@@ -148,6 +185,11 @@ export type UpdateProjectInput = {
   status?: ProjectMutableStatus;
 };
 
+export type MoveInboxItemToProjectInput = {
+  itemId: string;
+  projectId: string;
+};
+
 export type LocalWorkOsModuleName =
   | "containers"
   | "items"
@@ -170,6 +212,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   },
   database: {
     getHealthStatus: "local-work-os:database:get-health-status"
+  },
+  inbox: {
+    getInbox: "local-work-os:inbox:get-inbox",
+    listItems: "local-work-os:inbox:list-items",
+    moveItemToProject: "local-work-os:inbox:move-item-to-project"
   },
   projects: {
     createProject: "local-work-os:projects:create-project",
@@ -214,6 +261,18 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.database.getHealthStatus]: {
     input: undefined;
     result: ApiResult<DatabaseHealthStatus>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.inbox.getInbox]: {
+    input: string | undefined;
+    result: ApiResult<InboxSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.inbox.listItems]: {
+    input: string | undefined;
+    result: ApiResult<ItemSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.inbox.moveItemToProject]: {
+    input: MoveInboxItemToProjectInput;
+    result: ApiResult<ItemSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject]: {
     input: CreateProjectInput;
@@ -282,6 +341,13 @@ export type LocalWorkOsApi = {
   };
   database: {
     getHealthStatus: () => Promise<ApiResult<DatabaseHealthStatus>>;
+  };
+  inbox: {
+    getInbox: (workspaceId?: string) => Promise<ApiResult<InboxSummary>>;
+    listItems: (workspaceId?: string) => Promise<ApiResult<ItemSummary[]>>;
+    moveItemToProject: (
+      input: MoveInboxItemToProjectInput
+    ) => Promise<ApiResult<ItemSummary>>;
   };
   projects: {
     create: (
@@ -365,6 +431,14 @@ export function createLocalWorkOsApi(
     database: {
       getHealthStatus: () =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.database.getHealthStatus, undefined)
+    },
+    inbox: {
+      getInbox: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.inbox.getInbox, workspaceId),
+      listItems: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.inbox.listItems, workspaceId),
+      moveItemToProject: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.inbox.moveItemToProject, input)
     },
     projects: {
       create: (input) =>

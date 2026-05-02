@@ -28,3 +28,8 @@ export {
   ItemTypeIcon,
   type ItemTypeIconProps
 } from "./components/ItemTypeIcon";
+export {
+  MoveToContainerDialog,
+  type MoveTargetContainer,
+  type MoveToContainerDialogProps
+} from "./components/MoveToContainerDialog";

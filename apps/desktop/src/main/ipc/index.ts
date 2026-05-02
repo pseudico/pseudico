@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { registerContainerIpc } from "./registerContainerIpc";
 import { registerDatabaseIpc } from "./registerDatabaseIpc";
 import { registerFileIpc } from "./registerFileIpc";
+import { registerInboxIpc } from "./registerInboxIpc";
 import { registerItemIpc } from "./registerItemIpc";
 import { registerProjectIpc } from "./registerProjectIpc";
 import { registerWorkspaceIpc } from "./registerWorkspaceIpc";
@@ -30,6 +31,7 @@ export function registerDesktopIpc(
 ): void {
   registerWorkspaceIpc(services.workspaceService);
   registerDatabaseIpc(services.workspaceService);
+  registerInboxIpc(services.workspaceService);
   registerProjectIpc(services.workspaceService);
   registerContainerIpc();
   registerItemIpc();

@@ -41,6 +41,12 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
     database: {
       getHealthStatus: () => callApi(() => api.database.getHealthStatus())
     },
+    inbox: {
+      getInbox: (workspaceId) => callApi(() => api.inbox.getInbox(workspaceId)),
+      listItems: (workspaceId) => callApi(() => api.inbox.listItems(workspaceId)),
+      moveItemToProject: (input) =>
+        callApi(() => api.inbox.moveItemToProject(input))
+    },
     projects: {
       create: (input) => callApi(() => api.projects.create(input)),
       update: (input) => callApi(() => api.projects.update(input)),
@@ -90,6 +96,14 @@ export const desktopApiClient: LocalWorkOsApi = {
   },
   database: {
     getHealthStatus: () => getDesktopApiClient().database.getHealthStatus()
+  },
+  inbox: {
+    getInbox: (workspaceId) =>
+      getDesktopApiClient().inbox.getInbox(workspaceId),
+    listItems: (workspaceId) =>
+      getDesktopApiClient().inbox.listItems(workspaceId),
+    moveItemToProject: (input) =>
+      getDesktopApiClient().inbox.moveItemToProject(input)
   },
   projects: {
     create: (input) => getDesktopApiClient().projects.create(input),
