@@ -9,6 +9,7 @@ import {
   type ItemSummary,
   type LocalWorkOsApi,
   type ProjectSummary,
+  type TaskSummary,
   type WorkspaceSummary
 } from "../../src/preload/api";
 import { InboxPage } from "../../src/renderer/pages/InboxPage";
@@ -161,6 +162,27 @@ function createMockApi(): LocalWorkOsApi {
           containerId: project.id
         })
     },
+    tasks: {
+      create: async () => apiOk(taskSummary()),
+      update: async () => apiOk(taskSummary()),
+      complete: async () =>
+        apiOk({
+          ...taskSummary(),
+          status: "completed",
+          taskStatus: "done"
+        }),
+      reopen: async () => apiOk(taskSummary()),
+      listByContainer: async () => apiOk([taskSummary()]),
+      createTask: async () => apiOk(taskSummary()),
+      updateTask: async () => apiOk(taskSummary()),
+      completeTask: async () =>
+        apiOk({
+          ...taskSummary(),
+          status: "completed",
+          taskStatus: "done"
+        }),
+      reopenTask: async () => apiOk(taskSummary())
+    },
     projects: {
       create: async () => apiOk({ project, defaultTabId: "container_tab_1" }),
       update: async () => apiOk(project),
@@ -223,5 +245,21 @@ function inboxSummary(): InboxSummary {
     updatedAt: "2026-05-01T00:00:00.000Z",
     archivedAt: null,
     deletedAt: null
+  };
+}
+
+function taskSummary(): TaskSummary {
+  return {
+    ...inboxItem,
+    type: "task",
+    taskStatus: "open",
+    priority: null,
+    startAt: null,
+    dueAt: "2026-05-03T00:00:00.000Z",
+    allDay: true,
+    timezone: null,
+    taskCompletedAt: null,
+    taskCreatedAt: "2026-05-01T00:00:00.000Z",
+    taskUpdatedAt: "2026-05-01T00:00:00.000Z"
   };
 }

@@ -7,6 +7,11 @@ const currentDir = fileURLToPath(new URL(".", import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
+      "@local-work-os/core": resolve(
+        currentDir,
+        "../../packages/core/src/index.ts"
+      ),
+      "@local-work-os/db": resolve(currentDir, "../../packages/db/src/index.ts"),
       "@local-work-os/features": resolve(
         currentDir,
         "../../packages/features/src/index.ts"

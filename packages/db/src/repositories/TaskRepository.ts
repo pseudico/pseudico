@@ -288,6 +288,21 @@ export class TaskRepository {
     return this.listDueBetween(workspaceId, range);
   }
 
+  listByContainer(containerId: string): TaskWithItemRecord[] {
+    const rows = this.connection.sqlite
+      .prepare<[string], TaskWithItemRow>(
+        `${TASK_WITH_ITEM_SELECT}
+         where i.container_id = ?
+           and i.type = 'task'
+           and i.archived_at is null
+           and i.deleted_at is null
+         order by i.pinned desc, i.sort_order asc, i.created_at asc`
+      )
+      .all(containerId);
+
+    return rows.map(toTaskWithItemRecord);
+  }
+
   private listActiveDatedTasks(input: {
     workspaceId: string;
     whereSql: string;

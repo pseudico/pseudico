@@ -9,6 +9,7 @@ import {
   type LocalWorkOsApi,
   type ProjectSummary,
   type RecentWorkspace,
+  type TaskSummary,
   type WorkspaceSummary
 } from "../../src/preload/api";
 import { createDesktopApiClient } from "../../src/renderer/api/desktopApiClient";
@@ -87,6 +88,27 @@ function createMockApi(
           ...itemSummary(),
           containerId: "container_1"
         })
+    },
+    tasks: {
+      create: async () => apiOk(taskSummary()),
+      update: async () => apiOk(taskSummary()),
+      complete: async () =>
+        apiOk({
+          ...taskSummary(),
+          status: "completed",
+          taskStatus: "done"
+        }),
+      reopen: async () => apiOk(taskSummary()),
+      listByContainer: async () => apiOk([taskSummary()]),
+      createTask: async () => apiOk(taskSummary()),
+      updateTask: async () => apiOk(taskSummary()),
+      completeTask: async () =>
+        apiOk({
+          ...taskSummary(),
+          status: "completed",
+          taskStatus: "done"
+        }),
+      reopenTask: async () => apiOk(taskSummary())
     },
     projects: {
       create: async () =>
@@ -206,6 +228,22 @@ function itemSummary(): ItemSummary {
   };
 }
 
+function taskSummary(): TaskSummary {
+  return {
+    ...itemSummary(),
+    type: "task",
+    taskStatus: "open",
+    priority: null,
+    startAt: null,
+    dueAt: null,
+    allDay: true,
+    timezone: null,
+    taskCompletedAt: null,
+    taskCreatedAt: "2026-04-30T00:00:00.000Z",
+    taskUpdatedAt: "2026-04-30T00:00:00.000Z"
+  };
+}
+
 describe("desktop API client", () => {
   it("passes typed preload results through to renderer callers", async () => {
     const client = createDesktopApiClient(createMockApi());
@@ -245,6 +283,15 @@ describe("desktop API client", () => {
         {
           id: "container_1",
           type: "project"
+        }
+      ]
+    });
+    await expect(client.tasks.listByContainer("container_1")).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: "item_1",
+          taskStatus: "open"
         }
       ]
     });
