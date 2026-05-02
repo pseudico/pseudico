@@ -3,7 +3,9 @@ import {
   apiOk,
   type ApiResult,
   type DatabaseHealthStatus,
+  type InboxSummary,
   type IpcModuleStatus,
+  type ItemSummary,
   type LocalWorkOsApi,
   type ProjectSummary,
   type RecentWorkspace,
@@ -75,6 +77,15 @@ function createMockApi(
           searchIndexAvailable: false,
           databasePath: null,
           error: null
+        })
+    },
+    inbox: {
+      getInbox: async () => apiOk(inboxSummary()),
+      listItems: async () => apiOk([itemSummary()]),
+      moveItemToProject: async () =>
+        apiOk({
+          ...itemSummary(),
+          containerId: "container_1"
         })
     },
     projects: {
@@ -154,6 +165,47 @@ function projectSummary(): ProjectSummary {
   };
 }
 
+function inboxSummary(): InboxSummary {
+  return {
+    id: "container_inbox",
+    workspaceId: "workspace_1",
+    type: "inbox",
+    name: "Inbox",
+    slug: "inbox",
+    description: null,
+    status: "active",
+    categoryId: null,
+    color: null,
+    isFavorite: true,
+    sortOrder: 0,
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z",
+    archivedAt: null,
+    deletedAt: null
+  };
+}
+
+function itemSummary(): ItemSummary {
+  return {
+    id: "item_1",
+    workspaceId: "workspace_1",
+    containerId: "container_inbox",
+    containerTabId: null,
+    type: "task",
+    title: "Call accountant",
+    body: null,
+    categoryId: null,
+    status: "active",
+    sortOrder: 1024,
+    pinned: false,
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z",
+    completedAt: null,
+    archivedAt: null,
+    deletedAt: null
+  };
+}
+
 describe("desktop API client", () => {
   it("passes typed preload results through to renderer callers", async () => {
     const client = createDesktopApiClient(createMockApi());
@@ -168,6 +220,15 @@ describe("desktop API client", () => {
         connected: false,
         databasePath: null
       }
+    });
+    await expect(client.inbox.listItems()).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: "item_1",
+          title: "Call accountant"
+        }
+      ]
     });
     await expect(client.projects.listProjects()).resolves.toMatchObject({
       ok: true,

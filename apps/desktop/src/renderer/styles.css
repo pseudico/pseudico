@@ -21,12 +21,14 @@ body {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
 
 button:disabled,
 input:disabled,
+select:disabled,
 textarea:disabled {
   cursor: not-allowed;
   opacity: 0.62;
@@ -379,7 +381,8 @@ a {
 }
 
 .project-form input,
-.project-form textarea {
+.project-form textarea,
+.move-to-container-form select {
   width: 100%;
   min-height: 42px;
   padding: 9px 11px;
@@ -391,6 +394,19 @@ a {
 
 .project-form textarea {
   resize: vertical;
+}
+
+.move-to-container-form {
+  display: grid;
+  gap: 14px;
+}
+
+.move-to-container-form label {
+  display: grid;
+  gap: 6px;
+  color: #514e49;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .project-color-field {
@@ -684,6 +700,7 @@ a {
   gap: 22px;
 }
 
+.inbox-page,
 .projects-page,
 .project-detail-page {
   display: grid;
@@ -879,6 +896,7 @@ a {
   padding: 18px;
 }
 
+.inbox-content-section,
 .project-content-section {
   display: grid;
   gap: 12px;

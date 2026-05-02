@@ -1,5 +1,5 @@
 import { renderToString } from "react-dom/server";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   apiOk,
@@ -11,10 +11,8 @@ import {
   type ProjectSummary,
   type WorkspaceSummary
 } from "../../src/preload/api";
-import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
-import { ProjectsPage } from "../../src/renderer/pages/ProjectsPage";
+import { InboxPage } from "../../src/renderer/pages/InboxPage";
 import { workspaceStore } from "../../src/renderer/state/workspaceStore";
-import type { UniversalItemViewModel } from "@local-work-os/ui";
 
 const workspace: WorkspaceSummary = {
   id: "workspace_1",
@@ -24,8 +22,27 @@ const workspace: WorkspaceSummary = {
   schemaVersion: 1
 };
 
+const inboxItem: ItemSummary = {
+  id: "item_1",
+  workspaceId: "workspace_1",
+  containerId: "container_inbox",
+  containerTabId: null,
+  type: "task",
+  title: "Call supplier",
+  body: "Ask about Friday delivery.",
+  categoryId: "category_ops",
+  status: "active",
+  sortOrder: 1024,
+  pinned: false,
+  createdAt: "2026-05-01T00:00:00.000Z",
+  updatedAt: "2026-05-01T00:00:00.000Z",
+  completedAt: null,
+  archivedAt: null,
+  deletedAt: null
+};
+
 const project: ProjectSummary = {
-  id: "container_1",
+  id: "container_project_1",
   workspaceId: "workspace_1",
   type: "project",
   name: "Launch Plan",
@@ -34,7 +51,7 @@ const project: ProjectSummary = {
   status: "active",
   categoryId: null,
   color: "#245c55",
-  isFavorite: true,
+  isFavorite: false,
   sortOrder: 0,
   createdAt: "2026-05-01T00:00:00.000Z",
   updatedAt: "2026-05-01T00:00:00.000Z",
@@ -42,15 +59,50 @@ const project: ProjectSummary = {
   deletedAt: null
 };
 
-const projectItem: UniversalItemViewModel = {
-  id: "item_1",
-  type: "task",
-  title: "Book launch venue",
-  body: "Confirm the room hold before Friday.",
-  status: "active",
-  dueLabel: "Friday",
-  pinned: true
-};
+describe("Inbox renderer page", () => {
+  afterEach(() => {
+    workspaceStore.reset();
+  });
+
+  it("asks for a workspace before showing Inbox content", () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <InboxPage apiClient={createMockApi()} />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Open or create a local workspace");
+  });
+
+  it("renders Inbox items with move-only triage actions", () => {
+    workspaceStore.setCurrentWorkspace(workspace);
+
+    const html = renderToString(
+      <MemoryRouter>
+        <InboxPage
+          apiClient={createMockApi()}
+          initialItems={[inboxItem]}
+          initialProjects={[
+            project,
+            {
+              ...project,
+              id: "container_project_waiting",
+              name: "Waiting Project",
+              status: "waiting"
+            }
+          ]}
+        />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Triage queue");
+    expect(html).toContain("Call supplier");
+    expect(html).toContain("Ask about Friday delivery.");
+    expect(html).toContain("Move");
+    expect(html).toContain("Launch Plan");
+    expect(html).not.toContain("Waiting Project");
+  });
+});
 
 function moduleStatus(module: IpcModuleStatus["module"]): IpcModuleStatus {
   return {
@@ -61,7 +113,7 @@ function moduleStatus(module: IpcModuleStatus["module"]): IpcModuleStatus {
   };
 }
 
-function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
+function createMockApi(): LocalWorkOsApi {
   const health: DatabaseHealthStatus = {
     connected: true,
     schemaVersion: 1,
@@ -102,10 +154,10 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
     },
     inbox: {
       getInbox: async () => apiOk(inboxSummary()),
-      listItems: async () => apiOk([itemSummary()]),
+      listItems: async () => apiOk([inboxItem]),
       moveItemToProject: async () =>
         apiOk({
-          ...itemSummary(),
+          ...inboxItem,
           containerId: project.id
         })
     },
@@ -123,7 +175,7 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
           ...project,
           deletedAt: "2026-05-01T01:00:00.000Z"
         }),
-      list: async () => apiOk(projects),
+      list: async () => apiOk([project]),
       get: async () => apiOk(project),
       createProject: async () =>
         apiOk({ project, defaultTabId: "container_tab_1" }),
@@ -139,7 +191,7 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
           ...project,
           deletedAt: "2026-05-01T01:00:00.000Z"
         }),
-      listProjects: async () => apiOk(projects),
+      listProjects: async () => apiOk([project]),
       getProject: async () => apiOk(project)
     },
     containers: {
@@ -173,71 +225,3 @@ function inboxSummary(): InboxSummary {
     deletedAt: null
   };
 }
-
-function itemSummary(): ItemSummary {
-  return {
-    id: "item_1",
-    workspaceId: "workspace_1",
-    containerId: "container_inbox",
-    containerTabId: null,
-    type: "task",
-    title: "Book launch venue",
-    body: "Confirm the room hold before Friday.",
-    categoryId: null,
-    status: "active",
-    sortOrder: 1024,
-    pinned: true,
-    createdAt: "2026-05-01T00:00:00.000Z",
-    updatedAt: "2026-05-01T00:00:00.000Z",
-    completedAt: null,
-    archivedAt: null,
-    deletedAt: null
-  };
-}
-
-describe("Projects renderer pages", () => {
-  afterEach(() => {
-    workspaceStore.reset();
-  });
-
-  it("renders the empty Projects page for an open workspace", () => {
-    workspaceStore.setCurrentWorkspace(workspace);
-
-    const html = renderToString(
-      <MemoryRouter>
-        <ProjectsPage apiClient={createMockApi()} />
-      </MemoryRouter>
-    );
-
-    expect(html).toContain("Projects");
-    expect(html).toContain("No projects yet");
-    expect(html).toContain("Create project");
-  });
-
-  it("renders project detail metadata placeholders", () => {
-    const html = renderToString(
-      <MemoryRouter initialEntries={["/projects/container_1"]}>
-        <Routes>
-          <Route
-            path="/projects/:projectId"
-            element={
-              <ProjectDetailPage
-                apiClient={createMockApi([project])}
-                initialProject={project}
-                initialItems={[projectItem]}
-              />
-            }
-          />
-        </Routes>
-      </MemoryRouter>
-    );
-
-    expect(html).toContain("Launch Plan");
-    expect(html).toContain("Status");
-    expect(html).toContain("Category");
-    expect(html).toContain("Tags");
-    expect(html).toContain("Content feed");
-    expect(html).toContain("Book launch venue");
-    expect(html).toContain("Actions for Book launch venue");
-  });
-});

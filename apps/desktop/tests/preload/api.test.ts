@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(15);
+    expect(channels).toHaveLength(18);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -45,6 +45,7 @@ describe("typed preload API", () => {
     expect(Object.keys(api)).toEqual([
       "workspace",
       "database",
+      "inbox",
       "projects",
       "containers",
       "items",
@@ -137,6 +138,40 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.projects.archiveProject,
         input: "container_1"
+      }
+    ]);
+  });
+
+  it("routes Inbox calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.inbox.listItems("workspace_1");
+    await api.inbox.moveItemToProject({
+      itemId: "item_1",
+      projectId: "container_1"
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.inbox.listItems,
+        input: "workspace_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.inbox.moveItemToProject,
+        input: {
+          itemId: "item_1",
+          projectId: "container_1"
+        }
       }
     ]);
   });

@@ -4,6 +4,7 @@ import {
   getItemTypeLabel,
   ItemActionsMenu,
   ItemFeed,
+  MoveToContainerDialog,
   UniversalItemCard,
   type UniversalItemViewModel
 } from "../src";
@@ -70,5 +71,26 @@ describe("Universal item UI", () => {
     expect(html).toContain("Archive");
     expect(html).toContain("Delete");
     expect(html).toContain("Inspect");
+  });
+
+  it("renders the move-to-container dialog with project options", () => {
+    const html = renderToStaticMarkup(
+      <MoveToContainerDialog
+        containers={[
+          {
+            id: "container_project_1",
+            name: "Launch Plan"
+          }
+        ]}
+        itemTitle="Call accountant"
+        open
+        onCancel={() => undefined}
+        onMove={() => undefined}
+      />
+    );
+
+    expect(html).toContain("Call accountant");
+    expect(html).toContain("Launch Plan");
+    expect(html).toContain("Move");
   });
 });
