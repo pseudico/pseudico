@@ -9,6 +9,12 @@ export {
   type ProjectFormValues
 } from "./forms/ProjectForm";
 export {
+  QuickAddForm,
+  type QuickAddFormProps,
+  type QuickAddFormValues,
+  type QuickAddTargetOption
+} from "./forms/QuickAddForm";
+export {
   TaskQuickAdd,
   type TaskQuickAddProps,
   type TaskQuickAddValues

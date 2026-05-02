@@ -383,6 +383,48 @@ a {
   background: #ffffff;
 }
 
+.quick-add-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: start center;
+  padding: 96px 24px 24px;
+  background: rgba(38, 38, 36, 0.28);
+}
+
+.quick-add-dialog {
+  width: min(680px, 100%);
+  margin: 0;
+  padding: 18px;
+  border: 1px solid #dedbd1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #262624;
+  box-shadow: 0 24px 64px rgba(38, 38, 36, 0.22);
+}
+
+.quick-add-dialog-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.quick-add-dialog-header h2 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.quick-add-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(140px, 180px) minmax(180px, 220px) auto;
+  gap: 10px;
+  align-items: end;
+}
+
 .project-form label {
   display: grid;
   gap: 6px;
@@ -391,6 +433,7 @@ a {
   font-weight: 700;
 }
 
+.quick-add-form label,
 .task-quick-add label {
   display: grid;
   gap: 6px;
@@ -403,6 +446,8 @@ a {
 .project-form input,
 .project-form textarea,
 .move-to-container-form select,
+.quick-add-form input,
+.quick-add-form select,
 .task-quick-add input,
 .task-card-due-field input {
   width: 100%;
@@ -427,6 +472,10 @@ a {
 }
 
 .task-quick-add .form-message {
+  grid-column: 1 / -1;
+}
+
+.quick-add-form .form-message {
   grid-column: 1 / -1;
 }
 
@@ -1199,6 +1248,7 @@ a {
   .health-grid,
   .project-color-options,
   .project-meta-grid,
+  .quick-add-form,
   .task-quick-add {
     grid-template-columns: 1fr;
   }
