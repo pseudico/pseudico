@@ -44,7 +44,7 @@ export { notesModuleContract } from "./notes";
 export { ProjectService, projectsModuleContract } from "./projects";
 export { savedViewsModuleContract } from "./savedViews";
 export { SearchService, searchModuleContract } from "./search";
-export { tasksModuleContract } from "./tasks";
+export { TaskService, tasksModuleContract } from "./tasks";
 export { timelineModuleContract } from "./timeline";
 export { todayModuleContract } from "./today";
 export { workspaceModuleContract } from "./workspace";
@@ -81,7 +81,13 @@ export type {
   UpdateProjectInput
 } from "./projects";
 export type { SavedViewService } from "./savedViews";
-export type { TaskService } from "./tasks";
+export type {
+  CreateTaskInput,
+  TaskMutationResult,
+  TaskRangeInput,
+  TaskServiceIdFactory,
+  UpdateTaskInput
+} from "./tasks";
 export type { TimelineService } from "./timeline";
 export type { TodayService } from "./today";
 export type { WorkspaceService } from "./workspace";

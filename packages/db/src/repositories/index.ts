@@ -52,3 +52,10 @@ export {
   type SearchIndexRecord,
   type UpsertSearchIndexInput
 } from "./SearchIndexRepository";
+export {
+  TaskRepository,
+  type CreateTaskDetailsInput,
+  type TaskRecord,
+  type TaskWithItemRecord,
+  type UpdateTaskDetailsPatch
+} from "./TaskRepository";

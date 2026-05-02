@@ -16,6 +16,12 @@ export {
   isItemType
 } from "./entities/Item";
 export type { ItemStatus, ItemType } from "./entities/Item";
+export {
+  TASK_STATUSES,
+  isTaskStatus,
+  taskStatusToItemStatus
+} from "./entities/Task";
+export type { TaskDateRange, TaskStatus } from "./entities/Task";
 export { createLocalId } from "./ids";
 export { createIsoTimestamp } from "./time";
 
