@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   ContainerRepository,
   ItemRepository,
+  ListRepository,
   SearchIndexRepository,
   SearchIndexService,
   type DatabaseConnection
@@ -31,7 +32,7 @@ describe("SearchIndexService", () => {
     await testDb.cleanup();
   });
 
-  it("indexes containers and items with searchable projections", () => {
+  it("indexes containers, items, and list rows with searchable projections", () => {
     const container = createContainer("container_1", "workspace_1", "Launch Plan");
     const item = createItem({
       id: "item_1",
@@ -39,6 +40,14 @@ describe("SearchIndexService", () => {
       containerId: container.id,
       title: "Supplier checklist",
       body: "Confirm banner copy before Monday"
+    });
+    const list = createList("item_list_1", container.id);
+    const listItem = new ListRepository(connection).createListItem({
+      id: "list_item_1",
+      workspaceId: "workspace_1",
+      listId: list.id,
+      title: "Order launch signage",
+      timestamp: TEST_TIMESTAMP
     });
     const service = createService();
 
@@ -50,8 +59,17 @@ describe("SearchIndexService", () => {
       tags: "supplier",
       metadata: { source: "test" }
     });
+    service.upsertListItem(listItem, {
+      metadata: { source: "test" }
+    });
 
-    expect(search("launch")).toMatchObject([
+    expect(
+      service.searchWorkspace({
+        workspaceId: "workspace_1",
+        query: "launch",
+        targetTypes: ["container"]
+      })
+    ).toMatchObject([
       {
         targetType: "container",
         targetId: "container_1",
@@ -66,6 +84,13 @@ describe("SearchIndexService", () => {
         targetId: "item_1",
         title: "Supplier checklist",
         tags: "supplier"
+      }
+    ]);
+    expect(search("signage")).toMatchObject([
+      {
+        targetType: "list_item",
+        targetId: "list_item_1",
+        title: "Order launch signage"
       }
     ]);
   });
@@ -135,13 +160,21 @@ describe("SearchIndexService", () => {
     ).toEqual([]);
   });
 
-  it("rebuilds container and item records for one workspace", () => {
+  it("rebuilds container, item, and list row records for one workspace", () => {
     const container = createContainer("container_1", "workspace_1", "Launch Plan");
     createItem({
       id: "item_1",
       workspaceId: "workspace_1",
       containerId: container.id,
       title: "Supplier checklist"
+    });
+    const list = createList("item_list_1", container.id);
+    new ListRepository(connection).createListItem({
+      id: "list_item_1",
+      workspaceId: "workspace_1",
+      listId: list.id,
+      title: "Order launch signage",
+      timestamp: TEST_TIMESTAMP
     });
     createContainer("container_2", "workspace_2", "Launch Plan");
     new SearchIndexRepository(connection).upsert({
@@ -158,10 +191,18 @@ describe("SearchIndexService", () => {
 
     expect(result).toEqual({
       indexedContainerCount: 1,
-      indexedItemCount: 1
+      indexedItemCount: 2,
+      indexedListItemCount: 1
     });
     expect(search("stale")).toEqual([]);
-    expect(search("launch")).toHaveLength(1);
+    expect(
+      service.searchWorkspace({
+        workspaceId: "workspace_1",
+        query: "launch",
+        targetTypes: ["container"]
+      })
+    ).toHaveLength(1);
+    expect(search("signage")).toHaveLength(1);
     expect(
       service.searchWorkspace({
         workspaceId: "workspace_2",
@@ -180,6 +221,24 @@ function createService(): SearchIndexService {
     },
     now: () => new Date(TEST_TIMESTAMP)
   });
+}
+
+function createList(id: string, containerId: string) {
+  const item = new ItemRepository(connection).create({
+    id,
+    workspaceId: "workspace_1",
+    containerId,
+    type: "list",
+    title: "Launch rows",
+    timestamp: TEST_TIMESTAMP
+  });
+  new ListRepository(connection).createDetails({
+    itemId: item.id,
+    workspaceId: "workspace_1",
+    timestamp: TEST_TIMESTAMP
+  });
+
+  return item;
 }
 
 function createContainer(

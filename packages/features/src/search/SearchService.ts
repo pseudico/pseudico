@@ -9,7 +9,8 @@ import {
   type SearchProjectionInput,
   type SearchWorkspaceInput,
   type ContainerRecord,
-  type ItemRecord
+  type ItemRecord,
+  type ListItemRecord
 } from "@local-work-os/db";
 
 // Owns search-facing application service contracts.
@@ -36,6 +37,13 @@ export class SearchService {
 
   upsertItem(item: ItemRecord, input?: SearchProjectionInput): SearchIndexRecord {
     return this.searchIndexService.upsertItem(item, input);
+  }
+
+  upsertListItem(
+    listItem: ListItemRecord,
+    input?: SearchProjectionInput
+  ): SearchIndexRecord {
+    return this.searchIndexService.upsertListItem(listItem, input);
   }
 
   removeFromIndex(input: RemoveSearchIndexInput): void {
