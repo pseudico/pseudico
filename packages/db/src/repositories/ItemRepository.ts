@@ -52,6 +52,7 @@ export type CreateItemInput = {
   status?: string;
   sortOrder?: number;
   pinned?: boolean;
+  completedAt?: string | null;
 };
 
 export type ListItemsFilter = {
@@ -228,9 +229,10 @@ export class ItemRepository {
           status,
           sort_order,
           pinned,
+          completed_at,
           created_at,
           updated_at
-        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
         input.id,
@@ -244,6 +246,7 @@ export class ItemRepository {
         input.status ?? "active",
         input.sortOrder ?? 0,
         input.pinned === true ? 1 : 0,
+        input.completedAt ?? null,
         input.timestamp,
         input.timestamp
       );
