@@ -190,6 +190,56 @@ export type MoveInboxItemToProjectInput = {
   projectId: string;
 };
 
+export type TaskStatus = "open" | "done" | "waiting" | "cancelled";
+
+export type TaskSummary = ItemSummary & {
+  type: "task";
+  taskStatus: TaskStatus;
+  priority: number | null;
+  startAt: string | null;
+  dueAt: string | null;
+  allDay: boolean;
+  timezone: string | null;
+  taskCompletedAt: string | null;
+  taskCreatedAt: string;
+  taskUpdatedAt: string;
+};
+
+export type CreateTaskInput = {
+  workspaceId?: string;
+  containerId: string;
+  title: string;
+  actorType?: "local_user" | "system" | "importer";
+  body?: string | null;
+  categoryId?: string | null;
+  containerTabId?: string | null;
+  dueAt?: string | null;
+  startAt?: string | null;
+  priority?: number | null;
+  status?: TaskStatus;
+  allDay?: boolean;
+  timezone?: string | null;
+  sortOrder?: number;
+  pinned?: boolean;
+};
+
+export type UpdateTaskInput = {
+  itemId: string;
+  actorType?: "local_user" | "system" | "importer";
+  title?: string;
+  body?: string | null;
+  categoryId?: string | null;
+  dueAt?: string | null;
+  startAt?: string | null;
+  priority?: number | null;
+  status?: TaskStatus;
+  allDay?: boolean;
+  timezone?: string | null;
+  sortOrder?: number;
+  pinned?: boolean;
+  containerTabId?: string | null;
+};
+
 export type LocalWorkOsModuleName =
   | "containers"
   | "items"
@@ -217,6 +267,13 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     getInbox: "local-work-os:inbox:get-inbox",
     listItems: "local-work-os:inbox:list-items",
     moveItemToProject: "local-work-os:inbox:move-item-to-project"
+  },
+  tasks: {
+    createTask: "local-work-os:tasks:create-task",
+    updateTask: "local-work-os:tasks:update-task",
+    completeTask: "local-work-os:tasks:complete-task",
+    reopenTask: "local-work-os:tasks:reopen-task",
+    listByContainer: "local-work-os:tasks:list-by-container"
   },
   projects: {
     createProject: "local-work-os:projects:create-project",
@@ -273,6 +330,26 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.inbox.moveItemToProject]: {
     input: MoveInboxItemToProjectInput;
     result: ApiResult<ItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tasks.createTask]: {
+    input: CreateTaskInput;
+    result: ApiResult<TaskSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tasks.updateTask]: {
+    input: UpdateTaskInput;
+    result: ApiResult<TaskSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tasks.completeTask]: {
+    input: string;
+    result: ApiResult<TaskSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tasks.reopenTask]: {
+    input: string;
+    result: ApiResult<TaskSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tasks.listByContainer]: {
+    input: string;
+    result: ApiResult<TaskSummary[]>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject]: {
     input: CreateProjectInput;
@@ -348,6 +425,19 @@ export type LocalWorkOsApi = {
     moveItemToProject: (
       input: MoveInboxItemToProjectInput
     ) => Promise<ApiResult<ItemSummary>>;
+  };
+  tasks: {
+    create: (input: CreateTaskInput) => Promise<ApiResult<TaskSummary>>;
+    update: (input: UpdateTaskInput) => Promise<ApiResult<TaskSummary>>;
+    complete: (itemId: string) => Promise<ApiResult<TaskSummary>>;
+    reopen: (itemId: string) => Promise<ApiResult<TaskSummary>>;
+    listByContainer: (
+      containerId: string
+    ) => Promise<ApiResult<TaskSummary[]>>;
+    createTask: (input: CreateTaskInput) => Promise<ApiResult<TaskSummary>>;
+    updateTask: (input: UpdateTaskInput) => Promise<ApiResult<TaskSummary>>;
+    completeTask: (itemId: string) => Promise<ApiResult<TaskSummary>>;
+    reopenTask: (itemId: string) => Promise<ApiResult<TaskSummary>>;
   };
   projects: {
     create: (
@@ -439,6 +529,26 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.inbox.listItems, workspaceId),
       moveItemToProject: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.inbox.moveItemToProject, input)
+    },
+    tasks: {
+      create: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.createTask, input),
+      update: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.updateTask, input),
+      complete: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.completeTask, itemId),
+      reopen: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.reopenTask, itemId),
+      listByContainer: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.listByContainer, containerId),
+      createTask: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.createTask, input),
+      updateTask: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.updateTask, input),
+      completeTask: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.completeTask, itemId),
+      reopenTask: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.reopenTask, itemId)
     },
     projects: {
       create: (input) =>

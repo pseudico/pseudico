@@ -8,6 +8,11 @@ export {
   type ProjectFormErrors,
   type ProjectFormValues
 } from "./forms/ProjectForm";
+export {
+  TaskQuickAdd,
+  type TaskQuickAddProps,
+  type TaskQuickAddValues
+} from "./forms/TaskQuickAdd";
 
 export {
   ItemActionsMenu,
@@ -28,6 +33,11 @@ export {
   ItemTypeIcon,
   type ItemTypeIconProps
 } from "./components/ItemTypeIcon";
+export {
+  TaskCardContent,
+  type TaskCardContentProps,
+  type TaskCardViewModel
+} from "./components/TaskCardContent";
 export {
   MoveToContainerDialog,
   type MoveTargetContainer,

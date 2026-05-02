@@ -359,6 +359,12 @@ export class TaskService {
     );
   }
 
+  listTasksByContainer(containerId: string): TaskWithItemRecord[] {
+    validateNonEmptyString(containerId, "containerId");
+
+    return new TaskRepository(this.connection).listByContainer(containerId);
+  }
+
   private requireTask(itemId: string): TaskWithItemRecord {
     const task = new TaskRepository(this.connection).getByItemId(itemId);
 

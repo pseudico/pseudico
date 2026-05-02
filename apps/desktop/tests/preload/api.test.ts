@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(18);
+    expect(channels).toHaveLength(23);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -46,6 +46,7 @@ describe("typed preload API", () => {
       "workspace",
       "database",
       "inbox",
+      "tasks",
       "projects",
       "containers",
       "items",
@@ -172,6 +173,63 @@ describe("typed preload API", () => {
           itemId: "item_1",
           projectId: "container_1"
         }
+      }
+    ]);
+  });
+
+  it("routes task calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.tasks.create({
+      workspaceId: "workspace_1",
+      containerId: "container_1",
+      title: "Call supplier"
+    });
+    await api.tasks.update({
+      itemId: "item_1",
+      dueAt: "2026-05-04"
+    });
+    await api.tasks.complete("item_1");
+    await api.tasks.reopen("item_1");
+    await api.tasks.listByContainer("container_1");
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tasks.createTask,
+        input: {
+          workspaceId: "workspace_1",
+          containerId: "container_1",
+          title: "Call supplier"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tasks.updateTask,
+        input: {
+          itemId: "item_1",
+          dueAt: "2026-05-04"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tasks.completeTask,
+        input: "item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tasks.reopenTask,
+        input: "item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tasks.listByContainer,
+        input: "container_1"
       }
     ]);
   });

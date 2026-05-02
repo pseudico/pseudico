@@ -216,6 +216,44 @@ describe("TaskService", () => {
       end: "2026-05-10T00:00:00.000Z"
     }).map((task) => task.item.title)).toEqual(["Upcoming"]);
   });
+
+  it("lists task feed details by container including completed tasks", async () => {
+    const service = createService();
+    const first = await service.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "First task",
+      dueAt: "2026-05-03"
+    });
+    const second = await service.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Second task"
+    });
+    await service.completeTask(second.item.id);
+
+    expect(
+      service.listTasksByContainer("container_project_1").map((task) => ({
+        id: task.item.id,
+        title: task.item.title,
+        status: task.task.taskStatus,
+        dueAt: task.task.dueAt
+      }))
+    ).toEqual([
+      {
+        id: first.item.id,
+        title: "First task",
+        status: "open",
+        dueAt: "2026-05-03T00:00:00.000Z"
+      },
+      {
+        id: second.item.id,
+        title: "Second task",
+        status: "done",
+        dueAt: null
+      }
+    ]);
+  });
 });
 
 function createService(): TaskService {

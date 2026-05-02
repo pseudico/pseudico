@@ -47,6 +47,18 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       moveItemToProject: (input) =>
         callApi(() => api.inbox.moveItemToProject(input))
     },
+    tasks: {
+      create: (input) => callApi(() => api.tasks.create(input)),
+      update: (input) => callApi(() => api.tasks.update(input)),
+      complete: (itemId) => callApi(() => api.tasks.complete(itemId)),
+      reopen: (itemId) => callApi(() => api.tasks.reopen(itemId)),
+      listByContainer: (containerId) =>
+        callApi(() => api.tasks.listByContainer(containerId)),
+      createTask: (input) => callApi(() => api.tasks.createTask(input)),
+      updateTask: (input) => callApi(() => api.tasks.updateTask(input)),
+      completeTask: (itemId) => callApi(() => api.tasks.completeTask(itemId)),
+      reopenTask: (itemId) => callApi(() => api.tasks.reopenTask(itemId))
+    },
     projects: {
       create: (input) => callApi(() => api.projects.create(input)),
       update: (input) => callApi(() => api.projects.update(input)),
@@ -104,6 +116,19 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().inbox.listItems(workspaceId),
     moveItemToProject: (input) =>
       getDesktopApiClient().inbox.moveItemToProject(input)
+  },
+  tasks: {
+    create: (input) => getDesktopApiClient().tasks.create(input),
+    update: (input) => getDesktopApiClient().tasks.update(input),
+    complete: (itemId) => getDesktopApiClient().tasks.complete(itemId),
+    reopen: (itemId) => getDesktopApiClient().tasks.reopen(itemId),
+    listByContainer: (containerId) =>
+      getDesktopApiClient().tasks.listByContainer(containerId),
+    createTask: (input) => getDesktopApiClient().tasks.createTask(input),
+    updateTask: (input) => getDesktopApiClient().tasks.updateTask(input),
+    completeTask: (itemId) =>
+      getDesktopApiClient().tasks.completeTask(itemId),
+    reopenTask: (itemId) => getDesktopApiClient().tasks.reopenTask(itemId)
   },
   projects: {
     create: (input) => getDesktopApiClient().projects.create(input),

@@ -9,6 +9,7 @@ import {
   type ItemSummary,
   type LocalWorkOsApi,
   type ProjectSummary,
+  type TaskSummary,
   type WorkspaceSummary
 } from "../../src/preload/api";
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
@@ -47,10 +48,12 @@ const projectItem: UniversalItemViewModel = {
   type: "task",
   title: "Book launch venue",
   body: "Confirm the room hold before Friday.",
-  status: "active",
+  status: "open",
+  taskStatus: "open",
+  dueAt: "2026-05-03T00:00:00.000Z",
   dueLabel: "Friday",
   pinned: true
-};
+} as UniversalItemViewModel;
 
 function moduleStatus(module: IpcModuleStatus["module"]): IpcModuleStatus {
   return {
@@ -108,6 +111,27 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
           ...itemSummary(),
           containerId: project.id
         })
+    },
+    tasks: {
+      create: async () => apiOk(taskSummary()),
+      update: async () => apiOk(taskSummary()),
+      complete: async () =>
+        apiOk({
+          ...taskSummary(),
+          status: "completed",
+          taskStatus: "done"
+        }),
+      reopen: async () => apiOk(taskSummary()),
+      listByContainer: async () => apiOk([taskSummary()]),
+      createTask: async () => apiOk(taskSummary()),
+      updateTask: async () => apiOk(taskSummary()),
+      completeTask: async () =>
+        apiOk({
+          ...taskSummary(),
+          status: "completed",
+          taskStatus: "done"
+        }),
+      reopenTask: async () => apiOk(taskSummary())
     },
     projects: {
       create: async () => apiOk({ project, defaultTabId: "container_tab_1" }),
@@ -195,6 +219,22 @@ function itemSummary(): ItemSummary {
   };
 }
 
+function taskSummary(): TaskSummary {
+  return {
+    ...itemSummary(),
+    type: "task",
+    taskStatus: "open",
+    priority: null,
+    startAt: null,
+    dueAt: "2026-05-03T00:00:00.000Z",
+    allDay: true,
+    timezone: null,
+    taskCompletedAt: null,
+    taskCreatedAt: "2026-05-01T00:00:00.000Z",
+    taskUpdatedAt: "2026-05-01T00:00:00.000Z"
+  };
+}
+
 describe("Projects renderer pages", () => {
   afterEach(() => {
     workspaceStore.reset();
@@ -238,6 +278,8 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Tags");
     expect(html).toContain("Content feed");
     expect(html).toContain("Book launch venue");
+    expect(html).toContain("Complete");
+    expect(html).toContain("Due");
     expect(html).toContain("Actions for Book launch venue");
   });
 });

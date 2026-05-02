@@ -14,6 +14,7 @@ import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandle
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
 import { handleGetModuleStatus } from "../../src/main/ipc/moduleStatusHandlers";
 import { createProjectIpcHandlers } from "../../src/main/ipc/projectHandlers";
+import { createTaskIpcHandlers } from "../../src/main/ipc/taskHandlers";
 import { createWorkspaceIpcHandlers } from "../../src/main/ipc/workspaceHandlers";
 import type { WorkspaceFileSystemService } from "../../src/main/services/workspace/WorkspaceFileSystemService";
 
@@ -394,6 +395,129 @@ describe("Inbox IPC handlers", () => {
     await expect(handlers.handleListInboxItems(undefined)).resolves.toMatchObject({
       ok: true,
       data: []
+    });
+  });
+});
+
+describe("Task IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createTaskIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(
+      handlers.handleListTasksByContainer("container_1")
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("creates, updates, completes, reopens, and lists tasks", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-tasks-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const projectResult = await projectHandlers.handleCreateProject({
+      name: "Launch Plan"
+    });
+
+    if (!projectResult.ok) {
+      throw new Error(projectResult.error.message);
+    }
+
+    const handlers = createTaskIpcHandlers(workspaceService);
+    const created = await handlers.handleCreateTask({
+      containerId: projectResult.data.project.id,
+      title: "Book launch venue",
+      dueAt: "2026-05-03"
+    });
+
+    if (!created.ok) {
+      throw new Error(created.error.message);
+    }
+
+    expect(created).toMatchObject({
+      ok: true,
+      data: {
+        type: "task",
+        title: "Book launch venue",
+        taskStatus: "open",
+        dueAt: "2026-05-03T00:00:00.000Z"
+      }
+    });
+
+    await expect(
+      handlers.handleUpdateTask({
+        itemId: created.data.id,
+        dueAt: "2026-05-04"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: created.data.id,
+        dueAt: "2026-05-04T00:00:00.000Z"
+      }
+    });
+    await expect(
+      handlers.handleCompleteTask(created.data.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: created.data.id,
+        taskStatus: "done"
+      }
+    });
+    await expect(handlers.handleReopenTask(created.data.id)).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: created.data.id,
+        taskStatus: "open"
+      }
+    });
+    const listResult = await handlers.handleListTasksByContainer(
+      projectResult.data.project.id
+    );
+
+    if (!listResult.ok) {
+      throw new Error(listResult.error.message);
+    }
+
+    expect(listResult).toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: created.data.id,
+          title: "Book launch venue",
+          taskStatus: "open"
+        }
+      ]
     });
   });
 });

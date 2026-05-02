@@ -7,6 +7,7 @@ import {
   type IpcModuleStatus,
   type LocalWorkOsApi,
   type RecentWorkspace,
+  type TaskSummary,
   type WorkspaceSummary
 } from "../../src/preload/api";
 import { WelcomePage } from "../../src/renderer/pages/WelcomePage";
@@ -111,6 +112,27 @@ function createMockApi(
           archivedAt: null,
           deletedAt: null
         })
+    },
+    tasks: {
+      create: async () => apiOk(taskSummary()),
+      update: async () => apiOk(taskSummary()),
+      complete: async () =>
+        apiOk({
+          ...taskSummary(),
+          status: "completed",
+          taskStatus: "done"
+        }),
+      reopen: async () => apiOk(taskSummary()),
+      listByContainer: async () => apiOk([]),
+      createTask: async () => apiOk(taskSummary()),
+      updateTask: async () => apiOk(taskSummary()),
+      completeTask: async () =>
+        apiOk({
+          ...taskSummary(),
+          status: "completed",
+          taskStatus: "done"
+        }),
+      reopenTask: async () => apiOk(taskSummary())
     },
     projects: {
       create: async () =>
@@ -277,6 +299,36 @@ function createMockApi(
     files: {
       getStatus: async () => apiOk(moduleStatus("files"))
     }
+  };
+}
+
+function taskSummary(): TaskSummary {
+  return {
+    id: "item_1",
+    workspaceId: "workspace_1",
+    containerId: "container_inbox",
+    containerTabId: null,
+    type: "task",
+    title: "Call supplier",
+    body: null,
+    categoryId: null,
+    status: "active",
+    sortOrder: 1024,
+    pinned: false,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z",
+    completedAt: null,
+    archivedAt: null,
+    deletedAt: null,
+    taskStatus: "open",
+    priority: null,
+    startAt: null,
+    dueAt: null,
+    allDay: true,
+    timezone: null,
+    taskCompletedAt: null,
+    taskCreatedAt: "2026-05-01T00:00:00.000Z",
+    taskUpdatedAt: "2026-05-01T00:00:00.000Z"
   };
 }
 
