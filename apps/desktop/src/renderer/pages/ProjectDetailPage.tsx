@@ -1,17 +1,26 @@
 import { ArrowLeft, FolderKanban, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import {
+  ItemFeed,
+  type ItemActionId,
+  type UniversalItemViewModel
+} from "@local-work-os/ui";
 import type { LocalWorkOsApi, ProjectSummary } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 
 type ProjectDetailPageProps = {
   apiClient?: LocalWorkOsApi;
   initialProject?: ProjectSummary | null;
+  initialItems?: UniversalItemViewModel[];
 };
+
+const emptyProjectItems: UniversalItemViewModel[] = [];
 
 export function ProjectDetailPage({
   apiClient = desktopApiClient,
-  initialProject
+  initialProject,
+  initialItems = emptyProjectItems
 }: ProjectDetailPageProps): React.JSX.Element {
   const { projectId } = useParams();
   const [project, setProject] = useState<ProjectSummary | null>(
@@ -81,6 +90,14 @@ export function ProjectDetailPage({
     );
   }
 
+  function handlePlaceholderItemAction(
+    action: ItemActionId,
+    itemId: string
+  ): void {
+    void action;
+    void itemId;
+  }
+
   return (
     <section className="project-detail-page">
       <Link className="text-link page-action-link" to="/projects">
@@ -119,15 +136,18 @@ export function ProjectDetailPage({
         </div>
       </dl>
 
-      <section className="content-feed-placeholder" aria-label="Project content">
+      <section className="project-content-section" aria-label="Project content">
         <div className="panel-heading">
           <FolderKanban size={17} aria-hidden="true" />
           <h3>Content feed</h3>
         </div>
-        <p className="muted-text">
-          Tasks, lists, notes, files, and links will appear here as later M2
-          tickets add item feeds.
-        </p>
+        <ItemFeed
+          ariaLabel="Project content items"
+          emptyDescription="Tasks, lists, notes, files, and links will appear here as item workflows are connected."
+          emptyTitle="No project content yet"
+          items={initialItems}
+          onAction={handlePlaceholderItemAction}
+        />
       </section>
     </section>
   );
