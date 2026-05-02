@@ -12,6 +12,7 @@ import {
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
 import { ProjectsPage } from "../../src/renderer/pages/ProjectsPage";
 import { workspaceStore } from "../../src/renderer/state/workspaceStore";
+import type { UniversalItemViewModel } from "@local-work-os/ui";
 
 const workspace: WorkspaceSummary = {
   id: "workspace_1",
@@ -37,6 +38,16 @@ const project: ProjectSummary = {
   updatedAt: "2026-05-01T00:00:00.000Z",
   archivedAt: null,
   deletedAt: null
+};
+
+const projectItem: UniversalItemViewModel = {
+  id: "item_1",
+  type: "task",
+  title: "Book launch venue",
+  body: "Confirm the room hold before Friday.",
+  status: "active",
+  dueLabel: "Friday",
+  pinned: true
 };
 
 function moduleStatus(module: IpcModuleStatus["module"]): IpcModuleStatus {
@@ -161,6 +172,7 @@ describe("Projects renderer pages", () => {
               <ProjectDetailPage
                 apiClient={createMockApi([project])}
                 initialProject={project}
+                initialItems={[projectItem]}
               />
             }
           />
@@ -173,5 +185,7 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Category");
     expect(html).toContain("Tags");
     expect(html).toContain("Content feed");
+    expect(html).toContain("Book launch venue");
+    expect(html).toContain("Actions for Book launch venue");
   });
 });
