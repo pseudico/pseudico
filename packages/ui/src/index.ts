@@ -75,3 +75,18 @@ export {
   type MoveTargetContainer,
   type MoveToContainerDialogProps
 } from "./components/MoveToContainerDialog";
+export {
+  MoveItemDialog,
+  type MoveItemDialogProps
+} from "./components/MoveItemDialog";
+export {
+  ConfirmDialog,
+  type ConfirmDialogProps,
+  type ConfirmDialogTone
+} from "./components/ConfirmDialog";
+export {
+  ItemInspectorPanel,
+  type ItemInspectorActivity,
+  type ItemInspectorItem,
+  type ItemInspectorProps
+} from "./components/ItemInspector";

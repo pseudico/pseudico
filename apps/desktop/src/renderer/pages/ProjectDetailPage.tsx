@@ -2,17 +2,23 @@ import { ArrowLeft, FolderKanban, RefreshCw, StickyNote, Tag } from "lucide-reac
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
+  ConfirmDialog,
   CreateListForm,
+  ItemInspectorPanel,
   ItemFeed,
   ListCardContent,
+  MoveItemDialog,
   NoteCardContent,
   NoteEditor,
   TaskCardContent,
   TaskQuickAdd,
   type CreateListFormValues,
   type ItemActionId,
+  type ItemInspectorActivity,
+  type ItemInspectorItem,
   type ListCardItemViewModel,
   type ListCardViewModel,
+  type MoveTargetContainer,
   type NoteCardViewModel,
   type NoteEditorValues,
   type TaskCardViewModel,
@@ -20,6 +26,8 @@ import {
   type UniversalItemViewModel
 } from "@local-work-os/ui";
 import type {
+  ActivitySummary,
+  ItemSummary,
   ListItemSummary,
   ListSummary,
   LocalWorkOsApi,
@@ -48,6 +56,11 @@ type ProjectFeedViewModel =
   | ProjectNoteViewModel
   | UniversalItemViewModel;
 
+type PendingConfirmAction = {
+  action: "archive" | "delete";
+  item: ProjectFeedViewModel;
+};
+
 type ProjectDetailPageProps = {
   apiClient?: LocalWorkOsApi;
   initialProject?: ProjectSummary | null;
@@ -66,8 +79,10 @@ export function ProjectDetailPage({
     initialProject ?? null
   );
   const [items, setItems] = useState<ProjectFeedViewModel[]>(initialItems);
+  const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(initialProject === undefined);
   const [itemsLoading, setItemsLoading] = useState(false);
+  const [moving, setMoving] = useState(false);
   const [savingTask, setSavingTask] = useState(false);
   const [savingList, setSavingList] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
@@ -78,9 +93,19 @@ export function ProjectDetailPage({
   const [noteEditorOpen, setNoteEditorOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [itemError, setItemError] = useState<string | null>(null);
+  const [moveError, setMoveError] = useState<string | null>(null);
+  const [itemActionError, setItemActionError] = useState<string | null>(null);
   const [taskError, setTaskError] = useState<string | null>(null);
   const [listError, setListError] = useState<string | null>(null);
   const [noteError, setNoteError] = useState<string | null>(null);
+  const [movingItem, setMovingItem] = useState<ProjectFeedViewModel | null>(null);
+  const [confirmAction, setConfirmAction] =
+    useState<PendingConfirmAction | null>(null);
+  const [itemActionBusy, setItemActionBusy] = useState(false);
+  const [inspector, setInspector] = useState<{
+    item: ItemInspectorItem;
+    activity: ItemInspectorActivity[];
+  } | null>(null);
 
   useEffect(() => {
     if (projectId === undefined) {
@@ -98,8 +123,15 @@ export function ProjectDetailPage({
       setError(null);
       setItemError(null);
 
-      const [projectResult, tasksResult, listsResult, notesResult] = await Promise.all([
+      const [
+        projectResult,
+        projectsResult,
+        tasksResult,
+        listsResult,
+        notesResult
+      ] = await Promise.all([
         apiClient.projects.get(activeProjectId),
+        apiClient.projects.list(),
         apiClient.tasks.listByContainer(activeProjectId),
         apiClient.lists.listByContainer(activeProjectId),
         apiClient.notes.listByContainer(activeProjectId)
@@ -122,6 +154,11 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!projectsResult.ok) {
+        setItemError(projectsResult.error.message);
+        return;
+      }
+
       if (!listsResult.ok) {
         setItemError(listsResult.error.message);
         return;
@@ -133,6 +170,7 @@ export function ProjectDetailPage({
       }
 
       setProject(projectResult.data);
+      setProjects(projectsResult.data);
       setItems(mergeProjectContent(tasksResult.data, listsResult.data, notesResult.data));
     }
 
@@ -418,12 +456,93 @@ export function ProjectDetailPage({
     setListBusyId(null);
   }
 
-  function handlePlaceholderItemAction(
-    action: ItemActionId,
-    itemId: string
-  ): void {
-    void action;
-    void itemId;
+  function handleItemAction(action: ItemActionId, itemId: string): void {
+    const item = items.find((candidate) => candidate.id === itemId);
+
+    if (item === undefined) {
+      return;
+    }
+
+    setItemActionError(null);
+
+    if (action === "move") {
+      setMoveError(null);
+      setMovingItem(item);
+      return;
+    }
+
+    if (action === "archive" || action === "delete") {
+      setConfirmAction({ action, item });
+      return;
+    }
+
+    if (action === "inspect") {
+      void openInspector(item.id);
+    }
+  }
+
+  async function moveItemToProject(containerId: string): Promise<void> {
+    if (project === null || movingItem === null) {
+      return;
+    }
+
+    setMoving(true);
+    setMoveError(null);
+
+    const result = await apiClient.items.move({
+      itemId: movingItem.id,
+      targetContainerId: containerId
+    });
+
+    setMoving(false);
+
+    if (!result.ok) {
+      setMoveError(result.error.message);
+      return;
+    }
+
+    setMovingItem(null);
+    await refreshProjectContent(project.id);
+  }
+
+  async function confirmItemAction(): Promise<void> {
+    if (project === null || confirmAction === null) {
+      return;
+    }
+
+    setItemActionBusy(true);
+    setItemActionError(null);
+
+    const result =
+      confirmAction.action === "archive"
+        ? await apiClient.items.archive(confirmAction.item.id)
+        : await apiClient.items.softDelete(confirmAction.item.id);
+
+    setItemActionBusy(false);
+
+    if (!result.ok) {
+      setItemActionError(result.error.message);
+      return;
+    }
+
+    setConfirmAction(null);
+    await refreshProjectContent(project.id);
+  }
+
+  async function openInspector(itemId: string): Promise<void> {
+    setItemActionError(null);
+
+    const result = await apiClient.items.openInspector(itemId);
+
+    if (!result.ok) {
+      setItemActionError(result.error.message);
+      return;
+    }
+
+    setInspector({
+      item: toInspectorItem(result.data.item),
+      activity: result.data.activity.map(toInspectorActivity)
+    });
   }
 
   function renderItemContent(item: UniversalItemViewModel): React.ReactNode {
@@ -488,6 +607,22 @@ export function ProjectDetailPage({
       </section>
     );
   }
+
+  const moveTargets = projects
+    .filter((candidate) => candidate.status === "active" && candidate.id !== project.id)
+    .map(toMoveTarget);
+  const confirmTitle =
+    confirmAction === null
+      ? ""
+      : confirmAction.action === "archive"
+        ? `Archive ${confirmAction.item.title}?`
+        : `Delete ${confirmAction.item.title}?`;
+  const confirmDescription =
+    confirmAction === null
+      ? ""
+      : confirmAction.action === "archive"
+        ? "The item will leave active feeds and can be restored by a later archive management flow."
+        : "The item will be soft-deleted and removed from active feeds. The database row remains for audit and future recovery.";
 
   return (
     <section className="project-detail-page">
@@ -596,9 +731,54 @@ export function ProjectDetailPage({
           items={items}
           loading={itemsLoading}
           renderContent={renderItemContent}
-          onAction={handlePlaceholderItemAction}
+          onAction={handleItemAction}
         />
       </section>
+
+      {itemActionError === null ? null : (
+        <p className="form-message form-message-error">{itemActionError}</p>
+      )}
+
+      <MoveItemDialog
+        containers={moveTargets}
+        error={moveError}
+        itemTitle={movingItem === null ? null : movingItem.title}
+        moving={moving}
+        open={movingItem !== null}
+        onCancel={() => {
+          if (!moving) {
+            setMovingItem(null);
+            setMoveError(null);
+          }
+        }}
+        onMove={moveItemToProject}
+      />
+
+      <ConfirmDialog
+        confirmLabel={confirmAction?.action === "archive" ? "Archive" : "Delete"}
+        description={confirmDescription}
+        error={itemActionError}
+        open={confirmAction !== null}
+        title={confirmTitle}
+        tone={confirmAction?.action === "delete" ? "danger" : "normal"}
+        busy={itemActionBusy}
+        onCancel={() => {
+          if (!itemActionBusy) {
+            setConfirmAction(null);
+            setItemActionError(null);
+          }
+        }}
+        onConfirm={confirmItemAction}
+      />
+
+      {inspector === null ? null : (
+        <ItemInspectorPanel
+          activity={inspector.activity}
+          item={inspector.item}
+          open
+          onClose={() => setInspector(null)}
+        />
+      )}
     </section>
   );
 }
@@ -688,6 +868,44 @@ function mergeProjectContent(
     ...lists.map(toProjectListViewModel),
     ...notes.map(toProjectNoteViewModel)
   ].sort(compareFeedItems);
+}
+
+function toMoveTarget(project: ProjectSummary): MoveTargetContainer {
+  return {
+    id: project.id,
+    name: project.name,
+    description: project.description,
+    color: project.color
+  };
+}
+
+function toInspectorItem(item: ItemSummary): ItemInspectorItem {
+  return {
+    id: item.id,
+    type: item.type,
+    title: item.title,
+    body: item.body,
+    categoryLabel: item.categoryId,
+    containerId: item.containerId,
+    containerTabId: item.containerTabId,
+    status: item.status,
+    sortOrder: item.sortOrder,
+    pinned: item.pinned,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    archivedAt: item.archivedAt,
+    deletedAt: item.deletedAt
+  };
+}
+
+function toInspectorActivity(activity: ActivitySummary): ItemInspectorActivity {
+  return {
+    id: activity.id,
+    action: activity.action,
+    actorType: activity.actorType,
+    summary: activity.summary,
+    createdAt: activity.createdAt
+  };
 }
 
 function compareFeedItems(

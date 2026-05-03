@@ -179,7 +179,65 @@ function createMockApi(
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
     items: {
-      getStatus: async () => apiOk(moduleStatus("items"))
+      getStatus: async () => apiOk(moduleStatus("items")),
+      move: async () =>
+        apiOk({
+          ...itemSummary(),
+          containerId: "container_1"
+        }),
+      archive: async () =>
+        apiOk({
+          ...itemSummary(),
+          status: "archived",
+          archivedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      softDelete: async () =>
+        apiOk({
+          ...itemSummary(),
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      getActivity: async () =>
+        apiOk([
+          {
+            id: "activity_1",
+            workspaceId: "workspace_1",
+            actorType: "local_user",
+            action: "item_moved",
+            targetType: "item",
+            targetId: "item_1",
+            summary: "Moved item.",
+            beforeJson: null,
+            afterJson: null,
+            createdAt: "2026-04-30T01:00:00.000Z"
+          }
+        ]),
+      openInspector: async () =>
+        apiOk({
+          item: itemSummary(),
+          activity: []
+        }),
+      moveItem: async () =>
+        apiOk({
+          ...itemSummary(),
+          containerId: "container_1"
+        }),
+      archiveItem: async () =>
+        apiOk({
+          ...itemSummary(),
+          status: "archived",
+          archivedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      softDeleteItem: async () =>
+        apiOk({
+          ...itemSummary(),
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      getItemActivity: async () => apiOk([]),
+      openItemInspector: async () =>
+        apiOk({
+          item: itemSummary(),
+          activity: []
+        })
     },
     files: {
       getStatus: async () => apiOk(moduleStatus("files"))
@@ -393,6 +451,40 @@ describe("desktop API client", () => {
           content: "# Decision notes"
         }
       ]
+    });
+    await expect(
+      client.items.move({
+        itemId: "item_1",
+        targetContainerId: "container_1"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: "item_1",
+        containerId: "container_1"
+      }
+    });
+    await expect(client.items.archive("item_1")).resolves.toMatchObject({
+      ok: true,
+      data: {
+        status: "archived"
+      }
+    });
+    await expect(client.items.getActivity("item_1")).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          action: "item_moved"
+        }
+      ]
+    });
+    await expect(client.items.openInspector("item_1")).resolves.toMatchObject({
+      ok: true,
+      data: {
+        item: {
+          id: "item_1"
+        }
+      }
     });
   });
 

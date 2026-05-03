@@ -1,14 +1,18 @@
 import { Inbox, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
+  ConfirmDialog,
   CreateListForm,
+  ItemInspectorPanel,
   ItemFeed,
   ListCardContent,
-  MoveToContainerDialog,
+  MoveItemDialog,
   TaskCardContent,
   TaskQuickAdd,
   type CreateListFormValues,
   type ItemActionId,
+  type ItemInspectorActivity,
+  type ItemInspectorItem,
   type ListCardItemViewModel,
   type ListCardViewModel,
   type MoveTargetContainer,
@@ -17,6 +21,7 @@ import {
   type UniversalItemViewModel
 } from "@local-work-os/ui";
 import type {
+  ActivitySummary,
   InboxSummary,
   ItemSummary,
   ListItemSummary,
@@ -46,6 +51,11 @@ type InboxFeedViewModel =
   | InboxListViewModel
   | UniversalItemViewModel;
 
+type PendingConfirmAction = {
+  action: "archive" | "delete";
+  item: InboxFeedItemSummary;
+};
+
 type InboxPageProps = {
   apiClient?: LocalWorkOsApi;
   initialItems?: InboxFeedItemSummary[];
@@ -63,6 +73,7 @@ export function InboxPage({
   const [projects, setProjects] = useState<ProjectSummary[]>(initialProjects);
   const [loading, setLoading] = useState(false);
   const [moving, setMoving] = useState(false);
+  const [itemActionBusy, setItemActionBusy] = useState(false);
   const [savingTask, setSavingTask] = useState(false);
   const [savingList, setSavingList] = useState(false);
   const [taskBusyId, setTaskBusyId] = useState<string | null>(null);
@@ -71,9 +82,16 @@ export function InboxPage({
   const [taskError, setTaskError] = useState<string | null>(null);
   const [listError, setListError] = useState<string | null>(null);
   const [moveError, setMoveError] = useState<string | null>(null);
+  const [itemActionError, setItemActionError] = useState<string | null>(null);
   const [movingItem, setMovingItem] = useState<InboxFeedItemSummary | null>(
     null
   );
+  const [confirmAction, setConfirmAction] =
+    useState<PendingConfirmAction | null>(null);
+  const [inspector, setInspector] = useState<{
+    item: ItemInspectorItem;
+    activity: ItemInspectorActivity[];
+  } | null>(null);
   const projectTargets = useMemo(
     () =>
       projects
@@ -204,12 +222,28 @@ export function InboxPage({
   }, [apiClient, currentWorkspace]);
 
   function handleItemAction(action: ItemActionId, itemId: string): void {
-    if (action !== "move") {
+    const item = items.find((candidate) => candidate.id === itemId);
+
+    if (item === undefined) {
       return;
     }
 
-    setMoveError(null);
-    setMovingItem(items.find((item) => item.id === itemId) ?? null);
+    setItemActionError(null);
+
+    if (action === "move") {
+      setMoveError(null);
+      setMovingItem(item);
+      return;
+    }
+
+    if (action === "archive" || action === "delete") {
+      setConfirmAction({ action, item });
+      return;
+    }
+
+    if (action === "inspect") {
+      void openInspector(item.id);
+    }
   }
 
   async function createInboxTask(
@@ -305,9 +339,9 @@ export function InboxPage({
     setMoving(true);
     setMoveError(null);
 
-    const result = await apiClient.inbox.moveItemToProject({
+    const result = await apiClient.items.move({
       itemId: movingItem.id,
-      projectId
+      targetContainerId: projectId
     });
 
     setMoving(false);
@@ -319,6 +353,49 @@ export function InboxPage({
 
     setItems((current) => current.filter((item) => item.id !== movingItem.id));
     setMovingItem(null);
+  }
+
+  async function confirmItemAction(): Promise<void> {
+    if (currentWorkspace === null || confirmAction === null) {
+      return;
+    }
+
+    setItemActionBusy(true);
+    setItemActionError(null);
+
+    const result =
+      confirmAction.action === "archive"
+        ? await apiClient.items.archive(confirmAction.item.id)
+        : await apiClient.items.softDelete(confirmAction.item.id);
+
+    setItemActionBusy(false);
+
+    if (!result.ok) {
+      setItemActionError(result.error.message);
+      return;
+    }
+
+    setItems((current) =>
+      current.filter((item) => item.id !== confirmAction.item.id)
+    );
+    setConfirmAction(null);
+    await loadInbox(currentWorkspace.id);
+  }
+
+  async function openInspector(itemId: string): Promise<void> {
+    setItemActionError(null);
+
+    const result = await apiClient.items.openInspector(itemId);
+
+    if (!result.ok) {
+      setItemActionError(result.error.message);
+      return;
+    }
+
+    setInspector({
+      item: toInspectorItem(result.data.item),
+      activity: result.data.activity.map(toInspectorActivity)
+    });
   }
 
   async function toggleTaskComplete(item: TaskCardViewModel): Promise<void> {
@@ -530,7 +607,6 @@ export function InboxPage({
         </div>
         <ItemFeed
           ariaLabel="Inbox items"
-          disabledActions={["archive", "delete", "inspect"]}
           emptyDescription="Captured work will appear here before it is moved into a project."
           emptyTitle="Inbox is clear"
           error={error}
@@ -541,7 +617,11 @@ export function InboxPage({
         />
       </section>
 
-      <MoveToContainerDialog
+      {itemActionError === null ? null : (
+        <p className="form-message form-message-error">{itemActionError}</p>
+      )}
+
+      <MoveItemDialog
         containers={projectTargets}
         error={moveError}
         itemTitle={movingItem === null ? null : movingItem.title}
@@ -555,6 +635,40 @@ export function InboxPage({
         }}
         onMove={moveItemToProject}
       />
+
+      <ConfirmDialog
+        confirmLabel={confirmAction?.action === "archive" ? "Archive" : "Delete"}
+        description={
+          confirmAction?.action === "archive"
+            ? "The item will leave active feeds and can be restored by a later archive management flow."
+            : "The item will be soft-deleted and removed from active feeds. The database row remains for audit and future recovery."
+        }
+        error={itemActionError}
+        open={confirmAction !== null}
+        title={
+          confirmAction === null
+            ? ""
+            : `${confirmAction.action === "archive" ? "Archive" : "Delete"} ${confirmAction.item.title}?`
+        }
+        tone={confirmAction?.action === "delete" ? "danger" : "normal"}
+        busy={itemActionBusy}
+        onCancel={() => {
+          if (!itemActionBusy) {
+            setConfirmAction(null);
+            setItemActionError(null);
+          }
+        }}
+        onConfirm={confirmItemAction}
+      />
+
+      {inspector === null ? null : (
+        <ItemInspectorPanel
+          activity={inspector.activity}
+          item={inspector.item}
+          open
+          onClose={() => setInspector(null)}
+        />
+      )}
     </section>
   );
 }
@@ -662,6 +776,35 @@ function toMoveTarget(project: ProjectSummary): MoveTargetContainer {
     name: project.name,
     description: project.description,
     color: project.color
+  };
+}
+
+function toInspectorItem(item: ItemSummary): ItemInspectorItem {
+  return {
+    id: item.id,
+    type: item.type,
+    title: item.title,
+    body: item.body,
+    categoryLabel: item.categoryId,
+    containerId: item.containerId,
+    containerTabId: item.containerTabId,
+    status: item.status,
+    sortOrder: item.sortOrder,
+    pinned: item.pinned,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    archivedAt: item.archivedAt,
+    deletedAt: item.deletedAt
+  };
+}
+
+function toInspectorActivity(activity: ActivitySummary): ItemInspectorActivity {
+  return {
+    id: activity.id,
+    action: activity.action,
+    actorType: activity.actorType,
+    summary: activity.summary,
+    createdAt: activity.createdAt
   };
 }
 

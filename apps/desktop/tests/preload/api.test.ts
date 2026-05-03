@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(33);
+    expect(channels).toHaveLength(38);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -175,6 +175,55 @@ describe("typed preload API", () => {
           itemId: "item_1",
           projectId: "container_1"
         }
+      }
+    ]);
+  });
+
+  it("routes item lifecycle calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.items.move({
+      itemId: "item_1",
+      targetContainerId: "container_2"
+    });
+    await api.items.archive("item_1");
+    await api.items.softDelete("item_1");
+    await api.items.getActivity("item_1");
+    await api.items.openInspector("item_1");
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.items.moveItem,
+        input: {
+          itemId: "item_1",
+          targetContainerId: "container_2"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.items.archiveItem,
+        input: "item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.items.softDeleteItem,
+        input: "item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.items.getItemActivity,
+        input: "item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector,
+        input: "item_1"
       }
     ]);
   });

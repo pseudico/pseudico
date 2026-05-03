@@ -12,6 +12,7 @@ import { afterEach } from "vitest";
 import { describe, expect, it } from "vitest";
 import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandlers";
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
+import { createItemIpcHandlers } from "../../src/main/ipc/itemHandlers";
 import { createListIpcHandlers } from "../../src/main/ipc/listHandlers";
 import { handleGetModuleStatus } from "../../src/main/ipc/moduleStatusHandlers";
 import { createNoteIpcHandlers } from "../../src/main/ipc/noteHandlers";
@@ -397,6 +398,126 @@ describe("Inbox IPC handlers", () => {
     await expect(handlers.handleListInboxItems(undefined)).resolves.toMatchObject({
       ok: true,
       data: []
+    });
+  });
+});
+
+describe("Item IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createItemIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(handlers.handleArchiveItem("item_1")).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("moves, archives, soft-deletes, and inspects items", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-items-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const sourceProject = await projectHandlers.handleCreateProject({
+      name: "Launch Plan"
+    });
+    const targetProject = await projectHandlers.handleCreateProject({
+      name: "Operations"
+    });
+
+    if (!sourceProject.ok || !targetProject.ok) {
+      throw new Error("Project setup failed.");
+    }
+
+    const connection = await createDatabaseConnection({
+      databasePath,
+      fileMustExist: true
+    });
+    await new ItemService({
+      connection,
+      idFactory: (prefix) => `${prefix}_test`,
+      now: () => new Date("2026-05-01T00:00:00.000Z")
+    }).createItem({
+      workspaceId: "workspace_1",
+      containerId: sourceProject.data.project.id,
+      type: "note",
+      title: "Move me"
+    });
+    connection.close();
+
+    const handlers = createItemIpcHandlers(workspaceService);
+
+    await expect(
+      handlers.handleMoveItem({
+        itemId: "item_test",
+        targetContainerId: targetProject.data.project.id
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: "item_test",
+        containerId: targetProject.data.project.id
+      }
+    });
+    await expect(
+      handlers.handleOpenItemInspector("item_test")
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        item: {
+          id: "item_test"
+        },
+        activity: [
+          {
+            action: "item_moved"
+          },
+          {
+            action: "item_created"
+          }
+        ]
+      }
+    });
+    await expect(handlers.handleArchiveItem("item_test")).resolves.toMatchObject({
+      ok: true,
+      data: {
+        status: "archived",
+        archivedAt: expect.any(String)
+      }
+    });
+    await expect(
+      handlers.handleSoftDeleteItem("item_test")
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        deletedAt: expect.any(String)
+      }
     });
   });
 });

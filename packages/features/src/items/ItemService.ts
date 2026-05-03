@@ -8,6 +8,7 @@ import {
   type ActivityActorType
 } from "@local-work-os/core";
 import {
+  ActivityLogRepository,
   ActivityLogService,
   ItemRepository,
   SearchIndexService,
@@ -20,6 +21,7 @@ import {
 } from "@local-work-os/db";
 import type {
   CreateItemInput,
+  ItemInspectorSnapshot,
   ItemMutationResult,
   ItemServiceIdFactory,
   ListItemsByContainerInput,
@@ -260,6 +262,24 @@ export class ItemService {
       input.containerTabId,
       buildListItemsFilter(input)
     );
+  }
+
+  getItemActivity(targetId: string) {
+    validateNonEmptyString(targetId, "targetId");
+
+    return new ActivityLogRepository(this.connection).listForTarget(
+      "item",
+      targetId
+    );
+  }
+
+  openItemInspector(itemId: string): ItemInspectorSnapshot {
+    validateNonEmptyString(itemId, "itemId");
+
+    return {
+      item: this.requireItem(itemId),
+      activity: this.getItemActivity(itemId)
+    };
   }
 
   private requireItem(itemId: string): ItemRecord {

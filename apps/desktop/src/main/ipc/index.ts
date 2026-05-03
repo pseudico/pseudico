@@ -40,6 +40,6 @@ export function registerDesktopIpc(
   registerListIpc(services.workspaceService);
   registerNoteIpc(services.workspaceService);
   registerContainerIpc();
-  registerItemIpc();
+  registerItemIpc(services.workspaceService);
   registerFileIpc();
 }

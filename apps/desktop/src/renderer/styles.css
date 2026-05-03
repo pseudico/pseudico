@@ -540,6 +540,101 @@ a {
   gap: 14px;
 }
 
+.confirm-dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirm-dialog-description {
+  margin: 0 0 14px;
+  color: #514e49;
+  line-height: 1.5;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 8px;
+}
+
+.danger-button {
+  border-color: #8b3219;
+  background: #8b3219;
+}
+
+.item-inspector-panel {
+  width: min(760px, 100%);
+}
+
+.item-inspector-metadata {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.item-inspector-metadata div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #ece8dc;
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
+.item-inspector-metadata dt {
+  color: #6d6a62;
+  font-size: 12px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.item-inspector-metadata dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.item-inspector-activity {
+  display: grid;
+  gap: 10px;
+}
+
+.item-inspector-activity h4 {
+  margin: 0;
+  color: #262624;
+  font-size: 15px;
+}
+
+.item-inspector-activity ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.item-inspector-activity li {
+  color: #514e49;
+}
+
+.item-inspector-activity li strong,
+.item-inspector-activity li span,
+.item-inspector-activity li time {
+  display: block;
+}
+
+.item-inspector-activity li strong {
+  color: #262624;
+}
+
+.item-inspector-activity li time {
+  color: #6d6a62;
+  font-size: 12px;
+}
+
 .move-to-container-form label {
   display: grid;
   gap: 6px;
@@ -1417,6 +1512,7 @@ a {
   .health-grid,
   .project-color-options,
   .project-meta-grid,
+  .item-inspector-metadata,
   .quick-add-form,
   .task-quick-add,
   .create-list-form,
