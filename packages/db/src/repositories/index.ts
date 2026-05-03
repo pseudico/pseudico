@@ -107,6 +107,15 @@ export {
   type RelationshipRecord
 } from "./RelationshipRepository";
 export {
+  SavedViewRepository,
+  type CreateSavedViewInput,
+  type ListSavedViewsFilter,
+  type SavedViewEvaluationTargetRecord,
+  type SavedViewRecord,
+  type SavedViewType,
+  type UpdateSavedViewPatch
+} from "./SavedViewRepository";
+export {
   TaskRepository,
   type CreateTaskDetailsInput,
   type TaskRecord,
