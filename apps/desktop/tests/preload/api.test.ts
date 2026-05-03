@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(38);
+    expect(channels).toHaveLength(44);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -50,6 +50,7 @@ describe("typed preload API", () => {
       "lists",
       "notes",
       "projects",
+      "categories",
       "containers",
       "items",
       "files"
@@ -398,6 +399,80 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.notes.listByContainer,
         input: "container_1"
+      }
+    ]);
+  });
+
+  it("routes category calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.categories.createCategory({
+      workspaceId: "workspace_1",
+      name: "Operations",
+      color: "#3b82f6"
+    });
+    await api.categories.updateCategory({
+      categoryId: "category_1",
+      name: "Client Work"
+    });
+    await api.categories.assignToProject({
+      projectId: "container_1",
+      categoryId: "category_1"
+    });
+    await api.categories.assignToItem({
+      itemId: "item_1",
+      categoryId: null
+    });
+    await api.categories.listCategories("workspace_1");
+    await api.categories.deleteCategory("category_1");
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.categories.createCategory,
+        input: {
+          workspaceId: "workspace_1",
+          name: "Operations",
+          color: "#3b82f6"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.categories.updateCategory,
+        input: {
+          categoryId: "category_1",
+          name: "Client Work"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.categories.assignToProject,
+        input: {
+          projectId: "container_1",
+          categoryId: "category_1"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.categories.assignToItem,
+        input: {
+          itemId: "item_1",
+          categoryId: null
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.categories.listCategories,
+        input: "workspace_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.categories.deleteCategory,
+        input: "category_1"
       }
     ]);
   });

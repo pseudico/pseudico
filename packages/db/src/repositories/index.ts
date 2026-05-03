@@ -4,6 +4,13 @@ export {
   type CreateActivityLogInput
 } from "./ActivityLogRepository";
 export {
+  CategoryRepository,
+  type CategoryRecord,
+  type CreateCategoryInput,
+  type ListCategoriesFilter,
+  type UpdateCategoryPatch
+} from "./CategoryRepository";
+export {
   AppSettingsRepository,
   type AppSettingRecord,
   type CreateAppSettingInput

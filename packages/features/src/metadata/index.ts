@@ -1,6 +1,14 @@
-export { categoriesModuleContract } from "./CategoryService";
+export { CategoryService, categoriesModuleContract } from "./CategoryService";
 export { TagService, tagsModuleContract } from "./TagService";
-export type { CategoryService } from "./CategoryService";
+export type {
+  AssignCategoryToContainerInput,
+  AssignCategoryToItemInput,
+  CategoryAssignmentResult,
+  CategoryServiceIdFactory,
+  CreateCategoryInput,
+  DeleteOrArchiveCategoryResult,
+  UpdateCategoryInput
+} from "./CategoryService";
 export type {
   AddTagToTargetInput,
   HydrateItemTagsInput,

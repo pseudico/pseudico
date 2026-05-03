@@ -39,7 +39,12 @@ export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
 export { linksModuleContract } from "./links";
 export { ListService, listsModuleContract, parseBulkListItems } from "./lists";
-export { categoriesModuleContract, TagService, tagsModuleContract } from "./metadata";
+export {
+  CategoryService,
+  categoriesModuleContract,
+  TagService,
+  tagsModuleContract
+} from "./metadata";
 export {
   NoteService,
   extractInlineNoteTags,
@@ -86,7 +91,12 @@ export type {
 } from "./lists";
 export type {
   AddTagToTargetInput,
-  CategoryService,
+  AssignCategoryToContainerInput,
+  AssignCategoryToItemInput,
+  CategoryAssignmentResult,
+  CategoryServiceIdFactory,
+  CreateCategoryInput,
+  DeleteOrArchiveCategoryResult,
   HydrateItemTagsInput,
   RemoveTagFromTargetInput,
   SyncInlineTagsForNoteInput,
@@ -95,7 +105,8 @@ export type {
   SyncInlineTagsResult,
   TagMutationResult,
   TagServiceIdFactory,
-  TaggingTargetInput
+  TaggingTargetInput,
+  UpdateCategoryInput
 } from "./metadata";
 export type {
   CreateNoteInput,

@@ -3,6 +3,7 @@ import type { DatabaseConnection } from "../connection/createDatabaseConnection"
 import {
   ContainerRepository,
   type ContainerRecord,
+  CategoryRepository,
   ItemRepository,
   type ItemRecord,
   ListRepository,
@@ -76,7 +77,9 @@ export class SearchIndexService {
       title: container.name,
       body: container.description ?? "",
       tags: tagProjection.tags,
-      category: input.category ?? null,
+      category:
+        input.category ??
+        this.findCategoryName(container.categoryId, container.workspaceId),
       metadataJson: stringifyMetadata({
         type: container.type,
         slug: container.slug,
@@ -114,7 +117,7 @@ export class SearchIndexService {
       title: item.title,
       body: item.body ?? "",
       tags: tagProjection.tags,
-      category: input.category ?? null,
+      category: input.category ?? this.findCategoryName(item.categoryId, item.workspaceId),
       metadataJson: stringifyMetadata({
         type: item.type,
         containerId: item.containerId,
@@ -192,7 +195,7 @@ export class SearchIndexService {
       title: item.title,
       body: buildNoteSearchBody(note),
       tags: tagProjection.tags,
-      category: input.category ?? null,
+      category: input.category ?? this.findCategoryName(item.categoryId, item.workspaceId),
       metadataJson: stringifyMetadata({
         type: item.type,
         containerId: item.containerId,
@@ -346,6 +349,23 @@ export class SearchIndexService {
         inlineTagSlugs
       }
     };
+  }
+
+  private findCategoryName(
+    categoryId: string | null,
+    workspaceId: string
+  ): string | null {
+    if (categoryId === null) {
+      return null;
+    }
+
+    const category = new CategoryRepository(this.connection).getById(categoryId);
+
+    if (category === null || category.workspaceId !== workspaceId) {
+      return null;
+    }
+
+    return category.name;
   }
 }
 

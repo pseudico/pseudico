@@ -2,6 +2,8 @@ import { ArrowLeft, FolderKanban, RefreshCw, StickyNote, Tag } from "lucide-reac
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
+  CategoryBadge,
+  CategoryPicker,
   ConfirmDialog,
   CreateListForm,
   ItemInspectorPanel,
@@ -27,6 +29,7 @@ import {
 } from "@local-work-os/ui";
 import type {
   ActivitySummary,
+  CategorySummary,
   ItemSummary,
   ListItemSummary,
   ListSummary,
@@ -38,6 +41,7 @@ import type {
 import { desktopApiClient } from "../api/desktopApiClient";
 
 type ProjectTaskViewModel = TaskCardViewModel & {
+  categoryId?: string | null;
   taskStatus?: TaskSummary["taskStatus"];
   dueAt?: string | null;
   priority?: number | null;
@@ -45,9 +49,11 @@ type ProjectTaskViewModel = TaskCardViewModel & {
   timezone?: string | null;
 };
 type ProjectListViewModel = ListCardViewModel & {
+  categoryId?: string | null;
   listItems: ListCardItemViewModel[];
 };
 type ProjectNoteViewModel = NoteCardViewModel & {
+  categoryId?: string | null;
   format: NoteSummary["format"];
 };
 type ProjectFeedViewModel =
@@ -64,6 +70,7 @@ type PendingConfirmAction = {
 type ProjectDetailPageProps = {
   apiClient?: LocalWorkOsApi;
   initialProject?: ProjectSummary | null;
+  initialCategories?: CategorySummary[];
   initialItems?: UniversalItemViewModel[];
 };
 
@@ -72,6 +79,7 @@ const emptyProjectItems: UniversalItemViewModel[] = [];
 export function ProjectDetailPage({
   apiClient = desktopApiClient,
   initialProject,
+  initialCategories = [],
   initialItems = emptyProjectItems
 }: ProjectDetailPageProps): React.JSX.Element {
   const { projectId } = useParams();
@@ -79,6 +87,8 @@ export function ProjectDetailPage({
     initialProject ?? null
   );
   const [items, setItems] = useState<ProjectFeedViewModel[]>(initialItems);
+  const [categories, setCategories] =
+    useState<CategorySummary[]>(initialCategories);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(initialProject === undefined);
   const [itemsLoading, setItemsLoading] = useState(false);
@@ -126,12 +136,14 @@ export function ProjectDetailPage({
       const [
         projectResult,
         projectsResult,
+        categoriesResult,
         tasksResult,
         listsResult,
         notesResult
       ] = await Promise.all([
         apiClient.projects.get(activeProjectId),
         apiClient.projects.list(),
+        apiClient.categories.list(),
         apiClient.tasks.listByContainer(activeProjectId),
         apiClient.lists.listByContainer(activeProjectId),
         apiClient.notes.listByContainer(activeProjectId)
@@ -159,6 +171,11 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!categoriesResult.ok) {
+        setItemError(categoriesResult.error.message);
+        return;
+      }
+
       if (!listsResult.ok) {
         setItemError(listsResult.error.message);
         return;
@@ -171,7 +188,15 @@ export function ProjectDetailPage({
 
       setProject(projectResult.data);
       setProjects(projectsResult.data);
-      setItems(mergeProjectContent(tasksResult.data, listsResult.data, notesResult.data));
+      setCategories(categoriesResult.data);
+      setItems(
+        mergeProjectContent(
+          tasksResult.data,
+          listsResult.data,
+          notesResult.data,
+          categoriesResult.data
+        )
+      );
     }
 
     void loadProject();
@@ -208,7 +233,14 @@ export function ProjectDetailPage({
       return;
     }
 
-    setItems(mergeProjectContent(tasksResult.data, listsResult.data, notesResult.data));
+    setItems(
+      mergeProjectContent(
+        tasksResult.data,
+        listsResult.data,
+        notesResult.data,
+        categories
+      )
+    );
   }
 
   async function createProjectTask(
@@ -545,43 +577,109 @@ export function ProjectDetailPage({
     });
   }
 
+  async function assignProjectCategory(categoryId: string | null): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setError(null);
+
+    const result = await apiClient.categories.assignToProject({
+      projectId: project.id,
+      categoryId
+    });
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setProject(result.data);
+  }
+
+  async function assignItemCategory(
+    itemId: string,
+    categoryId: string | null
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setItemActionError(null);
+
+    const result = await apiClient.categories.assignToItem({
+      itemId,
+      categoryId
+    });
+
+    if (!result.ok) {
+      setItemActionError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+  }
+
   function renderItemContent(item: UniversalItemViewModel): React.ReactNode {
+    const categoryPicker = (
+      <CategoryPicker
+        categories={categories}
+        label="Item category"
+        value={findCategoryIdForItem(item, categories)}
+        onChange={(categoryId) => void assignItemCategory(item.id, categoryId)}
+      />
+    );
+
     if (isListCardViewModel(item)) {
       return (
-        <ListCardContent
-          disabled={listBusyId === item.id}
-          error={listBusyId === item.id ? listError : null}
-          item={item}
-          onAddItem={addListItem}
-          onBulkAddItems={bulkAddListItems}
-          onToggleItem={toggleListItem}
-        />
+        <>
+          {categoryPicker}
+          <ListCardContent
+            disabled={listBusyId === item.id}
+            error={listBusyId === item.id ? listError : null}
+            item={item}
+            onAddItem={addListItem}
+            onBulkAddItems={bulkAddListItems}
+            onToggleItem={toggleListItem}
+          />
+        </>
       );
     }
 
     if (isTaskCardViewModel(item)) {
       return (
-        <TaskCardContent
-          disabled={taskBusyId === item.id}
-          item={item}
-          onDueDateChange={updateTaskDueDate}
-          onToggleComplete={toggleTaskComplete}
-        />
+        <>
+          {categoryPicker}
+          <TaskCardContent
+            disabled={taskBusyId === item.id}
+            item={item}
+            onDueDateChange={updateTaskDueDate}
+            onToggleComplete={toggleTaskComplete}
+          />
+        </>
       );
     }
 
     if (isNoteCardViewModel(item)) {
       return (
-        <NoteCardContent
-          disabled={noteBusyId === item.id}
-          error={noteErrorItemId === item.id ? noteError : null}
-          item={item}
-          onSave={updateProjectNote}
-        />
+        <>
+          {categoryPicker}
+          <NoteCardContent
+            disabled={noteBusyId === item.id}
+            error={noteErrorItemId === item.id ? noteError : null}
+            item={item}
+            onSave={updateProjectNote}
+          />
+        </>
       );
     }
 
-    return item.body === undefined || item.body === null ? null : <p>{item.body}</p>;
+    return (
+      <>
+        {categoryPicker}
+        {item.body === undefined || item.body === null ? null : <p>{item.body}</p>}
+      </>
+    );
   }
 
   if (loading) {
@@ -623,6 +721,8 @@ export function ProjectDetailPage({
       : confirmAction.action === "archive"
         ? "The item will leave active feeds and can be restored by a later archive management flow."
         : "The item will be soft-deleted and removed from active feeds. The database row remains for audit and future recovery.";
+  const projectCategory =
+    categories.find((category) => category.id === project.categoryId) ?? null;
 
   return (
     <section className="project-detail-page">
@@ -651,7 +751,9 @@ export function ProjectDetailPage({
         </div>
         <div>
           <dt>Category</dt>
-          <dd>{project.categoryId ?? "Not assigned"}</dd>
+          <dd>
+            <CategoryBadge category={projectCategory} />
+          </dd>
         </div>
         <div>
           <dt>Tags</dt>
@@ -661,6 +763,15 @@ export function ProjectDetailPage({
           </dd>
         </div>
       </dl>
+
+      <div className="category-inline-picker">
+        <CategoryPicker
+          categories={categories}
+          label="Project category"
+          value={project.categoryId}
+          onChange={(categoryId) => void assignProjectCategory(categoryId)}
+        />
+      </div>
 
       <section className="project-content-section" aria-label="Project content">
         <div className="panel-heading-actions">
@@ -783,14 +894,18 @@ export function ProjectDetailPage({
   );
 }
 
-function toProjectTaskViewModel(task: TaskSummary): ProjectTaskViewModel {
+function toProjectTaskViewModel(
+  task: TaskSummary,
+  categories: readonly CategorySummary[]
+): ProjectTaskViewModel {
   return {
     id: task.id,
     type: "task",
     title: task.title,
     body: task.body,
     status: task.taskStatus,
-    categoryLabel: task.categoryId,
+    categoryId: task.categoryId,
+    categoryLabel: findCategoryName(task.categoryId, categories),
     sortOrder: task.sortOrder,
     createdAt: task.createdAt,
     dueLabel: formatDateLabel(task.dueAt),
@@ -810,14 +925,18 @@ function toProjectTaskViewModel(task: TaskSummary): ProjectTaskViewModel {
   };
 }
 
-function toProjectListViewModel(list: ListSummary): ProjectListViewModel {
+function toProjectListViewModel(
+  list: ListSummary,
+  categories: readonly CategorySummary[]
+): ProjectListViewModel {
   return {
     id: list.id,
     type: "list",
     title: list.title,
     body: list.body,
     status: list.status,
-    categoryLabel: list.categoryId,
+    categoryId: list.categoryId,
+    categoryLabel: findCategoryName(list.categoryId, categories),
     sortOrder: list.sortOrder,
     createdAt: list.createdAt,
     updatedLabel: list.updatedAt,
@@ -829,14 +948,18 @@ function toProjectListViewModel(list: ListSummary): ProjectListViewModel {
   };
 }
 
-function toProjectNoteViewModel(note: NoteSummary): ProjectNoteViewModel {
+function toProjectNoteViewModel(
+  note: NoteSummary,
+  categories: readonly CategorySummary[]
+): ProjectNoteViewModel {
   return {
     id: note.id,
     type: "note",
     title: note.title,
     body: note.preview,
     status: note.status,
-    categoryLabel: note.categoryId,
+    categoryId: note.categoryId,
+    categoryLabel: findCategoryName(note.categoryId, categories),
     sortOrder: note.sortOrder,
     createdAt: note.createdAt,
     updatedLabel: note.updatedAt,
@@ -864,12 +987,13 @@ function toListCardItemViewModel(
 function mergeProjectContent(
   tasks: readonly TaskSummary[],
   lists: readonly ListSummary[],
-  notes: readonly NoteSummary[]
+  notes: readonly NoteSummary[],
+  categories: readonly CategorySummary[] = []
 ): ProjectFeedViewModel[] {
   return [
-    ...tasks.map(toProjectTaskViewModel),
-    ...lists.map(toProjectListViewModel),
-    ...notes.map(toProjectNoteViewModel)
+    ...tasks.map((task) => toProjectTaskViewModel(task, categories)),
+    ...lists.map((list) => toProjectListViewModel(list, categories)),
+    ...notes.map((note) => toProjectNoteViewModel(note, categories))
   ].sort(compareFeedItems);
 }
 
@@ -899,6 +1023,34 @@ function toInspectorItem(item: ItemSummary): ItemInspectorItem {
     archivedAt: item.archivedAt,
     deletedAt: item.deletedAt
   };
+}
+
+function findCategoryName(
+  categoryId: string | null | undefined,
+  categories: readonly CategorySummary[]
+): string | null {
+  if (categoryId === undefined || categoryId === null) {
+    return null;
+  }
+
+  return categories.find((category) => category.id === categoryId)?.name ?? categoryId;
+}
+
+function findCategoryIdForItem(
+  item: UniversalItemViewModel,
+  categories: readonly CategorySummary[]
+): string | null {
+  if ("categoryId" in item && typeof item.categoryId === "string") {
+    return item.categoryId;
+  }
+
+  if (item.categoryLabel === undefined || item.categoryLabel === null) {
+    return null;
+  }
+
+  return (
+    categories.find((category) => category.name === item.categoryLabel)?.id ?? null
+  );
 }
 
 function toInspectorActivity(activity: ActivitySummary): ItemInspectorActivity {

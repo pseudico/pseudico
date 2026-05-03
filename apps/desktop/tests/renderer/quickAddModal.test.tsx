@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   apiOk,
   type ApiResult,
+  type CategorySummary,
   type DatabaseHealthStatus,
   type InboxSummary,
   type IpcModuleStatus,
@@ -255,6 +256,34 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
       listProjects: async () => apiOk([activeProject]),
       getProject: async () => apiOk(activeProject)
     },
+    categories: {
+      create: async () => apiOk(categorySummary()),
+      update: async () => apiOk(categorySummary()),
+      delete: async () =>
+        apiOk({
+          ...categorySummary(),
+          deletedAt: "2026-05-01T01:00:00.000Z"
+        }),
+      list: async () => apiOk([categorySummary()]),
+      assignToProject: async () =>
+        apiOk({
+          ...activeProject,
+          categoryId: categorySummary().id
+        }),
+      assignToItem: async () =>
+        apiOk({
+          ...itemSummary(),
+          categoryId: categorySummary().id
+        }),
+      createCategory: async () => apiOk(categorySummary()),
+      updateCategory: async () => apiOk(categorySummary()),
+      deleteCategory: async () =>
+        apiOk({
+          ...categorySummary(),
+          deletedAt: "2026-05-01T01:00:00.000Z"
+        }),
+      listCategories: async () => apiOk([categorySummary()])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
@@ -290,6 +319,20 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
     files: {
       getStatus: async () => apiOk(moduleStatus("files"))
     }
+  };
+}
+
+function categorySummary(): CategorySummary {
+  return {
+    id: "category_ops",
+    workspaceId: workspace.id,
+    name: "Operations",
+    slug: "operations",
+    description: null,
+    color: "#3b82f6",
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z",
+    deletedAt: null
   };
 }
 

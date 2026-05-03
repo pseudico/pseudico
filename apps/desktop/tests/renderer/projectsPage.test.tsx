@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   apiOk,
+  type CategorySummary,
   type DatabaseHealthStatus,
   type InboxSummary,
   type IpcModuleStatus,
@@ -43,6 +44,18 @@ const project: ProjectSummary = {
   createdAt: "2026-05-01T00:00:00.000Z",
   updatedAt: "2026-05-01T00:00:00.000Z",
   archivedAt: null,
+  deletedAt: null
+};
+
+const category: CategorySummary = {
+  id: "category_1",
+  workspaceId: "workspace_1",
+  name: "Finance",
+  slug: "finance",
+  color: "#2c6b8f",
+  description: null,
+  createdAt: "2026-05-01T00:00:00.000Z",
+  updatedAt: "2026-05-01T00:00:00.000Z",
   deletedAt: null
 };
 
@@ -201,6 +214,22 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
         }),
       listProjects: async () => apiOk(projects),
       getProject: async () => apiOk(project)
+    },
+    categories: {
+      create: async () => apiOk(category),
+      update: async () => apiOk(category),
+      delete: async () =>
+        apiOk({ ...category, deletedAt: "2026-05-01T01:00:00.000Z" }),
+      list: async () => apiOk([category]),
+      assignToProject: async (input) =>
+        apiOk({ ...project, categoryId: input.categoryId ?? null }),
+      assignToItem: async (input) =>
+        apiOk({ ...itemSummary(), categoryId: input.categoryId ?? null }),
+      createCategory: async () => apiOk(category),
+      updateCategory: async () => apiOk(category),
+      deleteCategory: async () =>
+        apiOk({ ...category, deletedAt: "2026-05-01T01:00:00.000Z" }),
+      listCategories: async () => apiOk([category])
     },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))

@@ -48,6 +48,16 @@ export {
   type TagBadgeProps,
   type TagBadgeViewModel
 } from "./components/TagBadge";
+export {
+  CategoryBadge,
+  type CategoryBadgeProps,
+  type CategoryBadgeViewModel
+} from "./components/CategoryBadge";
+export {
+  CategoryPicker,
+  type CategoryPickerOption,
+  type CategoryPickerProps
+} from "./components/CategoryPicker";
 export { ItemFeed, type ItemFeedProps } from "./components/ItemFeed";
 export {
   getItemTypeLabel,
