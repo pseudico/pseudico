@@ -10,6 +10,7 @@ import {
   NoteRepository,
   type NoteDetailsRecord,
   SearchIndexRepository,
+  TagRepository,
   type RemoveSearchIndexInput,
   type SearchIndexOptions,
   type SearchIndexRecord,
@@ -60,6 +61,13 @@ export class SearchIndexService {
     container: ContainerRecord,
     input: SearchProjectionInput = {}
   ): SearchIndexRecord {
+    const tagProjection = this.buildTagProjection({
+      workspaceId: container.workspaceId,
+      targetType: "container",
+      targetId: container.id,
+      tags: input.tags
+    });
+
     return this.repository.upsert({
       id: input.id ?? this.idFactory("search"),
       workspaceId: container.workspaceId,
@@ -67,7 +75,7 @@ export class SearchIndexService {
       targetId: container.id,
       title: container.name,
       body: container.description ?? "",
-      tags: normalizeTags(input.tags),
+      tags: tagProjection.tags,
       category: input.category ?? null,
       metadataJson: stringifyMetadata({
         type: container.type,
@@ -79,6 +87,7 @@ export class SearchIndexService {
         isSystem: container.isSystem,
         archivedAt: container.archivedAt,
         deletedAt: container.deletedAt,
+        ...tagProjection.metadata,
         ...input.metadata
       }),
       isDeleted: container.deletedAt !== null,
@@ -90,6 +99,13 @@ export class SearchIndexService {
     item: ItemRecord,
     input: SearchProjectionInput = {}
   ): SearchIndexRecord {
+    const tagProjection = this.buildTagProjection({
+      workspaceId: item.workspaceId,
+      targetType: "item",
+      targetId: item.id,
+      tags: input.tags
+    });
+
     return this.repository.upsert({
       id: input.id ?? this.idFactory("search"),
       workspaceId: item.workspaceId,
@@ -97,7 +113,7 @@ export class SearchIndexService {
       targetId: item.id,
       title: item.title,
       body: item.body ?? "",
-      tags: normalizeTags(input.tags),
+      tags: tagProjection.tags,
       category: input.category ?? null,
       metadataJson: stringifyMetadata({
         type: item.type,
@@ -109,6 +125,7 @@ export class SearchIndexService {
         completedAt: item.completedAt,
         archivedAt: item.archivedAt,
         deletedAt: item.deletedAt,
+        ...tagProjection.metadata,
         ...input.metadata
       }),
       isDeleted: item.deletedAt !== null,
@@ -120,6 +137,13 @@ export class SearchIndexService {
     listItem: ListItemRecord,
     input: SearchProjectionInput = {}
   ): SearchIndexRecord {
+    const tagProjection = this.buildTagProjection({
+      workspaceId: listItem.workspaceId,
+      targetType: "list_item",
+      targetId: listItem.id,
+      tags: input.tags
+    });
+
     return this.repository.upsert({
       id: input.id ?? this.idFactory("search"),
       workspaceId: listItem.workspaceId,
@@ -127,7 +151,7 @@ export class SearchIndexService {
       targetId: listItem.id,
       title: listItem.title,
       body: listItem.body ?? "",
-      tags: normalizeTags(input.tags),
+      tags: tagProjection.tags,
       category: input.category ?? null,
       metadataJson: stringifyMetadata({
         listId: listItem.listId,
@@ -140,6 +164,7 @@ export class SearchIndexService {
         completedAt: listItem.completedAt,
         archivedAt: listItem.archivedAt,
         deletedAt: listItem.deletedAt,
+        ...tagProjection.metadata,
         ...input.metadata
       }),
       isDeleted: listItem.deletedAt !== null,
@@ -152,6 +177,13 @@ export class SearchIndexService {
     note: NoteDetailsRecord,
     input: SearchProjectionInput = {}
   ): SearchIndexRecord {
+    const tagProjection = this.buildTagProjection({
+      workspaceId: item.workspaceId,
+      targetType: "item",
+      targetId: item.id,
+      tags: input.tags
+    });
+
     return this.repository.upsert({
       id: input.id ?? this.idFactory("search"),
       workspaceId: item.workspaceId,
@@ -159,7 +191,7 @@ export class SearchIndexService {
       targetId: item.id,
       title: item.title,
       body: buildNoteSearchBody(note),
-      tags: normalizeTags(input.tags),
+      tags: tagProjection.tags,
       category: input.category ?? null,
       metadataJson: stringifyMetadata({
         type: item.type,
@@ -173,6 +205,7 @@ export class SearchIndexService {
         deletedAt: item.deletedAt,
         format: note.format,
         preview: note.preview,
+        ...tagProjection.metadata,
         ...input.metadata
       }),
       isDeleted: item.deletedAt !== null,
@@ -270,6 +303,48 @@ export class SearchIndexService {
       indexedContainerCount: containers.length,
       indexedItemCount: items.length,
       indexedListItemCount: listItems.length
+    };
+  }
+
+  private buildTagProjection(input: {
+    workspaceId: string;
+    targetType: "container" | "item" | "list_item";
+    targetId: string;
+    tags?: string | string[] | undefined;
+  }): {
+    tags: string;
+    metadata: {
+      inlineTags?: string[];
+      inlineTagSlugs?: string[];
+      tagIds?: string[];
+      tagSlugs?: string[];
+    };
+  } {
+    if (input.tags !== undefined) {
+      return {
+        tags: normalizeTags(input.tags),
+        metadata: {}
+      };
+    }
+
+    const tags = new TagRepository(this.connection).listTagsForTarget({
+      workspaceId: input.workspaceId,
+      targetType: input.targetType,
+      targetId: input.targetId
+    });
+    const tagSlugs = tags.map((tag) => tag.slug);
+    const inlineTagSlugs = tags
+      .filter((tag) => tag.taggingSource === "inline")
+      .map((tag) => tag.slug);
+
+    return {
+      tags: tagSlugs.join(" "),
+      metadata: {
+        tagIds: tags.map((tag) => tag.id),
+        tagSlugs,
+        inlineTags: inlineTagSlugs,
+        inlineTagSlugs
+      }
     };
   }
 }
