@@ -357,6 +357,11 @@ function createMockApi(
         }),
       listCategories: async () => apiOk([categorySummary()])
     },
+    metadata: {
+      listTagsWithCounts: async () => apiOk([]),
+      listCategoriesWithCounts: async () => apiOk([]),
+      listTargetsByMetadata: async () => apiOk([])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },

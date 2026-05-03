@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(44);
+    expect(channels).toHaveLength(47);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -51,6 +51,7 @@ describe("typed preload API", () => {
       "notes",
       "projects",
       "categories",
+      "metadata",
       "containers",
       "items",
       "files"
@@ -473,6 +474,47 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.categories.deleteCategory,
         input: "category_1"
+      }
+    ]);
+  });
+
+  it("routes metadata browser calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk([])) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.metadata.listTagsWithCounts("workspace_1");
+    await api.metadata.listCategoriesWithCounts("workspace_1");
+    await api.metadata.listTargetsByMetadata({
+      workspaceId: "workspace_1",
+      tagSlugs: ["finance"],
+      categoryId: "category_1"
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTagsWithCounts,
+        input: "workspace_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.metadata.listCategoriesWithCounts,
+        input: "workspace_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTargetsByMetadata,
+        input: {
+          workspaceId: "workspace_1",
+          tagSlugs: ["finance"],
+          categoryId: "category_1"
+        }
       }
     ]);
   });

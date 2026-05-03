@@ -116,6 +116,14 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       listCategories: (workspaceId) =>
         callApi(() => api.categories.listCategories(workspaceId))
     },
+    metadata: {
+      listTagsWithCounts: (workspaceId) =>
+        callApi(() => api.metadata.listTagsWithCounts(workspaceId)),
+      listCategoriesWithCounts: (workspaceId) =>
+        callApi(() => api.metadata.listCategoriesWithCounts(workspaceId)),
+      listTargetsByMetadata: (input) =>
+        callApi(() => api.metadata.listTargetsByMetadata(input))
+    },
     containers: {
       getStatus: () => callApi(() => api.containers.getStatus())
     },
@@ -242,6 +250,14 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().categories.deleteCategory(categoryId),
     listCategories: (workspaceId) =>
       getDesktopApiClient().categories.listCategories(workspaceId)
+  },
+  metadata: {
+    listTagsWithCounts: (workspaceId) =>
+      getDesktopApiClient().metadata.listTagsWithCounts(workspaceId),
+    listCategoriesWithCounts: (workspaceId) =>
+      getDesktopApiClient().metadata.listCategoriesWithCounts(workspaceId),
+    listTargetsByMetadata: (input) =>
+      getDesktopApiClient().metadata.listTargetsByMetadata(input)
   },
   containers: {
     getStatus: () => getDesktopApiClient().containers.getStatus()

@@ -88,6 +88,15 @@ export {
   type TagRecord
 } from "./TagRepository";
 export {
+  MetadataBrowserRepository,
+  type CategoryWithTargetCountRecord,
+  type ListMetadataTargetsInput,
+  type MetadataTargetCategoryRecord,
+  type MetadataTargetRecord,
+  type MetadataTargetType,
+  type TagWithTargetCountRecord
+} from "./MetadataBrowserRepository";
+export {
   TaskRepository,
   type CreateTaskDetailsInput,
   type TaskRecord,
