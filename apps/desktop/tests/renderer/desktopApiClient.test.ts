@@ -228,6 +228,9 @@ function createMockApi(
         ]),
       listTargetsByMetadata: async () => apiOk([metadataTargetSummary()])
     },
+    search: {
+      searchWorkspace: async () => apiOk([])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
@@ -594,6 +597,14 @@ describe("desktop API client", () => {
           ]
         }
       ]
+    });
+    await expect(
+      client.search.searchWorkspace({
+        query: "launch"
+      })
+    ).resolves.toEqual({
+      ok: true,
+      data: []
     });
     await expect(
       client.items.move({

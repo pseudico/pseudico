@@ -143,6 +143,10 @@ export type {
 } from "./relationships";
 export type { SavedViewService } from "./savedViews";
 export type {
+  SearchInput,
+  SearchResult,
+  SearchResultKind,
+  SearchResultTargetType,
   UpsertListIndexResult,
   UpsertSearchTargetInput
 } from "./search";

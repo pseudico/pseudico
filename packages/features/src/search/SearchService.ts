@@ -19,6 +19,21 @@ import {
   type UpsertListIndexResult,
   type UpsertSearchTargetInput
 } from "./SearchIndexOrchestrator";
+import {
+  SearchResultHydrator,
+  type HydrateSearchResultsOptions,
+  type SearchResult,
+  type SearchResultKind
+} from "./SearchResultHydrator";
+
+export type SearchInput = {
+  workspaceId: string;
+  query: string;
+  kinds?: SearchResultKind[];
+  limit?: number;
+  includeArchived?: boolean;
+  includeDeleted?: boolean;
+};
 
 // Owns search-facing application service contracts.
 // Does not own source-of-truth domain records or remote indexing.
@@ -27,6 +42,7 @@ export class SearchService {
 
   private readonly searchIndexOrchestrator: SearchIndexOrchestrator;
   private readonly searchIndexService: SearchIndexService;
+  private readonly searchResultHydrator: SearchResultHydrator;
 
   constructor(input: {
     connection: DatabaseConnection;
@@ -35,6 +51,7 @@ export class SearchService {
   }) {
     this.searchIndexService = new SearchIndexService(input);
     this.searchIndexOrchestrator = new SearchIndexOrchestrator(input);
+    this.searchResultHydrator = new SearchResultHydrator(input);
   }
 
   upsertContainer(
@@ -90,6 +107,42 @@ export class SearchService {
 
   searchWorkspace(input: SearchWorkspaceInput): SearchIndexRecord[] {
     return this.searchIndexService.searchWorkspace(input);
+  }
+
+  search(input: SearchInput): SearchResult[] {
+    const searchWorkspaceInput: SearchWorkspaceInput = {
+      workspaceId: input.workspaceId,
+      query: input.query,
+      targetTypes: ["container", "item", "list_item"]
+    };
+
+    if (input.includeDeleted !== undefined) {
+      searchWorkspaceInput.includeDeleted = input.includeDeleted;
+    }
+
+    if (input.limit !== undefined) {
+      searchWorkspaceInput.limit = Math.max(input.limit * 3, input.limit);
+    }
+
+    const records = this.searchIndexService.searchWorkspace(searchWorkspaceInput);
+
+    const hydrateOptions: HydrateSearchResultsOptions = {};
+
+    if (input.includeArchived !== undefined) {
+      hydrateOptions.includeArchived = input.includeArchived;
+    }
+
+    if (input.includeDeleted !== undefined) {
+      hydrateOptions.includeDeleted = input.includeDeleted;
+    }
+
+    if (input.kinds !== undefined) {
+      hydrateOptions.kinds = input.kinds;
+    }
+
+    return this.searchResultHydrator
+      .hydrateSearchResults(records, hydrateOptions)
+      .slice(0, input.limit ?? 25);
   }
 
   rebuildWorkspaceIndex(workspaceId: string): RebuildWorkspaceIndexResult {

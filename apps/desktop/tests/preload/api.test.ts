@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(47);
+    expect(channels).toHaveLength(48);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -52,6 +52,7 @@ describe("typed preload API", () => {
       "projects",
       "categories",
       "metadata",
+      "search",
       "containers",
       "items",
       "files"
@@ -514,6 +515,37 @@ describe("typed preload API", () => {
           workspaceId: "workspace_1",
           tagSlugs: ["finance"],
           categoryId: "category_1"
+        }
+      }
+    ]);
+  });
+
+  it("routes search calls through their named channel", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk([])) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.search.searchWorkspace({
+      workspaceId: "workspace_1",
+      query: "launch",
+      kinds: ["project", "task"]
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.search.searchWorkspace,
+        input: {
+          workspaceId: "workspace_1",
+          query: "launch",
+          kinds: ["project", "task"]
         }
       }
     ]);

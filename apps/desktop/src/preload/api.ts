@@ -217,6 +217,51 @@ export type MetadataTargetSummary = {
   deletedAt: string | null;
 };
 
+export type SearchResultKind =
+  | "inbox"
+  | "project"
+  | "contact"
+  | "task"
+  | "list"
+  | "note"
+  | "file"
+  | "link"
+  | "heading"
+  | "location"
+  | "comment"
+  | "list_item"
+  | "unknown";
+
+export type SearchWorkspaceInput = {
+  workspaceId?: string;
+  query: string;
+  kinds?: SearchResultKind[];
+  limit?: number;
+  includeArchived?: boolean;
+  includeDeleted?: boolean;
+};
+
+export type SearchResultSummary = {
+  id: string;
+  workspaceId: string;
+  targetType: "container" | "item" | "list_item";
+  targetId: string;
+  kind: SearchResultKind;
+  title: string;
+  body: string | null;
+  status: string | null;
+  tags: string[];
+  category: string | null;
+  updatedAt: string;
+  archivedAt: string | null;
+  deletedAt: string | null;
+  containerId: string | null;
+  containerTitle: string | null;
+  parentItemId: string | null;
+  parentItemTitle: string | null;
+  destinationPath: string | null;
+};
+
 export type ListTargetsByMetadataInput = {
   workspaceId?: string;
   tagSlugs?: string[];
@@ -543,6 +588,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
       "local-work-os:metadata:list-categories-with-counts",
     listTargetsByMetadata: "local-work-os:metadata:list-targets-by-metadata"
   },
+  search: {
+    searchWorkspace: "local-work-os:search:search-workspace"
+  },
   containers: {
     getStatus: "local-work-os:containers:get-status"
   },
@@ -716,6 +764,10 @@ export type LocalWorkOsIpcContracts = {
     input: ListTargetsByMetadataInput;
     result: ApiResult<MetadataTargetSummary[]>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.search.searchWorkspace]: {
+    input: SearchWorkspaceInput;
+    result: ApiResult<SearchResultSummary[]>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.containers.getStatus]: {
     input: undefined;
     result: ApiResult<IpcModuleStatus>;
@@ -883,6 +935,11 @@ export type LocalWorkOsApi = {
     listTargetsByMetadata: (
       input: ListTargetsByMetadataInput
     ) => Promise<ApiResult<MetadataTargetSummary[]>>;
+  };
+  search: {
+    searchWorkspace: (
+      input: SearchWorkspaceInput
+    ) => Promise<ApiResult<SearchResultSummary[]>>;
   };
   containers: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
@@ -1082,6 +1139,10 @@ export function createLocalWorkOsApi(
         ),
       listTargetsByMetadata: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTargetsByMetadata, input)
+    },
+    search: {
+      searchWorkspace: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.search.searchWorkspace, input)
     },
     containers: {
       getStatus: () =>

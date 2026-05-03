@@ -183,6 +183,14 @@ a {
   color: #6d6a62;
 }
 
+.search-control label {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
 .search-control input {
   width: 100%;
   min-width: 0;
@@ -936,10 +944,119 @@ a {
 
 .inbox-page,
 .metadata-page,
+.search-page,
 .projects-page,
 .project-detail-page {
   display: grid;
   gap: 22px;
+}
+
+.search-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.search-page-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  max-width: 820px;
+}
+
+.search-page-input {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid #d5d0c3;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #6d6a62;
+}
+
+.search-page-input input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #262624;
+  font-size: 15px;
+}
+
+.search-filter-panel,
+.search-results-panel {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #dedbd1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(38, 38, 36, 0.06);
+}
+
+.search-filter-list,
+.search-result-list {
+  display: grid;
+  gap: 8px;
+}
+
+.search-result-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  width: 100%;
+  min-height: 96px;
+  padding: 14px;
+  border: 1px solid #ece8dc;
+  border-radius: 8px;
+  background: #fbfaf7;
+  color: #262624;
+  cursor: pointer;
+  text-align: left;
+}
+
+.search-result-card:hover:not(:disabled) {
+  border-color: #245c55;
+}
+
+.search-result-card:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.search-result-card-main {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.search-result-card-title,
+.search-result-card-meta {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-result-card-title strong,
+.search-result-card-body {
+  overflow-wrap: anywhere;
+}
+
+.search-result-card-body {
+  color: #514e49;
+  line-height: 1.45;
+}
+
+.search-result-card-meta {
+  color: #6d6a62;
+  font-size: 13px;
 }
 
 .metadata-browser-layout {
@@ -1826,6 +1943,8 @@ a {
     .category-form,
     .category-list-row,
     .metadata-browser-layout,
+    .search-layout,
+    .search-page-form,
     .checklist-inline-add,
   .checklist-bulk-add {
     grid-template-columns: 1fr;

@@ -19,6 +19,7 @@ import { createMetadataIpcHandlers } from "../../src/main/ipc/metadataHandlers";
 import { handleGetModuleStatus } from "../../src/main/ipc/moduleStatusHandlers";
 import { createNoteIpcHandlers } from "../../src/main/ipc/noteHandlers";
 import { createProjectIpcHandlers } from "../../src/main/ipc/projectHandlers";
+import { createSearchIpcHandlers } from "../../src/main/ipc/searchHandlers";
 import { createTaskIpcHandlers } from "../../src/main/ipc/taskHandlers";
 import { createWorkspaceIpcHandlers } from "../../src/main/ipc/workspaceHandlers";
 import type { WorkspaceFileSystemService } from "../../src/main/services/workspace/WorkspaceFileSystemService";
@@ -477,6 +478,92 @@ describe("Metadata browser IPC handlers", () => {
               slug: "finance"
             }
           ]
+        }
+      ]
+    });
+  });
+});
+
+describe("Search IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createSearchIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(
+      handlers.handleSearchWorkspace({ query: "launch" })
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("searches hydrated active records through the current workspace", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-search-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const projectResult = await projectHandlers.handleCreateProject({
+      name: "Launch Plan",
+      description: "Supplier checklist"
+    });
+
+    if (!projectResult.ok) {
+      throw new Error(projectResult.error.message);
+    }
+
+    const taskHandlers = createTaskIpcHandlers(workspaceService);
+    const taskResult = await taskHandlers.handleCreateTask({
+      containerId: projectResult.data.project.id,
+      title: "Call launch supplier"
+    });
+
+    if (!taskResult.ok) {
+      throw new Error(taskResult.error.message);
+    }
+
+    const handlers = createSearchIpcHandlers(workspaceService);
+
+    await expect(
+      handlers.handleSearchWorkspace({
+        query: "supplier",
+        kinds: ["task"]
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          targetId: taskResult.data.id,
+          kind: "task",
+          title: "Call launch supplier",
+          containerTitle: "Launch Plan",
+          destinationPath: `/projects/${projectResult.data.project.id}`
         }
       ]
     });

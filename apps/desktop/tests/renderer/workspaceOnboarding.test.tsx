@@ -362,6 +362,9 @@ function createMockApi(
       listCategoriesWithCounts: async () => apiOk([]),
       listTargetsByMetadata: async () => apiOk([])
     },
+    search: {
+      searchWorkspace: async () => apiOk([])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
