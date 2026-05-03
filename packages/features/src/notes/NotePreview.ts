@@ -1,5 +1,6 @@
+import { parseInlineTagSlugs } from "@local-work-os/core";
+
 const DEFAULT_PREVIEW_LENGTH = 160;
-const INLINE_TAG_PATTERN = /(?:^|[^A-Za-z0-9_])@([A-Za-z0-9][A-Za-z0-9_-]*)/g;
 
 export type GenerateNotePreviewOptions = {
   maxLength?: number;
@@ -31,20 +32,7 @@ export function generateNotePreview(
 export function extractInlineNoteTags(
   content: string | string[]
 ): string[] {
-  const source = Array.isArray(content) ? content.join("\n") : content;
-  const tags: string[] = [];
-  const seen = new Set<string>();
-
-  for (const match of source.matchAll(INLINE_TAG_PATTERN)) {
-    const tag = match[1]?.toLowerCase();
-
-    if (tag !== undefined && !seen.has(tag)) {
-      seen.add(tag);
-      tags.push(tag);
-    }
-  }
-
-  return tags;
+  return parseInlineTagSlugs(content);
 }
 
 function stripMarkdown(content: string): string {

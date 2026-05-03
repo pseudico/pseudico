@@ -23,6 +23,7 @@ export const ActivityAction = {
   taskUpdated: "task_updated",
   taskCompleted: "task_completed",
   taskReopened: "task_reopened",
+  tagCreated: "tag_created",
   tagAdded: "tag_added",
   tagRemoved: "tag_removed",
   categoryAssigned: "category_assigned",

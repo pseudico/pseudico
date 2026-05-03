@@ -71,6 +71,16 @@ export {
   type UpsertSearchIndexInput
 } from "./SearchIndexRepository";
 export {
+  TagRepository,
+  type CreateTagInput,
+  type CreateTaggingInput,
+  type TaggedTargetRecord,
+  type TaggingRecord,
+  type TaggingTargetInput,
+  type ListTaggingsForTargetInput,
+  type TagRecord
+} from "./TagRepository";
+export {
   TaskRepository,
   type CreateTaskDetailsInput,
   type TaskRecord,
