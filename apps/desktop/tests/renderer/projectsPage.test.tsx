@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   apiOk,
   type CategorySummary,
+  type CollectionEvaluationSummary,
+  type CollectionSummary,
   type DatabaseHealthStatus,
   type InboxSummary,
   type IpcModuleStatus,
@@ -20,6 +22,7 @@ import {
 } from "../../src/preload/api";
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
 import { ProjectsPage } from "../../src/renderer/pages/ProjectsPage";
+import { CollectionsPage } from "../../src/renderer/pages/CollectionsPage";
 import { SearchPage } from "../../src/renderer/pages/SearchPage";
 import { TagsCategoriesPage } from "../../src/renderer/pages/TagsCategoriesPage";
 import { workspaceStore } from "../../src/renderer/state/workspaceStore";
@@ -310,6 +313,30 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
     search: {
       searchWorkspace: async () => apiOk([])
     },
+    collections: {
+      listCollections: async () => apiOk([collectionSummary()]),
+      createTagCollection: async () => apiOk(collectionSummary()),
+      createKeywordCollection: async () => apiOk({
+        ...collectionSummary(),
+        id: "saved_view_2",
+        kind: "keyword",
+        tagSlug: null,
+        keyword: "supplier"
+      }),
+      evaluateCollection: async () => apiOk(collectionEvaluationSummary()),
+      createTaskInCollection: async () =>
+        apiOk({
+          ...taskSummary(),
+          tags: [
+            {
+              id: "tag_1",
+              name: "Finance",
+              slug: "finance",
+              source: "manual"
+            }
+          ]
+        })
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
@@ -458,6 +485,68 @@ function noteSummary(): NoteSummary {
   };
 }
 
+function collectionSummary(): CollectionSummary {
+  return {
+    id: "saved_view_1",
+    workspaceId: "workspace_1",
+    name: "Finance",
+    description: "Finance follow-ups",
+    kind: "tag",
+    tagSlug: "finance",
+    keyword: null,
+    isFavorite: true,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z"
+  };
+}
+
+function collectionEvaluationSummary(): CollectionEvaluationSummary {
+  return {
+    collection: collectionSummary(),
+    total: 1,
+    results: [
+      {
+        targetType: "item",
+        targetId: "item_1",
+        kind: "task",
+        title: "Book launch venue",
+        containerId: "container_1",
+        containerType: "project",
+        containerTitle: "Launch Plan",
+        categoryId: "category_1",
+        categoryName: "Finance",
+        taskStatus: "open",
+        dueAt: "2026-05-04T00:00:00.000Z",
+        tags: ["finance"],
+        destinationPath: "/projects/container_1/items/item_1"
+      }
+    ],
+    groups: [
+      {
+        key: "container_1",
+        label: "Launch Plan",
+        results: [
+          {
+            targetType: "item",
+            targetId: "item_1",
+            kind: "task",
+            title: "Book launch venue",
+            containerId: "container_1",
+            containerType: "project",
+            containerTitle: "Launch Plan",
+            categoryId: "category_1",
+            categoryName: "Finance",
+            taskStatus: "open",
+            dueAt: "2026-05-04T00:00:00.000Z",
+            tags: ["finance"],
+            destinationPath: "/projects/container_1/items/item_1"
+          }
+        ]
+      }
+    ]
+  };
+}
+
 describe("Projects renderer pages", () => {
   afterEach(() => {
     workspaceStore.reset();
@@ -568,6 +657,31 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Book launch venue");
     expect(html).toContain("Confirm the room hold before Friday.");
     expect(html).toContain("Launch Plan");
+    expect(html).toContain("data-tag-source=\"manual\"");
+  });
+
+  it("renders collections with create controls, grouped results, and tag task creation", () => {
+    workspaceStore.setCurrentWorkspace(workspace);
+
+    const html = renderToString(
+      <MemoryRouter>
+        <CollectionsPage
+          apiClient={createMockApi([project])}
+          initialCollections={[collectionSummary()]}
+          initialEvaluation={collectionEvaluationSummary()}
+          initialProjects={[project]}
+        />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Collections");
+    expect(html).toContain("Tag slug");
+    expect(html).toContain("Keyword");
+    expect(html).toContain("Finance");
+    expect(html).toContain("Finance follow-ups");
+    expect(html).toContain("Launch Plan");
+    expect(html).toContain("Book launch venue");
+    expect(html).toContain("Add task");
     expect(html).toContain("data-tag-source=\"manual\"");
   });
 });

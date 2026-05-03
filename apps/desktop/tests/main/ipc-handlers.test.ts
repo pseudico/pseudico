@@ -12,6 +12,7 @@ import { afterEach } from "vitest";
 import { describe, expect, it } from "vitest";
 import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandlers";
 import { createCategoryIpcHandlers } from "../../src/main/ipc/categoryHandlers";
+import { createCollectionIpcHandlers } from "../../src/main/ipc/collectionHandlers";
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
 import { createItemIpcHandlers } from "../../src/main/ipc/itemHandlers";
 import { createListIpcHandlers } from "../../src/main/ipc/listHandlers";
@@ -566,6 +567,144 @@ describe("Search IPC handlers", () => {
           destinationPath: `/projects/${projectResult.data.project.id}`
         }
       ]
+    });
+  });
+});
+
+describe("Collection IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createCollectionIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(
+      handlers.handleListCollections(undefined)
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("creates, evaluates, completes, and adds tasks in tag collections", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-collections-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const projectResult = await projectHandlers.handleCreateProject({
+      name: "Launch Plan"
+    });
+
+    if (!projectResult.ok) {
+      throw new Error(projectResult.error.message);
+    }
+
+    const handlers = createCollectionIpcHandlers(workspaceService);
+    const collection = await handlers.handleCreateTagCollection({
+      tagSlug: "finance",
+      name: "Finance"
+    });
+
+    if (!collection.ok) {
+      throw new Error(collection.error.message);
+    }
+
+    await expect(handlers.handleListCollections(undefined)).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: collection.data.id,
+          kind: "tag",
+          tagSlug: "finance"
+        }
+      ]
+    });
+    const task = await handlers.handleCreateTaskInCollection({
+      collectionId: collection.data.id,
+      containerId: projectResult.data.project.id,
+      title: "Call accountant"
+    });
+
+    if (!task.ok) {
+      throw new Error(task.error.message);
+    }
+
+    expect(task).toMatchObject({
+      ok: true,
+      data: {
+        title: "Call accountant",
+        tags: [
+          {
+            slug: "finance",
+            source: "manual"
+          }
+        ]
+      }
+    });
+    await expect(
+      handlers.handleEvaluateCollection(collection.data.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        total: 1,
+        groups: [
+          {
+            label: "Launch Plan",
+            results: [
+              {
+                targetId: task.data.id,
+                tags: ["finance"],
+                taskStatus: "open"
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const taskHandlers = createTaskIpcHandlers(workspaceService);
+    await taskHandlers.handleCompleteTask(task.data.id);
+    await expect(
+      handlers.handleEvaluateCollection(collection.data.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        groups: [
+          {
+            results: [
+              {
+                targetId: task.data.id,
+                taskStatus: "done"
+              }
+            ]
+          }
+        ]
+      }
     });
   });
 });

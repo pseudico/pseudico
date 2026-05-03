@@ -3,6 +3,12 @@ export {
   savedViewsModuleContract
 } from "./SavedViewService";
 export {
+  CollectionService,
+  createKeywordCollectionQuery,
+  createTagCollectionQuery,
+  toCollectionSummary
+} from "./CollectionService";
+export {
   SAVED_VIEW_QUERY_VERSION,
   parseSavedViewQueryJson,
   stringifySavedViewQuery,
@@ -15,6 +21,15 @@ export type {
   SavedViewServiceIdFactory,
   UpdateSavedViewInput
 } from "./SavedViewService";
+export type {
+  CollectionEvaluationResult,
+  CollectionKind,
+  CollectionSummary,
+  CollectionTaskMutationResult,
+  CreateKeywordCollectionInput,
+  CreateTagCollectionInput,
+  CreateTaskInCollectionInput
+} from "./CollectionService";
 export type {
   SavedViewGroupBy,
   SavedViewQuery,

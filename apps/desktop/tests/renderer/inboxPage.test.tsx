@@ -278,6 +278,19 @@ function createMockApi(): LocalWorkOsApi {
     search: {
       searchWorkspace: async () => apiOk([])
     },
+    collections: {
+      listCollections: async () => apiOk([]),
+      createTagCollection: async () => apiOk(collectionSummary()),
+      createKeywordCollection: async () => apiOk({
+        ...collectionSummary(),
+        kind: "keyword",
+        tagSlug: null,
+        keyword: "supplier"
+      }),
+      evaluateCollection: async () =>
+        apiOk({ collection: collectionSummary(), total: 0, results: [], groups: [] }),
+      createTaskInCollection: async () => apiOk(taskSummary())
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
@@ -414,5 +427,20 @@ function noteSummary(): NoteSummary {
     preview: "Captured note",
     noteCreatedAt: "2026-05-01T00:00:00.000Z",
     noteUpdatedAt: "2026-05-01T00:00:00.000Z"
+  };
+}
+
+function collectionSummary() {
+  return {
+    id: "saved_view_1",
+    workspaceId: "workspace_1",
+    name: "Finance",
+    description: null,
+    kind: "tag" as const,
+    tagSlug: "finance",
+    keyword: null,
+    isFavorite: true,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z"
   };
 }
