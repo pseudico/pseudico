@@ -10,6 +10,7 @@ import {
   type ListItemSummary,
   type ListSummary,
   type LocalWorkOsApi,
+  type NoteSummary,
   type ProjectSummary,
   type RecentWorkspace,
   type TaskSummary,
@@ -230,6 +231,13 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
       listByContainer: async () => apiOk([listSummary()]),
       createList: async () => apiOk(listSummary())
     },
+    notes: {
+      create: async () => apiOk(noteSummary()),
+      update: async () => apiOk(noteSummary()),
+      listByContainer: async () => apiOk([noteSummary()]),
+      createNote: async () => apiOk(noteSummary()),
+      updateNote: async () => apiOk(noteSummary())
+    },
     projects: {
       create: async () => apiOk({ project: activeProject, defaultTabId: "tab_1" }),
       update: async () => apiOk(activeProject),
@@ -331,6 +339,21 @@ function listSummary(): ListSummary {
     listCreatedAt: "2026-05-01T00:00:00.000Z",
     listUpdatedAt: "2026-05-01T00:00:00.000Z",
     items: [listItemSummary()]
+  };
+}
+
+function noteSummary(): NoteSummary {
+  return {
+    ...itemSummary(),
+    id: "item_note_1",
+    type: "note",
+    title: "Launch note",
+    body: "Decision notes",
+    format: "markdown",
+    content: "# Decision notes",
+    preview: "Decision notes",
+    noteCreatedAt: "2026-05-01T00:00:00.000Z",
+    noteUpdatedAt: "2026-05-01T00:00:00.000Z"
   };
 }
 

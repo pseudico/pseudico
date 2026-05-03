@@ -72,6 +72,14 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.lists.listByContainer(containerId)),
       createList: (input) => callApi(() => api.lists.createList(input))
     },
+    notes: {
+      create: (input) => callApi(() => api.notes.create(input)),
+      update: (input) => callApi(() => api.notes.update(input)),
+      listByContainer: (containerId) =>
+        callApi(() => api.notes.listByContainer(containerId)),
+      createNote: (input) => callApi(() => api.notes.createNote(input)),
+      updateNote: (input) => callApi(() => api.notes.updateNote(input))
+    },
     projects: {
       create: (input) => callApi(() => api.projects.create(input)),
       update: (input) => callApi(() => api.projects.update(input)),
@@ -155,6 +163,14 @@ export const desktopApiClient: LocalWorkOsApi = {
     listByContainer: (containerId) =>
       getDesktopApiClient().lists.listByContainer(containerId),
     createList: (input) => getDesktopApiClient().lists.createList(input)
+  },
+  notes: {
+    create: (input) => getDesktopApiClient().notes.create(input),
+    update: (input) => getDesktopApiClient().notes.update(input),
+    listByContainer: (containerId) =>
+      getDesktopApiClient().notes.listByContainer(containerId),
+    createNote: (input) => getDesktopApiClient().notes.createNote(input),
+    updateNote: (input) => getDesktopApiClient().notes.updateNote(input)
   },
   projects: {
     create: (input) => getDesktopApiClient().projects.create(input),

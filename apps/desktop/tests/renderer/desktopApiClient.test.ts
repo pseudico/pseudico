@@ -9,6 +9,7 @@ import {
   type ListItemSummary,
   type ListSummary,
   type LocalWorkOsApi,
+  type NoteSummary,
   type ProjectSummary,
   type RecentWorkspace,
   type TaskSummary,
@@ -126,6 +127,13 @@ function createMockApi(
       bulkAddItems: async () => apiOk([listItemSummary()]),
       listByContainer: async () => apiOk([listSummary()]),
       createList: async () => apiOk(listSummary())
+    },
+    notes: {
+      create: async () => apiOk(noteSummary()),
+      update: async () => apiOk(noteSummary()),
+      listByContainer: async () => apiOk([noteSummary()]),
+      createNote: async () => apiOk(noteSummary()),
+      updateNote: async () => apiOk(noteSummary())
     },
     projects: {
       create: async () =>
@@ -297,6 +305,21 @@ function listSummary(): ListSummary {
   };
 }
 
+function noteSummary(): NoteSummary {
+  return {
+    ...itemSummary(),
+    id: "item_note_1",
+    type: "note",
+    title: "Launch note",
+    body: "Decision notes",
+    format: "markdown",
+    content: "# Decision notes",
+    preview: "Decision notes",
+    noteCreatedAt: "2026-04-30T00:00:00.000Z",
+    noteUpdatedAt: "2026-04-30T00:00:00.000Z"
+  };
+}
+
 describe("desktop API client", () => {
   it("passes typed preload results through to renderer callers", async () => {
     const client = createDesktopApiClient(createMockApi());
@@ -358,6 +381,16 @@ describe("desktop API client", () => {
               id: "list_item_1"
             }
           ]
+        }
+      ]
+    });
+    await expect(client.notes.listByContainer("container_1")).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: "item_note_1",
+          type: "note",
+          content: "# Decision notes"
         }
       ]
     });

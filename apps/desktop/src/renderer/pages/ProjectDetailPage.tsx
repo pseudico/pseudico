@@ -1,16 +1,20 @@
-import { ArrowLeft, FolderKanban, RefreshCw, Tag } from "lucide-react";
+import { ArrowLeft, FolderKanban, RefreshCw, StickyNote, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   CreateListForm,
   ItemFeed,
   ListCardContent,
+  NoteCardContent,
+  NoteEditor,
   TaskCardContent,
   TaskQuickAdd,
   type CreateListFormValues,
   type ItemActionId,
   type ListCardItemViewModel,
   type ListCardViewModel,
+  type NoteCardViewModel,
+  type NoteEditorValues,
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel
@@ -19,6 +23,7 @@ import type {
   ListItemSummary,
   ListSummary,
   LocalWorkOsApi,
+  NoteSummary,
   ProjectSummary,
   TaskSummary
 } from "../../preload/api";
@@ -34,9 +39,13 @@ type ProjectTaskViewModel = TaskCardViewModel & {
 type ProjectListViewModel = ListCardViewModel & {
   listItems: ListCardItemViewModel[];
 };
+type ProjectNoteViewModel = NoteCardViewModel & {
+  format: NoteSummary["format"];
+};
 type ProjectFeedViewModel =
   | ProjectTaskViewModel
   | ProjectListViewModel
+  | ProjectNoteViewModel
   | UniversalItemViewModel;
 
 type ProjectDetailPageProps = {
@@ -61,12 +70,17 @@ export function ProjectDetailPage({
   const [itemsLoading, setItemsLoading] = useState(false);
   const [savingTask, setSavingTask] = useState(false);
   const [savingList, setSavingList] = useState(false);
+  const [savingNote, setSavingNote] = useState(false);
   const [taskBusyId, setTaskBusyId] = useState<string | null>(null);
   const [listBusyId, setListBusyId] = useState<string | null>(null);
+  const [noteBusyId, setNoteBusyId] = useState<string | null>(null);
+  const [noteErrorItemId, setNoteErrorItemId] = useState<string | null>(null);
+  const [noteEditorOpen, setNoteEditorOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [itemError, setItemError] = useState<string | null>(null);
   const [taskError, setTaskError] = useState<string | null>(null);
   const [listError, setListError] = useState<string | null>(null);
+  const [noteError, setNoteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (projectId === undefined) {
@@ -84,10 +98,11 @@ export function ProjectDetailPage({
       setError(null);
       setItemError(null);
 
-      const [projectResult, tasksResult, listsResult] = await Promise.all([
+      const [projectResult, tasksResult, listsResult, notesResult] = await Promise.all([
         apiClient.projects.get(activeProjectId),
         apiClient.tasks.listByContainer(activeProjectId),
-        apiClient.lists.listByContainer(activeProjectId)
+        apiClient.lists.listByContainer(activeProjectId),
+        apiClient.notes.listByContainer(activeProjectId)
       ]);
 
       if (!active) {
@@ -112,8 +127,13 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!notesResult.ok) {
+        setItemError(notesResult.error.message);
+        return;
+      }
+
       setProject(projectResult.data);
-      setItems(mergeProjectContent(tasksResult.data, listsResult.data));
+      setItems(mergeProjectContent(tasksResult.data, listsResult.data, notesResult.data));
     }
 
     void loadProject();
@@ -127,9 +147,10 @@ export function ProjectDetailPage({
     setItemsLoading(true);
     setItemError(null);
 
-    const [tasksResult, listsResult] = await Promise.all([
+    const [tasksResult, listsResult, notesResult] = await Promise.all([
       apiClient.tasks.listByContainer(activeProjectId),
-      apiClient.lists.listByContainer(activeProjectId)
+      apiClient.lists.listByContainer(activeProjectId),
+      apiClient.notes.listByContainer(activeProjectId)
     ]);
 
     setItemsLoading(false);
@@ -144,7 +165,12 @@ export function ProjectDetailPage({
       return;
     }
 
-    setItems(mergeProjectContent(tasksResult.data, listsResult.data));
+    if (!notesResult.ok) {
+      setItemError(notesResult.error.message);
+      return;
+    }
+
+    setItems(mergeProjectContent(tasksResult.data, listsResult.data, notesResult.data));
   }
 
   async function createProjectTask(
@@ -199,6 +225,67 @@ export function ProjectDetailPage({
 
     await refreshProjectContent(project.id);
     setSavingList(false);
+    return true;
+  }
+
+  async function createProjectNote(
+    values: NoteEditorValues
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setSavingNote(true);
+    setNoteError(null);
+    setNoteErrorItemId(null);
+
+    const result = await apiClient.notes.create({
+      workspaceId: project.workspaceId,
+      containerId: project.id,
+      title: values.title,
+      content: values.content
+    });
+
+    if (!result.ok) {
+      setSavingNote(false);
+      setNoteError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    setSavingNote(false);
+    setNoteEditorOpen(false);
+    return true;
+  }
+
+  async function updateProjectNote(
+    item: NoteCardViewModel,
+    values: NoteEditorValues
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setNoteBusyId(item.id);
+    setNoteError(null);
+    setNoteErrorItemId(item.id);
+
+    const result = await apiClient.notes.update({
+      itemId: item.id,
+      title: values.title,
+      content: values.content
+    });
+
+    if (!result.ok) {
+      setNoteBusyId(null);
+      setNoteError(result.error.message);
+      setNoteErrorItemId(item.id);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    setNoteBusyId(null);
+    setNoteErrorItemId(null);
     return true;
   }
 
@@ -364,6 +451,17 @@ export function ProjectDetailPage({
       );
     }
 
+    if (isNoteCardViewModel(item)) {
+      return (
+        <NoteCardContent
+          disabled={noteBusyId === item.id}
+          error={noteErrorItemId === item.id ? noteError : null}
+          item={item}
+          onSave={updateProjectNote}
+        />
+      );
+    }
+
     return item.body === undefined || item.body === null ? null : <p>{item.body}</p>;
   }
 
@@ -460,9 +558,39 @@ export function ProjectDetailPage({
           onSubmit={createProjectList}
         />
 
+        {noteEditorOpen ? (
+          <NoteEditor
+            contextLabel={project.name}
+            disabled={savingNote || itemsLoading}
+            error={noteErrorItemId === null ? noteError : null}
+            resetOnSubmit
+            submitLabel="Add note"
+            onCancel={() => {
+              setNoteEditorOpen(false);
+              setNoteError(null);
+              setNoteErrorItemId(null);
+            }}
+            onSubmit={createProjectNote}
+          />
+        ) : (
+          <button
+            className="secondary-button note-create-button"
+            disabled={itemsLoading}
+            type="button"
+            onClick={() => {
+              setNoteEditorOpen(true);
+              setNoteError(null);
+              setNoteErrorItemId(null);
+            }}
+          >
+            <StickyNote size={17} aria-hidden="true" />
+            New note
+          </button>
+        )}
+
         <ItemFeed
           ariaLabel="Project content items"
-          emptyDescription="Tasks and checklists created for this project will appear here with inline controls."
+          emptyDescription="Tasks, checklists, and notes created for this project will appear here with inline controls."
           emptyTitle="No project content yet"
           error={itemError}
           items={items}
@@ -519,6 +647,24 @@ function toProjectListViewModel(list: ListSummary): ProjectListViewModel {
   };
 }
 
+function toProjectNoteViewModel(note: NoteSummary): ProjectNoteViewModel {
+  return {
+    id: note.id,
+    type: "note",
+    title: note.title,
+    body: note.preview,
+    status: note.status,
+    categoryLabel: note.categoryId,
+    sortOrder: note.sortOrder,
+    createdAt: note.createdAt,
+    updatedLabel: note.updatedAt,
+    pinned: note.pinned,
+    content: note.content,
+    preview: note.preview,
+    format: note.format
+  };
+}
+
 function toListCardItemViewModel(
   listItem: ListItemSummary
 ): ListCardItemViewModel {
@@ -534,11 +680,13 @@ function toListCardItemViewModel(
 
 function mergeProjectContent(
   tasks: readonly TaskSummary[],
-  lists: readonly ListSummary[]
+  lists: readonly ListSummary[],
+  notes: readonly NoteSummary[]
 ): ProjectFeedViewModel[] {
   return [
     ...tasks.map(toProjectTaskViewModel),
-    ...lists.map(toProjectListViewModel)
+    ...lists.map(toProjectListViewModel),
+    ...notes.map(toProjectNoteViewModel)
   ].sort(compareFeedItems);
 }
 
@@ -565,6 +713,12 @@ function isListCardViewModel(
   item: UniversalItemViewModel
 ): item is ListCardViewModel {
   return item.type === "list" && "listItems" in item;
+}
+
+function isNoteCardViewModel(
+  item: UniversalItemViewModel
+): item is NoteCardViewModel {
+  return item.type === "note" && "content" in item;
 }
 
 function formatDateLabel(value: string | null | undefined): string | null {

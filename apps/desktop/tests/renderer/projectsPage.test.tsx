@@ -10,6 +10,7 @@ import {
   type ListItemSummary,
   type ListSummary,
   type LocalWorkOsApi,
+  type NoteSummary,
   type ProjectSummary,
   type TaskSummary,
   type WorkspaceSummary
@@ -17,7 +18,7 @@ import {
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
 import { ProjectsPage } from "../../src/renderer/pages/ProjectsPage";
 import { workspaceStore } from "../../src/renderer/state/workspaceStore";
-import type { UniversalItemViewModel } from "@local-work-os/ui";
+import type { NoteCardViewModel, UniversalItemViewModel } from "@local-work-os/ui";
 
 const workspace: WorkspaceSummary = {
   id: "workspace_1",
@@ -56,6 +57,17 @@ const projectItem: UniversalItemViewModel = {
   dueLabel: "Friday",
   pinned: true
 } as UniversalItemViewModel;
+
+const projectNote: NoteCardViewModel = {
+  id: "item_note_1",
+  type: "note",
+  title: "Launch note",
+  body: "Decision notes",
+  status: "active",
+  content: "# Decision notes\n\nConfirm launch plan.",
+  preview: "Decision notes Confirm launch plan.",
+  pinned: false
+};
 
 function moduleStatus(module: IpcModuleStatus["module"]): IpcModuleStatus {
   return {
@@ -149,6 +161,13 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
       bulkAddItems: async () => apiOk([listItemSummary()]),
       listByContainer: async () => apiOk([listSummary()]),
       createList: async () => apiOk(listSummary())
+    },
+    notes: {
+      create: async () => apiOk(noteSummary()),
+      update: async () => apiOk(noteSummary()),
+      listByContainer: async () => apiOk([noteSummary()]),
+      createNote: async () => apiOk(noteSummary()),
+      updateNote: async () => apiOk(noteSummary())
     },
     projects: {
       create: async () => apiOk({ project, defaultTabId: "container_tab_1" }),
@@ -289,6 +308,22 @@ function listSummary(): ListSummary {
   };
 }
 
+function noteSummary(): NoteSummary {
+  return {
+    ...itemSummary(),
+    id: "item_note_1",
+    containerId: project.id,
+    type: "note",
+    title: "Launch note",
+    body: "Decision notes Confirm launch plan.",
+    format: "markdown",
+    content: "# Decision notes\n\nConfirm launch plan.",
+    preview: "Decision notes Confirm launch plan.",
+    noteCreatedAt: "2026-05-01T00:00:00.000Z",
+    noteUpdatedAt: "2026-05-01T00:00:00.000Z"
+  };
+}
+
 describe("Projects renderer pages", () => {
   afterEach(() => {
     workspaceStore.reset();
@@ -318,7 +353,7 @@ describe("Projects renderer pages", () => {
               <ProjectDetailPage
                 apiClient={createMockApi([project])}
                 initialProject={project}
-                initialItems={[projectItem]}
+                initialItems={[projectItem, projectNote]}
               />
             }
           />
@@ -332,6 +367,9 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Tags");
     expect(html).toContain("Content feed");
     expect(html).toContain("Book launch venue");
+    expect(html).toContain("Launch note");
+    expect(html).toContain("Decision notes Confirm launch plan.");
+    expect(html).toContain("Edit note");
     expect(html).toContain("Complete");
     expect(html).toContain("Due");
     expect(html).toContain("Actions for Book launch venue");

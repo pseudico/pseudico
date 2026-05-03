@@ -6,6 +6,8 @@ import {
   ItemFeed,
   ListCardContent,
   MoveToContainerDialog,
+  NoteCardContent,
+  NoteEditor,
   UniversalItemCard,
   type UniversalItemViewModel
 } from "../src";
@@ -128,5 +130,46 @@ describe("Universal item UI", () => {
     expect(html).toContain("Send update");
     expect(html).toContain("Bulk paste");
     expect(html).toContain("Add pasted");
+  });
+
+  it("renders Markdown note previews without raw HTML injection", () => {
+    const html = renderToStaticMarkup(
+      <NoteCardContent
+        item={{
+          id: "item_note_1",
+          type: "note",
+          title: "Launch note",
+          content: "# Decision\n\n- Confirm **brief**\n\n<script>alert(1)</script>",
+          preview: "Decision Confirm brief"
+        }}
+        onSave={() => true}
+      />
+    );
+
+    expect(html).toContain("Decision Confirm brief");
+    expect(html).toContain("Confirm brief");
+    expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(html).toContain("Edit note");
+  });
+
+  it("renders the Markdown note editor with save and cancel controls", () => {
+    const html = renderToStaticMarkup(
+      <NoteEditor
+        contextLabel="Launch Plan"
+        initialValues={{
+          title: "Launch note",
+          content: "# Decision"
+        }}
+        onCancel={() => undefined}
+        onSubmit={() => true}
+      />
+    );
+
+    expect(html).toContain("Note title");
+    expect(html).toContain("Markdown");
+    expect(html).toContain("Launch note");
+    expect(html).toContain("# Decision");
+    expect(html).toContain("Save note");
+    expect(html).toContain("Cancel");
   });
 });

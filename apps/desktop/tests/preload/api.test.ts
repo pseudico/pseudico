@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(30);
+    expect(channels).toHaveLength(33);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -48,6 +48,7 @@ describe("typed preload API", () => {
       "inbox",
       "tasks",
       "lists",
+      "notes",
       "projects",
       "containers",
       "items",
@@ -298,6 +299,55 @@ describe("typed preload API", () => {
       },
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.listByContainer,
+        input: "container_1"
+      }
+    ]);
+  });
+
+  it("routes note calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.notes.create({
+      workspaceId: "workspace_1",
+      containerId: "container_1",
+      title: "Launch note",
+      content: "# Brief"
+    });
+    await api.notes.update({
+      itemId: "item_note_1",
+      content: "Updated note"
+    });
+    await api.notes.listByContainer("container_1");
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.notes.createNote,
+        input: {
+          workspaceId: "workspace_1",
+          containerId: "container_1",
+          title: "Launch note",
+          content: "# Brief"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.notes.updateNote,
+        input: {
+          itemId: "item_note_1",
+          content: "Updated note"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.notes.listByContainer,
         input: "container_1"
       }
     ]);
