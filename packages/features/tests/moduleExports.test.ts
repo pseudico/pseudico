@@ -15,6 +15,7 @@ import {
   notesModuleContract,
   plannedFeatureAreas,
   projectsModuleContract,
+  SavedViewService,
   relationshipsModuleContract,
   savedViewsModuleContract,
   searchModuleContract,
@@ -99,5 +100,9 @@ describe("feature module exports", () => {
       "backup",
       "export"
     ]);
+  });
+
+  it("exports the saved-view service implementation", () => {
+    expect(SavedViewService).toBeDefined();
   });
 });

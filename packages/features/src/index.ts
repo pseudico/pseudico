@@ -56,7 +56,15 @@ export {
 } from "./notes";
 export { ProjectService, projectsModuleContract } from "./projects";
 export { RelationshipService, relationshipsModuleContract } from "./relationships";
-export { savedViewsModuleContract } from "./savedViews";
+export {
+  QueryEvaluator,
+  SAVED_VIEW_QUERY_VERSION,
+  SavedViewService,
+  parseSavedViewQueryJson,
+  savedViewsModuleContract,
+  stringifySavedViewQuery,
+  validateSavedViewQuery
+} from "./savedViews";
 export {
   SearchIndexOrchestrator,
   SearchService,
@@ -141,7 +149,25 @@ export type {
   RelationshipServiceIdFactory,
   RemoveRelationshipInput
 } from "./relationships";
-export type { SavedViewService } from "./savedViews";
+export type {
+  CreateSavedViewInput,
+  SavedViewEvaluationResult,
+  SavedViewGroupBy,
+  SavedViewMutationResult,
+  SavedViewQuery,
+  SavedViewQueryCondition,
+  SavedViewQueryMatch,
+  SavedViewQueryTarget,
+  SavedViewQueryV1,
+  SavedViewQueryValidationResult,
+  SavedViewResultGroup,
+  SavedViewResultRef,
+  SavedViewServiceIdFactory,
+  SavedViewSort,
+  SavedViewSortDirection,
+  SavedViewSortField,
+  UpdateSavedViewInput
+} from "./savedViews";
 export type {
   SearchInput,
   SearchResult,

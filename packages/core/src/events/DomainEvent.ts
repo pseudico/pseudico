@@ -10,6 +10,7 @@ export type ActivityTargetType =
   | "tag"
   | "category"
   | "relationship"
+  | "saved_view"
   | "attachment"
   | "search_index"
   | "backup"
