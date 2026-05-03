@@ -3,6 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   apiOk,
+  type CategorySummary,
   type DatabaseHealthStatus,
   type InboxSummary,
   type IpcModuleStatus,
@@ -241,6 +242,34 @@ function createMockApi(): LocalWorkOsApi {
       listProjects: async () => apiOk([project]),
       getProject: async () => apiOk(project)
     },
+    categories: {
+      create: async () => apiOk(categorySummary()),
+      update: async () => apiOk(categorySummary()),
+      delete: async () =>
+        apiOk({
+          ...categorySummary(),
+          deletedAt: "2026-05-01T01:00:00.000Z"
+        }),
+      list: async () => apiOk([categorySummary()]),
+      assignToProject: async () =>
+        apiOk({
+          ...project,
+          categoryId: categorySummary().id
+        }),
+      assignToItem: async () =>
+        apiOk({
+          ...inboxItem,
+          categoryId: categorySummary().id
+        }),
+      createCategory: async () => apiOk(categorySummary()),
+      updateCategory: async () => apiOk(categorySummary()),
+      deleteCategory: async () =>
+        apiOk({
+          ...categorySummary(),
+          deletedAt: "2026-05-01T01:00:00.000Z"
+        }),
+      listCategories: async () => apiOk([categorySummary()])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
@@ -295,6 +324,20 @@ function inboxSummary(): InboxSummary {
     createdAt: "2026-05-01T00:00:00.000Z",
     updatedAt: "2026-05-01T00:00:00.000Z",
     archivedAt: null,
+    deletedAt: null
+  };
+}
+
+function categorySummary(): CategorySummary {
+  return {
+    id: "category_ops",
+    workspaceId: "workspace_1",
+    name: "Operations",
+    slug: "operations",
+    description: null,
+    color: "#3b82f6",
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z",
     deletedAt: null
   };
 }

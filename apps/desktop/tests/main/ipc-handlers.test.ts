@@ -11,6 +11,7 @@ import { ItemService } from "@local-work-os/features";
 import { afterEach } from "vitest";
 import { describe, expect, it } from "vitest";
 import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandlers";
+import { createCategoryIpcHandlers } from "../../src/main/ipc/categoryHandlers";
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
 import { createItemIpcHandlers } from "../../src/main/ipc/itemHandlers";
 import { createListIpcHandlers } from "../../src/main/ipc/listHandlers";
@@ -280,6 +281,85 @@ describe("project IPC handlers", () => {
           description: "Supplier checklist"
         }
       ]
+    });
+  });
+});
+
+describe("Category IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("creates, lists, assigns, and deletes categories", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-categories-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const projectResult = await projectHandlers.handleCreateProject({
+      name: "Tax Prep"
+    });
+
+    if (!projectResult.ok) {
+      throw new Error(projectResult.error.message);
+    }
+
+    const handlers = createCategoryIpcHandlers(workspaceService);
+    const created = await handlers.handleCreateCategory({
+      name: "Finance",
+      color: "#2c6b8f"
+    });
+
+    if (!created.ok) {
+      throw new Error(created.error.message);
+    }
+
+    await expect(handlers.handleListCategories(undefined)).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          name: "Finance",
+          slug: "finance"
+        }
+      ]
+    });
+    await expect(
+      handlers.handleAssignCategoryToProject({
+        projectId: projectResult.data.project.id,
+        categoryId: created.data.id
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        categoryId: created.data.id
+      }
+    });
+    await expect(
+      handlers.handleDeleteCategory(created.data.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: created.data.id,
+        deletedAt: expect.any(String)
+      }
     });
   });
 });

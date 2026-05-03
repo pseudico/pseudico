@@ -1248,6 +1248,128 @@ a {
   color: #66531d;
 }
 
+.category-badge {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  max-width: 100%;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid #d5d0c3;
+  border-radius: 999px;
+  background: #fbfaf7;
+  color: #262624;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.category-badge-empty {
+  color: #6d6a62;
+}
+
+.category-badge-swatch,
+.category-list-swatch {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.category-picker {
+  display: grid;
+  gap: 7px;
+  min-width: min(100%, 240px);
+  color: #514e49;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.category-picker > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-picker select,
+.category-form input,
+.category-form textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid #d5d0c3;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #262624;
+}
+
+.category-form textarea {
+  resize: vertical;
+}
+
+.category-management-panel {
+  display: grid;
+  max-width: 900px;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #dedbd1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(38, 38, 36, 0.06);
+}
+
+.category-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 140px minmax(180px, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.category-form label {
+  display: grid;
+  gap: 6px;
+  color: #514e49;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.category-list {
+  display: grid;
+  gap: 8px;
+}
+
+.category-list-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 260px) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ece8dc;
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
+.category-list-main {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-list-main strong,
+.category-list-main span {
+  overflow-wrap: anywhere;
+}
+
+.category-inline-picker {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #ece8dc;
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
 .task-card-content {
   display: grid;
   gap: 10px;
@@ -1539,11 +1661,13 @@ a {
   .health-grid,
   .project-color-options,
   .project-meta-grid,
-  .item-inspector-metadata,
-  .quick-add-form,
-  .task-quick-add,
-  .create-list-form,
-  .checklist-inline-add,
+    .item-inspector-metadata,
+    .quick-add-form,
+    .task-quick-add,
+    .create-list-form,
+    .category-form,
+    .category-list-row,
+    .checklist-inline-add,
   .checklist-bulk-add {
     grid-template-columns: 1fr;
   }

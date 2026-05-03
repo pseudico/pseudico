@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   apiOk,
   type ApiResult,
+  type CategorySummary,
   type DatabaseHealthStatus,
   type InboxSummary,
   type IpcModuleStatus,
@@ -175,6 +176,34 @@ function createMockApi(
       listProjects: async () => apiOk([projectSummary()]),
       getProject: async () => apiOk(projectSummary())
     },
+    categories: {
+      create: async () => apiOk(categorySummary()),
+      update: async () => apiOk(categorySummary()),
+      delete: async () =>
+        apiOk({
+          ...categorySummary(),
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      list: async () => apiOk([categorySummary()]),
+      assignToProject: async () =>
+        apiOk({
+          ...projectSummary(),
+          categoryId: "category_1"
+        }),
+      assignToItem: async () =>
+        apiOk({
+          ...itemSummary(),
+          categoryId: "category_1"
+        }),
+      createCategory: async () => apiOk(categorySummary()),
+      updateCategory: async () => apiOk(categorySummary()),
+      deleteCategory: async () =>
+        apiOk({
+          ...categorySummary(),
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      listCategories: async () => apiOk([categorySummary()])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
@@ -247,6 +276,20 @@ function createMockApi(
   return {
     ...api,
     ...overrides
+  };
+}
+
+function categorySummary(): CategorySummary {
+  return {
+    id: "category_1",
+    workspaceId: "workspace_1",
+    name: "Finance",
+    slug: "finance",
+    color: "#2c6b8f",
+    description: null,
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z",
+    deletedAt: null
   };
 }
 
@@ -451,6 +494,26 @@ describe("desktop API client", () => {
           content: "# Decision notes"
         }
       ]
+    });
+    await expect(client.categories.list()).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: "category_1",
+          name: "Finance"
+        }
+      ]
+    });
+    await expect(
+      client.categories.assignToProject({
+        projectId: "container_1",
+        categoryId: "category_1"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        categoryId: "category_1"
+      }
     });
     await expect(
       client.items.move({

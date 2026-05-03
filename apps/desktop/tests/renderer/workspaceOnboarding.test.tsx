@@ -3,6 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import {
   apiOk,
+  type CategorySummary,
   type DatabaseHealthStatus,
   type IpcModuleStatus,
   type ListItemSummary,
@@ -315,6 +316,47 @@ function createMockApi(
       listProjects: async () => apiOk([]),
       getProject: async () => apiOk(null)
     },
+    categories: {
+      create: async () => apiOk(categorySummary()),
+      update: async () => apiOk(categorySummary()),
+      delete: async () =>
+        apiOk({
+          ...categorySummary(),
+          deletedAt: "2026-05-01T01:00:00.000Z"
+        }),
+      list: async () => apiOk([categorySummary()]),
+      assignToProject: async () =>
+        apiOk({
+          id: "container_1",
+          workspaceId: "workspace_1",
+          type: "project",
+          name: "Launch Plan",
+          slug: "launch-plan",
+          description: null,
+          status: "active",
+          categoryId: categorySummary().id,
+          color: null,
+          isFavorite: false,
+          sortOrder: 0,
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z",
+          archivedAt: null,
+          deletedAt: null
+        }),
+      assignToItem: async () =>
+        apiOk({
+          ...taskSummary(),
+          categoryId: categorySummary().id
+        }),
+      createCategory: async () => apiOk(categorySummary()),
+      updateCategory: async () => apiOk(categorySummary()),
+      deleteCategory: async () =>
+        apiOk({
+          ...categorySummary(),
+          deletedAt: "2026-05-01T01:00:00.000Z"
+        }),
+      listCategories: async () => apiOk([categorySummary()])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
@@ -350,6 +392,20 @@ function createMockApi(
     files: {
       getStatus: async () => apiOk(moduleStatus("files"))
     }
+  };
+}
+
+function categorySummary(): CategorySummary {
+  return {
+    id: "category_ops",
+    workspaceId: "workspace_1",
+    name: "Operations",
+    slug: "operations",
+    description: null,
+    color: "#3b82f6",
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z",
+    deletedAt: null
   };
 }
 

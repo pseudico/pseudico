@@ -98,6 +98,24 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.projects.listProjects(workspaceId)),
       getProject: (projectId) => callApi(() => api.projects.getProject(projectId))
     },
+    categories: {
+      create: (input) => callApi(() => api.categories.create(input)),
+      update: (input) => callApi(() => api.categories.update(input)),
+      delete: (categoryId) => callApi(() => api.categories.delete(categoryId)),
+      list: (workspaceId) => callApi(() => api.categories.list(workspaceId)),
+      assignToProject: (input) =>
+        callApi(() => api.categories.assignToProject(input)),
+      assignToItem: (input) =>
+        callApi(() => api.categories.assignToItem(input)),
+      createCategory: (input) =>
+        callApi(() => api.categories.createCategory(input)),
+      updateCategory: (input) =>
+        callApi(() => api.categories.updateCategory(input)),
+      deleteCategory: (categoryId) =>
+        callApi(() => api.categories.deleteCategory(categoryId)),
+      listCategories: (workspaceId) =>
+        callApi(() => api.categories.listCategories(workspaceId))
+    },
     containers: {
       getStatus: () => callApi(() => api.containers.getStatus())
     },
@@ -206,6 +224,24 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().projects.listProjects(workspaceId),
     getProject: (projectId) =>
       getDesktopApiClient().projects.getProject(projectId)
+  },
+  categories: {
+    create: (input) => getDesktopApiClient().categories.create(input),
+    update: (input) => getDesktopApiClient().categories.update(input),
+    delete: (categoryId) => getDesktopApiClient().categories.delete(categoryId),
+    list: (workspaceId) => getDesktopApiClient().categories.list(workspaceId),
+    assignToProject: (input) =>
+      getDesktopApiClient().categories.assignToProject(input),
+    assignToItem: (input) =>
+      getDesktopApiClient().categories.assignToItem(input),
+    createCategory: (input) =>
+      getDesktopApiClient().categories.createCategory(input),
+    updateCategory: (input) =>
+      getDesktopApiClient().categories.updateCategory(input),
+    deleteCategory: (categoryId) =>
+      getDesktopApiClient().categories.deleteCategory(categoryId),
+    listCategories: (workspaceId) =>
+      getDesktopApiClient().categories.listCategories(workspaceId)
   },
   containers: {
     getStatus: () => getDesktopApiClient().containers.getStatus()

@@ -165,6 +165,42 @@ export type ItemTagSummary = {
   source: "inline" | "manual" | "imported";
 };
 
+export type CategorySummary = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  slug: string;
+  color: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
+export type CreateCategoryInput = {
+  workspaceId?: string;
+  name: string;
+  color: string;
+  description?: string | null;
+};
+
+export type UpdateCategoryInput = {
+  categoryId: string;
+  name?: string;
+  color?: string;
+  description?: string | null;
+};
+
+export type AssignCategoryToProjectInput = {
+  projectId: string;
+  categoryId?: string | null;
+};
+
+export type AssignCategoryToItemInput = {
+  itemId: string;
+  categoryId?: string | null;
+};
+
 export type CreateProjectInput = {
   workspaceId?: string;
   name: string;
@@ -444,6 +480,14 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     listProjects: "local-work-os:projects:list-projects",
     getProject: "local-work-os:projects:get-project"
   },
+  categories: {
+    createCategory: "local-work-os:categories:create-category",
+    updateCategory: "local-work-os:categories:update-category",
+    deleteCategory: "local-work-os:categories:delete-category",
+    listCategories: "local-work-os:categories:list-categories",
+    assignToProject: "local-work-os:categories:assign-to-project",
+    assignToItem: "local-work-os:categories:assign-to-item"
+  },
   containers: {
     getStatus: "local-work-os:containers:get-status"
   },
@@ -581,6 +625,30 @@ export type LocalWorkOsIpcContracts = {
     input: string;
     result: ApiResult<ProjectSummary | null>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.categories.createCategory]: {
+    input: CreateCategoryInput;
+    result: ApiResult<CategorySummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.categories.updateCategory]: {
+    input: UpdateCategoryInput;
+    result: ApiResult<CategorySummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.categories.deleteCategory]: {
+    input: string;
+    result: ApiResult<CategorySummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.categories.listCategories]: {
+    input: string | undefined;
+    result: ApiResult<CategorySummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.categories.assignToProject]: {
+    input: AssignCategoryToProjectInput;
+    result: ApiResult<ProjectSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.categories.assignToItem]: {
+    input: AssignCategoryToItemInput;
+    result: ApiResult<ItemSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.containers.getStatus]: {
     input: undefined;
     result: ApiResult<IpcModuleStatus>;
@@ -715,6 +783,28 @@ export type LocalWorkOsApi = {
       workspaceId?: string
     ) => Promise<ApiResult<ProjectSummary[]>>;
     getProject: (projectId: string) => Promise<ApiResult<ProjectSummary | null>>;
+  };
+  categories: {
+    create: (input: CreateCategoryInput) => Promise<ApiResult<CategorySummary>>;
+    update: (input: UpdateCategoryInput) => Promise<ApiResult<CategorySummary>>;
+    delete: (categoryId: string) => Promise<ApiResult<CategorySummary>>;
+    list: (workspaceId?: string) => Promise<ApiResult<CategorySummary[]>>;
+    assignToProject: (
+      input: AssignCategoryToProjectInput
+    ) => Promise<ApiResult<ProjectSummary>>;
+    assignToItem: (
+      input: AssignCategoryToItemInput
+    ) => Promise<ApiResult<ItemSummary>>;
+    createCategory: (
+      input: CreateCategoryInput
+    ) => Promise<ApiResult<CategorySummary>>;
+    updateCategory: (
+      input: UpdateCategoryInput
+    ) => Promise<ApiResult<CategorySummary>>;
+    deleteCategory: (categoryId: string) => Promise<ApiResult<CategorySummary>>;
+    listCategories: (
+      workspaceId?: string
+    ) => Promise<ApiResult<CategorySummary[]>>;
   };
   containers: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
@@ -878,6 +968,28 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.listProjects, workspaceId),
       getProject: (projectId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.getProject, projectId)
+    },
+    categories: {
+      create: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.createCategory, input),
+      update: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.updateCategory, input),
+      delete: (categoryId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.deleteCategory, categoryId),
+      list: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.listCategories, workspaceId),
+      assignToProject: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.assignToProject, input),
+      assignToItem: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.assignToItem, input),
+      createCategory: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.createCategory, input),
+      updateCategory: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.updateCategory, input),
+      deleteCategory: (categoryId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.deleteCategory, categoryId),
+      listCategories: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.listCategories, workspaceId)
     },
     containers: {
       getStatus: () =>

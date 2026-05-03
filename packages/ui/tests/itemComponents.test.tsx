@@ -2,6 +2,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
   getItemTypeLabel,
+  CategoryBadge,
+  CategoryPicker,
   ConfirmDialog,
   ItemActionsMenu,
   ItemFeed,
@@ -63,6 +65,30 @@ describe("Universal item UI", () => {
     expect(html).toContain("@Manual");
     expect(html).toContain("data-tag-source=\"inline\"");
     expect(html).toContain("data-tag-source=\"manual\"");
+  });
+
+  it("renders category badge and picker controls", () => {
+    const category = {
+      id: "category_1",
+      name: "Finance",
+      color: "#2c6b8f"
+    };
+    const badgeHtml = renderToStaticMarkup(
+      <CategoryBadge category={category} />
+    );
+    const pickerHtml = renderToStaticMarkup(
+      <CategoryPicker
+        categories={[category]}
+        value="category_1"
+        onChange={() => undefined}
+      />
+    );
+
+    expect(badgeHtml).toContain("Finance");
+    expect(badgeHtml).toContain("#2c6b8f");
+    expect(pickerHtml).toContain("Category");
+    expect(pickerHtml).toContain("No category");
+    expect(pickerHtml).toContain("Finance");
   });
 
   it("renders a safe placeholder for unknown item types", () => {
