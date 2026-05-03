@@ -40,7 +40,12 @@ export { ItemService, itemsModuleContract } from "./items";
 export { linksModuleContract } from "./links";
 export { ListService, listsModuleContract, parseBulkListItems } from "./lists";
 export { categoriesModuleContract, tagsModuleContract } from "./metadata";
-export { notesModuleContract } from "./notes";
+export {
+  NoteService,
+  extractInlineNoteTags,
+  generateNotePreview,
+  notesModuleContract
+} from "./notes";
 export { ProjectService, projectsModuleContract } from "./projects";
 export { savedViewsModuleContract } from "./savedViews";
 export { SearchService, searchModuleContract } from "./search";
@@ -80,7 +85,13 @@ export type {
   UpdateListItemInput
 } from "./lists";
 export type { CategoryService, TagService } from "./metadata";
-export type { NoteService } from "./notes";
+export type {
+  CreateNoteInput,
+  GenerateNotePreviewOptions,
+  NoteMutationResult,
+  NoteServiceIdFactory,
+  UpdateNoteInput
+} from "./notes";
 export type {
   CreateProjectInput,
   CreateProjectResult,

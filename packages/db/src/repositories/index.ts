@@ -55,6 +55,14 @@ export {
   type UpdateListItemPatch
 } from "./ListRepository";
 export {
+  NoteRepository,
+  type CreateNoteDetailsInput,
+  type ListNotesFilter,
+  type NoteDetailsRecord,
+  type NoteWithItemRecord,
+  type UpdateNoteDetailsPatch
+} from "./NoteRepository";
+export {
   SearchIndexRepository,
   type RemoveWorkspaceSearchTargetsInput,
   type RemoveSearchIndexInput,
