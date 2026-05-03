@@ -100,6 +100,12 @@ describe("TaskRepository", () => {
       taskStatus: "open"
     });
     createTaskProjection({
+      itemId: "item_old_overdue",
+      title: "Old overdue",
+      dueAt: "2026-04-15T09:00:00.000Z",
+      taskStatus: "open"
+    });
+    createTaskProjection({
       itemId: "item_upcoming",
       title: "Upcoming",
       dueAt: "2026-05-04T09:00:00.000Z",
@@ -111,6 +117,22 @@ describe("TaskRepository", () => {
       dueAt: "2026-05-02T10:00:00.000Z",
       taskStatus: "done"
     });
+    createTaskProjection({
+      itemId: "item_cancelled_today",
+      title: "Cancelled today",
+      dueAt: "2026-05-02T10:30:00.000Z",
+      taskStatus: "cancelled"
+    });
+    const completedItem = createTaskProjection({
+      itemId: "item_completed_at_today",
+      title: "Completed item today",
+      dueAt: "2026-05-02T10:45:00.000Z",
+      taskStatus: "open"
+    });
+    new ItemRepository(connection).update(completedItem.item.id, {
+      completedAt: TEST_TIMESTAMP_LATER,
+      timestamp: TEST_TIMESTAMP_LATER
+    });
     const archived = createTaskProjection({
       itemId: "item_archived_today",
       title: "Archived today",
@@ -118,6 +140,13 @@ describe("TaskRepository", () => {
       taskStatus: "open"
     });
     new ItemRepository(connection).archive(archived.item.id, TEST_TIMESTAMP_LATER);
+    const deleted = createTaskProjection({
+      itemId: "item_deleted_today",
+      title: "Deleted today",
+      dueAt: "2026-05-02T11:30:00.000Z",
+      taskStatus: "open"
+    });
+    new ItemRepository(connection).softDelete(deleted.item.id, TEST_TIMESTAMP_LATER);
 
     expect(repository.listDueBetween("workspace_1", {
       startInclusive: "2026-05-02T00:00:00.000Z",
@@ -129,7 +158,11 @@ describe("TaskRepository", () => {
     expect(repository.listOverdue(
       "workspace_1",
       "2026-05-02T00:00:00.000Z"
-    ).map((task) => task.item.id)).toEqual(["item_overdue"]);
+    ).map((task) => task.item.id)).toEqual(["item_old_overdue", "item_overdue"]);
+    expect(repository.listOverdueBetween("workspace_1", {
+      startInclusive: "2026-05-01T00:00:00.000Z",
+      endExclusive: "2026-05-02T00:00:00.000Z"
+    }).map((task) => task.item.id)).toEqual(["item_overdue"]);
     expect(repository.listUpcoming("workspace_1", {
       startInclusive: "2026-05-03T00:00:00.000Z",
       endExclusive: "2026-05-10T00:00:00.000Z"

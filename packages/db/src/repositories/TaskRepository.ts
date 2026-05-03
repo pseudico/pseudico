@@ -281,6 +281,17 @@ export class TaskRepository {
     });
   }
 
+  listOverdueBetween(
+    workspaceId: string,
+    range: TaskDateRange
+  ): TaskWithItemRecord[] {
+    return this.listActiveDatedTasks({
+      workspaceId,
+      whereSql: "td.due_at >= ? and td.due_at < ?",
+      values: [range.startInclusive, range.endExclusive]
+    });
+  }
+
   listUpcoming(
     workspaceId: string,
     range: TaskDateRange
@@ -315,6 +326,7 @@ export class TaskRepository {
            and i.type = 'task'
            and i.archived_at is null
            and i.deleted_at is null
+           and i.completed_at is null
            and td.due_at is not null
            and td.task_status in ('open', 'waiting')
            and ${input.whereSql}

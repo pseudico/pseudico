@@ -62,7 +62,14 @@ export {
 } from "./services/tagParser";
 export type { ParsedInlineTag } from "./services/tagParser";
 export { createLocalId } from "./ids";
-export { createIsoTimestamp } from "./time";
+export {
+  createIsoTimestamp,
+  createLocalDayRange,
+  createLocalDayWindowRange,
+  createRelativeLocalDayRange,
+  formatLocalDate
+} from "./time";
+export type { Clock, LocalDateInput, LocalDayRange } from "./time";
 
 export type LocalOnlyBoundary = {
   cloudSync: false;
