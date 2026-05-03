@@ -7,6 +7,8 @@ import {
   type ItemRecord,
   ListRepository,
   type ListItemRecord,
+  NoteRepository,
+  type NoteDetailsRecord,
   SearchIndexRepository,
   type RemoveSearchIndexInput,
   type SearchIndexOptions,
@@ -145,6 +147,39 @@ export class SearchIndexService {
     });
   }
 
+  upsertNote(
+    item: ItemRecord,
+    note: NoteDetailsRecord,
+    input: SearchProjectionInput = {}
+  ): SearchIndexRecord {
+    return this.repository.upsert({
+      id: input.id ?? this.idFactory("search"),
+      workspaceId: item.workspaceId,
+      targetType: "item",
+      targetId: item.id,
+      title: item.title,
+      body: buildNoteSearchBody(note),
+      tags: normalizeTags(input.tags),
+      category: input.category ?? null,
+      metadataJson: stringifyMetadata({
+        type: item.type,
+        containerId: item.containerId,
+        containerTabId: item.containerTabId,
+        status: item.status,
+        categoryId: item.categoryId,
+        pinned: item.pinned,
+        completedAt: item.completedAt,
+        archivedAt: item.archivedAt,
+        deletedAt: item.deletedAt,
+        format: note.format,
+        preview: note.preview,
+        ...input.metadata
+      }),
+      isDeleted: item.deletedAt !== null,
+      timestamp: input.timestamp ?? createIsoTimestamp(this.now())
+    });
+  }
+
   removeTarget(input: RemoveSearchIndexInput): void {
     this.repository.remove(input);
   }
@@ -210,6 +245,10 @@ export class SearchIndexService {
         includeDeleted: true
       }
     );
+    const notes = new NoteRepository(this.connection).listByWorkspace(workspaceId, {
+      includeArchived: true,
+      includeDeleted: true
+    });
 
     for (const container of containers) {
       this.upsertContainer(container);
@@ -221,6 +260,10 @@ export class SearchIndexService {
 
     for (const listItem of listItems) {
       this.upsertListItem(listItem);
+    }
+
+    for (const note of notes) {
+      this.upsertNote(note.item, note.note);
     }
 
     return {
@@ -249,4 +292,11 @@ function stringifyMetadata(metadata: Record<string, unknown>): string {
       Object.entries(metadata).filter(([, value]) => value !== undefined)
     )
   );
+}
+
+function buildNoteSearchBody(note: NoteDetailsRecord): string {
+  return [note.content, note.preview ?? ""]
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .join("\n");
 }

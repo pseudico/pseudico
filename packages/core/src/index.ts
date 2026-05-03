@@ -35,6 +35,8 @@ export type {
   ListItemStatus,
   ListProgressMode
 } from "./entities/List";
+export { NOTE_FORMATS, isNoteFormat } from "./entities/Note";
+export type { NoteFormat } from "./entities/Note";
 export { createLocalId } from "./ids";
 export { createIsoTimestamp } from "./time";
 
