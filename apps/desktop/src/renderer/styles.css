@@ -1221,6 +1221,33 @@ a {
   overflow-wrap: anywhere;
 }
 
+.item-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag-badge {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  max-width: 100%;
+  padding: 3px 8px;
+  border: 1px solid #c9d8d1;
+  border-radius: 999px;
+  background: #eef7f2;
+  color: #245c55;
+  font-size: 12px;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.tag-badge[data-tag-source="manual"] {
+  border-color: #d6cfb8;
+  background: #f7f0dc;
+  color: #66531d;
+}
+
 .task-card-content {
   display: grid;
   gap: 10px;

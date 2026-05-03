@@ -3,13 +3,14 @@ import {
   ContainerRepository,
   MigrationService,
   SearchIndexRepository,
+  TagRepository,
   WorkspaceRepository,
   createDatabaseConnection,
   type DatabaseConnection
 } from "@local-work-os/db";
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { TaskService } from "../src";
+import { TagService, TaskService } from "../src";
 
 let cleanup: (() => Promise<void>) | undefined;
 let connection: DatabaseConnection;
@@ -136,6 +137,75 @@ describe("TaskService", () => {
       { action: "task_created" },
       { action: "task_updated" }
     ]);
+  });
+
+  it("syncs inline task tags, preserves manual tags, and projects tags into search", async () => {
+    const service = createService();
+    const created = await service.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Call @Ops",
+      body: "Discuss @launch checklist"
+    });
+
+    expect(created.inlineTags).toEqual(["ops", "launch"]);
+    expect(
+      new TagRepository(connection)
+        .listTagsForTarget({
+          workspaceId: "workspace_1",
+          targetType: "item",
+          targetId: created.item.id
+        })
+        .map((tag) => ({ slug: tag.slug, source: tag.taggingSource }))
+    ).toEqual([
+      { slug: "launch", source: "inline" },
+      { slug: "ops", source: "inline" }
+    ]);
+    expect(created.searchRecord.tags).toBe("launch ops");
+
+    await new TagService({
+      connection,
+      idFactory: (prefix) => {
+        idCounter += 1;
+        return `${prefix}_${idCounter}`;
+      },
+      now: () => new Date("2026-05-02T01:02:03.000Z")
+    }).addTagToTarget({
+      workspaceId: "workspace_1",
+      targetType: "item",
+      targetId: created.item.id,
+      name: "manual-only"
+    });
+
+    const updated = await service.updateTask({
+      itemId: created.item.id,
+      title: "Call @Ops",
+      body: "Checklist moved out of title"
+    });
+
+    expect(updated.inlineTags).toEqual(["ops"]);
+    expect(
+      new TagRepository(connection)
+        .listTagsForTarget({
+          workspaceId: "workspace_1",
+          targetType: "item",
+          targetId: created.item.id
+        })
+        .map((tag) => ({ slug: tag.slug, source: tag.taggingSource }))
+    ).toEqual([
+      { slug: "manual-only", source: "manual" },
+      { slug: "ops", source: "inline" }
+    ]);
+    expect(updated.searchRecord.tags).toBe("manual-only ops");
+    expect(JSON.parse(updated.searchRecord.metadataJson)).toMatchObject({
+      inlineTags: ["ops"],
+      tagSlugs: ["manual-only", "ops"]
+    });
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("item", created.item.id)
+        .map((event) => event.action)
+    ).toEqual(expect.arrayContaining(["tag_added", "tag_removed", "task_updated"]));
   });
 
   it("completes and reopens tasks with mirrored item state", async () => {

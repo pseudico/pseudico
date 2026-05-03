@@ -6,6 +6,7 @@ import {
   type ItemActionId
 } from "./ItemActionsMenu";
 import { getItemTypeLabel, ItemTypeIcon } from "./ItemTypeIcon";
+import { TagBadge, type TagBadgeViewModel } from "./TagBadge";
 
 export type UniversalItemMetadata = {
   label: string;
@@ -25,6 +26,7 @@ export type UniversalItemViewModel = {
   updatedLabel?: string | null;
   pinned?: boolean;
   metadata?: readonly UniversalItemMetadata[];
+  tags?: readonly TagBadgeViewModel[];
 };
 
 export type UniversalItemCardProps = {
@@ -70,6 +72,7 @@ export function UniversalItemCard({
         ) : (
           renderContent(item)
         )}
+        <ItemTagBadges tags={item.tags} />
       </div>
 
       {metadata.length === 0 ? null : (
@@ -83,6 +86,26 @@ export function UniversalItemCard({
         </dl>
       )}
     </article>
+  );
+}
+
+function ItemTagBadges({
+  tags
+}: {
+  tags: readonly TagBadgeViewModel[] | undefined;
+}): React.JSX.Element | null {
+  const visibleTags = tags?.filter((tag) => tag.slug.trim().length > 0) ?? [];
+
+  if (visibleTags.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="item-tag-list" aria-label="Tags">
+      {visibleTags.map((tag) => (
+        <TagBadge key={tag.id ?? tag.slug} tag={tag} />
+      ))}
+    </div>
   );
 }
 

@@ -1,8 +1,9 @@
-import { TaskService } from "@local-work-os/features";
+import { TagService, TaskService } from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
   type DatabaseConnection,
+  type TaggedTargetRecord,
   type TaskWithItemRecord
 } from "@local-work-os/db";
 import {
@@ -10,6 +11,7 @@ import {
   apiOk,
   type ApiResult,
   type CreateTaskInput,
+  type ItemTagSummary,
   type TaskStatus,
   type TaskSummary,
   type UpdateTaskInput,
@@ -51,7 +53,7 @@ export function createTaskIpcHandlers(
           workspaceId
         });
 
-        return apiOk(toTaskSummary(result));
+        return apiOk(toTaskSummary(result, hydrateSingleItemTags(context, result.item.id)));
       });
     },
 
@@ -63,9 +65,10 @@ export function createTaskIpcHandlers(
         );
       }
 
-      return await withTaskService(workspaceService, async (context) =>
-        apiOk(toTaskSummary(await context.taskService.updateTask(input)))
-      );
+      return await withTaskService(workspaceService, async (context) => {
+        const result = await context.taskService.updateTask(input);
+        return apiOk(toTaskSummary(result, hydrateSingleItemTags(context, result.item.id)));
+      });
     },
 
     async handleCompleteTask(input) {
@@ -76,9 +79,10 @@ export function createTaskIpcHandlers(
         );
       }
 
-      return await withTaskService(workspaceService, async (context) =>
-        apiOk(toTaskSummary(await context.taskService.completeTask(input)))
-      );
+      return await withTaskService(workspaceService, async (context) => {
+        const result = await context.taskService.completeTask(input);
+        return apiOk(toTaskSummary(result, hydrateSingleItemTags(context, result.item.id)));
+      });
     },
 
     async handleReopenTask(input) {
@@ -89,9 +93,10 @@ export function createTaskIpcHandlers(
         );
       }
 
-      return await withTaskService(workspaceService, async (context) =>
-        apiOk(toTaskSummary(await context.taskService.reopenTask(input)))
-      );
+      return await withTaskService(workspaceService, async (context) => {
+        const result = await context.taskService.reopenTask(input);
+        return apiOk(toTaskSummary(result, hydrateSingleItemTags(context, result.item.id)));
+      });
     },
 
     async handleListTasksByContainer(input) {
@@ -102,9 +107,17 @@ export function createTaskIpcHandlers(
         );
       }
 
-      return await withTaskService(workspaceService, async (context) =>
-        apiOk(context.taskService.listTasksByContainer(input).map(toTaskSummary))
-      );
+      return await withTaskService(workspaceService, async (context) => {
+        const tasks = context.taskService.listTasksByContainer(input);
+        const tagsByItemId = context.tagService.hydrateItemTags({
+          workspaceId: context.workspace.id,
+          itemIds: tasks.map((task) => task.item.id)
+        });
+
+        return apiOk(
+          tasks.map((task) => toTaskSummary(task, tagsByItemId[task.item.id] ?? []))
+        );
+      });
     }
   };
 }
@@ -113,6 +126,7 @@ async function withTaskService<T>(
   workspaceService: CurrentWorkspaceService,
   operation: (context: {
     connection: DatabaseConnection;
+    tagService: TagService;
     taskService: TaskService;
     workspace: WorkspaceSummary;
   }) => Promise<ApiResult<T>>
@@ -131,6 +145,7 @@ async function withTaskService<T>(
   try {
     return await operation({
       connection,
+      tagService: new TagService({ connection }),
       taskService: new TaskService({ connection }),
       workspace
     });
@@ -158,7 +173,23 @@ function resolveWorkspaceId(
   return currentWorkspace.id;
 }
 
-function toTaskSummary(taskWithItem: TaskWithItemRecord): TaskSummary {
+function hydrateSingleItemTags(
+  context: {
+    tagService: TagService;
+    workspace: WorkspaceSummary;
+  },
+  itemId: string
+): TaggedTargetRecord[] {
+  return context.tagService.hydrateItemTags({
+    workspaceId: context.workspace.id,
+    itemIds: [itemId]
+  })[itemId] ?? [];
+}
+
+function toTaskSummary(
+  taskWithItem: TaskWithItemRecord,
+  tags: readonly TaggedTargetRecord[] = []
+): TaskSummary {
   const { item, task } = taskWithItem;
 
   if (item.type !== "task") {
@@ -182,6 +213,7 @@ function toTaskSummary(taskWithItem: TaskWithItemRecord): TaskSummary {
     completedAt: item.completedAt,
     archivedAt: item.archivedAt,
     deletedAt: item.deletedAt,
+    tags: tags.map(toItemTagSummary),
     taskStatus: task.taskStatus,
     priority: task.priority,
     startAt: task.startAt,
@@ -191,6 +223,15 @@ function toTaskSummary(taskWithItem: TaskWithItemRecord): TaskSummary {
     taskCompletedAt: task.completedAt,
     taskCreatedAt: task.createdAt,
     taskUpdatedAt: task.updatedAt
+  };
+}
+
+function toItemTagSummary(tag: TaggedTargetRecord): ItemTagSummary {
+  return {
+    id: tag.id,
+    name: tag.name,
+    slug: tag.slug,
+    source: tag.taggingSource
   };
 }
 

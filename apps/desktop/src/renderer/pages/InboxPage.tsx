@@ -709,6 +709,7 @@ function toItemViewModel(item: InboxFeedItemSummary): InboxFeedViewModel {
     dueLabel: formatDateLabel(task?.dueAt),
     updatedLabel: item.updatedAt,
     pinned: item.pinned,
+    tags: item.tags ?? [],
     ...(task === null
       ? {}
       : {
@@ -738,6 +739,7 @@ function toInboxListViewModel(list: ListSummary): InboxListViewModel {
     createdAt: list.createdAt,
     updatedLabel: list.updatedAt,
     pinned: list.pinned,
+    tags: list.tags ?? [],
     progressMode: list.progressMode,
     showCompleted: list.showCompleted,
     listItems: list.items.map(toListCardItemViewModel)

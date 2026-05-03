@@ -87,7 +87,10 @@ export type {
 export type {
   AddTagToTargetInput,
   CategoryService,
+  HydrateItemTagsInput,
   RemoveTagFromTargetInput,
+  SyncInlineTagsForNoteInput,
+  SyncInlineTagsForTaskInput,
   SyncInlineTagsInput,
   SyncInlineTagsResult,
   TagMutationResult,
