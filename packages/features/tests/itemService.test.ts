@@ -226,6 +226,37 @@ describe("ItemService", () => {
       { action: "item_deleted" }
     ]);
   });
+
+  it("opens an item inspector snapshot with recent activity", async () => {
+    const service = createService();
+    const created = await service.createItem({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      type: "note",
+      title: "Inspect me"
+    });
+
+    await service.updateItem({
+      itemId: created.item.id,
+      body: "Inspector body"
+    });
+
+    expect(service.getItemActivity(created.item.id).map((entry) => entry.action)).toEqual([
+      "item_created",
+      "item_updated"
+    ]);
+    expect(service.openItemInspector(created.item.id)).toMatchObject({
+      item: {
+        id: created.item.id,
+        title: "Inspect me",
+        body: "Inspector body"
+      },
+      activity: [
+        { action: "item_created" },
+        { action: "item_updated" }
+      ]
+    });
+  });
 });
 
 function createService(): ItemService {

@@ -1,5 +1,10 @@
 import type { ActivityActorType, ItemStatus, ItemType } from "@local-work-os/core";
-import type { ItemRecord, ListItemsFilter, SearchIndexRecord } from "@local-work-os/db";
+import type {
+  ActivityLogRecord,
+  ItemRecord,
+  ListItemsFilter,
+  SearchIndexRecord
+} from "@local-work-os/db";
 
 export type ItemServiceIdFactory = (prefix: string) => string;
 
@@ -50,4 +55,9 @@ export type ListItemsByContainerTabInput = ListItemsFilter & {
 export type ItemMutationResult = {
   item: ItemRecord;
   searchRecord: SearchIndexRecord;
+};
+
+export type ItemInspectorSnapshot = {
+  item: ItemRecord;
+  activity: ActivityLogRecord[];
 };

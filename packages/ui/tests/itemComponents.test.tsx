@@ -2,9 +2,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
   getItemTypeLabel,
+  ConfirmDialog,
   ItemActionsMenu,
   ItemFeed,
+  ItemInspectorPanel,
   ListCardContent,
+  MoveItemDialog,
   MoveToContainerDialog,
   NoteCardContent,
   NoteEditor,
@@ -95,6 +98,66 @@ describe("Universal item UI", () => {
     expect(html).toContain("Call accountant");
     expect(html).toContain("Launch Plan");
     expect(html).toContain("Move");
+  });
+
+  it("renders the move item alias dialog with project options", () => {
+    const html = renderToStaticMarkup(
+      <MoveItemDialog
+        containers={[{ id: "container_project_1", name: "Launch Plan" }]}
+        itemTitle="Call accountant"
+        open
+        onCancel={() => undefined}
+        onMove={() => undefined}
+      />
+    );
+
+    expect(html).toContain("Call accountant");
+    expect(html).toContain("Launch Plan");
+  });
+
+  it("renders item confirmations and inspector activity", () => {
+    const confirmHtml = renderToStaticMarkup(
+      <ConfirmDialog
+        confirmLabel="Delete"
+        description="The item will be soft-deleted."
+        open
+        title="Delete Call accountant?"
+        tone="danger"
+        onCancel={() => undefined}
+        onConfirm={() => undefined}
+      />
+    );
+    const inspectorHtml = renderToStaticMarkup(
+      <ItemInspectorPanel
+        activity={[
+          {
+            id: "activity_1",
+            action: "item_moved",
+            actorType: "local_user",
+            summary: "Moved task.",
+            createdAt: "2026-05-01T00:00:00.000Z"
+          }
+        ]}
+        item={{
+          id: "item_1",
+          type: "task",
+          title: "Call accountant",
+          status: "active",
+          containerId: "container_inbox",
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z"
+        }}
+        open
+        onClose={() => undefined}
+      />
+    );
+
+    expect(confirmHtml).toContain("Delete Call accountant?");
+    expect(confirmHtml).toContain("The item will be soft-deleted.");
+    expect(inspectorHtml).toContain("Call accountant");
+    expect(inspectorHtml).toContain("Recent activity");
+    expect(inspectorHtml).toContain("Item Moved");
+    expect(inspectorHtml).toContain("Moved task.");
   });
 
   it("renders checklist content with progress and bulk paste controls", () => {

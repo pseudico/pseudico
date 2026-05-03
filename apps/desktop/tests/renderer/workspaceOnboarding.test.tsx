@@ -319,7 +319,33 @@ function createMockApi(
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
     items: {
-      getStatus: async () => apiOk(moduleStatus("items"))
+      getStatus: async () => apiOk(moduleStatus("items")),
+      move: async () => apiOk(taskSummary()),
+      archive: async () => apiOk({ ...taskSummary(), status: "archived" }),
+      softDelete: async () =>
+        apiOk({
+          ...taskSummary(),
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      getActivity: async () => apiOk([]),
+      openInspector: async () =>
+        apiOk({
+          item: taskSummary(),
+          activity: []
+        }),
+      moveItem: async () => apiOk(taskSummary()),
+      archiveItem: async () => apiOk({ ...taskSummary(), status: "archived" }),
+      softDeleteItem: async () =>
+        apiOk({
+          ...taskSummary(),
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      getItemActivity: async () => apiOk([]),
+      openItemInspector: async () =>
+        apiOk({
+          item: taskSummary(),
+          activity: []
+        })
     },
     files: {
       getStatus: async () => apiOk(moduleStatus("files"))

@@ -245,7 +245,33 @@ function createMockApi(): LocalWorkOsApi {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
     items: {
-      getStatus: async () => apiOk(moduleStatus("items"))
+      getStatus: async () => apiOk(moduleStatus("items")),
+      move: async () => apiOk(inboxItem),
+      archive: async () => apiOk({ ...inboxItem, status: "archived" }),
+      softDelete: async () =>
+        apiOk({
+          ...inboxItem,
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      getActivity: async () => apiOk([]),
+      openInspector: async () =>
+        apiOk({
+          item: inboxItem,
+          activity: []
+        }),
+      moveItem: async () => apiOk(inboxItem),
+      archiveItem: async () => apiOk({ ...inboxItem, status: "archived" }),
+      softDeleteItem: async () =>
+        apiOk({
+          ...inboxItem,
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      getItemActivity: async () => apiOk([]),
+      openItemInspector: async () =>
+        apiOk({
+          item: inboxItem,
+          activity: []
+        })
     },
     files: {
       getStatus: async () => apiOk(moduleStatus("files"))

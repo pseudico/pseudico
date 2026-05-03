@@ -190,6 +190,31 @@ export type MoveInboxItemToProjectInput = {
   projectId: string;
 };
 
+export type MoveItemInput = {
+  itemId: string;
+  targetContainerId: string;
+  targetContainerTabId?: string | null;
+  sortOrder?: number;
+};
+
+export type ActivitySummary = {
+  id: string;
+  workspaceId: string;
+  actorType: string;
+  action: string;
+  targetType: string;
+  targetId: string;
+  summary: string | null;
+  beforeJson: string | null;
+  afterJson: string | null;
+  createdAt: string;
+};
+
+export type ItemInspectorSummary = {
+  item: ItemSummary;
+  activity: ActivitySummary[];
+};
+
 export type TaskStatus = "open" | "done" | "waiting" | "cancelled";
 export type ListItemStatus = "open" | "done" | "waiting" | "cancelled";
 export type ListDisplayMode = "checklist" | "pipeline";
@@ -415,7 +440,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     getStatus: "local-work-os:containers:get-status"
   },
   items: {
-    getStatus: "local-work-os:items:get-status"
+    getStatus: "local-work-os:items:get-status",
+    moveItem: "local-work-os:items:move-item",
+    archiveItem: "local-work-os:items:archive-item",
+    softDeleteItem: "local-work-os:items:soft-delete-item",
+    getItemActivity: "local-work-os:items:get-item-activity",
+    openItemInspector: "local-work-os:items:open-item-inspector"
   },
   files: {
     getStatus: "local-work-os:files:get-status"
@@ -551,6 +581,26 @@ export type LocalWorkOsIpcContracts = {
     input: undefined;
     result: ApiResult<IpcModuleStatus>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.moveItem]: {
+    input: MoveItemInput;
+    result: ApiResult<ItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.archiveItem]: {
+    input: string;
+    result: ApiResult<ItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.softDeleteItem]: {
+    input: string;
+    result: ApiResult<ItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.getItemActivity]: {
+    input: string;
+    result: ApiResult<ActivitySummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector]: {
+    input: string;
+    result: ApiResult<ItemInspectorSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.files.getStatus]: {
     input: undefined;
     result: ApiResult<IpcModuleStatus>;
@@ -663,6 +713,22 @@ export type LocalWorkOsApi = {
   };
   items: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
+    move: (input: MoveItemInput) => Promise<ApiResult<ItemSummary>>;
+    archive: (itemId: string) => Promise<ApiResult<ItemSummary>>;
+    softDelete: (itemId: string) => Promise<ApiResult<ItemSummary>>;
+    getActivity: (itemId: string) => Promise<ApiResult<ActivitySummary[]>>;
+    openInspector: (
+      itemId: string
+    ) => Promise<ApiResult<ItemInspectorSummary>>;
+    moveItem: (input: MoveItemInput) => Promise<ApiResult<ItemSummary>>;
+    archiveItem: (itemId: string) => Promise<ApiResult<ItemSummary>>;
+    softDeleteItem: (itemId: string) => Promise<ApiResult<ItemSummary>>;
+    getItemActivity: (
+      itemId: string
+    ) => Promise<ApiResult<ActivitySummary[]>>;
+    openItemInspector: (
+      itemId: string
+    ) => Promise<ApiResult<ItemInspectorSummary>>;
   };
   files: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
@@ -811,7 +877,27 @@ export function createLocalWorkOsApi(
     },
     items: {
       getStatus: () =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.getStatus, undefined)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.getStatus, undefined),
+      move: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.moveItem, input),
+      archive: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.archiveItem, itemId),
+      softDelete: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.softDeleteItem, itemId),
+      getActivity: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.getItemActivity, itemId),
+      openInspector: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector, itemId),
+      moveItem: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.moveItem, input),
+      archiveItem: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.archiveItem, itemId),
+      softDeleteItem: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.softDeleteItem, itemId),
+      getItemActivity: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.getItemActivity, itemId),
+      openItemInspector: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector, itemId)
     },
     files: {
       getStatus: () =>

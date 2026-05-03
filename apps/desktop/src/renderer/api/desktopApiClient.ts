@@ -102,7 +102,21 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       getStatus: () => callApi(() => api.containers.getStatus())
     },
     items: {
-      getStatus: () => callApi(() => api.items.getStatus())
+      getStatus: () => callApi(() => api.items.getStatus()),
+      move: (input) => callApi(() => api.items.move(input)),
+      archive: (itemId) => callApi(() => api.items.archive(itemId)),
+      softDelete: (itemId) => callApi(() => api.items.softDelete(itemId)),
+      getActivity: (itemId) => callApi(() => api.items.getActivity(itemId)),
+      openInspector: (itemId) =>
+        callApi(() => api.items.openInspector(itemId)),
+      moveItem: (input) => callApi(() => api.items.moveItem(input)),
+      archiveItem: (itemId) => callApi(() => api.items.archiveItem(itemId)),
+      softDeleteItem: (itemId) =>
+        callApi(() => api.items.softDeleteItem(itemId)),
+      getItemActivity: (itemId) =>
+        callApi(() => api.items.getItemActivity(itemId)),
+      openItemInspector: (itemId) =>
+        callApi(() => api.items.openItemInspector(itemId))
     },
     files: {
       getStatus: () => callApi(() => api.files.getStatus())
@@ -197,7 +211,21 @@ export const desktopApiClient: LocalWorkOsApi = {
     getStatus: () => getDesktopApiClient().containers.getStatus()
   },
   items: {
-    getStatus: () => getDesktopApiClient().items.getStatus()
+    getStatus: () => getDesktopApiClient().items.getStatus(),
+    move: (input) => getDesktopApiClient().items.move(input),
+    archive: (itemId) => getDesktopApiClient().items.archive(itemId),
+    softDelete: (itemId) => getDesktopApiClient().items.softDelete(itemId),
+    getActivity: (itemId) => getDesktopApiClient().items.getActivity(itemId),
+    openInspector: (itemId) =>
+      getDesktopApiClient().items.openInspector(itemId),
+    moveItem: (input) => getDesktopApiClient().items.moveItem(input),
+    archiveItem: (itemId) => getDesktopApiClient().items.archiveItem(itemId),
+    softDeleteItem: (itemId) =>
+      getDesktopApiClient().items.softDeleteItem(itemId),
+    getItemActivity: (itemId) =>
+      getDesktopApiClient().items.getItemActivity(itemId),
+    openItemInspector: (itemId) =>
+      getDesktopApiClient().items.openItemInspector(itemId)
   },
   files: {
     getStatus: () => getDesktopApiClient().files.getStatus()

@@ -259,7 +259,33 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
     items: {
-      getStatus: async () => apiOk(moduleStatus("items"))
+      getStatus: async () => apiOk(moduleStatus("items")),
+      move: async () => apiOk(itemSummary()),
+      archive: async () => apiOk({ ...itemSummary(), status: "archived" }),
+      softDelete: async () =>
+        apiOk({
+          ...itemSummary(),
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      getActivity: async () => apiOk([]),
+      openInspector: async () =>
+        apiOk({
+          item: itemSummary(),
+          activity: []
+        }),
+      moveItem: async () => apiOk(itemSummary()),
+      archiveItem: async () => apiOk({ ...itemSummary(), status: "archived" }),
+      softDeleteItem: async () =>
+        apiOk({
+          ...itemSummary(),
+          deletedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      getItemActivity: async () => apiOk([]),
+      openItemInspector: async () =>
+        apiOk({
+          item: itemSummary(),
+          activity: []
+        })
     },
     files: {
       getStatus: async () => apiOk(moduleStatus("files"))
