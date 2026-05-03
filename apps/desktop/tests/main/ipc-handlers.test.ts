@@ -14,6 +14,7 @@ import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandle
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
 import { createListIpcHandlers } from "../../src/main/ipc/listHandlers";
 import { handleGetModuleStatus } from "../../src/main/ipc/moduleStatusHandlers";
+import { createNoteIpcHandlers } from "../../src/main/ipc/noteHandlers";
 import { createProjectIpcHandlers } from "../../src/main/ipc/projectHandlers";
 import { createTaskIpcHandlers } from "../../src/main/ipc/taskHandlers";
 import { createWorkspaceIpcHandlers } from "../../src/main/ipc/workspaceHandlers";
@@ -537,6 +538,110 @@ describe("List IPC handlers", () => {
               title: "Confirm brief"
             }
           ]
+        }
+      ]
+    });
+  });
+});
+
+describe("Note IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createNoteIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(
+      handlers.handleListNotesByContainer("container_1")
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("creates, updates, and lists Markdown notes", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-notes-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const projectResult = await projectHandlers.handleCreateProject({
+      name: "Launch Plan"
+    });
+
+    if (!projectResult.ok) {
+      throw new Error(projectResult.error.message);
+    }
+
+    const handlers = createNoteIpcHandlers(workspaceService);
+    const created = await handlers.handleCreateNote({
+      containerId: projectResult.data.project.id,
+      title: "Launch note",
+      content: "# Brief\n\nConfirm @launch plan."
+    });
+
+    if (!created.ok) {
+      throw new Error(created.error.message);
+    }
+
+    expect(created).toMatchObject({
+      ok: true,
+      data: {
+        type: "note",
+        title: "Launch note",
+        content: "# Brief\n\nConfirm @launch plan.",
+        preview: "Brief Confirm @launch plan."
+      }
+    });
+
+    await expect(
+      handlers.handleUpdateNote({
+        itemId: created.data.id,
+        title: "Final launch note",
+        content: "## Decision\n\nProceed with launch."
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: created.data.id,
+        title: "Final launch note",
+        preview: "Decision Proceed with launch."
+      }
+    });
+
+    await expect(
+      handlers.handleListNotesByContainer(projectResult.data.project.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: created.data.id,
+          title: "Final launch note",
+          content: "## Decision\n\nProceed with launch."
         }
       ]
     });

@@ -8,6 +8,7 @@ import {
   type ListItemSummary,
   type ListSummary,
   type LocalWorkOsApi,
+  type NoteSummary,
   type RecentWorkspace,
   type TaskSummary,
   type WorkspaceSummary
@@ -150,6 +151,13 @@ function createMockApi(
       bulkAddItems: async () => apiOk([listItemSummary()]),
       listByContainer: async () => apiOk([listSummary()]),
       createList: async () => apiOk(listSummary())
+    },
+    notes: {
+      create: async () => apiOk(noteSummary()),
+      update: async () => apiOk(noteSummary()),
+      listByContainer: async () => apiOk([noteSummary()]),
+      createNote: async () => apiOk(noteSummary()),
+      updateNote: async () => apiOk(noteSummary())
     },
     projects: {
       create: async () =>
@@ -394,6 +402,32 @@ function listSummary(): ListSummary {
     listCreatedAt: "2026-05-01T00:00:00.000Z",
     listUpdatedAt: "2026-05-01T00:00:00.000Z",
     items: [listItemSummary()]
+  };
+}
+
+function noteSummary(): NoteSummary {
+  return {
+    id: "item_note_1",
+    workspaceId: "workspace_1",
+    containerId: "container_inbox",
+    containerTabId: null,
+    type: "note",
+    title: "Inbox note",
+    body: "Captured note",
+    categoryId: null,
+    status: "active",
+    sortOrder: 1024,
+    pinned: false,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z",
+    completedAt: null,
+    archivedAt: null,
+    deletedAt: null,
+    format: "markdown",
+    content: "# Captured note",
+    preview: "Captured note",
+    noteCreatedAt: "2026-05-01T00:00:00.000Z",
+    noteUpdatedAt: "2026-05-01T00:00:00.000Z"
   };
 }
 

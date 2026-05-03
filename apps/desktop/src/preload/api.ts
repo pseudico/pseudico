@@ -194,6 +194,7 @@ export type TaskStatus = "open" | "done" | "waiting" | "cancelled";
 export type ListItemStatus = "open" | "done" | "waiting" | "cancelled";
 export type ListDisplayMode = "checklist" | "pipeline";
 export type ListProgressMode = "count" | "manual" | "none";
+export type NoteFormat = "markdown";
 
 export type TaskSummary = ItemSummary & {
   type: "task";
@@ -320,6 +321,39 @@ export type BulkAddListItemsInput = {
   startSortOrder?: number;
 };
 
+export type NoteSummary = ItemSummary & {
+  type: "note";
+  format: NoteFormat;
+  content: string;
+  preview: string | null;
+  noteCreatedAt: string;
+  noteUpdatedAt: string;
+};
+
+export type CreateNoteInput = {
+  workspaceId?: string;
+  containerId: string;
+  title: string;
+  content: string;
+  actorType?: "local_user" | "system" | "importer";
+  categoryId?: string | null;
+  containerTabId?: string | null;
+  format?: NoteFormat;
+  sortOrder?: number;
+  pinned?: boolean;
+};
+
+export type UpdateNoteInput = {
+  itemId: string;
+  actorType?: "local_user" | "system" | "importer";
+  title?: string;
+  content?: string;
+  categoryId?: string | null;
+  containerTabId?: string | null;
+  sortOrder?: number;
+  pinned?: boolean;
+};
+
 export type LocalWorkOsModuleName =
   | "containers"
   | "items"
@@ -363,6 +397,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     reopenItem: "local-work-os:lists:reopen-item",
     bulkAddItems: "local-work-os:lists:bulk-add-items",
     listByContainer: "local-work-os:lists:list-by-container"
+  },
+  notes: {
+    createNote: "local-work-os:notes:create-note",
+    updateNote: "local-work-os:notes:update-note",
+    listByContainer: "local-work-os:notes:list-by-container"
   },
   projects: {
     createProject: "local-work-os:projects:create-project",
@@ -468,6 +507,18 @@ export type LocalWorkOsIpcContracts = {
     input: string;
     result: ApiResult<ListSummary[]>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.notes.createNote]: {
+    input: CreateNoteInput;
+    result: ApiResult<NoteSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.notes.updateNote]: {
+    input: UpdateNoteInput;
+    result: ApiResult<NoteSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.notes.listByContainer]: {
+    input: string;
+    result: ApiResult<NoteSummary[]>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject]: {
     input: CreateProjectInput;
     result: ApiResult<CreateProjectResult>;
@@ -571,6 +622,15 @@ export type LocalWorkOsApi = {
       containerId: string
     ) => Promise<ApiResult<ListSummary[]>>;
     createList: (input: CreateListInput) => Promise<ApiResult<ListSummary>>;
+  };
+  notes: {
+    create: (input: CreateNoteInput) => Promise<ApiResult<NoteSummary>>;
+    update: (input: UpdateNoteInput) => Promise<ApiResult<NoteSummary>>;
+    listByContainer: (
+      containerId: string
+    ) => Promise<ApiResult<NoteSummary[]>>;
+    createNote: (input: CreateNoteInput) => Promise<ApiResult<NoteSummary>>;
+    updateNote: (input: UpdateNoteInput) => Promise<ApiResult<NoteSummary>>;
   };
   projects: {
     create: (
@@ -700,6 +760,18 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.listByContainer, containerId),
       createList: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.createList, input)
+    },
+    notes: {
+      create: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.notes.createNote, input),
+      update: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.notes.updateNote, input),
+      listByContainer: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.notes.listByContainer, containerId),
+      createNote: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.notes.createNote, input),
+      updateNote: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.notes.updateNote, input)
     },
     projects: {
       create: (input) =>

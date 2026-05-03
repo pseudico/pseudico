@@ -20,6 +20,11 @@ export {
   type TaskQuickAddValues
 } from "./forms/TaskQuickAdd";
 export {
+  NoteEditor,
+  type NoteEditorProps,
+  type NoteEditorValues
+} from "./forms/NoteEditor";
+export {
   CreateListForm,
   type CreateListFormProps,
   type CreateListFormValues
@@ -60,6 +65,11 @@ export {
   type ListCardItemViewModel,
   type ListCardViewModel
 } from "./components/ListCardContent";
+export {
+  NoteCardContent,
+  type NoteCardContentProps,
+  type NoteCardViewModel
+} from "./components/NoteCardContent";
 export {
   MoveToContainerDialog,
   type MoveTargetContainer,

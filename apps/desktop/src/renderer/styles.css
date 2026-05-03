@@ -394,6 +394,22 @@ a {
   background: #ffffff;
 }
 
+.note-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.project-content-section > .note-editor {
+  padding: 14px;
+  border: 1px solid #dedbd1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.note-create-button {
+  justify-self: start;
+}
+
 .quick-add-backdrop {
   position: fixed;
   inset: 0;
@@ -447,6 +463,7 @@ a {
 .quick-add-form label,
 .task-quick-add label,
 .create-list-form label,
+.note-editor label,
 .checklist-bulk-add label {
   display: grid;
   gap: 6px;
@@ -463,6 +480,8 @@ a {
 .quick-add-form select,
 .task-quick-add input,
 .create-list-form input,
+.note-editor input,
+.note-editor textarea,
 .checklist-inline-add input,
 .checklist-bulk-add textarea,
 .task-card-due-field input {
@@ -479,8 +498,14 @@ a {
   resize: vertical;
 }
 
+.note-editor textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
 .task-date-input,
-.list-title-input {
+.list-title-input,
+.note-title-input {
   display: grid;
   grid-template-columns: 20px minmax(0, 1fr);
   align-items: center;
@@ -496,8 +521,18 @@ a {
   grid-column: 1 / -1;
 }
 
+.note-editor .form-message {
+  grid-column: 1 / -1;
+}
+
 .quick-add-form .form-message {
   grid-column: 1 / -1;
+}
+
+.note-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .move-to-container-form {
@@ -1099,6 +1134,52 @@ a {
 .list-card-content {
   display: grid;
   gap: 12px;
+}
+
+.note-card-content {
+  display: grid;
+  gap: 10px;
+}
+
+.note-card-preview {
+  font-weight: 700;
+}
+
+.note-markdown-preview {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid #ece8dc;
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
+.note-markdown-preview p {
+  margin: 0;
+  color: #514e49;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.note-preview-heading {
+  color: #262624;
+  font-weight: 750;
+}
+
+.note-preview-list-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 6px;
+}
+
+.note-preview-quote {
+  padding-left: 10px;
+  border-left: 3px solid #d5d0c3;
+}
+
+.note-card-truncated {
+  color: #6d6a62;
+  font-size: 13px;
 }
 
 .list-progress {
