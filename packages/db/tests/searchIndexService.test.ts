@@ -239,6 +239,78 @@ describe("SearchIndexService", () => {
       })
     ).toEqual([]);
   });
+
+  it("reports missing, orphaned, and deleted-state health issues", () => {
+    const container = createContainer("container_1", "workspace_1", "Launch Plan");
+    const item = createItem({
+      id: "item_1",
+      workspaceId: "workspace_1",
+      containerId: container.id,
+      title: "Supplier checklist"
+    });
+    const deletedItem = new ItemRepository(connection).softDelete(
+      item.id,
+      TEST_TIMESTAMP_LATER
+    );
+    const service = createService();
+    const repository = new SearchIndexRepository(connection);
+
+    service.upsertContainer(container);
+    repository.upsert({
+      id: "search_deleted_item",
+      workspaceId: "workspace_1",
+      targetType: "item",
+      targetId: deletedItem.id,
+      title: deletedItem.title,
+      isDeleted: false,
+      timestamp: TEST_TIMESTAMP
+    });
+    repository.upsert({
+      id: "search_orphaned",
+      workspaceId: "workspace_1",
+      targetType: "list_item",
+      targetId: "missing_list_item",
+      title: "Missing row",
+      timestamp: TEST_TIMESTAMP
+    });
+
+    expect(service.getSearchIndexHealth("workspace_1")).toMatchObject({
+      workspaceId: "workspace_1",
+      status: "degraded",
+      containerSourceCount: 1,
+      itemSourceCount: 1,
+      listItemSourceCount: 0,
+      indexedContainerCount: 1,
+      indexedItemCount: 1,
+      indexedListItemCount: 1,
+      missingRecordCount: 0,
+      orphanedRecordCount: 1,
+      deletedFlagMismatchCount: 1,
+      orphanedTargets: [
+        {
+          targetType: "list_item",
+          targetId: "missing_list_item"
+        }
+      ],
+      deletedFlagMismatches: [
+        {
+          targetType: "item",
+          targetId: deletedItem.id,
+          expectedIsDeleted: true,
+          indexedIsDeleted: false
+        }
+      ]
+    });
+
+    service.rebuildWorkspaceIndex("workspace_1");
+
+    expect(service.getSearchIndexHealth("workspace_1")).toMatchObject({
+      status: "healthy",
+      missingRecordCount: 0,
+      orphanedRecordCount: 0,
+      deletedFlagMismatchCount: 0
+    });
+  });
 });
 
 function createService(): SearchIndexService {

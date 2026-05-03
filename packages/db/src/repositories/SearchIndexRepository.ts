@@ -59,6 +59,10 @@ export type SearchIndexOptions = {
   includeDeleted?: boolean;
 };
 
+export type ListSearchIndexRecordsOptions = {
+  targetTypes?: string[];
+};
+
 export class SearchIndexRepository {
   private readonly connection: DatabaseConnection;
 
@@ -156,6 +160,31 @@ export class SearchIndexRepository {
            and target_type in (${placeholders})`
       )
       .run(input.workspaceId, ...input.targetTypes);
+  }
+
+  listByWorkspace(
+    workspaceId: string,
+    options: ListSearchIndexRecordsOptions = {}
+  ): SearchIndexRecord[] {
+    const where = ["workspace_id = ?"];
+    const values: unknown[] = [workspaceId];
+
+    if (options.targetTypes !== undefined && options.targetTypes.length > 0) {
+      const placeholders = options.targetTypes.map(() => "?").join(", ");
+      where.push(`target_type in (${placeholders})`);
+      values.push(...options.targetTypes);
+    }
+
+    const rows = this.connection.sqlite
+      .prepare<unknown[], SearchIndexRow>(
+        `select *
+         from search_index
+         where ${where.join(" and ")}
+         order by target_type asc, target_id asc`
+      )
+      .all(...values);
+
+    return rows.map(toSearchIndexRecord);
   }
 
   search(

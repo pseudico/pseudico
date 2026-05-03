@@ -36,6 +36,9 @@ export {
 } from "./services/TransactionService";
 export {
   SearchIndexService,
+  type SearchIndexDeletedFlagMismatch,
+  type SearchIndexHealthReport,
+  type SearchIndexHealthTarget,
   type RebuildWorkspaceIndexResult,
   type SearchIndexIdFactory,
   type SearchIndexTargetType,
