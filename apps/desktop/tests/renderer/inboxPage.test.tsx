@@ -7,6 +7,8 @@ import {
   type InboxSummary,
   type IpcModuleStatus,
   type ItemSummary,
+  type ListItemSummary,
+  type ListSummary,
   type LocalWorkOsApi,
   type ProjectSummary,
   type TaskSummary,
@@ -183,6 +185,21 @@ function createMockApi(): LocalWorkOsApi {
         }),
       reopenTask: async () => apiOk(taskSummary())
     },
+    lists: {
+      create: async () => apiOk(listSummary()),
+      addItem: async () => apiOk(listItemSummary()),
+      updateItem: async () => apiOk(listItemSummary()),
+      completeItem: async () =>
+        apiOk({
+          ...listItemSummary(),
+          status: "done",
+          completedAt: "2026-05-01T01:00:00.000Z"
+        }),
+      reopenItem: async () => apiOk(listItemSummary()),
+      bulkAddItems: async () => apiOk([listItemSummary()]),
+      listByContainer: async () => apiOk([listSummary()]),
+      createList: async () => apiOk(listSummary())
+    },
     projects: {
       create: async () => apiOk({ project, defaultTabId: "container_tab_1" }),
       update: async () => apiOk(project),
@@ -261,5 +278,41 @@ function taskSummary(): TaskSummary {
     taskCompletedAt: null,
     taskCreatedAt: "2026-05-01T00:00:00.000Z",
     taskUpdatedAt: "2026-05-01T00:00:00.000Z"
+  };
+}
+
+function listItemSummary(): ListItemSummary {
+  return {
+    id: "list_item_1",
+    workspaceId: "workspace_1",
+    listItemParentId: null,
+    listId: "item_list_1",
+    title: "Sort captured links",
+    body: null,
+    status: "open",
+    depth: 0,
+    sortOrder: 1024,
+    startAt: null,
+    dueAt: null,
+    completedAt: null,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z",
+    archivedAt: null,
+    deletedAt: null
+  };
+}
+
+function listSummary(): ListSummary {
+  return {
+    ...inboxItem,
+    id: "item_list_1",
+    type: "list",
+    title: "Inbox checklist",
+    displayMode: "checklist",
+    showCompleted: true,
+    progressMode: "count",
+    listCreatedAt: "2026-05-01T00:00:00.000Z",
+    listUpdatedAt: "2026-05-01T00:00:00.000Z",
+    items: [listItemSummary()]
   };
 }

@@ -59,6 +59,19 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       completeTask: (itemId) => callApi(() => api.tasks.completeTask(itemId)),
       reopenTask: (itemId) => callApi(() => api.tasks.reopenTask(itemId))
     },
+    lists: {
+      create: (input) => callApi(() => api.lists.create(input)),
+      addItem: (input) => callApi(() => api.lists.addItem(input)),
+      updateItem: (input) => callApi(() => api.lists.updateItem(input)),
+      completeItem: (listItemId) =>
+        callApi(() => api.lists.completeItem(listItemId)),
+      reopenItem: (listItemId) =>
+        callApi(() => api.lists.reopenItem(listItemId)),
+      bulkAddItems: (input) => callApi(() => api.lists.bulkAddItems(input)),
+      listByContainer: (containerId) =>
+        callApi(() => api.lists.listByContainer(containerId)),
+      createList: (input) => callApi(() => api.lists.createList(input))
+    },
     projects: {
       create: (input) => callApi(() => api.projects.create(input)),
       update: (input) => callApi(() => api.projects.update(input)),
@@ -129,6 +142,19 @@ export const desktopApiClient: LocalWorkOsApi = {
     completeTask: (itemId) =>
       getDesktopApiClient().tasks.completeTask(itemId),
     reopenTask: (itemId) => getDesktopApiClient().tasks.reopenTask(itemId)
+  },
+  lists: {
+    create: (input) => getDesktopApiClient().lists.create(input),
+    addItem: (input) => getDesktopApiClient().lists.addItem(input),
+    updateItem: (input) => getDesktopApiClient().lists.updateItem(input),
+    completeItem: (listItemId) =>
+      getDesktopApiClient().lists.completeItem(listItemId),
+    reopenItem: (listItemId) =>
+      getDesktopApiClient().lists.reopenItem(listItemId),
+    bulkAddItems: (input) => getDesktopApiClient().lists.bulkAddItems(input),
+    listByContainer: (containerId) =>
+      getDesktopApiClient().lists.listByContainer(containerId),
+    createList: (input) => getDesktopApiClient().lists.createList(input)
   },
   projects: {
     create: (input) => getDesktopApiClient().projects.create(input),

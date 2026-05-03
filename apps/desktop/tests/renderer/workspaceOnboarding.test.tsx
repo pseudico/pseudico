@@ -5,6 +5,8 @@ import {
   apiOk,
   type DatabaseHealthStatus,
   type IpcModuleStatus,
+  type ListItemSummary,
+  type ListSummary,
   type LocalWorkOsApi,
   type RecentWorkspace,
   type TaskSummary,
@@ -133,6 +135,21 @@ function createMockApi(
           taskStatus: "done"
         }),
       reopenTask: async () => apiOk(taskSummary())
+    },
+    lists: {
+      create: async () => apiOk(listSummary()),
+      addItem: async () => apiOk(listItemSummary()),
+      updateItem: async () => apiOk(listItemSummary()),
+      completeItem: async () =>
+        apiOk({
+          ...listItemSummary(),
+          status: "done",
+          completedAt: "2026-05-01T01:00:00.000Z"
+        }),
+      reopenItem: async () => apiOk(listItemSummary()),
+      bulkAddItems: async () => apiOk([listItemSummary()]),
+      listByContainer: async () => apiOk([listSummary()]),
+      createList: async () => apiOk(listSummary())
     },
     projects: {
       create: async () =>
@@ -329,6 +346,54 @@ function taskSummary(): TaskSummary {
     taskCompletedAt: null,
     taskCreatedAt: "2026-05-01T00:00:00.000Z",
     taskUpdatedAt: "2026-05-01T00:00:00.000Z"
+  };
+}
+
+function listItemSummary(): ListItemSummary {
+  return {
+    id: "list_item_1",
+    workspaceId: "workspace_1",
+    listItemParentId: null,
+    listId: "item_list_1",
+    title: "Confirm copy",
+    body: null,
+    status: "open",
+    depth: 0,
+    sortOrder: 1024,
+    startAt: null,
+    dueAt: null,
+    completedAt: null,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z",
+    archivedAt: null,
+    deletedAt: null
+  };
+}
+
+function listSummary(): ListSummary {
+  return {
+    id: "item_list_1",
+    workspaceId: "workspace_1",
+    containerId: "container_inbox",
+    containerTabId: null,
+    type: "list",
+    title: "Inbox checklist",
+    body: null,
+    categoryId: null,
+    status: "active",
+    sortOrder: 1024,
+    pinned: false,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z",
+    completedAt: null,
+    archivedAt: null,
+    deletedAt: null,
+    displayMode: "checklist",
+    showCompleted: true,
+    progressMode: "count",
+    listCreatedAt: "2026-05-01T00:00:00.000Z",
+    listUpdatedAt: "2026-05-01T00:00:00.000Z",
+    items: [listItemSummary()]
   };
 }
 

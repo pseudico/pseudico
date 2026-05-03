@@ -2,15 +2,22 @@ import { ArrowLeft, FolderKanban, RefreshCw, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
+  CreateListForm,
   ItemFeed,
+  ListCardContent,
   TaskCardContent,
   TaskQuickAdd,
+  type CreateListFormValues,
   type ItemActionId,
+  type ListCardItemViewModel,
+  type ListCardViewModel,
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel
 } from "@local-work-os/ui";
 import type {
+  ListItemSummary,
+  ListSummary,
   LocalWorkOsApi,
   ProjectSummary,
   TaskSummary
@@ -24,6 +31,13 @@ type ProjectTaskViewModel = TaskCardViewModel & {
   allDay?: boolean;
   timezone?: string | null;
 };
+type ProjectListViewModel = ListCardViewModel & {
+  listItems: ListCardItemViewModel[];
+};
+type ProjectFeedViewModel =
+  | ProjectTaskViewModel
+  | ProjectListViewModel
+  | UniversalItemViewModel;
 
 type ProjectDetailPageProps = {
   apiClient?: LocalWorkOsApi;
@@ -42,14 +56,17 @@ export function ProjectDetailPage({
   const [project, setProject] = useState<ProjectSummary | null>(
     initialProject ?? null
   );
-  const [items, setItems] = useState<UniversalItemViewModel[]>(initialItems);
+  const [items, setItems] = useState<ProjectFeedViewModel[]>(initialItems);
   const [loading, setLoading] = useState(initialProject === undefined);
   const [itemsLoading, setItemsLoading] = useState(false);
   const [savingTask, setSavingTask] = useState(false);
+  const [savingList, setSavingList] = useState(false);
   const [taskBusyId, setTaskBusyId] = useState<string | null>(null);
+  const [listBusyId, setListBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [itemError, setItemError] = useState<string | null>(null);
   const [taskError, setTaskError] = useState<string | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
 
   useEffect(() => {
     if (projectId === undefined) {
@@ -67,9 +84,10 @@ export function ProjectDetailPage({
       setError(null);
       setItemError(null);
 
-      const [projectResult, tasksResult] = await Promise.all([
+      const [projectResult, tasksResult, listsResult] = await Promise.all([
         apiClient.projects.get(activeProjectId),
-        apiClient.tasks.listByContainer(activeProjectId)
+        apiClient.tasks.listByContainer(activeProjectId),
+        apiClient.lists.listByContainer(activeProjectId)
       ]);
 
       if (!active) {
@@ -89,8 +107,13 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!listsResult.ok) {
+        setItemError(listsResult.error.message);
+        return;
+      }
+
       setProject(projectResult.data);
-      setItems(tasksResult.data.map(toProjectTaskViewModel));
+      setItems(mergeProjectContent(tasksResult.data, listsResult.data));
     }
 
     void loadProject();
@@ -100,20 +123,28 @@ export function ProjectDetailPage({
     };
   }, [apiClient, projectId]);
 
-  async function refreshProjectTasks(activeProjectId: string): Promise<void> {
+  async function refreshProjectContent(activeProjectId: string): Promise<void> {
     setItemsLoading(true);
     setItemError(null);
 
-    const result = await apiClient.tasks.listByContainer(activeProjectId);
+    const [tasksResult, listsResult] = await Promise.all([
+      apiClient.tasks.listByContainer(activeProjectId),
+      apiClient.lists.listByContainer(activeProjectId)
+    ]);
 
     setItemsLoading(false);
 
-    if (!result.ok) {
-      setItemError(result.error.message);
+    if (!tasksResult.ok) {
+      setItemError(tasksResult.error.message);
       return;
     }
 
-    setItems(result.data.map(toProjectTaskViewModel));
+    if (!listsResult.ok) {
+      setItemError(listsResult.error.message);
+      return;
+    }
+
+    setItems(mergeProjectContent(tasksResult.data, listsResult.data));
   }
 
   async function createProjectTask(
@@ -139,8 +170,35 @@ export function ProjectDetailPage({
       return false;
     }
 
-    await refreshProjectTasks(project.id);
+    await refreshProjectContent(project.id);
     setSavingTask(false);
+    return true;
+  }
+
+  async function createProjectList(
+    values: CreateListFormValues
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setSavingList(true);
+    setListError(null);
+
+    const result = await apiClient.lists.create({
+      workspaceId: project.workspaceId,
+      containerId: project.id,
+      title: values.title
+    });
+
+    if (!result.ok) {
+      setSavingList(false);
+      setListError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    setSavingList(false);
     return true;
   }
 
@@ -163,7 +221,7 @@ export function ProjectDetailPage({
       return;
     }
 
-    await refreshProjectTasks(project.id);
+    await refreshProjectContent(project.id);
     setTaskBusyId(null);
   }
 
@@ -189,8 +247,88 @@ export function ProjectDetailPage({
       return;
     }
 
-    await refreshProjectTasks(project.id);
+    await refreshProjectContent(project.id);
     setTaskBusyId(null);
+  }
+
+  async function addListItem(
+    item: ListCardViewModel,
+    title: string
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result = await apiClient.lists.addItem({
+      listId: item.id,
+      title
+    });
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    setListBusyId(null);
+    return true;
+  }
+
+  async function bulkAddListItems(
+    item: ListCardViewModel,
+    text: string
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result = await apiClient.lists.bulkAddItems({
+      listId: item.id,
+      text
+    });
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    setListBusyId(null);
+    return true;
+  }
+
+  async function toggleListItem(
+    item: ListCardViewModel,
+    listItem: ListCardItemViewModel
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result =
+      listItem.status === "done"
+        ? await apiClient.lists.reopenItem(listItem.id)
+        : await apiClient.lists.completeItem(listItem.id);
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    setListBusyId(null);
   }
 
   function handlePlaceholderItemAction(
@@ -202,6 +340,19 @@ export function ProjectDetailPage({
   }
 
   function renderItemContent(item: UniversalItemViewModel): React.ReactNode {
+    if (isListCardViewModel(item)) {
+      return (
+        <ListCardContent
+          disabled={listBusyId === item.id}
+          error={listBusyId === item.id ? listError : null}
+          item={item}
+          onAddItem={addListItem}
+          onBulkAddItems={bulkAddListItems}
+          onToggleItem={toggleListItem}
+        />
+      );
+    }
+
     if (isTaskCardViewModel(item)) {
       return (
         <TaskCardContent
@@ -288,7 +439,7 @@ export function ProjectDetailPage({
             className="secondary-button compact-button"
             disabled={itemsLoading}
             type="button"
-            onClick={() => void refreshProjectTasks(project.id)}
+            onClick={() => void refreshProjectContent(project.id)}
           >
             <RefreshCw size={16} aria-hidden="true" />
             Refresh
@@ -302,10 +453,17 @@ export function ProjectDetailPage({
           onSubmit={createProjectTask}
         />
 
+        <CreateListForm
+          contextLabel={project.name}
+          disabled={savingList || itemsLoading}
+          error={listBusyId === null ? listError : null}
+          onSubmit={createProjectList}
+        />
+
         <ItemFeed
           ariaLabel="Project content items"
-          emptyDescription="Tasks created for this project will appear here with completion and due-date controls."
-          emptyTitle="No project tasks yet"
+          emptyDescription="Tasks and checklists created for this project will appear here with inline controls."
+          emptyTitle="No project content yet"
           error={itemError}
           items={items}
           loading={itemsLoading}
@@ -325,6 +483,8 @@ function toProjectTaskViewModel(task: TaskSummary): ProjectTaskViewModel {
     body: task.body,
     status: task.taskStatus,
     categoryLabel: task.categoryId,
+    sortOrder: task.sortOrder,
+    createdAt: task.createdAt,
     dueLabel: formatDateLabel(task.dueAt),
     updatedLabel: task.updatedAt,
     pinned: task.pinned,
@@ -341,10 +501,70 @@ function toProjectTaskViewModel(task: TaskSummary): ProjectTaskViewModel {
   };
 }
 
+function toProjectListViewModel(list: ListSummary): ProjectListViewModel {
+  return {
+    id: list.id,
+    type: "list",
+    title: list.title,
+    body: list.body,
+    status: list.status,
+    categoryLabel: list.categoryId,
+    sortOrder: list.sortOrder,
+    createdAt: list.createdAt,
+    updatedLabel: list.updatedAt,
+    pinned: list.pinned,
+    progressMode: list.progressMode,
+    showCompleted: list.showCompleted,
+    listItems: list.items.map(toListCardItemViewModel)
+  };
+}
+
+function toListCardItemViewModel(
+  listItem: ListItemSummary
+): ListCardItemViewModel {
+  return {
+    id: listItem.id,
+    title: listItem.title,
+    body: listItem.body,
+    status: listItem.status,
+    depth: listItem.depth,
+    sortOrder: listItem.sortOrder
+  };
+}
+
+function mergeProjectContent(
+  tasks: readonly TaskSummary[],
+  lists: readonly ListSummary[]
+): ProjectFeedViewModel[] {
+  return [
+    ...tasks.map(toProjectTaskViewModel),
+    ...lists.map(toProjectListViewModel)
+  ].sort(compareFeedItems);
+}
+
+function compareFeedItems(
+  left: UniversalItemViewModel,
+  right: UniversalItemViewModel
+): number {
+  const sortDelta = (left.sortOrder ?? 0) - (right.sortOrder ?? 0);
+
+  if (sortDelta !== 0) {
+    return sortDelta;
+  }
+
+  return (left.createdAt ?? "").localeCompare(right.createdAt ?? "");
+}
+
 function isTaskCardViewModel(
   item: UniversalItemViewModel
 ): item is TaskCardViewModel {
   return item.type === "task" && "taskStatus" in item;
+}
+
+function isListCardViewModel(
+  item: UniversalItemViewModel
+): item is ListCardViewModel {
+  return item.type === "list" && "listItems" in item;
 }
 
 function formatDateLabel(value: string | null | undefined): string | null {

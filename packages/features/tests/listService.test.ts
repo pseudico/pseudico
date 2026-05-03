@@ -93,6 +93,17 @@ describe("ListService", () => {
     expect(
       new ActivityLogRepository(connection).listForTarget("item", "item_1")
     ).toMatchObject([{ action: "list_created" }]);
+    expect(createService().listListsByContainer("container_project_1")).toMatchObject([
+      {
+        item: {
+          id: "item_1",
+          type: "list"
+        },
+        list: {
+          itemId: "item_1"
+        }
+      }
+    ]);
   });
 
   it("adds, completes, and reopens list rows with activity and search alignment", async () => {

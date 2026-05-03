@@ -387,6 +387,12 @@ export class ListService {
     return new ListRepository(this.connection).listItems(listId);
   }
 
+  listListsByContainer(containerId: string): ListWithItemRecord[] {
+    validateNonEmptyString(containerId, "containerId");
+
+    return new ListRepository(this.connection).listByContainer(containerId);
+  }
+
   private createListItemInCurrentTransaction(
     input: AddListItemInput
   ): ListItemMutationResult {

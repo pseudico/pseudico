@@ -4,6 +4,7 @@ import {
   getItemTypeLabel,
   ItemActionsMenu,
   ItemFeed,
+  ListCardContent,
   MoveToContainerDialog,
   UniversalItemCard,
   type UniversalItemViewModel
@@ -92,5 +93,40 @@ describe("Universal item UI", () => {
     expect(html).toContain("Call accountant");
     expect(html).toContain("Launch Plan");
     expect(html).toContain("Move");
+  });
+
+  it("renders checklist content with progress and bulk paste controls", () => {
+    const html = renderToStaticMarkup(
+      <ListCardContent
+        item={{
+          id: "item_list_1",
+          type: "list",
+          title: "Launch checklist",
+          listItems: [
+            {
+              id: "list_item_1",
+              title: "Confirm launch copy",
+              status: "done",
+              depth: 0
+            },
+            {
+              id: "list_item_2",
+              title: "Send update",
+              status: "open",
+              depth: 1
+            }
+          ]
+        }}
+        onAddItem={() => undefined}
+        onBulkAddItems={() => undefined}
+        onToggleItem={() => undefined}
+      />
+    );
+
+    expect(html).toContain("1 of 2 complete");
+    expect(html).toContain("Confirm launch copy");
+    expect(html).toContain("Send update");
+    expect(html).toContain("Bulk paste");
+    expect(html).toContain("Add pasted");
   });
 });
