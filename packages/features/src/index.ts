@@ -86,7 +86,13 @@ export {
 } from "./search";
 export { TaskService, tasksModuleContract } from "./tasks";
 export { timelineModuleContract } from "./timeline";
-export { todayModuleContract } from "./today";
+export {
+  DEFAULT_TODAY_BACKLOG_DAYS,
+  TODAY_BACKLOG_DAYS_SETTING_KEY,
+  TodayService,
+  todayModuleContract,
+  toTodayTaskView
+} from "./today";
 export { workspaceModuleContract } from "./workspace";
 export type { BackupService } from "./backup";
 export type { CalendarService } from "./calendar";
@@ -205,5 +211,5 @@ export type {
   UpdateTaskInput
 } from "./tasks";
 export type { TimelineService } from "./timeline";
-export type { TodayService } from "./today";
+export type { TodayQueryInput, TodayTaskView, TodayViewModel } from "./today";
 export type { WorkspaceService } from "./workspace";
