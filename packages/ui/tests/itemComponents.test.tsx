@@ -8,6 +8,7 @@ import {
   ItemActionsMenu,
   ItemFeed,
   ItemInspectorPanel,
+  RelatedItemsPanel,
   ListCardContent,
   MetadataFilterPanel,
   MoveItemDialog,
@@ -229,6 +230,18 @@ describe("Universal item UI", () => {
             createdAt: "2026-05-01T00:00:00.000Z"
           }
         ]}
+        relationships={[
+          {
+            id: "relationship_1",
+            direction: "outgoing",
+            relationType: "references",
+            sourceType: "item",
+            sourceId: "item_1",
+            targetType: "container",
+            targetId: "container_project_1",
+            label: "Project context"
+          }
+        ]}
         item={{
           id: "item_1",
           type: "task",
@@ -247,8 +260,36 @@ describe("Universal item UI", () => {
     expect(confirmHtml).toContain("The item will be soft-deleted.");
     expect(inspectorHtml).toContain("Call accountant");
     expect(inspectorHtml).toContain("Recent activity");
+    expect(inspectorHtml).toContain("Related items");
+    expect(inspectorHtml).toContain("References: Project context");
+    expect(inspectorHtml).toContain("To container container_project_1");
     expect(inspectorHtml).toContain("Item Moved");
     expect(inspectorHtml).toContain("Moved task.");
+  });
+
+  it("renders a related items placeholder and populated relationships", () => {
+    expect(
+      renderToStaticMarkup(<RelatedItemsPanel relationships={[]} />)
+    ).toContain("No relationships recorded yet.");
+
+    const html = renderToStaticMarkup(
+      <RelatedItemsPanel
+        relationships={[
+          {
+            id: "relationship_1",
+            direction: "incoming",
+            relationType: "depends_on",
+            sourceType: "list_item",
+            sourceId: "list_item_1",
+            targetType: "item",
+            targetId: "item_1"
+          }
+        ]}
+      />
+    );
+
+    expect(html).toContain("Depends On");
+    expect(html).toContain("From list_item list_item_1");
   });
 
   it("renders checklist content with progress and bulk paste controls", () => {

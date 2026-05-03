@@ -97,6 +97,15 @@ export {
   type TagWithTargetCountRecord
 } from "./MetadataBrowserRepository";
 export {
+  RelationshipRepository,
+  type BacklinkRecord,
+  type CreateRelationshipInput,
+  type FindRelationshipDuplicateInput,
+  type ListRelationshipsForEndpointInput,
+  type RelationshipEndpointInput,
+  type RelationshipRecord
+} from "./RelationshipRepository";
+export {
   TaskRepository,
   type CreateTaskDetailsInput,
   type TaskRecord,

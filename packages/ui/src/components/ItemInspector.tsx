@@ -1,5 +1,9 @@
 import { Clock3, X } from "lucide-react";
 import { getItemTypeLabel } from "./ItemTypeIcon";
+import {
+  RelatedItemsPanel,
+  type RelatedItemViewModel
+} from "./RelatedItemsPanel";
 
 export type ItemInspectorItem = {
   id: string;
@@ -29,6 +33,7 @@ export type ItemInspectorActivity = {
 export type ItemInspectorProps = {
   item: ItemInspectorItem;
   activity: readonly ItemInspectorActivity[];
+  relationships?: readonly RelatedItemViewModel[];
   open: boolean;
   onClose: () => void;
 };
@@ -36,6 +41,7 @@ export type ItemInspectorProps = {
 export function ItemInspectorPanel({
   item,
   activity,
+  relationships = [],
   open,
   onClose
 }: ItemInspectorProps): React.JSX.Element {
@@ -65,6 +71,8 @@ export function ItemInspectorPanel({
           </div>
         ))}
       </dl>
+
+      <RelatedItemsPanel relationships={relationships} />
 
       <section className="item-inspector-activity" aria-label="Recent activity">
         <div className="panel-heading">

@@ -111,3 +111,9 @@ export {
   type ItemInspectorItem,
   type ItemInspectorProps
 } from "./components/ItemInspector";
+export {
+  RelatedItemsPanel,
+  type RelatedItemDirection,
+  type RelatedItemViewModel,
+  type RelatedItemsPanelProps
+} from "./components/RelatedItemsPanel";
