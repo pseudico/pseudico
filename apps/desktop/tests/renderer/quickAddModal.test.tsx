@@ -289,6 +289,9 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
       listCategoriesWithCounts: async () => apiOk([]),
       listTargetsByMetadata: async () => apiOk([])
     },
+    search: {
+      searchWorkspace: async () => apiOk([])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },

@@ -71,6 +71,11 @@ export {
   type ItemTypeIconProps
 } from "./components/ItemTypeIcon";
 export {
+  SearchResultCard,
+  type SearchResultCardProps,
+  type SearchResultCardViewModel
+} from "./components/SearchResultCard";
+export {
   TaskCardContent,
   type TaskCardContentProps,
   type TaskCardViewModel

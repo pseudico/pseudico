@@ -14,11 +14,13 @@ import {
   type MetadataTargetSummary,
   type NoteSummary,
   type ProjectSummary,
+  type SearchResultSummary,
   type TaskSummary,
   type WorkspaceSummary
 } from "../../src/preload/api";
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
 import { ProjectsPage } from "../../src/renderer/pages/ProjectsPage";
+import { SearchPage } from "../../src/renderer/pages/SearchPage";
 import { TagsCategoriesPage } from "../../src/renderer/pages/TagsCategoriesPage";
 import { workspaceStore } from "../../src/renderer/state/workspaceStore";
 import type { NoteCardViewModel, UniversalItemViewModel } from "@local-work-os/ui";
@@ -87,6 +89,27 @@ const metadataTarget: MetadataTargetSummary = {
   updatedAt: "2026-05-01T00:00:00.000Z",
   archivedAt: null,
   deletedAt: null
+};
+
+const searchResult: SearchResultSummary = {
+  id: "search_1",
+  workspaceId: "workspace_1",
+  targetType: "item",
+  targetId: "item_1",
+  kind: "task",
+  title: "Book launch venue",
+  body: "Confirm the room hold before Friday.",
+  status: "open",
+  tags: ["launch"],
+  category: "Finance",
+  updatedAt: "2026-05-01T00:00:00.000Z",
+  archivedAt: null,
+  deletedAt: null,
+  containerId: "container_1",
+  containerTitle: "Launch Plan",
+  parentItemId: null,
+  parentItemTitle: null,
+  destinationPath: "/projects/container_1"
 };
 
 const projectItem: UniversalItemViewModel = {
@@ -283,6 +306,9 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
           }
         ]),
       listTargetsByMetadata: async () => apiOk([metadataTarget])
+    },
+    search: {
+      searchWorkspace: async () => apiOk([])
     },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
@@ -520,5 +546,28 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Finance");
     expect(html).toContain("Book launch venue");
     expect(html).toContain("Items");
+  });
+
+  it("renders global search results with type filters and source context", () => {
+    workspaceStore.setCurrentWorkspace(workspace);
+
+    const html = renderToString(
+      <MemoryRouter initialEntries={["/search?q=launch"]}>
+        <SearchPage
+          apiClient={createMockApi([project])}
+          initialQuery="launch"
+          initialKinds={["task"]}
+          initialResults={[searchResult]}
+        />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Search");
+    expect(html).toContain("Projects");
+    expect(html).toContain("Tasks");
+    expect(html).toContain("Book launch venue");
+    expect(html).toContain("Confirm the room hold before Friday.");
+    expect(html).toContain("Launch Plan");
+    expect(html).toContain("data-tag-source=\"manual\"");
   });
 });

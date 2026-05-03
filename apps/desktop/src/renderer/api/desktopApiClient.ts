@@ -124,6 +124,10 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       listTargetsByMetadata: (input) =>
         callApi(() => api.metadata.listTargetsByMetadata(input))
     },
+    search: {
+      searchWorkspace: (input) =>
+        callApi(() => api.search.searchWorkspace(input))
+    },
     containers: {
       getStatus: () => callApi(() => api.containers.getStatus())
     },
@@ -258,6 +262,10 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().metadata.listCategoriesWithCounts(workspaceId),
     listTargetsByMetadata: (input) =>
       getDesktopApiClient().metadata.listTargetsByMetadata(input)
+  },
+  search: {
+    searchWorkspace: (input) =>
+      getDesktopApiClient().search.searchWorkspace(input)
   },
   containers: {
     getStatus: () => getDesktopApiClient().containers.getStatus()
