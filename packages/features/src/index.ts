@@ -42,6 +42,8 @@ export { ListService, listsModuleContract, parseBulkListItems } from "./lists";
 export {
   CategoryService,
   categoriesModuleContract,
+  MetadataBrowserService,
+  metadataBrowserModuleContract,
   TagService,
   tagsModuleContract
 } from "./metadata";
@@ -98,6 +100,7 @@ export type {
   CreateCategoryInput,
   DeleteOrArchiveCategoryResult,
   HydrateItemTagsInput,
+  ListMetadataTargetsInput,
   RemoveTagFromTargetInput,
   SyncInlineTagsForNoteInput,
   SyncInlineTagsForTaskInput,

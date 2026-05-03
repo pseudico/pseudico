@@ -7,7 +7,7 @@ import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath
 } from "@local-work-os/db";
-import { ItemService } from "@local-work-os/features";
+import { ItemService, TagService } from "@local-work-os/features";
 import { afterEach } from "vitest";
 import { describe, expect, it } from "vitest";
 import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandlers";
@@ -15,6 +15,7 @@ import { createCategoryIpcHandlers } from "../../src/main/ipc/categoryHandlers";
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
 import { createItemIpcHandlers } from "../../src/main/ipc/itemHandlers";
 import { createListIpcHandlers } from "../../src/main/ipc/listHandlers";
+import { createMetadataIpcHandlers } from "../../src/main/ipc/metadataHandlers";
 import { handleGetModuleStatus } from "../../src/main/ipc/moduleStatusHandlers";
 import { createNoteIpcHandlers } from "../../src/main/ipc/noteHandlers";
 import { createProjectIpcHandlers } from "../../src/main/ipc/projectHandlers";
@@ -360,6 +361,124 @@ describe("Category IPC handlers", () => {
         id: created.data.id,
         deletedAt: expect.any(String)
       }
+    });
+  });
+});
+
+describe("Metadata browser IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createMetadataIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(
+      handlers.handleListTagsWithCounts(undefined)
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("lists metadata counts and matching targets through the current workspace", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-metadata-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const projectResult = await projectHandlers.handleCreateProject({
+      name: "Tax Prep"
+    });
+
+    if (!projectResult.ok) {
+      throw new Error(projectResult.error.message);
+    }
+
+    const connection = await createDatabaseConnection({
+      databasePath,
+      fileMustExist: true
+    });
+    let idCounter = 0;
+    const idFactory = (prefix: string): string => {
+      idCounter += 1;
+      return `${prefix}_metadata_${idCounter}`;
+    };
+    const createdItem = await new ItemService({
+      connection,
+      idFactory,
+      now: () => new Date("2026-05-01T00:00:00.000Z")
+    }).createItem({
+      workspaceId: "workspace_1",
+      containerId: projectResult.data.project.id,
+      type: "task",
+      title: "Send @finance forms"
+    });
+    await new TagService({
+      connection,
+      idFactory,
+      now: () => new Date("2026-05-01T00:00:00.000Z")
+    }).addTagToTarget({
+      workspaceId: "workspace_1",
+      targetType: "item",
+      targetId: createdItem.item.id,
+      name: "finance"
+    });
+    connection.close();
+
+    const handlers = createMetadataIpcHandlers(workspaceService);
+
+    await expect(
+      handlers.handleListTagsWithCounts(undefined)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          slug: "finance",
+          targetCount: 1
+        }
+      ]
+    });
+    await expect(
+      handlers.handleListTargetsByMetadata({
+        tagSlugs: ["finance"]
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          targetId: "item_metadata_1",
+          title: "Send @finance forms",
+          tags: [
+            {
+              slug: "finance"
+            }
+          ]
+        }
+      ]
     });
   });
 });

@@ -177,6 +177,55 @@ export type CategorySummary = {
   deletedAt: string | null;
 };
 
+export type TagCountSummary = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  targetCount: number;
+};
+
+export type CategoryCountSummary = CategorySummary & {
+  targetCount: number;
+};
+
+export type MetadataTargetType = "container" | "item" | "list_item";
+
+export type MetadataTargetCategorySummary = {
+  id: string;
+  name: string;
+  slug: string;
+  color: string;
+};
+
+export type MetadataTargetSummary = {
+  targetType: MetadataTargetType;
+  targetId: string;
+  workspaceId: string;
+  kind: string;
+  title: string;
+  body: string | null;
+  status: string;
+  category: MetadataTargetCategorySummary | null;
+  tags: ItemTagSummary[];
+  createdAt: string;
+  updatedAt: string;
+  archivedAt: string | null;
+  deletedAt: string | null;
+};
+
+export type ListTargetsByMetadataInput = {
+  workspaceId?: string;
+  tagSlugs?: string[];
+  categoryId?: string | null;
+  categorySlug?: string | null;
+  includeArchived?: boolean;
+  includeDeleted?: boolean;
+};
+
 export type CreateCategoryInput = {
   workspaceId?: string;
   name: string;
@@ -488,6 +537,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     assignToProject: "local-work-os:categories:assign-to-project",
     assignToItem: "local-work-os:categories:assign-to-item"
   },
+  metadata: {
+    listTagsWithCounts: "local-work-os:metadata:list-tags-with-counts",
+    listCategoriesWithCounts:
+      "local-work-os:metadata:list-categories-with-counts",
+    listTargetsByMetadata: "local-work-os:metadata:list-targets-by-metadata"
+  },
   containers: {
     getStatus: "local-work-os:containers:get-status"
   },
@@ -649,6 +704,18 @@ export type LocalWorkOsIpcContracts = {
     input: AssignCategoryToItemInput;
     result: ApiResult<ItemSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTagsWithCounts]: {
+    input: string | undefined;
+    result: ApiResult<TagCountSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.metadata.listCategoriesWithCounts]: {
+    input: string | undefined;
+    result: ApiResult<CategoryCountSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTargetsByMetadata]: {
+    input: ListTargetsByMetadataInput;
+    result: ApiResult<MetadataTargetSummary[]>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.containers.getStatus]: {
     input: undefined;
     result: ApiResult<IpcModuleStatus>;
@@ -805,6 +872,17 @@ export type LocalWorkOsApi = {
     listCategories: (
       workspaceId?: string
     ) => Promise<ApiResult<CategorySummary[]>>;
+  };
+  metadata: {
+    listTagsWithCounts: (
+      workspaceId?: string
+    ) => Promise<ApiResult<TagCountSummary[]>>;
+    listCategoriesWithCounts: (
+      workspaceId?: string
+    ) => Promise<ApiResult<CategoryCountSummary[]>>;
+    listTargetsByMetadata: (
+      input: ListTargetsByMetadataInput
+    ) => Promise<ApiResult<MetadataTargetSummary[]>>;
   };
   containers: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
@@ -990,6 +1068,20 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.deleteCategory, categoryId),
       listCategories: (workspaceId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.categories.listCategories, workspaceId)
+    },
+    metadata: {
+      listTagsWithCounts: (workspaceId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTagsWithCounts,
+          workspaceId
+        ),
+      listCategoriesWithCounts: (workspaceId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.metadata.listCategoriesWithCounts,
+          workspaceId
+        ),
+      listTargetsByMetadata: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTargetsByMetadata, input)
     },
     containers: {
       getStatus: () =>

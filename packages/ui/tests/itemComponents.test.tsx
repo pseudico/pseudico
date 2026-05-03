@@ -9,6 +9,7 @@ import {
   ItemFeed,
   ItemInspectorPanel,
   ListCardContent,
+  MetadataFilterPanel,
   MoveItemDialog,
   MoveToContainerDialog,
   NoteCardContent,
@@ -89,6 +90,41 @@ describe("Universal item UI", () => {
     expect(pickerHtml).toContain("Category");
     expect(pickerHtml).toContain("No category");
     expect(pickerHtml).toContain("Finance");
+  });
+
+  it("renders metadata filter controls with counts", () => {
+    const html = renderToStaticMarkup(
+      <MetadataFilterPanel
+        categories={[
+          {
+            id: "category_1",
+            name: "Finance",
+            color: "#2c6b8f",
+            targetCount: 2
+          }
+        ]}
+        selectedCategoryId="category_1"
+        selectedTagSlugs={["finance"]}
+        tags={[
+          {
+            id: "tag_1",
+            name: "Finance",
+            slug: "finance",
+            targetCount: 3
+          }
+        ]}
+        onClear={() => undefined}
+        onSelectCategory={() => undefined}
+        onToggleTag={() => undefined}
+      />
+    );
+
+    expect(html).toContain("Filters");
+    expect(html).toContain("@Finance");
+    expect(html).toContain("3");
+    expect(html).toContain("Any category");
+    expect(html).toContain("Finance");
+    expect(html).toContain("2");
   });
 
   it("renders a safe placeholder for unknown item types", () => {

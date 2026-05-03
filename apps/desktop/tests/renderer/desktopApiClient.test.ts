@@ -10,6 +10,7 @@ import {
   type ListItemSummary,
   type ListSummary,
   type LocalWorkOsApi,
+  type MetadataTargetSummary,
   type NoteSummary,
   type ProjectSummary,
   type RecentWorkspace,
@@ -203,6 +204,29 @@ function createMockApi(
           deletedAt: "2026-04-30T01:00:00.000Z"
         }),
       listCategories: async () => apiOk([categorySummary()])
+    },
+    metadata: {
+      listTagsWithCounts: async () =>
+        apiOk([
+          {
+            id: "tag_1",
+            workspaceId: "workspace_1",
+            name: "Finance",
+            slug: "finance",
+            createdAt: "2026-04-30T00:00:00.000Z",
+            updatedAt: "2026-04-30T00:00:00.000Z",
+            deletedAt: null,
+            targetCount: 2
+          }
+        ]),
+      listCategoriesWithCounts: async () =>
+        apiOk([
+          {
+            ...categorySummary(),
+            targetCount: 2
+          }
+        ]),
+      listTargetsByMetadata: async () => apiOk([metadataTargetSummary()])
     },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
@@ -421,6 +445,36 @@ function noteSummary(): NoteSummary {
   };
 }
 
+function metadataTargetSummary(): MetadataTargetSummary {
+  return {
+    targetType: "item",
+    targetId: "item_1",
+    workspaceId: "workspace_1",
+    kind: "task",
+    title: "Call accountant",
+    body: null,
+    status: "active",
+    category: {
+      id: "category_1",
+      name: "Finance",
+      slug: "finance",
+      color: "#2c6b8f"
+    },
+    tags: [
+      {
+        id: "tag_1",
+        name: "Finance",
+        slug: "finance",
+        source: "manual"
+      }
+    ],
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z",
+    archivedAt: null,
+    deletedAt: null
+  };
+}
+
 describe("desktop API client", () => {
   it("passes typed preload results through to renderer callers", async () => {
     const client = createDesktopApiClient(createMockApi());
@@ -514,6 +568,32 @@ describe("desktop API client", () => {
       data: {
         categoryId: "category_1"
       }
+    });
+    await expect(client.metadata.listTagsWithCounts()).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          slug: "finance",
+          targetCount: 2
+        }
+      ]
+    });
+    await expect(
+      client.metadata.listTargetsByMetadata({
+        tagSlugs: ["finance"]
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          targetId: "item_1",
+          tags: [
+            {
+              slug: "finance"
+            }
+          ]
+        }
+      ]
     });
     await expect(
       client.items.move({

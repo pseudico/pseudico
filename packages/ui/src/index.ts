@@ -58,6 +58,12 @@ export {
   type CategoryPickerOption,
   type CategoryPickerProps
 } from "./components/CategoryPicker";
+export {
+  MetadataFilterPanel,
+  type MetadataCategoryFilterOption,
+  type MetadataFilterPanelProps,
+  type MetadataTagFilterOption
+} from "./components/MetadataFilterPanel";
 export { ItemFeed, type ItemFeedProps } from "./components/ItemFeed";
 export {
   getItemTypeLabel,

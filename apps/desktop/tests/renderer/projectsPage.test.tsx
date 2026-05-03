@@ -11,6 +11,7 @@ import {
   type ListItemSummary,
   type ListSummary,
   type LocalWorkOsApi,
+  type MetadataTargetSummary,
   type NoteSummary,
   type ProjectSummary,
   type TaskSummary,
@@ -18,6 +19,7 @@ import {
 } from "../../src/preload/api";
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
 import { ProjectsPage } from "../../src/renderer/pages/ProjectsPage";
+import { TagsCategoriesPage } from "../../src/renderer/pages/TagsCategoriesPage";
 import { workspaceStore } from "../../src/renderer/state/workspaceStore";
 import type { NoteCardViewModel, UniversalItemViewModel } from "@local-work-os/ui";
 
@@ -56,6 +58,34 @@ const category: CategorySummary = {
   description: null,
   createdAt: "2026-05-01T00:00:00.000Z",
   updatedAt: "2026-05-01T00:00:00.000Z",
+  deletedAt: null
+};
+
+const metadataTarget: MetadataTargetSummary = {
+  targetType: "item",
+  targetId: "item_1",
+  workspaceId: "workspace_1",
+  kind: "task",
+  title: "Book launch venue",
+  body: "Confirm the room hold before Friday.",
+  status: "active",
+  category: {
+    id: "category_1",
+    name: "Finance",
+    slug: "finance",
+    color: "#2c6b8f"
+  },
+  tags: [
+    {
+      id: "tag_1",
+      name: "Launch",
+      slug: "launch",
+      source: "manual"
+    }
+  ],
+  createdAt: "2026-05-01T00:00:00.000Z",
+  updatedAt: "2026-05-01T00:00:00.000Z",
+  archivedAt: null,
   deletedAt: null
 };
 
@@ -230,6 +260,29 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
       deleteCategory: async () =>
         apiOk({ ...category, deletedAt: "2026-05-01T01:00:00.000Z" }),
       listCategories: async () => apiOk([category])
+    },
+    metadata: {
+      listTagsWithCounts: async () =>
+        apiOk([
+          {
+            id: "tag_1",
+            workspaceId: "workspace_1",
+            name: "Launch",
+            slug: "launch",
+            createdAt: "2026-05-01T00:00:00.000Z",
+            updatedAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: null,
+            targetCount: 1
+          }
+        ]),
+      listCategoriesWithCounts: async () =>
+        apiOk([
+          {
+            ...category,
+            targetCount: 1
+          }
+        ]),
+      listTargetsByMetadata: async () => apiOk([metadataTarget])
     },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
@@ -428,5 +481,44 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Complete");
     expect(html).toContain("Due");
     expect(html).toContain("Actions for Book launch venue");
+  });
+
+  it("renders the Tags & Categories browser with filters and grouped results", () => {
+    workspaceStore.setCurrentWorkspace(workspace);
+
+    const html = renderToString(
+      <MemoryRouter>
+        <TagsCategoriesPage
+          apiClient={createMockApi([project])}
+          initialCategories={[
+            {
+              ...category,
+              targetCount: 1
+            }
+          ]}
+          initialTags={[
+            {
+              id: "tag_1",
+              workspaceId: "workspace_1",
+              name: "Launch",
+              slug: "launch",
+              createdAt: "2026-05-01T00:00:00.000Z",
+              updatedAt: "2026-05-01T00:00:00.000Z",
+              deletedAt: null,
+              targetCount: 1
+            }
+          ]}
+          initialSelectedTagSlugs={["launch"]}
+          initialTargets={[metadataTarget]}
+        />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Tags &amp; Categories");
+    expect(html).toContain("Launch");
+    expect(html).toContain("data-tag-source=\"manual\"");
+    expect(html).toContain("Finance");
+    expect(html).toContain("Book launch venue");
+    expect(html).toContain("Items");
   });
 });
