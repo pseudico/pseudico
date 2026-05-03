@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(53);
+    expect(channels).toHaveLength(55);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -54,6 +54,7 @@ describe("typed preload API", () => {
       "metadata",
       "search",
       "collections",
+      "activity",
       "containers",
       "items",
       "files"
@@ -612,6 +613,40 @@ describe("typed preload API", () => {
           collectionId: "saved_view_1",
           containerId: "container_1",
           title: "Call accountant"
+        }
+      }
+    ]);
+  });
+
+  it("routes activity calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk([])) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.activity.listRecent({ workspaceId: "workspace_1", limit: 5 });
+    await api.activity.listForTarget({
+      targetType: "container",
+      targetId: "container_1"
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.activity.listRecentActivity,
+        input: { workspaceId: "workspace_1", limit: 5 }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.activity.listActivityForTarget,
+        input: {
+          targetType: "container",
+          targetId: "container_1"
         }
       }
     ]);

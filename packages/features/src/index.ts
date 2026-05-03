@@ -20,10 +20,20 @@ export const plannedFeatureAreas = [
   "timeline",
   "calendar",
   "backup",
-  "export"
+  "export",
+  "activity"
 ] as const;
 
 export type { FeatureModuleContract, FeatureModulePriority } from "./featureModuleContract";
+export {
+  ActivityService,
+  activityModuleContract,
+  formatActivityEvent,
+  formatActionLabel,
+  formatActorLabel,
+  formatTargetLabel
+} from "./activity";
+export type { ActivityEventView } from "./activity";
 export { backupModuleContract } from "./backup";
 export { calendarModuleContract } from "./calendar";
 export { contactsModuleContract } from "./contacts";

@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   apiOk,
+  type ActivitySummary,
   type CategorySummary,
   type CollectionEvaluationSummary,
   type CollectionSummary,
@@ -337,6 +338,12 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
           ]
         })
     },
+    activity: {
+      listRecent: async () => apiOk([activitySummary()]),
+      listForTarget: async () => apiOk([activitySummary()]),
+      listRecentActivity: async () => apiOk([activitySummary()]),
+      listActivityForTarget: async () => apiOk([activitySummary()])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
@@ -547,6 +554,25 @@ function collectionEvaluationSummary(): CollectionEvaluationSummary {
   };
 }
 
+function activitySummary(): ActivitySummary {
+  return {
+    id: "activity_1",
+    workspaceId: "workspace_1",
+    actorType: "local_user",
+    action: "container_created",
+    targetType: "container",
+    targetId: "container_1",
+    summary: "Created project \"Launch Plan\".",
+    beforeJson: null,
+    afterJson: null,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    actionLabel: "Container Created",
+    actorLabel: "Local user",
+    targetLabel: "Container container_1",
+    description: "Created project \"Launch Plan\"."
+  };
+}
+
 describe("Projects renderer pages", () => {
   afterEach(() => {
     workspaceStore.reset();
@@ -575,6 +601,7 @@ describe("Projects renderer pages", () => {
             element={
               <ProjectDetailPage
                 apiClient={createMockApi([project])}
+                initialActivity={[activitySummary()]}
                 initialProject={project}
                 initialItems={[projectItem, projectNote]}
               />
@@ -589,6 +616,8 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Category");
     expect(html).toContain("Tags");
     expect(html).toContain("Content feed");
+    expect(html).toContain("Recent activity");
+    expect(html).toContain("Created project &quot;Launch Plan&quot;.");
     expect(html).toContain("Book launch venue");
     expect(html).toContain("Launch note");
     expect(html).toContain("Decision notes Confirm launch plan.");

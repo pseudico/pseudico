@@ -120,16 +120,21 @@ export class ActivityLogRepository {
     return rows.map(toActivityLogRecord);
   }
 
-  listForTarget(targetType: string, targetId: string): ActivityLogRecord[] {
+  listForTarget(
+    targetType: string,
+    targetId: string,
+    limit = 20
+  ): ActivityLogRecord[] {
     const rows = this.connection.sqlite
-      .prepare<[string, string], ActivityLogRow>(
+      .prepare<[string, string, number], ActivityLogRow>(
         `select *
          from activity_log
          where target_type = ?
            and target_id = ?
-         order by created_at desc`
+         order by created_at desc
+         limit ?`
       )
-      .all(targetType, targetId);
+      .all(targetType, targetId, limit);
 
     return rows.map(toActivityLogRecord);
   }

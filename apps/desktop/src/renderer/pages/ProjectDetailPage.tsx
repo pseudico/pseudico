@@ -12,6 +12,7 @@ import {
   MoveItemDialog,
   NoteCardContent,
   NoteEditor,
+  RecentActivityList,
   TaskCardContent,
   TaskQuickAdd,
   type CreateListFormValues,
@@ -23,6 +24,7 @@ import {
   type MoveTargetContainer,
   type NoteCardViewModel,
   type NoteEditorValues,
+  type RecentActivityViewModel,
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel
@@ -72,6 +74,7 @@ type ProjectDetailPageProps = {
   initialProject?: ProjectSummary | null;
   initialCategories?: CategorySummary[];
   initialItems?: UniversalItemViewModel[];
+  initialActivity?: RecentActivityViewModel[];
 };
 
 const emptyProjectItems: UniversalItemViewModel[] = [];
@@ -80,7 +83,8 @@ export function ProjectDetailPage({
   apiClient = desktopApiClient,
   initialProject,
   initialCategories = [],
-  initialItems = emptyProjectItems
+  initialItems = emptyProjectItems,
+  initialActivity = []
 }: ProjectDetailPageProps): React.JSX.Element {
   const { projectId } = useParams();
   const [project, setProject] = useState<ProjectSummary | null>(
@@ -89,6 +93,8 @@ export function ProjectDetailPage({
   const [items, setItems] = useState<ProjectFeedViewModel[]>(initialItems);
   const [categories, setCategories] =
     useState<CategorySummary[]>(initialCategories);
+  const [projectActivity, setProjectActivity] =
+    useState<RecentActivityViewModel[]>(initialActivity);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(initialProject === undefined);
   const [itemsLoading, setItemsLoading] = useState(false);
@@ -137,6 +143,7 @@ export function ProjectDetailPage({
         projectResult,
         projectsResult,
         categoriesResult,
+        activityResult,
         tasksResult,
         listsResult,
         notesResult
@@ -144,6 +151,10 @@ export function ProjectDetailPage({
         apiClient.projects.get(activeProjectId),
         apiClient.projects.list(),
         apiClient.categories.list(),
+        apiClient.activity.listForTarget({
+          targetType: "container",
+          targetId: activeProjectId
+        }),
         apiClient.tasks.listByContainer(activeProjectId),
         apiClient.lists.listByContainer(activeProjectId),
         apiClient.notes.listByContainer(activeProjectId)
@@ -176,6 +187,11 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!activityResult.ok) {
+        setItemError(activityResult.error.message);
+        return;
+      }
+
       if (!listsResult.ok) {
         setItemError(listsResult.error.message);
         return;
@@ -189,6 +205,7 @@ export function ProjectDetailPage({
       setProject(projectResult.data);
       setProjects(projectsResult.data);
       setCategories(categoriesResult.data);
+      setProjectActivity(activityResult.data.map(toRecentActivityViewModel));
       setItems(
         mergeProjectContent(
           tasksResult.data,
@@ -241,6 +258,22 @@ export function ProjectDetailPage({
         categories
       )
     );
+  }
+
+  async function refreshProjectActivity(activeProjectId: string): Promise<void> {
+    setItemError(null);
+
+    const result = await apiClient.activity.listForTarget({
+      targetType: "container",
+      targetId: activeProjectId
+    });
+
+    if (!result.ok) {
+      setItemError(result.error.message);
+      return;
+    }
+
+    setProjectActivity(result.data.map(toRecentActivityViewModel));
   }
 
   async function createProjectTask(
@@ -595,6 +628,7 @@ export function ProjectDetailPage({
     }
 
     setProject(result.data);
+    await refreshProjectActivity(project.id);
   }
 
   async function assignItemCategory(
@@ -763,6 +797,11 @@ export function ProjectDetailPage({
           </dd>
         </div>
       </dl>
+
+      <RecentActivityList
+        activity={projectActivity}
+        emptyMessage="No project activity recorded yet."
+      />
 
       <div className="category-inline-picker">
         <CategoryPicker
@@ -1058,7 +1097,26 @@ function toInspectorActivity(activity: ActivitySummary): ItemInspectorActivity {
     id: activity.id,
     action: activity.action,
     actorType: activity.actorType,
+    actionLabel: activity.actionLabel,
+    actorLabel: activity.actorLabel,
+    targetLabel: activity.targetLabel,
     summary: activity.summary,
+    description: activity.description,
+    createdAt: activity.createdAt
+  };
+}
+
+function toRecentActivityViewModel(
+  activity: ActivitySummary
+): RecentActivityViewModel {
+  return {
+    id: activity.id,
+    action: activity.action,
+    actionLabel: activity.actionLabel,
+    actorLabel: activity.actorLabel,
+    targetLabel: activity.targetLabel,
+    summary: activity.summary,
+    description: activity.description,
     createdAt: activity.createdAt
   };
 }

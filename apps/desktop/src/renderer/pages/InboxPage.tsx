@@ -805,7 +805,11 @@ function toInspectorActivity(activity: ActivitySummary): ItemInspectorActivity {
     id: activity.id,
     action: activity.action,
     actorType: activity.actorType,
+    actionLabel: activity.actionLabel,
+    actorLabel: activity.actorLabel,
+    targetLabel: activity.targetLabel,
     summary: activity.summary,
+    description: activity.description,
     createdAt: activity.createdAt
   };
 }

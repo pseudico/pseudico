@@ -15,6 +15,7 @@ import {
   MoveToContainerDialog,
   NoteCardContent,
   NoteEditor,
+  RecentActivityList,
   UniversalItemCard,
   type UniversalItemViewModel
 } from "../src";
@@ -265,6 +266,28 @@ describe("Universal item UI", () => {
     expect(inspectorHtml).toContain("To container container_project_1");
     expect(inspectorHtml).toContain("Item Moved");
     expect(inspectorHtml).toContain("Moved task.");
+  });
+
+  it("renders recent activity rows with formatted labels", () => {
+    const html = renderToStaticMarkup(
+      <RecentActivityList
+        activity={[
+          {
+            id: "activity_1",
+            action: "container_updated",
+            actionLabel: "Container Updated",
+            description: "Updated project.",
+            targetLabel: "Container container_1",
+            createdAt: "2026-05-01T00:00:00.000Z"
+          }
+        ]}
+      />
+    );
+
+    expect(html).toContain("Recent activity");
+    expect(html).toContain("Container Updated");
+    expect(html).toContain("Updated project.");
+    expect(html).toContain("Container container_1");
   });
 
   it("renders a related items placeholder and populated relationships", () => {

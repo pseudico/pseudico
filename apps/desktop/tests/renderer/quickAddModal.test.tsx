@@ -306,6 +306,12 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
       createTaskInCollection: async () =>
         apiOk(taskSummary("Call supplier", activeProject.id))
     },
+    activity: {
+      listRecent: async () => apiOk([]),
+      listForTarget: async () => apiOk([]),
+      listRecentActivity: async () => apiOk([]),
+      listActivityForTarget: async () => apiOk([])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },

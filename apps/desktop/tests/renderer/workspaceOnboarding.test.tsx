@@ -378,6 +378,12 @@ function createMockApi(
         apiOk({ collection: collectionSummary(), total: 0, results: [], groups: [] }),
       createTaskInCollection: async () => apiOk(taskSummary())
     },
+    activity: {
+      listRecent: async () => apiOk([]),
+      listForTarget: async () => apiOk([]),
+      listRecentActivity: async () => apiOk([]),
+      listActivityForTarget: async () => apiOk([])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },

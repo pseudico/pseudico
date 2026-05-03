@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   apiOk,
+  type ActivitySummary,
   type ApiResult,
   type CategorySummary,
   type CollectionEvaluationSummary,
@@ -257,6 +258,12 @@ function createMockApi(
           ]
         })
     },
+    activity: {
+      listRecent: async () => apiOk([activitySummary()]),
+      listForTarget: async () => apiOk([activitySummary()]),
+      listRecentActivity: async () => apiOk([activitySummary()]),
+      listActivityForTarget: async () => apiOk([activitySummary()])
+    },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
     },
@@ -278,21 +285,7 @@ function createMockApi(
           ...itemSummary(),
           deletedAt: "2026-04-30T01:00:00.000Z"
         }),
-      getActivity: async () =>
-        apiOk([
-          {
-            id: "activity_1",
-            workspaceId: "workspace_1",
-            actorType: "local_user",
-            action: "item_moved",
-            targetType: "item",
-            targetId: "item_1",
-            summary: "Moved item.",
-            beforeJson: null,
-            afterJson: null,
-            createdAt: "2026-04-30T01:00:00.000Z"
-          }
-        ]),
+      getActivity: async () => apiOk([activitySummary()]),
       openInspector: async () =>
         apiOk({
           item: itemSummary(),
@@ -471,6 +464,25 @@ function noteSummary(): NoteSummary {
     preview: "Decision notes",
     noteCreatedAt: "2026-04-30T00:00:00.000Z",
     noteUpdatedAt: "2026-04-30T00:00:00.000Z"
+  };
+}
+
+function activitySummary(): ActivitySummary {
+  return {
+    id: "activity_1",
+    workspaceId: "workspace_1",
+    actorType: "local_user",
+    action: "item_moved",
+    targetType: "item",
+    targetId: "item_1",
+    summary: "Moved item.",
+    beforeJson: null,
+    afterJson: null,
+    createdAt: "2026-04-30T01:00:00.000Z",
+    actionLabel: "Item Moved",
+    actorLabel: "Local user",
+    targetLabel: "Item item_1",
+    description: "Moved item."
   };
 }
 
@@ -732,6 +744,25 @@ describe("desktop API client", () => {
           }
         ]
       }
+    });
+    await expect(client.activity.listRecent()).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          action: "item_moved",
+          actionLabel: "Item Moved"
+        }
+      ]
+    });
+    await expect(
+      client.activity.listForTarget({ targetType: "item", targetId: "item_1" })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          targetLabel: "Item item_1"
+        }
+      ]
     });
     await expect(
       client.items.move({
