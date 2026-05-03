@@ -262,6 +262,68 @@ export type SearchResultSummary = {
   destinationPath: string | null;
 };
 
+export type CollectionKind = "tag" | "keyword" | "custom";
+
+export type CollectionSummary = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  description: string | null;
+  kind: CollectionKind;
+  tagSlug: string | null;
+  keyword: string | null;
+  isFavorite: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CollectionResultSummary = {
+  targetType: "container" | "item";
+  targetId: string;
+  kind: string;
+  title: string;
+  containerId: string;
+  containerType: string;
+  containerTitle: string;
+  categoryId: string | null;
+  categoryName: string | null;
+  taskStatus: string | null;
+  dueAt: string | null;
+  tags: string[];
+  destinationPath: string;
+};
+
+export type CollectionResultGroupSummary = {
+  key: string;
+  label: string;
+  results: CollectionResultSummary[];
+};
+
+export type CollectionEvaluationSummary = {
+  collection: CollectionSummary;
+  total: number;
+  results: CollectionResultSummary[];
+  groups: CollectionResultGroupSummary[];
+};
+
+export type CreateTagCollectionInput = {
+  workspaceId?: string;
+  tagSlug: string;
+  name?: string;
+  description?: string | null;
+};
+
+export type CreateKeywordCollectionInput = {
+  workspaceId?: string;
+  query: string;
+  name?: string;
+  description?: string | null;
+};
+
+export type CreateTaskInCollectionInput = CreateTaskInput & {
+  collectionId: string;
+};
+
 export type ListTargetsByMetadataInput = {
   workspaceId?: string;
   tagSlugs?: string[];
@@ -591,6 +653,15 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   search: {
     searchWorkspace: "local-work-os:search:search-workspace"
   },
+  collections: {
+    listCollections: "local-work-os:collections:list-collections",
+    createTagCollection: "local-work-os:collections:create-tag-collection",
+    createKeywordCollection:
+      "local-work-os:collections:create-keyword-collection",
+    evaluateCollection: "local-work-os:collections:evaluate-collection",
+    createTaskInCollection:
+      "local-work-os:collections:create-task-in-collection"
+  },
   containers: {
     getStatus: "local-work-os:containers:get-status"
   },
@@ -768,6 +839,26 @@ export type LocalWorkOsIpcContracts = {
     input: SearchWorkspaceInput;
     result: ApiResult<SearchResultSummary[]>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.collections.listCollections]: {
+    input: string | undefined;
+    result: ApiResult<CollectionSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.collections.createTagCollection]: {
+    input: CreateTagCollectionInput;
+    result: ApiResult<CollectionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.collections.createKeywordCollection]: {
+    input: CreateKeywordCollectionInput;
+    result: ApiResult<CollectionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.collections.evaluateCollection]: {
+    input: string;
+    result: ApiResult<CollectionEvaluationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.collections.createTaskInCollection]: {
+    input: CreateTaskInCollectionInput;
+    result: ApiResult<TaskSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.containers.getStatus]: {
     input: undefined;
     result: ApiResult<IpcModuleStatus>;
@@ -940,6 +1031,23 @@ export type LocalWorkOsApi = {
     searchWorkspace: (
       input: SearchWorkspaceInput
     ) => Promise<ApiResult<SearchResultSummary[]>>;
+  };
+  collections: {
+    listCollections: (
+      workspaceId?: string
+    ) => Promise<ApiResult<CollectionSummary[]>>;
+    createTagCollection: (
+      input: CreateTagCollectionInput
+    ) => Promise<ApiResult<CollectionSummary>>;
+    createKeywordCollection: (
+      input: CreateKeywordCollectionInput
+    ) => Promise<ApiResult<CollectionSummary>>;
+    evaluateCollection: (
+      collectionId: string
+    ) => Promise<ApiResult<CollectionEvaluationSummary>>;
+    createTaskInCollection: (
+      input: CreateTaskInCollectionInput
+    ) => Promise<ApiResult<TaskSummary>>;
   };
   containers: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
@@ -1143,6 +1251,33 @@ export function createLocalWorkOsApi(
     search: {
       searchWorkspace: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.search.searchWorkspace, input)
+    },
+    collections: {
+      listCollections: (workspaceId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.collections.listCollections,
+          workspaceId
+        ),
+      createTagCollection: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.collections.createTagCollection,
+          input
+        ),
+      createKeywordCollection: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.collections.createKeywordCollection,
+          input
+        ),
+      evaluateCollection: (collectionId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.collections.evaluateCollection,
+          collectionId
+        ),
+      createTaskInCollection: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.collections.createTaskInCollection,
+          input
+        )
     },
     containers: {
       getStatus: () =>

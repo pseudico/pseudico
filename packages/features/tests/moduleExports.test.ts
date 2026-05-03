@@ -15,6 +15,7 @@ import {
   notesModuleContract,
   plannedFeatureAreas,
   projectsModuleContract,
+  CollectionService,
   SavedViewService,
   relationshipsModuleContract,
   savedViewsModuleContract,
@@ -102,7 +103,8 @@ describe("feature module exports", () => {
     ]);
   });
 
-  it("exports the saved-view service implementation", () => {
+  it("exports the saved-view and collection service implementations", () => {
     expect(SavedViewService).toBeDefined();
+    expect(CollectionService).toBeDefined();
   });
 });

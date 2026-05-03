@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(48);
+    expect(channels).toHaveLength(53);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -53,6 +53,7 @@ describe("typed preload API", () => {
       "categories",
       "metadata",
       "search",
+      "collections",
       "containers",
       "items",
       "files"
@@ -546,6 +547,71 @@ describe("typed preload API", () => {
           workspaceId: "workspace_1",
           query: "launch",
           kinds: ["project", "task"]
+        }
+      }
+    ]);
+  });
+
+  it("routes collection calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk([])) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.collections.listCollections("workspace_1");
+    await api.collections.createTagCollection({
+      workspaceId: "workspace_1",
+      tagSlug: "finance"
+    });
+    await api.collections.createKeywordCollection({
+      workspaceId: "workspace_1",
+      query: "supplier"
+    });
+    await api.collections.evaluateCollection("saved_view_1");
+    await api.collections.createTaskInCollection({
+      workspaceId: "workspace_1",
+      collectionId: "saved_view_1",
+      containerId: "container_1",
+      title: "Call accountant"
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.collections.listCollections,
+        input: "workspace_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.collections.createTagCollection,
+        input: {
+          workspaceId: "workspace_1",
+          tagSlug: "finance"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.collections.createKeywordCollection,
+        input: {
+          workspaceId: "workspace_1",
+          query: "supplier"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.collections.evaluateCollection,
+        input: "saved_view_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.collections.createTaskInCollection,
+        input: {
+          workspaceId: "workspace_1",
+          collectionId: "saved_view_1",
+          containerId: "container_1",
+          title: "Call accountant"
         }
       }
     ]);

@@ -3,6 +3,8 @@ import {
   apiOk,
   type ApiResult,
   type CategorySummary,
+  type CollectionEvaluationSummary,
+  type CollectionSummary,
   type DatabaseHealthStatus,
   type InboxSummary,
   type IpcModuleStatus,
@@ -230,6 +232,30 @@ function createMockApi(
     },
     search: {
       searchWorkspace: async () => apiOk([])
+    },
+    collections: {
+      listCollections: async () => apiOk([collectionSummary()]),
+      createTagCollection: async () => apiOk(collectionSummary()),
+      createKeywordCollection: async () => apiOk({
+        ...collectionSummary(),
+        id: "saved_view_2",
+        kind: "keyword",
+        tagSlug: null,
+        keyword: "supplier"
+      }),
+      evaluateCollection: async () => apiOk(collectionEvaluationSummary()),
+      createTaskInCollection: async () =>
+        apiOk({
+          ...taskSummary(),
+          tags: [
+            {
+              id: "tag_1",
+              name: "Finance",
+              slug: "finance",
+              source: "manual"
+            }
+          ]
+        })
     },
     containers: {
       getStatus: async () => apiOk(moduleStatus("containers"))
@@ -478,6 +504,68 @@ function metadataTargetSummary(): MetadataTargetSummary {
   };
 }
 
+function collectionSummary(): CollectionSummary {
+  return {
+    id: "saved_view_1",
+    workspaceId: "workspace_1",
+    name: "Finance",
+    description: "Finance work",
+    kind: "tag",
+    tagSlug: "finance",
+    keyword: null,
+    isFavorite: true,
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z"
+  };
+}
+
+function collectionEvaluationSummary(): CollectionEvaluationSummary {
+  return {
+    collection: collectionSummary(),
+    total: 1,
+    results: [
+      {
+        targetType: "item",
+        targetId: "item_1",
+        kind: "task",
+        title: "Call accountant",
+        containerId: "container_1",
+        containerType: "project",
+        containerTitle: "Launch Plan",
+        categoryId: null,
+        categoryName: null,
+        taskStatus: "open",
+        dueAt: null,
+        tags: ["finance"],
+        destinationPath: "/projects/container_1/items/item_1"
+      }
+    ],
+    groups: [
+      {
+        key: "container_1",
+        label: "Launch Plan",
+        results: [
+          {
+            targetType: "item",
+            targetId: "item_1",
+            kind: "task",
+            title: "Call accountant",
+            containerId: "container_1",
+            containerType: "project",
+            containerTitle: "Launch Plan",
+            categoryId: null,
+            categoryName: null,
+            taskStatus: "open",
+            dueAt: null,
+            tags: ["finance"],
+            destinationPath: "/projects/container_1/items/item_1"
+          }
+        ]
+      }
+    ]
+  };
+}
+
 describe("desktop API client", () => {
   it("passes typed preload results through to renderer callers", async () => {
     const client = createDesktopApiClient(createMockApi());
@@ -605,6 +693,45 @@ describe("desktop API client", () => {
     ).resolves.toEqual({
       ok: true,
       data: []
+    });
+    await expect(client.collections.listCollections()).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: "saved_view_1",
+          kind: "tag",
+          tagSlug: "finance"
+        }
+      ]
+    });
+    await expect(
+      client.collections.evaluateCollection("saved_view_1")
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        total: 1,
+        groups: [
+          {
+            label: "Launch Plan"
+          }
+        ]
+      }
+    });
+    await expect(
+      client.collections.createTaskInCollection({
+        collectionId: "saved_view_1",
+        containerId: "container_1",
+        title: "Call accountant"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        tags: [
+          {
+            slug: "finance"
+          }
+        ]
+      }
     });
     await expect(
       client.items.move({

@@ -59,10 +59,14 @@ export { RelationshipService, relationshipsModuleContract } from "./relationship
 export {
   QueryEvaluator,
   SAVED_VIEW_QUERY_VERSION,
+  CollectionService,
   SavedViewService,
+  createKeywordCollectionQuery,
+  createTagCollectionQuery,
   parseSavedViewQueryJson,
   savedViewsModuleContract,
   stringifySavedViewQuery,
+  toCollectionSummary,
   validateSavedViewQuery
 } from "./savedViews";
 export {
@@ -151,6 +155,13 @@ export type {
 } from "./relationships";
 export type {
   CreateSavedViewInput,
+  CollectionEvaluationResult,
+  CollectionKind,
+  CollectionSummary,
+  CollectionTaskMutationResult,
+  CreateKeywordCollectionInput,
+  CreateTagCollectionInput,
+  CreateTaskInCollectionInput,
   SavedViewEvaluationResult,
   SavedViewGroupBy,
   SavedViewMutationResult,

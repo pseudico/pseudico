@@ -29,6 +29,12 @@ export {
   type CreateListFormProps,
   type CreateListFormValues
 } from "./forms/CreateListForm";
+export {
+  CreateCollectionForm,
+  type CreateCollectionFormProps,
+  type CreateCollectionFormValues,
+  type CreateCollectionMode
+} from "./forms/CreateCollectionForm";
 
 export {
   ItemActionsMenu,
@@ -75,6 +81,12 @@ export {
   type SearchResultCardProps,
   type SearchResultCardViewModel
 } from "./components/SearchResultCard";
+export {
+  GroupedResultsList,
+  type GroupedResultGroupViewModel,
+  type GroupedResultViewModel,
+  type GroupedResultsListProps
+} from "./components/GroupedResultsList";
 export {
   TaskCardContent,
   type TaskCardContentProps,

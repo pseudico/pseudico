@@ -128,6 +128,18 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       searchWorkspace: (input) =>
         callApi(() => api.search.searchWorkspace(input))
     },
+    collections: {
+      listCollections: (workspaceId) =>
+        callApi(() => api.collections.listCollections(workspaceId)),
+      createTagCollection: (input) =>
+        callApi(() => api.collections.createTagCollection(input)),
+      createKeywordCollection: (input) =>
+        callApi(() => api.collections.createKeywordCollection(input)),
+      evaluateCollection: (collectionId) =>
+        callApi(() => api.collections.evaluateCollection(collectionId)),
+      createTaskInCollection: (input) =>
+        callApi(() => api.collections.createTaskInCollection(input))
+    },
     containers: {
       getStatus: () => callApi(() => api.containers.getStatus())
     },
@@ -266,6 +278,18 @@ export const desktopApiClient: LocalWorkOsApi = {
   search: {
     searchWorkspace: (input) =>
       getDesktopApiClient().search.searchWorkspace(input)
+  },
+  collections: {
+    listCollections: (workspaceId) =>
+      getDesktopApiClient().collections.listCollections(workspaceId),
+    createTagCollection: (input) =>
+      getDesktopApiClient().collections.createTagCollection(input),
+    createKeywordCollection: (input) =>
+      getDesktopApiClient().collections.createKeywordCollection(input),
+    evaluateCollection: (collectionId) =>
+      getDesktopApiClient().collections.evaluateCollection(collectionId),
+    createTaskInCollection: (input) =>
+      getDesktopApiClient().collections.createTaskInCollection(input)
   },
   containers: {
     getStatus: () => getDesktopApiClient().containers.getStatus()
