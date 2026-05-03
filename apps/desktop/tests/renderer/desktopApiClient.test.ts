@@ -6,6 +6,8 @@ import {
   type InboxSummary,
   type IpcModuleStatus,
   type ItemSummary,
+  type ListItemSummary,
+  type ListSummary,
   type LocalWorkOsApi,
   type ProjectSummary,
   type RecentWorkspace,
@@ -109,6 +111,21 @@ function createMockApi(
           taskStatus: "done"
         }),
       reopenTask: async () => apiOk(taskSummary())
+    },
+    lists: {
+      create: async () => apiOk(listSummary()),
+      addItem: async () => apiOk(listItemSummary()),
+      updateItem: async () => apiOk(listItemSummary()),
+      completeItem: async () =>
+        apiOk({
+          ...listItemSummary(),
+          status: "done",
+          completedAt: "2026-04-30T01:00:00.000Z"
+        }),
+      reopenItem: async () => apiOk(listItemSummary()),
+      bulkAddItems: async () => apiOk([listItemSummary()]),
+      listByContainer: async () => apiOk([listSummary()]),
+      createList: async () => apiOk(listSummary())
     },
     projects: {
       create: async () =>
@@ -244,6 +261,42 @@ function taskSummary(): TaskSummary {
   };
 }
 
+function listItemSummary(): ListItemSummary {
+  return {
+    id: "list_item_1",
+    workspaceId: "workspace_1",
+    listItemParentId: null,
+    listId: "item_list_1",
+    title: "Confirm copy",
+    body: null,
+    status: "open",
+    depth: 0,
+    sortOrder: 1024,
+    startAt: null,
+    dueAt: null,
+    completedAt: null,
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z",
+    archivedAt: null,
+    deletedAt: null
+  };
+}
+
+function listSummary(): ListSummary {
+  return {
+    ...itemSummary(),
+    id: "item_list_1",
+    type: "list",
+    title: "Launch checklist",
+    displayMode: "checklist",
+    showCompleted: true,
+    progressMode: "count",
+    listCreatedAt: "2026-04-30T00:00:00.000Z",
+    listUpdatedAt: "2026-04-30T00:00:00.000Z",
+    items: [listItemSummary()]
+  };
+}
+
 describe("desktop API client", () => {
   it("passes typed preload results through to renderer callers", async () => {
     const client = createDesktopApiClient(createMockApi());
@@ -292,6 +345,19 @@ describe("desktop API client", () => {
         {
           id: "item_1",
           taskStatus: "open"
+        }
+      ]
+    });
+    await expect(client.lists.listByContainer("container_1")).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: "item_list_1",
+          items: [
+            {
+              id: "list_item_1"
+            }
+          ]
         }
       ]
     });

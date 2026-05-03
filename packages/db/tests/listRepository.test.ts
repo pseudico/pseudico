@@ -108,6 +108,17 @@ describe("ListRepository", () => {
       "list_item_1",
       "list_item_2"
     ]);
+    expect(repository.listByContainer("container_1")).toMatchObject([
+      {
+        item: {
+          id: "item_list_1",
+          type: "list"
+        },
+        list: {
+          itemId: "item_list_1"
+        }
+      }
+    ]);
     expect(repository.getMaxListItemSortOrder("item_list_1")).toBe(3072);
   });
 });

@@ -200,6 +200,32 @@ export class ListRepository {
     return row === undefined ? null : toListWithItemRecord(row);
   }
 
+  listByContainer(
+    containerId: string,
+    filters: ListItemsFilter = {}
+  ): ListWithItemRecord[] {
+    const where = ["i.container_id = ?", "i.type = 'list'"];
+    const values: unknown[] = [containerId];
+
+    if (filters.includeArchived !== true) {
+      where.push("i.archived_at is null");
+    }
+
+    if (filters.includeDeleted !== true) {
+      where.push("i.deleted_at is null");
+    }
+
+    const rows = this.connection.sqlite
+      .prepare<unknown[], ListWithItemRow>(
+        `${LIST_WITH_ITEM_SELECT}
+         where ${where.join(" and ")}
+         order by i.sort_order asc, i.created_at asc`
+      )
+      .all(...values);
+
+    return rows.map(toListWithItemRecord);
+  }
+
   createDetails(input: CreateListDetailsInput): ListDetailsRecord {
     this.connection.sqlite
       .prepare(

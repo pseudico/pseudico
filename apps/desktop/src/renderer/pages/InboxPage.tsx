@@ -1,11 +1,16 @@
 import { Inbox, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
+  CreateListForm,
   ItemFeed,
+  ListCardContent,
   MoveToContainerDialog,
   TaskCardContent,
   TaskQuickAdd,
+  type CreateListFormValues,
   type ItemActionId,
+  type ListCardItemViewModel,
+  type ListCardViewModel,
   type MoveTargetContainer,
   type TaskCardViewModel,
   type TaskQuickAddValues,
@@ -14,6 +19,8 @@ import {
 import type {
   InboxSummary,
   ItemSummary,
+  ListItemSummary,
+  ListSummary,
   LocalWorkOsApi,
   ProjectSummary,
   TaskSummary
@@ -22,6 +29,8 @@ import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
 
 type FeedItemSummary = ItemSummary | TaskSummary;
+type FeedListSummary = ListSummary;
+type InboxFeedItemSummary = FeedItemSummary | FeedListSummary;
 type InboxTaskViewModel = TaskCardViewModel & {
   taskStatus?: TaskSummary["taskStatus"];
   dueAt?: string | null;
@@ -29,10 +38,17 @@ type InboxTaskViewModel = TaskCardViewModel & {
   allDay?: boolean;
   timezone?: string | null;
 };
+type InboxListViewModel = ListCardViewModel & {
+  listItems: ListCardItemViewModel[];
+};
+type InboxFeedViewModel =
+  | InboxTaskViewModel
+  | InboxListViewModel
+  | UniversalItemViewModel;
 
 type InboxPageProps = {
   apiClient?: LocalWorkOsApi;
-  initialItems?: FeedItemSummary[];
+  initialItems?: InboxFeedItemSummary[];
   initialProjects?: ProjectSummary[];
 };
 
@@ -43,16 +59,21 @@ export function InboxPage({
 }: InboxPageProps): React.JSX.Element {
   const { currentWorkspace } = useWorkspaceStore();
   const [inbox, setInbox] = useState<InboxSummary | null>(null);
-  const [items, setItems] = useState<FeedItemSummary[]>(initialItems);
+  const [items, setItems] = useState<InboxFeedItemSummary[]>(initialItems);
   const [projects, setProjects] = useState<ProjectSummary[]>(initialProjects);
   const [loading, setLoading] = useState(false);
   const [moving, setMoving] = useState(false);
   const [savingTask, setSavingTask] = useState(false);
+  const [savingList, setSavingList] = useState(false);
   const [taskBusyId, setTaskBusyId] = useState<string | null>(null);
+  const [listBusyId, setListBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [taskError, setTaskError] = useState<string | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
   const [moveError, setMoveError] = useState<string | null>(null);
-  const [movingItem, setMovingItem] = useState<FeedItemSummary | null>(null);
+  const [movingItem, setMovingItem] = useState<InboxFeedItemSummary | null>(
+    null
+  );
   const projectTargets = useMemo(
     () =>
       projects
@@ -77,7 +98,10 @@ export function InboxPage({
       return;
     }
 
-    const tasksResult = await apiClient.tasks.listByContainer(inboxResult.data.id);
+    const [tasksResult, listsResult] = await Promise.all([
+      apiClient.tasks.listByContainer(inboxResult.data.id),
+      apiClient.lists.listByContainer(inboxResult.data.id)
+    ]);
 
     setLoading(false);
 
@@ -96,8 +120,13 @@ export function InboxPage({
       return;
     }
 
+    if (!listsResult.ok) {
+      setError(listsResult.error.message);
+      return;
+    }
+
     setInbox(inboxResult.data);
-    setItems(mergeTaskDetails(itemsResult.data, tasksResult.data));
+    setItems(mergeFeedDetails(itemsResult.data, tasksResult.data, listsResult.data));
     setProjects(projectsResult.data);
   }
 
@@ -129,9 +158,10 @@ export function InboxPage({
         return;
       }
 
-      const tasksResult = await apiClient.tasks.listByContainer(
-        inboxResult.data.id
-      );
+      const [tasksResult, listsResult] = await Promise.all([
+        apiClient.tasks.listByContainer(inboxResult.data.id),
+        apiClient.lists.listByContainer(inboxResult.data.id)
+      ]);
 
       if (!active) {
         return;
@@ -154,8 +184,15 @@ export function InboxPage({
         return;
       }
 
+      if (!listsResult.ok) {
+        setError(listsResult.error.message);
+        return;
+      }
+
       setInbox(inboxResult.data);
-      setItems(mergeTaskDetails(itemsResult.data, tasksResult.data));
+      setItems(
+        mergeFeedDetails(itemsResult.data, tasksResult.data, listsResult.data)
+      );
       setProjects(projectsResult.data);
     }
 
@@ -207,6 +244,40 @@ export function InboxPage({
 
     await loadInbox(currentWorkspace.id);
     setSavingTask(false);
+    return true;
+  }
+
+  async function createInboxList(
+    values: CreateListFormValues
+  ): Promise<boolean> {
+    if (currentWorkspace === null) {
+      return false;
+    }
+
+    setSavingList(true);
+    setListError(null);
+
+    const activeInbox = await resolveInbox(currentWorkspace.id);
+
+    if (activeInbox === null) {
+      setSavingList(false);
+      return false;
+    }
+
+    const result = await apiClient.lists.create({
+      workspaceId: currentWorkspace.id,
+      containerId: activeInbox.id,
+      title: values.title
+    });
+
+    if (!result.ok) {
+      setSavingList(false);
+      setListError(result.error.message);
+      return false;
+    }
+
+    await loadInbox(currentWorkspace.id);
+    setSavingList(false);
     return true;
   }
 
@@ -299,7 +370,100 @@ export function InboxPage({
     setTaskBusyId(null);
   }
 
+  async function addListItem(
+    item: ListCardViewModel,
+    title: string
+  ): Promise<boolean> {
+    if (currentWorkspace === null) {
+      return false;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result = await apiClient.lists.addItem({
+      listId: item.id,
+      title
+    });
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return false;
+    }
+
+    await loadInbox(currentWorkspace.id);
+    setListBusyId(null);
+    return true;
+  }
+
+  async function bulkAddListItems(
+    item: ListCardViewModel,
+    text: string
+  ): Promise<boolean> {
+    if (currentWorkspace === null) {
+      return false;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result = await apiClient.lists.bulkAddItems({
+      listId: item.id,
+      text
+    });
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return false;
+    }
+
+    await loadInbox(currentWorkspace.id);
+    setListBusyId(null);
+    return true;
+  }
+
+  async function toggleListItem(
+    item: ListCardViewModel,
+    listItem: ListCardItemViewModel
+  ): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result =
+      listItem.status === "done"
+        ? await apiClient.lists.reopenItem(listItem.id)
+        : await apiClient.lists.completeItem(listItem.id);
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return;
+    }
+
+    await loadInbox(currentWorkspace.id);
+    setListBusyId(null);
+  }
+
   function renderItemContent(item: UniversalItemViewModel): React.ReactNode {
+    if (isListCardViewModel(item)) {
+      return (
+        <ListCardContent
+          disabled={listBusyId === item.id}
+          error={listBusyId === item.id ? listError : null}
+          item={item}
+          onAddItem={addListItem}
+          onBulkAddItems={bulkAddListItems}
+          onToggleItem={toggleListItem}
+        />
+      );
+    }
+
     if (isTaskCardViewModel(item)) {
       return (
         <TaskCardContent
@@ -352,6 +516,13 @@ export function InboxPage({
         onSubmit={createInboxTask}
       />
 
+      <CreateListForm
+        contextLabel="Inbox"
+        disabled={savingList || loading}
+        error={listBusyId === null ? listError : null}
+        onSubmit={createInboxList}
+      />
+
       <section className="inbox-content-section" aria-label="Inbox content">
         <div className="panel-heading">
           <Inbox size={17} aria-hidden="true" />
@@ -388,17 +559,29 @@ export function InboxPage({
   );
 }
 
-function mergeTaskDetails(
+function mergeFeedDetails(
   items: readonly ItemSummary[],
-  tasks: readonly TaskSummary[]
-): FeedItemSummary[] {
+  tasks: readonly TaskSummary[],
+  lists: readonly ListSummary[]
+): InboxFeedItemSummary[] {
   const tasksByItemId = new Map(tasks.map((task) => [task.id, task]));
+  const listsByItemId = new Map(lists.map((list) => [list.id, list]));
 
-  return items.map((item) => tasksByItemId.get(item.id) ?? item);
+  const mergedItems = items.map(
+    (item) => tasksByItemId.get(item.id) ?? listsByItemId.get(item.id) ?? item
+  );
+  const mergedItemIds = new Set(mergedItems.map((item) => item.id));
+  const missingLists = lists.filter((list) => !mergedItemIds.has(list.id));
+
+  return [...mergedItems, ...missingLists].sort(compareFeedSummaries);
 }
 
-function toItemViewModel(item: FeedItemSummary): InboxTaskViewModel {
+function toItemViewModel(item: InboxFeedItemSummary): InboxFeedViewModel {
   const task = isTaskSummary(item) ? item : null;
+
+  if (isListSummary(item)) {
+    return toInboxListViewModel(item);
+  }
 
   return {
     id: item.id,
@@ -407,6 +590,8 @@ function toItemViewModel(item: FeedItemSummary): InboxTaskViewModel {
     body: item.body,
     status: task?.taskStatus ?? item.status,
     categoryLabel: item.categoryId,
+    sortOrder: item.sortOrder,
+    createdAt: item.createdAt,
     dueLabel: formatDateLabel(task?.dueAt),
     updatedLabel: item.updatedAt,
     pinned: item.pinned,
@@ -427,6 +612,50 @@ function toItemViewModel(item: FeedItemSummary): InboxTaskViewModel {
   };
 }
 
+function toInboxListViewModel(list: ListSummary): InboxListViewModel {
+  return {
+    id: list.id,
+    type: "list",
+    title: list.title,
+    body: list.body,
+    status: list.status,
+    categoryLabel: list.categoryId,
+    sortOrder: list.sortOrder,
+    createdAt: list.createdAt,
+    updatedLabel: list.updatedAt,
+    pinned: list.pinned,
+    progressMode: list.progressMode,
+    showCompleted: list.showCompleted,
+    listItems: list.items.map(toListCardItemViewModel)
+  };
+}
+
+function toListCardItemViewModel(
+  listItem: ListItemSummary
+): ListCardItemViewModel {
+  return {
+    id: listItem.id,
+    title: listItem.title,
+    body: listItem.body,
+    status: listItem.status,
+    depth: listItem.depth,
+    sortOrder: listItem.sortOrder
+  };
+}
+
+function compareFeedSummaries(
+  left: InboxFeedItemSummary,
+  right: InboxFeedItemSummary
+): number {
+  const sortDelta = left.sortOrder - right.sortOrder;
+
+  if (sortDelta !== 0) {
+    return sortDelta;
+  }
+
+  return left.createdAt.localeCompare(right.createdAt);
+}
+
 function toMoveTarget(project: ProjectSummary): MoveTargetContainer {
   return {
     id: project.id,
@@ -436,14 +665,24 @@ function toMoveTarget(project: ProjectSummary): MoveTargetContainer {
   };
 }
 
-function isTaskSummary(item: FeedItemSummary): item is TaskSummary {
+function isTaskSummary(item: InboxFeedItemSummary): item is TaskSummary {
   return item.type === "task" && "taskStatus" in item;
+}
+
+function isListSummary(item: InboxFeedItemSummary): item is ListSummary {
+  return item.type === "list" && "items" in item;
 }
 
 function isTaskCardViewModel(
   item: UniversalItemViewModel
 ): item is TaskCardViewModel {
   return item.type === "task" && "taskStatus" in item;
+}
+
+function isListCardViewModel(
+  item: UniversalItemViewModel
+): item is ListCardViewModel {
+  return item.type === "list" && "listItems" in item;
 }
 
 function formatDateLabel(value: string | null | undefined): string | null {

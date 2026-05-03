@@ -12,6 +12,7 @@ import { afterEach } from "vitest";
 import { describe, expect, it } from "vitest";
 import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandlers";
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
+import { createListIpcHandlers } from "../../src/main/ipc/listHandlers";
 import { handleGetModuleStatus } from "../../src/main/ipc/moduleStatusHandlers";
 import { createProjectIpcHandlers } from "../../src/main/ipc/projectHandlers";
 import { createTaskIpcHandlers } from "../../src/main/ipc/taskHandlers";
@@ -395,6 +396,149 @@ describe("Inbox IPC handlers", () => {
     await expect(handlers.handleListInboxItems(undefined)).resolves.toMatchObject({
       ok: true,
       data: []
+    });
+  });
+});
+
+describe("List IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createListIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(
+      handlers.handleListListsByContainer("container_1")
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("creates, edits, and lists checklist content", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-lists-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const projectResult = await projectHandlers.handleCreateProject({
+      name: "Launch Plan"
+    });
+
+    if (!projectResult.ok) {
+      throw new Error(projectResult.error.message);
+    }
+
+    const handlers = createListIpcHandlers(workspaceService);
+    const createdList = await handlers.handleCreateList({
+      containerId: projectResult.data.project.id,
+      title: "Launch checklist"
+    });
+
+    if (!createdList.ok) {
+      throw new Error(createdList.error.message);
+    }
+
+    expect(createdList).toMatchObject({
+      ok: true,
+      data: {
+        type: "list",
+        title: "Launch checklist",
+        items: []
+      }
+    });
+
+    const createdItem = await handlers.handleAddListItem({
+      listId: createdList.data.id,
+      title: "Confirm copy"
+    });
+
+    if (!createdItem.ok) {
+      throw new Error(createdItem.error.message);
+    }
+
+    await expect(
+      handlers.handleCompleteListItem(createdItem.data.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: createdItem.data.id,
+        status: "done"
+      }
+    });
+    await expect(
+      handlers.handleReopenListItem(createdItem.data.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: createdItem.data.id,
+        status: "open"
+      }
+    });
+    await expect(
+      handlers.handleBulkAddListItems({
+        listId: createdList.data.id,
+        text: "- Send update\n[x] Confirm brief"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          title: "Send update",
+          status: "open"
+        },
+        {
+          title: "Confirm brief",
+          status: "done"
+        }
+      ]
+    });
+
+    await expect(
+      handlers.handleListListsByContainer(projectResult.data.project.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: createdList.data.id,
+          title: "Launch checklist",
+          items: [
+            {
+              title: "Confirm copy"
+            },
+            {
+              title: "Send update"
+            },
+            {
+              title: "Confirm brief"
+            }
+          ]
+        }
+      ]
     });
   });
 });

@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(23);
+    expect(channels).toHaveLength(30);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -47,6 +47,7 @@ describe("typed preload API", () => {
       "database",
       "inbox",
       "tasks",
+      "lists",
       "projects",
       "containers",
       "items",
@@ -229,6 +230,74 @@ describe("typed preload API", () => {
       },
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.tasks.listByContainer,
+        input: "container_1"
+      }
+    ]);
+  });
+
+  it("routes list calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.lists.create({
+      workspaceId: "workspace_1",
+      containerId: "container_1",
+      title: "Launch checklist"
+    });
+    await api.lists.addItem({
+      listId: "item_list_1",
+      title: "Confirm copy"
+    });
+    await api.lists.completeItem("list_item_1");
+    await api.lists.reopenItem("list_item_1");
+    await api.lists.bulkAddItems({
+      listId: "item_list_1",
+      text: "- Confirm copy"
+    });
+    await api.lists.listByContainer("container_1");
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.createList,
+        input: {
+          workspaceId: "workspace_1",
+          containerId: "container_1",
+          title: "Launch checklist"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.addItem,
+        input: {
+          listId: "item_list_1",
+          title: "Confirm copy"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.completeItem,
+        input: "list_item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.reopenItem,
+        input: "list_item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems,
+        input: {
+          listId: "item_list_1",
+          text: "- Confirm copy"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.listByContainer,
         input: "container_1"
       }
     ]);

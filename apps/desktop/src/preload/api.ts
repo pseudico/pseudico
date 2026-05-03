@@ -191,6 +191,9 @@ export type MoveInboxItemToProjectInput = {
 };
 
 export type TaskStatus = "open" | "done" | "waiting" | "cancelled";
+export type ListItemStatus = "open" | "done" | "waiting" | "cancelled";
+export type ListDisplayMode = "checklist" | "pipeline";
+export type ListProgressMode = "count" | "manual" | "none";
 
 export type TaskSummary = ItemSummary & {
   type: "task";
@@ -240,6 +243,83 @@ export type UpdateTaskInput = {
   containerTabId?: string | null;
 };
 
+export type ListItemSummary = {
+  id: string;
+  workspaceId: string;
+  listItemParentId: string | null;
+  listId: string;
+  title: string;
+  body: string | null;
+  status: ListItemStatus;
+  depth: number;
+  sortOrder: number;
+  startAt: string | null;
+  dueAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  archivedAt: string | null;
+  deletedAt: string | null;
+};
+
+export type ListSummary = ItemSummary & {
+  type: "list";
+  displayMode: ListDisplayMode;
+  showCompleted: boolean;
+  progressMode: ListProgressMode;
+  listCreatedAt: string;
+  listUpdatedAt: string;
+  items: ListItemSummary[];
+};
+
+export type CreateListInput = {
+  workspaceId?: string;
+  containerId: string;
+  title: string;
+  actorType?: "local_user" | "system" | "importer";
+  body?: string | null;
+  categoryId?: string | null;
+  containerTabId?: string | null;
+  displayMode?: ListDisplayMode;
+  showCompleted?: boolean;
+  progressMode?: ListProgressMode;
+  sortOrder?: number;
+  pinned?: boolean;
+};
+
+export type AddListItemInput = {
+  listId: string;
+  title: string;
+  actorType?: "local_user" | "system" | "importer";
+  body?: string | null;
+  status?: ListItemStatus;
+  depth?: number;
+  sortOrder?: number;
+  listItemParentId?: string | null;
+  startAt?: string | null;
+  dueAt?: string | null;
+};
+
+export type UpdateListItemInput = {
+  listItemId: string;
+  actorType?: "local_user" | "system" | "importer";
+  title?: string;
+  body?: string | null;
+  status?: ListItemStatus;
+  depth?: number;
+  sortOrder?: number;
+  listItemParentId?: string | null;
+  startAt?: string | null;
+  dueAt?: string | null;
+};
+
+export type BulkAddListItemsInput = {
+  listId: string;
+  text: string;
+  actorType?: "local_user" | "system" | "importer";
+  startSortOrder?: number;
+};
+
 export type LocalWorkOsModuleName =
   | "containers"
   | "items"
@@ -274,6 +354,15 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     completeTask: "local-work-os:tasks:complete-task",
     reopenTask: "local-work-os:tasks:reopen-task",
     listByContainer: "local-work-os:tasks:list-by-container"
+  },
+  lists: {
+    createList: "local-work-os:lists:create-list",
+    addItem: "local-work-os:lists:add-item",
+    updateItem: "local-work-os:lists:update-item",
+    completeItem: "local-work-os:lists:complete-item",
+    reopenItem: "local-work-os:lists:reopen-item",
+    bulkAddItems: "local-work-os:lists:bulk-add-items",
+    listByContainer: "local-work-os:lists:list-by-container"
   },
   projects: {
     createProject: "local-work-os:projects:create-project",
@@ -350,6 +439,34 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.tasks.listByContainer]: {
     input: string;
     result: ApiResult<TaskSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.createList]: {
+    input: CreateListInput;
+    result: ApiResult<ListSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.addItem]: {
+    input: AddListItemInput;
+    result: ApiResult<ListItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.updateItem]: {
+    input: UpdateListItemInput;
+    result: ApiResult<ListItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.completeItem]: {
+    input: string;
+    result: ApiResult<ListItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.reopenItem]: {
+    input: string;
+    result: ApiResult<ListItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems]: {
+    input: BulkAddListItemsInput;
+    result: ApiResult<ListItemSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.listByContainer]: {
+    input: string;
+    result: ApiResult<ListSummary[]>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject]: {
     input: CreateProjectInput;
@@ -438,6 +555,22 @@ export type LocalWorkOsApi = {
     updateTask: (input: UpdateTaskInput) => Promise<ApiResult<TaskSummary>>;
     completeTask: (itemId: string) => Promise<ApiResult<TaskSummary>>;
     reopenTask: (itemId: string) => Promise<ApiResult<TaskSummary>>;
+  };
+  lists: {
+    create: (input: CreateListInput) => Promise<ApiResult<ListSummary>>;
+    addItem: (input: AddListItemInput) => Promise<ApiResult<ListItemSummary>>;
+    updateItem: (
+      input: UpdateListItemInput
+    ) => Promise<ApiResult<ListItemSummary>>;
+    completeItem: (listItemId: string) => Promise<ApiResult<ListItemSummary>>;
+    reopenItem: (listItemId: string) => Promise<ApiResult<ListItemSummary>>;
+    bulkAddItems: (
+      input: BulkAddListItemsInput
+    ) => Promise<ApiResult<ListItemSummary[]>>;
+    listByContainer: (
+      containerId: string
+    ) => Promise<ApiResult<ListSummary[]>>;
+    createList: (input: CreateListInput) => Promise<ApiResult<ListSummary>>;
   };
   projects: {
     create: (
@@ -549,6 +682,24 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.completeTask, itemId),
       reopenTask: (itemId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.reopenTask, itemId)
+    },
+    lists: {
+      create: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.createList, input),
+      addItem: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.addItem, input),
+      updateItem: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.updateItem, input),
+      completeItem: (listItemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.completeItem, listItemId),
+      reopenItem: (listItemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.reopenItem, listItemId),
+      bulkAddItems: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems, input),
+      listByContainer: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.listByContainer, containerId),
+      createList: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.createList, input)
     },
     projects: {
       create: (input) =>

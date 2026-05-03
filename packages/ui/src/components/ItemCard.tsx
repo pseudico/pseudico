@@ -19,6 +19,8 @@ export type UniversalItemViewModel = {
   body?: string | null;
   status?: string | null;
   categoryLabel?: string | null;
+  sortOrder?: number;
+  createdAt?: string;
   dueLabel?: string | null;
   updatedLabel?: string | null;
   pinned?: boolean;
