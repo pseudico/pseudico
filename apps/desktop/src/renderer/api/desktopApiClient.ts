@@ -140,6 +140,15 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       createTaskInCollection: (input) =>
         callApi(() => api.collections.createTaskInCollection(input))
     },
+    activity: {
+      listRecent: (input) => callApi(() => api.activity.listRecent(input)),
+      listForTarget: (input) =>
+        callApi(() => api.activity.listForTarget(input)),
+      listRecentActivity: (input) =>
+        callApi(() => api.activity.listRecentActivity(input)),
+      listActivityForTarget: (input) =>
+        callApi(() => api.activity.listActivityForTarget(input))
+    },
     containers: {
       getStatus: () => callApi(() => api.containers.getStatus())
     },
@@ -290,6 +299,16 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().collections.evaluateCollection(collectionId),
     createTaskInCollection: (input) =>
       getDesktopApiClient().collections.createTaskInCollection(input)
+  },
+  activity: {
+    listRecent: (input) =>
+      getDesktopApiClient().activity.listRecent(input),
+    listForTarget: (input) =>
+      getDesktopApiClient().activity.listForTarget(input),
+    listRecentActivity: (input) =>
+      getDesktopApiClient().activity.listRecentActivity(input),
+    listActivityForTarget: (input) =>
+      getDesktopApiClient().activity.listActivityForTarget(input)
   },
   containers: {
     getStatus: () => getDesktopApiClient().containers.getStatus()

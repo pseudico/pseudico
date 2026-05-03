@@ -57,5 +57,8 @@ describe("ActivityLogRepository", () => {
       second,
       first
     ]);
+    expect(repository.listForTarget("container", "container_1", 1)).toEqual([
+      second
+    ]);
   });
 });

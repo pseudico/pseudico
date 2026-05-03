@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   backupModuleContract,
+  activityModuleContract,
   calendarModuleContract,
   categoriesModuleContract,
   contactsModuleContract,
@@ -49,7 +50,8 @@ describe("feature module exports", () => {
       "timeline",
       "calendar",
       "backup",
-      "export"
+      "export",
+      "activity"
     ]);
   });
 
@@ -75,7 +77,8 @@ describe("feature module exports", () => {
       timelineModuleContract.module,
       calendarModuleContract.module,
       backupModuleContract.module,
-      exportModuleContract.module
+      exportModuleContract.module,
+      activityModuleContract.module
     ];
 
     expect(exportedModules).toEqual([
@@ -99,7 +102,8 @@ describe("feature module exports", () => {
       "timeline",
       "calendar",
       "backup",
-      "export"
+      "export",
+      "activity"
     ]);
   });
 

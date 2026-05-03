@@ -1,4 +1,4 @@
-import { ItemService } from "@local-work-os/features";
+import { formatActivityEvent, ItemService } from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -168,6 +168,8 @@ function toItemSummary(item: ItemRecord): ItemSummary {
 }
 
 function toActivitySummary(activity: ActivityLogRecord): ActivitySummary {
+  const formatted = formatActivityEvent(activity);
+
   return {
     id: activity.id,
     workspaceId: activity.workspaceId,
@@ -178,7 +180,11 @@ function toActivitySummary(activity: ActivityLogRecord): ActivitySummary {
     summary: activity.summary,
     beforeJson: activity.beforeJson,
     afterJson: activity.afterJson,
-    createdAt: activity.createdAt
+    createdAt: activity.createdAt,
+    actionLabel: formatted.actionLabel,
+    actorLabel: formatted.actorLabel,
+    targetLabel: formatted.targetLabel,
+    description: formatted.description
   };
 }
 

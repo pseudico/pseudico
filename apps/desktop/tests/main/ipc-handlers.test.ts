@@ -11,6 +11,7 @@ import { ItemService, TagService } from "@local-work-os/features";
 import { afterEach } from "vitest";
 import { describe, expect, it } from "vitest";
 import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandlers";
+import { createActivityIpcHandlers } from "../../src/main/ipc/activityHandlers";
 import { createCategoryIpcHandlers } from "../../src/main/ipc/categoryHandlers";
 import { createCollectionIpcHandlers } from "../../src/main/ipc/collectionHandlers";
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
@@ -943,6 +944,89 @@ describe("Item IPC handlers", () => {
       data: {
         deletedAt: expect.any(String)
       }
+    });
+  });
+});
+
+describe("Activity IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createActivityIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(
+      handlers.handleListRecentActivity(undefined)
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("lists recent and target activity through the current workspace", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-activity-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const projectResult = await projectHandlers.handleCreateProject({
+      name: "Launch Plan"
+    });
+
+    if (!projectResult.ok) {
+      throw new Error(projectResult.error.message);
+    }
+
+    const handlers = createActivityIpcHandlers(workspaceService);
+
+    await expect(
+      handlers.handleListRecentActivity({ limit: 1 })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          action: "container_created",
+          actionLabel: "Container Created",
+          description: "Created project \"Launch Plan\"."
+        }
+      ]
+    });
+    await expect(
+      handlers.handleListActivityForTarget({
+        targetType: "container",
+        targetId: projectResult.data.project.id
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          targetLabel: `Container ${projectResult.data.project.id}`
+        }
+      ]
     });
   });
 });

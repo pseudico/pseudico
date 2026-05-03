@@ -2,6 +2,7 @@ import { DatabaseBootstrapService } from "@local-work-os/db";
 import { app } from "electron";
 import { join } from "node:path";
 import { registerCategoryIpc } from "./registerCategoryIpc";
+import { registerActivityIpc } from "./registerActivityIpc";
 import { registerCollectionIpc } from "./registerCollectionIpc";
 import { registerContainerIpc } from "./registerContainerIpc";
 import { registerDatabaseIpc } from "./registerDatabaseIpc";
@@ -44,6 +45,7 @@ export function registerDesktopIpc(
   registerListIpc(services.workspaceService);
   registerNoteIpc(services.workspaceService);
   registerCategoryIpc(services.workspaceService);
+  registerActivityIpc(services.workspaceService);
   registerMetadataIpc(services.workspaceService);
   registerSearchIpc(services.workspaceService);
   registerCollectionIpc(services.workspaceService);

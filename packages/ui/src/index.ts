@@ -129,6 +129,11 @@ export {
   type ItemInspectorProps
 } from "./components/ItemInspector";
 export {
+  RecentActivityList,
+  type RecentActivityListProps,
+  type RecentActivityViewModel
+} from "./components/RecentActivityList";
+export {
   RelatedItemsPanel,
   type RelatedItemDirection,
   type RelatedItemViewModel,

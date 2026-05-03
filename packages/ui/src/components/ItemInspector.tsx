@@ -1,9 +1,10 @@
-import { Clock3, X } from "lucide-react";
+import { X } from "lucide-react";
 import { getItemTypeLabel } from "./ItemTypeIcon";
 import {
   RelatedItemsPanel,
   type RelatedItemViewModel
 } from "./RelatedItemsPanel";
+import { RecentActivityList } from "./RecentActivityList";
 
 export type ItemInspectorItem = {
   id: string;
@@ -26,7 +27,11 @@ export type ItemInspectorActivity = {
   id: string;
   action: string;
   actorType: string;
+  actionLabel?: string;
+  actorLabel?: string;
+  targetLabel?: string;
   summary?: string | null;
+  description?: string | null;
   createdAt: string;
 };
 
@@ -74,25 +79,7 @@ export function ItemInspectorPanel({
 
       <RelatedItemsPanel relationships={relationships} />
 
-      <section className="item-inspector-activity" aria-label="Recent activity">
-        <div className="panel-heading">
-          <Clock3 size={16} aria-hidden="true" />
-          <h4>Recent activity</h4>
-        </div>
-        {activity.length === 0 ? (
-          <p className="muted-text">No activity recorded yet.</p>
-        ) : (
-          <ol>
-            {activity.map((entry) => (
-              <li key={entry.id}>
-                <strong>{formatActionLabel(entry.action)}</strong>
-                <span>{entry.summary ?? "No summary"}</span>
-                <time dateTime={entry.createdAt}>{entry.createdAt}</time>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
+      <RecentActivityList activity={activity} />
     </dialog>
   );
 }
@@ -121,12 +108,4 @@ function buildInspectorMetadata(
   }
 
   return metadata;
-}
-
-function formatActionLabel(action: string): string {
-  return action
-    .split("_")
-    .filter(Boolean)
-    .map((part) => part[0]?.toUpperCase() + part.slice(1))
-    .join(" ");
 }

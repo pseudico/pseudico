@@ -408,6 +408,21 @@ export type ActivitySummary = {
   beforeJson: string | null;
   afterJson: string | null;
   createdAt: string;
+  actionLabel: string;
+  actorLabel: string;
+  targetLabel: string;
+  description: string;
+};
+
+export type ListRecentActivityInput = {
+  workspaceId?: string;
+  limit?: number;
+};
+
+export type ListActivityForTargetInput = {
+  targetType: string;
+  targetId: string;
+  limit?: number;
 };
 
 export type ItemInspectorSummary = {
@@ -662,6 +677,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     createTaskInCollection:
       "local-work-os:collections:create-task-in-collection"
   },
+  activity: {
+    listRecentActivity: "local-work-os:activity:list-recent-activity",
+    listActivityForTarget: "local-work-os:activity:list-activity-for-target"
+  },
   containers: {
     getStatus: "local-work-os:containers:get-status"
   },
@@ -859,6 +878,14 @@ export type LocalWorkOsIpcContracts = {
     input: CreateTaskInCollectionInput;
     result: ApiResult<TaskSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.activity.listRecentActivity]: {
+    input: ListRecentActivityInput | undefined;
+    result: ApiResult<ActivitySummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.activity.listActivityForTarget]: {
+    input: ListActivityForTargetInput;
+    result: ApiResult<ActivitySummary[]>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.containers.getStatus]: {
     input: undefined;
     result: ApiResult<IpcModuleStatus>;
@@ -1048,6 +1075,20 @@ export type LocalWorkOsApi = {
     createTaskInCollection: (
       input: CreateTaskInCollectionInput
     ) => Promise<ApiResult<TaskSummary>>;
+  };
+  activity: {
+    listRecent: (
+      input?: ListRecentActivityInput
+    ) => Promise<ApiResult<ActivitySummary[]>>;
+    listForTarget: (
+      input: ListActivityForTargetInput
+    ) => Promise<ApiResult<ActivitySummary[]>>;
+    listRecentActivity: (
+      input?: ListRecentActivityInput
+    ) => Promise<ApiResult<ActivitySummary[]>>;
+    listActivityForTarget: (
+      input: ListActivityForTargetInput
+    ) => Promise<ApiResult<ActivitySummary[]>>;
   };
   containers: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
@@ -1278,6 +1319,16 @@ export function createLocalWorkOsApi(
           LOCAL_WORK_OS_IPC_CHANNELS.collections.createTaskInCollection,
           input
         )
+    },
+    activity: {
+      listRecent: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.activity.listRecentActivity, input),
+      listForTarget: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.activity.listActivityForTarget, input),
+      listRecentActivity: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.activity.listRecentActivity, input),
+      listActivityForTarget: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.activity.listActivityForTarget, input)
     },
     containers: {
       getStatus: () =>
