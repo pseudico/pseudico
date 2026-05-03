@@ -37,6 +37,20 @@ export type {
 } from "./entities/List";
 export { NOTE_FORMATS, isNoteFormat } from "./entities/Note";
 export type { NoteFormat } from "./entities/Note";
+export {
+  TAGGING_SOURCES,
+  TAGGING_TARGET_TYPES,
+  isTaggingSource,
+  isTaggingTargetType
+} from "./entities/Tag";
+export type { TaggingSource, TaggingTargetType } from "./entities/Tag";
+export {
+  normalizeTagName,
+  parseInlineTagSlugs,
+  parseInlineTags,
+  slugifyTagName
+} from "./services/tagParser";
+export type { ParsedInlineTag } from "./services/tagParser";
 export { createLocalId } from "./ids";
 export { createIsoTimestamp } from "./time";
 
