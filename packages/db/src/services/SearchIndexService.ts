@@ -41,6 +41,33 @@ export type RebuildWorkspaceIndexResult = {
   indexedListItemCount: number;
 };
 
+export type SearchIndexHealthTarget = {
+  targetType: "container" | "item" | "list_item";
+  targetId: string;
+};
+
+export type SearchIndexDeletedFlagMismatch = SearchIndexHealthTarget & {
+  expectedIsDeleted: boolean;
+  indexedIsDeleted: boolean;
+};
+
+export type SearchIndexHealthReport = {
+  workspaceId: string;
+  status: "healthy" | "degraded";
+  containerSourceCount: number;
+  itemSourceCount: number;
+  listItemSourceCount: number;
+  indexedContainerCount: number;
+  indexedItemCount: number;
+  indexedListItemCount: number;
+  missingRecordCount: number;
+  orphanedRecordCount: number;
+  deletedFlagMismatchCount: number;
+  missingTargets: SearchIndexHealthTarget[];
+  orphanedTargets: SearchIndexHealthTarget[];
+  deletedFlagMismatches: SearchIndexDeletedFlagMismatch[];
+};
+
 export class SearchIndexService {
   private readonly connection: DatabaseConnection;
   private readonly idFactory: SearchIndexIdFactory;
@@ -255,6 +282,116 @@ export class SearchIndexService {
     }
   }
 
+  getSearchIndexHealth(workspaceId: string): SearchIndexHealthReport {
+    const containers = new ContainerRepository(this.connection).listByWorkspace(
+      workspaceId,
+      {
+        includeArchived: true,
+        includeDeleted: true
+      }
+    );
+    const items = new ItemRepository(this.connection).listByWorkspace(workspaceId, {
+      includeArchived: true,
+      includeDeleted: true
+    });
+    const listItems = new ListRepository(this.connection).listItemsByWorkspace(
+      workspaceId,
+      {
+        includeArchived: true,
+        includeDeleted: true
+      }
+    );
+    const indexedRecords = this.repository.listByWorkspace(workspaceId, {
+      targetTypes: ["container", "item", "list_item"]
+    });
+    const expected = new Map<string, boolean>();
+    const missingTargets: SearchIndexHealthTarget[] = [];
+    const orphanedTargets: SearchIndexHealthTarget[] = [];
+    const deletedFlagMismatches: SearchIndexDeletedFlagMismatch[] = [];
+
+    for (const container of containers) {
+      expected.set(createHealthKey("container", container.id), container.deletedAt !== null);
+    }
+
+    for (const item of items) {
+      expected.set(createHealthKey("item", item.id), item.deletedAt !== null);
+    }
+
+    for (const listItem of listItems) {
+      expected.set(createHealthKey("list_item", listItem.id), listItem.deletedAt !== null);
+    }
+
+    const indexed = new Map<string, SearchIndexRecord>();
+
+    for (const record of indexedRecords) {
+      if (!isCoreSearchTargetType(record.targetType)) {
+        continue;
+      }
+
+      const key = createHealthKey(record.targetType, record.targetId);
+      indexed.set(key, record);
+
+      const expectedIsDeleted = expected.get(key);
+
+      if (expectedIsDeleted === undefined) {
+        orphanedTargets.push({
+          targetType: record.targetType,
+          targetId: record.targetId
+        });
+        continue;
+      }
+
+      if (expectedIsDeleted !== record.isDeleted) {
+        deletedFlagMismatches.push({
+          targetType: record.targetType,
+          targetId: record.targetId,
+          expectedIsDeleted,
+          indexedIsDeleted: record.isDeleted
+        });
+      }
+    }
+
+    for (const [key] of expected) {
+      if (indexed.has(key)) {
+        continue;
+      }
+
+      missingTargets.push(parseHealthKey(key));
+    }
+
+    const indexedContainerCount = indexedRecords.filter(
+      (record) => record.targetType === "container"
+    ).length;
+    const indexedItemCount = indexedRecords.filter(
+      (record) => record.targetType === "item"
+    ).length;
+    const indexedListItemCount = indexedRecords.filter(
+      (record) => record.targetType === "list_item"
+    ).length;
+
+    return {
+      workspaceId,
+      status:
+        missingTargets.length === 0 &&
+        orphanedTargets.length === 0 &&
+        deletedFlagMismatches.length === 0
+          ? "healthy"
+          : "degraded",
+      containerSourceCount: containers.length,
+      itemSourceCount: items.length,
+      listItemSourceCount: listItems.length,
+      indexedContainerCount,
+      indexedItemCount,
+      indexedListItemCount,
+      missingRecordCount: missingTargets.length,
+      orphanedRecordCount: orphanedTargets.length,
+      deletedFlagMismatchCount: deletedFlagMismatches.length,
+      missingTargets,
+      orphanedTargets,
+      deletedFlagMismatches
+    };
+  }
+
   private rebuildWorkspaceIndexInCurrentTransaction(
     workspaceId: string
   ): RebuildWorkspaceIndexResult {
@@ -394,4 +531,34 @@ function buildNoteSearchBody(note: NoteDetailsRecord): string {
     .map((value) => value.trim())
     .filter(Boolean)
     .join("\n");
+}
+
+function createHealthKey(
+  targetType: SearchIndexHealthTarget["targetType"],
+  targetId: string
+): string {
+  return `${targetType}:${targetId}`;
+}
+
+function parseHealthKey(key: string): SearchIndexHealthTarget {
+  const delimiterIndex = key.indexOf(":");
+
+  if (delimiterIndex === -1) {
+    throw new Error(`Invalid search index health key: ${key}.`);
+  }
+
+  const targetType = key.slice(0, delimiterIndex);
+  const targetId = key.slice(delimiterIndex + 1);
+
+  if (!isCoreSearchTargetType(targetType)) {
+    throw new Error(`Invalid search index target type: ${targetType}.`);
+  }
+
+  return { targetType, targetId };
+}
+
+function isCoreSearchTargetType(
+  targetType: string
+): targetType is SearchIndexHealthTarget["targetType"] {
+  return ["container", "item", "list_item"].includes(targetType);
 }

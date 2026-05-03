@@ -4,6 +4,7 @@ import {
   type DatabaseConnection,
   type RebuildWorkspaceIndexResult,
   type RemoveSearchIndexInput,
+  type SearchIndexHealthReport,
   type SearchIndexIdFactory,
   type SearchIndexRecord,
   type SearchProjectionInput,
@@ -13,12 +14,18 @@ import {
   type ListItemRecord,
   type NoteDetailsRecord
 } from "@local-work-os/db";
+import {
+  SearchIndexOrchestrator,
+  type UpsertListIndexResult,
+  type UpsertSearchTargetInput
+} from "./SearchIndexOrchestrator";
 
 // Owns search-facing application service contracts.
 // Does not own source-of-truth domain records or remote indexing.
 export class SearchService {
   readonly module = "search";
 
+  private readonly searchIndexOrchestrator: SearchIndexOrchestrator;
   private readonly searchIndexService: SearchIndexService;
 
   constructor(input: {
@@ -27,6 +34,7 @@ export class SearchService {
     now?: () => Date;
   }) {
     this.searchIndexService = new SearchIndexService(input);
+    this.searchIndexOrchestrator = new SearchIndexOrchestrator(input);
   }
 
   upsertContainer(
@@ -36,8 +44,22 @@ export class SearchService {
     return this.searchIndexService.upsertContainer(container, input);
   }
 
+  upsertContainerIndex(
+    containerId: string,
+    input?: UpsertSearchTargetInput
+  ): SearchIndexRecord {
+    return this.searchIndexOrchestrator.upsertContainerIndex(containerId, input);
+  }
+
   upsertItem(item: ItemRecord, input?: SearchProjectionInput): SearchIndexRecord {
     return this.searchIndexService.upsertItem(item, input);
+  }
+
+  upsertItemIndex(
+    itemId: string,
+    input?: UpsertSearchTargetInput
+  ): SearchIndexRecord {
+    return this.searchIndexOrchestrator.upsertItemIndex(itemId, input);
   }
 
   upsertListItem(
@@ -45,6 +67,13 @@ export class SearchService {
     input?: SearchProjectionInput
   ): SearchIndexRecord {
     return this.searchIndexService.upsertListItem(listItem, input);
+  }
+
+  upsertListIndex(
+    listId: string,
+    input?: UpsertSearchTargetInput
+  ): UpsertListIndexResult {
+    return this.searchIndexOrchestrator.upsertListIndex(listId, input);
   }
 
   upsertNote(
@@ -65,6 +94,10 @@ export class SearchService {
 
   rebuildWorkspaceIndex(workspaceId: string): RebuildWorkspaceIndexResult {
     return this.searchIndexService.rebuildWorkspaceIndex(workspaceId);
+  }
+
+  getSearchIndexHealth(workspaceId: string): SearchIndexHealthReport {
+    return this.searchIndexOrchestrator.getSearchIndexHealth(workspaceId);
   }
 }
 

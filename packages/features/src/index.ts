@@ -57,7 +57,11 @@ export {
 export { ProjectService, projectsModuleContract } from "./projects";
 export { RelationshipService, relationshipsModuleContract } from "./relationships";
 export { savedViewsModuleContract } from "./savedViews";
-export { SearchService, searchModuleContract } from "./search";
+export {
+  SearchIndexOrchestrator,
+  SearchService,
+  searchModuleContract
+} from "./search";
 export { TaskService, tasksModuleContract } from "./tasks";
 export { timelineModuleContract } from "./timeline";
 export { todayModuleContract } from "./today";
@@ -138,6 +142,10 @@ export type {
   RemoveRelationshipInput
 } from "./relationships";
 export type { SavedViewService } from "./savedViews";
+export type {
+  UpsertListIndexResult,
+  UpsertSearchTargetInput
+} from "./search";
 export type {
   CreateTaskInput,
   TaskMutationResult,

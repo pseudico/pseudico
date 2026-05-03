@@ -71,6 +71,7 @@ export {
 } from "./NoteRepository";
 export {
   SearchIndexRepository,
+  type ListSearchIndexRecordsOptions,
   type RemoveWorkspaceSearchTargetsInput,
   type RemoveSearchIndexInput,
   type SearchIndexOptions,
