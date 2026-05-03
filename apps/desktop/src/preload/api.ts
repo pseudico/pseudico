@@ -155,6 +155,14 @@ export type ItemSummary = {
   completedAt: string | null;
   archivedAt: string | null;
   deletedAt: string | null;
+  tags?: ItemTagSummary[];
+};
+
+export type ItemTagSummary = {
+  id: string;
+  name: string;
+  slug: string;
+  source: "inline" | "manual" | "imported";
 };
 
 export type CreateProjectInput = {

@@ -51,6 +51,27 @@ export type SyncInlineTagsInput = TaggingTargetInput & {
   actorType?: ActivityActorType;
 };
 
+export type SyncInlineTagsForTaskInput = {
+  workspaceId: string;
+  itemId: string;
+  title: string;
+  actorType?: ActivityActorType;
+  body?: string | null;
+};
+
+export type SyncInlineTagsForNoteInput = {
+  workspaceId: string;
+  itemId: string;
+  title: string;
+  content: string;
+  actorType?: ActivityActorType;
+};
+
+export type HydrateItemTagsInput = {
+  workspaceId: string;
+  itemIds: readonly string[];
+};
+
 export type TagMutationResult = {
   tag: TagRecord;
   tagging: TaggingRecord | null;
@@ -303,6 +324,56 @@ export class TagService {
     });
   }
 
+  async syncInlineTagsForTask(
+    input: SyncInlineTagsForTaskInput
+  ): Promise<SyncInlineTagsResult> {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+    validateNonEmptyString(input.itemId, "itemId");
+    validateNonEmptyString(input.title, "title");
+
+    return await this.syncInlineTags({
+      workspaceId: input.workspaceId,
+      targetType: "item",
+      targetId: input.itemId,
+      text: [input.title, input.body ?? ""],
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+  }
+
+  async syncInlineTagsForNote(
+    input: SyncInlineTagsForNoteInput
+  ): Promise<SyncInlineTagsResult> {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+    validateNonEmptyString(input.itemId, "itemId");
+    validateNonEmptyString(input.title, "title");
+
+    return await this.syncInlineTags({
+      workspaceId: input.workspaceId,
+      targetType: "item",
+      targetId: input.itemId,
+      text: [input.title, input.content],
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+  }
+
+  hydrateItemTags(input: HydrateItemTagsInput): Record<string, TaggedTargetRecord[]> {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+
+    const hydrated: Record<string, TaggedTargetRecord[]> = {};
+    const repository = new TagRepository(this.connection);
+
+    for (const itemId of input.itemIds) {
+      validateNonEmptyString(itemId, "itemId");
+      hydrated[itemId] = repository.listTagsForTarget({
+        workspaceId: input.workspaceId,
+        targetType: "item",
+        targetId: itemId
+      });
+    }
+
+    return hydrated;
+  }
+
   listTagsForTarget(input: TaggingTargetInput): TaggedTargetRecord[] {
     this.validateTargetInput(input);
 
@@ -396,6 +467,9 @@ export class TagService {
     });
     const tags = new TagRepository(this.connection).listTagsForTarget(input);
     const tagSlugs = tags.map((tag) => tag.slug);
+    const inlineTagSlugs = tags
+      .filter((tag) => tag.taggingSource === "inline")
+      .map((tag) => tag.slug);
     const metadata = parseMetadata(existing?.metadataJson);
 
     return repository.upsert({
@@ -410,7 +484,9 @@ export class TagService {
       metadataJson: JSON.stringify({
         ...metadata,
         tagIds: tags.map((tag) => tag.id),
-        tagSlugs
+        tagSlugs,
+        inlineTags: inlineTagSlugs,
+        inlineTagSlugs
       }),
       isDeleted: existing?.isDeleted ?? false,
       timestamp

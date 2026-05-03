@@ -3,7 +3,10 @@ export { TagService, tagsModuleContract } from "./TagService";
 export type { CategoryService } from "./CategoryService";
 export type {
   AddTagToTargetInput,
+  HydrateItemTagsInput,
   RemoveTagFromTargetInput,
+  SyncInlineTagsForNoteInput,
+  SyncInlineTagsForTaskInput,
   SyncInlineTagsInput,
   SyncInlineTagsResult,
   TagMutationResult,

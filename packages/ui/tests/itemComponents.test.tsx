@@ -36,6 +36,35 @@ describe("Universal item UI", () => {
     expect(html).toContain("Today");
   });
 
+  it("renders tag badges on item cards", () => {
+    const html = renderToStaticMarkup(
+      <UniversalItemCard
+        item={{
+          ...taskItem,
+          tags: [
+            {
+              id: "tag_1",
+              name: "Ops",
+              slug: "ops",
+              source: "inline"
+            },
+            {
+              id: "tag_2",
+              name: "Manual",
+              slug: "manual",
+              source: "manual"
+            }
+          ]
+        }}
+      />
+    );
+
+    expect(html).toContain("@Ops");
+    expect(html).toContain("@Manual");
+    expect(html).toContain("data-tag-source=\"inline\"");
+    expect(html).toContain("data-tag-source=\"manual\"");
+  });
+
   it("renders a safe placeholder for unknown item types", () => {
     const html = renderToStaticMarkup(
       <UniversalItemCard

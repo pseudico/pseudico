@@ -43,6 +43,11 @@ export {
   type UniversalItemMetadata,
   type UniversalItemViewModel
 } from "./components/ItemCard";
+export {
+  TagBadge,
+  type TagBadgeProps,
+  type TagBadgeViewModel
+} from "./components/TagBadge";
 export { ItemFeed, type ItemFeedProps } from "./components/ItemFeed";
 export {
   getItemTypeLabel,

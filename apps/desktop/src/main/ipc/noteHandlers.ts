@@ -1,15 +1,17 @@
-import { NoteService } from "@local-work-os/features";
+import { NoteService, TagService } from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
   type DatabaseConnection,
-  type NoteWithItemRecord
+  type NoteWithItemRecord,
+  type TaggedTargetRecord
 } from "@local-work-os/db";
 import {
   apiError,
   apiOk,
   type ApiResult,
   type CreateNoteInput,
+  type ItemTagSummary,
   type NoteFormat,
   type NoteSummary,
   type UpdateNoteInput,
@@ -49,7 +51,7 @@ export function createNoteIpcHandlers(
           workspaceId
         });
 
-        return apiOk(toNoteSummary(result));
+        return apiOk(toNoteSummary(result, hydrateSingleItemTags(context, result.item.id)));
       });
     },
 
@@ -61,9 +63,10 @@ export function createNoteIpcHandlers(
         );
       }
 
-      return await withNoteService(workspaceService, async (context) =>
-        apiOk(toNoteSummary(await context.noteService.updateNote(input)))
-      );
+      return await withNoteService(workspaceService, async (context) => {
+        const result = await context.noteService.updateNote(input);
+        return apiOk(toNoteSummary(result, hydrateSingleItemTags(context, result.item.id)));
+      });
     },
 
     async handleListNotesByContainer(input) {
@@ -74,9 +77,17 @@ export function createNoteIpcHandlers(
         );
       }
 
-      return await withNoteService(workspaceService, async (context) =>
-        apiOk(context.noteService.listNotesByContainer(input).map(toNoteSummary))
-      );
+      return await withNoteService(workspaceService, async (context) => {
+        const notes = context.noteService.listNotesByContainer(input);
+        const tagsByItemId = context.tagService.hydrateItemTags({
+          workspaceId: context.workspace.id,
+          itemIds: notes.map((note) => note.item.id)
+        });
+
+        return apiOk(
+          notes.map((note) => toNoteSummary(note, tagsByItemId[note.item.id] ?? []))
+        );
+      });
     }
   };
 }
@@ -86,6 +97,7 @@ async function withNoteService<T>(
   operation: (context: {
     connection: DatabaseConnection;
     noteService: NoteService;
+    tagService: TagService;
     workspace: WorkspaceSummary;
   }) => Promise<ApiResult<T>>
 ): Promise<ApiResult<T>> {
@@ -104,6 +116,7 @@ async function withNoteService<T>(
     return await operation({
       connection,
       noteService: new NoteService({ connection }),
+      tagService: new TagService({ connection }),
       workspace
     });
   } catch (error) {
@@ -130,7 +143,23 @@ function resolveWorkspaceId(
   return currentWorkspace.id;
 }
 
-function toNoteSummary(noteWithItem: NoteWithItemRecord): NoteSummary {
+function hydrateSingleItemTags(
+  context: {
+    tagService: TagService;
+    workspace: WorkspaceSummary;
+  },
+  itemId: string
+): TaggedTargetRecord[] {
+  return context.tagService.hydrateItemTags({
+    workspaceId: context.workspace.id,
+    itemIds: [itemId]
+  })[itemId] ?? [];
+}
+
+function toNoteSummary(
+  noteWithItem: NoteWithItemRecord,
+  tags: readonly TaggedTargetRecord[] = []
+): NoteSummary {
   const { item, note } = noteWithItem;
 
   if (item.type !== "note") {
@@ -154,11 +183,21 @@ function toNoteSummary(noteWithItem: NoteWithItemRecord): NoteSummary {
     completedAt: item.completedAt,
     archivedAt: item.archivedAt,
     deletedAt: item.deletedAt,
+    tags: tags.map(toItemTagSummary),
     format: note.format,
     content: note.content,
     preview: note.preview,
     noteCreatedAt: note.createdAt,
     noteUpdatedAt: note.updatedAt
+  };
+}
+
+function toItemTagSummary(tag: TaggedTargetRecord): ItemTagSummary {
+  return {
+    id: tag.id,
+    name: tag.name,
+    slug: tag.slug,
+    source: tag.taggingSource
   };
 }
 

@@ -14,6 +14,7 @@ import {
   ItemRepository,
   SearchIndexService,
   SortOrderService,
+  TagRepository,
   TaskRepository,
   TransactionService,
   type DatabaseConnection,
@@ -32,6 +33,7 @@ import {
   normalizeTaskDateTime,
   type TaskRangeInput
 } from "./TaskQueries";
+import { TagService } from "../metadata/TagService";
 
 // Owns task-specific application operations.
 // Does not own container persistence or calendar rendering.
@@ -74,6 +76,7 @@ export type UpdateTaskInput = {
 
 export type TaskMutationResult = TaskWithItemRecord & {
   searchRecord: SearchIndexRecord;
+  inlineTags: string[];
 };
 
 export class TaskService {
@@ -100,7 +103,7 @@ export class TaskService {
   async createTask(input: CreateTaskInput): Promise<TaskMutationResult> {
     this.validateCreateInput(input);
 
-    return await this.transactionService.runInTransaction(() => {
+    return await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const taskStatus = input.status ?? "open";
       const startAt = normalizeTaskDateTime(input.startAt, "startAt") ?? null;
@@ -156,16 +159,25 @@ export class TaskService {
         timestamp
       });
 
-      const searchRecord = this.upsertSearchRecord(item, task, timestamp);
+      this.upsertSearchRecord(item, task, timestamp);
+      const inlineTags = await this.syncInlineTagsForTask({
+        item,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
 
-      return { item, task, searchRecord };
+      return {
+        item,
+        task,
+        searchRecord: inlineTags.searchRecord,
+        inlineTags: inlineTags.inlineTagSlugs
+      };
     });
   }
 
   async updateTask(input: UpdateTaskInput): Promise<TaskMutationResult> {
     this.validateUpdateInput(input);
 
-    return await this.transactionService.runInTransaction(() => {
+    return await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const before = this.requireTask(input.itemId);
       const itemPatch: UpdateItemPatch = { timestamp };
@@ -249,9 +261,18 @@ export class TaskService {
         timestamp
       });
 
-      const searchRecord = this.upsertSearchRecord(item, task, timestamp);
+      this.upsertSearchRecord(item, task, timestamp);
+      const inlineTags = await this.syncInlineTagsForTask({
+        item,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
 
-      return { item, task, searchRecord };
+      return {
+        item,
+        task,
+        searchRecord: inlineTags.searchRecord,
+        inlineTags: inlineTags.inlineTagSlugs
+      };
     });
   }
 
@@ -287,7 +308,7 @@ export class TaskService {
 
       const searchRecord = this.upsertSearchRecord(item, task, timestamp);
 
-      return { item, task, searchRecord };
+      return { item, task, searchRecord, inlineTags: this.getInlineTagSlugs(item) };
     });
   }
 
@@ -323,7 +344,7 @@ export class TaskService {
 
       const searchRecord = this.upsertSearchRecord(item, task, timestamp);
 
-      return { item, task, searchRecord };
+      return { item, task, searchRecord, inlineTags: this.getInlineTagSlugs(item) };
     });
   }
 
@@ -380,12 +401,23 @@ export class TaskService {
     task: TaskRecord,
     timestamp: string
   ): SearchIndexRecord {
+    const tags = new TagRepository(this.connection).listTagsForTarget({
+      workspaceId: item.workspaceId,
+      targetType: "item",
+      targetId: item.id
+    });
+    const tagSlugs = tags.map((tag) => tag.slug);
+    const inlineTagSlugs = tags
+      .filter((tag) => tag.taggingSource === "inline")
+      .map((tag) => tag.slug);
+
     return new SearchIndexService({
       connection: this.connection,
       idFactory: this.idFactory,
       now: this.now
     }).upsertItem(item, {
       timestamp,
+      tags: tagSlugs,
       metadata: {
         taskStatus: task.taskStatus,
         priority: task.priority,
@@ -393,9 +425,41 @@ export class TaskService {
         dueAt: task.dueAt,
         allDay: task.allDay,
         timezone: task.timezone,
-        completedAt: task.completedAt
+        completedAt: task.completedAt,
+        tagIds: tags.map((tag) => tag.id),
+        tagSlugs,
+        inlineTags: inlineTagSlugs,
+        inlineTagSlugs
       }
     });
+  }
+
+  private async syncInlineTagsForTask(input: {
+    item: ItemRecord;
+    actorType?: ActivityActorType;
+  }): ReturnType<TagService["syncInlineTagsForTask"]> {
+    return await new TagService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).syncInlineTagsForTask({
+      workspaceId: input.item.workspaceId,
+      itemId: input.item.id,
+      title: input.item.title,
+      body: input.item.body,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+  }
+
+  private getInlineTagSlugs(item: ItemRecord): string[] {
+    return new TagRepository(this.connection)
+      .listTagsForTarget({
+        workspaceId: item.workspaceId,
+        targetType: "item",
+        targetId: item.id,
+        source: "inline"
+      })
+      .map((tag) => tag.slug);
   }
 
   private logTaskEvent(input: {

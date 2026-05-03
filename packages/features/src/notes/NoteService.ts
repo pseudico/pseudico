@@ -13,6 +13,7 @@ import {
   NoteRepository,
   SearchIndexService,
   SortOrderService,
+  TagRepository,
   TransactionService,
   type DatabaseConnection,
   type ItemRecord,
@@ -23,9 +24,9 @@ import {
   type UpdateNoteDetailsPatch
 } from "@local-work-os/db";
 import {
-  extractInlineNoteTags,
   generateNotePreview
 } from "./NotePreview";
+import { TagService } from "../metadata/TagService";
 
 // Owns Markdown note application operations.
 // Does not own rich text editor internals or attachment storage.
@@ -84,7 +85,7 @@ export class NoteService {
   async createNote(input: CreateNoteInput): Promise<NoteMutationResult> {
     this.validateCreateInput(input);
 
-    return await this.transactionService.runInTransaction(() => {
+    return await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const preview = generateNotePreview(input.content);
       const itemRepository = new ItemRepository(this.connection);
@@ -129,13 +130,18 @@ export class NoteService {
         timestamp
       });
 
-      const search = this.upsertSearchRecord(item, note, timestamp);
+      this.upsertSearchRecord(item, note, timestamp);
+      const inlineTags = await this.syncInlineTagsForNote({
+        item,
+        note,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
 
       return {
         item,
         note,
-        searchRecord: search.record,
-        inlineTags: search.inlineTags
+        searchRecord: inlineTags.searchRecord,
+        inlineTags: inlineTags.inlineTagSlugs
       };
     });
   }
@@ -143,7 +149,7 @@ export class NoteService {
   async updateNote(input: UpdateNoteInput): Promise<NoteMutationResult> {
     this.validateUpdateInput(input);
 
-    return await this.transactionService.runInTransaction(() => {
+    return await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const before = this.requireNote(input.itemId);
       const itemPatch: UpdateItemPatch = { timestamp };
@@ -195,13 +201,18 @@ export class NoteService {
         timestamp
       });
 
-      const search = this.upsertSearchRecord(item, note, timestamp);
+      this.upsertSearchRecord(item, note, timestamp);
+      const inlineTags = await this.syncInlineTagsForNote({
+        item,
+        note,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
 
       return {
         item,
         note,
-        searchRecord: search.record,
-        inlineTags: search.inlineTags
+        searchRecord: inlineTags.searchRecord,
+        inlineTags: inlineTags.inlineTagSlugs
       };
     });
   }
@@ -232,13 +243,13 @@ export class NoteService {
         timestamp
       });
 
-      const search = this.upsertSearchRecord(item, note, timestamp);
+      const searchRecord = this.upsertSearchRecord(item, note, timestamp);
 
       return {
         item,
         note,
-        searchRecord: search.record,
-        inlineTags: search.inlineTags
+        searchRecord,
+        inlineTags: this.getInlineTagSlugs(item)
       };
     });
   }
@@ -267,21 +278,60 @@ export class NoteService {
     item: ItemRecord,
     note: NoteDetailsRecord,
     timestamp: string
-  ): { record: SearchIndexRecord; inlineTags: string[] } {
-    const inlineTags = extractInlineNoteTags([item.title, note.content]);
-    const record = new SearchIndexService({
+  ): SearchIndexRecord {
+    const tags = new TagRepository(this.connection).listTagsForTarget({
+      workspaceId: item.workspaceId,
+      targetType: "item",
+      targetId: item.id
+    });
+    const tagSlugs = tags.map((tag) => tag.slug);
+    const inlineTagSlugs = tags
+      .filter((tag) => tag.taggingSource === "inline")
+      .map((tag) => tag.slug);
+
+    return new SearchIndexService({
       connection: this.connection,
       idFactory: this.idFactory,
       now: this.now
     }).upsertNote(item, note, {
       timestamp,
-      tags: inlineTags,
+      tags: tagSlugs,
       metadata: {
-        inlineTags
+        inlineTags: inlineTagSlugs,
+        inlineTagSlugs,
+        tagIds: tags.map((tag) => tag.id),
+        tagSlugs
       }
     });
+  }
 
-    return { record, inlineTags };
+  private async syncInlineTagsForNote(input: {
+    item: ItemRecord;
+    note: NoteDetailsRecord;
+    actorType?: ActivityActorType;
+  }): ReturnType<TagService["syncInlineTagsForNote"]> {
+    return await new TagService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).syncInlineTagsForNote({
+      workspaceId: input.item.workspaceId,
+      itemId: input.item.id,
+      title: input.item.title,
+      content: input.note.content,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+  }
+
+  private getInlineTagSlugs(item: ItemRecord): string[] {
+    return new TagRepository(this.connection)
+      .listTagsForTarget({
+        workspaceId: item.workspaceId,
+        targetType: "item",
+        targetId: item.id,
+        source: "inline"
+      })
+      .map((tag) => tag.slug);
   }
 
   private logNoteEvent(input: {

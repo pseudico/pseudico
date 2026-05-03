@@ -802,6 +802,7 @@ function toProjectTaskViewModel(task: TaskSummary): ProjectTaskViewModel {
     priority: task.priority,
     allDay: task.allDay,
     timezone: task.timezone,
+    tags: task.tags ?? [],
     metadata:
       task.priority === null
         ? []
@@ -823,6 +824,7 @@ function toProjectListViewModel(list: ListSummary): ProjectListViewModel {
     pinned: list.pinned,
     progressMode: list.progressMode,
     showCompleted: list.showCompleted,
+    tags: list.tags ?? [],
     listItems: list.items.map(toListCardItemViewModel)
   };
 }
@@ -839,6 +841,7 @@ function toProjectNoteViewModel(note: NoteSummary): ProjectNoteViewModel {
     createdAt: note.createdAt,
     updatedLabel: note.updatedAt,
     pinned: note.pinned,
+    tags: note.tags ?? [],
     content: note.content,
     preview: note.preview,
     format: note.format

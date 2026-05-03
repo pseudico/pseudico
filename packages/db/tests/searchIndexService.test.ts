@@ -5,6 +5,7 @@ import {
   ListRepository,
   SearchIndexRepository,
   SearchIndexService,
+  TagRepository,
   type DatabaseConnection
 } from "../src";
 import {
@@ -168,6 +169,23 @@ describe("SearchIndexService", () => {
       containerId: container.id,
       title: "Supplier checklist"
     });
+    const tagRepository = new TagRepository(connection);
+    const tag = tagRepository.create({
+      id: "tag_1",
+      workspaceId: "workspace_1",
+      name: "Ops",
+      slug: "ops",
+      timestamp: TEST_TIMESTAMP
+    });
+    tagRepository.createTagging({
+      id: "tagging_1",
+      workspaceId: "workspace_1",
+      tagId: tag.id,
+      targetType: "item",
+      targetId: "item_1",
+      source: "inline",
+      timestamp: TEST_TIMESTAMP
+    });
     const list = createList("item_list_1", container.id);
     new ListRepository(connection).createListItem({
       id: "list_item_1",
@@ -203,6 +221,17 @@ describe("SearchIndexService", () => {
       })
     ).toHaveLength(1);
     expect(search("signage")).toHaveLength(1);
+    expect(search("ops")).toMatchObject([
+      {
+        targetType: "item",
+        targetId: "item_1",
+        tags: "ops"
+      }
+    ]);
+    expect(JSON.parse(search("ops")[0]?.metadataJson ?? "{}")).toMatchObject({
+      inlineTags: ["ops"],
+      tagSlugs: ["ops"]
+    });
     expect(
       service.searchWorkspace({
         workspaceId: "workspace_2",

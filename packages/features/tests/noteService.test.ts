@@ -3,6 +3,7 @@ import {
   ContainerRepository,
   MigrationService,
   SearchIndexRepository,
+  TagRepository,
   WorkspaceRepository,
   createDatabaseConnection,
   type DatabaseConnection
@@ -11,6 +12,7 @@ import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   NoteService,
+  TagService,
   extractInlineNoteTags,
   generateNotePreview
 } from "../src";
@@ -102,8 +104,10 @@ describe("NoteService", () => {
       inlineTags: ["ops"]
     });
     expect(
-      new ActivityLogRepository(connection).listForTarget("item", "item_1")
-    ).toMatchObject([{ action: "note_created" }]);
+      new ActivityLogRepository(connection)
+        .listForTarget("item", "item_1")
+        .map((event) => event.action)
+    ).toEqual(expect.arrayContaining(["note_created", "tag_added"]));
   });
 
   it("updates note content and keeps preview, search, and activity aligned", async () => {
@@ -145,6 +149,55 @@ describe("NoteService", () => {
         .listForTarget("item", created.item.id)
         .map((event) => event.action)
     ).toEqual(expect.arrayContaining(["note_created", "note_updated"]));
+  });
+
+  it("syncs persisted note tags while preserving manual taggings", async () => {
+    const service = createService();
+    const created = await service.createNote({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Research @Ops",
+      content: "Capture @launch notes."
+    });
+
+    await new TagService({
+      connection,
+      idFactory: (prefix) => {
+        idCounter += 1;
+        return `${prefix}_${idCounter}`;
+      },
+      now: () => new Date("2026-05-02T01:02:03.000Z")
+    }).addTagToTarget({
+      workspaceId: "workspace_1",
+      targetType: "item",
+      targetId: created.item.id,
+      name: "manual-only"
+    });
+
+    const updated = await service.updateNote({
+      itemId: created.item.id,
+      title: "Research",
+      content: "Capture @launch notes."
+    });
+
+    expect(updated.inlineTags).toEqual(["launch"]);
+    expect(
+      new TagRepository(connection)
+        .listTagsForTarget({
+          workspaceId: "workspace_1",
+          targetType: "item",
+          targetId: created.item.id
+        })
+        .map((tag) => ({ slug: tag.slug, source: tag.taggingSource }))
+    ).toEqual([
+      { slug: "launch", source: "inline" },
+      { slug: "manual-only", source: "manual" }
+    ]);
+    expect(updated.searchRecord.tags).toBe("launch manual-only");
+    expect(JSON.parse(updated.searchRecord.metadataJson)).toMatchObject({
+      inlineTags: ["launch"],
+      tagSlugs: ["launch", "manual-only"]
+    });
   });
 
   it("archives notes with activity and updated search metadata", async () => {
