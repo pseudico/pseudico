@@ -31,6 +31,7 @@ export const ActivityAction = {
   categoryDeleted: "category_deleted",
   categoryAssigned: "category_assigned",
   relationshipCreated: "relationship_created",
+  relationshipRemoved: "relationship_removed",
   fileAttached: "file_attached",
   searchIndexRebuilt: "search_index_rebuilt",
   backupCreated: "backup_created",

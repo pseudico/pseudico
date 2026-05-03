@@ -12,6 +12,7 @@ export const plannedFeatureAreas = [
   "files",
   "links",
   "metadata",
+  "relationships",
   "search",
   "savedViews",
   "today",
@@ -54,6 +55,7 @@ export {
   notesModuleContract
 } from "./notes";
 export { ProjectService, projectsModuleContract } from "./projects";
+export { RelationshipService, relationshipsModuleContract } from "./relationships";
 export { savedViewsModuleContract } from "./savedViews";
 export { SearchService, searchModuleContract } from "./search";
 export { TaskService, tasksModuleContract } from "./tasks";
@@ -127,6 +129,14 @@ export type {
   ProjectStatus,
   UpdateProjectInput
 } from "./projects";
+export type {
+  CreateRelationshipInput,
+  ListRelationshipsInput,
+  RelationshipEndpoint,
+  RelationshipMutationResult,
+  RelationshipServiceIdFactory,
+  RemoveRelationshipInput
+} from "./relationships";
 export type { SavedViewService } from "./savedViews";
 export type {
   CreateTaskInput,

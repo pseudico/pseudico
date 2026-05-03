@@ -35,6 +35,16 @@ export type {
   ListItemStatus,
   ListProgressMode
 } from "./entities/List";
+export {
+  RELATIONSHIP_OBJECT_TYPES,
+  RELATIONSHIP_TYPES,
+  isRelationshipObjectType,
+  isRelationshipType
+} from "./entities/Relationship";
+export type {
+  RelationshipObjectType,
+  RelationshipType
+} from "./entities/Relationship";
 export { NOTE_FORMATS, isNoteFormat } from "./entities/Note";
 export type { NoteFormat } from "./entities/Note";
 export {
