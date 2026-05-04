@@ -76,4 +76,33 @@ describe("AttachmentRepository", () => {
       })
     ).toEqual([attachment]);
   });
+
+  it("updates attachment metadata without changing stored file identity", () => {
+    const repository = new AttachmentRepository(connection);
+    const attachment = repository.create({
+      id: "attachment_1",
+      workspaceId: "workspace_1",
+      itemId: "item_file_1",
+      originalName: "Brief.pdf",
+      storedName: "Brief.pdf",
+      sizeBytes: 12,
+      checksum: "abc123",
+      storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
+      description: "Launch brief",
+      timestamp: TEST_TIMESTAMP
+    });
+
+    const updated = repository.update(attachment.id, {
+      description: "Signed launch brief",
+      timestamp: "2026-05-02T00:00:00.000Z"
+    });
+
+    expect(updated).toMatchObject({
+      id: attachment.id,
+      originalName: "Brief.pdf",
+      storagePath: attachment.storagePath,
+      description: "Signed launch brief",
+      updatedAt: "2026-05-02T00:00:00.000Z"
+    });
+  });
 });

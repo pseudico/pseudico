@@ -37,6 +37,11 @@ export type ListAttachmentsForItemInput = {
   includeDeleted?: boolean;
 };
 
+export type UpdateAttachmentPatch = {
+  description?: string | null;
+  timestamp: string;
+};
+
 export class AttachmentRepository {
   private readonly connection: DatabaseConnection;
 
@@ -117,6 +122,36 @@ export class AttachmentRepository {
     }
 
     return created;
+  }
+
+  update(id: string, patch: UpdateAttachmentPatch): AttachmentRecord {
+    const assignments: string[] = [];
+    const values: unknown[] = [];
+
+    if (patch.description !== undefined) {
+      assignments.push("description = ?");
+      values.push(patch.description);
+    }
+
+    assignments.push("updated_at = ?");
+    values.push(patch.timestamp, id);
+
+    this.connection.sqlite
+      .prepare(
+        `update attachments
+         set ${assignments.join(", ")}
+         where id = ?
+           and deleted_at is null`
+      )
+      .run(...values);
+
+    const updated = this.getById(id);
+
+    if (updated === null) {
+      throw new Error(`Attachment row was not found: ${id}.`);
+    }
+
+    return updated;
   }
 }
 

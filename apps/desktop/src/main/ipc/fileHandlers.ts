@@ -12,13 +12,20 @@ import {
   type ApiResult,
   type AttachFileToContainerInput,
   type AttachFileToItemInput,
+  type ChooseAndAttachFileInput,
   type FileAttachmentResultSummary,
+  type FileItemSummary,
   type FileAttachmentSummary,
   type ItemSummary,
+  type OpenAttachmentSummary,
+  type UpdateFileMetadataInput,
+  type VerifyAttachmentSummary,
   type WorkspaceSummary
 } from "../../preload/api";
 import {
   copyFileIntoWorkspace,
+  localPathExists,
+  resolveInsideWorkspace,
   type CopiedWorkspaceFile
 } from "../services/safeFileSystem";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
@@ -35,10 +42,39 @@ type FileIpcHandlers = {
   handleAttachFileToItem: (
     input: unknown
   ) => Promise<ApiResult<FileAttachmentResultSummary>>;
+  handleChooseAndAttach: (
+    input: unknown
+  ) => Promise<ApiResult<FileAttachmentResultSummary | null>>;
+  handleListFilesByContainer: (
+    input: unknown
+  ) => Promise<ApiResult<FileItemSummary[]>>;
+  handleOpenAttachment: (
+    input: unknown
+  ) => Promise<ApiResult<OpenAttachmentSummary>>;
+  handleRevealAttachment: (
+    input: unknown
+  ) => Promise<ApiResult<OpenAttachmentSummary>>;
+  handleUpdateMetadata: (
+    input: unknown
+  ) => Promise<ApiResult<FileAttachmentResultSummary>>;
+  handleVerifyAttachment: (
+    input: unknown
+  ) => Promise<ApiResult<VerifyAttachmentSummary>>;
+};
+
+export type FileIpcPlatform = {
+  chooseSourcePath: () => Promise<string | null>;
+  openPath: (path: string) => Promise<string>;
+  revealPath: (path: string) => void;
 };
 
 export function createFileIpcHandlers(
-  workspaceService: CurrentWorkspaceService
+  workspaceService: CurrentWorkspaceService,
+  platform: FileIpcPlatform = {
+    chooseSourcePath: async () => null,
+    openPath: async () => "",
+    revealPath: () => undefined
+  }
 ): FileIpcHandlers {
   return {
     async handleAttachFileToContainer(input) {
@@ -121,6 +157,142 @@ export function createFileIpcHandlers(
           return apiOk(toFileAttachmentResultSummary(result));
         }
       );
+    },
+
+    async handleChooseAndAttach(input) {
+      if (!isChooseAndAttachFileInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "chooseAndAttach requires a containerId string."
+        );
+      }
+
+      const sourcePath = await platform.chooseSourcePath();
+
+      if (sourcePath === null) {
+        return apiOk(null);
+      }
+
+      return await this.handleAttachFileToContainer({
+        ...input,
+        sourcePath
+      });
+    },
+
+    async handleListFilesByContainer(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "listByContainer requires a containerId string."
+        );
+      }
+
+      return await withFileAttachmentService(
+        workspaceService,
+        async (context) => {
+          const entries = context.fileAttachmentService.listFileItemsByContainer({
+            containerId: input
+          });
+          const files = await Promise.all(
+            entries.map(async ({ item, attachment }) => ({
+              ...toItemSummary(item),
+              type: "file" as const,
+              attachment: toFileAttachmentSummary(attachment),
+              missing: !(await attachmentExists(context.workspace, attachment))
+            }))
+          );
+
+          return apiOk(files);
+        }
+      );
+    },
+
+    async handleOpenAttachment(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "openAttachment requires an attachmentId string."
+        );
+      }
+
+      return await withResolvedAttachment(
+        workspaceService,
+        input,
+        async (context) => {
+          if (!(await localPathExists(context.localPath))) {
+            return apiError("WORKSPACE_ERROR", "Attachment file is missing.");
+          }
+
+          const error = await platform.openPath(context.localPath);
+
+          if (error.trim().length > 0) {
+            return apiError("WORKSPACE_ERROR", error);
+          }
+
+          return apiOk(toVerifyAttachmentSummary(context, true));
+        }
+      );
+    },
+
+    async handleRevealAttachment(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "revealAttachment requires an attachmentId string."
+        );
+      }
+
+      return await withResolvedAttachment(
+        workspaceService,
+        input,
+        async (context) => {
+          if (!(await localPathExists(context.localPath))) {
+            return apiError("WORKSPACE_ERROR", "Attachment file is missing.");
+          }
+
+          platform.revealPath(context.localPath);
+
+          return apiOk(toVerifyAttachmentSummary(context, true));
+        }
+      );
+    },
+
+    async handleUpdateMetadata(input) {
+      if (!isUpdateFileMetadataInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "updateMetadata requires attachmentId plus title or description."
+        );
+      }
+
+      return await withFileAttachmentService(
+        workspaceService,
+        async (context) => {
+          const result = await context.fileAttachmentService.updateMetadata(input);
+          return apiOk(toFileAttachmentResultSummary(result));
+        }
+      );
+    },
+
+    async handleVerifyAttachment(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "verifyAttachment requires an attachmentId string."
+        );
+      }
+
+      return await withResolvedAttachment(
+        workspaceService,
+        input,
+        async (context) =>
+          apiOk(
+            toVerifyAttachmentSummary(
+              context,
+              await localPathExists(context.localPath)
+            )
+          )
+      );
     }
   };
 }
@@ -158,6 +330,32 @@ async function withFileAttachmentService<T>(
   } finally {
     connection.close();
   }
+}
+
+async function withResolvedAttachment<T>(
+  workspaceService: CurrentWorkspaceService,
+  attachmentId: string,
+  operation: (context: {
+    attachment: FileAttachmentSummary;
+    localPath: string;
+  }) => Promise<ApiResult<T>>
+): Promise<ApiResult<T>> {
+  return await withFileAttachmentService(workspaceService, async (context) => {
+    const attachment =
+      context.fileAttachmentService.getAttachmentById(attachmentId);
+
+    if (attachment === null) {
+      return apiError("WORKSPACE_ERROR", "Attachment was not found.");
+    }
+
+    return await operation({
+      attachment: toFileAttachmentSummary(attachment),
+      localPath: resolveInsideWorkspace(
+        context.workspace.rootPath,
+        attachment.storagePath
+      )
+    });
+  });
 }
 
 function toFileAttachmentResultSummary(input: {
@@ -211,6 +409,29 @@ function toFileAttachmentSummary(
   };
 }
 
+function toVerifyAttachmentSummary(
+  context: {
+    attachment: FileAttachmentSummary;
+  },
+  exists: boolean
+): VerifyAttachmentSummary {
+  return {
+    attachmentId: context.attachment.id,
+    itemId: context.attachment.itemId,
+    exists,
+    storagePath: context.attachment.storagePath
+  };
+}
+
+async function attachmentExists(
+  workspace: WorkspaceSummary,
+  attachment: FileAttachmentSummary
+): Promise<boolean> {
+  return await localPathExists(
+    resolveInsideWorkspace(workspace.rootPath, attachment.storagePath)
+  );
+}
+
 function isAttachFileToContainerInput(
   input: unknown
 ): input is AttachFileToContainerInput {
@@ -233,6 +454,33 @@ function isAttachFileToItemInput(input: unknown): input is AttachFileToItemInput
     isNonEmptyString(input.sourcePath) &&
     isOptionalActorType(input.actorType) &&
     isOptionalNullableString(input.description)
+  );
+}
+
+function isChooseAndAttachFileInput(
+  input: unknown
+): input is ChooseAndAttachFileInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.containerId) &&
+    isOptionalString(input.workspaceId) &&
+    isOptionalActorType(input.actorType) &&
+    isOptionalNullableString(input.containerTabId) &&
+    isOptionalNullableString(input.description) &&
+    (input.sortOrder === undefined || typeof input.sortOrder === "number")
+  );
+}
+
+function isUpdateFileMetadataInput(
+  input: unknown
+): input is UpdateFileMetadataInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.attachmentId) &&
+    (input.title === undefined || isNonEmptyString(input.title)) &&
+    isOptionalNullableString(input.description) &&
+    isOptionalActorType(input.actorType) &&
+    (input.title !== undefined || input.description !== undefined)
   );
 }
 

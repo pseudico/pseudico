@@ -30,7 +30,11 @@ import { CollectionsPage } from "../../src/renderer/pages/CollectionsPage";
 import { SearchPage } from "../../src/renderer/pages/SearchPage";
 import { TagsCategoriesPage } from "../../src/renderer/pages/TagsCategoriesPage";
 import { workspaceStore } from "../../src/renderer/state/workspaceStore";
-import type { NoteCardViewModel, UniversalItemViewModel } from "@local-work-os/ui";
+import type {
+  FileCardViewModel,
+  NoteCardViewModel,
+  UniversalItemViewModel
+} from "@local-work-os/ui";
 
 const workspace: WorkspaceSummary = {
   id: "workspace_1",
@@ -165,6 +169,24 @@ const projectNote: NoteCardViewModel = {
   content: "# Decision notes\n\nConfirm launch plan.",
   preview: "Decision notes Confirm launch plan.",
   pinned: false
+};
+
+const projectFile: FileCardViewModel = {
+  id: "item_file_1",
+  type: "file",
+  title: "Brief.pdf",
+  body: "Launch brief",
+  status: "active",
+  pinned: false,
+  attachment: {
+    id: "attachment_1",
+    originalName: "Brief.pdf",
+    storedName: "Brief.pdf",
+    sizeBytes: 2048,
+    storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
+    description: "Launch brief"
+  },
+  missing: true
 };
 
 function moduleStatus(module: IpcModuleStatus["module"]): IpcModuleStatus {
@@ -424,7 +446,31 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
     files: {
       getStatus: async () => apiOk(moduleStatus("files")),
       attachFileToContainer: async () => apiOk(null as never),
-      attachFileToItem: async () => apiOk(null as never)
+      attachFileToItem: async () => apiOk(null as never),
+      chooseAndAttach: async () => apiOk(null),
+      listByContainer: async () => apiOk([]),
+      openAttachment: async () =>
+        apiOk({
+          attachmentId: "attachment_1",
+          itemId: "item_file_1",
+          exists: true,
+          storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
+        }),
+      revealAttachment: async () =>
+        apiOk({
+          attachmentId: "attachment_1",
+          itemId: "item_file_1",
+          exists: true,
+          storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
+        }),
+      updateMetadata: async () => apiOk(null as never),
+      verifyAttachment: async () =>
+        apiOk({
+          attachmentId: "attachment_1",
+          itemId: "item_file_1",
+          exists: true,
+          storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
+        })
     }
   };
 }
@@ -717,7 +763,7 @@ describe("Projects renderer pages", () => {
                 apiClient={createMockApi([project])}
                 initialActivity={[activitySummary()]}
                 initialProject={project}
-                initialItems={[projectItem, projectNote]}
+                initialItems={[projectItem, projectNote, projectFile]}
               />
             }
           />
@@ -735,6 +781,9 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Book launch venue");
     expect(html).toContain("Launch note");
     expect(html).toContain("Decision notes Confirm launch plan.");
+    expect(html).toContain("Brief.pdf");
+    expect(html).toContain("File missing from workspace storage.");
+    expect(html).toContain("Attach file");
     expect(html).toContain("Edit note");
     expect(html).toContain("Complete");
     expect(html).toContain("Due");

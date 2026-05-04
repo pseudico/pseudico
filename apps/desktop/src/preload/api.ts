@@ -202,6 +202,12 @@ export type FileAttachmentResultSummary = {
   attachment: FileAttachmentSummary;
 };
 
+export type FileItemSummary = ItemSummary & {
+  type: "file";
+  attachment: FileAttachmentSummary;
+  missing: boolean;
+};
+
 export type AttachFileToContainerInput = {
   containerId: string;
   sourcePath: string;
@@ -218,6 +224,27 @@ export type AttachFileToItemInput = {
   actorType?: "local_user" | "system" | "importer";
   description?: string | null;
 };
+
+export type ChooseAndAttachFileInput = Omit<
+  AttachFileToContainerInput,
+  "sourcePath"
+>;
+
+export type UpdateFileMetadataInput = {
+  attachmentId: string;
+  title?: string;
+  description?: string | null;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type VerifyAttachmentSummary = {
+  attachmentId: string;
+  itemId: string;
+  exists: boolean;
+  storagePath: string;
+};
+
+export type OpenAttachmentSummary = VerifyAttachmentSummary;
 
 export type ItemTagSummary = {
   id: string;
@@ -1013,7 +1040,13 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   files: {
     getStatus: "local-work-os:files:get-status",
     attachFileToContainer: "local-work-os:files:attach-file-to-container",
-    attachFileToItem: "local-work-os:files:attach-file-to-item"
+    attachFileToItem: "local-work-os:files:attach-file-to-item",
+    chooseAndAttach: "local-work-os:files:choose-and-attach",
+    listByContainer: "local-work-os:files:list-by-container",
+    openAttachment: "local-work-os:files:open-attachment",
+    revealAttachment: "local-work-os:files:reveal-attachment",
+    updateMetadata: "local-work-os:files:update-metadata",
+    verifyAttachment: "local-work-os:files:verify-attachment"
   }
 } as const;
 
@@ -1286,6 +1319,30 @@ export type LocalWorkOsIpcContracts = {
     input: AttachFileToItemInput;
     result: ApiResult<FileAttachmentResultSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.chooseAndAttach]: {
+    input: ChooseAndAttachFileInput;
+    result: ApiResult<FileAttachmentResultSummary | null>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.listByContainer]: {
+    input: string;
+    result: ApiResult<FileItemSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.openAttachment]: {
+    input: string;
+    result: ApiResult<OpenAttachmentSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.revealAttachment]: {
+    input: string;
+    result: ApiResult<OpenAttachmentSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.updateMetadata]: {
+    input: UpdateFileMetadataInput;
+    result: ApiResult<FileAttachmentResultSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.verifyAttachment]: {
+    input: string;
+    result: ApiResult<VerifyAttachmentSummary>;
+  };
 };
 
 export type LocalWorkOsIpcChannel = keyof LocalWorkOsIpcContracts & string;
@@ -1523,6 +1580,24 @@ export type LocalWorkOsApi = {
     attachFileToItem: (
       input: AttachFileToItemInput
     ) => Promise<ApiResult<FileAttachmentResultSummary>>;
+    chooseAndAttach: (
+      input: ChooseAndAttachFileInput
+    ) => Promise<ApiResult<FileAttachmentResultSummary | null>>;
+    listByContainer: (
+      containerId: string
+    ) => Promise<ApiResult<FileItemSummary[]>>;
+    openAttachment: (
+      attachmentId: string
+    ) => Promise<ApiResult<OpenAttachmentSummary>>;
+    revealAttachment: (
+      attachmentId: string
+    ) => Promise<ApiResult<OpenAttachmentSummary>>;
+    updateMetadata: (
+      input: UpdateFileMetadataInput
+    ) => Promise<ApiResult<FileAttachmentResultSummary>>;
+    verifyAttachment: (
+      attachmentId: string
+    ) => Promise<ApiResult<VerifyAttachmentSummary>>;
   };
 };
 
@@ -1803,7 +1878,19 @@ export function createLocalWorkOsApi(
       attachFileToContainer: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.attachFileToContainer, input),
       attachFileToItem: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.attachFileToItem, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.attachFileToItem, input),
+      chooseAndAttach: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.chooseAndAttach, input),
+      listByContainer: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.listByContainer, containerId),
+      openAttachment: (attachmentId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.openAttachment, attachmentId),
+      revealAttachment: (attachmentId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.revealAttachment, attachmentId),
+      updateMetadata: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.updateMetadata, input),
+      verifyAttachment: (attachmentId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.verifyAttachment, attachmentId)
     }
   };
 }

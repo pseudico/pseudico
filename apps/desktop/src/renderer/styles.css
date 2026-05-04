@@ -418,6 +418,55 @@ a {
   justify-self: start;
 }
 
+.file-card-content,
+.file-metadata-editor {
+  display: grid;
+  gap: 10px;
+}
+
+.file-missing-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  padding: 6px 9px;
+  border: 1px solid #e1b854;
+  border-radius: 8px;
+  background: #fff6d7;
+  color: #4e3c0a;
+  font-weight: 700;
+}
+
+.file-card-details {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.file-card-details div {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.25fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.file-card-details dt,
+.file-card-details dd {
+  margin: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.file-card-details dt {
+  color: #6d6a62;
+  font-weight: 750;
+}
+
+.file-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .quick-add-backdrop {
   position: fixed;
   inset: 0;

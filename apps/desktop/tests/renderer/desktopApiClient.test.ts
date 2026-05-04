@@ -345,7 +345,31 @@ function createMockApi(
     files: {
       getStatus: async () => apiOk(moduleStatus("files")),
       attachFileToContainer: async () => apiOk(fileAttachmentResultSummary()),
-      attachFileToItem: async () => apiOk(fileAttachmentResultSummary())
+      attachFileToItem: async () => apiOk(fileAttachmentResultSummary()),
+      chooseAndAttach: async () => apiOk(fileAttachmentResultSummary()),
+      listByContainer: async () => apiOk([]),
+      openAttachment: async () =>
+        apiOk({
+          attachmentId: "attachment_1",
+          itemId: "item_1",
+          exists: true,
+          storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
+        }),
+      revealAttachment: async () =>
+        apiOk({
+          attachmentId: "attachment_1",
+          itemId: "item_1",
+          exists: true,
+          storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
+        }),
+      updateMetadata: async () => apiOk(fileAttachmentResultSummary()),
+      verifyAttachment: async () =>
+        apiOk({
+          attachmentId: "attachment_1",
+          itemId: "item_1",
+          exists: true,
+          storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
+        })
     }
   };
 
@@ -1061,6 +1085,41 @@ describe("desktop API client", () => {
       data: {
         item: {
           type: "file"
+        }
+      }
+    });
+    await expect(
+      client.files.chooseAndAttach({
+        containerId: "container_1"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        attachment: {
+          originalName: "Brief.pdf"
+        }
+      }
+    });
+    await expect(client.files.listByContainer("container_1")).resolves.toEqual({
+      ok: true,
+      data: []
+    });
+    await expect(client.files.openAttachment("attachment_1")).resolves.toMatchObject({
+      ok: true,
+      data: {
+        exists: true
+      }
+    });
+    await expect(
+      client.files.updateMetadata({
+        attachmentId: "attachment_1",
+        title: "Final brief"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        attachment: {
+          originalName: "Brief.pdf"
         }
       }
     });

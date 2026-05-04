@@ -383,7 +383,31 @@ function createMockApi(): LocalWorkOsApi {
     files: {
       getStatus: async () => apiOk(moduleStatus("files")),
       attachFileToContainer: async () => apiOk(null as never),
-      attachFileToItem: async () => apiOk(null as never)
+      attachFileToItem: async () => apiOk(null as never),
+      chooseAndAttach: async () => apiOk(null),
+      listByContainer: async () => apiOk([]),
+      openAttachment: async () =>
+        apiOk({
+          attachmentId: "attachment_1",
+          itemId: "item_file_1",
+          exists: true,
+          storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
+        }),
+      revealAttachment: async () =>
+        apiOk({
+          attachmentId: "attachment_1",
+          itemId: "item_file_1",
+          exists: true,
+          storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
+        }),
+      updateMetadata: async () => apiOk(null as never),
+      verifyAttachment: async () =>
+        apiOk({
+          attachmentId: "attachment_1",
+          itemId: "item_file_1",
+          exists: true,
+          storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
+        })
     }
   };
 }
