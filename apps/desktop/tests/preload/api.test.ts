@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(55);
+    expect(channels).toHaveLength(56);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -54,6 +54,7 @@ describe("typed preload API", () => {
       "metadata",
       "search",
       "collections",
+      "today",
       "activity",
       "containers",
       "items",
@@ -647,6 +648,37 @@ describe("typed preload API", () => {
         input: {
           targetType: "container",
           targetId: "container_1"
+        }
+      }
+    ]);
+  });
+
+  it("routes Today calls through their named channel", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk([])) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.today.getViewModel({
+      workspaceId: "workspace_1",
+      date: "2026-05-04",
+      backlogDays: 7
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.today.getViewModel,
+        input: {
+          workspaceId: "workspace_1",
+          date: "2026-05-04",
+          backlogDays: 7
         }
       }
     ]);

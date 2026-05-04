@@ -19,6 +19,7 @@ import {
   type ProjectSummary,
   type SearchResultSummary,
   type TaskSummary,
+  type TodayViewModelSummary,
   type WorkspaceSummary
 } from "../../src/preload/api";
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
@@ -338,6 +339,9 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
           ]
         })
     },
+    today: {
+      getViewModel: async () => apiOk(todayViewModelSummary())
+    },
     activity: {
       listRecent: async () => apiOk([activitySummary()]),
       listForTarget: async () => apiOk([activitySummary()]),
@@ -504,6 +508,32 @@ function collectionSummary(): CollectionSummary {
     isFavorite: true,
     createdAt: "2026-05-01T00:00:00.000Z",
     updatedAt: "2026-05-01T00:00:00.000Z"
+  };
+}
+
+function todayViewModelSummary(): TodayViewModelSummary {
+  return {
+    workspaceId: "workspace_1",
+    generatedAt: "2026-05-01T00:00:00.000Z",
+    localDate: "2026-05-01",
+    backlogDays: 14,
+    ranges: {
+      today: {
+        startInclusive: "2026-05-01T00:00:00.000Z",
+        endExclusive: "2026-05-02T00:00:00.000Z"
+      },
+      overdueBacklog: {
+        startInclusive: "2026-04-17T00:00:00.000Z",
+        endExclusive: "2026-05-01T00:00:00.000Z"
+      },
+      tomorrow: {
+        startInclusive: "2026-05-02T00:00:00.000Z",
+        endExclusive: "2026-05-03T00:00:00.000Z"
+      }
+    },
+    dueToday: [],
+    overdueBacklog: [],
+    tomorrowPreview: []
   };
 }
 

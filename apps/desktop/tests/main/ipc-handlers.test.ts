@@ -23,6 +23,7 @@ import { createNoteIpcHandlers } from "../../src/main/ipc/noteHandlers";
 import { createProjectIpcHandlers } from "../../src/main/ipc/projectHandlers";
 import { createSearchIpcHandlers } from "../../src/main/ipc/searchHandlers";
 import { createTaskIpcHandlers } from "../../src/main/ipc/taskHandlers";
+import { createTodayIpcHandlers } from "../../src/main/ipc/todayHandlers";
 import { createWorkspaceIpcHandlers } from "../../src/main/ipc/workspaceHandlers";
 import type { WorkspaceFileSystemService } from "../../src/main/services/workspace/WorkspaceFileSystemService";
 
@@ -1397,6 +1398,98 @@ describe("Task IPC handlers", () => {
           taskStatus: "open"
         }
       ]
+    });
+  });
+});
+
+describe("Today IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createTodayIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(
+      handlers.handleGetTodayViewModel(undefined)
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("returns the Today view model through the current workspace database", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-today-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const projectResult = await projectHandlers.handleCreateProject({
+      name: "Launch Plan"
+    });
+
+    if (!projectResult.ok) {
+      throw new Error(projectResult.error.message);
+    }
+
+    const taskHandlers = createTaskIpcHandlers(workspaceService);
+    const taskResult = await taskHandlers.handleCreateTask({
+      containerId: projectResult.data.project.id,
+      title: "Book launch venue",
+      dueAt: "2026-05-04"
+    });
+
+    if (!taskResult.ok) {
+      throw new Error(taskResult.error.message);
+    }
+
+    const handlers = createTodayIpcHandlers(workspaceService);
+
+    await expect(
+      handlers.handleGetTodayViewModel({
+        workspaceId: "workspace_1",
+        date: "2026-05-04",
+        backlogDays: 7
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        workspaceId: "workspace_1",
+        localDate: "2026-05-04",
+        backlogDays: 7,
+        dueToday: [
+          {
+            itemId: taskResult.data.id,
+            title: "Book launch venue",
+            taskStatus: "open"
+          }
+        ],
+        overdueBacklog: [],
+        tomorrowPreview: []
+      }
     });
   });
 });

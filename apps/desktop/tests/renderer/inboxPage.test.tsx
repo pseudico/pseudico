@@ -14,6 +14,7 @@ import {
   type NoteSummary,
   type ProjectSummary,
   type TaskSummary,
+  type TodayViewModelSummary,
   type WorkspaceSummary
 } from "../../src/preload/api";
 import { InboxPage } from "../../src/renderer/pages/InboxPage";
@@ -291,6 +292,9 @@ function createMockApi(): LocalWorkOsApi {
         apiOk({ collection: collectionSummary(), total: 0, results: [], groups: [] }),
       createTaskInCollection: async () => apiOk(taskSummary())
     },
+    today: {
+      getViewModel: async () => apiOk(todayViewModelSummary())
+    },
     activity: {
       listRecent: async () => apiOk([]),
       listForTarget: async () => apiOk([]),
@@ -448,5 +452,31 @@ function collectionSummary() {
     isFavorite: true,
     createdAt: "2026-05-01T00:00:00.000Z",
     updatedAt: "2026-05-01T00:00:00.000Z"
+  };
+}
+
+function todayViewModelSummary(): TodayViewModelSummary {
+  return {
+    workspaceId: "workspace_1",
+    generatedAt: "2026-05-01T00:00:00.000Z",
+    localDate: "2026-05-01",
+    backlogDays: 14,
+    ranges: {
+      today: {
+        startInclusive: "2026-05-01T00:00:00.000Z",
+        endExclusive: "2026-05-02T00:00:00.000Z"
+      },
+      overdueBacklog: {
+        startInclusive: "2026-04-17T00:00:00.000Z",
+        endExclusive: "2026-05-01T00:00:00.000Z"
+      },
+      tomorrow: {
+        startInclusive: "2026-05-02T00:00:00.000Z",
+        endExclusive: "2026-05-03T00:00:00.000Z"
+      }
+    },
+    dueToday: [],
+    overdueBacklog: [],
+    tomorrowPreview: []
   };
 }

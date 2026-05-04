@@ -16,6 +16,8 @@ import {
   NoteCardContent,
   NoteEditor,
   RecentActivityList,
+  TodayLane,
+  TodayTaskCard,
   UniversalItemCard,
   type UniversalItemViewModel
 } from "../src";
@@ -288,6 +290,40 @@ describe("Universal item UI", () => {
     expect(html).toContain("Container Updated");
     expect(html).toContain("Updated project.");
     expect(html).toContain("Container container_1");
+  });
+
+  it("renders Today lanes and task completion controls", () => {
+    const task = {
+      itemId: "item_1",
+      title: "Call accountant",
+      body: "Ask for the revised statement.",
+      taskStatus: "open",
+      itemStatus: "active",
+      dueAt: "2026-05-04T00:00:00.000Z",
+      priority: 2,
+      containerId: "container_project_1",
+      sourceLabel: "Open source"
+    };
+    const cardHtml = renderToStaticMarkup(
+      <TodayTaskCard task={task} onOpenSource={() => undefined} />
+    );
+    const laneHtml = renderToStaticMarkup(
+      <TodayLane
+        description="Tasks due today."
+        kind="today"
+        tasks={[task]}
+        title="Today"
+        onToggleComplete={() => undefined}
+      />
+    );
+
+    expect(cardHtml).toContain("Call accountant");
+    expect(cardHtml).toContain("Ask for the revised statement.");
+    expect(cardHtml).toContain("Complete");
+    expect(cardHtml).toContain("Open source");
+    expect(laneHtml).toContain("Today");
+    expect(laneHtml).toContain("Tasks due today.");
+    expect(laneHtml).toContain("Call accountant");
   });
 
   it("renders a related items placeholder and populated relationships", () => {
