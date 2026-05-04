@@ -89,6 +89,8 @@ export { timelineModuleContract } from "./timeline";
 export {
   DEFAULT_TODAY_BACKLOG_DAYS,
   TODAY_BACKLOG_DAYS_SETTING_KEY,
+  DailyPlanService,
+  normalizePlanDate,
   TodayService,
   todayModuleContract,
   toTodayTaskView
@@ -211,5 +213,16 @@ export type {
   UpdateTaskInput
 } from "./tasks";
 export type { TimelineService } from "./timeline";
-export type { TodayQueryInput, TodayTaskView, TodayViewModel } from "./today";
+export type {
+  DailyPlanDateInput,
+  DailyPlanServiceIdFactory,
+  GetPlannedTasksInput,
+  PlannedTaskView,
+  PlanTaskInput,
+  ReorderPlannedTaskInput,
+  TodayQueryInput,
+  TodayTaskView,
+  TodayViewModel,
+  UnplanTaskInput
+} from "./today";
 export type { WorkspaceService } from "./workspace";

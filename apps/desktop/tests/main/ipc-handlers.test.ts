@@ -1491,5 +1491,69 @@ describe("Today IPC handlers", () => {
         tomorrowPreview: []
       }
     });
+
+    await expect(
+      handlers.handlePlanTask({
+        workspaceId: "workspace_1",
+        date: "2026-05-04",
+        itemId: taskResult.data.id,
+        lane: "today",
+        sortOrder: 1024
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        itemId: taskResult.data.id,
+        lane: "today",
+        sortOrder: 1024
+      }
+    });
+    await expect(
+      handlers.handleGetPlannedTasks({
+        workspaceId: "workspace_1",
+        date: "2026-05-04",
+        lane: "today"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          itemId: taskResult.data.id,
+          planItemId: expect.any(String),
+          lane: "today"
+        }
+      ]
+    });
+    await expect(
+      handlers.handleReorderPlannedTask({
+        workspaceId: "workspace_1",
+        date: "2026-05-04",
+        itemId: taskResult.data.id,
+        lane: "today",
+        sortOrder: 512
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        itemId: taskResult.data.id,
+        sortOrder: 512
+      }
+    });
+    await expect(
+      handlers.handleUnplanTask({
+        workspaceId: "workspace_1",
+        date: "2026-05-04",
+        itemId: taskResult.data.id,
+        lane: "today"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          itemId: taskResult.data.id,
+          lane: "today"
+        }
+      ]
+    });
   });
 });

@@ -142,7 +142,15 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
     },
     today: {
       getViewModel: (input) =>
-        callApi(() => api.today.getViewModel(input))
+        callApi(() => api.today.getViewModel(input)),
+      getOrCreateDailyPlan: (input) =>
+        callApi(() => api.today.getOrCreateDailyPlan(input)),
+      planTask: (input) => callApi(() => api.today.planTask(input)),
+      unplanTask: (input) => callApi(() => api.today.unplanTask(input)),
+      reorderPlannedTask: (input) =>
+        callApi(() => api.today.reorderPlannedTask(input)),
+      getPlannedTasks: (input) =>
+        callApi(() => api.today.getPlannedTasks(input))
     },
     activity: {
       listRecent: (input) => callApi(() => api.activity.listRecent(input)),
@@ -306,7 +314,15 @@ export const desktopApiClient: LocalWorkOsApi = {
   },
   today: {
     getViewModel: (input) =>
-      getDesktopApiClient().today.getViewModel(input)
+      getDesktopApiClient().today.getViewModel(input),
+    getOrCreateDailyPlan: (input) =>
+      getDesktopApiClient().today.getOrCreateDailyPlan(input),
+    planTask: (input) => getDesktopApiClient().today.planTask(input),
+    unplanTask: (input) => getDesktopApiClient().today.unplanTask(input),
+    reorderPlannedTask: (input) =>
+      getDesktopApiClient().today.reorderPlannedTask(input),
+    getPlannedTasks: (input) =>
+      getDesktopApiClient().today.getPlannedTasks(input)
   },
   activity: {
     listRecent: (input) =>

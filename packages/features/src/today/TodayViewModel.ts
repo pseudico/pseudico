@@ -13,7 +13,7 @@ export type TodayTaskView = {
   taskStatus: TaskStatus;
   priority: number | null;
   startAt: string | null;
-  dueAt: string;
+  dueAt: string | null;
   allDay: boolean;
   timezone: string | null;
   sortOrder: number;
@@ -38,10 +38,6 @@ export type TodayViewModel = {
 };
 
 export function toTodayTaskView(record: TaskWithItemRecord): TodayTaskView {
-  if (record.task.dueAt === null) {
-    throw new Error(`Today task projection requires a due date: ${record.item.id}.`);
-  }
-
   return {
     itemId: record.item.id,
     workspaceId: record.item.workspaceId,

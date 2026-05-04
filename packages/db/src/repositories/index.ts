@@ -38,6 +38,16 @@ export {
   type DashboardWidgetRecord
 } from "./DashboardRepository";
 export {
+  DailyPlanRepository,
+  type CreateDailyPlanInput,
+  type CreateDailyPlanItemInput,
+  type DailyPlanItemRecord,
+  type DailyPlanItemType,
+  type DailyPlanLane,
+  type DailyPlanRecord,
+  type PlannedTaskRecord
+} from "./DailyPlanRepository";
+export {
   WorkspaceRepository,
   type CreateWorkspaceRecordInput,
   type UpdateWorkspaceLastOpenedInput,
