@@ -340,7 +340,12 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
         })
     },
     today: {
-      getViewModel: async () => apiOk(todayViewModelSummary())
+      getViewModel: async () => apiOk(todayViewModelSummary()),
+      getOrCreateDailyPlan: async () => apiOk(dailyPlanSummary()),
+      planTask: async () => apiOk(dailyPlanItemSummary()),
+      unplanTask: async () => apiOk([dailyPlanItemSummary()]),
+      reorderPlannedTask: async () => apiOk(dailyPlanItemSummary()),
+      getPlannedTasks: async () => apiOk([])
     },
     activity: {
       listRecent: async () => apiOk([activitySummary()]),
@@ -534,6 +539,31 @@ function todayViewModelSummary(): TodayViewModelSummary {
     dueToday: [],
     overdueBacklog: [],
     tomorrowPreview: []
+  };
+}
+
+function dailyPlanSummary() {
+  return {
+    id: "daily_plan_1",
+    workspaceId: "workspace_1",
+    planDate: "2026-05-01",
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z"
+  };
+}
+
+function dailyPlanItemSummary() {
+  return {
+    id: "daily_plan_item_1",
+    workspaceId: "workspace_1",
+    dailyPlanId: "daily_plan_1",
+    itemType: "task" as const,
+    itemId: "item_1",
+    lane: "today" as const,
+    sortOrder: 1024,
+    addedManually: true,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z"
   };
 }
 

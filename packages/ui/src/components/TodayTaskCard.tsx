@@ -6,7 +6,7 @@ export type TodayTaskCardViewModel = {
   body?: string | null;
   taskStatus: string;
   itemStatus: string;
-  dueAt: string;
+  dueAt: string | null;
   priority?: number | null;
   containerId: string;
   containerLabel?: string | null;
@@ -77,7 +77,11 @@ export function TodayTaskCard({
   );
 }
 
-function formatDueLabel(value: string): string {
+function formatDueLabel(value: string | null): string {
+  if (value === null) {
+    return "No due date";
+  }
+
   if (value.endsWith("T00:00:00.000Z")) {
     return value.slice(0, 10);
   }

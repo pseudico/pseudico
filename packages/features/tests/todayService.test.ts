@@ -1,5 +1,6 @@
 import {
   AppSettingsRepository,
+  ActivityLogRepository,
   ContainerRepository,
   ItemRepository,
   MigrationService,
@@ -12,6 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   DEFAULT_TODAY_BACKLOG_DAYS,
   TODAY_BACKLOG_DAYS_SETTING_KEY,
+  DailyPlanService,
   TaskService,
   TodayService
 } from "../src";
@@ -167,6 +169,132 @@ describe("TodayService", () => {
     }).backlogDays).toBe(DEFAULT_TODAY_BACKLOG_DAYS);
   });
 
+  it("merges manual Today and Tomorrow planning without duplicate lane display", async () => {
+    const taskService = createTaskService();
+    const dailyPlanService = createDailyPlanService();
+    const manualToday = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Manual today"
+    });
+    const dueToday = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Due today but planned tomorrow",
+      dueAt: new Date(2026, 4, 15, 10).toISOString()
+    });
+    await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Naturally tomorrow",
+      dueAt: new Date(2026, 4, 16, 8).toISOString()
+    });
+
+    await dailyPlanService.planTask({
+      workspaceId: "workspace_1",
+      itemId: manualToday.item.id,
+      lane: "today",
+      sortOrder: 1024
+    });
+    await dailyPlanService.planTask({
+      workspaceId: "workspace_1",
+      itemId: dueToday.item.id,
+      lane: "tomorrow",
+      sortOrder: 1024
+    });
+
+    const viewModel = createTodayService().getTodayViewModel({
+      workspaceId: "workspace_1"
+    });
+
+    expect(viewModel.dueToday.map((task) => task.title)).toEqual([
+      "Manual today"
+    ]);
+    expect(viewModel.dueToday[0]?.dueAt).toBeNull();
+    expect(viewModel.tomorrowPreview.map((task) => task.title)).toEqual([
+      "Due today but planned tomorrow",
+      "Naturally tomorrow"
+    ]);
+  });
+
+  it("plans, reorders, unplans, and logs daily planning activity", async () => {
+    const taskService = createTaskService();
+    const dailyPlanService = createDailyPlanService();
+    const first = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "First planned task"
+    });
+    const second = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Second planned task"
+    });
+
+    const plan = await dailyPlanService.getOrCreateDailyPlan({
+      workspaceId: "workspace_1",
+      date: "2026-05-15"
+    });
+    await dailyPlanService.planTask({
+      workspaceId: "workspace_1",
+      date: "2026-05-15",
+      itemId: first.item.id,
+      lane: "today",
+      sortOrder: 2048
+    });
+    await dailyPlanService.planTask({
+      workspaceId: "workspace_1",
+      date: "2026-05-15",
+      itemId: second.item.id,
+      lane: "today",
+      sortOrder: 1024
+    });
+
+    expect(plan).toMatchObject({
+      workspaceId: "workspace_1",
+      planDate: "2026-05-15"
+    });
+    expect(dailyPlanService.getPlannedTasks({
+      workspaceId: "workspace_1",
+      date: "2026-05-15",
+      lane: "today"
+    }).map((task) => task.itemId)).toEqual([second.item.id, first.item.id]);
+
+    await dailyPlanService.reorderPlannedTask({
+      workspaceId: "workspace_1",
+      date: "2026-05-15",
+      itemId: first.item.id,
+      lane: "today",
+      sortOrder: 512
+    });
+
+    expect(dailyPlanService.getPlannedTasks({
+      workspaceId: "workspace_1",
+      date: "2026-05-15",
+      lane: "today"
+    }).map((task) => task.itemId)).toEqual([first.item.id, second.item.id]);
+
+    const removed = await dailyPlanService.unplanTask({
+      workspaceId: "workspace_1",
+      date: "2026-05-15",
+      itemId: second.item.id,
+      lane: "today"
+    });
+
+    expect(removed).toHaveLength(1);
+    expect(dailyPlanService.getPlannedTasks({
+      workspaceId: "workspace_1",
+      date: "2026-05-15",
+      lane: "today"
+    }).map((task) => task.itemId)).toEqual([first.item.id]);
+    expect(new ActivityLogRepository(connection).listRecent("workspace_1", 3)
+      .map((event) => event.action)).toEqual([
+        "task_unplanned",
+        "task_plan_reordered",
+        "task_planned"
+      ]);
+  });
+
   it("rejects invalid inputs", () => {
     const service = createTodayService();
 
@@ -193,6 +321,17 @@ function createTaskService(): TaskService {
 function createTodayService(): TodayService {
   return new TodayService({
     connection,
+    now: () => NOW
+  });
+}
+
+function createDailyPlanService(): DailyPlanService {
+  return new DailyPlanService({
+    connection,
+    idFactory: (prefix) => {
+      idCounter += 1;
+      return `${prefix}_${idCounter}`;
+    },
     now: () => NOW
   });
 }

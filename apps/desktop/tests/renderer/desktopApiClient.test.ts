@@ -18,6 +18,9 @@ import {
   type ProjectSummary,
   type RecentWorkspace,
   type TaskSummary,
+  type DailyPlanItemSummary,
+  type DailyPlanSummary,
+  type PlannedTaskSummary,
   type TodayViewModelSummary,
   type WorkspaceSummary
 } from "../../src/preload/api";
@@ -260,7 +263,16 @@ function createMockApi(
         })
     },
     today: {
-      getViewModel: async () => apiOk(todayViewModelSummary())
+      getViewModel: async () => apiOk(todayViewModelSummary()),
+      getOrCreateDailyPlan: async () => apiOk(dailyPlanSummary()),
+      planTask: async () => apiOk(dailyPlanItemSummary()),
+      unplanTask: async () => apiOk([dailyPlanItemSummary()]),
+      reorderPlannedTask: async () =>
+        apiOk({
+          ...dailyPlanItemSummary(),
+          sortOrder: 512
+        }),
+      getPlannedTasks: async () => apiOk([plannedTaskSummary()])
     },
     activity: {
       listRecent: async () => apiOk([activitySummary()]),
@@ -629,6 +641,40 @@ function todayViewModelSummary(): TodayViewModelSummary {
   };
 }
 
+function dailyPlanSummary(): DailyPlanSummary {
+  return {
+    id: "daily_plan_1",
+    workspaceId: "workspace_1",
+    planDate: "2026-05-04",
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z"
+  };
+}
+
+function dailyPlanItemSummary(): DailyPlanItemSummary {
+  return {
+    id: "daily_plan_item_1",
+    workspaceId: "workspace_1",
+    dailyPlanId: "daily_plan_1",
+    itemType: "task",
+    itemId: "item_1",
+    lane: "today",
+    sortOrder: 1024,
+    addedManually: true,
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z"
+  };
+}
+
+function plannedTaskSummary(): PlannedTaskSummary {
+  return {
+    ...todayViewModelSummary().dueToday[0]!,
+    planItemId: "daily_plan_item_1",
+    lane: "today",
+    plannedSortOrder: 1024
+  };
+}
+
 describe("desktop API client", () => {
   it("passes typed preload results through to renderer callers", async () => {
     const client = createDesktopApiClient(createMockApi());
@@ -807,6 +853,24 @@ describe("desktop API client", () => {
           }
         ]
       }
+    });
+    await expect(
+      client.today.planTask({ itemId: "item_1", lane: "today" })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        itemId: "item_1",
+        lane: "today"
+      }
+    });
+    await expect(client.today.getPlannedTasks()).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          itemId: "item_1",
+          planItemId: "daily_plan_item_1"
+        }
+      ]
     });
     await expect(client.activity.listRecent()).resolves.toMatchObject({
       ok: true,

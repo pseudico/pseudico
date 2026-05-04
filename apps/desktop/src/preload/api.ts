@@ -318,13 +318,42 @@ export type TodayTaskSummary = {
   taskStatus: TaskStatus;
   priority: number | null;
   startAt: string | null;
-  dueAt: string;
+  dueAt: string | null;
   allDay: boolean;
   timezone: string | null;
   sortOrder: number;
   pinned: boolean;
   createdAt: string;
   updatedAt: string;
+};
+
+export type DailyPlanLane = "today" | "tomorrow" | "backlog";
+
+export type DailyPlanSummary = {
+  id: string;
+  workspaceId: string;
+  planDate: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type DailyPlanItemSummary = {
+  id: string;
+  workspaceId: string;
+  dailyPlanId: string;
+  itemType: "task" | "item" | "list_item";
+  itemId: string;
+  lane: DailyPlanLane;
+  sortOrder: number;
+  addedManually: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PlannedTaskSummary = TodayTaskSummary & {
+  planItemId: string;
+  lane: DailyPlanLane;
+  plannedSortOrder: number;
 };
 
 export type TodayDateRangeSummary = {
@@ -351,6 +380,32 @@ export type TodayViewModelInput = {
   workspaceId?: string;
   date?: string | Date;
   backlogDays?: number;
+};
+
+export type DailyPlanDateInput = {
+  workspaceId?: string;
+  date?: string | Date;
+};
+
+export type PlanTaskInput = DailyPlanDateInput & {
+  itemId: string;
+  lane: DailyPlanLane;
+  sortOrder?: number;
+};
+
+export type UnplanTaskInput = DailyPlanDateInput & {
+  itemId: string;
+  lane?: DailyPlanLane;
+};
+
+export type ReorderPlannedTaskInput = DailyPlanDateInput & {
+  itemId: string;
+  lane: DailyPlanLane;
+  sortOrder: number;
+};
+
+export type GetPlannedTasksInput = DailyPlanDateInput & {
+  lane?: DailyPlanLane;
 };
 
 export type CreateTagCollectionInput = {
@@ -725,7 +780,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
       "local-work-os:collections:create-task-in-collection"
   },
   today: {
-    getViewModel: "local-work-os:today:get-view-model"
+    getViewModel: "local-work-os:today:get-view-model",
+    getOrCreateDailyPlan: "local-work-os:today:get-or-create-daily-plan",
+    planTask: "local-work-os:today:plan-task",
+    unplanTask: "local-work-os:today:unplan-task",
+    reorderPlannedTask: "local-work-os:today:reorder-planned-task",
+    getPlannedTasks: "local-work-os:today:get-planned-tasks"
   },
   activity: {
     listRecentActivity: "local-work-os:activity:list-recent-activity",
@@ -932,6 +992,26 @@ export type LocalWorkOsIpcContracts = {
     input: TodayViewModelInput | undefined;
     result: ApiResult<TodayViewModelSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.today.getOrCreateDailyPlan]: {
+    input: DailyPlanDateInput | undefined;
+    result: ApiResult<DailyPlanSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.today.planTask]: {
+    input: PlanTaskInput;
+    result: ApiResult<DailyPlanItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.today.unplanTask]: {
+    input: UnplanTaskInput;
+    result: ApiResult<DailyPlanItemSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.today.reorderPlannedTask]: {
+    input: ReorderPlannedTaskInput;
+    result: ApiResult<DailyPlanItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.today.getPlannedTasks]: {
+    input: GetPlannedTasksInput | undefined;
+    result: ApiResult<PlannedTaskSummary[]>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.activity.listRecentActivity]: {
     input: ListRecentActivityInput | undefined;
     result: ApiResult<ActivitySummary[]>;
@@ -1134,6 +1214,19 @@ export type LocalWorkOsApi = {
     getViewModel: (
       input?: TodayViewModelInput
     ) => Promise<ApiResult<TodayViewModelSummary>>;
+    getOrCreateDailyPlan: (
+      input?: DailyPlanDateInput
+    ) => Promise<ApiResult<DailyPlanSummary>>;
+    planTask: (input: PlanTaskInput) => Promise<ApiResult<DailyPlanItemSummary>>;
+    unplanTask: (
+      input: UnplanTaskInput
+    ) => Promise<ApiResult<DailyPlanItemSummary[]>>;
+    reorderPlannedTask: (
+      input: ReorderPlannedTaskInput
+    ) => Promise<ApiResult<DailyPlanItemSummary>>;
+    getPlannedTasks: (
+      input?: GetPlannedTasksInput
+    ) => Promise<ApiResult<PlannedTaskSummary[]>>;
   };
   activity: {
     listRecent: (
@@ -1381,7 +1474,17 @@ export function createLocalWorkOsApi(
     },
     today: {
       getViewModel: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.getViewModel, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.getViewModel, input),
+      getOrCreateDailyPlan: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.getOrCreateDailyPlan, input),
+      planTask: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.planTask, input),
+      unplanTask: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.unplanTask, input),
+      reorderPlannedTask: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.reorderPlannedTask, input),
+      getPlannedTasks: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.getPlannedTasks, input)
     },
     activity: {
       listRecent: (input) =>

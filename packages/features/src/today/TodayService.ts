@@ -9,6 +9,7 @@ import {
 } from "@local-work-os/core";
 import {
   AppSettingsRepository,
+  DailyPlanRepository,
   TaskRepository,
   type DatabaseConnection,
   type TaskWithItemRecord
@@ -80,33 +81,56 @@ export class TodayService {
   listDueToday(input: TodayQueryInput): TodayTaskView[] {
     this.validateInput(input);
 
-    const range = createLocalDayRange(input.date ?? this.now());
-    return this.listTasks(input.workspaceId, (repository) =>
+    const date = input.date ?? this.now();
+    const range = createLocalDayRange(date);
+    const automaticTasks = this.listTasks(input.workspaceId, (repository) =>
       repository.listDueBetween(input.workspaceId, range)
     );
+
+    return this.listTasksForLane({
+      workspaceId: input.workspaceId,
+      date,
+      lane: "today",
+      automaticTasks
+    });
   }
 
   listOverdueBacklog(input: TodayQueryInput): TodayTaskView[] {
     this.validateInput(input);
 
+    const date = input.date ?? this.now();
     const range = createLocalDayWindowRange({
-      date: input.date ?? this.now(),
+      date,
       startOffsetDays: -this.resolveBacklogDays(input),
       endOffsetDays: 0
     });
-
-    return this.listTasks(input.workspaceId, (repository) =>
+    const automaticTasks = this.listTasks(input.workspaceId, (repository) =>
       repository.listOverdueBetween(input.workspaceId, range)
     );
+
+    return this.listTasksForLane({
+      workspaceId: input.workspaceId,
+      date,
+      lane: "backlog",
+      automaticTasks
+    });
   }
 
   listTomorrowPreview(input: TodayQueryInput): TodayTaskView[] {
     this.validateInput(input);
 
-    const range = createRelativeLocalDayRange(input.date ?? this.now(), 1);
-    return this.listTasks(input.workspaceId, (repository) =>
+    const date = input.date ?? this.now();
+    const range = createRelativeLocalDayRange(date, 1);
+    const automaticTasks = this.listTasks(input.workspaceId, (repository) =>
       repository.listDueBetween(input.workspaceId, range)
     );
+
+    return this.listTasksForLane({
+      workspaceId: input.workspaceId,
+      date,
+      lane: "tomorrow",
+      automaticTasks
+    });
   }
 
   private listTasks(
@@ -116,6 +140,42 @@ export class TodayService {
     validateNonEmptyString(workspaceId, "workspaceId");
 
     return query(new TaskRepository(this.connection)).map(toTodayTaskView);
+  }
+
+  private listTasksForLane(input: {
+    workspaceId: string;
+    date: LocalDateInput;
+    lane: "today" | "tomorrow" | "backlog";
+    automaticTasks: TodayTaskView[];
+  }): TodayTaskView[] {
+    const repository = new DailyPlanRepository(this.connection);
+    const plan = repository.findPlanByDate({
+      workspaceId: input.workspaceId,
+      planDate: createLocalDayRange(input.date).localDate
+    });
+
+    if (plan === null) {
+      return input.automaticTasks;
+    }
+
+    const plannedTasks = repository.listPlannedTasks({
+      workspaceId: input.workspaceId,
+      dailyPlanId: plan.id
+    });
+    const plannedIds = new Set(
+      plannedTasks.map((record) => record.task.item.id)
+    );
+    const laneTasks = plannedTasks
+      .filter((record) => record.planItem.lane === input.lane)
+      .map((record) => ({
+        ...toTodayTaskView(record.task),
+        sortOrder: record.planItem.sortOrder
+      }));
+
+    return [
+      ...laneTasks,
+      ...input.automaticTasks.filter((task) => !plannedIds.has(task.itemId))
+    ];
   }
 
   private resolveBacklogDays(input: TodayQueryInput): number {

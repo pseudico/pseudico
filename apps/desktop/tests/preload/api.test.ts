@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(56);
+    expect(channels).toHaveLength(61);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -671,6 +671,34 @@ describe("typed preload API", () => {
       date: "2026-05-04",
       backlogDays: 7
     });
+    await api.today.getOrCreateDailyPlan({
+      workspaceId: "workspace_1",
+      date: "2026-05-04"
+    });
+    await api.today.planTask({
+      workspaceId: "workspace_1",
+      date: "2026-05-04",
+      itemId: "item_1",
+      lane: "today"
+    });
+    await api.today.reorderPlannedTask({
+      workspaceId: "workspace_1",
+      date: "2026-05-04",
+      itemId: "item_1",
+      lane: "today",
+      sortOrder: 512
+    });
+    await api.today.getPlannedTasks({
+      workspaceId: "workspace_1",
+      date: "2026-05-04",
+      lane: "today"
+    });
+    await api.today.unplanTask({
+      workspaceId: "workspace_1",
+      date: "2026-05-04",
+      itemId: "item_1",
+      lane: "today"
+    });
 
     expect(calls).toEqual([
       {
@@ -679,6 +707,49 @@ describe("typed preload API", () => {
           workspaceId: "workspace_1",
           date: "2026-05-04",
           backlogDays: 7
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.today.getOrCreateDailyPlan,
+        input: {
+          workspaceId: "workspace_1",
+          date: "2026-05-04"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.today.planTask,
+        input: {
+          workspaceId: "workspace_1",
+          date: "2026-05-04",
+          itemId: "item_1",
+          lane: "today"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.today.reorderPlannedTask,
+        input: {
+          workspaceId: "workspace_1",
+          date: "2026-05-04",
+          itemId: "item_1",
+          lane: "today",
+          sortOrder: 512
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.today.getPlannedTasks,
+        input: {
+          workspaceId: "workspace_1",
+          date: "2026-05-04",
+          lane: "today"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.today.unplanTask,
+        input: {
+          workspaceId: "workspace_1",
+          date: "2026-05-04",
+          itemId: "item_1",
+          lane: "today"
         }
       }
     ]);
