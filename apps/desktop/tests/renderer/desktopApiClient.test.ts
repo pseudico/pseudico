@@ -8,6 +8,7 @@ import {
   type CollectionSummary,
   type DatabaseHealthStatus,
   type DashboardViewModelSummary,
+  type FileAttachmentResultSummary,
   type InboxSummary,
   type IpcModuleStatus,
   type ItemSummary,
@@ -342,7 +343,9 @@ function createMockApi(
         })
     },
     files: {
-      getStatus: async () => apiOk(moduleStatus("files"))
+      getStatus: async () => apiOk(moduleStatus("files")),
+      attachFileToContainer: async () => apiOk(fileAttachmentResultSummary()),
+      attachFileToItem: async () => apiOk(fileAttachmentResultSummary())
     }
   };
 
@@ -533,6 +536,31 @@ function activitySummary(): ActivitySummary {
     actorLabel: "Local user",
     targetLabel: "Item item_1",
     description: "Moved item."
+  };
+}
+
+function fileAttachmentResultSummary(): FileAttachmentResultSummary {
+  return {
+    item: {
+      ...itemSummary(),
+      type: "file",
+      title: "Brief.pdf"
+    },
+    attachment: {
+      id: "attachment_1",
+      workspaceId: "workspace_1",
+      itemId: "item_1",
+      originalName: "Brief.pdf",
+      storedName: "Brief.pdf",
+      mimeType: "application/pdf",
+      sizeBytes: 42,
+      checksum: "abc123",
+      storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
+      description: "Brief",
+      createdAt: "2026-04-30T00:00:00.000Z",
+      updatedAt: "2026-04-30T00:00:00.000Z",
+      deletedAt: null
+    }
   };
 }
 
@@ -1007,6 +1035,32 @@ describe("desktop API client", () => {
       data: {
         item: {
           id: "item_1"
+        }
+      }
+    });
+    await expect(
+      client.files.attachFileToContainer({
+        containerId: "container_1",
+        sourcePath: "C:\\source\\Brief.pdf"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        attachment: {
+          originalName: "Brief.pdf"
+        }
+      }
+    });
+    await expect(
+      client.files.attachFileToItem({
+        itemId: "item_1",
+        sourcePath: "C:\\source\\Brief.pdf"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        item: {
+          type: "file"
         }
       }
     });

@@ -193,7 +193,11 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.items.openItemInspector(itemId))
     },
     files: {
-      getStatus: () => callApi(() => api.files.getStatus())
+      getStatus: () => callApi(() => api.files.getStatus()),
+      attachFileToContainer: (input) =>
+        callApi(() => api.files.attachFileToContainer(input)),
+      attachFileToItem: (input) =>
+        callApi(() => api.files.attachFileToItem(input))
     }
   };
 }
@@ -379,6 +383,10 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().items.openItemInspector(itemId)
   },
   files: {
-    getStatus: () => getDesktopApiClient().files.getStatus()
+    getStatus: () => getDesktopApiClient().files.getStatus(),
+    attachFileToContainer: (input) =>
+      getDesktopApiClient().files.attachFileToContainer(input),
+    attachFileToItem: (input) =>
+      getDesktopApiClient().files.attachFileToItem(input)
   }
 };

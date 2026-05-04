@@ -399,7 +399,9 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
         })
     },
     files: {
-      getStatus: async () => apiOk(moduleStatus("files"))
+      getStatus: async () => apiOk(moduleStatus("files")),
+      attachFileToContainer: async () => apiOk(null as never),
+      attachFileToItem: async () => apiOk(null as never)
     }
   };
 }

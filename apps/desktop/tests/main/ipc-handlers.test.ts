@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -15,6 +15,7 @@ import { createActivityIpcHandlers } from "../../src/main/ipc/activityHandlers";
 import { createCategoryIpcHandlers } from "../../src/main/ipc/categoryHandlers";
 import { createCollectionIpcHandlers } from "../../src/main/ipc/collectionHandlers";
 import { createDashboardIpcHandlers } from "../../src/main/ipc/dashboardHandlers";
+import { createFileIpcHandlers } from "../../src/main/ipc/fileHandlers";
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
 import { createItemIpcHandlers } from "../../src/main/ipc/itemHandlers";
 import { createListIpcHandlers } from "../../src/main/ipc/listHandlers";
@@ -201,15 +202,119 @@ describe("database IPC handlers", () => {
 });
 
 describe("placeholder module IPC handlers", () => {
-  it("documents future file IPC without enabling file operations", () => {
+  it("reports implemented file IPC", () => {
     expect(handleGetModuleStatus("files")).toEqual({
       ok: true,
       data: {
         module: "files",
         available: true,
-        implemented: false,
+        implemented: true,
+        message: "File IPC supports safe local attachment imports."
+      }
+    });
+  });
+});
+
+describe("file IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("validates attachment input and requires an open workspace", async () => {
+    const handlers = createFileIpcHandlers(createMockWorkspaceService());
+
+    await expect(
+      handlers.handleAttachFileToContainer({
+        containerId: "",
+        sourcePath: "C:\\source\\Brief.pdf"
+      })
+    ).resolves.toEqual({
+      ok: false,
+      error: {
+        code: "INVALID_INPUT",
         message:
-          "File IPC is typed but awaits workspace filesystem service tickets."
+          "attachFileToContainer requires containerId and sourcePath strings."
+      }
+    });
+    await expect(
+      handlers.handleAttachFileToItem({
+        itemId: "item_1",
+        sourcePath: "C:\\source\\Brief.pdf"
+      })
+    ).resolves.toEqual({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("copies source files through main and creates attachment metadata", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-file-ipc-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+    const connection = await createDatabaseConnection({
+      databasePath,
+      fileMustExist: true
+    });
+
+    try {
+      new ContainerRepository(connection).create({
+        id: "container_project_1",
+        workspaceId: "workspace_1",
+        type: "project",
+        name: "Launch Plan",
+        slug: "launch-plan",
+        timestamp: "2026-05-01T00:00:00.000Z"
+      });
+    } finally {
+      connection.close();
+    }
+
+    const sourcePath = join(tempRoot, "Brief.pdf");
+    await writeFile(sourcePath, "brief contents", "utf8");
+    const handlers = createFileIpcHandlers({
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    });
+
+    await expect(
+      handlers.handleAttachFileToContainer({
+        workspaceId: "workspace_1",
+        containerId: "container_project_1",
+        sourcePath,
+        description: "Launch brief"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        item: {
+          type: "file",
+          title: "Brief.pdf"
+        },
+        attachment: {
+          originalName: "Brief.pdf",
+          storedName: "Brief.pdf",
+          sizeBytes: 14,
+          storagePath: expect.stringMatching(
+            /^attachments\/\d{4}\/\d{2}\/attachment_/
+          )
+        }
       }
     });
   });
