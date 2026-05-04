@@ -1128,6 +1128,32 @@ a {
   background: #ffffff;
 }
 
+.today-task-card-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.today-task-plan-actions {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.reorder-controls {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.reorder-controls .icon-button {
+  width: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 6px;
+}
+
 .search-layout {
   display: grid;
   grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
@@ -2319,6 +2345,7 @@ a {
     .search-layout,
     .search-page-form,
     .today-lane-grid,
+    .today-task-card-actions,
     .checklist-inline-add,
   .checklist-bulk-add {
     grid-template-columns: 1fr;

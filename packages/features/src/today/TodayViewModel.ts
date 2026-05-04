@@ -1,5 +1,5 @@
 import type { TaskDateRange, TaskStatus } from "@local-work-os/core";
-import type { TaskWithItemRecord } from "@local-work-os/db";
+import type { DailyPlanLane, TaskWithItemRecord } from "@local-work-os/db";
 
 export type TodayTaskView = {
   itemId: string;
@@ -17,6 +17,9 @@ export type TodayTaskView = {
   allDay: boolean;
   timezone: string | null;
   sortOrder: number;
+  plannedLane: DailyPlanLane | null;
+  plannedSortOrder: number | null;
+  addedManually: boolean;
   pinned: boolean;
   createdAt: string;
   updatedAt: string;
@@ -54,6 +57,9 @@ export function toTodayTaskView(record: TaskWithItemRecord): TodayTaskView {
     allDay: record.task.allDay,
     timezone: record.task.timezone,
     sortOrder: record.item.sortOrder,
+    plannedLane: null,
+    plannedSortOrder: null,
+    addedManually: false,
     pinned: record.item.pinned,
     createdAt: record.item.createdAt,
     updatedAt: record.item.updatedAt

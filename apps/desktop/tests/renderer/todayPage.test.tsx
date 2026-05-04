@@ -20,6 +20,9 @@ describe("Today renderer page", () => {
     expect(html).toContain("Send overdue report");
     expect(html).toContain("Complete");
     expect(html).toContain("Open source");
+    expect(html).toContain("Tomorrow");
+    expect(html).toContain("Remove");
+    expect(html).toContain("Move down");
   });
 });
 
@@ -43,7 +46,20 @@ function todayViewModel(): TodayViewModelSummary {
         endExclusive: "2026-05-06T00:00:00.000Z"
       }
     },
-    dueToday: [todayTask("item_today", "Call accountant", "2026-05-04T09:00:00.000Z")],
+    dueToday: [
+      {
+        ...todayTask("item_today", "Call accountant", "2026-05-04T09:00:00.000Z"),
+        plannedLane: "today" as const,
+        plannedSortOrder: 1024,
+        addedManually: true
+      },
+      {
+        ...todayTask("item_today_2", "Send agenda", "2026-05-04T11:00:00.000Z"),
+        plannedLane: "today" as const,
+        plannedSortOrder: 2048,
+        addedManually: true
+      }
+    ],
     tomorrowPreview: [
       todayTask("item_tomorrow", "Review launch copy", "2026-05-05T09:00:00.000Z")
     ],
@@ -70,6 +86,9 @@ function todayTask(itemId: string, title: string, dueAt: string) {
     allDay: true,
     timezone: null,
     sortOrder: 1024,
+    plannedLane: null,
+    plannedSortOrder: null,
+    addedManually: false,
     pinned: false,
     createdAt: "2026-05-01T00:00:00.000Z",
     updatedAt: "2026-05-01T00:00:00.000Z"

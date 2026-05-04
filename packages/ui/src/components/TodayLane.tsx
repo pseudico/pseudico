@@ -18,6 +18,15 @@ export type TodayLaneProps = {
   error?: string | null;
   onOpenSource?: (task: TodayTaskCardViewModel) => void;
   onToggleComplete?: (task: TodayTaskCardViewModel) => Promise<void> | void;
+  onPlanTask?: (
+    task: TodayTaskCardViewModel,
+    lane: "today" | "tomorrow"
+  ) => Promise<void> | void;
+  onUnplanTask?: (task: TodayTaskCardViewModel) => Promise<void> | void;
+  onReorderTask?: (
+    task: TodayTaskCardViewModel,
+    direction: "up" | "down"
+  ) => Promise<void> | void;
 };
 
 const laneIcons = {
@@ -37,9 +46,15 @@ export function TodayLane({
   loading = false,
   error = null,
   onOpenSource,
-  onToggleComplete
+  onToggleComplete,
+  onPlanTask,
+  onUnplanTask,
+  onReorderTask
 }: TodayLaneProps): React.JSX.Element {
   const LaneIcon = laneIcons[kind];
+  const plannedTaskIds = tasks
+    .filter((task) => task.plannedLane === kind)
+    .map((task) => task.itemId);
 
   return (
     <section className="today-lane" data-today-lane={kind}>
@@ -65,15 +80,27 @@ export function TodayLane({
       ) : null}
 
       <div className="today-task-list">
-        {tasks.map((task) => (
-          <TodayTaskCard
-            busy={busyTaskId === task.itemId}
-            key={task.itemId}
-            task={task}
-            {...(onOpenSource === undefined ? {} : { onOpenSource })}
-            {...(onToggleComplete === undefined ? {} : { onToggleComplete })}
-          />
-        ))}
+        {tasks.map((task) => {
+          const plannedIndex = plannedTaskIds.indexOf(task.itemId);
+
+          return (
+            <TodayTaskCard
+              busy={busyTaskId === task.itemId}
+              canMoveDown={
+                plannedIndex >= 0 && plannedIndex < plannedTaskIds.length - 1
+              }
+              canMoveUp={plannedIndex > 0}
+              key={task.itemId}
+              lane={kind}
+              task={task}
+              {...(onOpenSource === undefined ? {} : { onOpenSource })}
+              {...(onToggleComplete === undefined ? {} : { onToggleComplete })}
+              {...(onPlanTask === undefined ? {} : { onPlanTask })}
+              {...(onUnplanTask === undefined ? {} : { onUnplanTask })}
+              {...(onReorderTask === undefined ? {} : { onReorderTask })}
+            />
+          );
+        })}
       </div>
     </section>
   );

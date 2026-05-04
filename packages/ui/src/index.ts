@@ -103,6 +103,10 @@ export {
   type TodayTaskCardViewModel
 } from "./components/TodayTaskCard";
 export {
+  ReorderControls,
+  type ReorderControlsProps
+} from "./components/ReorderControls";
+export {
   ChecklistEditor,
   type ChecklistEditorItem,
   type ChecklistEditorProps

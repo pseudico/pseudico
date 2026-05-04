@@ -169,7 +169,10 @@ export class TodayService {
       .filter((record) => record.planItem.lane === input.lane)
       .map((record) => ({
         ...toTodayTaskView(record.task),
-        sortOrder: record.planItem.sortOrder
+        sortOrder: record.planItem.sortOrder,
+        plannedLane: record.planItem.lane,
+        plannedSortOrder: record.planItem.sortOrder,
+        addedManually: record.planItem.addedManually
       }));
 
     return [
