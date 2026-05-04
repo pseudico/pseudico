@@ -209,6 +209,9 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
       update: async () => apiOk(taskSummary("Call supplier", activeProject.id)),
       complete: async () => apiOk(taskSummary("Call supplier", activeProject.id)),
       reopen: async () => apiOk(taskSummary("Call supplier", activeProject.id)),
+      snooze: async () => apiOk(taskSummary("Call supplier", activeProject.id)),
+      reschedule: async () =>
+        apiOk(taskSummary("Call supplier", activeProject.id)),
       listByContainer: async () =>
         apiOk([taskSummary("Call supplier", activeProject.id)]),
       createTask: async () => apiOk(taskSummary("Call supplier", activeProject.id)),
@@ -216,6 +219,10 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
       completeTask: async () =>
         apiOk(taskSummary("Call supplier", activeProject.id)),
       reopenTask: async () =>
+        apiOk(taskSummary("Call supplier", activeProject.id)),
+      snoozeTask: async () =>
+        apiOk(taskSummary("Call supplier", activeProject.id)),
+      rescheduleTask: async () =>
         apiOk(taskSummary("Call supplier", activeProject.id))
     },
     lists: {

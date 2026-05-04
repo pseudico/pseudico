@@ -139,6 +139,52 @@ describe("TaskService", () => {
     ]);
   });
 
+  it("snoozes and reschedules tasks with activity and search metadata", async () => {
+    const service = createService();
+    const created = await service.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Plan follow-up",
+      dueAt: "2026-05-02"
+    });
+
+    const snoozed = await service.snoozeTask({
+      itemId: created.item.id,
+      preset: "tomorrow"
+    });
+
+    expect(snoozed.task).toMatchObject({
+      dueAt: new Date(2026, 4, 3).toISOString(),
+      allDay: true
+    });
+    expect(JSON.parse(snoozed.searchRecord.metadataJson)).toMatchObject({
+      dueAt: new Date(2026, 4, 3).toISOString()
+    });
+
+    const rescheduled = await service.rescheduleTask({
+      itemId: created.item.id,
+      dueAt: "2026-05-09T15:30:00.000Z",
+      allDay: false
+    });
+
+    expect(rescheduled.task).toMatchObject({
+      dueAt: "2026-05-09T15:30:00.000Z",
+      allDay: false
+    });
+    expect(new SearchIndexRepository(connection).getByTarget({
+      workspaceId: "workspace_1",
+      targetType: "item",
+      targetId: created.item.id
+    })).toMatchObject({
+      targetId: created.item.id
+    });
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("item", created.item.id)
+        .map((event) => event.action)
+    ).toEqual(["task_created", "task_snoozed", "task_rescheduled"]);
+  });
+
   it("syncs inline task tags, preserves manual tags, and projects tags into search", async () => {
     const service = createService();
     const created = await service.createTask({

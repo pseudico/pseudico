@@ -52,12 +52,17 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       update: (input) => callApi(() => api.tasks.update(input)),
       complete: (itemId) => callApi(() => api.tasks.complete(itemId)),
       reopen: (itemId) => callApi(() => api.tasks.reopen(itemId)),
+      snooze: (input) => callApi(() => api.tasks.snooze(input)),
+      reschedule: (input) => callApi(() => api.tasks.reschedule(input)),
       listByContainer: (containerId) =>
         callApi(() => api.tasks.listByContainer(containerId)),
       createTask: (input) => callApi(() => api.tasks.createTask(input)),
       updateTask: (input) => callApi(() => api.tasks.updateTask(input)),
       completeTask: (itemId) => callApi(() => api.tasks.completeTask(itemId)),
-      reopenTask: (itemId) => callApi(() => api.tasks.reopenTask(itemId))
+      reopenTask: (itemId) => callApi(() => api.tasks.reopenTask(itemId)),
+      snoozeTask: (input) => callApi(() => api.tasks.snoozeTask(input)),
+      rescheduleTask: (input) =>
+        callApi(() => api.tasks.rescheduleTask(input))
     },
     lists: {
       create: (input) => callApi(() => api.lists.create(input)),
@@ -220,13 +225,18 @@ export const desktopApiClient: LocalWorkOsApi = {
     update: (input) => getDesktopApiClient().tasks.update(input),
     complete: (itemId) => getDesktopApiClient().tasks.complete(itemId),
     reopen: (itemId) => getDesktopApiClient().tasks.reopen(itemId),
+    snooze: (input) => getDesktopApiClient().tasks.snooze(input),
+    reschedule: (input) => getDesktopApiClient().tasks.reschedule(input),
     listByContainer: (containerId) =>
       getDesktopApiClient().tasks.listByContainer(containerId),
     createTask: (input) => getDesktopApiClient().tasks.createTask(input),
     updateTask: (input) => getDesktopApiClient().tasks.updateTask(input),
     completeTask: (itemId) =>
       getDesktopApiClient().tasks.completeTask(itemId),
-    reopenTask: (itemId) => getDesktopApiClient().tasks.reopenTask(itemId)
+    reopenTask: (itemId) => getDesktopApiClient().tasks.reopenTask(itemId),
+    snoozeTask: (input) => getDesktopApiClient().tasks.snoozeTask(input),
+    rescheduleTask: (input) =>
+      getDesktopApiClient().tasks.rescheduleTask(input)
   },
   lists: {
     create: (input) => getDesktopApiClient().lists.create(input),

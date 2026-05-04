@@ -2,6 +2,7 @@ import {
   ActivityAction,
   createIsoTimestamp,
   createLocalDayRange,
+  createRelativeLocalDayRange,
   createLocalId,
   type ActivityActorType,
   type Clock,
@@ -49,6 +50,10 @@ export type ReorderPlannedTaskInput = DailyPlanDateInput & {
 
 export type GetPlannedTasksInput = DailyPlanDateInput & {
   lane?: DailyPlanLane;
+};
+
+export type RolloverTomorrowToTodayInput = DailyPlanDateInput & {
+  actorType?: ActivityActorType;
 };
 
 export type PlannedTaskView = TodayTaskView & {
@@ -226,6 +231,89 @@ export class DailyPlanService {
       });
 
       return updated;
+    });
+  }
+
+  async rolloverTomorrowToToday(
+    input: RolloverTomorrowToTodayInput
+  ): Promise<DailyPlanItemRecord[]> {
+    this.validateDateInput(input);
+
+    return await this.transactionService.runInTransaction(() => {
+      const timestamp = createIsoTimestamp(this.now());
+      const currentDate = input.date ?? this.now();
+      const yesterdayPlanDate = createRelativeLocalDayRange(
+        currentDate,
+        -1
+      ).localDate;
+      const todayPlanDate = normalizePlanDate(currentDate);
+      const repository = new DailyPlanRepository(this.connection);
+      const yesterdayPlan = repository.findPlanByDate({
+        workspaceId: input.workspaceId,
+        planDate: yesterdayPlanDate
+      });
+
+      if (yesterdayPlan === null) {
+        return [];
+      }
+
+      const sourceTasks = repository.listPlannedTasks({
+        workspaceId: input.workspaceId,
+        dailyPlanId: yesterdayPlan.id,
+        lane: "tomorrow"
+      });
+
+      if (sourceTasks.length === 0) {
+        return [];
+      }
+
+      const todayPlan = this.getOrCreatePlan(
+        { workspaceId: input.workspaceId, date: todayPlanDate },
+        timestamp
+      );
+      const rolledOver: DailyPlanItemRecord[] = [];
+
+      for (const source of sourceTasks) {
+        const existing = repository.findPlanItemsForTarget({
+          dailyPlanId: todayPlan.id,
+          itemType: "task",
+          itemId: source.task.item.id
+        });
+
+        if (existing.length > 0) {
+          continue;
+        }
+
+        const planItem = repository.createPlanItem({
+          id: this.idFactory("daily_plan_item"),
+          workspaceId: input.workspaceId,
+          dailyPlanId: todayPlan.id,
+          itemType: "task",
+          itemId: source.task.item.id,
+          lane: "today",
+          sortOrder: source.planItem.sortOrder,
+          addedManually: source.planItem.addedManually,
+          timestamp
+        });
+
+        rolledOver.push(planItem);
+        this.logPlanningEvent({
+          workspaceId: input.workspaceId,
+          actorType: input.actorType ?? "system",
+          action: ActivityAction.taskPlanRolledOver,
+          targetId: source.task.item.id,
+          summary: `Rolled task "${source.task.item.title}" from yesterday's Tomorrow plan into Today.`,
+          before: source.planItem,
+          after: planItem,
+          timestamp
+        });
+      }
+
+      if (rolledOver.length > 0) {
+        repository.touchPlan(todayPlan.id, timestamp);
+      }
+
+      return rolledOver;
     });
   }
 

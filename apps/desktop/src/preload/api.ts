@@ -589,6 +589,22 @@ export type UpdateTaskInput = {
   containerTabId?: string | null;
 };
 
+export type SnoozeTaskInput = {
+  itemId: string;
+  preset?: "tomorrow" | "next_week";
+  dueAt?: string;
+  date?: string | Date;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type RescheduleTaskInput = {
+  itemId: string;
+  dueAt: string | null;
+  actorType?: "local_user" | "system" | "importer";
+  startAt?: string | null;
+  allDay?: boolean;
+};
+
 export type ListItemSummary = {
   id: string;
   workspaceId: string;
@@ -732,6 +748,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     updateTask: "local-work-os:tasks:update-task",
     completeTask: "local-work-os:tasks:complete-task",
     reopenTask: "local-work-os:tasks:reopen-task",
+    snoozeTask: "local-work-os:tasks:snooze-task",
+    rescheduleTask: "local-work-os:tasks:reschedule-task",
     listByContainer: "local-work-os:tasks:list-by-container"
   },
   lists: {
@@ -861,6 +879,14 @@ export type LocalWorkOsIpcContracts = {
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.tasks.reopenTask]: {
     input: string;
+    result: ApiResult<TaskSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tasks.snoozeTask]: {
+    input: SnoozeTaskInput;
+    result: ApiResult<TaskSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tasks.rescheduleTask]: {
+    input: RescheduleTaskInput;
     result: ApiResult<TaskSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.tasks.listByContainer]: {
@@ -1099,6 +1125,10 @@ export type LocalWorkOsApi = {
     update: (input: UpdateTaskInput) => Promise<ApiResult<TaskSummary>>;
     complete: (itemId: string) => Promise<ApiResult<TaskSummary>>;
     reopen: (itemId: string) => Promise<ApiResult<TaskSummary>>;
+    snooze: (input: SnoozeTaskInput) => Promise<ApiResult<TaskSummary>>;
+    reschedule: (
+      input: RescheduleTaskInput
+    ) => Promise<ApiResult<TaskSummary>>;
     listByContainer: (
       containerId: string
     ) => Promise<ApiResult<TaskSummary[]>>;
@@ -1106,6 +1136,10 @@ export type LocalWorkOsApi = {
     updateTask: (input: UpdateTaskInput) => Promise<ApiResult<TaskSummary>>;
     completeTask: (itemId: string) => Promise<ApiResult<TaskSummary>>;
     reopenTask: (itemId: string) => Promise<ApiResult<TaskSummary>>;
+    snoozeTask: (input: SnoozeTaskInput) => Promise<ApiResult<TaskSummary>>;
+    rescheduleTask: (
+      input: RescheduleTaskInput
+    ) => Promise<ApiResult<TaskSummary>>;
   };
   lists: {
     create: (input: CreateListInput) => Promise<ApiResult<ListSummary>>;
@@ -1335,6 +1369,10 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.completeTask, itemId),
       reopen: (itemId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.reopenTask, itemId),
+      snooze: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.snoozeTask, input),
+      reschedule: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.rescheduleTask, input),
       listByContainer: (containerId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.listByContainer, containerId),
       createTask: (input) =>
@@ -1344,7 +1382,11 @@ export function createLocalWorkOsApi(
       completeTask: (itemId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.completeTask, itemId),
       reopenTask: (itemId) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.reopenTask, itemId)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.reopenTask, itemId),
+      snoozeTask: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.snoozeTask, input),
+      rescheduleTask: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.rescheduleTask, input)
     },
     lists: {
       create: (input) =>

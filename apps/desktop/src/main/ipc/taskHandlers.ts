@@ -12,6 +12,8 @@ import {
   type ApiResult,
   type CreateTaskInput,
   type ItemTagSummary,
+  type RescheduleTaskInput,
+  type SnoozeTaskInput,
   type TaskStatus,
   type TaskSummary,
   type UpdateTaskInput,
@@ -29,6 +31,8 @@ type TaskIpcHandlers = {
   handleUpdateTask: (input: unknown) => Promise<ApiResult<TaskSummary>>;
   handleCompleteTask: (input: unknown) => Promise<ApiResult<TaskSummary>>;
   handleReopenTask: (input: unknown) => Promise<ApiResult<TaskSummary>>;
+  handleSnoozeTask: (input: unknown) => Promise<ApiResult<TaskSummary>>;
+  handleRescheduleTask: (input: unknown) => Promise<ApiResult<TaskSummary>>;
   handleListTasksByContainer: (
     input: unknown
   ) => Promise<ApiResult<TaskSummary[]>>;
@@ -95,6 +99,34 @@ export function createTaskIpcHandlers(
 
       return await withTaskService(workspaceService, async (context) => {
         const result = await context.taskService.reopenTask(input);
+        return apiOk(toTaskSummary(result, hydrateSingleItemTags(context, result.item.id)));
+      });
+    },
+
+    async handleSnoozeTask(input) {
+      if (!isSnoozeTaskInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "snoozeTask requires itemId and either preset or dueAt."
+        );
+      }
+
+      return await withTaskService(workspaceService, async (context) => {
+        const result = await context.taskService.snoozeTask(input);
+        return apiOk(toTaskSummary(result, hydrateSingleItemTags(context, result.item.id)));
+      });
+    },
+
+    async handleRescheduleTask(input) {
+      if (!isRescheduleTaskInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "rescheduleTask requires itemId and dueAt."
+        );
+      }
+
+      return await withTaskService(workspaceService, async (context) => {
+        const result = await context.taskService.rescheduleTask(input);
         return apiOk(toTaskSummary(result, hydrateSingleItemTags(context, result.item.id)));
       });
     },
@@ -294,6 +326,31 @@ function hasTaskUpdateField(input: Record<string, unknown>): boolean {
   ].some((field) => input[field] !== undefined);
 }
 
+function isSnoozeTaskInput(input: unknown): input is SnoozeTaskInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.itemId) &&
+    (input.preset === undefined ||
+      input.preset === "tomorrow" ||
+      input.preset === "next_week") &&
+    (input.dueAt === undefined || isNonEmptyString(input.dueAt)) &&
+    isOptionalDateInput(input.date) &&
+    isOptionalActorType(input.actorType) &&
+    ((input.preset === undefined) !== (input.dueAt === undefined))
+  );
+}
+
+function isRescheduleTaskInput(input: unknown): input is RescheduleTaskInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.itemId) &&
+    (input.dueAt === null || isNonEmptyString(input.dueAt)) &&
+    isOptionalNullableString(input.startAt) &&
+    isOptionalBoolean(input.allDay) &&
+    isOptionalActorType(input.actorType)
+  );
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -308,6 +365,10 @@ function isOptionalString(value: unknown): boolean {
 
 function isOptionalNullableString(value: unknown): boolean {
   return value === undefined || value === null || typeof value === "string";
+}
+
+function isOptionalDateInput(value: unknown): boolean {
+  return value === undefined || typeof value === "string" || value instanceof Date;
 }
 
 function isOptionalBoolean(value: unknown): boolean {

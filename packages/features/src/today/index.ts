@@ -14,6 +14,7 @@ export type {
   PlannedTaskView,
   PlanTaskInput,
   ReorderPlannedTaskInput,
+  RolloverTomorrowToTodayInput,
   UnplanTaskInput
 } from "./DailyPlanService";
 export type { TodayTaskView, TodayViewModel } from "./TodayViewModel";

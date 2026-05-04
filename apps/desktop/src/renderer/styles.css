@@ -1130,7 +1130,7 @@ a {
 
 .today-task-card-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
 }
@@ -1140,6 +1140,31 @@ a {
   min-width: 0;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.snooze-menu {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.snooze-menu-custom {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.snooze-menu-custom input {
+  width: 132px;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid #d5d0c3;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #262624;
+  font: inherit;
 }
 
 .reorder-controls {

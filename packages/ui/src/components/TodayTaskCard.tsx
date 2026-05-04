@@ -8,6 +8,7 @@ import {
   X
 } from "lucide-react";
 import { ReorderControls } from "./ReorderControls";
+import { SnoozeMenu, type SnoozePreset } from "./SnoozeMenu";
 
 export type TodayTaskCardViewModel = {
   itemId: string;
@@ -42,6 +43,14 @@ export type TodayTaskCardProps = {
     task: TodayTaskCardViewModel,
     direction: "up" | "down"
   ) => Promise<void> | void;
+  onSnoozeTask?: (
+    task: TodayTaskCardViewModel,
+    preset: SnoozePreset
+  ) => Promise<void> | void;
+  onRescheduleTask?: (
+    task: TodayTaskCardViewModel,
+    dueAt: string
+  ) => Promise<void> | void;
 };
 
 export function TodayTaskCard({
@@ -54,7 +63,9 @@ export function TodayTaskCard({
   onToggleComplete,
   onPlanTask,
   onUnplanTask,
-  onReorderTask
+  onReorderTask,
+  onSnoozeTask,
+  onRescheduleTask
 }: TodayTaskCardProps): React.JSX.Element {
   const completed = task.taskStatus === "done" || task.itemStatus === "completed";
   const dueLabel = formatDueLabel(task.dueAt);
@@ -132,6 +143,11 @@ export function TodayTaskCard({
           label={`Reorder ${task.title}`}
           onMoveDown={() => onReorderTask?.(task, "down")}
           onMoveUp={() => onReorderTask?.(task, "up")}
+        />
+        <SnoozeMenu
+          busy={busy}
+          onReschedule={(dueAt) => onRescheduleTask?.(task, dueAt)}
+          onSnoozePreset={(preset) => onSnoozeTask?.(task, preset)}
         />
         <button
           className={completed ? "secondary-button compact-button" : "primary-button compact-button"}

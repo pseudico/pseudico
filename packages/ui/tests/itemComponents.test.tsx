@@ -320,6 +320,8 @@ describe("Universal item UI", () => {
     expect(cardHtml).toContain("Call accountant");
     expect(cardHtml).toContain("Ask for the revised statement.");
     expect(cardHtml).toContain("Complete");
+    expect(cardHtml).toContain("Next week");
+    expect(cardHtml).toContain("Custom due date");
     expect(cardHtml).toContain("Open source");
     expect(laneHtml).toContain("Today");
     expect(laneHtml).toContain("Tasks due today.");

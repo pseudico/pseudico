@@ -3,6 +3,7 @@ import {
   TodayTaskCard,
   type TodayTaskCardViewModel
 } from "./TodayTaskCard";
+import type { SnoozePreset } from "./SnoozeMenu";
 
 export type TodayLaneKind = "today" | "tomorrow" | "backlog";
 
@@ -27,6 +28,14 @@ export type TodayLaneProps = {
     task: TodayTaskCardViewModel,
     direction: "up" | "down"
   ) => Promise<void> | void;
+  onSnoozeTask?: (
+    task: TodayTaskCardViewModel,
+    preset: SnoozePreset
+  ) => Promise<void> | void;
+  onRescheduleTask?: (
+    task: TodayTaskCardViewModel,
+    dueAt: string
+  ) => Promise<void> | void;
 };
 
 const laneIcons = {
@@ -49,7 +58,9 @@ export function TodayLane({
   onToggleComplete,
   onPlanTask,
   onUnplanTask,
-  onReorderTask
+  onReorderTask,
+  onSnoozeTask,
+  onRescheduleTask
 }: TodayLaneProps): React.JSX.Element {
   const LaneIcon = laneIcons[kind];
   const plannedTaskIds = tasks
@@ -98,6 +109,8 @@ export function TodayLane({
               {...(onPlanTask === undefined ? {} : { onPlanTask })}
               {...(onUnplanTask === undefined ? {} : { onUnplanTask })}
               {...(onReorderTask === undefined ? {} : { onReorderTask })}
+              {...(onSnoozeTask === undefined ? {} : { onSnoozeTask })}
+              {...(onRescheduleTask === undefined ? {} : { onRescheduleTask })}
             />
           );
         })}
