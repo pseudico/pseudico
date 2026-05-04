@@ -93,6 +93,16 @@ export {
   type TaskCardViewModel
 } from "./components/TaskCardContent";
 export {
+  TodayLane,
+  type TodayLaneKind,
+  type TodayLaneProps
+} from "./components/TodayLane";
+export {
+  TodayTaskCard,
+  type TodayTaskCardProps,
+  type TodayTaskCardViewModel
+} from "./components/TodayTaskCard";
+export {
   ChecklistEditor,
   type ChecklistEditorItem,
   type ChecklistEditorProps

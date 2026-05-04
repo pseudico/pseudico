@@ -15,6 +15,7 @@ import { registerNoteIpc } from "./registerNoteIpc";
 import { registerProjectIpc } from "./registerProjectIpc";
 import { registerSearchIpc } from "./registerSearchIpc";
 import { registerTaskIpc } from "./registerTaskIpc";
+import { registerTodayIpc } from "./registerTodayIpc";
 import { registerWorkspaceIpc } from "./registerWorkspaceIpc";
 import { RecentWorkspacesService } from "../services/workspace/RecentWorkspacesService";
 import { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
@@ -49,6 +50,7 @@ export function registerDesktopIpc(
   registerMetadataIpc(services.workspaceService);
   registerSearchIpc(services.workspaceService);
   registerCollectionIpc(services.workspaceService);
+  registerTodayIpc(services.workspaceService);
   registerContainerIpc();
   registerItemIpc(services.workspaceService);
   registerFileIpc();

@@ -306,6 +306,53 @@ export type CollectionEvaluationSummary = {
   groups: CollectionResultGroupSummary[];
 };
 
+export type TodayTaskSummary = {
+  itemId: string;
+  workspaceId: string;
+  containerId: string;
+  containerTabId: string | null;
+  title: string;
+  body: string | null;
+  categoryId: string | null;
+  itemStatus: string;
+  taskStatus: TaskStatus;
+  priority: number | null;
+  startAt: string | null;
+  dueAt: string;
+  allDay: boolean;
+  timezone: string | null;
+  sortOrder: number;
+  pinned: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TodayDateRangeSummary = {
+  startInclusive: string;
+  endExclusive: string;
+};
+
+export type TodayViewModelSummary = {
+  workspaceId: string;
+  generatedAt: string;
+  localDate: string;
+  backlogDays: number;
+  ranges: {
+    today: TodayDateRangeSummary;
+    overdueBacklog: TodayDateRangeSummary;
+    tomorrow: TodayDateRangeSummary;
+  };
+  dueToday: TodayTaskSummary[];
+  overdueBacklog: TodayTaskSummary[];
+  tomorrowPreview: TodayTaskSummary[];
+};
+
+export type TodayViewModelInput = {
+  workspaceId?: string;
+  date?: string | Date;
+  backlogDays?: number;
+};
+
 export type CreateTagCollectionInput = {
   workspaceId?: string;
   tagSlug: string;
@@ -677,6 +724,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     createTaskInCollection:
       "local-work-os:collections:create-task-in-collection"
   },
+  today: {
+    getViewModel: "local-work-os:today:get-view-model"
+  },
   activity: {
     listRecentActivity: "local-work-os:activity:list-recent-activity",
     listActivityForTarget: "local-work-os:activity:list-activity-for-target"
@@ -878,6 +928,10 @@ export type LocalWorkOsIpcContracts = {
     input: CreateTaskInCollectionInput;
     result: ApiResult<TaskSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.today.getViewModel]: {
+    input: TodayViewModelInput | undefined;
+    result: ApiResult<TodayViewModelSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.activity.listRecentActivity]: {
     input: ListRecentActivityInput | undefined;
     result: ApiResult<ActivitySummary[]>;
@@ -1075,6 +1129,11 @@ export type LocalWorkOsApi = {
     createTaskInCollection: (
       input: CreateTaskInCollectionInput
     ) => Promise<ApiResult<TaskSummary>>;
+  };
+  today: {
+    getViewModel: (
+      input?: TodayViewModelInput
+    ) => Promise<ApiResult<TodayViewModelSummary>>;
   };
   activity: {
     listRecent: (
@@ -1319,6 +1378,10 @@ export function createLocalWorkOsApi(
           LOCAL_WORK_OS_IPC_CHANNELS.collections.createTaskInCollection,
           input
         )
+    },
+    today: {
+      getViewModel: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.getViewModel, input)
     },
     activity: {
       listRecent: (input) =>

@@ -18,6 +18,7 @@ import {
   type ProjectSummary,
   type RecentWorkspace,
   type TaskSummary,
+  type TodayViewModelSummary,
   type WorkspaceSummary
 } from "../../src/preload/api";
 import { createDesktopApiClient } from "../../src/renderer/api/desktopApiClient";
@@ -257,6 +258,9 @@ function createMockApi(
             }
           ]
         })
+    },
+    today: {
+      getViewModel: async () => apiOk(todayViewModelSummary())
     },
     activity: {
       listRecent: async () => apiOk([activitySummary()]),
@@ -578,6 +582,53 @@ function collectionEvaluationSummary(): CollectionEvaluationSummary {
   };
 }
 
+function todayViewModelSummary(): TodayViewModelSummary {
+  return {
+    workspaceId: "workspace_1",
+    generatedAt: "2026-05-04T00:00:00.000Z",
+    localDate: "2026-05-04",
+    backlogDays: 14,
+    ranges: {
+      today: {
+        startInclusive: "2026-05-04T00:00:00.000Z",
+        endExclusive: "2026-05-05T00:00:00.000Z"
+      },
+      overdueBacklog: {
+        startInclusive: "2026-04-20T00:00:00.000Z",
+        endExclusive: "2026-05-04T00:00:00.000Z"
+      },
+      tomorrow: {
+        startInclusive: "2026-05-05T00:00:00.000Z",
+        endExclusive: "2026-05-06T00:00:00.000Z"
+      }
+    },
+    dueToday: [
+      {
+        itemId: "item_1",
+        workspaceId: "workspace_1",
+        containerId: "container_1",
+        containerTabId: null,
+        title: "Call accountant",
+        body: null,
+        categoryId: null,
+        itemStatus: "active",
+        taskStatus: "open",
+        priority: null,
+        startAt: null,
+        dueAt: "2026-05-04T00:00:00.000Z",
+        allDay: true,
+        timezone: null,
+        sortOrder: 1024,
+        pinned: false,
+        createdAt: "2026-04-30T00:00:00.000Z",
+        updatedAt: "2026-04-30T00:00:00.000Z"
+      }
+    ],
+    overdueBacklog: [],
+    tomorrowPreview: []
+  };
+}
+
 describe("desktop API client", () => {
   it("passes typed preload results through to renderer callers", async () => {
     const client = createDesktopApiClient(createMockApi());
@@ -741,6 +792,18 @@ describe("desktop API client", () => {
         tags: [
           {
             slug: "finance"
+          }
+        ]
+      }
+    });
+    await expect(client.today.getViewModel()).resolves.toMatchObject({
+      ok: true,
+      data: {
+        localDate: "2026-05-04",
+        dueToday: [
+          {
+            itemId: "item_1",
+            title: "Call accountant"
           }
         ]
       }

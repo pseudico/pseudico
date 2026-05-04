@@ -140,6 +140,10 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       createTaskInCollection: (input) =>
         callApi(() => api.collections.createTaskInCollection(input))
     },
+    today: {
+      getViewModel: (input) =>
+        callApi(() => api.today.getViewModel(input))
+    },
     activity: {
       listRecent: (input) => callApi(() => api.activity.listRecent(input)),
       listForTarget: (input) =>
@@ -299,6 +303,10 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().collections.evaluateCollection(collectionId),
     createTaskInCollection: (input) =>
       getDesktopApiClient().collections.createTaskInCollection(input)
+  },
+  today: {
+    getViewModel: (input) =>
+      getDesktopApiClient().today.getViewModel(input)
   },
   activity: {
     listRecent: (input) =>
