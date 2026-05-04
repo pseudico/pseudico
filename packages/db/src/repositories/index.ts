@@ -1,6 +1,7 @@
 export {
   AttachmentRepository,
   type CreateAttachmentInput,
+  type ListAttachmentsByWorkspaceInput,
   type ListAttachmentsForItemInput
 } from "./AttachmentRepository";
 export type { AttachmentRecord } from "@local-work-os/core";

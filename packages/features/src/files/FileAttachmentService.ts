@@ -11,7 +11,6 @@ import {
   ActivityLogService,
   AttachmentRepository,
   ItemRepository,
-  SearchIndexRepository,
   SearchIndexService,
   SortOrderService,
   TransactionService,
@@ -405,28 +404,11 @@ export class FileAttachmentService {
     item: ItemRecord;
     timestamp: string;
   }): SearchIndexRecord {
-    return new SearchIndexRepository(this.connection).upsert({
-      id: this.idFactory("search"),
-      workspaceId: input.attachment.workspaceId,
-      targetType: "attachment",
-      targetId: input.attachment.id,
-      title: input.attachment.originalName,
-      body: [
-        input.attachment.description ?? "",
-        input.attachment.storedName,
-        input.attachment.storagePath,
-        input.attachment.checksum ?? ""
-      ]
-        .map((value) => value.trim())
-        .filter(Boolean)
-        .join("\n"),
-      metadataJson: JSON.stringify({
-        ...createAttachmentMetadata(input.attachment),
-        itemId: input.item.id,
-        containerId: input.item.containerId
-      }),
-      timestamp: input.timestamp
-    });
+    return new SearchIndexService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).upsertAttachment(input.attachment, { timestamp: input.timestamp }, input.item);
   }
 
   private validateAttachFileToContainerInput(

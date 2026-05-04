@@ -3,6 +3,8 @@ import type { DatabaseConnection } from "../connection/createDatabaseConnection"
 import {
   ContainerRepository,
   type ContainerRecord,
+  AttachmentRepository,
+  type AttachmentRecord,
   CategoryRepository,
   ItemRepository,
   type ItemRecord,
@@ -39,10 +41,11 @@ export type RebuildWorkspaceIndexResult = {
   indexedContainerCount: number;
   indexedItemCount: number;
   indexedListItemCount: number;
+  indexedAttachmentCount: number;
 };
 
 export type SearchIndexHealthTarget = {
-  targetType: "container" | "item" | "list_item";
+  targetType: "container" | "item" | "list_item" | "attachment";
   targetId: string;
 };
 
@@ -57,9 +60,11 @@ export type SearchIndexHealthReport = {
   containerSourceCount: number;
   itemSourceCount: number;
   listItemSourceCount: number;
+  attachmentSourceCount: number;
   indexedContainerCount: number;
   indexedItemCount: number;
   indexedListItemCount: number;
+  indexedAttachmentCount: number;
   missingRecordCount: number;
   orphanedRecordCount: number;
   deletedFlagMismatchCount: number;
@@ -243,6 +248,58 @@ export class SearchIndexService {
     });
   }
 
+  upsertAttachment(
+    attachment: AttachmentRecord,
+    input: SearchProjectionInput = {},
+    item?: ItemRecord
+  ): SearchIndexRecord {
+    const sourceItem = item ?? new ItemRepository(this.connection).getById(attachment.itemId);
+
+    if (sourceItem === null || sourceItem.workspaceId !== attachment.workspaceId) {
+      throw new Error(`Attachment source item was not found: ${attachment.itemId}.`);
+    }
+
+    const tagProjection = this.buildTagProjection({
+      workspaceId: attachment.workspaceId,
+      targetType: "item",
+      targetId: sourceItem.id,
+      tags: input.tags
+    });
+
+    return this.repository.upsert({
+      id: input.id ?? this.idFactory("search"),
+      workspaceId: attachment.workspaceId,
+      targetType: "attachment",
+      targetId: attachment.id,
+      title: attachment.originalName,
+      body: buildAttachmentSearchBody(attachment),
+      tags: tagProjection.tags,
+      category:
+        input.category ??
+        this.findCategoryName(sourceItem.categoryId, sourceItem.workspaceId),
+      metadataJson: stringifyMetadata({
+        itemId: sourceItem.id,
+        itemTitle: sourceItem.title,
+        itemType: sourceItem.type,
+        containerId: sourceItem.containerId,
+        containerTabId: sourceItem.containerTabId,
+        itemDeletedAt: sourceItem.deletedAt,
+        originalName: attachment.originalName,
+        storedName: attachment.storedName,
+        mimeType: attachment.mimeType,
+        sizeBytes: attachment.sizeBytes,
+        checksum: attachment.checksum,
+        storagePath: attachment.storagePath,
+        description: attachment.description,
+        deletedAt: attachment.deletedAt,
+        ...tagProjection.metadata,
+        ...input.metadata
+      }),
+      isDeleted: attachment.deletedAt !== null || sourceItem.deletedAt !== null,
+      timestamp: input.timestamp ?? createIsoTimestamp(this.now())
+    });
+  }
+
   removeTarget(input: RemoveSearchIndexInput): void {
     this.repository.remove(input);
   }
@@ -301,8 +358,13 @@ export class SearchIndexService {
         includeDeleted: true
       }
     );
+    const attachments = new AttachmentRepository(this.connection).listByWorkspace({
+      workspaceId,
+      includeDeleted: true
+    });
+    const itemsById = new Map(items.map((item) => [item.id, item]));
     const indexedRecords = this.repository.listByWorkspace(workspaceId, {
-      targetTypes: ["container", "item", "list_item"]
+      targetTypes: ["container", "item", "list_item", "attachment"]
     });
     const expected = new Map<string, boolean>();
     const missingTargets: SearchIndexHealthTarget[] = [];
@@ -319,6 +381,14 @@ export class SearchIndexService {
 
     for (const listItem of listItems) {
       expected.set(createHealthKey("list_item", listItem.id), listItem.deletedAt !== null);
+    }
+
+    for (const attachment of attachments) {
+      const item = itemsById.get(attachment.itemId);
+      expected.set(
+        createHealthKey("attachment", attachment.id),
+        attachment.deletedAt !== null || item?.deletedAt !== null
+      );
     }
 
     const indexed = new Map<string, SearchIndexRecord>();
@@ -368,6 +438,9 @@ export class SearchIndexService {
     const indexedListItemCount = indexedRecords.filter(
       (record) => record.targetType === "list_item"
     ).length;
+    const indexedAttachmentCount = indexedRecords.filter(
+      (record) => record.targetType === "attachment"
+    ).length;
 
     return {
       workspaceId,
@@ -380,9 +453,11 @@ export class SearchIndexService {
       containerSourceCount: containers.length,
       itemSourceCount: items.length,
       listItemSourceCount: listItems.length,
+      attachmentSourceCount: attachments.length,
       indexedContainerCount,
       indexedItemCount,
       indexedListItemCount,
+      indexedAttachmentCount,
       missingRecordCount: missingTargets.length,
       orphanedRecordCount: orphanedTargets.length,
       deletedFlagMismatchCount: deletedFlagMismatches.length,
@@ -397,7 +472,7 @@ export class SearchIndexService {
   ): RebuildWorkspaceIndexResult {
     this.repository.removeWorkspaceTargets({
       workspaceId,
-      targetTypes: ["container", "item", "list_item"]
+      targetTypes: ["container", "item", "list_item", "attachment"]
     });
 
     const containers = new ContainerRepository(this.connection).listByWorkspace(
@@ -422,6 +497,11 @@ export class SearchIndexService {
       includeArchived: true,
       includeDeleted: true
     });
+    const attachments = new AttachmentRepository(this.connection).listByWorkspace({
+      workspaceId,
+      includeDeleted: true
+    });
+    const itemsById = new Map(items.map((item) => [item.id, item]));
 
     for (const container of containers) {
       this.upsertContainer(container);
@@ -439,10 +519,19 @@ export class SearchIndexService {
       this.upsertNote(note.item, note.note);
     }
 
+    for (const attachment of attachments) {
+      const item = itemsById.get(attachment.itemId);
+
+      if (item !== undefined) {
+        this.upsertAttachment(attachment, {}, item);
+      }
+    }
+
     return {
       indexedContainerCount: containers.length,
       indexedItemCount: items.length,
-      indexedListItemCount: listItems.length
+      indexedListItemCount: listItems.length,
+      indexedAttachmentCount: attachments.length
     };
   }
 
@@ -533,6 +622,19 @@ function buildNoteSearchBody(note: NoteDetailsRecord): string {
     .join("\n");
 }
 
+function buildAttachmentSearchBody(attachment: AttachmentRecord): string {
+  return [
+    attachment.description ?? "",
+    attachment.storedName,
+    attachment.storagePath,
+    attachment.mimeType ?? "",
+    attachment.checksum ?? ""
+  ]
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
 function createHealthKey(
   targetType: SearchIndexHealthTarget["targetType"],
   targetId: string
@@ -560,5 +662,5 @@ function parseHealthKey(key: string): SearchIndexHealthTarget {
 function isCoreSearchTargetType(
   targetType: string
 ): targetType is SearchIndexHealthTarget["targetType"] {
-  return ["container", "item", "list_item"].includes(targetType);
+  return ["container", "item", "list_item", "attachment"].includes(targetType);
 }

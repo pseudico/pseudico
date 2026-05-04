@@ -1,5 +1,6 @@
 import {
   ContainerRepository,
+  AttachmentRepository,
   ItemRepository,
   ListRepository,
   type ContainerRecord,
@@ -8,7 +9,11 @@ import {
   type SearchIndexRecord
 } from "@local-work-os/db";
 
-export type SearchResultTargetType = "container" | "item" | "list_item";
+export type SearchResultTargetType =
+  | "container"
+  | "item"
+  | "list_item"
+  | "attachment";
 
 export type SearchResultKind =
   | "inbox"
@@ -54,11 +59,13 @@ export type HydrateSearchResultsOptions = {
 
 export class SearchResultHydrator {
   private readonly containerRepository: ContainerRepository;
+  private readonly attachmentRepository: AttachmentRepository;
   private readonly itemRepository: ItemRepository;
   private readonly listRepository: ListRepository;
 
   constructor(input: { connection: DatabaseConnection }) {
     this.containerRepository = new ContainerRepository(input.connection);
+    this.attachmentRepository = new AttachmentRepository(input.connection);
     this.itemRepository = new ItemRepository(input.connection);
     this.listRepository = new ListRepository(input.connection);
   }
@@ -89,6 +96,10 @@ export class SearchResultHydrator {
 
     if (record.targetType === "list_item") {
       return this.hydrateListItem(record);
+    }
+
+    if (record.targetType === "attachment") {
+      return this.hydrateAttachment(record);
     }
 
     return null;
@@ -198,6 +209,47 @@ export class SearchResultHydrator {
       parentItemTitle: parentItem?.title ?? null,
       destinationPath:
         parentItem === null ? null : getItemDestinationPath(parentItem, container)
+    };
+  }
+
+  private hydrateAttachment(record: SearchIndexRecord): SearchResult | null {
+    const attachment = this.attachmentRepository.getById(record.targetId);
+
+    if (attachment === null || attachment.workspaceId !== record.workspaceId) {
+      return null;
+    }
+
+    const item = this.itemRepository.getById(attachment.itemId);
+
+    if (item === null || item.workspaceId !== record.workspaceId) {
+      return null;
+    }
+
+    const container = this.containerRepository.getById(item.containerId);
+
+    return {
+      id: record.id,
+      workspaceId: record.workspaceId,
+      targetType: "attachment",
+      targetId: attachment.id,
+      kind: "file",
+      title: attachment.originalName,
+      body: attachment.description,
+      status: item.status,
+      tags: splitTags(record.tags),
+      category: record.category,
+      updatedAt: attachment.updatedAt,
+      archivedAt: firstNonNull(item.archivedAt, container?.archivedAt ?? null),
+      deletedAt: firstNonNull(
+        attachment.deletedAt,
+        item.deletedAt,
+        container?.deletedAt ?? null
+      ),
+      containerId: item.containerId,
+      containerTitle: container?.name ?? null,
+      parentItemId: item.id,
+      parentItemTitle: item.title,
+      destinationPath: getItemDestinationPath(item, container)
     };
   }
 }

@@ -26,6 +26,7 @@ const searchKindOptions = [
   { label: "Tasks", value: "task" },
   { label: "Lists", value: "list" },
   { label: "Notes", value: "note" },
+  { label: "Files", value: "file" },
   { label: "Checklist rows", value: "list_item" }
 ] as const satisfies readonly { label: string; value: SearchResultKind }[];
 
@@ -176,7 +177,7 @@ export function SearchPage({
         <p className="top-eyebrow">Find</p>
         <h2>Search</h2>
         <p>
-          Search projects, tasks, lists, notes, tags, and categories from the
+          Search projects, tasks, lists, notes, files, tags, and categories from the
           local workspace index.
         </p>
       </div>

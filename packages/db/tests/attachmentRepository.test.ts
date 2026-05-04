@@ -75,6 +75,11 @@ describe("AttachmentRepository", () => {
         itemId: "item_file_1"
       })
     ).toEqual([attachment]);
+    expect(
+      repository.listByWorkspace({
+        workspaceId: "workspace_1"
+      })
+    ).toEqual([attachment]);
   });
 
   it("updates attachment metadata without changing stored file identity", () => {

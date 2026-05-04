@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   ContainerRepository,
+  AttachmentRepository,
   ItemRepository,
   ListRepository,
   SearchIndexRepository,
@@ -33,7 +34,7 @@ describe("SearchIndexService", () => {
     await testDb.cleanup();
   });
 
-  it("indexes containers, items, and list rows with searchable projections", () => {
+  it("indexes containers, items, list rows, and attachments with searchable projections", () => {
     const container = createContainer("container_1", "workspace_1", "Launch Plan");
     const item = createItem({
       id: "item_1",
@@ -50,6 +51,18 @@ describe("SearchIndexService", () => {
       title: "Order launch signage",
       timestamp: TEST_TIMESTAMP
     });
+    const attachment = new AttachmentRepository(connection).create({
+      id: "attachment_1",
+      workspaceId: "workspace_1",
+      itemId: item.id,
+      originalName: "Launch Brief.pdf",
+      storedName: "Launch Brief.pdf",
+      storagePath: "attachments/2026/05/attachment_1/Launch Brief.pdf",
+      sizeBytes: 42,
+      checksum: "a".repeat(64),
+      description: "Signed supplier scope",
+      timestamp: TEST_TIMESTAMP
+    });
     const service = createService();
 
     service.upsertContainer(container, {
@@ -62,6 +75,10 @@ describe("SearchIndexService", () => {
     });
     service.upsertListItem(listItem, {
       metadata: { source: "test" }
+    });
+    service.upsertAttachment(attachment, {
+      tags: "supplier",
+      category: "Work"
     });
 
     expect(
@@ -92,6 +109,15 @@ describe("SearchIndexService", () => {
         targetType: "list_item",
         targetId: "list_item_1",
         title: "Order launch signage"
+      }
+    ]);
+    expect(search("scope")).toMatchObject([
+      {
+        targetType: "attachment",
+        targetId: "attachment_1",
+        title: "Launch Brief.pdf",
+        tags: "supplier",
+        category: "Work"
       }
     ]);
   });
@@ -210,7 +236,8 @@ describe("SearchIndexService", () => {
     expect(result).toEqual({
       indexedContainerCount: 1,
       indexedItemCount: 2,
-      indexedListItemCount: 1
+      indexedListItemCount: 1,
+      indexedAttachmentCount: 0
     });
     expect(search("stale")).toEqual([]);
     expect(
@@ -280,9 +307,11 @@ describe("SearchIndexService", () => {
       containerSourceCount: 1,
       itemSourceCount: 1,
       listItemSourceCount: 0,
+      attachmentSourceCount: 0,
       indexedContainerCount: 1,
       indexedItemCount: 1,
       indexedListItemCount: 1,
+      indexedAttachmentCount: 0,
       missingRecordCount: 0,
       orphanedRecordCount: 1,
       deletedFlagMismatchCount: 1,

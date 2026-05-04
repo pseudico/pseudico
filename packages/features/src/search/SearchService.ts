@@ -9,6 +9,7 @@ import {
   type SearchIndexRecord,
   type SearchProjectionInput,
   type SearchWorkspaceInput,
+  type AttachmentRecord,
   type ContainerRecord,
   type ItemRecord,
   type ListItemRecord,
@@ -79,6 +80,20 @@ export class SearchService {
     return this.searchIndexOrchestrator.upsertItemIndex(itemId, input);
   }
 
+  upsertAttachment(
+    attachment: AttachmentRecord,
+    input?: SearchProjectionInput
+  ): SearchIndexRecord {
+    return this.searchIndexService.upsertAttachment(attachment, input);
+  }
+
+  upsertAttachmentIndex(
+    attachmentId: string,
+    input?: UpsertSearchTargetInput
+  ): SearchIndexRecord {
+    return this.searchIndexOrchestrator.upsertAttachmentIndex(attachmentId, input);
+  }
+
   upsertListItem(
     listItem: ListItemRecord,
     input?: SearchProjectionInput
@@ -113,7 +128,7 @@ export class SearchService {
     const searchWorkspaceInput: SearchWorkspaceInput = {
       workspaceId: input.workspaceId,
       query: input.query,
-      targetTypes: ["container", "item", "list_item"]
+      targetTypes: ["container", "item", "list_item", "attachment"]
     };
 
     if (input.includeDeleted !== undefined) {

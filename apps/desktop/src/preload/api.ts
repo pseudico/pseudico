@@ -332,7 +332,7 @@ export type SearchWorkspaceInput = {
 export type SearchResultSummary = {
   id: string;
   workspaceId: string;
-  targetType: "container" | "item" | "list_item";
+  targetType: "container" | "item" | "list_item" | "attachment";
   targetId: string;
   kind: SearchResultKind;
   title: string;
