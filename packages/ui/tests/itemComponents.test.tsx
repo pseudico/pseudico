@@ -12,6 +12,8 @@ import {
   ItemActionsMenu,
   ItemFeed,
   ItemInspectorPanel,
+  LinkCardContent,
+  LinkEditor,
   RelatedItemsPanel,
   ListCardContent,
   MetadataFilterPanel,
@@ -601,5 +603,44 @@ describe("Universal item UI", () => {
     expect(editorHtml).toContain("File title");
     expect(editorHtml).toContain("Description");
     expect(editorHtml).toContain("Save file");
+  });
+
+  it("renders link cards and the link editor", () => {
+    const linkItem = {
+      id: "item_link_1",
+      type: "link" as const,
+      title: "Launch brief",
+      url: "example.com/brief",
+      normalizedUrl: "https://example.com/brief",
+      description: "Supplier reference",
+      domain: "example.com"
+    };
+    const cardHtml = renderToStaticMarkup(
+      <LinkCardContent
+        item={linkItem}
+        onOpen={() => undefined}
+        onSave={() => true}
+      />
+    );
+    const editorHtml = renderToStaticMarkup(
+      <LinkEditor
+        initialValues={{
+          url: "https://example.com/brief",
+          title: "Launch brief",
+          description: "Supplier reference"
+        }}
+        onCancel={() => undefined}
+        onSubmit={() => true}
+      />
+    );
+
+    expect(cardHtml).toContain("Supplier reference");
+    expect(cardHtml).toContain("example.com");
+    expect(cardHtml).toContain("https://example.com/brief");
+    expect(cardHtml).toContain("Open");
+    expect(cardHtml).toContain("Edit");
+    expect(editorHtml).toContain("URL");
+    expect(editorHtml).toContain("Title");
+    expect(editorHtml).toContain("Save link");
   });
 });

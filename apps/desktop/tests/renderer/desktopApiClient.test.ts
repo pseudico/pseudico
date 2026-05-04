@@ -12,6 +12,7 @@ import {
   type InboxSummary,
   type IpcModuleStatus,
   type ItemSummary,
+  type LinkSummary,
   type ListItemSummary,
   type ListSummary,
   type LocalWorkOsApi,
@@ -150,6 +151,19 @@ function createMockApi(
       listByContainer: async () => apiOk([noteSummary()]),
       createNote: async () => apiOk(noteSummary()),
       updateNote: async () => apiOk(noteSummary())
+    },
+    links: {
+      create: async () => apiOk(linkSummary()),
+      update: async () => apiOk(linkSummary()),
+      listByContainer: async () => apiOk([linkSummary()]),
+      openExternal: async () =>
+        apiOk({
+          itemId: "item_link_1",
+          url: "example.com/brief",
+          normalizedUrl: "https://example.com/brief"
+        }),
+      createLink: async () => apiOk(linkSummary()),
+      updateLink: async () => apiOk(linkSummary())
     },
     projects: {
       create: async () =>
@@ -474,6 +488,25 @@ function itemSummary(): ItemSummary {
     completedAt: null,
     archivedAt: null,
     deletedAt: null
+  };
+}
+
+function linkSummary(): LinkSummary {
+  return {
+    ...itemSummary(),
+    id: "item_link_1",
+    type: "link",
+    title: "Launch brief",
+    body: "Supplier reference",
+    url: "example.com/brief",
+    normalizedUrl: "https://example.com/brief",
+    linkTitle: "Launch brief",
+    description: "Supplier reference",
+    domain: "example.com",
+    faviconPath: null,
+    previewImagePath: null,
+    linkCreatedAt: "2026-04-30T00:00:00.000Z",
+    linkUpdatedAt: "2026-04-30T00:00:00.000Z"
   };
 }
 

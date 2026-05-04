@@ -234,6 +234,19 @@ function createMockApi(): LocalWorkOsApi {
       createNote: async () => apiOk(noteSummary()),
       updateNote: async () => apiOk(noteSummary())
     },
+    links: {
+      create: async () => apiOk(null as never),
+      update: async () => apiOk(null as never),
+      listByContainer: async () => apiOk([]),
+      openExternal: async () =>
+        apiOk({
+          itemId: "item_link_1",
+          url: "example.com/brief",
+          normalizedUrl: "https://example.com/brief"
+        }),
+      createLink: async () => apiOk(null as never),
+      updateLink: async () => apiOk(null as never)
+    },
     projects: {
       create: async () => apiOk({ project, defaultTabId: "container_tab_1" }),
       update: async () => apiOk(project),

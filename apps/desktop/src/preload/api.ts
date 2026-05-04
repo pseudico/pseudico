@@ -925,6 +925,50 @@ export type UpdateNoteInput = {
   pinned?: boolean;
 };
 
+export type LinkSummary = ItemSummary & {
+  type: "link";
+  url: string;
+  normalizedUrl: string;
+  linkTitle: string | null;
+  description: string | null;
+  domain: string | null;
+  faviconPath: string | null;
+  previewImagePath: string | null;
+  linkCreatedAt: string;
+  linkUpdatedAt: string;
+};
+
+export type CreateLinkInput = {
+  workspaceId?: string;
+  containerId: string;
+  url: string;
+  actorType?: "local_user" | "system" | "importer";
+  categoryId?: string | null;
+  containerTabId?: string | null;
+  description?: string | null;
+  sortOrder?: number;
+  pinned?: boolean;
+  title?: string | null;
+};
+
+export type UpdateLinkInput = {
+  itemId: string;
+  actorType?: "local_user" | "system" | "importer";
+  categoryId?: string | null;
+  containerTabId?: string | null;
+  description?: string | null;
+  pinned?: boolean;
+  sortOrder?: number;
+  title?: string | null;
+  url?: string;
+};
+
+export type OpenLinkSummary = {
+  itemId: string;
+  url: string;
+  normalizedUrl: string;
+};
+
 export type LocalWorkOsModuleName =
   | "containers"
   | "items"
@@ -975,6 +1019,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     createNote: "local-work-os:notes:create-note",
     updateNote: "local-work-os:notes:update-note",
     listByContainer: "local-work-os:notes:list-by-container"
+  },
+  links: {
+    createLink: "local-work-os:links:create-link",
+    updateLink: "local-work-os:links:update-link",
+    listByContainer: "local-work-os:links:list-by-container",
+    openExternal: "local-work-os:links:open-external"
   },
   projects: {
     createProject: "local-work-os:projects:create-project",
@@ -1154,6 +1204,22 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.notes.listByContainer]: {
     input: string;
     result: ApiResult<NoteSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.links.createLink]: {
+    input: CreateLinkInput;
+    result: ApiResult<LinkSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.links.updateLink]: {
+    input: UpdateLinkInput;
+    result: ApiResult<LinkSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.links.listByContainer]: {
+    input: string;
+    result: ApiResult<LinkSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.links.openExternal]: {
+    input: string;
+    result: ApiResult<OpenLinkSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject]: {
     input: CreateProjectInput;
@@ -1427,6 +1493,16 @@ export type LocalWorkOsApi = {
     ) => Promise<ApiResult<NoteSummary[]>>;
     createNote: (input: CreateNoteInput) => Promise<ApiResult<NoteSummary>>;
     updateNote: (input: UpdateNoteInput) => Promise<ApiResult<NoteSummary>>;
+  };
+  links: {
+    create: (input: CreateLinkInput) => Promise<ApiResult<LinkSummary>>;
+    update: (input: UpdateLinkInput) => Promise<ApiResult<LinkSummary>>;
+    listByContainer: (
+      containerId: string
+    ) => Promise<ApiResult<LinkSummary[]>>;
+    openExternal: (itemId: string) => Promise<ApiResult<OpenLinkSummary>>;
+    createLink: (input: CreateLinkInput) => Promise<ApiResult<LinkSummary>>;
+    updateLink: (input: UpdateLinkInput) => Promise<ApiResult<LinkSummary>>;
   };
   projects: {
     create: (
@@ -1712,6 +1788,20 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.notes.createNote, input),
       updateNote: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.notes.updateNote, input)
+    },
+    links: {
+      create: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.createLink, input),
+      update: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.updateLink, input),
+      listByContainer: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.listByContainer, containerId),
+      openExternal: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.openExternal, itemId),
+      createLink: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.createLink, input),
+      updateLink: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.updateLink, input)
     },
     projects: {
       create: (input) =>
