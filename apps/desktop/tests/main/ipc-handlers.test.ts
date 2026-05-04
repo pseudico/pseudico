@@ -283,6 +283,8 @@ describe("file IPC handlers", () => {
 
     const sourcePath = join(tempRoot, "Brief.pdf");
     await writeFile(sourcePath, "brief contents", "utf8");
+    const openedPaths: string[] = [];
+    const revealedPaths: string[] = [];
     const handlers = createFileIpcHandlers({
       getCurrentWorkspace: () => ({
         id: "workspace_1",
@@ -291,16 +293,25 @@ describe("file IPC handlers", () => {
         openedAt: "2026-05-01T00:00:00.000Z",
         schemaVersion: 1
       })
+    }, {
+      chooseSourcePath: async () => sourcePath,
+      openPath: async (path) => {
+        openedPaths.push(path);
+        return "";
+      },
+      revealPath: (path) => {
+        revealedPaths.push(path);
+      }
     });
 
-    await expect(
-      handlers.handleAttachFileToContainer({
+    const attached = await handlers.handleAttachFileToContainer({
         workspaceId: "workspace_1",
         containerId: "container_project_1",
         sourcePath,
         description: "Launch brief"
-      })
-    ).resolves.toMatchObject({
+      });
+
+    expect(attached).toMatchObject({
       ok: true,
       data: {
         item: {
@@ -314,6 +325,85 @@ describe("file IPC handlers", () => {
           storagePath: expect.stringMatching(
             /^attachments\/\d{4}\/\d{2}\/attachment_/
           )
+        }
+      }
+    });
+
+    if (!attached.ok) {
+      throw new Error(attached.error.message);
+    }
+
+    await expect(
+      handlers.handleListFilesByContainer("container_project_1")
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: attached.data.item.id,
+          type: "file",
+          missing: false,
+          attachment: {
+            id: attached.data.attachment.id,
+            description: "Launch brief"
+          }
+        }
+      ]
+    });
+    await expect(
+      handlers.handleVerifyAttachment(attached.data.attachment.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        attachmentId: attached.data.attachment.id,
+        exists: true
+      }
+    });
+    await expect(
+      handlers.handleOpenAttachment(attached.data.attachment.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        exists: true
+      }
+    });
+    await expect(
+      handlers.handleRevealAttachment(attached.data.attachment.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        exists: true
+      }
+    });
+    expect(openedPaths).toHaveLength(1);
+    expect(revealedPaths).toHaveLength(1);
+    await expect(
+      handlers.handleUpdateMetadata({
+        attachmentId: attached.data.attachment.id,
+        title: "Final brief.pdf",
+        description: "Signed launch brief"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        item: {
+          title: "Final brief.pdf",
+          body: "Signed launch brief"
+        },
+        attachment: {
+          description: "Signed launch brief"
+        }
+      }
+    });
+    await expect(
+      handlers.handleChooseAndAttach({
+        workspaceId: "workspace_1",
+        containerId: "container_project_1"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        item: {
+          type: "file"
         }
       }
     });

@@ -58,6 +58,18 @@ export type FileAttachmentMutationResult = {
   attachmentSearchRecord: SearchIndexRecord;
 };
 
+export type FileItemWithAttachment = {
+  item: ItemRecord;
+  attachment: AttachmentRecord;
+};
+
+export type UpdateFileMetadataInput = {
+  attachmentId: string;
+  title?: string;
+  description?: string | null;
+  actorType?: ActivityActorType;
+};
+
 export class FileAttachmentService {
   readonly module = "files";
 
@@ -197,6 +209,108 @@ export class FileAttachmentService {
     return new AttachmentRepository(this.connection).listForItem(input);
   }
 
+  listFileItemsByContainer(input: {
+    containerId: string;
+  }): FileItemWithAttachment[] {
+    validateNonEmptyString(input.containerId, "containerId");
+
+    const itemRepository = new ItemRepository(this.connection);
+    const attachmentRepository = new AttachmentRepository(this.connection);
+
+    return itemRepository
+      .listByContainer(input.containerId, { type: "file" })
+      .map((item) => ({
+        item,
+        attachment: attachmentRepository.listForItem({
+          workspaceId: item.workspaceId,
+          itemId: item.id
+        })[0]
+      }))
+      .filter(
+        (entry): entry is FileItemWithAttachment =>
+          entry.attachment !== undefined
+      );
+  }
+
+  getAttachmentById(attachmentId: string): AttachmentRecord | null {
+    validateNonEmptyString(attachmentId, "attachmentId");
+
+    return new AttachmentRepository(this.connection).getById(attachmentId);
+  }
+
+  async updateMetadata(
+    input: UpdateFileMetadataInput
+  ): Promise<FileAttachmentMutationResult> {
+    this.validateUpdateMetadataInput(input);
+
+    return await this.transactionService.runInTransaction(() => {
+      const timestamp = createIsoTimestamp(this.now());
+      const itemRepository = new ItemRepository(this.connection);
+      const attachmentRepository = new AttachmentRepository(this.connection);
+      const beforeAttachment = attachmentRepository.getById(input.attachmentId);
+
+      if (beforeAttachment === null) {
+        throw new Error(`Attachment was not found: ${input.attachmentId}.`);
+      }
+
+      const beforeItem = itemRepository.getById(beforeAttachment.itemId);
+
+      if (beforeItem === null) {
+        throw new Error(`File item was not found: ${beforeAttachment.itemId}.`);
+      }
+
+      if (beforeItem.type !== "file") {
+        throw new Error("File metadata can only be updated for file items.");
+      }
+
+      const description = normalizeNullableString(input.description);
+      const item = itemRepository.update(beforeItem.id, {
+        ...(input.title === undefined
+          ? {}
+          : { title: input.title.trim() }),
+        ...(input.description === undefined ? {} : { body: description }),
+        timestamp
+      });
+      const attachment = attachmentRepository.update(beforeAttachment.id, {
+        ...(input.description === undefined
+          ? {}
+          : { description }),
+        timestamp
+      });
+
+      this.logFileMetadataUpdated({
+        before: {
+          item: beforeItem,
+          attachment: beforeAttachment
+        },
+        after: {
+          item,
+          attachment
+        },
+        actorType: input.actorType,
+        timestamp
+      });
+
+      const itemSearchRecord = this.upsertItemSearchRecord({
+        item,
+        attachment,
+        timestamp
+      });
+      const attachmentSearchRecord = this.upsertAttachmentSearchRecord({
+        attachment,
+        item,
+        timestamp
+      });
+
+      return {
+        item,
+        attachment,
+        itemSearchRecord,
+        attachmentSearchRecord
+      };
+    });
+  }
+
   private createAttachment(input: {
     item: ItemRecord;
     copiedFile: CopiedAttachmentFileInput;
@@ -239,6 +353,34 @@ export class FileAttachmentService {
         item: input.item,
         attachment: input.attachment
       }),
+      timestamp: input.timestamp
+    });
+  }
+
+  private logFileMetadataUpdated(input: {
+    before: {
+      item: ItemRecord;
+      attachment: AttachmentRecord;
+    };
+    after: {
+      item: ItemRecord;
+      attachment: AttachmentRecord;
+    };
+    actorType: ActivityActorType | undefined;
+    timestamp: string;
+  }): void {
+    new ActivityLogService({
+      connection: this.connection,
+      idFactory: this.idFactory
+    }).logEvent({
+      workspaceId: input.after.item.workspaceId,
+      actorType: input.actorType ?? "local_user",
+      action: ActivityAction.itemUpdated,
+      targetType: "item",
+      targetId: input.after.item.id,
+      summary: `Updated file "${input.after.item.title}".`,
+      beforeJson: JSON.stringify(input.before),
+      afterJson: JSON.stringify(input.after),
       timestamp: input.timestamp
     });
   }
@@ -309,6 +451,18 @@ export class FileAttachmentService {
 
     if (!Number.isInteger(input.sizeBytes) || input.sizeBytes < 0) {
       throw new Error("sizeBytes must be a non-negative integer.");
+    }
+  }
+
+  private validateUpdateMetadataInput(input: UpdateFileMetadataInput): void {
+    validateNonEmptyString(input.attachmentId, "attachmentId");
+
+    if (input.title !== undefined) {
+      validateNonEmptyString(input.title, "title");
+    }
+
+    if (input.title === undefined && input.description === undefined) {
+      throw new Error("At least one file metadata field must be provided.");
     }
   }
 }

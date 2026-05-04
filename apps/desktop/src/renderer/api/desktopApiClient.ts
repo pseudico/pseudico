@@ -197,7 +197,19 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       attachFileToContainer: (input) =>
         callApi(() => api.files.attachFileToContainer(input)),
       attachFileToItem: (input) =>
-        callApi(() => api.files.attachFileToItem(input))
+        callApi(() => api.files.attachFileToItem(input)),
+      chooseAndAttach: (input) =>
+        callApi(() => api.files.chooseAndAttach(input)),
+      listByContainer: (containerId) =>
+        callApi(() => api.files.listByContainer(containerId)),
+      openAttachment: (attachmentId) =>
+        callApi(() => api.files.openAttachment(attachmentId)),
+      revealAttachment: (attachmentId) =>
+        callApi(() => api.files.revealAttachment(attachmentId)),
+      updateMetadata: (input) =>
+        callApi(() => api.files.updateMetadata(input)),
+      verifyAttachment: (attachmentId) =>
+        callApi(() => api.files.verifyAttachment(attachmentId))
     }
   };
 }
@@ -387,6 +399,18 @@ export const desktopApiClient: LocalWorkOsApi = {
     attachFileToContainer: (input) =>
       getDesktopApiClient().files.attachFileToContainer(input),
     attachFileToItem: (input) =>
-      getDesktopApiClient().files.attachFileToItem(input)
+      getDesktopApiClient().files.attachFileToItem(input),
+    chooseAndAttach: (input) =>
+      getDesktopApiClient().files.chooseAndAttach(input),
+    listByContainer: (containerId) =>
+      getDesktopApiClient().files.listByContainer(containerId),
+    openAttachment: (attachmentId) =>
+      getDesktopApiClient().files.openAttachment(attachmentId),
+    revealAttachment: (attachmentId) =>
+      getDesktopApiClient().files.revealAttachment(attachmentId),
+    updateMetadata: (input) =>
+      getDesktopApiClient().files.updateMetadata(input),
+    verifyAttachment: (attachmentId) =>
+      getDesktopApiClient().files.verifyAttachment(attachmentId)
   }
 };

@@ -7,6 +7,8 @@ import {
   ConfirmDialog,
   DashboardWidget,
   FavoriteProjectsWidget,
+  FileCardContent,
+  FileMetadataEditor,
   ItemActionsMenu,
   ItemFeed,
   ItemInspectorPanel,
@@ -554,5 +556,50 @@ describe("Universal item UI", () => {
     expect(html).toContain("# Decision");
     expect(html).toContain("Save note");
     expect(html).toContain("Cancel");
+  });
+
+  it("renders file cards with missing state and metadata editing", () => {
+    const fileItem = {
+      id: "item_file_1",
+      type: "file" as const,
+      title: "Brief.pdf",
+      attachment: {
+        id: "attachment_1",
+        originalName: "Brief.pdf",
+        storedName: "Brief.pdf",
+        sizeBytes: 2048,
+        storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
+        description: "Launch brief"
+      },
+      missing: true
+    };
+    const cardHtml = renderToStaticMarkup(
+      <FileCardContent
+        item={fileItem}
+        onOpen={() => undefined}
+        onReveal={() => undefined}
+        onSave={() => true}
+      />
+    );
+    const editorHtml = renderToStaticMarkup(
+      <FileMetadataEditor
+        initialValues={{
+          title: "Brief.pdf",
+          description: "Launch brief"
+        }}
+        onCancel={() => undefined}
+        onSubmit={() => true}
+      />
+    );
+
+    expect(cardHtml).toContain("File missing from workspace storage.");
+    expect(cardHtml).toContain("Launch brief");
+    expect(cardHtml).toContain("2.0 KB");
+    expect(cardHtml).toContain("Open");
+    expect(cardHtml).toContain("Reveal");
+    expect(cardHtml).toContain("Edit");
+    expect(editorHtml).toContain("File title");
+    expect(editorHtml).toContain("Description");
+    expect(editorHtml).toContain("Save file");
   });
 });

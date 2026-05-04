@@ -1,4 +1,11 @@
-import { ArrowLeft, FolderKanban, RefreshCw, StickyNote, Tag } from "lucide-react";
+import {
+  ArrowLeft,
+  FolderKanban,
+  Paperclip,
+  RefreshCw,
+  StickyNote,
+  Tag
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -6,6 +13,7 @@ import {
   CategoryPicker,
   ConfirmDialog,
   CreateListForm,
+  FileCardContent,
   ItemInspectorPanel,
   ItemFeed,
   ListCardContent,
@@ -17,6 +25,8 @@ import {
   TaskCardContent,
   TaskQuickAdd,
   type CreateListFormValues,
+  type FileCardViewModel,
+  type FileMetadataEditorValues,
   type ItemActionId,
   type ItemInspectorActivity,
   type ItemInspectorItem,
@@ -34,6 +44,7 @@ import {
 import type {
   ActivitySummary,
   CategorySummary,
+  FileItemSummary,
   ItemSummary,
   ListItemSummary,
   ListSummary,
@@ -65,6 +76,7 @@ type ProjectFeedViewModel =
   | ProjectTaskViewModel
   | ProjectListViewModel
   | ProjectNoteViewModel
+  | FileCardViewModel
   | UniversalItemViewModel;
 
 type PendingConfirmAction = {
@@ -109,9 +121,11 @@ export function ProjectDetailPage({
   const [savingTask, setSavingTask] = useState(false);
   const [savingList, setSavingList] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
+  const [savingFile, setSavingFile] = useState(false);
   const [taskBusyId, setTaskBusyId] = useState<string | null>(null);
   const [listBusyId, setListBusyId] = useState<string | null>(null);
   const [noteBusyId, setNoteBusyId] = useState<string | null>(null);
+  const [fileBusyId, setFileBusyId] = useState<string | null>(null);
   const [noteErrorItemId, setNoteErrorItemId] = useState<string | null>(null);
   const [noteEditorOpen, setNoteEditorOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -121,6 +135,7 @@ export function ProjectDetailPage({
   const [taskError, setTaskError] = useState<string | null>(null);
   const [listError, setListError] = useState<string | null>(null);
   const [noteError, setNoteError] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [movingItem, setMovingItem] = useState<ProjectFeedViewModel | null>(null);
   const [confirmAction, setConfirmAction] =
     useState<PendingConfirmAction | null>(null);
@@ -154,7 +169,8 @@ export function ProjectDetailPage({
         healthResult,
         tasksResult,
         listsResult,
-        notesResult
+        notesResult,
+        filesResult
       ] = await Promise.all([
         apiClient.projects.get(activeProjectId),
         apiClient.projects.list(),
@@ -166,7 +182,8 @@ export function ProjectDetailPage({
         apiClient.projects.getHealth(activeProjectId),
         apiClient.tasks.listByContainer(activeProjectId),
         apiClient.lists.listByContainer(activeProjectId),
-        apiClient.notes.listByContainer(activeProjectId)
+        apiClient.notes.listByContainer(activeProjectId),
+        apiClient.files.listByContainer(activeProjectId)
       ]);
 
       if (!active) {
@@ -216,6 +233,11 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!filesResult.ok) {
+        setItemError(filesResult.error.message);
+        return;
+      }
+
       setProject(projectResult.data);
       setProjects(projectsResult.data);
       setCategories(categoriesResult.data);
@@ -226,6 +248,7 @@ export function ProjectDetailPage({
           tasksResult.data,
           listsResult.data,
           notesResult.data,
+          filesResult.data,
           categoriesResult.data
         )
       );
@@ -242,10 +265,11 @@ export function ProjectDetailPage({
     setItemsLoading(true);
     setItemError(null);
 
-    const [tasksResult, listsResult, notesResult] = await Promise.all([
+    const [tasksResult, listsResult, notesResult, filesResult] = await Promise.all([
       apiClient.tasks.listByContainer(activeProjectId),
       apiClient.lists.listByContainer(activeProjectId),
-      apiClient.notes.listByContainer(activeProjectId)
+      apiClient.notes.listByContainer(activeProjectId),
+      apiClient.files.listByContainer(activeProjectId)
     ]);
 
     setItemsLoading(false);
@@ -265,11 +289,17 @@ export function ProjectDetailPage({
       return;
     }
 
+    if (!filesResult.ok) {
+      setItemError(filesResult.error.message);
+      return;
+    }
+
     setItems(
       mergeProjectContent(
         tasksResult.data,
         listsResult.data,
         notesResult.data,
+        filesResult.data,
         categories
       )
     );
@@ -387,6 +417,99 @@ export function ProjectDetailPage({
     await refreshProjectContent(project.id);
     setSavingNote(false);
     setNoteEditorOpen(false);
+    return true;
+  }
+
+  async function attachProjectFile(): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setSavingFile(true);
+    setFileError(null);
+
+    const result = await apiClient.files.chooseAndAttach({
+      workspaceId: project.workspaceId,
+      containerId: project.id
+    });
+
+    setSavingFile(false);
+
+    if (!result.ok) {
+      setFileError(result.error.message);
+      return;
+    }
+
+    if (result.data === null) {
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+  }
+
+  async function openProjectFile(item: FileCardViewModel): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setFileBusyId(item.id);
+    setFileError(null);
+
+    const result = await apiClient.files.openAttachment(item.attachment.id);
+
+    setFileBusyId(null);
+
+    if (!result.ok) {
+      setFileError(result.error.message);
+      await refreshProjectContent(project.id);
+    }
+  }
+
+  async function revealProjectFile(item: FileCardViewModel): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setFileBusyId(item.id);
+    setFileError(null);
+
+    const result = await apiClient.files.revealAttachment(item.attachment.id);
+
+    setFileBusyId(null);
+
+    if (!result.ok) {
+      setFileError(result.error.message);
+      await refreshProjectContent(project.id);
+    }
+  }
+
+  async function updateProjectFileMetadata(
+    item: FileCardViewModel,
+    values: FileMetadataEditorValues
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setFileBusyId(item.id);
+    setFileError(null);
+
+    const result = await apiClient.files.updateMetadata({
+      attachmentId: item.attachment.id,
+      title: values.title,
+      description: values.description.length === 0 ? null : values.description
+    });
+
+    if (!result.ok) {
+      setFileBusyId(null);
+      setFileError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    setFileBusyId(null);
     return true;
   }
 
@@ -739,6 +862,22 @@ export function ProjectDetailPage({
       );
     }
 
+    if (isFileCardViewModel(item)) {
+      return (
+        <>
+          {categoryPicker}
+          <FileCardContent
+            disabled={fileBusyId === item.id}
+            error={fileBusyId === item.id ? fileError : null}
+            item={item}
+            onOpen={openProjectFile}
+            onReveal={revealProjectFile}
+            onSave={updateProjectFileMetadata}
+          />
+        </>
+      );
+    }
+
     return (
       <>
         {categoryPicker}
@@ -908,9 +1047,23 @@ export function ProjectDetailPage({
           </button>
         )}
 
+        <button
+          className="secondary-button note-create-button"
+          disabled={savingFile || itemsLoading}
+          type="button"
+          onClick={() => void attachProjectFile()}
+        >
+          <Paperclip size={17} aria-hidden="true" />
+          Attach file
+        </button>
+
+        {fileError === null || fileBusyId !== null ? null : (
+          <p className="form-message form-message-error">{fileError}</p>
+        )}
+
         <ItemFeed
           ariaLabel="Project content items"
-          emptyDescription="Tasks, checklists, and notes created for this project will appear here with inline controls."
+          emptyDescription="Tasks, checklists, notes, and files created for this project will appear here with inline controls."
           emptyTitle="No project content yet"
           error={itemError}
           items={items}
@@ -1045,6 +1198,37 @@ function toProjectNoteViewModel(
   };
 }
 
+function toProjectFileViewModel(
+  file: FileItemSummary,
+  categories: readonly CategorySummary[]
+): FileCardViewModel {
+  return {
+    id: file.id,
+    type: "file",
+    title: file.title,
+    body: file.body,
+    status: file.status,
+    categoryId: file.categoryId,
+    categoryLabel: findCategoryName(file.categoryId, categories),
+    sortOrder: file.sortOrder,
+    createdAt: file.createdAt,
+    updatedLabel: file.updatedAt,
+    pinned: file.pinned,
+    tags: file.tags ?? [],
+    attachment: {
+      id: file.attachment.id,
+      originalName: file.attachment.originalName,
+      storedName: file.attachment.storedName,
+      mimeType: file.attachment.mimeType,
+      sizeBytes: file.attachment.sizeBytes,
+      checksum: file.attachment.checksum,
+      storagePath: file.attachment.storagePath,
+      description: file.attachment.description
+    },
+    missing: file.missing
+  };
+}
+
 function toListCardItemViewModel(
   listItem: ListItemSummary
 ): ListCardItemViewModel {
@@ -1062,12 +1246,14 @@ function mergeProjectContent(
   tasks: readonly TaskSummary[],
   lists: readonly ListSummary[],
   notes: readonly NoteSummary[],
+  files: readonly FileItemSummary[],
   categories: readonly CategorySummary[] = []
 ): ProjectFeedViewModel[] {
   return [
     ...tasks.map((task) => toProjectTaskViewModel(task, categories)),
     ...lists.map((list) => toProjectListViewModel(list, categories)),
-    ...notes.map((note) => toProjectNoteViewModel(note, categories))
+    ...notes.map((note) => toProjectNoteViewModel(note, categories)),
+    ...files.map((file) => toProjectFileViewModel(file, categories))
   ].sort(compareFeedItems);
 }
 
@@ -1202,6 +1388,12 @@ function isNoteCardViewModel(
   item: UniversalItemViewModel
 ): item is NoteCardViewModel {
   return item.type === "note" && "content" in item;
+}
+
+function isFileCardViewModel(
+  item: UniversalItemViewModel
+): item is FileCardViewModel {
+  return item.type === "file" && "attachment" in item;
 }
 
 function formatDateLabel(value: string | null | undefined): string | null {

@@ -150,6 +150,109 @@ describe("FileAttachmentService", () => {
     ).toMatchObject([{ action: "file_attached" }]);
   });
 
+  it("does not rename non-file items through file metadata updates", async () => {
+    const item = await new ItemService({
+      connection,
+      idFactory: createId,
+      now: () => new Date("2026-05-01T00:00:00.000Z")
+    }).createItem({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      type: "note",
+      title: "Supplier note"
+    });
+    await createService().attachFileToItem({
+      itemId: item.item.id,
+      copiedFile: {
+        attachmentId: "attachment_image",
+        originalName: "Sketch.png",
+        storedName: "Sketch.png",
+        storagePath: "attachments/2026/05/attachment_image/Sketch.png",
+        sizeBytes: 128,
+        checksum: "b".repeat(64),
+        mimeType: "image/png"
+      }
+    });
+
+    await expect(
+      createService().updateMetadata({
+        attachmentId: "attachment_image",
+        title: "Renamed note by attachment"
+      })
+    ).rejects.toThrow("File metadata can only be updated for file items.");
+  });
+
+  it("lists file items and updates searchable metadata with activity", async () => {
+    const created = await createService().attachFileToContainer({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      description: "Draft brief",
+      copiedFile: {
+        attachmentId: "attachment_brief",
+        originalName: "Brief.pdf",
+        storedName: "Brief.pdf",
+        storagePath: "attachments/2026/05/attachment_brief/Brief.pdf",
+        sizeBytes: 42,
+        checksum: "d".repeat(64),
+        mimeType: "application/pdf"
+      }
+    });
+
+    expect(
+      createService().listFileItemsByContainer({
+        containerId: "container_project_1"
+      })
+    ).toMatchObject([
+      {
+        item: {
+          id: created.item.id,
+          type: "file"
+        },
+        attachment: {
+          id: "attachment_brief"
+        }
+      }
+    ]);
+
+    const updated = await createService().updateMetadata({
+      attachmentId: "attachment_brief",
+      title: "Final brief.pdf",
+      description: "Signed launch brief"
+    });
+
+    expect(updated.item).toMatchObject({
+      id: created.item.id,
+      title: "Final brief.pdf",
+      body: "Signed launch brief"
+    });
+    expect(updated.attachment).toMatchObject({
+      id: "attachment_brief",
+      description: "Signed launch brief"
+    });
+    expect(
+      new ActivityLogRepository(connection).listForTarget("item", created.item.id)
+    ).toMatchObject([{ action: "item_updated" }]);
+    expect(
+      new SearchIndexRepository(connection).getByTarget({
+        workspaceId: "workspace_1",
+        targetType: "item",
+        targetId: created.item.id
+      })
+    ).toMatchObject({
+      title: "Final brief.pdf",
+      body: "Signed launch brief"
+    });
+    expect(
+      new SearchIndexRepository(connection).getByTarget({
+        workspaceId: "workspace_1",
+        targetType: "attachment",
+        targetId: "attachment_brief"
+      })
+    ).toMatchObject({
+      body: expect.stringContaining("Signed launch brief")
+    });
+  });
+
   it("rejects copied file metadata outside workspace attachment storage", async () => {
     await expect(
       createService().attachFileToContainer({

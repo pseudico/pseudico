@@ -25,6 +25,11 @@ export {
   type NoteEditorValues
 } from "./forms/NoteEditor";
 export {
+  FileMetadataEditor,
+  type FileMetadataEditorProps,
+  type FileMetadataEditorValues
+} from "./forms/FileMetadataEditor";
+export {
   CreateListForm,
   type CreateListFormProps,
   type CreateListFormValues
@@ -127,6 +132,12 @@ export {
   type NoteCardContentProps,
   type NoteCardViewModel
 } from "./components/NoteCardContent";
+export {
+  FileCardContent,
+  type FileAttachmentViewModel,
+  type FileCardContentProps,
+  type FileCardViewModel
+} from "./components/FileCardContent";
 export {
   MoveToContainerDialog,
   type MoveTargetContainer,
