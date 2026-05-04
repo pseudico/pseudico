@@ -12,6 +12,7 @@ import {
   type ListSummary,
   type LocalWorkOsApi,
   type NoteSummary,
+  type ProjectHealthSummary,
   type ProjectSummary,
   type RecentWorkspace,
   type TaskSummary,
@@ -68,6 +69,25 @@ const activeProject: ProjectSummary = {
   archivedAt: null,
   deletedAt: null
 };
+
+function projectHealthSummary(
+  sourceProject: ProjectSummary
+): ProjectHealthSummary {
+  return {
+    projectId: sourceProject.id,
+    workspaceId: sourceProject.workspaceId,
+    name: sourceProject.name,
+    status: sourceProject.status,
+    color: sourceProject.color,
+    generatedAt: "2026-05-01T01:00:00.000Z",
+    openTaskCount: 0,
+    completedTaskCount: 0,
+    overdueTaskCount: 0,
+    totalTaskCount: 0,
+    nextDueTask: null,
+    recentActivity: []
+  };
+}
 
 describe("QuickAddModal", () => {
   it("defaults capture to Inbox outside a project route", () => {
@@ -255,6 +275,7 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
         apiOk({ ...activeProject, deletedAt: "2026-05-01T00:00:00.000Z" }),
       list: async () => apiOk([activeProject]),
       get: async () => apiOk(activeProject),
+      getHealth: async () => apiOk(projectHealthSummary(activeProject)),
       createProject: async () =>
         apiOk({ project: activeProject, defaultTabId: "tab_1" }),
       updateProject: async () => apiOk(activeProject),
@@ -262,7 +283,8 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
       softDeleteProject: async () =>
         apiOk({ ...activeProject, deletedAt: "2026-05-01T00:00:00.000Z" }),
       listProjects: async () => apiOk([activeProject]),
-      getProject: async () => apiOk(activeProject)
+      getProject: async () => apiOk(activeProject),
+      getProjectHealth: async () => apiOk(projectHealthSummary(activeProject))
     },
     categories: {
       create: async () => apiOk(categorySummary()),

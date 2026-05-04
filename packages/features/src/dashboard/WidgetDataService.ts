@@ -5,14 +5,16 @@ import {
 } from "@local-work-os/core";
 import type { DatabaseConnection } from "@local-work-os/db";
 import { ActivityService } from "../activity";
-import { ProjectService } from "../projects";
+import { ProjectHealthService, ProjectService } from "../projects";
 import { TaskService } from "../tasks";
 import { TodayService, toTodayTaskView } from "../today";
 import {
   toActivityWidgetItem,
+  toProjectHealthWidgetItem,
   toProjectWidgetItem,
   toTaskWidgetItem,
   type DashboardActivityWidgetItem,
+  type DashboardProjectHealthWidgetItem,
   type DashboardProjectWidgetItem,
   type DashboardTaskWidgetItem,
   type DashboardWidgetData,
@@ -112,6 +114,26 @@ export class WidgetDataService {
     };
   }
 
+  getProjectHealthWidgetData(input: WidgetDataQueryInput): DashboardWidgetData {
+    const normalized = this.normalizeInput(input);
+    const items = new ProjectHealthService({
+      connection: this.connection,
+      now: this.now
+    })
+      .listProjectHealthSummaries({
+        workspaceId: normalized.workspaceId,
+        limit: normalized.limit + normalized.offset,
+        recentActivityLimit: 1
+      })
+      .map(toProjectHealthWidgetItem);
+
+    return {
+      widgetType: "project_health",
+      generatedAt: createIsoTimestamp(this.now()),
+      ...pageItems(items, normalized)
+    };
+  }
+
   getRecentActivityWidgetData(input: WidgetDataQueryInput): DashboardWidgetData {
     const normalized = this.normalizeInput(input);
     const requestedLimit = normalized.limit + normalized.offset + 1;
@@ -145,6 +167,7 @@ function pageItems<
   TItem extends
     | DashboardTaskWidgetItem
     | DashboardProjectWidgetItem
+    | DashboardProjectHealthWidgetItem
     | DashboardActivityWidgetItem
 >(
   items: TItem[],

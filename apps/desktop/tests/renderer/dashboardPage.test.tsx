@@ -17,11 +17,13 @@ describe("Dashboard renderer page", () => {
     expect(html).toContain("Overdue");
     expect(html).toContain("Upcoming");
     expect(html).toContain("Favorite Projects");
+    expect(html).toContain("Project Health");
     expect(html).toContain("Recent Activity");
     expect(html).toContain("Call accountant");
     expect(html).toContain("Send overdue report");
     expect(html).toContain("Review launch copy");
     expect(html).toContain("Launch Plan");
+    expect(html).toContain("1 overdue");
     expect(html).toContain("Container Created");
     expect(html).toContain("Created project");
   });
@@ -62,6 +64,42 @@ function dashboardViewModel(): DashboardViewModelSummary {
               name: "Launch Plan",
               status: "active",
               color: "#245c55",
+              navigationTarget: {
+                targetType: "container",
+                targetId: "container_project_1",
+                workspaceId: "workspace_1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        widget: widget("widget_project_health", "project_health", "Project Health"),
+        data: {
+          widgetType: "project_health",
+          generatedAt: "2026-05-04T08:00:00.000Z",
+          page: page(1),
+          items: [
+            {
+              kind: "project_health",
+              projectId: "container_project_1",
+              workspaceId: "workspace_1",
+              name: "Launch Plan",
+              status: "active",
+              color: "#245c55",
+              generatedAt: "2026-05-04T08:00:00.000Z",
+              openTaskCount: 3,
+              completedTaskCount: 2,
+              overdueTaskCount: 1,
+              totalTaskCount: 5,
+              nextDueTask: {
+                itemId: "item_next",
+                title: "Book launch venue",
+                dueAt: "2026-05-05T09:00:00.000Z",
+                taskStatus: "open",
+                priority: 2
+              },
+              recentActivity: [],
               navigationTarget: {
                 targetType: "container",
                 targetId: "container_project_1",

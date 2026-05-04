@@ -106,6 +106,10 @@ export class DashboardService {
     return this.widgetDataService.getRecentActivityWidgetData(input);
   }
 
+  getProjectHealthWidgetData(input: WidgetDataQueryInput): DashboardWidgetData {
+    return this.widgetDataService.getProjectHealthWidgetData(input);
+  }
+
   private ensureDefaultDashboard(input: GetDefaultDashboardInput): {
     dashboard: DashboardRecord;
     widgets: DashboardWidgetRecord[];
@@ -197,6 +201,8 @@ export class DashboardService {
         return this.widgetDataService.getFavoriteProjectsWidgetData(input);
       case "recent_activity":
         return this.widgetDataService.getRecentActivityWidgetData(input);
+      case "project_health":
+        return this.widgetDataService.getProjectHealthWidgetData(input);
       default:
         throw new Error(`Unsupported dashboard widget type: ${widget.type}.`);
     }
@@ -282,6 +288,8 @@ function dashboardWidgetTitle(
       return "Favorite Projects";
     case "recent_activity":
       return "Recent Activity";
+    case "project_health":
+      return "Project Health";
   }
 }
 

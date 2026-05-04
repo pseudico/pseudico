@@ -4,15 +4,18 @@ import { useNavigate } from "react-router-dom";
 import {
   FavoriteProjectsWidget,
   OverdueWidget,
+  ProjectHealthWidget,
   RecentActivityWidget,
   TodayWidget,
   UpcomingWidget,
   type DashboardActivityWidgetItem,
   type DashboardProjectWidgetItem,
-  type DashboardTaskWidgetItem
+  type DashboardTaskWidgetItem,
+  type ProjectHealthViewModel
 } from "@local-work-os/ui";
 import type {
   DashboardActivityWidgetItemSummary,
+  DashboardProjectHealthWidgetItemSummary,
   DashboardProjectWidgetItemSummary,
   DashboardTaskWidgetItemSummary,
   DashboardViewModelSummary,
@@ -107,6 +110,10 @@ export function DashboardPage({
     navigate(`/projects/${project.projectId}`);
   }
 
+  function openProjectHealth(project: ProjectHealthViewModel): void {
+    navigate(`/projects/${project.projectId}`);
+  }
+
   function openTask(task: DashboardTaskWidgetItem): void {
     navigate(`/projects/${task.containerId}`);
   }
@@ -142,7 +149,7 @@ export function DashboardPage({
           <h2>{dashboard?.dashboard.name ?? "Dashboard"}</h2>
           <p>
             Workspace widgets for due work, overdue recovery, upcoming tasks,
-            favorite projects, and recent activity.
+            favorite projects, project health, and recent activity.
           </p>
         </div>
         <button
@@ -180,6 +187,11 @@ export function DashboardPage({
           loading={loading && dashboard === null}
           projects={getProjectWidgetItems(widgets)}
           onOpenProject={openProject}
+        />
+        <ProjectHealthWidget
+          loading={loading && dashboard === null}
+          projects={getProjectHealthWidgetItems(widgets)}
+          onOpenProject={openProjectHealth}
         />
         <RecentActivityWidget
           activity={getActivityWidgetItems(widgets)}
@@ -219,6 +231,18 @@ function getProjectWidgetItems(
   }
 
   return data.items.map(toDashboardProjectWidgetItem);
+}
+
+function getProjectHealthWidgetItems(
+  widgets: readonly DashboardWidgetSummary[]
+): ProjectHealthViewModel[] {
+  const data = findWidgetData(widgets, "project_health");
+
+  if (data?.widgetType !== "project_health") {
+    return [];
+  }
+
+  return data.items.map(toProjectHealthWidgetItem);
 }
 
 function getActivityWidgetItems(
@@ -261,6 +285,23 @@ function toDashboardProjectWidgetItem(
     name: project.name,
     status: project.status,
     color: project.color
+  };
+}
+
+function toProjectHealthWidgetItem(
+  project: DashboardProjectHealthWidgetItemSummary
+): ProjectHealthViewModel {
+  return {
+    projectId: project.projectId,
+    name: project.name,
+    status: project.status,
+    color: project.color,
+    openTaskCount: project.openTaskCount,
+    completedTaskCount: project.completedTaskCount,
+    overdueTaskCount: project.overdueTaskCount,
+    totalTaskCount: project.totalTaskCount,
+    nextDueTask: project.nextDueTask,
+    recentActivity: project.recentActivity
   };
 }
 

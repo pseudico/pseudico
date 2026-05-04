@@ -16,6 +16,7 @@ import {
   type LocalWorkOsApi,
   type MetadataTargetSummary,
   type NoteSummary,
+  type ProjectHealthSummary,
   type ProjectSummary,
   type RecentWorkspace,
   type TaskSummary,
@@ -169,6 +170,7 @@ function createMockApi(
         }),
       list: async () => apiOk([projectSummary()]),
       get: async () => apiOk(projectSummary()),
+      getHealth: async () => apiOk(projectHealthSummary()),
       createProject: async () =>
         apiOk({
           project: projectSummary(),
@@ -187,7 +189,8 @@ function createMockApi(
           deletedAt: "2026-04-30T01:00:00.000Z"
         }),
       listProjects: async () => apiOk([projectSummary()]),
-      getProject: async () => apiOk(projectSummary())
+      getProject: async () => apiOk(projectSummary()),
+      getProjectHealth: async () => apiOk(projectHealthSummary())
     },
     categories: {
       create: async () => apiOk(categorySummary()),
@@ -380,6 +383,29 @@ function projectSummary(): ProjectSummary {
     updatedAt: "2026-04-30T00:00:00.000Z",
     archivedAt: null,
     deletedAt: null
+  };
+}
+
+function projectHealthSummary(): ProjectHealthSummary {
+  return {
+    projectId: "container_1",
+    workspaceId: "workspace_1",
+    name: "Launch Plan",
+    status: "active",
+    color: null,
+    generatedAt: "2026-04-30T01:00:00.000Z",
+    openTaskCount: 1,
+    completedTaskCount: 0,
+    overdueTaskCount: 0,
+    totalTaskCount: 1,
+    nextDueTask: {
+      itemId: "item_1",
+      title: "Call accountant",
+      dueAt: "2026-05-04T00:00:00.000Z",
+      taskStatus: "open",
+      priority: 2
+    },
+    recentActivity: [activitySummary()]
   };
 }
 

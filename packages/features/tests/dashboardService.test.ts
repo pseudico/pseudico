@@ -61,11 +61,13 @@ describe("DashboardService", () => {
       "overdue",
       "upcoming",
       "favorites",
-      "recent_activity"
+      "recent_activity",
+      "project_health"
     ]);
     expect(viewModel.widgets.every((widget) => widget.data !== null)).toBe(true);
     expect(new ActivityLogRepository(connection).listRecent("workspace_1", 20)
       .map((event) => event.action)).toEqual([
+        "dashboard_widget_created",
         "dashboard_widget_created",
         "dashboard_widget_created",
         "dashboard_widget_created",
@@ -80,7 +82,7 @@ describe("DashboardService", () => {
 
     expect(secondLoad.dashboard.id).toBe(viewModel.dashboard.id);
     expect(new ActivityLogRepository(connection).listRecent("workspace_1", 20))
-      .toHaveLength(6);
+      .toHaveLength(7);
   });
 
   it("returns limited widget data with navigation targets", async () => {
@@ -202,6 +204,40 @@ describe("DashboardService", () => {
       ])
     });
     expect(data).toBeNull();
+  });
+
+  it("returns project health summaries for the project health widget", async () => {
+    const project = await createProjectService().createProject({
+      workspaceId: "workspace_1",
+      name: "At Risk Project"
+    });
+    await createTaskService().createTask({
+      workspaceId: "workspace_1",
+      containerId: project.project.id,
+      title: "Past due task",
+      dueAt: new Date(2026, 4, 14, 8).toISOString()
+    });
+
+    const data = createDashboardService().getProjectHealthWidgetData({
+      workspaceId: "workspace_1"
+    });
+
+    expect(data).toMatchObject({
+      widgetType: "project_health",
+      items: expect.arrayContaining([
+        expect.objectContaining({
+          kind: "project_health",
+          projectId: project.project.id,
+          name: "At Risk Project",
+          overdueTaskCount: 1,
+          navigationTarget: {
+            targetType: "container",
+            targetId: project.project.id,
+            workspaceId: "workspace_1"
+          }
+        })
+      ])
+    });
   });
 });
 
