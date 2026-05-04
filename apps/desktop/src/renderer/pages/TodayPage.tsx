@@ -6,6 +6,7 @@ import {
   type TodayTaskCardViewModel
 } from "@local-work-os/ui";
 import type {
+  DailyPlanLane,
   LocalWorkOsApi,
   TodayTaskSummary,
   TodayViewModelSummary
@@ -77,16 +78,25 @@ export function TodayPage({
   }, [apiClient, currentWorkspace, initialViewModel]);
 
   async function refreshToday(): Promise<void> {
-    if (currentWorkspace === null) {
+    const workspaceId = resolveWorkspaceId(currentWorkspace?.id, viewModel);
+
+    if (workspaceId === null) {
       return;
     }
 
-    setLoading(true);
+    await reloadToday(workspaceId);
+  }
+
+  async function reloadToday(workspaceId: string): Promise<void> {
+    if (viewModel === null) {
+      setLoading(true);
+    }
+
     setError(null);
     setMutationError(null);
 
     const result = await apiClient.today.getViewModel({
-      workspaceId: currentWorkspace.id
+      workspaceId
     });
 
     setLoading(false);
@@ -127,6 +137,124 @@ export function TodayPage({
             updatedAt: result.data.updatedAt
           })
     );
+  }
+
+  async function planTask(
+    task: TodayTaskCardViewModel,
+    lane: "today" | "tomorrow"
+  ): Promise<void> {
+    const workspaceId = resolveWorkspaceId(currentWorkspace?.id, viewModel);
+
+    if (workspaceId === null) {
+      return;
+    }
+
+    setBusyTaskId(task.itemId);
+    setMutationError(null);
+
+    const result = await apiClient.today.planTask({
+      workspaceId,
+      itemId: task.itemId,
+      lane
+    });
+
+    setBusyTaskId(null);
+
+    if (!result.ok) {
+      setMutationError(result.error.message);
+      return;
+    }
+
+    await reloadToday(workspaceId);
+  }
+
+  async function unplanTask(task: TodayTaskCardViewModel): Promise<void> {
+    const workspaceId = resolveWorkspaceId(currentWorkspace?.id, viewModel);
+
+    if (workspaceId === null || task.plannedLane === null || task.plannedLane === undefined) {
+      return;
+    }
+
+    setBusyTaskId(task.itemId);
+    setMutationError(null);
+
+    const result = await apiClient.today.unplanTask({
+      workspaceId,
+      itemId: task.itemId,
+      lane: task.plannedLane
+    });
+
+    setBusyTaskId(null);
+
+    if (!result.ok) {
+      setMutationError(result.error.message);
+      return;
+    }
+
+    await reloadToday(workspaceId);
+  }
+
+  async function reorderTask(
+    task: TodayTaskCardViewModel,
+    direction: "up" | "down"
+  ): Promise<void> {
+    const workspaceId = resolveWorkspaceId(currentWorkspace?.id, viewModel);
+
+    if (
+      workspaceId === null ||
+      viewModel === null ||
+      task.plannedLane === null ||
+      task.plannedLane === undefined ||
+      task.plannedSortOrder === null ||
+      task.plannedSortOrder === undefined
+    ) {
+      return;
+    }
+
+    const laneTasks = getLaneTasks(viewModel, task.plannedLane).filter(
+      (laneTask) => laneTask.plannedLane === task.plannedLane
+    );
+    const currentIndex = laneTasks.findIndex(
+      (laneTask) => laneTask.itemId === task.itemId
+    );
+    const targetTask =
+      currentIndex === -1
+        ? undefined
+        : laneTasks[currentIndex + (direction === "up" ? -1 : 1)];
+
+    if (
+      targetTask === undefined ||
+      targetTask.plannedSortOrder === null ||
+      targetTask.plannedSortOrder === undefined
+    ) {
+      return;
+    }
+
+    const sortOrder = getMovedSortOrder({
+      direction,
+      currentIndex,
+      laneTasks,
+      targetTask
+    });
+
+    setBusyTaskId(task.itemId);
+    setMutationError(null);
+
+    const result = await apiClient.today.reorderPlannedTask({
+      workspaceId,
+      itemId: task.itemId,
+      lane: task.plannedLane,
+      sortOrder
+    });
+
+    setBusyTaskId(null);
+
+    if (!result.ok) {
+      setMutationError(result.error.message);
+      return;
+    }
+
+    await reloadToday(workspaceId);
   }
 
   function openTaskSource(task: TodayTaskCardViewModel): void {
@@ -187,7 +315,10 @@ export function TodayPage({
           title="Today"
           busyTaskId={busyTaskId}
           onOpenSource={openTaskSource}
+          onPlanTask={planTask}
+          onReorderTask={reorderTask}
           onToggleComplete={toggleTaskComplete}
+          onUnplanTask={unplanTask}
         />
         <TodayLane
           description="A quick look at tasks dated for the next local day."
@@ -199,7 +330,10 @@ export function TodayPage({
           title="Tomorrow"
           busyTaskId={busyTaskId}
           onOpenSource={openTaskSource}
+          onPlanTask={planTask}
+          onReorderTask={reorderTask}
           onToggleComplete={toggleTaskComplete}
+          onUnplanTask={unplanTask}
         />
         <TodayLane
           description={`Open overdue tasks from the recent backlog window${
@@ -213,7 +347,10 @@ export function TodayPage({
           title="Backlog"
           busyTaskId={busyTaskId}
           onOpenSource={openTaskSource}
+          onPlanTask={planTask}
+          onReorderTask={reorderTask}
           onToggleComplete={toggleTaskComplete}
+          onUnplanTask={unplanTask}
         />
       </div>
     </section>
@@ -230,8 +367,65 @@ function toTodayTaskCard(task: TodayTaskSummary): TodayTaskCardViewModel {
     dueAt: task.dueAt,
     priority: task.priority,
     containerId: task.containerId,
+    plannedLane: task.plannedLane,
+    plannedSortOrder: task.plannedSortOrder,
+    addedManually: task.addedManually,
     sourceLabel: "Open source"
   };
+}
+
+function resolveWorkspaceId(
+  currentWorkspaceId: string | undefined,
+  viewModel: TodayViewModelSummary | null
+): string | null {
+  return currentWorkspaceId ?? viewModel?.workspaceId ?? null;
+}
+
+function getLaneTasks(
+  viewModel: TodayViewModelSummary,
+  lane: DailyPlanLane
+): TodayTaskSummary[] {
+  if (lane === "today") {
+    return viewModel.dueToday;
+  }
+
+  if (lane === "tomorrow") {
+    return viewModel.tomorrowPreview;
+  }
+
+  return viewModel.overdueBacklog;
+}
+
+function getMovedSortOrder(input: {
+  direction: "up" | "down";
+  currentIndex: number;
+  laneTasks: TodayTaskSummary[];
+  targetTask: TodayTaskSummary;
+}): number {
+  const targetSortOrder = input.targetTask.plannedSortOrder ?? 0;
+
+  if (input.direction === "up") {
+    const previousTask = input.laneTasks[input.currentIndex - 2];
+    const previousSortOrder = previousTask?.plannedSortOrder;
+
+    if (previousSortOrder !== null && previousSortOrder !== undefined) {
+      return Math.max(
+        0,
+        Math.floor((previousSortOrder + targetSortOrder) / 2)
+      );
+    }
+
+    return Math.max(0, targetSortOrder - 1024);
+  }
+
+  const nextTask = input.laneTasks[input.currentIndex + 2];
+  const nextSortOrder = nextTask?.plannedSortOrder;
+
+  if (nextSortOrder !== null && nextSortOrder !== undefined) {
+    return Math.max(0, Math.floor((targetSortOrder + nextSortOrder) / 2));
+  }
+
+  return targetSortOrder + 1024;
 }
 
 function updateTaskInViewModel(

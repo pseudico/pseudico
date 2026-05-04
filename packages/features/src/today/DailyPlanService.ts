@@ -251,9 +251,11 @@ export class DailyPlanService {
       .map((record) => ({
         ...toTodayTaskView(record.task),
         sortOrder: record.planItem.sortOrder,
+        plannedLane: record.planItem.lane,
+        plannedSortOrder: record.planItem.sortOrder,
+        addedManually: record.planItem.addedManually,
         planItemId: record.planItem.id,
-        lane: record.planItem.lane,
-        plannedSortOrder: record.planItem.sortOrder
+        lane: record.planItem.lane
       }));
   }
 

@@ -631,6 +631,9 @@ function todayViewModelSummary(): TodayViewModelSummary {
         allDay: true,
         timezone: null,
         sortOrder: 1024,
+        plannedLane: null,
+        plannedSortOrder: null,
+        addedManually: false,
         pinned: false,
         createdAt: "2026-04-30T00:00:00.000Z",
         updatedAt: "2026-04-30T00:00:00.000Z"
@@ -862,6 +865,30 @@ describe("desktop API client", () => {
         itemId: "item_1",
         lane: "today"
       }
+    });
+    await expect(
+      client.today.reorderPlannedTask({
+        itemId: "item_1",
+        lane: "today",
+        sortOrder: 512
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        itemId: "item_1",
+        sortOrder: 512
+      }
+    });
+    await expect(
+      client.today.unplanTask({ itemId: "item_1", lane: "today" })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          itemId: "item_1",
+          lane: "today"
+        }
+      ]
     });
     await expect(client.today.getPlannedTasks()).resolves.toMatchObject({
       ok: true,

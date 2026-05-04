@@ -322,6 +322,9 @@ export type TodayTaskSummary = {
   allDay: boolean;
   timezone: string | null;
   sortOrder: number;
+  plannedLane: DailyPlanLane | null;
+  plannedSortOrder: number | null;
+  addedManually: boolean;
   pinned: boolean;
   createdAt: string;
   updatedAt: string;

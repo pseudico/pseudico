@@ -211,10 +211,25 @@ describe("TodayService", () => {
       "Manual today"
     ]);
     expect(viewModel.dueToday[0]?.dueAt).toBeNull();
+    expect(viewModel.dueToday[0]).toMatchObject({
+      plannedLane: "today",
+      plannedSortOrder: 1024,
+      addedManually: true
+    });
     expect(viewModel.tomorrowPreview.map((task) => task.title)).toEqual([
       "Due today but planned tomorrow",
       "Naturally tomorrow"
     ]);
+    expect(viewModel.tomorrowPreview[0]).toMatchObject({
+      plannedLane: "tomorrow",
+      plannedSortOrder: 1024,
+      addedManually: true
+    });
+    expect(viewModel.tomorrowPreview[1]).toMatchObject({
+      plannedLane: null,
+      plannedSortOrder: null,
+      addedManually: false
+    });
   });
 
   it("plans, reorders, unplans, and logs daily planning activity", async () => {
