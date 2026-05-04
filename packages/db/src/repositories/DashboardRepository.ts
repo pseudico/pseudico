@@ -52,6 +52,15 @@ export type DashboardWidgetRecord = {
   deletedAt: string | null;
 };
 
+export type DashboardWidgetType =
+  | "today"
+  | "overdue"
+  | "upcoming"
+  | "favorites"
+  | "recent_activity"
+  | "saved_view"
+  | "project_health";
+
 export type CreateDefaultDashboardInput = {
   id: string;
   workspaceId: string;
@@ -141,6 +150,34 @@ export class DashboardRepository {
       .get(input.dashboardId, input.type);
 
     return row === undefined ? null : toDashboardWidgetRecord(row);
+  }
+
+  getWidgetById(widgetId: string): DashboardWidgetRecord | null {
+    const row = this.connection.sqlite
+      .prepare<[string], DashboardWidgetRow>(
+        `select *
+         from dashboard_widgets
+         where id = ?
+           and deleted_at is null
+         limit 1`
+      )
+      .get(widgetId);
+
+    return row === undefined ? null : toDashboardWidgetRecord(row);
+  }
+
+  listWidgetsByDashboard(dashboardId: string): DashboardWidgetRecord[] {
+    const rows = this.connection.sqlite
+      .prepare<[string], DashboardWidgetRow>(
+        `select *
+         from dashboard_widgets
+         where dashboard_id = ?
+           and deleted_at is null
+         order by sort_order asc, created_at asc`
+      )
+      .all(dashboardId);
+
+    return rows.map(toDashboardWidgetRecord);
   }
 
   createWidget(input: CreateDashboardWidgetInput): DashboardWidgetRecord {

@@ -43,7 +43,11 @@ export type {
   CreateContainerCommandInput,
   CreateContainerCommandResult
 } from "./containers";
-export { dashboardModuleContract } from "./dashboard";
+export {
+  DashboardService,
+  WidgetDataService,
+  dashboardModuleContract
+} from "./dashboard";
 export { exportModuleContract } from "./export";
 export { filesModuleContract } from "./files";
 export { InboxService, inboxModuleContract } from "./inbox";
@@ -99,7 +103,19 @@ export { workspaceModuleContract } from "./workspace";
 export type { BackupService } from "./backup";
 export type { CalendarService } from "./calendar";
 export type { ContactService } from "./contacts";
-export type { DashboardService } from "./dashboard";
+export type {
+  DashboardActivityWidgetItem,
+  DashboardNavigationTarget,
+  DashboardProjectWidgetItem,
+  DashboardServiceIdFactory,
+  DashboardTaskWidgetItem,
+  DashboardViewModel,
+  DashboardWidgetData,
+  DashboardWidgetPage,
+  DashboardWidgetViewModel,
+  GetDefaultDashboardInput,
+  WidgetDataQueryInput
+} from "./dashboard";
 export type { ExportService } from "./export";
 export type { FileAttachmentService } from "./files";
 export type {

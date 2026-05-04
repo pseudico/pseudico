@@ -7,6 +7,7 @@ import {
   categoriesModuleContract,
   contactsModuleContract,
   dashboardModuleContract,
+  DashboardService,
   exportModuleContract,
   filesModuleContract,
   inboxModuleContract,
@@ -110,5 +111,9 @@ describe("feature module exports", () => {
   it("exports the saved-view and collection service implementations", () => {
     expect(SavedViewService).toBeDefined();
     expect(CollectionService).toBeDefined();
+  });
+
+  it("exports the dashboard service implementation", () => {
+    expect(DashboardService).toBeDefined();
   });
 });

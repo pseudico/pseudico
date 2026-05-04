@@ -1,2 +1,17 @@
-export { dashboardModuleContract } from "./DashboardService";
-export type { DashboardService } from "./DashboardService";
+export { DashboardService, dashboardModuleContract } from "./DashboardService";
+export { WidgetDataService } from "./WidgetDataService";
+export type {
+  DashboardServiceIdFactory,
+  GetDefaultDashboardInput
+} from "./DashboardService";
+export type {
+  DashboardActivityWidgetItem,
+  DashboardNavigationTarget,
+  DashboardProjectWidgetItem,
+  DashboardTaskWidgetItem,
+  DashboardViewModel,
+  DashboardWidgetData,
+  DashboardWidgetPage,
+  DashboardWidgetViewModel,
+  WidgetDataQueryInput
+} from "./DashboardViewModel";

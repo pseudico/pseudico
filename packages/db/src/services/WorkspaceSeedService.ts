@@ -340,7 +340,7 @@ function dashboardWidgetTitle(
     case "upcoming":
       return "Upcoming";
     case "favorites":
-      return "Favorites";
+      return "Favorite Projects";
     case "recent_activity":
       return "Recent Activity";
   }
