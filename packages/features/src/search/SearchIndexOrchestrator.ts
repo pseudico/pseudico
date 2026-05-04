@@ -1,5 +1,6 @@
 import {
   ContainerRepository,
+  AttachmentRepository,
   ItemRepository,
   ListRepository,
   NoteRepository,
@@ -90,6 +91,21 @@ export class SearchIndexOrchestrator {
     }
 
     return searchIndexService.upsertItem(item, input);
+  }
+
+  upsertAttachmentIndex(
+    attachmentId: string,
+    input: UpsertSearchTargetInput = {}
+  ): SearchIndexRecord {
+    validateNonEmptyString(attachmentId, "attachmentId");
+
+    const attachment = new AttachmentRepository(this.connection).getById(attachmentId);
+
+    if (attachment === null) {
+      throw new Error(`Attachment was not found: ${attachmentId}.`);
+    }
+
+    return this.createSearchIndexService().upsertAttachment(attachment, input);
   }
 
   upsertListIndex(

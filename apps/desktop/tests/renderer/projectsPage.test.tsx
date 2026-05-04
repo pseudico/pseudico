@@ -846,6 +846,7 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Search");
     expect(html).toContain("Projects");
     expect(html).toContain("Tasks");
+    expect(html).toContain("Files");
     expect(html).toContain("Book launch venue");
     expect(html).toContain("Confirm the room hold before Friday.");
     expect(html).toContain("Launch Plan");

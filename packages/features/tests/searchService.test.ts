@@ -1,5 +1,6 @@
 import {
   ContainerRepository,
+  AttachmentRepository,
   ItemRepository,
   ListRepository,
   MigrationService,
@@ -225,6 +226,66 @@ describe("SearchService", () => {
         parentItemTitle: "Supplier checklist",
         containerTitle: "Launch Plan",
         destinationPath: "/projects/container_1"
+      }
+    ]);
+  });
+
+  it("hydrates attachment search records as file results with item context", () => {
+    const project = new ContainerRepository(connection).create({
+      id: "container_1",
+      workspaceId: "workspace_1",
+      type: "project",
+      name: "Launch Plan",
+      slug: "launch-plan",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const fileItem = new ItemRepository(connection).create({
+      id: "item_file_1",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      type: "file",
+      title: "Launch brief",
+      body: "Signed launch scope",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const attachment = new AttachmentRepository(connection).create({
+      id: "attachment_1",
+      workspaceId: "workspace_1",
+      itemId: fileItem.id,
+      originalName: "Brief.pdf",
+      storedName: "Brief.pdf",
+      storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
+      sizeBytes: 42,
+      checksum: "c".repeat(64),
+      description: "Signed launch scope",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const service = createService();
+
+    service.upsertAttachment(attachment, {
+      tags: ["launch"],
+      category: "Finance"
+    });
+
+    expect(
+      service.search({
+        workspaceId: "workspace_1",
+        query: "signed",
+        kinds: ["file"]
+      })
+    ).toMatchObject([
+      {
+        targetType: "attachment",
+        targetId: "attachment_1",
+        kind: "file",
+        title: "Brief.pdf",
+        body: "Signed launch scope",
+        containerTitle: "Launch Plan",
+        parentItemId: "item_file_1",
+        parentItemTitle: "Launch brief",
+        destinationPath: "/projects/container_1",
+        tags: ["launch"],
+        category: "Finance"
       }
     ]);
   });

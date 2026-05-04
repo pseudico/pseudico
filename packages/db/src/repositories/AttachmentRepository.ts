@@ -37,6 +37,11 @@ export type ListAttachmentsForItemInput = {
   includeDeleted?: boolean;
 };
 
+export type ListAttachmentsByWorkspaceInput = {
+  workspaceId: string;
+  includeDeleted?: boolean;
+};
+
 export type UpdateAttachmentPatch = {
   description?: string | null;
   timestamp: string;
@@ -76,6 +81,28 @@ export class AttachmentRepository {
          from attachments
          where ${where.join(" and ")}
          order by created_at asc, original_name asc`
+      )
+      .all(...values);
+
+    return rows.map(toAttachmentRecord);
+  }
+
+  listByWorkspace(
+    input: ListAttachmentsByWorkspaceInput
+  ): AttachmentRecord[] {
+    const where = ["workspace_id = ?"];
+    const values: unknown[] = [input.workspaceId];
+
+    if (input.includeDeleted !== true) {
+      where.push("deleted_at is null");
+    }
+
+    const rows = this.connection.sqlite
+      .prepare<unknown[], AttachmentRow>(
+        `select *
+         from attachments
+         where ${where.join(" and ")}
+         order by item_id asc, created_at asc, original_name asc`
       )
       .all(...values);
 

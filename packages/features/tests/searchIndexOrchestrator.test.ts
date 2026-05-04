@@ -1,5 +1,6 @@
 import {
   ContainerRepository,
+  AttachmentRepository,
   ItemRepository,
   ListRepository,
   MigrationService,
@@ -105,7 +106,8 @@ describe("SearchIndexOrchestrator", () => {
     expect(service.rebuildWorkspaceIndex("workspace_1")).toEqual({
       indexedContainerCount: 1,
       indexedItemCount: 2,
-      indexedListItemCount: 1
+      indexedListItemCount: 1,
+      indexedAttachmentCount: 0
     });
     expect(service.getSearchIndexHealth("workspace_1")).toMatchObject({
       status: "healthy",
@@ -123,6 +125,35 @@ describe("SearchIndexOrchestrator", () => {
         targetId: "item_note_1"
       }
     ]);
+  });
+
+  it("upserts attachment projections from source IDs", () => {
+    new AttachmentRepository(connection).create({
+      id: "attachment_1",
+      workspaceId: "workspace_1",
+      itemId: "item_note_1",
+      originalName: "Launch Brief.pdf",
+      storedName: "Launch Brief.pdf",
+      storagePath: "attachments/2026/05/attachment_1/Launch Brief.pdf",
+      sizeBytes: 42,
+      checksum: "b".repeat(64),
+      description: "Signed launch scope",
+      timestamp: TEST_TIMESTAMP
+    });
+
+    const record = createOrchestrator().upsertAttachmentIndex("attachment_1", {
+      tags: ["launch"],
+      category: "Finance"
+    });
+
+    expect(record).toMatchObject({
+      targetType: "attachment",
+      targetId: "attachment_1",
+      title: "Launch Brief.pdf",
+      body: expect.stringContaining("Signed launch scope"),
+      tags: "launch",
+      category: "Finance"
+    });
   });
 });
 
