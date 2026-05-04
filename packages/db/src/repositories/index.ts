@@ -35,7 +35,8 @@ export {
   type CreateDashboardWidgetInput,
   type CreateDefaultDashboardInput,
   type DashboardRecord,
-  type DashboardWidgetRecord
+  type DashboardWidgetRecord,
+  type DashboardWidgetType
 } from "./DashboardRepository";
 export {
   DailyPlanRepository,

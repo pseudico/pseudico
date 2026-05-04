@@ -38,6 +38,8 @@ export const ActivityAction = {
   categoryAssigned: "category_assigned",
   relationshipCreated: "relationship_created",
   relationshipRemoved: "relationship_removed",
+  dashboardCreated: "dashboard_created",
+  dashboardWidgetCreated: "dashboard_widget_created",
   savedViewCreated: "saved_view_created",
   savedViewUpdated: "saved_view_updated",
   savedViewDeleted: "saved_view_deleted",
