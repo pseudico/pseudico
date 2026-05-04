@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   TodayLane,
+  type SnoozePreset,
   type TodayTaskCardViewModel
 } from "@local-work-os/ui";
 import type {
@@ -257,6 +258,63 @@ export function TodayPage({
     await reloadToday(workspaceId);
   }
 
+  async function snoozeTask(
+    task: TodayTaskCardViewModel,
+    preset: SnoozePreset
+  ): Promise<void> {
+    const workspaceId = resolveWorkspaceId(currentWorkspace?.id, viewModel);
+
+    if (workspaceId === null) {
+      return;
+    }
+
+    setBusyTaskId(task.itemId);
+    setMutationError(null);
+
+    const result = await apiClient.tasks.snooze({
+      itemId: task.itemId,
+      preset
+    });
+
+    setBusyTaskId(null);
+
+    if (!result.ok) {
+      setMutationError(result.error.message);
+      return;
+    }
+
+    await reloadToday(workspaceId);
+  }
+
+  async function rescheduleTask(
+    task: TodayTaskCardViewModel,
+    dueAt: string
+  ): Promise<void> {
+    const workspaceId = resolveWorkspaceId(currentWorkspace?.id, viewModel);
+
+    if (workspaceId === null) {
+      return;
+    }
+
+    setBusyTaskId(task.itemId);
+    setMutationError(null);
+
+    const result = await apiClient.tasks.reschedule({
+      itemId: task.itemId,
+      dueAt,
+      allDay: true
+    });
+
+    setBusyTaskId(null);
+
+    if (!result.ok) {
+      setMutationError(result.error.message);
+      return;
+    }
+
+    await reloadToday(workspaceId);
+  }
+
   function openTaskSource(task: TodayTaskCardViewModel): void {
     navigate(`/projects/${task.containerId}`);
   }
@@ -317,6 +375,8 @@ export function TodayPage({
           onOpenSource={openTaskSource}
           onPlanTask={planTask}
           onReorderTask={reorderTask}
+          onRescheduleTask={rescheduleTask}
+          onSnoozeTask={snoozeTask}
           onToggleComplete={toggleTaskComplete}
           onUnplanTask={unplanTask}
         />
@@ -332,6 +392,8 @@ export function TodayPage({
           onOpenSource={openTaskSource}
           onPlanTask={planTask}
           onReorderTask={reorderTask}
+          onRescheduleTask={rescheduleTask}
+          onSnoozeTask={snoozeTask}
           onToggleComplete={toggleTaskComplete}
           onUnplanTask={unplanTask}
         />
@@ -349,6 +411,8 @@ export function TodayPage({
           onOpenSource={openTaskSource}
           onPlanTask={planTask}
           onReorderTask={reorderTask}
+          onRescheduleTask={rescheduleTask}
+          onSnoozeTask={snoozeTask}
           onToggleComplete={toggleTaskComplete}
           onUnplanTask={unplanTask}
         />

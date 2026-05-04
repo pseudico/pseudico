@@ -1381,6 +1381,31 @@ describe("Task IPC handlers", () => {
         taskStatus: "open"
       }
     });
+    await expect(
+      handlers.handleSnoozeTask({
+        itemId: created.data.id,
+        preset: "tomorrow",
+        date: "2026-05-04"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: created.data.id,
+        dueAt: new Date(2026, 4, 5).toISOString()
+      }
+    });
+    await expect(
+      handlers.handleRescheduleTask({
+        itemId: created.data.id,
+        dueAt: "2026-05-10"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: created.data.id,
+        dueAt: "2026-05-10T00:00:00.000Z"
+      }
+    });
     const listResult = await handlers.handleListTasksByContainer(
       projectResult.data.project.id
     );
@@ -1554,6 +1579,35 @@ describe("Today IPC handlers", () => {
           lane: "today"
         }
       ]
+    });
+    await expect(
+      handlers.handlePlanTask({
+        workspaceId: "workspace_1",
+        date: "2026-05-04",
+        itemId: taskResult.data.id,
+        lane: "tomorrow",
+        sortOrder: 1024
+      })
+    ).resolves.toMatchObject({
+      ok: true
+    });
+    await expect(
+      handlers.handleGetTodayViewModel({
+        workspaceId: "workspace_1",
+        date: "2026-05-05",
+        backlogDays: 7
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        dueToday: [
+          {
+            itemId: taskResult.data.id,
+            plannedLane: "today",
+            plannedSortOrder: 1024
+          }
+        ]
+      }
     });
   });
 });

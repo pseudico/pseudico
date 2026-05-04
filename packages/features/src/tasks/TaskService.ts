@@ -3,9 +3,11 @@ import {
   ActivityAction,
   createIsoTimestamp,
   createLocalId,
+  createRelativeLocalDayRange,
   isTaskStatus,
   taskStatusToItemStatus,
   type ActivityActorType,
+  type LocalDateInput,
   type TaskDateRange,
   type TaskStatus
 } from "@local-work-os/core";
@@ -72,6 +74,24 @@ export type UpdateTaskInput = {
   sortOrder?: number;
   pinned?: boolean;
   containerTabId?: string | null;
+};
+
+export type SnoozeTaskPreset = "tomorrow" | "next_week";
+
+export type SnoozeTaskInput = {
+  itemId: string;
+  preset?: SnoozeTaskPreset;
+  dueAt?: string;
+  date?: LocalDateInput;
+  actorType?: ActivityActorType;
+};
+
+export type RescheduleTaskInput = {
+  itemId: string;
+  dueAt: string | null;
+  actorType?: ActivityActorType;
+  startAt?: string | null;
+  allDay?: boolean;
 };
 
 export type TaskMutationResult = TaskWithItemRecord & {
@@ -276,6 +296,47 @@ export class TaskService {
     });
   }
 
+  async snoozeTask(input: SnoozeTaskInput): Promise<TaskMutationResult> {
+    this.validateSnoozeInput(input);
+
+    const dueAt =
+      input.dueAt === undefined
+        ? createRelativeLocalDayRange(
+            input.date ?? this.now(),
+            input.preset === "next_week" ? 7 : 1
+          ).startInclusive
+        : normalizeTaskDateTime(input.dueAt, "dueAt");
+
+    if (dueAt === undefined || dueAt === null) {
+      throw new Error("snooze dueAt must resolve to a date.");
+    }
+
+    return await this.updateTaskSchedule({
+      itemId: input.itemId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      dueAt,
+      allDay: true,
+      action: ActivityAction.taskSnoozed,
+      summaryVerb: "Snoozed"
+    });
+  }
+
+  async rescheduleTask(input: RescheduleTaskInput): Promise<TaskMutationResult> {
+    this.validateRescheduleInput(input);
+
+    return await this.updateTaskSchedule({
+      itemId: input.itemId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      dueAt: normalizeTaskDateTime(input.dueAt, "dueAt") ?? null,
+      ...(input.startAt === undefined
+        ? {}
+        : { startAt: normalizeTaskDateTime(input.startAt, "startAt") ?? null }),
+      ...(input.allDay === undefined ? {} : { allDay: input.allDay }),
+      action: ActivityAction.taskRescheduled,
+      summaryVerb: "Rescheduled"
+    });
+  }
+
   async completeTask(
     itemId: string,
     actorType: ActivityActorType = "local_user"
@@ -394,6 +455,80 @@ export class TaskService {
     }
 
     return task;
+  }
+
+  private requireActiveTaskForDateChange(itemId: string): TaskWithItemRecord {
+    const task = this.requireTask(itemId);
+
+    if (
+      task.item.archivedAt !== null ||
+      task.item.deletedAt !== null ||
+      task.item.completedAt !== null ||
+      task.task.completedAt !== null ||
+      task.task.taskStatus === "done" ||
+      task.task.taskStatus === "cancelled"
+    ) {
+      throw new Error("Only active open or waiting tasks can be rescheduled.");
+    }
+
+    return task;
+  }
+
+  private async updateTaskSchedule(input: {
+    itemId: string;
+    actorType?: ActivityActorType;
+    dueAt: string | null;
+    startAt?: string | null;
+    allDay?: boolean;
+    action: typeof ActivityAction[keyof typeof ActivityAction];
+    summaryVerb: string;
+  }): Promise<TaskMutationResult> {
+    return await this.transactionService.runInTransaction(() => {
+      const timestamp = createIsoTimestamp(this.now());
+      const before = this.requireActiveTaskForDateChange(input.itemId);
+      const nextStartAt =
+        input.startAt === undefined ? before.task.startAt : input.startAt;
+      const nextDueAt = input.dueAt;
+      assertTaskDateOrder(nextStartAt, nextDueAt);
+
+      const taskPatch: UpdateTaskDetailsPatch = {
+        dueAt: nextDueAt,
+        timestamp
+      };
+
+      if (input.startAt !== undefined) {
+        taskPatch.startAt = input.startAt;
+      }
+
+      taskPatch.allDay =
+        input.allDay ??
+        inferAllDay(
+          input.startAt === undefined ? before.task.startAt : input.startAt,
+          input.dueAt
+        );
+
+      const item = new ItemRepository(this.connection).update(input.itemId, {
+        timestamp
+      });
+      const task = new TaskRepository(this.connection).updateDetails(
+        input.itemId,
+        taskPatch
+      );
+
+      this.logTaskEvent({
+        item,
+        task,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+        action: input.action,
+        summary: `${input.summaryVerb} task "${item.title}".`,
+        before,
+        timestamp
+      });
+
+      const searchRecord = this.upsertSearchRecord(item, task, timestamp);
+
+      return { item, task, searchRecord, inlineTags: this.getInlineTagSlugs(item) };
+    });
   }
 
   private upsertSearchRecord(
@@ -528,6 +663,30 @@ export class TaskService {
     ) {
       throw new Error("At least one task field must be provided.");
     }
+  }
+
+  private validateSnoozeInput(input: SnoozeTaskInput): void {
+    validateNonEmptyString(input.itemId, "itemId");
+
+    if (
+      input.preset !== undefined &&
+      input.preset !== "tomorrow" &&
+      input.preset !== "next_week"
+    ) {
+      throw new Error("preset must be tomorrow or next_week.");
+    }
+
+    if (input.preset === undefined && input.dueAt === undefined) {
+      throw new Error("snoozeTask requires a preset or dueAt.");
+    }
+
+    if (input.preset !== undefined && input.dueAt !== undefined) {
+      throw new Error("snoozeTask accepts either preset or dueAt, not both.");
+    }
+  }
+
+  private validateRescheduleInput(input: RescheduleTaskInput): void {
+    validateNonEmptyString(input.itemId, "itemId");
   }
 }
 

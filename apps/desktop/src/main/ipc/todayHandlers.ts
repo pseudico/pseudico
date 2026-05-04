@@ -64,6 +64,10 @@ export function createTodayIpcHandlers(
 
       return await withTodayService(workspaceService, async (context) => {
         const workspaceId = resolveWorkspaceId(input?.workspaceId, context.workspace);
+        await context.dailyPlanService.rolloverTomorrowToToday({
+          workspaceId,
+          ...(input?.date === undefined ? {} : { date: input.date })
+        });
         const viewModel = context.todayService.getTodayViewModel({
           ...input,
           workspaceId

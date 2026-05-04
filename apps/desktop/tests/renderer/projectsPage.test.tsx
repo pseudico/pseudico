@@ -205,8 +205,10 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
           ...taskSummary(),
           status: "completed",
           taskStatus: "done"
-        }),
+      }),
       reopen: async () => apiOk(taskSummary()),
+      snooze: async () => apiOk(taskSummary()),
+      reschedule: async () => apiOk(taskSummary()),
       listByContainer: async () => apiOk([taskSummary()]),
       createTask: async () => apiOk(taskSummary()),
       updateTask: async () => apiOk(taskSummary()),
@@ -216,7 +218,9 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
           status: "completed",
           taskStatus: "done"
         }),
-      reopenTask: async () => apiOk(taskSummary())
+      reopenTask: async () => apiOk(taskSummary()),
+      snoozeTask: async () => apiOk(taskSummary()),
+      rescheduleTask: async () => apiOk(taskSummary())
     },
     lists: {
       create: async () => apiOk(listSummary()),

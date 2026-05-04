@@ -310,6 +310,84 @@ describe("TodayService", () => {
       ]);
   });
 
+  it("rolls yesterday's Tomorrow lane into Today once and skips inactive tasks", async () => {
+    const taskService = createTaskService();
+    const dailyPlanService = createDailyPlanService();
+    const active = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Carry forward"
+    });
+    const completed = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Already done"
+    });
+    const cancelled = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Cancelled plan"
+    });
+    const deleted = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Deleted plan"
+    });
+
+    for (const [task, sortOrder] of [
+      [active, 2048],
+      [completed, 1024],
+      [cancelled, 3072],
+      [deleted, 4096]
+    ] as const) {
+      await dailyPlanService.planTask({
+        workspaceId: "workspace_1",
+        date: "2026-05-15",
+        itemId: task.item.id,
+        lane: "tomorrow",
+        sortOrder
+      });
+    }
+
+    await taskService.completeTask(completed.item.id);
+    await taskService.updateTask({
+      itemId: cancelled.item.id,
+      status: "cancelled"
+    });
+    new ItemRepository(connection).softDelete(
+      deleted.item.id,
+      "2026-05-15T23:00:00.000Z"
+    );
+
+    const firstRun = await dailyPlanService.rolloverTomorrowToToday({
+      workspaceId: "workspace_1",
+      date: "2026-05-16"
+    });
+    const secondRun = await dailyPlanService.rolloverTomorrowToToday({
+      workspaceId: "workspace_1",
+      date: "2026-05-16"
+    });
+
+    expect(firstRun).toMatchObject([
+      {
+        itemId: active.item.id,
+        lane: "today",
+        sortOrder: 2048,
+        addedManually: true
+      }
+    ]);
+    expect(secondRun).toEqual([]);
+    expect(dailyPlanService.getPlannedTasks({
+      workspaceId: "workspace_1",
+      date: "2026-05-16",
+      lane: "today"
+    }).map((task) => task.itemId)).toEqual([active.item.id]);
+    expect(new ActivityLogRepository(connection).listForTarget(
+      "item",
+      active.item.id
+    ).map((event) => event.action)).toContain("task_plan_rolled_over");
+  });
+
   it("rejects invalid inputs", () => {
     const service = createTodayService();
 

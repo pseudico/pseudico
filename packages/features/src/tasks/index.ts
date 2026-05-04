@@ -8,6 +8,9 @@ export {
 } from "./TaskQueries";
 export type {
   CreateTaskInput,
+  RescheduleTaskInput,
+  SnoozeTaskInput,
+  SnoozeTaskPreset,
   TaskMutationResult,
   TaskServiceIdFactory,
   UpdateTaskInput

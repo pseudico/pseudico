@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(61);
+    expect(channels).toHaveLength(63);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -258,6 +258,14 @@ describe("typed preload API", () => {
     });
     await api.tasks.complete("item_1");
     await api.tasks.reopen("item_1");
+    await api.tasks.snooze({
+      itemId: "item_1",
+      preset: "tomorrow"
+    });
+    await api.tasks.reschedule({
+      itemId: "item_1",
+      dueAt: "2026-05-10"
+    });
     await api.tasks.listByContainer("container_1");
 
     expect(calls).toEqual([
@@ -283,6 +291,20 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.tasks.reopenTask,
         input: "item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tasks.snoozeTask,
+        input: {
+          itemId: "item_1",
+          preset: "tomorrow"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tasks.rescheduleTask,
+        input: {
+          itemId: "item_1",
+          dueAt: "2026-05-10"
+        }
       },
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.tasks.listByContainer,

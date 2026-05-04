@@ -25,6 +25,14 @@ export function registerTaskIpc(
     (_event, input) => handlers.handleReopenTask(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.tasks.snoozeTask,
+    (_event, input) => handlers.handleSnoozeTask(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.tasks.rescheduleTask,
+    (_event, input) => handlers.handleRescheduleTask(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.tasks.listByContainer,
     (_event, input) => handlers.handleListTasksByContainer(input)
   );
