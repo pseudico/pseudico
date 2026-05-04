@@ -304,6 +304,22 @@ function createMockApi(): LocalWorkOsApi {
       reorderPlannedTask: async () => apiOk(dailyPlanItemSummary()),
       getPlannedTasks: async () => apiOk([])
     },
+    dashboard: {
+      getDefault: async () =>
+        apiOk({
+          dashboard: {
+            id: "dashboard_1",
+            workspaceId: "workspace_1",
+            name: "Dashboard",
+            isDefault: true,
+            layoutJson: "{}",
+            createdAt: "2026-05-01T00:00:00.000Z",
+            updatedAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: null
+          },
+          widgets: []
+        })
+    },
     activity: {
       listRecent: async () => apiOk([]),
       listForTarget: async () => apiOk([]),

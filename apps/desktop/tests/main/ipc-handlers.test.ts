@@ -14,6 +14,7 @@ import { handleGetDatabaseHealthStatus } from "../../src/main/ipc/databaseHandle
 import { createActivityIpcHandlers } from "../../src/main/ipc/activityHandlers";
 import { createCategoryIpcHandlers } from "../../src/main/ipc/categoryHandlers";
 import { createCollectionIpcHandlers } from "../../src/main/ipc/collectionHandlers";
+import { createDashboardIpcHandlers } from "../../src/main/ipc/dashboardHandlers";
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
 import { createItemIpcHandlers } from "../../src/main/ipc/itemHandlers";
 import { createListIpcHandlers } from "../../src/main/ipc/listHandlers";
@@ -1607,6 +1608,115 @@ describe("Today IPC handlers", () => {
             plannedSortOrder: 1024
           }
         ]
+      }
+    });
+  });
+});
+
+describe("Dashboard IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createDashboardIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(
+      handlers.handleGetDefaultDashboard(undefined)
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("returns default dashboard widgets through the current workspace database", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-dashboard-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const projectResult = await projectHandlers.handleCreateProject({
+      name: "Launch Plan",
+      isFavorite: true
+    });
+
+    if (!projectResult.ok) {
+      throw new Error(projectResult.error.message);
+    }
+
+    const taskHandlers = createTaskIpcHandlers(workspaceService);
+    const taskResult = await taskHandlers.handleCreateTask({
+      containerId: projectResult.data.project.id,
+      title: "Book launch venue",
+      dueAt: "2026-05-04"
+    });
+
+    if (!taskResult.ok) {
+      throw new Error(taskResult.error.message);
+    }
+
+    const handlers = createDashboardIpcHandlers(workspaceService);
+
+    await expect(
+      handlers.handleGetDefaultDashboard({
+        workspaceId: "workspace_1"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        dashboard: {
+          name: "Dashboard",
+          isDefault: true
+        },
+        widgets: expect.arrayContaining([
+          expect.objectContaining({
+            widget: expect.objectContaining({ type: "today" }),
+            data: expect.objectContaining({
+              widgetType: "today",
+              items: [
+                expect.objectContaining({
+                  title: "Book launch venue",
+                  containerId: projectResult.data.project.id
+                })
+              ]
+            })
+          }),
+          expect.objectContaining({
+            widget: expect.objectContaining({ type: "favorites" }),
+            data: expect.objectContaining({
+              widgetType: "favorites",
+              items: [
+                expect.objectContaining({
+                  name: "Launch Plan",
+                  projectId: projectResult.data.project.id
+                })
+              ]
+            })
+          })
+        ])
       }
     });
   });

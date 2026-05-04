@@ -519,6 +519,117 @@ export type ActivitySummary = {
   description: string;
 };
 
+export type DashboardWidgetType =
+  | "today"
+  | "overdue"
+  | "upcoming"
+  | "favorites"
+  | "recent_activity"
+  | "saved_view"
+  | "project_health";
+
+export type DashboardRecordSummary = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  isDefault: boolean;
+  layoutJson: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
+export type DashboardWidgetRecordSummary = {
+  id: string;
+  workspaceId: string;
+  dashboardId: string;
+  type: DashboardWidgetType | string;
+  title: string | null;
+  savedViewId: string | null;
+  configJson: string;
+  positionJson: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
+export type DashboardNavigationTargetSummary = {
+  targetType: string;
+  targetId: string;
+  workspaceId: string;
+};
+
+export type DashboardWidgetPageSummary = {
+  limit: number;
+  offset: number;
+  totalCount: number;
+  hasMore: boolean;
+};
+
+export type DashboardTaskWidgetItemSummary = {
+  kind: "task";
+  itemId: string;
+  title: string;
+  containerId: string;
+  dueAt: string | null;
+  taskStatus: string;
+  priority: number | null;
+  navigationTarget: DashboardNavigationTargetSummary;
+};
+
+export type DashboardProjectWidgetItemSummary = {
+  kind: "project";
+  projectId: string;
+  name: string;
+  status: string;
+  color: string | null;
+  navigationTarget: DashboardNavigationTargetSummary;
+};
+
+export type DashboardActivityWidgetItemSummary = {
+  kind: "activity";
+  activityId: string;
+  action: string;
+  description: string;
+  createdAt: string;
+  targetNavigationTarget: DashboardNavigationTargetSummary;
+};
+
+export type DashboardWidgetDataSummary =
+  | {
+      widgetType: "today" | "overdue" | "upcoming";
+      generatedAt: string;
+      page: DashboardWidgetPageSummary;
+      items: DashboardTaskWidgetItemSummary[];
+    }
+  | {
+      widgetType: "favorites";
+      generatedAt: string;
+      page: DashboardWidgetPageSummary;
+      items: DashboardProjectWidgetItemSummary[];
+    }
+  | {
+      widgetType: "recent_activity";
+      generatedAt: string;
+      page: DashboardWidgetPageSummary;
+      items: DashboardActivityWidgetItemSummary[];
+    };
+
+export type DashboardWidgetSummary = {
+  widget: DashboardWidgetRecordSummary;
+  data: DashboardWidgetDataSummary | null;
+};
+
+export type DashboardViewModelSummary = {
+  dashboard: DashboardRecordSummary;
+  widgets: DashboardWidgetSummary[];
+};
+
+export type GetDefaultDashboardInput = {
+  workspaceId?: string;
+};
+
 export type ListRecentActivityInput = {
   workspaceId?: string;
   limit?: number;
@@ -808,6 +919,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     reorderPlannedTask: "local-work-os:today:reorder-planned-task",
     getPlannedTasks: "local-work-os:today:get-planned-tasks"
   },
+  dashboard: {
+    getDefault: "local-work-os:dashboard:get-default"
+  },
   activity: {
     listRecentActivity: "local-work-os:activity:list-recent-activity",
     listActivityForTarget: "local-work-os:activity:list-activity-for-target"
@@ -1041,6 +1155,10 @@ export type LocalWorkOsIpcContracts = {
     input: GetPlannedTasksInput | undefined;
     result: ApiResult<PlannedTaskSummary[]>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.getDefault]: {
+    input: GetDefaultDashboardInput | undefined;
+    result: ApiResult<DashboardViewModelSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.activity.listRecentActivity]: {
     input: ListRecentActivityInput | undefined;
     result: ApiResult<ActivitySummary[]>;
@@ -1264,6 +1382,11 @@ export type LocalWorkOsApi = {
     getPlannedTasks: (
       input?: GetPlannedTasksInput
     ) => Promise<ApiResult<PlannedTaskSummary[]>>;
+  };
+  dashboard: {
+    getDefault: (
+      input?: GetDefaultDashboardInput
+    ) => Promise<ApiResult<DashboardViewModelSummary>>;
   };
   activity: {
     listRecent: (
@@ -1530,6 +1653,10 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.reorderPlannedTask, input),
       getPlannedTasks: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.getPlannedTasks, input)
+    },
+    dashboard: {
+      getDefault: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dashboard.getDefault, input)
     },
     activity: {
       listRecent: (input) =>
