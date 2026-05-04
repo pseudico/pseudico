@@ -49,7 +49,7 @@ export {
   dashboardModuleContract
 } from "./dashboard";
 export { exportModuleContract } from "./export";
-export { filesModuleContract } from "./files";
+export { FileAttachmentService, filesModuleContract } from "./files";
 export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
 export { linksModuleContract } from "./links";
@@ -118,7 +118,13 @@ export type {
   WidgetDataQueryInput
 } from "./dashboard";
 export type { ExportService } from "./export";
-export type { FileAttachmentService } from "./files";
+export type {
+  AttachFileToContainerInput,
+  AttachFileToItemInput,
+  CopiedAttachmentFileInput,
+  FileAttachmentMutationResult,
+  FileAttachmentServiceIdFactory
+} from "./files";
 export type {
   InboxServiceIdFactory,
   MoveInboxItemToProjectInput

@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(65);
+    expect(channels).toHaveLength(67);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -236,6 +236,50 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector,
         input: "item_1"
+      }
+    ]);
+  });
+
+  it("routes file attachment calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.files.attachFileToContainer({
+      workspaceId: "workspace_1",
+      containerId: "container_1",
+      sourcePath: "C:\\source\\Brief.pdf",
+      description: "Brief"
+    });
+    await api.files.attachFileToItem({
+      itemId: "item_1",
+      sourcePath: "C:\\source\\Sketch.png"
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.files.attachFileToContainer,
+        input: {
+          workspaceId: "workspace_1",
+          containerId: "container_1",
+          sourcePath: "C:\\source\\Brief.pdf",
+          description: "Brief"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.files.attachFileToItem,
+        input: {
+          itemId: "item_1",
+          sourcePath: "C:\\source\\Sketch.png"
+        }
       }
     ]);
   });

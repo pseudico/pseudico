@@ -181,6 +181,44 @@ export type ItemSummary = {
   tags?: ItemTagSummary[];
 };
 
+export type FileAttachmentSummary = {
+  id: string;
+  workspaceId: string;
+  itemId: string;
+  originalName: string;
+  storedName: string;
+  mimeType: string | null;
+  sizeBytes: number;
+  checksum: string | null;
+  storagePath: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
+export type FileAttachmentResultSummary = {
+  item: ItemSummary;
+  attachment: FileAttachmentSummary;
+};
+
+export type AttachFileToContainerInput = {
+  containerId: string;
+  sourcePath: string;
+  workspaceId?: string;
+  actorType?: "local_user" | "system" | "importer";
+  containerTabId?: string | null;
+  description?: string | null;
+  sortOrder?: number;
+};
+
+export type AttachFileToItemInput = {
+  itemId: string;
+  sourcePath: string;
+  actorType?: "local_user" | "system" | "importer";
+  description?: string | null;
+};
+
 export type ItemTagSummary = {
   id: string;
   name: string;
@@ -973,7 +1011,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     openItemInspector: "local-work-os:items:open-item-inspector"
   },
   files: {
-    getStatus: "local-work-os:files:get-status"
+    getStatus: "local-work-os:files:get-status",
+    attachFileToContainer: "local-work-os:files:attach-file-to-container",
+    attachFileToItem: "local-work-os:files:attach-file-to-item"
   }
 } as const;
 
@@ -1238,6 +1278,14 @@ export type LocalWorkOsIpcContracts = {
     input: undefined;
     result: ApiResult<IpcModuleStatus>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.attachFileToContainer]: {
+    input: AttachFileToContainerInput;
+    result: ApiResult<FileAttachmentResultSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.attachFileToItem]: {
+    input: AttachFileToItemInput;
+    result: ApiResult<FileAttachmentResultSummary>;
+  };
 };
 
 export type LocalWorkOsIpcChannel = keyof LocalWorkOsIpcContracts & string;
@@ -1469,6 +1517,12 @@ export type LocalWorkOsApi = {
   };
   files: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
+    attachFileToContainer: (
+      input: AttachFileToContainerInput
+    ) => Promise<ApiResult<FileAttachmentResultSummary>>;
+    attachFileToItem: (
+      input: AttachFileToItemInput
+    ) => Promise<ApiResult<FileAttachmentResultSummary>>;
   };
 };
 
@@ -1745,7 +1799,11 @@ export function createLocalWorkOsApi(
     },
     files: {
       getStatus: () =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.getStatus, undefined)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.getStatus, undefined),
+      attachFileToContainer: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.attachFileToContainer, input),
+      attachFileToItem: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.attachFileToItem, input)
     }
   };
 }

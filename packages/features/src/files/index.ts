@@ -1,2 +1,8 @@
-export { filesModuleContract } from "./FileAttachmentService";
-export type { FileAttachmentService } from "./FileAttachmentService";
+export { FileAttachmentService, filesModuleContract } from "./FileAttachmentService";
+export type {
+  AttachFileToContainerInput,
+  AttachFileToItemInput,
+  CopiedAttachmentFileInput,
+  FileAttachmentMutationResult,
+  FileAttachmentServiceIdFactory
+} from "./FileAttachmentService";

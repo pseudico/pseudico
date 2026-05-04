@@ -48,6 +48,14 @@ export type {
 export { NOTE_FORMATS, isNoteFormat } from "./entities/Note";
 export type { NoteFormat } from "./entities/Note";
 export {
+  ATTACHMENT_STORAGE_ROOT,
+  createAttachmentStorageRelativePath
+} from "./entities/Attachment";
+export type {
+  AttachmentRecord,
+  AttachmentStorageLayout
+} from "./entities/Attachment";
+export {
   TAGGING_SOURCES,
   TAGGING_TARGET_TYPES,
   isTaggingSource,

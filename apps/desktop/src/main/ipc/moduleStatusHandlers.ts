@@ -8,8 +8,10 @@ import {
 const placeholderMessages: Record<LocalWorkOsModuleName, string> = {
   containers: "Container IPC is typed but awaits repository/service tickets.",
   items: "Item IPC is typed but awaits repository/service tickets.",
-  files: "File IPC is typed but awaits workspace filesystem service tickets."
+  files: "File IPC supports safe local attachment imports."
 };
+
+const implementedModules = new Set<LocalWorkOsModuleName>(["files"]);
 
 export function handleGetModuleStatus(
   module: LocalWorkOsModuleName
@@ -17,7 +19,7 @@ export function handleGetModuleStatus(
   return apiOk({
     module,
     available: true,
-    implemented: false,
+    implemented: implementedModules.has(module),
     message: placeholderMessages[module]
   });
 }

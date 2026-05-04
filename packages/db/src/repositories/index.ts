@@ -1,4 +1,10 @@
 export {
+  AttachmentRepository,
+  type CreateAttachmentInput,
+  type ListAttachmentsForItemInput
+} from "./AttachmentRepository";
+export type { AttachmentRecord } from "@local-work-os/core";
+export {
   ActivityLogRepository,
   type ActivityLogRecord,
   type CreateActivityLogInput

@@ -55,5 +55,5 @@ export function registerDesktopIpc(
   registerDashboardIpc(services.workspaceService);
   registerContainerIpc();
   registerItemIpc(services.workspaceService);
-  registerFileIpc();
+  registerFileIpc(services.workspaceService);
 }
