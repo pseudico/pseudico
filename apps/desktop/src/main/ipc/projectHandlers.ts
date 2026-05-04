@@ -1,4 +1,10 @@
-import { ProjectService, type ProjectRecord } from "@local-work-os/features";
+import {
+  ProjectHealthService,
+  ProjectService,
+  type ActivityEventView,
+  type ProjectHealthSummary as FeatureProjectHealthSummary,
+  type ProjectRecord
+} from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -8,8 +14,10 @@ import {
   apiError,
   apiOk,
   type ApiResult,
+  type ActivitySummary,
   type CreateProjectInput,
   type CreateProjectResult,
+  type ProjectHealthSummary,
   type ProjectSummary,
   type UpdateProjectInput,
   type WorkspaceSummary
@@ -38,6 +46,9 @@ type ProjectIpcHandlers = {
   handleGetProject: (
     input: unknown
   ) => Promise<ApiResult<ProjectSummary | null>>;
+  handleGetProjectHealth: (
+    input: unknown
+  ) => Promise<ApiResult<ProjectHealthSummary>>;
 };
 
 export function createProjectIpcHandlers(
@@ -138,6 +149,23 @@ export function createProjectIpcHandlers(
 
         return apiOk(project === null ? null : toProjectSummary(project));
       });
+    },
+
+    async handleGetProjectHealth(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "getProjectHealth requires a projectId string."
+        );
+      }
+
+      return await withProjectService(workspaceService, async (context) =>
+        apiOk(toProjectHealthSummary(
+          new ProjectHealthService({
+            connection: context.connection
+          }).getProjectHealth(input)
+        ))
+      );
     }
   };
 }
@@ -208,6 +236,34 @@ function toProjectSummary(project: ProjectRecord): ProjectSummary {
     updatedAt: project.updatedAt,
     archivedAt: project.archivedAt,
     deletedAt: project.deletedAt
+  };
+}
+
+function toProjectHealthSummary(
+  summary: FeatureProjectHealthSummary
+): ProjectHealthSummary {
+  return {
+    ...summary,
+    recentActivity: summary.recentActivity.map(toActivitySummary)
+  };
+}
+
+function toActivitySummary(activity: ActivityEventView): ActivitySummary {
+  return {
+    id: activity.id,
+    workspaceId: activity.workspaceId,
+    actorType: activity.actorType,
+    action: activity.action,
+    targetType: activity.targetType,
+    targetId: activity.targetId,
+    summary: activity.summary,
+    beforeJson: activity.beforeJson,
+    afterJson: activity.afterJson,
+    createdAt: activity.createdAt,
+    actionLabel: activity.actionLabel,
+    actorLabel: activity.actorLabel,
+    targetLabel: activity.targetLabel,
+    description: activity.description
   };
 }
 

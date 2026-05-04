@@ -93,6 +93,7 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.projects.softDelete(projectId)),
       list: (workspaceId) => callApi(() => api.projects.list(workspaceId)),
       get: (projectId) => callApi(() => api.projects.get(projectId)),
+      getHealth: (projectId) => callApi(() => api.projects.getHealth(projectId)),
       createProject: (input) => callApi(() => api.projects.createProject(input)),
       updateProject: (input) => callApi(() => api.projects.updateProject(input)),
       archiveProject: (projectId) =>
@@ -101,7 +102,9 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.projects.softDeleteProject(projectId)),
       listProjects: (workspaceId) =>
         callApi(() => api.projects.listProjects(workspaceId)),
-      getProject: (projectId) => callApi(() => api.projects.getProject(projectId))
+      getProject: (projectId) => callApi(() => api.projects.getProject(projectId)),
+      getProjectHealth: (projectId) =>
+        callApi(() => api.projects.getProjectHealth(projectId))
     },
     categories: {
       create: (input) => callApi(() => api.categories.create(input)),
@@ -270,6 +273,8 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().projects.softDelete(projectId),
     list: (workspaceId) => getDesktopApiClient().projects.list(workspaceId),
     get: (projectId) => getDesktopApiClient().projects.get(projectId),
+    getHealth: (projectId) =>
+      getDesktopApiClient().projects.getHealth(projectId),
     createProject: (input) =>
       getDesktopApiClient().projects.createProject(input),
     updateProject: (input) =>
@@ -281,7 +286,9 @@ export const desktopApiClient: LocalWorkOsApi = {
     listProjects: (workspaceId) =>
       getDesktopApiClient().projects.listProjects(workspaceId),
     getProject: (projectId) =>
-      getDesktopApiClient().projects.getProject(projectId)
+      getDesktopApiClient().projects.getProject(projectId),
+    getProjectHealth: (projectId) =>
+      getDesktopApiClient().projects.getProjectHealth(projectId)
   },
   categories: {
     create: (input) => getDesktopApiClient().categories.create(input),

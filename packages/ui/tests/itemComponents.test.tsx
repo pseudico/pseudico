@@ -17,6 +17,8 @@ import {
   MoveToContainerDialog,
   NoteCardContent,
   NoteEditor,
+  ProjectHealthCard,
+  ProjectHealthWidget,
   RecentActivityList,
   RecentActivityWidget,
   TodayWidget,
@@ -376,6 +378,30 @@ describe("Universal item UI", () => {
         ]}
       />
     );
+    const projectHealthHtml = renderToStaticMarkup(
+      <ProjectHealthWidget
+        projects={[
+          {
+            projectId: "container_project_1",
+            name: "Launch Plan",
+            status: "active",
+            color: "#245c55",
+            openTaskCount: 3,
+            completedTaskCount: 2,
+            overdueTaskCount: 1,
+            totalTaskCount: 5,
+            nextDueTask: {
+              itemId: "item_1",
+              title: "Book launch venue",
+              dueAt: "2026-05-04T00:00:00.000Z",
+              taskStatus: "open",
+              priority: 2
+            },
+            recentActivity: []
+          }
+        ]}
+      />
+    );
 
     expect(emptyHtml).toContain("Nothing to show");
     expect(todayHtml).toContain("Call accountant");
@@ -384,6 +410,49 @@ describe("Universal item UI", () => {
     expect(projectsHtml).toContain("Launch Plan");
     expect(activityHtml).toContain("Container Created");
     expect(activityHtml).toContain("Created project.");
+    expect(projectHealthHtml).toContain("Project Health");
+    expect(projectHealthHtml).toContain("Launch Plan");
+    expect(projectHealthHtml).toContain("1 overdue");
+  });
+
+  it("renders project health cards with counts, next due, and recent activity", () => {
+    const html = renderToStaticMarkup(
+      <ProjectHealthCard
+        health={{
+          projectId: "container_project_1",
+          name: "Launch Plan",
+          status: "active",
+          color: "#245c55",
+          openTaskCount: 3,
+          completedTaskCount: 2,
+          overdueTaskCount: 1,
+          totalTaskCount: 5,
+          nextDueTask: {
+            itemId: "item_1",
+            title: "Book launch venue",
+            dueAt: "2026-05-04T00:00:00.000Z",
+            taskStatus: "open",
+            priority: 2
+          },
+          recentActivity: [
+            {
+              id: "activity_1",
+              action: "task_created",
+              actionLabel: "Task Created",
+              description: "Created task.",
+              createdAt: "2026-05-04T00:00:00.000Z"
+            }
+          ]
+        }}
+      />
+    );
+
+    expect(html).toContain("Project health");
+    expect(html).toContain("Open");
+    expect(html).toContain("Completed");
+    expect(html).toContain("Overdue");
+    expect(html).toContain("Book launch venue");
+    expect(html).toContain("Task Created");
   });
 
   it("renders a related items placeholder and populated relationships", () => {

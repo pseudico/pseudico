@@ -68,7 +68,7 @@ export {
   generateNotePreview,
   notesModuleContract
 } from "./notes";
-export { ProjectService, projectsModuleContract } from "./projects";
+export { ProjectHealthService, ProjectService, projectsModuleContract } from "./projects";
 export { RelationshipService, relationshipsModuleContract } from "./relationships";
 export {
   QueryEvaluator,
@@ -106,6 +106,7 @@ export type { ContactService } from "./contacts";
 export type {
   DashboardActivityWidgetItem,
   DashboardNavigationTarget,
+  DashboardProjectHealthWidgetItem,
   DashboardProjectWidgetItem,
   DashboardServiceIdFactory,
   DashboardTaskWidgetItem,
@@ -174,6 +175,9 @@ export type {
   CreateProjectInput,
   CreateProjectResult,
   ProjectMutableStatus,
+  ProjectHealthQueryInput,
+  ProjectHealthSummary,
+  ProjectHealthTaskSummary,
   ProjectRecord,
   ProjectServiceIdFactory,
   ProjectStatus,

@@ -32,5 +32,9 @@ export function registerProjectIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.projects.getProject,
     (_event, input) => handlers.handleGetProject(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.projects.getProjectHealth,
+    (_event, input) => handlers.handleGetProjectHealth(input)
+  );
 }
 

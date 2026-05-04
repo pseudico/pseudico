@@ -10,6 +10,7 @@ import {
   type ListSummary,
   type LocalWorkOsApi,
   type NoteSummary,
+  type ProjectHealthSummary,
   type RecentWorkspace,
   type TaskSummary,
   type TodayViewModelSummary,
@@ -39,6 +40,23 @@ const healthyDatabase: DatabaseHealthStatus = {
   databasePath: "C:\\Work\\Personal\\data\\local-work-os.sqlite",
   error: null
 };
+
+function projectHealthSummary(): ProjectHealthSummary {
+  return {
+    projectId: "container_1",
+    workspaceId: "workspace_1",
+    name: "Launch Plan",
+    status: "active",
+    color: null,
+    generatedAt: "2026-05-01T01:00:00.000Z",
+    openTaskCount: 0,
+    completedTaskCount: 0,
+    overdueTaskCount: 0,
+    totalTaskCount: 0,
+    nextDueTask: null,
+    recentActivity: []
+  };
+}
 
 function moduleStatus(module: IpcModuleStatus["module"]): IpcModuleStatus {
   return {
@@ -243,6 +261,7 @@ function createMockApi(
         }),
       list: async () => apiOk([]),
       get: async () => apiOk(null),
+      getHealth: async () => apiOk(projectHealthSummary()),
       createProject: async () =>
         apiOk({
           project: {
@@ -319,7 +338,8 @@ function createMockApi(
           deletedAt: "2026-05-01T01:00:00.000Z"
         }),
       listProjects: async () => apiOk([]),
-      getProject: async () => apiOk(null)
+      getProject: async () => apiOk(null),
+      getProjectHealth: async () => apiOk(projectHealthSummary())
     },
     categories: {
       create: async () => apiOk(categorySummary()),

@@ -153,6 +153,12 @@ export {
   type RecentActivityViewModel
 } from "./components/RecentActivityList";
 export {
+  ProjectHealthCard,
+  type ProjectHealthCardProps,
+  type ProjectHealthTaskViewModel,
+  type ProjectHealthViewModel
+} from "./components/ProjectHealthCard";
+export {
   RelatedItemsPanel,
   type RelatedItemDirection,
   type RelatedItemViewModel,
@@ -190,3 +196,7 @@ export {
   type DashboardActivityWidgetItem,
   type RecentActivityWidgetProps
 } from "./components/widgets/RecentActivityWidget";
+export {
+  ProjectHealthWidget,
+  type ProjectHealthWidgetProps
+} from "./components/widgets/ProjectHealthWidget";

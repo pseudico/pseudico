@@ -12,6 +12,7 @@ import {
   type ListSummary,
   type LocalWorkOsApi,
   type NoteSummary,
+  type ProjectHealthSummary,
   type ProjectSummary,
   type TaskSummary,
   type TodayViewModelSummary,
@@ -64,6 +65,25 @@ const project: ProjectSummary = {
   archivedAt: null,
   deletedAt: null
 };
+
+function projectHealthSummary(
+  sourceProject: ProjectSummary
+): ProjectHealthSummary {
+  return {
+    projectId: sourceProject.id,
+    workspaceId: sourceProject.workspaceId,
+    name: sourceProject.name,
+    status: sourceProject.status,
+    color: sourceProject.color,
+    generatedAt: "2026-05-01T01:00:00.000Z",
+    openTaskCount: 1,
+    completedTaskCount: 0,
+    overdueTaskCount: 0,
+    totalTaskCount: 1,
+    nextDueTask: null,
+    recentActivity: []
+  };
+}
 
 describe("Inbox renderer page", () => {
   afterEach(() => {
@@ -230,6 +250,7 @@ function createMockApi(): LocalWorkOsApi {
         }),
       list: async () => apiOk([project]),
       get: async () => apiOk(project),
+      getHealth: async () => apiOk(projectHealthSummary(project)),
       createProject: async () =>
         apiOk({ project, defaultTabId: "container_tab_1" }),
       updateProject: async () => apiOk(project),
@@ -245,7 +266,8 @@ function createMockApi(): LocalWorkOsApi {
           deletedAt: "2026-05-01T01:00:00.000Z"
         }),
       listProjects: async () => apiOk([project]),
-      getProject: async () => apiOk(project)
+      getProject: async () => apiOk(project),
+      getProjectHealth: async () => apiOk(projectHealthSummary(project))
     },
     categories: {
       create: async () => apiOk(categorySummary()),

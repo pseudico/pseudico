@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(64);
+    expect(channels).toHaveLength(65);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -136,6 +136,7 @@ describe("typed preload API", () => {
       name: "Launch Plan"
     });
     await api.projects.archiveProject("container_1");
+    await api.projects.getProjectHealth("container_1");
 
     expect(calls).toEqual([
       {
@@ -147,6 +148,10 @@ describe("typed preload API", () => {
       },
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.projects.archiveProject,
+        input: "container_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.projects.getProjectHealth,
         input: "container_1"
       }
     ]);

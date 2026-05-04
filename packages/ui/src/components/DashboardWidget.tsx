@@ -3,6 +3,7 @@ import {
   CalendarClock,
   CalendarDays,
   Clock3,
+  FolderKanban,
   Star,
   type LucideIcon
 } from "lucide-react";
@@ -12,7 +13,8 @@ export type DashboardWidgetKind =
   | "overdue"
   | "upcoming"
   | "favorites"
-  | "recent_activity";
+  | "recent_activity"
+  | "project_health";
 
 export type DashboardWidgetProps = {
   title: string;
@@ -31,7 +33,8 @@ const widgetIcons = {
   overdue: AlertTriangle,
   upcoming: CalendarClock,
   favorites: Star,
-  recent_activity: Clock3
+  recent_activity: Clock3,
+  project_health: FolderKanban
 } satisfies Record<DashboardWidgetKind, LucideIcon>;
 
 export function DashboardWidget({

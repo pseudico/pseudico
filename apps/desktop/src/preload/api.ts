@@ -120,6 +120,29 @@ export type ProjectSummary = {
   deletedAt: string | null;
 };
 
+export type ProjectHealthTaskSummary = {
+  itemId: string;
+  title: string;
+  dueAt: string | null;
+  taskStatus: string;
+  priority: number | null;
+};
+
+export type ProjectHealthSummary = {
+  projectId: string;
+  workspaceId: string;
+  name: string;
+  status: string;
+  color: string | null;
+  generatedAt: string;
+  openTaskCount: number;
+  completedTaskCount: number;
+  overdueTaskCount: number;
+  totalTaskCount: number;
+  nextDueTask: ProjectHealthTaskSummary | null;
+  recentActivity: ActivitySummary[];
+};
+
 export type InboxSummary = {
   id: string;
   workspaceId: string;
@@ -596,6 +619,11 @@ export type DashboardActivityWidgetItemSummary = {
   targetNavigationTarget: DashboardNavigationTargetSummary;
 };
 
+export type DashboardProjectHealthWidgetItemSummary = ProjectHealthSummary & {
+  kind: "project_health";
+  navigationTarget: DashboardNavigationTargetSummary;
+};
+
 export type DashboardWidgetDataSummary =
   | {
       widgetType: "today" | "overdue" | "upcoming";
@@ -608,6 +636,12 @@ export type DashboardWidgetDataSummary =
       generatedAt: string;
       page: DashboardWidgetPageSummary;
       items: DashboardProjectWidgetItemSummary[];
+    }
+  | {
+      widgetType: "project_health";
+      generatedAt: string;
+      page: DashboardWidgetPageSummary;
+      items: DashboardProjectHealthWidgetItemSummary[];
     }
   | {
       widgetType: "recent_activity";
@@ -883,7 +917,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     archiveProject: "local-work-os:projects:archive-project",
     softDeleteProject: "local-work-os:projects:soft-delete-project",
     listProjects: "local-work-os:projects:list-projects",
-    getProject: "local-work-os:projects:get-project"
+    getProject: "local-work-os:projects:get-project",
+    getProjectHealth: "local-work-os:projects:get-project-health"
   },
   categories: {
     createCategory: "local-work-os:categories:create-category",
@@ -1070,6 +1105,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.getProject]: {
     input: string;
     result: ApiResult<ProjectSummary | null>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.projects.getProjectHealth]: {
+    input: string;
+    result: ApiResult<ProjectHealthSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.categories.createCategory]: {
     input: CreateCategoryInput;
@@ -1297,6 +1336,7 @@ export type LocalWorkOsApi = {
       workspaceId?: string
     ) => Promise<ApiResult<ProjectSummary[]>>;
     get: (projectId: string) => Promise<ApiResult<ProjectSummary | null>>;
+    getHealth: (projectId: string) => Promise<ApiResult<ProjectHealthSummary>>;
     createProject: (
       input: CreateProjectInput
     ) => Promise<ApiResult<CreateProjectResult>>;
@@ -1309,6 +1349,9 @@ export type LocalWorkOsApi = {
       workspaceId?: string
     ) => Promise<ApiResult<ProjectSummary[]>>;
     getProject: (projectId: string) => Promise<ApiResult<ProjectSummary | null>>;
+    getProjectHealth: (
+      projectId: string
+    ) => Promise<ApiResult<ProjectHealthSummary>>;
   };
   categories: {
     create: (input: CreateCategoryInput) => Promise<ApiResult<CategorySummary>>;
@@ -1557,6 +1600,8 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.listProjects, workspaceId),
       get: (projectId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.getProject, projectId),
+      getHealth: (projectId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.getProjectHealth, projectId),
       createProject: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject, input),
       updateProject: (input) =>
@@ -1571,7 +1616,9 @@ export function createLocalWorkOsApi(
       listProjects: (workspaceId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.listProjects, workspaceId),
       getProject: (projectId) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.getProject, projectId)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.getProject, projectId),
+      getProjectHealth: (projectId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.getProjectHealth, projectId)
     },
     categories: {
       create: (input) =>

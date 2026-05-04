@@ -1626,6 +1626,111 @@ a {
   text-transform: capitalize;
 }
 
+.project-health-card {
+  display: grid;
+  max-width: 900px;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #dedbd1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(38, 38, 36, 0.06);
+}
+
+.project-health-card-header {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+
+.project-health-color {
+  width: 12px;
+  height: 44px;
+  border-radius: 999px;
+}
+
+.project-health-card-header h3,
+.project-health-detail-grid h4 {
+  margin: 0;
+  color: #262624;
+  letter-spacing: 0;
+}
+
+.project-health-card-header h3 {
+  font-size: 18px;
+}
+
+.project-health-card-header p {
+  margin: 4px 0 0;
+  color: #6d6a62;
+  font-size: 13px;
+  font-weight: 750;
+  text-transform: capitalize;
+}
+
+.project-health-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.project-health-metrics div {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #ece8dc;
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
+.project-health-metrics dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #6d6a62;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.project-health-metrics dd {
+  margin: 0;
+  color: #262624;
+  font-size: 24px;
+  font-weight: 850;
+}
+
+.project-health-metrics [data-health-tone="risk"] dd {
+  color: #9f2d20;
+}
+
+.project-health-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.project-health-detail-grid > div {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.project-health-detail-grid p {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  color: #514e49;
+}
+
+.project-health-detail-grid strong,
+.project-health-detail-grid span {
+  overflow-wrap: anywhere;
+}
+
 .content-feed-placeholder {
   display: grid;
   gap: 10px;
@@ -2462,6 +2567,16 @@ a {
   gap: 10px;
 }
 
+.project-widget-color {
+  width: 14px;
+  height: 36px;
+  border-radius: 999px;
+}
+
+.project-health-widget-row {
+  grid-template-columns: 14px minmax(0, 1fr);
+}
+
 @media (max-width: 860px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -2497,6 +2612,8 @@ a {
   .health-grid,
   .project-color-options,
   .project-meta-grid,
+    .project-health-metrics,
+    .project-health-detail-grid,
     .item-inspector-metadata,
     .quick-add-form,
     .task-quick-add,

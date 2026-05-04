@@ -20,7 +20,8 @@ export const DEFAULT_DASHBOARD_WIDGET_TYPES = [
   "overdue",
   "upcoming",
   "favorites",
-  "recent_activity"
+  "recent_activity",
+  "project_health"
 ] as const;
 
 export const DEFAULT_APP_SETTINGS = [
@@ -343,6 +344,8 @@ function dashboardWidgetTitle(
       return "Favorite Projects";
     case "recent_activity":
       return "Recent Activity";
+    case "project_health":
+      return "Project Health";
   }
 }
 

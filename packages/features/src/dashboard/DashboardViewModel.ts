@@ -4,7 +4,7 @@ import type {
   DashboardWidgetType
 } from "@local-work-os/db";
 import type { ActivityEventView } from "../activity";
-import type { ProjectRecord } from "../projects";
+import type { ProjectHealthSummary, ProjectRecord } from "../projects";
 import type { TodayTaskView } from "../today";
 
 export type DashboardNavigationTarget = {
@@ -40,6 +40,11 @@ export type DashboardProjectWidgetItem = {
   navigationTarget: DashboardNavigationTarget;
 };
 
+export type DashboardProjectHealthWidgetItem = ProjectHealthSummary & {
+  kind: "project_health";
+  navigationTarget: DashboardNavigationTarget;
+};
+
 export type DashboardActivityWidgetItem = {
   kind: "activity";
   activityId: string;
@@ -61,6 +66,12 @@ export type DashboardWidgetData =
       generatedAt: string;
       page: DashboardWidgetPage;
       items: DashboardProjectWidgetItem[];
+    }
+  | {
+      widgetType: "project_health";
+      generatedAt: string;
+      page: DashboardWidgetPage;
+      items: DashboardProjectHealthWidgetItem[];
     }
   | {
       widgetType: "recent_activity";
@@ -91,14 +102,20 @@ export function isDefaultDashboardWidgetType(
   value: string
 ): value is Extract<
   DashboardWidgetType,
-  "today" | "overdue" | "upcoming" | "favorites" | "recent_activity"
+  | "today"
+  | "overdue"
+  | "upcoming"
+  | "favorites"
+  | "recent_activity"
+  | "project_health"
 > {
   return [
     "today",
     "overdue",
     "upcoming",
     "favorites",
-    "recent_activity"
+    "recent_activity",
+    "project_health"
   ].includes(value);
 }
 
@@ -134,6 +151,20 @@ export function toProjectWidgetItem(
       targetType: "container",
       targetId: project.id,
       workspaceId: project.workspaceId
+    }
+  };
+}
+
+export function toProjectHealthWidgetItem(
+  summary: ProjectHealthSummary
+): DashboardProjectHealthWidgetItem {
+  return {
+    kind: "project_health",
+    ...summary,
+    navigationTarget: {
+      targetType: "container",
+      targetId: summary.projectId,
+      workspaceId: summary.workspaceId
     }
   };
 }

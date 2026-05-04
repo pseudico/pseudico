@@ -7,6 +7,7 @@ export type {
 export type {
   DashboardActivityWidgetItem,
   DashboardNavigationTarget,
+  DashboardProjectHealthWidgetItem,
   DashboardProjectWidgetItem,
   DashboardTaskWidgetItem,
   DashboardViewModel,

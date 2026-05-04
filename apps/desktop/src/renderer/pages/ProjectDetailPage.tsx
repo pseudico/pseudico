@@ -12,6 +12,7 @@ import {
   MoveItemDialog,
   NoteCardContent,
   NoteEditor,
+  ProjectHealthCard,
   RecentActivityList,
   TaskCardContent,
   TaskQuickAdd,
@@ -24,6 +25,7 @@ import {
   type MoveTargetContainer,
   type NoteCardViewModel,
   type NoteEditorValues,
+  type ProjectHealthViewModel,
   type RecentActivityViewModel,
   type TaskCardViewModel,
   type TaskQuickAddValues,
@@ -38,6 +40,7 @@ import type {
   LocalWorkOsApi,
   NoteSummary,
   ProjectSummary,
+  ProjectHealthSummary,
   TaskSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
@@ -75,6 +78,7 @@ type ProjectDetailPageProps = {
   initialCategories?: CategorySummary[];
   initialItems?: UniversalItemViewModel[];
   initialActivity?: RecentActivityViewModel[];
+  initialProjectHealth?: ProjectHealthViewModel | null;
 };
 
 const emptyProjectItems: UniversalItemViewModel[] = [];
@@ -84,7 +88,8 @@ export function ProjectDetailPage({
   initialProject,
   initialCategories = [],
   initialItems = emptyProjectItems,
-  initialActivity = []
+  initialActivity = [],
+  initialProjectHealth = null
 }: ProjectDetailPageProps): React.JSX.Element {
   const { projectId } = useParams();
   const [project, setProject] = useState<ProjectSummary | null>(
@@ -95,6 +100,8 @@ export function ProjectDetailPage({
     useState<CategorySummary[]>(initialCategories);
   const [projectActivity, setProjectActivity] =
     useState<RecentActivityViewModel[]>(initialActivity);
+  const [projectHealth, setProjectHealth] =
+    useState<ProjectHealthViewModel | null>(initialProjectHealth);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(initialProject === undefined);
   const [itemsLoading, setItemsLoading] = useState(false);
@@ -144,6 +151,7 @@ export function ProjectDetailPage({
         projectsResult,
         categoriesResult,
         activityResult,
+        healthResult,
         tasksResult,
         listsResult,
         notesResult
@@ -155,6 +163,7 @@ export function ProjectDetailPage({
           targetType: "container",
           targetId: activeProjectId
         }),
+        apiClient.projects.getHealth(activeProjectId),
         apiClient.tasks.listByContainer(activeProjectId),
         apiClient.lists.listByContainer(activeProjectId),
         apiClient.notes.listByContainer(activeProjectId)
@@ -192,6 +201,11 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!healthResult.ok) {
+        setItemError(healthResult.error.message);
+        return;
+      }
+
       if (!listsResult.ok) {
         setItemError(listsResult.error.message);
         return;
@@ -206,6 +220,7 @@ export function ProjectDetailPage({
       setProjects(projectsResult.data);
       setCategories(categoriesResult.data);
       setProjectActivity(activityResult.data.map(toRecentActivityViewModel));
+      setProjectHealth(toProjectHealthViewModel(healthResult.data));
       setItems(
         mergeProjectContent(
           tasksResult.data,
@@ -276,6 +291,19 @@ export function ProjectDetailPage({
     setProjectActivity(result.data.map(toRecentActivityViewModel));
   }
 
+  async function refreshProjectHealth(activeProjectId: string): Promise<void> {
+    setItemError(null);
+
+    const result = await apiClient.projects.getHealth(activeProjectId);
+
+    if (!result.ok) {
+      setItemError(result.error.message);
+      return;
+    }
+
+    setProjectHealth(toProjectHealthViewModel(result.data));
+  }
+
   async function createProjectTask(
     values: TaskQuickAddValues
   ): Promise<boolean> {
@@ -300,6 +328,7 @@ export function ProjectDetailPage({
     }
 
     await refreshProjectContent(project.id);
+    await refreshProjectHealth(project.id);
     setSavingTask(false);
     return true;
   }
@@ -412,6 +441,7 @@ export function ProjectDetailPage({
     }
 
     await refreshProjectContent(project.id);
+    await refreshProjectHealth(project.id);
     setTaskBusyId(null);
   }
 
@@ -438,6 +468,7 @@ export function ProjectDetailPage({
     }
 
     await refreshProjectContent(project.id);
+    await refreshProjectHealth(project.id);
     setTaskBusyId(null);
   }
 
@@ -803,6 +834,10 @@ export function ProjectDetailPage({
         emptyMessage="No project activity recorded yet."
       />
 
+      {projectHealth === null ? null : (
+        <ProjectHealthCard health={projectHealth} />
+      )}
+
       <div className="category-inline-picker">
         <CategoryPicker
           categories={categories}
@@ -1118,6 +1153,23 @@ function toRecentActivityViewModel(
     summary: activity.summary,
     description: activity.description,
     createdAt: activity.createdAt
+  };
+}
+
+function toProjectHealthViewModel(
+  health: ProjectHealthSummary
+): ProjectHealthViewModel {
+  return {
+    projectId: health.projectId,
+    name: health.name,
+    status: health.status,
+    color: health.color,
+    openTaskCount: health.openTaskCount,
+    completedTaskCount: health.completedTaskCount,
+    overdueTaskCount: health.overdueTaskCount,
+    totalTaskCount: health.totalTaskCount,
+    nextDueTask: health.nextDueTask,
+    recentActivity: health.recentActivity.map(toRecentActivityViewModel)
   };
 }
 
