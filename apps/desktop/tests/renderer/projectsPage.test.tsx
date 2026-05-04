@@ -8,6 +8,7 @@ import {
   type CollectionEvaluationSummary,
   type CollectionSummary,
   type DatabaseHealthStatus,
+  type DashboardViewModelSummary,
   type InboxSummary,
   type IpcModuleStatus,
   type ItemSummary,
@@ -351,6 +352,9 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
       reorderPlannedTask: async () => apiOk(dailyPlanItemSummary()),
       getPlannedTasks: async () => apiOk([])
     },
+    dashboard: {
+      getDefault: async () => apiOk(dashboardViewModelSummary())
+    },
     activity: {
       listRecent: async () => apiOk([activitySummary()]),
       listForTarget: async () => apiOk([activitySummary()]),
@@ -568,6 +572,22 @@ function dailyPlanItemSummary() {
     addedManually: true,
     createdAt: "2026-05-01T00:00:00.000Z",
     updatedAt: "2026-05-01T00:00:00.000Z"
+  };
+}
+
+function dashboardViewModelSummary(): DashboardViewModelSummary {
+  return {
+    dashboard: {
+      id: "dashboard_1",
+      workspaceId: "workspace_1",
+      name: "Dashboard",
+      isDefault: true,
+      layoutJson: "{}",
+      createdAt: "2026-05-01T00:00:00.000Z",
+      updatedAt: "2026-05-01T00:00:00.000Z",
+      deletedAt: null
+    },
+    widgets: []
   };
 }
 

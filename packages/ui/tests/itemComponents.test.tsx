@@ -5,6 +5,8 @@ import {
   CategoryBadge,
   CategoryPicker,
   ConfirmDialog,
+  DashboardWidget,
+  FavoriteProjectsWidget,
   ItemActionsMenu,
   ItemFeed,
   ItemInspectorPanel,
@@ -16,6 +18,8 @@ import {
   NoteCardContent,
   NoteEditor,
   RecentActivityList,
+  RecentActivityWidget,
+  TodayWidget,
   TodayLane,
   TodayTaskCard,
   UniversalItemCard,
@@ -326,6 +330,60 @@ describe("Universal item UI", () => {
     expect(laneHtml).toContain("Today");
     expect(laneHtml).toContain("Tasks due today.");
     expect(laneHtml).toContain("Call accountant");
+  });
+
+  it("renders dashboard widget states and rows", () => {
+    const emptyHtml = renderToStaticMarkup(
+      <DashboardWidget kind="today" title="Today" />
+    );
+    const todayHtml = renderToStaticMarkup(
+      <TodayWidget
+        tasks={[
+          {
+            itemId: "item_1",
+            title: "Call accountant",
+            containerId: "container_project_1",
+            dueAt: "2026-05-04T00:00:00.000Z",
+            taskStatus: "open",
+            priority: 2
+          }
+        ]}
+      />
+    );
+    const projectsHtml = renderToStaticMarkup(
+      <FavoriteProjectsWidget
+        projects={[
+          {
+            projectId: "container_project_1",
+            name: "Launch Plan",
+            status: "active",
+            color: "#245c55"
+          }
+        ]}
+      />
+    );
+    const activityHtml = renderToStaticMarkup(
+      <RecentActivityWidget
+        activity={[
+          {
+            activityId: "activity_1",
+            action: "container_created",
+            description: "Created project.",
+            createdAt: "2026-05-04T00:00:00.000Z",
+            targetType: "container",
+            targetId: "container_project_1"
+          }
+        ]}
+      />
+    );
+
+    expect(emptyHtml).toContain("Nothing to show");
+    expect(todayHtml).toContain("Call accountant");
+    expect(todayHtml).toContain("P2");
+    expect(projectsHtml).toContain("Favorite Projects");
+    expect(projectsHtml).toContain("Launch Plan");
+    expect(activityHtml).toContain("Container Created");
+    expect(activityHtml).toContain("Created project.");
   });
 
   it("renders a related items placeholder and populated relationships", () => {

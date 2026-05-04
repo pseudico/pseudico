@@ -2323,6 +2323,145 @@ a {
   gap: 8px;
 }
 
+.dashboard-page {
+  display: grid;
+  gap: 22px;
+}
+
+.dashboard-widget-grid {
+  display: grid;
+  max-width: 1180px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.dashboard-widget {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #dedbd1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(38, 38, 36, 0.06);
+}
+
+.dashboard-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.dashboard-widget-header > div {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashboard-widget-header h3 {
+  margin: 0;
+  color: #262624;
+  font-size: 18px;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-widget-header > span {
+  display: inline-flex;
+  min-width: 28px;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d5d0c3;
+  border-radius: 999px;
+  background: #fbfaf7;
+  color: #514e49;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.dashboard-widget > p {
+  margin: 0;
+  color: #514e49;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.dashboard-widget-empty {
+  display: grid;
+  gap: 4px;
+  min-height: 92px;
+  align-content: center;
+  padding: 12px;
+  border: 1px dashed #d5d0c3;
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
+.dashboard-widget-empty span {
+  color: #6d6a62;
+  line-height: 1.45;
+}
+
+.dashboard-widget-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboard-widget-row {
+  display: grid;
+  width: 100%;
+  min-height: 62px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #ece8dc;
+  border-radius: 8px;
+  background: #fbfaf7;
+  color: #262624;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dashboard-widget-row:hover {
+  border-color: #245c55;
+}
+
+.dashboard-widget-row-main {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.dashboard-widget-row-main strong,
+.dashboard-widget-row-main span {
+  overflow-wrap: anywhere;
+}
+
+.dashboard-widget-row-main > span,
+.dashboard-widget-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: #6d6a62;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.project-widget-main {
+  grid-template-columns: 14px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
 @media (max-width: 860px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -2369,6 +2508,7 @@ a {
     .collection-task-form,
     .search-layout,
     .search-page-form,
+    .dashboard-widget-grid,
     .today-lane-grid,
     .today-task-card-actions,
     .checklist-inline-add,

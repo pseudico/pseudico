@@ -7,6 +7,7 @@ import {
   type CollectionEvaluationSummary,
   type CollectionSummary,
   type DatabaseHealthStatus,
+  type DashboardViewModelSummary,
   type InboxSummary,
   type IpcModuleStatus,
   type ItemSummary,
@@ -277,6 +278,9 @@ function createMockApi(
           sortOrder: 512
         }),
       getPlannedTasks: async () => apiOk([plannedTaskSummary()])
+    },
+    dashboard: {
+      getDefault: async () => apiOk(dashboardViewModelSummary())
     },
     activity: {
       listRecent: async () => apiOk([activitySummary()]),
@@ -682,6 +686,22 @@ function plannedTaskSummary(): PlannedTaskSummary {
   };
 }
 
+function dashboardViewModelSummary(): DashboardViewModelSummary {
+  return {
+    dashboard: {
+      id: "dashboard_1",
+      workspaceId: "workspace_1",
+      name: "Dashboard",
+      isDefault: true,
+      layoutJson: "{}",
+      createdAt: "2026-04-30T00:00:00.000Z",
+      updatedAt: "2026-04-30T00:00:00.000Z",
+      deletedAt: null
+    },
+    widgets: []
+  };
+}
+
 describe("desktop API client", () => {
   it("passes typed preload results through to renderer callers", async () => {
     const client = createDesktopApiClient(createMockApi());
@@ -902,6 +922,14 @@ describe("desktop API client", () => {
           planItemId: "daily_plan_item_1"
         }
       ]
+    });
+    await expect(client.dashboard.getDefault()).resolves.toMatchObject({
+      ok: true,
+      data: {
+        dashboard: {
+          id: "dashboard_1"
+        }
+      }
     });
     await expect(client.activity.listRecent()).resolves.toMatchObject({
       ok: true,

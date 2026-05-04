@@ -158,3 +158,35 @@ export {
   type RelatedItemViewModel,
   type RelatedItemsPanelProps
 } from "./components/RelatedItemsPanel";
+export {
+  DashboardWidget,
+  type DashboardWidgetKind,
+  type DashboardWidgetProps
+} from "./components/DashboardWidget";
+export {
+  TaskDashboardWidget,
+  type DashboardTaskWidgetItem,
+  type TaskDashboardWidgetProps
+} from "./components/widgets/TaskDashboardWidget";
+export {
+  TodayWidget,
+  type TodayWidgetProps
+} from "./components/widgets/TodayWidget";
+export {
+  OverdueWidget,
+  type OverdueWidgetProps
+} from "./components/widgets/OverdueWidget";
+export {
+  UpcomingWidget,
+  type UpcomingWidgetProps
+} from "./components/widgets/UpcomingWidget";
+export {
+  FavoriteProjectsWidget,
+  type DashboardProjectWidgetItem,
+  type FavoriteProjectsWidgetProps
+} from "./components/widgets/FavoriteProjectsWidget";
+export {
+  RecentActivityWidget,
+  type DashboardActivityWidgetItem,
+  type RecentActivityWidgetProps
+} from "./components/widgets/RecentActivityWidget";
