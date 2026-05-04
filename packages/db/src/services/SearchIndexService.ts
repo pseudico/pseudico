@@ -8,6 +8,8 @@ import {
   CategoryRepository,
   ItemRepository,
   type ItemRecord,
+  LinkRepository,
+  type LinkRecord,
   ListRepository,
   type ListItemRecord,
   NoteRepository,
@@ -240,6 +242,52 @@ export class SearchIndexService {
         deletedAt: item.deletedAt,
         format: note.format,
         preview: note.preview,
+        ...tagProjection.metadata,
+        ...input.metadata
+      }),
+      isDeleted: item.deletedAt !== null,
+      timestamp: input.timestamp ?? createIsoTimestamp(this.now())
+    });
+  }
+
+  upsertLink(
+    item: ItemRecord,
+    link: LinkRecord,
+    input: SearchProjectionInput = {}
+  ): SearchIndexRecord {
+    const tagProjection = this.buildTagProjection({
+      workspaceId: item.workspaceId,
+      targetType: "item",
+      targetId: item.id,
+      tags: input.tags
+    });
+
+    return this.repository.upsert({
+      id: input.id ?? this.idFactory("search"),
+      workspaceId: item.workspaceId,
+      targetType: "item",
+      targetId: item.id,
+      title: item.title,
+      body: buildLinkSearchBody(link),
+      tags: tagProjection.tags,
+      category: input.category ?? this.findCategoryName(item.categoryId, item.workspaceId),
+      metadataJson: stringifyMetadata({
+        type: item.type,
+        containerId: item.containerId,
+        containerTabId: item.containerTabId,
+        status: item.status,
+        categoryId: item.categoryId,
+        pinned: item.pinned,
+        completedAt: item.completedAt,
+        archivedAt: item.archivedAt,
+        deletedAt: item.deletedAt,
+        url: link.url,
+        normalizedUrl: link.normalizedUrl,
+        linkTitle: link.title,
+        linkDescription: link.description,
+        domain: link.domain,
+        faviconPath: link.faviconPath,
+        previewImagePath: link.previewImagePath,
         ...tagProjection.metadata,
         ...input.metadata
       }),
@@ -497,6 +545,10 @@ export class SearchIndexService {
       includeArchived: true,
       includeDeleted: true
     });
+    const links = new LinkRepository(this.connection).listByWorkspace(workspaceId, {
+      includeArchived: true,
+      includeDeleted: true
+    });
     const attachments = new AttachmentRepository(this.connection).listByWorkspace({
       workspaceId,
       includeDeleted: true
@@ -517,6 +569,10 @@ export class SearchIndexService {
 
     for (const note of notes) {
       this.upsertNote(note.item, note.note);
+    }
+
+    for (const link of links) {
+      this.upsertLink(link.item, link.link);
     }
 
     for (const attachment of attachments) {
@@ -629,6 +685,19 @@ function buildAttachmentSearchBody(attachment: AttachmentRecord): string {
     attachment.storagePath,
     attachment.mimeType ?? "",
     attachment.checksum ?? ""
+  ]
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
+function buildLinkSearchBody(link: LinkRecord): string {
+  return [
+    link.description ?? "",
+    link.title ?? "",
+    link.url,
+    link.normalizedUrl,
+    link.domain ?? ""
   ]
     .map((value) => value.trim())
     .filter(Boolean)

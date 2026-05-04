@@ -25,6 +25,11 @@ export {
   type NoteEditorValues
 } from "./forms/NoteEditor";
 export {
+  LinkEditor,
+  type LinkEditorProps,
+  type LinkEditorValues
+} from "./forms/LinkEditor";
+export {
   FileMetadataEditor,
   type FileMetadataEditorProps,
   type FileMetadataEditorValues
@@ -138,6 +143,11 @@ export {
   type FileCardContentProps,
   type FileCardViewModel
 } from "./components/FileCardContent";
+export {
+  LinkCardContent,
+  type LinkCardContentProps,
+  type LinkCardViewModel
+} from "./components/LinkCardContent";
 export {
   MoveToContainerDialog,
   type MoveTargetContainer,

@@ -18,6 +18,7 @@ import { createDashboardIpcHandlers } from "../../src/main/ipc/dashboardHandlers
 import { createFileIpcHandlers } from "../../src/main/ipc/fileHandlers";
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
 import { createItemIpcHandlers } from "../../src/main/ipc/itemHandlers";
+import { createLinkIpcHandlers } from "../../src/main/ipc/linkHandlers";
 import { createListIpcHandlers } from "../../src/main/ipc/listHandlers";
 import { createMetadataIpcHandlers } from "../../src/main/ipc/metadataHandlers";
 import { handleGetModuleStatus } from "../../src/main/ipc/moduleStatusHandlers";
@@ -1472,6 +1473,145 @@ describe("Note IPC handlers", () => {
         }
       ]
     });
+  });
+});
+
+describe("Link IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("returns an error when no workspace is open", async () => {
+    const handlers = createLinkIpcHandlers({
+      getCurrentWorkspace: () => null
+    });
+
+    await expect(
+      handlers.handleListLinksByContainer("container_1")
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "No workspace is open."
+      }
+    });
+  });
+
+  it("creates, updates, lists, and opens link metadata", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-links-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-01T00:00:00.000Z",
+        schemaVersion: 1
+      })
+    };
+    const projectHandlers = createProjectIpcHandlers(workspaceService);
+    const projectResult = await projectHandlers.handleCreateProject({
+      name: "Launch Plan"
+    });
+
+    if (!projectResult.ok) {
+      throw new Error(projectResult.error.message);
+    }
+
+    const openedUrls: string[] = [];
+    const handlers = createLinkIpcHandlers(workspaceService, {
+      openExternal: async (url) => {
+        openedUrls.push(url);
+      }
+    });
+    const created = await handlers.handleCreateLink({
+      containerId: projectResult.data.project.id,
+      url: "example.com/brief",
+      title: "Launch brief",
+      description: "Supplier reference"
+    });
+
+    if (!created.ok) {
+      throw new Error(created.error.message);
+    }
+
+    expect(created).toMatchObject({
+      ok: true,
+      data: {
+        type: "link",
+        title: "Launch brief",
+        normalizedUrl: "https://example.com/brief",
+        domain: "example.com",
+        description: "Supplier reference"
+      }
+    });
+    await expect(
+      handlers.handleUpdateLink({
+        itemId: created.data.id,
+        url: "docs.example.com/final",
+        title: "Final brief"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: created.data.id,
+        title: "Final brief",
+        normalizedUrl: "https://docs.example.com/final"
+      }
+    });
+    await expect(
+      handlers.handleListLinksByContainer(projectResult.data.project.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: created.data.id,
+          title: "Final brief",
+          domain: "docs.example.com"
+        }
+      ]
+    });
+    await expect(
+      handlers.handleOpenLinkExternally(created.data.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        itemId: created.data.id,
+        normalizedUrl: "https://docs.example.com/final"
+      }
+    });
+    expect(openedUrls).toEqual(["https://docs.example.com/final"]);
+
+    const connection = await createDatabaseConnection({
+      databasePath,
+      fileMustExist: true
+    });
+    connection.sqlite
+      .prepare("update links set normalized_url = ? where item_id = ?")
+      .run("file:///C:/secret.txt", created.data.id);
+    connection.close();
+
+    await expect(
+      handlers.handleOpenLinkExternally(created.data.id)
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "url must use HTTP or HTTPS."
+      }
+    });
+    expect(openedUrls).toEqual(["https://docs.example.com/final"]);
   });
 });
 

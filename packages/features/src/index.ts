@@ -52,7 +52,7 @@ export { exportModuleContract } from "./export";
 export { FileAttachmentService, filesModuleContract } from "./files";
 export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
-export { linksModuleContract } from "./links";
+export { LinkService, linksModuleContract } from "./links";
 export { ListService, listsModuleContract, parseBulkListItems } from "./lists";
 export {
   CategoryService,
@@ -138,7 +138,12 @@ export type {
   MoveItemInput,
   UpdateItemInput
 } from "./items";
-export type { LinkService } from "./links";
+export type {
+  CreateLinkInput,
+  LinkMutationResult,
+  LinkServiceIdFactory,
+  UpdateLinkInput
+} from "./links";
 export type {
   AddListItemInput,
   BulkCreateListItemsInput,

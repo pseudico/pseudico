@@ -55,6 +55,8 @@ export type {
   AttachmentRecord,
   AttachmentStorageLayout
 } from "./entities/Attachment";
+export { isSupportedLinkProtocol } from "./entities/Link";
+export type { LinkProtocol, LinkRecord } from "./entities/Link";
 export {
   TAGGING_SOURCES,
   TAGGING_TARGET_TYPES,

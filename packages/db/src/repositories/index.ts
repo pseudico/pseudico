@@ -88,6 +88,14 @@ export {
   type UpdateNoteDetailsPatch
 } from "./NoteRepository";
 export {
+  LinkRepository,
+  type CreateLinkDetailsInput,
+  type LinkWithItemRecord,
+  type ListLinksFilter,
+  type UpdateLinkDetailsPatch
+} from "./LinkRepository";
+export type { LinkRecord } from "@local-work-os/core";
+export {
   SearchIndexRepository,
   type ListSearchIndexRecordsOptions,
   type RemoveWorkspaceSearchTargetsInput,

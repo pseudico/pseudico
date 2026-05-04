@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   FolderKanban,
+  Link2,
   Paperclip,
   RefreshCw,
   StickyNote,
@@ -16,6 +17,8 @@ import {
   FileCardContent,
   ItemInspectorPanel,
   ItemFeed,
+  LinkCardContent,
+  LinkEditor,
   ListCardContent,
   MoveItemDialog,
   NoteCardContent,
@@ -30,6 +33,8 @@ import {
   type ItemActionId,
   type ItemInspectorActivity,
   type ItemInspectorItem,
+  type LinkCardViewModel,
+  type LinkEditorValues,
   type ListCardItemViewModel,
   type ListCardViewModel,
   type MoveTargetContainer,
@@ -46,6 +51,7 @@ import type {
   CategorySummary,
   FileItemSummary,
   ItemSummary,
+  LinkSummary,
   ListItemSummary,
   ListSummary,
   LocalWorkOsApi,
@@ -72,10 +78,14 @@ type ProjectNoteViewModel = NoteCardViewModel & {
   categoryId?: string | null;
   format: NoteSummary["format"];
 };
+type ProjectLinkViewModel = LinkCardViewModel & {
+  categoryId?: string | null;
+};
 type ProjectFeedViewModel =
   | ProjectTaskViewModel
   | ProjectListViewModel
   | ProjectNoteViewModel
+  | ProjectLinkViewModel
   | FileCardViewModel
   | UniversalItemViewModel;
 
@@ -121,13 +131,16 @@ export function ProjectDetailPage({
   const [savingTask, setSavingTask] = useState(false);
   const [savingList, setSavingList] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
+  const [savingLink, setSavingLink] = useState(false);
   const [savingFile, setSavingFile] = useState(false);
   const [taskBusyId, setTaskBusyId] = useState<string | null>(null);
   const [listBusyId, setListBusyId] = useState<string | null>(null);
   const [noteBusyId, setNoteBusyId] = useState<string | null>(null);
+  const [linkBusyId, setLinkBusyId] = useState<string | null>(null);
   const [fileBusyId, setFileBusyId] = useState<string | null>(null);
   const [noteErrorItemId, setNoteErrorItemId] = useState<string | null>(null);
   const [noteEditorOpen, setNoteEditorOpen] = useState(false);
+  const [linkEditorOpen, setLinkEditorOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [itemError, setItemError] = useState<string | null>(null);
   const [moveError, setMoveError] = useState<string | null>(null);
@@ -135,6 +148,7 @@ export function ProjectDetailPage({
   const [taskError, setTaskError] = useState<string | null>(null);
   const [listError, setListError] = useState<string | null>(null);
   const [noteError, setNoteError] = useState<string | null>(null);
+  const [linkError, setLinkError] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [movingItem, setMovingItem] = useState<ProjectFeedViewModel | null>(null);
   const [confirmAction, setConfirmAction] =
@@ -170,6 +184,7 @@ export function ProjectDetailPage({
         tasksResult,
         listsResult,
         notesResult,
+        linksResult,
         filesResult
       ] = await Promise.all([
         apiClient.projects.get(activeProjectId),
@@ -183,6 +198,7 @@ export function ProjectDetailPage({
         apiClient.tasks.listByContainer(activeProjectId),
         apiClient.lists.listByContainer(activeProjectId),
         apiClient.notes.listByContainer(activeProjectId),
+        apiClient.links.listByContainer(activeProjectId),
         apiClient.files.listByContainer(activeProjectId)
       ]);
 
@@ -233,6 +249,11 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!linksResult.ok) {
+        setItemError(linksResult.error.message);
+        return;
+      }
+
       if (!filesResult.ok) {
         setItemError(filesResult.error.message);
         return;
@@ -248,6 +269,7 @@ export function ProjectDetailPage({
           tasksResult.data,
           listsResult.data,
           notesResult.data,
+          linksResult.data,
           filesResult.data,
           categoriesResult.data
         )
@@ -265,10 +287,11 @@ export function ProjectDetailPage({
     setItemsLoading(true);
     setItemError(null);
 
-    const [tasksResult, listsResult, notesResult, filesResult] = await Promise.all([
+    const [tasksResult, listsResult, notesResult, linksResult, filesResult] = await Promise.all([
       apiClient.tasks.listByContainer(activeProjectId),
       apiClient.lists.listByContainer(activeProjectId),
       apiClient.notes.listByContainer(activeProjectId),
+      apiClient.links.listByContainer(activeProjectId),
       apiClient.files.listByContainer(activeProjectId)
     ]);
 
@@ -289,6 +312,11 @@ export function ProjectDetailPage({
       return;
     }
 
+    if (!linksResult.ok) {
+      setItemError(linksResult.error.message);
+      return;
+    }
+
     if (!filesResult.ok) {
       setItemError(filesResult.error.message);
       return;
@@ -299,6 +327,7 @@ export function ProjectDetailPage({
         tasksResult.data,
         listsResult.data,
         notesResult.data,
+        linksResult.data,
         filesResult.data,
         categories
       )
@@ -420,6 +449,37 @@ export function ProjectDetailPage({
     return true;
   }
 
+  async function createProjectLink(
+    values: LinkEditorValues
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setSavingLink(true);
+    setLinkError(null);
+
+    const result = await apiClient.links.create({
+      workspaceId: project.workspaceId,
+      containerId: project.id,
+      url: values.url,
+      title: values.title.length === 0 ? null : values.title,
+      description: values.description.length === 0 ? null : values.description
+    });
+
+    if (!result.ok) {
+      setSavingLink(false);
+      setLinkError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    setSavingLink(false);
+    setLinkEditorOpen(false);
+    return true;
+  }
+
   async function attachProjectFile(): Promise<void> {
     if (project === null) {
       return;
@@ -510,6 +570,49 @@ export function ProjectDetailPage({
     await refreshProjectContent(project.id);
     await refreshProjectActivity(project.id);
     setFileBusyId(null);
+    return true;
+  }
+
+  async function openProjectLink(item: LinkCardViewModel): Promise<void> {
+    setLinkBusyId(item.id);
+    setLinkError(null);
+
+    const result = await apiClient.links.openExternal(item.id);
+
+    setLinkBusyId(null);
+
+    if (!result.ok) {
+      setLinkError(result.error.message);
+    }
+  }
+
+  async function updateProjectLink(
+    item: LinkCardViewModel,
+    values: LinkEditorValues
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setLinkBusyId(item.id);
+    setLinkError(null);
+
+    const result = await apiClient.links.update({
+      itemId: item.id,
+      url: values.url,
+      title: values.title.length === 0 ? null : values.title,
+      description: values.description.length === 0 ? null : values.description
+    });
+
+    if (!result.ok) {
+      setLinkBusyId(null);
+      setLinkError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    setLinkBusyId(null);
     return true;
   }
 
@@ -878,6 +981,21 @@ export function ProjectDetailPage({
       );
     }
 
+    if (isLinkCardViewModel(item)) {
+      return (
+        <>
+          {categoryPicker}
+          <LinkCardContent
+            disabled={linkBusyId === item.id}
+            error={linkBusyId === item.id ? linkError : null}
+            item={item}
+            onOpen={openProjectLink}
+            onSave={updateProjectLink}
+          />
+        </>
+      );
+    }
+
     return (
       <>
         {categoryPicker}
@@ -1047,6 +1165,33 @@ export function ProjectDetailPage({
           </button>
         )}
 
+        {linkEditorOpen ? (
+          <LinkEditor
+            disabled={savingLink || itemsLoading}
+            error={linkError}
+            resetOnSubmit
+            submitLabel="Add link"
+            onCancel={() => {
+              setLinkEditorOpen(false);
+              setLinkError(null);
+            }}
+            onSubmit={createProjectLink}
+          />
+        ) : (
+          <button
+            className="secondary-button note-create-button"
+            disabled={itemsLoading}
+            type="button"
+            onClick={() => {
+              setLinkEditorOpen(true);
+              setLinkError(null);
+            }}
+          >
+            <Link2 size={17} aria-hidden="true" />
+            New link
+          </button>
+        )}
+
         <button
           className="secondary-button note-create-button"
           disabled={savingFile || itemsLoading}
@@ -1059,6 +1204,9 @@ export function ProjectDetailPage({
 
         {fileError === null || fileBusyId !== null ? null : (
           <p className="form-message form-message-error">{fileError}</p>
+        )}
+        {linkError === null || linkBusyId !== null || linkEditorOpen ? null : (
+          <p className="form-message form-message-error">{linkError}</p>
         )}
 
         <ItemFeed
@@ -1229,6 +1377,33 @@ function toProjectFileViewModel(
   };
 }
 
+function toProjectLinkViewModel(
+  link: LinkSummary,
+  categories: readonly CategorySummary[]
+): ProjectLinkViewModel {
+  return {
+    id: link.id,
+    type: "link",
+    title: link.title,
+    body: link.body,
+    status: link.status,
+    categoryId: link.categoryId,
+    categoryLabel: findCategoryName(link.categoryId, categories),
+    sortOrder: link.sortOrder,
+    createdAt: link.createdAt,
+    updatedLabel: link.updatedAt,
+    pinned: link.pinned,
+    tags: link.tags ?? [],
+    url: link.url,
+    normalizedUrl: link.normalizedUrl,
+    linkTitle: link.linkTitle,
+    description: link.description,
+    domain: link.domain,
+    metadata:
+      link.domain === null ? [] : [{ label: "Domain", value: link.domain }]
+  };
+}
+
 function toListCardItemViewModel(
   listItem: ListItemSummary
 ): ListCardItemViewModel {
@@ -1246,6 +1421,7 @@ function mergeProjectContent(
   tasks: readonly TaskSummary[],
   lists: readonly ListSummary[],
   notes: readonly NoteSummary[],
+  links: readonly LinkSummary[],
   files: readonly FileItemSummary[],
   categories: readonly CategorySummary[] = []
 ): ProjectFeedViewModel[] {
@@ -1253,6 +1429,7 @@ function mergeProjectContent(
     ...tasks.map((task) => toProjectTaskViewModel(task, categories)),
     ...lists.map((list) => toProjectListViewModel(list, categories)),
     ...notes.map((note) => toProjectNoteViewModel(note, categories)),
+    ...links.map((link) => toProjectLinkViewModel(link, categories)),
     ...files.map((file) => toProjectFileViewModel(file, categories))
   ].sort(compareFeedItems);
 }
@@ -1394,6 +1571,12 @@ function isFileCardViewModel(
   item: UniversalItemViewModel
 ): item is FileCardViewModel {
   return item.type === "file" && "attachment" in item;
+}
+
+function isLinkCardViewModel(
+  item: UniversalItemViewModel
+): item is LinkCardViewModel {
+  return item.type === "link" && "normalizedUrl" in item;
 }
 
 function formatDateLabel(value: string | null | undefined): string | null {

@@ -85,6 +85,15 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       createNote: (input) => callApi(() => api.notes.createNote(input)),
       updateNote: (input) => callApi(() => api.notes.updateNote(input))
     },
+    links: {
+      create: (input) => callApi(() => api.links.create(input)),
+      update: (input) => callApi(() => api.links.update(input)),
+      listByContainer: (containerId) =>
+        callApi(() => api.links.listByContainer(containerId)),
+      openExternal: (itemId) => callApi(() => api.links.openExternal(itemId)),
+      createLink: (input) => callApi(() => api.links.createLink(input)),
+      updateLink: (input) => callApi(() => api.links.updateLink(input))
+    },
     projects: {
       create: (input) => callApi(() => api.projects.create(input)),
       update: (input) => callApi(() => api.projects.update(input)),
@@ -280,6 +289,15 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().notes.listByContainer(containerId),
     createNote: (input) => getDesktopApiClient().notes.createNote(input),
     updateNote: (input) => getDesktopApiClient().notes.updateNote(input)
+  },
+  links: {
+    create: (input) => getDesktopApiClient().links.create(input),
+    update: (input) => getDesktopApiClient().links.update(input),
+    listByContainer: (containerId) =>
+      getDesktopApiClient().links.listByContainer(containerId),
+    openExternal: (itemId) => getDesktopApiClient().links.openExternal(itemId),
+    createLink: (input) => getDesktopApiClient().links.createLink(input),
+    updateLink: (input) => getDesktopApiClient().links.updateLink(input)
   },
   projects: {
     create: (input) => getDesktopApiClient().projects.create(input),

@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(73);
+    expect(channels).toHaveLength(77);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -49,6 +49,7 @@ describe("typed preload API", () => {
       "tasks",
       "lists",
       "notes",
+      "links",
       "projects",
       "categories",
       "metadata",
@@ -476,6 +477,60 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.notes.listByContainer,
         input: "container_1"
+      }
+    ]);
+  });
+
+  it("routes link calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.links.create({
+      workspaceId: "workspace_1",
+      containerId: "container_1",
+      url: "example.com/brief",
+      title: "Launch brief"
+    });
+    await api.links.update({
+      itemId: "item_link_1",
+      description: "Updated reference"
+    });
+    await api.links.listByContainer("container_1");
+    await api.links.openExternal("item_link_1");
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.links.createLink,
+        input: {
+          workspaceId: "workspace_1",
+          containerId: "container_1",
+          url: "example.com/brief",
+          title: "Launch brief"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.links.updateLink,
+        input: {
+          itemId: "item_link_1",
+          description: "Updated reference"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.links.listByContainer,
+        input: "container_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.links.openExternal,
+        input: "item_link_1"
       }
     ]);
   });

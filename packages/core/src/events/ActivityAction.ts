@@ -19,6 +19,8 @@ export const ActivityAction = {
   noteCreated: "note_created",
   noteUpdated: "note_updated",
   noteArchived: "note_archived",
+  linkCreated: "link_created",
+  linkUpdated: "link_updated",
   taskCreated: "task_created",
   taskUpdated: "task_updated",
   taskCompleted: "task_completed",
