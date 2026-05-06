@@ -506,6 +506,10 @@ function createMockApi(
           exists: true,
           storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
         })
+    },
+    backup: {
+      createManualBackup: async () => apiOk(null as never),
+      listBackups: async () => apiOk([])
     }
   };
 }

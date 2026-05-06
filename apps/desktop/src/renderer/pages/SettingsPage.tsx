@@ -1,4 +1,4 @@
-import { Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { Archive, Plus, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { CategoryBadge } from "@local-work-os/ui";
 import { WorkspaceHealthPanel } from "./WorkspaceHealthPanel";
@@ -7,7 +7,11 @@ import {
   useWorkspaceStore
 } from "../state/workspaceStore";
 import { desktopApiClient } from "../api/desktopApiClient";
-import type { CategorySummary, LocalWorkOsApi } from "../../preload/api";
+import type {
+  BackupSnapshotSummary,
+  CategorySummary,
+  LocalWorkOsApi
+} from "../../preload/api";
 
 type SettingsPageProps = {
   apiClient?: LocalWorkOsApi;
@@ -28,7 +32,10 @@ export function SettingsPage({
   const [description, setDescription] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [backupBusy, setBackupBusy] = useState(false);
+  const [backups, setBackups] = useState<BackupSnapshotSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [backupMessage, setBackupMessage] = useState<string | null>(null);
 
   useEffect(() => {
     void refreshCurrentWorkspace(apiClient);
@@ -36,28 +43,38 @@ export function SettingsPage({
 
   useEffect(() => {
     if (currentWorkspace === null) {
+      setBackups([]);
       return;
     }
 
     let active = true;
 
-    async function loadCategories(): Promise<void> {
+    async function loadSettingsData(): Promise<void> {
       setError(null);
-      const result = await apiClient.categories.list(currentWorkspace!.id);
+      const [categoryResult, backupResult] = await Promise.all([
+        apiClient.categories.list(currentWorkspace!.id),
+        apiClient.backup.listBackups({ workspaceId: currentWorkspace!.id })
+      ]);
 
       if (!active) {
         return;
       }
 
-      if (!result.ok) {
-        setError(result.error.message);
+      if (!categoryResult.ok) {
+        setError(categoryResult.error.message);
         return;
       }
 
-      setCategories(result.data);
+      if (!backupResult.ok) {
+        setError(backupResult.error.message);
+        return;
+      }
+
+      setCategories(categoryResult.data);
+      setBackups(backupResult.data);
     }
 
-    void loadCategories();
+    void loadSettingsData();
 
     return () => {
       active = false;
@@ -146,6 +163,58 @@ export function SettingsPage({
     );
   }
 
+  async function refreshBackups(): Promise<void> {
+    if (currentWorkspace === null) {
+      setError("Open a workspace before listing backups.");
+      return;
+    }
+
+    setBackupBusy(true);
+    setError(null);
+
+    const result = await apiClient.backup.listBackups({
+      workspaceId: currentWorkspace.id
+    });
+
+    setBackupBusy(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setBackups(result.data);
+  }
+
+  async function createManualBackup(): Promise<void> {
+    if (currentWorkspace === null) {
+      setError("Open a workspace before creating a backup.");
+      return;
+    }
+
+    setBackupBusy(true);
+    setBackupMessage(null);
+    setError(null);
+
+    const result = await apiClient.backup.createManualBackup({
+      workspaceId: currentWorkspace.id
+    });
+
+    setBackupBusy(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setBackups((current) =>
+      [result.data, ...current.filter((backup) => backup.id !== result.data.id)].sort(
+        compareBackups
+      )
+    );
+    setBackupMessage(`Backup created at ${result.data.relativePath}.`);
+  }
+
   return (
     <section className="settings-layout">
       <div className="page-heading">
@@ -158,6 +227,47 @@ export function SettingsPage({
         </p>
       </div>
       <WorkspaceHealthPanel workspace={currentWorkspace} />
+      <section className="backup-management-panel" aria-label="Backups">
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <h3>Backups</h3>
+          </div>
+          <div className="top-actions">
+            <button
+              className="secondary-button compact-button"
+              disabled={backupBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void refreshBackups()}
+            >
+              <RefreshCw size={16} aria-hidden="true" />
+              Refresh
+            </button>
+            <button
+              className="primary-button compact-button"
+              disabled={backupBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void createManualBackup()}
+            >
+              <Archive size={16} aria-hidden="true" />
+              Create backup
+            </button>
+          </div>
+        </div>
+
+        {backupMessage === null ? null : (
+          <p className="form-message">{backupMessage}</p>
+        )}
+
+        <div className="backup-list" aria-label="Backup list">
+          {backups.length === 0 ? (
+            <p className="muted-text">No backups yet.</p>
+          ) : (
+            backups.map((backup) => (
+              <BackupListRow key={backup.id} backup={backup} />
+            ))
+          )}
+        </div>
+      </section>
       <section className="category-management-panel" aria-label="Categories">
         <div className="panel-heading-actions">
           <div className="panel-heading">
@@ -290,4 +400,53 @@ function CategoryListRow({
 
 function compareCategories(left: CategorySummary, right: CategorySummary): number {
   return left.name.localeCompare(right.name);
+}
+
+function BackupListRow({
+  backup
+}: {
+  backup: BackupSnapshotSummary;
+}): React.JSX.Element {
+  return (
+    <div className="backup-list-row">
+      <div>
+        <strong>{formatBackupDate(backup.createdAt)}</strong>
+        <span>{backup.relativePath}</span>
+      </div>
+      <div className="backup-list-meta">
+        <span>{backup.attachmentCount} attachments</span>
+        <span>{formatBytes(backup.totalAttachmentBytes)} manifest total</span>
+        <span>
+          {backup.databaseSizeBytes === null
+            ? "Database copy missing"
+            : `${formatBytes(backup.databaseSizeBytes)} database`}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function compareBackups(
+  left: BackupSnapshotSummary,
+  right: BackupSnapshotSummary
+): number {
+  return right.createdAt.localeCompare(left.createdAt);
+}
+
+function formatBackupDate(value: string): string {
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+}
+
+function formatBytes(value: number): string {
+  if (value < 1024) {
+    return `${value} B`;
+  }
+
+  if (value < 1024 * 1024) {
+    return `${(value / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
 }

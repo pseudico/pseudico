@@ -16,6 +16,7 @@ import {
   type ListItemSummary,
   type ListSummary,
   type LocalWorkOsApi,
+  type ManualBackupSnapshotSummary,
   type MetadataTargetSummary,
   type NoteSummary,
   type ProjectHealthSummary,
@@ -384,6 +385,10 @@ function createMockApi(
           exists: true,
           storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
         })
+    },
+    backup: {
+      createManualBackup: async () => apiOk(backupSnapshotSummary()),
+      listBackups: async () => apiOk([backupSnapshotSummary()])
     }
   };
 
@@ -617,6 +622,38 @@ function fileAttachmentResultSummary(): FileAttachmentResultSummary {
       createdAt: "2026-04-30T00:00:00.000Z",
       updatedAt: "2026-04-30T00:00:00.000Z",
       deletedAt: null
+    }
+  };
+}
+
+function backupSnapshotSummary(): ManualBackupSnapshotSummary {
+  return {
+    id: "backup_1",
+    workspaceId: "workspace_1",
+    createdAt: "2026-05-01T00:00:00.000Z",
+    relativePath: "backups/2026-05-01T00-00-00-000Z",
+    databaseRelativePath:
+      "backups/2026-05-01T00-00-00-000Z/local-work-os.sqlite",
+    manifestRelativePath:
+      "backups/2026-05-01T00-00-00-000Z/attachment-manifest.json",
+    attachmentCount: 1,
+    totalAttachmentBytes: 42,
+    databaseSizeBytes: 2048,
+    manifest: {
+      id: "backup_1",
+      kind: "manual",
+      workspaceId: "workspace_1",
+      workspaceName: "Personal",
+      createdAt: "2026-05-01T00:00:00.000Z",
+      database: {
+        sourceRelativePath: "data/local-work-os.sqlite",
+        backupRelativePath:
+          "backups/2026-05-01T00-00-00-000Z/local-work-os.sqlite",
+        sizeBytes: 2048
+      },
+      attachments: [],
+      attachmentCount: 1,
+      totalAttachmentBytes: 42
     }
   };
 }
@@ -1154,6 +1191,22 @@ describe("desktop API client", () => {
         attachment: {
           originalName: "Brief.pdf"
         }
+      }
+    });
+    await expect(client.backup.listBackups()).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: "backup_1",
+          attachmentCount: 1
+        }
+      ]
+    });
+    await expect(client.backup.createManualBackup()).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: "backup_1",
+        databaseSizeBytes: 2048
       }
     });
   });

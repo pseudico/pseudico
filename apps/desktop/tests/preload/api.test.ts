@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(77);
+    expect(channels).toHaveLength(79);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -60,7 +60,8 @@ describe("typed preload API", () => {
       "activity",
       "containers",
       "items",
-      "files"
+      "files",
+      "backup"
     ]);
     expect("ipcRenderer" in api).toBe(false);
     expect("send" in api).toBe(false);
@@ -280,6 +281,38 @@ describe("typed preload API", () => {
         input: {
           itemId: "item_1",
           sourcePath: "C:\\source\\Sketch.png"
+        }
+      }
+    ]);
+  });
+
+  it("routes backup calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.backup.createManualBackup({ workspaceId: "workspace_1" });
+    await api.backup.listBackups({ workspaceId: "workspace_1" });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.createManualBackup,
+        input: {
+          workspaceId: "workspace_1"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackups,
+        input: {
+          workspaceId: "workspace_1"
         }
       }
     ]);

@@ -34,7 +34,7 @@ export {
   formatTargetLabel
 } from "./activity";
 export type { ActivityEventView } from "./activity";
-export { backupModuleContract } from "./backup";
+export { BackupService, backupModuleContract, createBackupManifest } from "./backup";
 export { calendarModuleContract } from "./calendar";
 export { contactsModuleContract } from "./contacts";
 export { CreateContainerCommand } from "./containers";
@@ -100,7 +100,17 @@ export {
   toTodayTaskView
 } from "./today";
 export { workspaceModuleContract } from "./workspace";
-export type { BackupService } from "./backup";
+export type {
+  BackupFileSystemAdapter,
+  BackupManifest,
+  BackupManifestAttachment,
+  BackupServiceIdFactory,
+  BackupSnapshotSummary,
+  CreateBackupManifestInput,
+  CreateManualBackupInput,
+  ListBackupsInput,
+  ManualBackupSnapshot
+} from "./backup";
 export type { CalendarService } from "./calendar";
 export type { ContactService } from "./contacts";
 export type {

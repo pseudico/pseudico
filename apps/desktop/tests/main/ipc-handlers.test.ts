@@ -2028,9 +2028,9 @@ describe("Dashboard IPC handlers", () => {
         },
         widgets: expect.arrayContaining([
           expect.objectContaining({
-            widget: expect.objectContaining({ type: "today" }),
+            widget: expect.objectContaining({ type: "overdue" }),
             data: expect.objectContaining({
-              widgetType: "today",
+              widgetType: "overdue",
               items: [
                 expect.objectContaining({
                   title: "Book launch venue",

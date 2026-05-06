@@ -73,6 +73,63 @@ export type WorkspaceValidationResult = {
   manifest?: WorkspaceManifest;
 };
 
+export type BackupManifestAttachment = {
+  id: string;
+  itemId: string;
+  originalName: string;
+  storedName: string;
+  mimeType: string | null;
+  sizeBytes: number;
+  checksum: string | null;
+  storagePath: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BackupManifestSummary = {
+  id: string;
+  kind: "manual";
+  workspaceId: string;
+  workspaceName: string;
+  createdAt: string;
+  database: {
+    sourceRelativePath: string;
+    backupRelativePath: string;
+    sizeBytes: number;
+  };
+  attachments: BackupManifestAttachment[];
+  attachmentCount: number;
+  totalAttachmentBytes: number;
+};
+
+export type BackupSnapshotSummary = {
+  id: string;
+  workspaceId: string;
+  createdAt: string;
+  relativePath: string;
+  databaseRelativePath: string | null;
+  manifestRelativePath: string | null;
+  attachmentCount: number;
+  totalAttachmentBytes: number;
+  databaseSizeBytes: number | null;
+};
+
+export type ManualBackupSnapshotSummary = BackupSnapshotSummary & {
+  databaseRelativePath: string;
+  manifestRelativePath: string;
+  databaseSizeBytes: number;
+  manifest: BackupManifestSummary;
+};
+
+export type CreateManualBackupInput = {
+  workspaceId?: string;
+};
+
+export type ListBackupsInput = {
+  workspaceId?: string;
+};
+
 export type CreateWorkspaceInput = {
   name: string;
   rootPath: string;
@@ -1097,6 +1154,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     revealAttachment: "local-work-os:files:reveal-attachment",
     updateMetadata: "local-work-os:files:update-metadata",
     verifyAttachment: "local-work-os:files:verify-attachment"
+  },
+  backup: {
+    createManualBackup: "local-work-os:backup:create-manual-backup",
+    listBackups: "local-work-os:backup:list-backups"
   }
 } as const;
 
@@ -1409,6 +1470,14 @@ export type LocalWorkOsIpcContracts = {
     input: string;
     result: ApiResult<VerifyAttachmentSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.createManualBackup]: {
+    input: CreateManualBackupInput | undefined;
+    result: ApiResult<ManualBackupSnapshotSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackups]: {
+    input: ListBackupsInput | undefined;
+    result: ApiResult<BackupSnapshotSummary[]>;
+  };
 };
 
 export type LocalWorkOsIpcChannel = keyof LocalWorkOsIpcContracts & string;
@@ -1674,6 +1743,14 @@ export type LocalWorkOsApi = {
     verifyAttachment: (
       attachmentId: string
     ) => Promise<ApiResult<VerifyAttachmentSummary>>;
+  };
+  backup: {
+    createManualBackup: (
+      input?: CreateManualBackupInput
+    ) => Promise<ApiResult<ManualBackupSnapshotSummary>>;
+    listBackups: (
+      input?: ListBackupsInput
+    ) => Promise<ApiResult<BackupSnapshotSummary[]>>;
   };
 };
 
@@ -1981,6 +2058,12 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.updateMetadata, input),
       verifyAttachment: (attachmentId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.verifyAttachment, attachmentId)
+    },
+    backup: {
+      createManualBackup: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.createManualBackup, input),
+      listBackups: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackups, input)
     }
   };
 }

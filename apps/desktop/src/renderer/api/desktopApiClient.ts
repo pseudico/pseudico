@@ -219,6 +219,11 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.files.updateMetadata(input)),
       verifyAttachment: (attachmentId) =>
         callApi(() => api.files.verifyAttachment(attachmentId))
+    },
+    backup: {
+      createManualBackup: (input) =>
+        callApi(() => api.backup.createManualBackup(input)),
+      listBackups: (input) => callApi(() => api.backup.listBackups(input))
     }
   };
 }
@@ -430,5 +435,10 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().files.updateMetadata(input),
     verifyAttachment: (attachmentId) =>
       getDesktopApiClient().files.verifyAttachment(attachmentId)
+  },
+  backup: {
+    createManualBackup: (input) =>
+      getDesktopApiClient().backup.createManualBackup(input),
+    listBackups: (input) => getDesktopApiClient().backup.listBackups(input)
   }
 };
