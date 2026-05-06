@@ -142,8 +142,30 @@ export type WorkspaceJsonExportSummary = {
   totalAttachmentBytes: number;
 };
 
+export type TextExportKind = "project_markdown" | "tasks_csv" | "tasks_tsv";
+
+export type TextExportSummary = {
+  id: string;
+  workspaceId: string;
+  createdAt: string;
+  relativePath: string;
+  sizeBytes: number;
+  kind: TextExportKind;
+  sourceId: string;
+  rowCount: number;
+};
+
 export type ExportWorkspaceJsonInput = {
   workspaceId?: string;
+};
+
+export type ExportProjectMarkdownInput = {
+  projectId: string;
+};
+
+export type ExportTasksCsvInput = {
+  workspaceId?: string;
+  format?: "csv" | "tsv";
 };
 
 export type CreateWorkspaceInput = {
@@ -1176,7 +1198,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     listBackups: "local-work-os:backup:list-backups"
   },
   export: {
-    exportWorkspaceJson: "local-work-os:export:export-workspace-json"
+    exportWorkspaceJson: "local-work-os:export:export-workspace-json",
+    exportProjectMarkdown: "local-work-os:export:export-project-markdown",
+    exportTasksCsv: "local-work-os:export:export-tasks-csv"
   }
 } as const;
 
@@ -1501,6 +1525,14 @@ export type LocalWorkOsIpcContracts = {
     input: ExportWorkspaceJsonInput | undefined;
     result: ApiResult<WorkspaceJsonExportSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.export.exportProjectMarkdown]: {
+    input: ExportProjectMarkdownInput;
+    result: ApiResult<TextExportSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.export.exportTasksCsv]: {
+    input: ExportTasksCsvInput | undefined;
+    result: ApiResult<TextExportSummary>;
+  };
 };
 
 export type LocalWorkOsIpcChannel = keyof LocalWorkOsIpcContracts & string;
@@ -1779,6 +1811,12 @@ export type LocalWorkOsApi = {
     exportWorkspaceJson: (
       input?: ExportWorkspaceJsonInput
     ) => Promise<ApiResult<WorkspaceJsonExportSummary>>;
+    exportProjectMarkdown: (
+      input: ExportProjectMarkdownInput
+    ) => Promise<ApiResult<TextExportSummary>>;
+    exportTasksCsv: (
+      input?: ExportTasksCsvInput
+    ) => Promise<ApiResult<TextExportSummary>>;
   };
 };
 
@@ -2095,7 +2133,11 @@ export function createLocalWorkOsApi(
     },
     export: {
       exportWorkspaceJson: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportWorkspaceJson, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportWorkspaceJson, input),
+      exportProjectMarkdown: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportProjectMarkdown, input),
+      exportTasksCsv: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportTasksCsv, input)
     }
   };
 }

@@ -25,6 +25,8 @@ describe("SettingsPage", () => {
     expect(html).toContain("No backups yet.");
     expect(html).toContain("Exports");
     expect(html).toContain("Export JSON");
+    expect(html).toContain("Export tasks CSV");
+    expect(html).toContain("Export tasks TSV");
     expect(html).toContain("Categories");
   });
 });

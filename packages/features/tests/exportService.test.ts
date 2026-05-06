@@ -139,6 +139,71 @@ describe("ExportService", () => {
       }
     ]);
   });
+
+  it("exports project Markdown with escaped titles and local file metadata", async () => {
+    const result = await createService().exportProjectMarkdown({
+      projectId: "container_project_1",
+      exportRelativePath: "exports/launch-plan-project.md"
+    });
+
+    expect(result).toMatchObject({
+      id: "export_1",
+      workspaceId: "workspace_1",
+      relativePath: "exports/launch-plan-project.md",
+      kind: "project_markdown",
+      sourceId: "container_project_1",
+      rowCount: 5
+    });
+
+    const contents = writtenExports.get("exports/launch-plan-project.md");
+    expect(contents).toBeDefined();
+    expect(contents).toContain("# Launch Plan");
+    expect(contents).toContain("- [ ] Call supplier");
+    expect(contents).toContain("Notes: Confirm \"launch\", then call\\.");
+    expect(contents).toContain("```markdown\n# Launch notes\n```");
+    expect(contents).toContain("Brief\\.pdf");
+    expect(contents).toContain(
+      "attachments/2026/05/attachment\\_1/Brief\\.pdf"
+    );
+
+    expect(
+      new ActivityLogRepository(connection).listForTarget("export", "export_1")
+    ).toMatchObject([
+      {
+        action: "export_created",
+        summary: "Created project Markdown export exports/launch-plan-project.md."
+      }
+    ]);
+  });
+
+  it("exports tasks as escaped CSV and TSV", async () => {
+    const csv = await createService().exportTasksCsv({
+      workspaceId: "workspace_1",
+      exportRelativePath: "exports/tasks.csv"
+    });
+    const tsv = await createService().exportTasksCsv({
+      workspaceId: "workspace_1",
+      format: "tsv",
+      exportRelativePath: "exports/tasks.tsv"
+    });
+
+    expect(csv).toMatchObject({
+      kind: "tasks_csv",
+      rowCount: 1,
+      relativePath: "exports/tasks.csv"
+    });
+    expect(tsv).toMatchObject({
+      kind: "tasks_tsv",
+      rowCount: 1,
+      relativePath: "exports/tasks.tsv"
+    });
+    expect(writtenExports.get("exports/tasks.csv")).toContain(
+      'Launch Plan,Call supplier,open,2,,2026-05-07T00:00:00.000Z,,launch,"Confirm ""launch"", then call.",item_task_1'
+    );
+    expect(writtenExports.get("exports/tasks.tsv")).toContain(
+      'Launch Plan\tCall supplier\topen\t2\t\t2026-05-07T00:00:00.000Z\t\tlaunch\t"Confirm ""launch"", then call."\titem_task_1'
+    );
+  });
 });
 
 function seedWorkspace(): void {
@@ -195,6 +260,7 @@ function seedItems(): void {
     containerTabId: "container_tab_1",
     type: "task",
     title: "Call supplier",
+    body: "Confirm \"launch\", then call.",
     categoryId: "category_1",
     sortOrder: 10,
     timestamp
@@ -373,6 +439,13 @@ function createService(): ExportService {
     now: () => new Date(timestamp),
     fileSystem: {
       async writeJsonExport(input) {
+        writtenExports.set(input.exportRelativePath, input.contents);
+
+        return {
+          sizeBytes: Buffer.byteLength(input.contents)
+        };
+      },
+      async writeTextExport(input) {
         writtenExports.set(input.exportRelativePath, input.contents);
 
         return {

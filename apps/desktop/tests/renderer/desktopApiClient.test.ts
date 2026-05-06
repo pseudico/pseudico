@@ -392,7 +392,9 @@ function createMockApi(
       listBackups: async () => apiOk([backupSnapshotSummary()])
     },
     export: {
-      exportWorkspaceJson: async () => apiOk(workspaceJsonExportSummary())
+      exportWorkspaceJson: async () => apiOk(workspaceJsonExportSummary()),
+      exportProjectMarkdown: async () => apiOk(textExportSummary("project_markdown")),
+      exportTasksCsv: async () => apiOk(textExportSummary("tasks_csv"))
     }
   };
 
@@ -673,6 +675,22 @@ function workspaceJsonExportSummary(): WorkspaceJsonExportSummary {
     itemCount: 5,
     attachmentCount: 1,
     totalAttachmentBytes: 42
+  };
+}
+
+function textExportSummary(kind: "project_markdown" | "tasks_csv" | "tasks_tsv") {
+  return {
+    id: "export_2",
+    workspaceId: "workspace_1",
+    createdAt: "2026-05-01T00:00:00.000Z",
+    relativePath:
+      kind === "project_markdown"
+        ? "exports/2026-05-01T00-00-00-000Z-launch-plan-project.md"
+        : "exports/2026-05-01T00-00-00-000Z-tasks.csv",
+    sizeBytes: 1024,
+    kind,
+    sourceId: kind === "project_markdown" ? "container_1" : "workspace_1",
+    rowCount: 1
   };
 }
 
@@ -1233,6 +1251,24 @@ describe("desktop API client", () => {
         id: "export_1",
         schemaVersion: 1,
         itemCount: 5
+      }
+    });
+    await expect(
+      client.export.exportProjectMarkdown({ projectId: "container_1" })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        kind: "project_markdown",
+        sourceId: "container_1"
+      }
+    });
+    await expect(
+      client.export.exportTasksCsv({ workspaceId: "workspace_1" })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        kind: "tasks_csv",
+        rowCount: 1
       }
     });
   });

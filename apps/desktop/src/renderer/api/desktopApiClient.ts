@@ -227,7 +227,11 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
     },
     export: {
       exportWorkspaceJson: (input) =>
-        callApi(() => api.export.exportWorkspaceJson(input))
+        callApi(() => api.export.exportWorkspaceJson(input)),
+      exportProjectMarkdown: (input) =>
+        callApi(() => api.export.exportProjectMarkdown(input)),
+      exportTasksCsv: (input) =>
+        callApi(() => api.export.exportTasksCsv(input))
     }
   };
 }
@@ -447,6 +451,9 @@ export const desktopApiClient: LocalWorkOsApi = {
   },
   export: {
     exportWorkspaceJson: (input) =>
-      getDesktopApiClient().export.exportWorkspaceJson(input)
+      getDesktopApiClient().export.exportWorkspaceJson(input),
+    exportProjectMarkdown: (input) =>
+      getDesktopApiClient().export.exportProjectMarkdown(input),
+    exportTasksCsv: (input) => getDesktopApiClient().export.exportTasksCsv(input)
   }
 };

@@ -50,6 +50,8 @@ export {
 } from "./dashboard";
 export {
   ExportService,
+  ProjectMarkdownExporter,
+  TaskCsvExporter,
   createAttachmentManifest,
   exportModuleContract,
   WORKSPACE_EXPORT_SCHEMA_VERSION
@@ -133,15 +135,24 @@ export type {
   WidgetDataQueryInput
 } from "./dashboard";
 export type {
+  BuildProjectMarkdownInput,
+  BuildTaskDelimitedExportInput,
   BuildWorkspaceExportInput,
+  ExportProjectMarkdownInput,
   ExportFileSystemAdapter,
   ExportServiceIdFactory,
+  ExportTasksCsvInput,
   ExportWorkspaceJsonInput,
+  ProjectMarkdownExportItem,
+  TaskDelimitedExportFormat,
+  TaskDelimitedExportRow,
+  TextExportResult,
   WorkspaceExportAttachmentManifest,
   WorkspaceExportAttachmentManifestEntry,
   WorkspaceExportV1,
   WorkspaceJsonExportResult,
-  WriteExportFileInput
+  WriteExportFileInput,
+  WriteTextExportInput
 } from "./export";
 export type {
   AttachFileToContainerInput,

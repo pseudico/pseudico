@@ -46,13 +46,26 @@ import {
   WORKSPACE_EXPORT_SCHEMA_VERSION,
   type WorkspaceExportV1
 } from "./WorkspaceExportV1";
+import {
+  ProjectMarkdownExporter,
+  type ProjectMarkdownExportItem
+} from "./ProjectMarkdownExporter";
+import {
+  TaskCsvExporter,
+  type TaskDelimitedExportFormat,
+  type TaskDelimitedExportRow
+} from "./TaskCsvExporter";
 
 // Owns export orchestration application contracts.
 // Does not own backup lifecycle or direct renderer filesystem writes.
 export type ExportServiceIdFactory = (prefix: string) => string;
 
 export type ExportFileSystemAdapter = {
-  writeJsonExport: (input: {
+  writeJsonExport?: (input: {
+    exportRelativePath: string;
+    contents: string;
+  }) => Promise<{ sizeBytes: number }>;
+  writeTextExport?: (input: {
     exportRelativePath: string;
     contents: string;
   }) => Promise<{ sizeBytes: number }>;
@@ -67,7 +80,25 @@ export type WriteExportFileInput = {
   exportData: WorkspaceExportV1;
 };
 
+export type WriteTextExportInput = {
+  exportRelativePath: string;
+  contents: string;
+};
+
 export type ExportWorkspaceJsonInput = BuildWorkspaceExportInput & {
+  exportRelativePath?: string;
+  actorType?: ActivityActorType;
+};
+
+export type ExportProjectMarkdownInput = {
+  projectId: string;
+  exportRelativePath?: string;
+  actorType?: ActivityActorType;
+};
+
+export type ExportTasksCsvInput = {
+  workspaceId: string;
+  format?: TaskDelimitedExportFormat;
   exportRelativePath?: string;
   actorType?: ActivityActorType;
 };
@@ -82,6 +113,17 @@ export type WorkspaceJsonExportResult = {
   itemCount: number;
   attachmentCount: number;
   totalAttachmentBytes: number;
+};
+
+export type TextExportResult = {
+  id: string;
+  workspaceId: string;
+  createdAt: string;
+  relativePath: string;
+  sizeBytes: number;
+  kind: "project_markdown" | "tasks_csv" | "tasks_tsv";
+  sourceId: string;
+  rowCount: number;
 };
 
 export class ExportService {
@@ -216,9 +258,37 @@ export class ExportService {
   }> {
     validateExportRelativePath(input.exportRelativePath, "exportRelativePath");
 
-    const written = await this.fileSystem.writeJsonExport({
+    const writeJsonExport =
+      this.fileSystem.writeJsonExport ?? this.fileSystem.writeTextExport;
+
+    if (writeJsonExport === undefined) {
+      throw new Error("Export file system adapter cannot write JSON exports.");
+    }
+
+    const written = await writeJsonExport({
       exportRelativePath: input.exportRelativePath,
       contents: `${JSON.stringify(input.exportData, null, 2)}\n`
+    });
+
+    return {
+      relativePath: input.exportRelativePath,
+      sizeBytes: written.sizeBytes
+    };
+  }
+
+  async writeTextExport(input: WriteTextExportInput): Promise<{
+    relativePath: string;
+    sizeBytes: number;
+  }> {
+    validateTextExportRelativePath(input.exportRelativePath, "exportRelativePath");
+
+    if (this.fileSystem.writeTextExport === undefined) {
+      throw new Error("Export file system adapter cannot write text exports.");
+    }
+
+    const written = await this.fileSystem.writeTextExport({
+      exportRelativePath: input.exportRelativePath,
+      contents: input.contents
     });
 
     return {
@@ -278,6 +348,148 @@ export class ExportService {
       totalAttachmentBytes: exportData.attachmentManifest.totalAttachmentBytes
     };
   }
+
+  async exportProjectMarkdown(
+    input: ExportProjectMarkdownInput
+  ): Promise<TextExportResult> {
+    validateNonEmptyString(input.projectId, "projectId");
+
+    const project = new ContainerRepository(this.connection).getById(
+      input.projectId
+    );
+
+    if (project === null || project.type !== "project") {
+      throw new Error(`Project row was not found: ${input.projectId}.`);
+    }
+
+    const createdAt = createIsoTimestamp(this.now());
+    const exportId = this.idFactory("export");
+    const exportRelativePath =
+      input.exportRelativePath ??
+      createProjectMarkdownRelativePath(createdAt, project.slug);
+    const contents = new ProjectMarkdownExporter().build({
+      exportedAt: createdAt,
+      project,
+      items: buildProjectMarkdownItems(this.connection, project)
+    });
+    const written = await this.writeTextExport({
+      exportRelativePath,
+      contents
+    });
+
+    this.logTextExport({
+      workspaceId: project.workspaceId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      exportId,
+      createdAt,
+      kind: "project_markdown",
+      relativePath: written.relativePath,
+      sizeBytes: written.sizeBytes,
+      sourceId: project.id,
+      rowCount: new ItemRepository(this.connection).listByContainer(project.id)
+        .length,
+      summary: `Created project Markdown export ${written.relativePath}.`
+    });
+
+    return {
+      id: exportId,
+      workspaceId: project.workspaceId,
+      createdAt,
+      relativePath: written.relativePath,
+      sizeBytes: written.sizeBytes,
+      kind: "project_markdown",
+      sourceId: project.id,
+      rowCount: new ItemRepository(this.connection).listByContainer(project.id)
+        .length
+    };
+  }
+
+  async exportTasksCsv(input: ExportTasksCsvInput): Promise<TextExportResult> {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+
+    const workspace = new WorkspaceRepository(this.connection).getById(
+      input.workspaceId
+    );
+
+    if (workspace === null) {
+      throw new Error(`Workspace row was not found: ${input.workspaceId}.`);
+    }
+
+    const format = input.format ?? "csv";
+    const rows = buildTaskExportRows(this.connection, input.workspaceId);
+    const createdAt = createIsoTimestamp(this.now());
+    const exportId = this.idFactory("export");
+    const exportRelativePath =
+      input.exportRelativePath ??
+      createTasksRelativePath(createdAt, format);
+    const contents = new TaskCsvExporter().build({ format, rows });
+    const written = await this.writeTextExport({
+      exportRelativePath,
+      contents
+    });
+    const kind = format === "tsv" ? "tasks_tsv" : "tasks_csv";
+
+    this.logTextExport({
+      workspaceId: input.workspaceId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      exportId,
+      createdAt,
+      kind,
+      relativePath: written.relativePath,
+      sizeBytes: written.sizeBytes,
+      sourceId: input.workspaceId,
+      rowCount: rows.length,
+      summary: `Created task ${format.toUpperCase()} export ${written.relativePath}.`
+    });
+
+    return {
+      id: exportId,
+      workspaceId: input.workspaceId,
+      createdAt,
+      relativePath: written.relativePath,
+      sizeBytes: written.sizeBytes,
+      kind,
+      sourceId: input.workspaceId,
+      rowCount: rows.length
+    };
+  }
+
+  private logTextExport(input: {
+    workspaceId: string;
+    actorType?: ActivityActorType;
+    exportId: string;
+    createdAt: string;
+    kind: TextExportResult["kind"];
+    relativePath: string;
+    sizeBytes: number;
+    sourceId: string;
+    rowCount: number;
+    summary: string;
+  }): void {
+    new ActivityLogService({
+      connection: this.connection,
+      idFactory: this.idFactory
+    }).logEvent({
+      workspaceId: input.workspaceId,
+      actorType: input.actorType ?? "local_user",
+      action: ActivityAction.exportCreated,
+      targetType: "export",
+      targetId: input.exportId,
+      summary: input.summary,
+      beforeJson: null,
+      afterJson: JSON.stringify({
+        export: {
+          id: input.exportId,
+          kind: input.kind,
+          relativePath: input.relativePath,
+          sizeBytes: input.sizeBytes,
+          sourceId: input.sourceId,
+          rowCount: input.rowCount
+        }
+      }),
+      timestamp: input.createdAt
+    });
+  }
 }
 
 export const exportModuleContract = {
@@ -291,6 +503,20 @@ export const exportModuleContract = {
 
 function createExportRelativePath(createdAt: string): string {
   return `exports/${createdAt.replace(/[:.]/g, "-")}-workspace-export.json`;
+}
+
+function createProjectMarkdownRelativePath(
+  createdAt: string,
+  projectSlug: string
+): string {
+  return `exports/${createdAt.replace(/[:.]/g, "-")}-${projectSlug}-project.md`;
+}
+
+function createTasksRelativePath(
+  createdAt: string,
+  format: TaskDelimitedExportFormat
+): string {
+  return `exports/${createdAt.replace(/[:.]/g, "-")}-tasks.${format}`;
 }
 
 function validateNonEmptyString(value: string, fieldName: string): void {
@@ -315,6 +541,134 @@ function validateExportRelativePath(value: string, fieldName: string): void {
   if (!normalized.startsWith("exports/") || !normalized.endsWith(".json")) {
     throw new Error(`${fieldName} must be a JSON file inside workspace exports.`);
   }
+}
+
+function validateTextExportRelativePath(value: string, fieldName: string): void {
+  validateNonEmptyString(value, fieldName);
+
+  const normalized = value.replace(/\\/g, "/");
+
+  if (
+    normalized.startsWith("/") ||
+    /^[a-zA-Z]:/.test(normalized) ||
+    normalized.split("/").some((segment) => segment === "." || segment === "..")
+  ) {
+    throw new Error(`${fieldName} must be workspace-relative.`);
+  }
+
+  if (
+    !normalized.startsWith("exports/") ||
+    (!normalized.endsWith(".md") &&
+      !normalized.endsWith(".csv") &&
+      !normalized.endsWith(".tsv"))
+  ) {
+    throw new Error(
+      `${fieldName} must be a Markdown, CSV, or TSV file inside workspace exports.`
+    );
+  }
+}
+
+function buildProjectMarkdownItems(
+  connection: DatabaseConnection,
+  project: ContainerRecord
+): ProjectMarkdownExportItem[] {
+  const itemRepository = new ItemRepository(connection);
+  const taskRepository = new TaskRepository(connection);
+  const noteRepository = new NoteRepository(connection);
+  const listRepository = new ListRepository(connection);
+  const linkRepository = new LinkRepository(connection);
+  const attachmentRepository = new AttachmentRepository(connection);
+  const tagRepository = new TagRepository(connection);
+
+  return itemRepository.listByContainer(project.id).map((item) => {
+    const entry: ProjectMarkdownExportItem = {
+      item,
+      tags: tagRepository
+        .listTagsForTarget({
+          workspaceId: item.workspaceId,
+          targetType: "item",
+          targetId: item.id
+        })
+        .map((tag) => tag.slug)
+    };
+
+    if (item.type === "task") {
+      const task = taskRepository.getDetailsByItemId(item.id);
+
+      if (task !== null) {
+        entry.task = task;
+      }
+    }
+
+    if (item.type === "note") {
+      const note = noteRepository.getDetailsByItemId(item.id);
+
+      if (note !== null) {
+        entry.note = note;
+      }
+    }
+
+    if (item.type === "list") {
+      const list = listRepository.getDetailsByItemId(item.id);
+
+      if (list !== null) {
+        entry.list = list;
+        entry.listItems = listRepository.listItems(item.id);
+      }
+    }
+
+    if (item.type === "link") {
+      const link = linkRepository.getDetailsByItemId(item.id);
+
+      if (link !== null) {
+        entry.link = link;
+      }
+    }
+
+    if (item.type === "file") {
+      entry.attachments = attachmentRepository.listForItem({
+        workspaceId: item.workspaceId,
+        itemId: item.id
+      });
+    }
+
+    return entry;
+  });
+}
+
+function buildTaskExportRows(
+  connection: DatabaseConnection,
+  workspaceId: string
+): TaskDelimitedExportRow[] {
+  const itemRepository = new ItemRepository(connection);
+  const containerRepository = new ContainerRepository(connection);
+  const taskRepository = new TaskRepository(connection);
+  const tagRepository = new TagRepository(connection);
+
+  const rows: TaskDelimitedExportRow[] = [];
+
+  for (const item of itemRepository.listByWorkspace(workspaceId, { type: "task" })) {
+    const task = taskRepository.getDetailsByItemId(item.id);
+
+    if (task === null) {
+      continue;
+    }
+
+    rows.push({
+      item,
+      task,
+      container: containerRepository.getById(item.containerId),
+      tags: tagRepository
+        .listTagsForTarget({
+          workspaceId: item.workspaceId,
+          targetType: "item",
+          targetId: item.id
+        })
+        .map((tag) => tag.slug)
+    });
+  }
+
+  return rows;
 }
 
 function sortContainers(records: ContainerRecord[]): ContainerRecord[] {
