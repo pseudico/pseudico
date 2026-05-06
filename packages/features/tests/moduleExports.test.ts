@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   backupModuleContract,
+  BackupService,
   activityModuleContract,
   calendarModuleContract,
   categoriesModuleContract,
@@ -115,5 +116,9 @@ describe("feature module exports", () => {
 
   it("exports the dashboard service implementation", () => {
     expect(DashboardService).toBeDefined();
+  });
+
+  it("exports the backup service implementation", () => {
+    expect(BackupService).toBeDefined();
   });
 });

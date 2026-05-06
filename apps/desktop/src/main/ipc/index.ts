@@ -3,6 +3,7 @@ import { app } from "electron";
 import { join } from "node:path";
 import { registerCategoryIpc } from "./registerCategoryIpc";
 import { registerActivityIpc } from "./registerActivityIpc";
+import { registerBackupIpc } from "./registerBackupIpc";
 import { registerCollectionIpc } from "./registerCollectionIpc";
 import { registerContainerIpc } from "./registerContainerIpc";
 import { registerDashboardIpc } from "./registerDashboardIpc";
@@ -41,6 +42,7 @@ export function registerDesktopIpc(
   services: DesktopIpcServices = createDesktopIpcServices()
 ): void {
   registerWorkspaceIpc(services.workspaceService);
+  registerBackupIpc(services.workspaceService);
   registerDatabaseIpc(services.workspaceService);
   registerInboxIpc(services.workspaceService);
   registerProjectIpc(services.workspaceService);
