@@ -235,6 +235,25 @@ export class TagRepository {
     return rows.map(toTaggedTargetRecord);
   }
 
+  listTaggingsByWorkspace(
+    workspaceId: string,
+    filters: { includeDeleted?: boolean } = {}
+  ): TaggingRecord[] {
+    const deletedFilter =
+      filters.includeDeleted === true ? "" : "and deleted_at is null";
+    const rows = this.connection.sqlite
+      .prepare<[string], TaggingRow>(
+        `select *
+         from taggings
+         where workspace_id = ?
+           ${deletedFilter}
+         order by target_type asc, target_id asc, tag_id asc, created_at asc, id asc`
+      )
+      .all(workspaceId);
+
+    return rows.map(toTaggingRecord);
+  }
+
   listTaggingsForTarget(input: ListTaggingsForTargetInput): TaggingRecord[] {
     const where = [
       "workspace_id = ?",

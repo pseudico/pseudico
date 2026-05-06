@@ -138,6 +138,19 @@ export class DailyPlanRepository {
     return row === undefined ? null : toDailyPlanRecord(row);
   }
 
+  listPlansByWorkspace(workspaceId: string): DailyPlanRecord[] {
+    const rows = this.connection.sqlite
+      .prepare<[string], DailyPlanRow>(
+        `select *
+         from daily_plans
+         where workspace_id = ?
+         order by plan_date asc, created_at asc, id asc`
+      )
+      .all(workspaceId);
+
+    return rows.map(toDailyPlanRecord);
+  }
+
   createPlan(input: CreateDailyPlanInput): DailyPlanRecord {
     this.connection.sqlite
       .prepare(
@@ -357,6 +370,19 @@ export class DailyPlanRepository {
          order by lane asc, sort_order asc, created_at asc`
       )
       .all(...values, input.dailyPlanId);
+
+    return rows.map(toDailyPlanItemRecord);
+  }
+
+  listPlanItemsByWorkspace(workspaceId: string): DailyPlanItemRecord[] {
+    const rows = this.connection.sqlite
+      .prepare<[string], DailyPlanItemRow>(
+        `select *
+         from daily_plan_items
+         where workspace_id = ?
+         order by daily_plan_id asc, lane asc, sort_order asc, created_at asc, id asc`
+      )
+      .all(workspaceId);
 
     return rows.map(toDailyPlanItemRecord);
   }

@@ -210,6 +210,25 @@ export class RelationshipRepository {
     );
   }
 
+  listByWorkspace(
+    workspaceId: string,
+    options: { includeDeleted?: boolean } = {}
+  ): RelationshipRecord[] {
+    const deletedFilter =
+      options.includeDeleted === true ? "" : "and deleted_at is null";
+    const rows = this.connection.sqlite
+      .prepare<[string], RelationshipRow>(
+        `select *
+         from relationships
+         where workspace_id = ?
+           ${deletedFilter}
+         order by source_type asc, source_id asc, target_type asc, target_id asc, created_at asc, id asc`
+      )
+      .all(workspaceId);
+
+    return rows.map(toRelationshipRecord);
+  }
+
   private listRowsForEndpoint(
     input: ListRelationshipsForEndpointInput,
     side: "source" | "target"

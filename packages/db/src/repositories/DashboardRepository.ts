@@ -101,6 +101,20 @@ export class DashboardRepository {
     return row === undefined ? null : toDashboardRecord(row);
   }
 
+  listByWorkspace(workspaceId: string): DashboardRecord[] {
+    const rows = this.connection.sqlite
+      .prepare<[string], DashboardRow>(
+        `select *
+         from dashboards
+         where workspace_id = ?
+           and deleted_at is null
+         order by is_default desc, name collate nocase asc, created_at asc, id asc`
+      )
+      .all(workspaceId);
+
+    return rows.map(toDashboardRecord);
+  }
+
   createDefaultDashboard(
     input: CreateDefaultDashboardInput
   ): DashboardRecord {
@@ -176,6 +190,20 @@ export class DashboardRepository {
          order by sort_order asc, created_at asc`
       )
       .all(dashboardId);
+
+    return rows.map(toDashboardWidgetRecord);
+  }
+
+  listWidgetsByWorkspace(workspaceId: string): DashboardWidgetRecord[] {
+    const rows = this.connection.sqlite
+      .prepare<[string], DashboardWidgetRow>(
+        `select *
+         from dashboard_widgets
+         where workspace_id = ?
+           and deleted_at is null
+         order by dashboard_id asc, sort_order asc, created_at asc, id asc`
+      )
+      .all(workspaceId);
 
     return rows.map(toDashboardWidgetRecord);
   }

@@ -23,6 +23,8 @@ describe("SettingsPage", () => {
     expect(html).toContain("Backups");
     expect(html).toContain("Create backup");
     expect(html).toContain("No backups yet.");
+    expect(html).toContain("Exports");
+    expect(html).toContain("Export JSON");
     expect(html).toContain("Categories");
   });
 });

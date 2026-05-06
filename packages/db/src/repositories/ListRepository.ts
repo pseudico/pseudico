@@ -200,6 +200,19 @@ export class ListRepository {
     return row === undefined ? null : toListWithItemRecord(row);
   }
 
+  listDetailsByWorkspace(workspaceId: string): ListDetailsRecord[] {
+    const rows = this.connection.sqlite
+      .prepare<[string], ListDetailsRow>(
+        `select *
+         from list_details
+         where workspace_id = ?
+         order by item_id asc`
+      )
+      .all(workspaceId);
+
+    return rows.map(toListDetailsRecord);
+  }
+
   listByContainer(
     containerId: string,
     filters: ListItemsFilter = {}

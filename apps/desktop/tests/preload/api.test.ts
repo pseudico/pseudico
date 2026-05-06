@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(79);
+    expect(channels).toHaveLength(80);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -61,7 +61,8 @@ describe("typed preload API", () => {
       "containers",
       "items",
       "files",
-      "backup"
+      "backup",
+      "export"
     ]);
     expect("ipcRenderer" in api).toBe(false);
     expect("send" in api).toBe(false);
@@ -311,6 +312,31 @@ describe("typed preload API", () => {
       },
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackups,
+        input: {
+          workspaceId: "workspace_1"
+        }
+      }
+    ]);
+  });
+
+  it("routes export calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.export.exportWorkspaceJson({ workspaceId: "workspace_1" });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.export.exportWorkspaceJson,
         input: {
           workspaceId: "workspace_1"
         }
