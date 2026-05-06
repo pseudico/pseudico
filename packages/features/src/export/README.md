@@ -18,9 +18,17 @@ Likely service methods later:
 
 - `exportWorkspaceJson`
 - `exportProjectMarkdown`
-- `exportContactMarkdown`
 - `exportTasksCsv`
+- `exportContactMarkdown`
 - `createAttachmentManifest`
+
+Implemented focused exports:
+
+- Workspace JSON export writes a portable full-workspace JSON snapshot.
+- Project Markdown export writes a Markdown summary of a project container,
+  including tasks, lists, notes, links, and file attachment metadata.
+- Task CSV/TSV export writes active workspace tasks with project context,
+  status, dates, priority, tags, body, and item IDs.
 
 Integration points:
 

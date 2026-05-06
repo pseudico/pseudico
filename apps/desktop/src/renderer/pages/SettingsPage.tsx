@@ -1,4 +1,12 @@
-import { Archive, FileJson, Plus, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
+import {
+  Archive,
+  FileJson,
+  FileSpreadsheet,
+  Plus,
+  RefreshCw,
+  ShieldCheck,
+  Trash2
+} from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { CategoryBadge } from "@local-work-os/ui";
 import { WorkspaceHealthPanel } from "./WorkspaceHealthPanel";
@@ -243,6 +251,33 @@ export function SettingsPage({
     );
   }
 
+  async function exportTasks(format: "csv" | "tsv"): Promise<void> {
+    if (currentWorkspace === null) {
+      setError("Open a workspace before exporting tasks.");
+      return;
+    }
+
+    setExportBusy(true);
+    setExportMessage(null);
+    setError(null);
+
+    const result = await apiClient.export.exportTasksCsv({
+      workspaceId: currentWorkspace.id,
+      format
+    });
+
+    setExportBusy(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setExportMessage(
+      `Task ${format.toUpperCase()} export created at ${result.data.relativePath}.`
+    );
+  }
+
   return (
     <section className="settings-layout">
       <div className="page-heading">
@@ -310,6 +345,24 @@ export function SettingsPage({
             >
               <FileJson size={16} aria-hidden="true" />
               Export JSON
+            </button>
+            <button
+              className="secondary-button compact-button"
+              disabled={exportBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void exportTasks("csv")}
+            >
+              <FileSpreadsheet size={16} aria-hidden="true" />
+              Export tasks CSV
+            </button>
+            <button
+              className="secondary-button compact-button"
+              disabled={exportBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void exportTasks("tsv")}
+            >
+              <FileSpreadsheet size={16} aria-hidden="true" />
+              Export tasks TSV
             </button>
           </div>
         </div>

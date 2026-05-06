@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  Download,
   FolderKanban,
   Link2,
   Paperclip,
@@ -150,6 +151,8 @@ export function ProjectDetailPage({
   const [noteError, setNoteError] = useState<string | null>(null);
   const [linkError, setLinkError] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportMessage, setExportMessage] = useState<string | null>(null);
   const [movingItem, setMovingItem] = useState<ProjectFeedViewModel | null>(null);
   const [confirmAction, setConfirmAction] =
     useState<PendingConfirmAction | null>(null);
@@ -505,6 +508,32 @@ export function ProjectDetailPage({
     }
 
     await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+  }
+
+  async function exportProjectMarkdown(): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setExportBusy(true);
+    setExportMessage(null);
+    setItemActionError(null);
+
+    const result = await apiClient.export.exportProjectMarkdown({
+      projectId: project.id
+    });
+
+    setExportBusy(false);
+
+    if (!result.ok) {
+      setItemActionError(result.error.message);
+      return;
+    }
+
+    setExportMessage(
+      `Project Markdown export created at ${result.data.relativePath}.`
+    );
     await refreshProjectActivity(project.id);
   }
 
@@ -1064,7 +1093,20 @@ export function ProjectDetailPage({
           <h2>{project.name}</h2>
           <p>{project.description ?? "No description added yet."}</p>
         </div>
+        <button
+          className="secondary-button compact-button"
+          disabled={exportBusy}
+          type="button"
+          onClick={() => void exportProjectMarkdown()}
+        >
+          <Download size={16} aria-hidden="true" />
+          Export Markdown
+        </button>
       </header>
+
+      {exportMessage === null ? null : (
+        <p className="form-message">{exportMessage}</p>
+      )}
 
       <dl className="project-meta-grid">
         <div>

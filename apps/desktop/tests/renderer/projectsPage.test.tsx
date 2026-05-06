@@ -490,7 +490,9 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
       listBackups: async () => apiOk([])
     },
     export: {
-      exportWorkspaceJson: async () => apiOk(null as never)
+      exportWorkspaceJson: async () => apiOk(null as never),
+      exportProjectMarkdown: async () => apiOk(null as never),
+      exportTasksCsv: async () => apiOk(null as never)
     }
   };
 }
@@ -804,6 +806,7 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Brief.pdf");
     expect(html).toContain("File missing from workspace storage.");
     expect(html).toContain("Attach file");
+    expect(html).toContain("Export Markdown");
     expect(html).toContain("Edit note");
     expect(html).toContain("Complete");
     expect(html).toContain("Due");

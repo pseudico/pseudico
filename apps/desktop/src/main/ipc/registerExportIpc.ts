@@ -12,4 +12,12 @@ export function registerExportIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.export.exportWorkspaceJson,
     (_event, input) => handlers.handleExportWorkspaceJson(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.export.exportProjectMarkdown,
+    (_event, input) => handlers.handleExportProjectMarkdown(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.export.exportTasksCsv,
+    (_event, input) => handlers.handleExportTasksCsv(input)
+  );
 }
