@@ -9,6 +9,7 @@ import {
   contactsModuleContract,
   dashboardModuleContract,
   DashboardService,
+  ExportService,
   exportModuleContract,
   filesModuleContract,
   inboxModuleContract,
@@ -120,5 +121,9 @@ describe("feature module exports", () => {
 
   it("exports the backup service implementation", () => {
     expect(BackupService).toBeDefined();
+  });
+
+  it("exports the workspace JSON export service implementation", () => {
+    expect(ExportService).toBeDefined();
   });
 });

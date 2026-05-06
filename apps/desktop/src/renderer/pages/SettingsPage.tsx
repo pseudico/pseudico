@@ -1,4 +1,4 @@
-import { Archive, Plus, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
+import { Archive, FileJson, Plus, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { CategoryBadge } from "@local-work-os/ui";
 import { WorkspaceHealthPanel } from "./WorkspaceHealthPanel";
@@ -33,9 +33,11 @@ export function SettingsPage({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [backupBusy, setBackupBusy] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
   const [backups, setBackups] = useState<BackupSnapshotSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
+  const [exportMessage, setExportMessage] = useState<string | null>(null);
 
   useEffect(() => {
     void refreshCurrentWorkspace(apiClient);
@@ -215,6 +217,32 @@ export function SettingsPage({
     setBackupMessage(`Backup created at ${result.data.relativePath}.`);
   }
 
+  async function exportWorkspaceJson(): Promise<void> {
+    if (currentWorkspace === null) {
+      setError("Open a workspace before exporting workspace JSON.");
+      return;
+    }
+
+    setExportBusy(true);
+    setExportMessage(null);
+    setError(null);
+
+    const result = await apiClient.export.exportWorkspaceJson({
+      workspaceId: currentWorkspace.id
+    });
+
+    setExportBusy(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setExportMessage(
+      `Workspace JSON export created at ${result.data.relativePath}.`
+    );
+  }
+
   return (
     <section className="settings-layout">
       <div className="page-heading">
@@ -267,6 +295,30 @@ export function SettingsPage({
             ))
           )}
         </div>
+      </section>
+      <section className="export-management-panel" aria-label="Exports">
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <h3>Exports</h3>
+          </div>
+          <div className="top-actions">
+            <button
+              className="primary-button compact-button"
+              disabled={exportBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void exportWorkspaceJson()}
+            >
+              <FileJson size={16} aria-hidden="true" />
+              Export JSON
+            </button>
+          </div>
+        </div>
+
+        {exportMessage === null ? (
+          <p className="muted-text">No workspace JSON export created this session.</p>
+        ) : (
+          <p className="form-message">{exportMessage}</p>
+        )}
       </section>
       <section className="category-management-panel" aria-label="Categories">
         <div className="panel-heading-actions">

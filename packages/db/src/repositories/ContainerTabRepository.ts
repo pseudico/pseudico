@@ -97,6 +97,20 @@ export class ContainerTabRepository {
     return rows.map(toContainerTabRecord);
   }
 
+  listByWorkspace(workspaceId: string): ContainerTabRecord[] {
+    const rows = this.connection.sqlite
+      .prepare<[string], ContainerTabRow>(
+        `select *
+         from container_tabs
+         where workspace_id = ?
+           and deleted_at is null
+         order by container_id asc, sort_order asc, created_at asc, id asc`
+      )
+      .all(workspaceId);
+
+    return rows.map(toContainerTabRecord);
+  }
+
   create(input: CreateContainerTabInput): ContainerTabRecord {
     this.connection.sqlite
       .prepare(

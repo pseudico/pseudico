@@ -48,7 +48,12 @@ export {
   WidgetDataService,
   dashboardModuleContract
 } from "./dashboard";
-export { exportModuleContract } from "./export";
+export {
+  ExportService,
+  createAttachmentManifest,
+  exportModuleContract,
+  WORKSPACE_EXPORT_SCHEMA_VERSION
+} from "./export";
 export { FileAttachmentService, filesModuleContract } from "./files";
 export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
@@ -127,7 +132,17 @@ export type {
   GetDefaultDashboardInput,
   WidgetDataQueryInput
 } from "./dashboard";
-export type { ExportService } from "./export";
+export type {
+  BuildWorkspaceExportInput,
+  ExportFileSystemAdapter,
+  ExportServiceIdFactory,
+  ExportWorkspaceJsonInput,
+  WorkspaceExportAttachmentManifest,
+  WorkspaceExportAttachmentManifestEntry,
+  WorkspaceExportV1,
+  WorkspaceJsonExportResult,
+  WriteExportFileInput
+} from "./export";
 export type {
   AttachFileToContainerInput,
   AttachFileToItemInput,

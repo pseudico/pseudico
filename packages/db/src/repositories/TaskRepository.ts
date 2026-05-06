@@ -163,6 +163,19 @@ export class TaskRepository {
     return row === undefined ? null : toTaskWithItemRecord(row);
   }
 
+  listDetailsByWorkspace(workspaceId: string): TaskRecord[] {
+    const rows = this.connection.sqlite
+      .prepare<[string], TaskDetailsRow>(
+        `select *
+         from task_details
+         where workspace_id = ?
+         order by item_id asc`
+      )
+      .all(workspaceId);
+
+    return rows.map(toTaskRecord);
+  }
+
   createDetails(input: CreateTaskDetailsInput): TaskRecord {
     this.connection.sqlite
       .prepare(

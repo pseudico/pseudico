@@ -22,6 +22,7 @@ import {
   type ProjectHealthSummary,
   type ProjectSummary,
   type RecentWorkspace,
+  type WorkspaceJsonExportSummary,
   type TaskSummary,
   type DailyPlanItemSummary,
   type DailyPlanSummary,
@@ -389,6 +390,9 @@ function createMockApi(
     backup: {
       createManualBackup: async () => apiOk(backupSnapshotSummary()),
       listBackups: async () => apiOk([backupSnapshotSummary()])
+    },
+    export: {
+      exportWorkspaceJson: async () => apiOk(workspaceJsonExportSummary())
     }
   };
 
@@ -655,6 +659,20 @@ function backupSnapshotSummary(): ManualBackupSnapshotSummary {
       attachmentCount: 1,
       totalAttachmentBytes: 42
     }
+  };
+}
+
+function workspaceJsonExportSummary(): WorkspaceJsonExportSummary {
+  return {
+    id: "export_1",
+    workspaceId: "workspace_1",
+    createdAt: "2026-05-01T00:00:00.000Z",
+    relativePath: "exports/2026-05-01T00-00-00-000Z-workspace-export.json",
+    sizeBytes: 4096,
+    schemaVersion: 1,
+    itemCount: 5,
+    attachmentCount: 1,
+    totalAttachmentBytes: 42
   };
 }
 
@@ -1207,6 +1225,14 @@ describe("desktop API client", () => {
       data: {
         id: "backup_1",
         databaseSizeBytes: 2048
+      }
+    });
+    await expect(client.export.exportWorkspaceJson()).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: "export_1",
+        schemaVersion: 1,
+        itemCount: 5
       }
     });
   });

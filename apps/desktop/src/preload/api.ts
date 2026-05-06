@@ -130,6 +130,22 @@ export type ListBackupsInput = {
   workspaceId?: string;
 };
 
+export type WorkspaceJsonExportSummary = {
+  id: string;
+  workspaceId: string;
+  createdAt: string;
+  relativePath: string;
+  sizeBytes: number;
+  schemaVersion: number;
+  itemCount: number;
+  attachmentCount: number;
+  totalAttachmentBytes: number;
+};
+
+export type ExportWorkspaceJsonInput = {
+  workspaceId?: string;
+};
+
 export type CreateWorkspaceInput = {
   name: string;
   rootPath: string;
@@ -1158,6 +1174,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   backup: {
     createManualBackup: "local-work-os:backup:create-manual-backup",
     listBackups: "local-work-os:backup:list-backups"
+  },
+  export: {
+    exportWorkspaceJson: "local-work-os:export:export-workspace-json"
   }
 } as const;
 
@@ -1478,6 +1497,10 @@ export type LocalWorkOsIpcContracts = {
     input: ListBackupsInput | undefined;
     result: ApiResult<BackupSnapshotSummary[]>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.export.exportWorkspaceJson]: {
+    input: ExportWorkspaceJsonInput | undefined;
+    result: ApiResult<WorkspaceJsonExportSummary>;
+  };
 };
 
 export type LocalWorkOsIpcChannel = keyof LocalWorkOsIpcContracts & string;
@@ -1751,6 +1774,11 @@ export type LocalWorkOsApi = {
     listBackups: (
       input?: ListBackupsInput
     ) => Promise<ApiResult<BackupSnapshotSummary[]>>;
+  };
+  export: {
+    exportWorkspaceJson: (
+      input?: ExportWorkspaceJsonInput
+    ) => Promise<ApiResult<WorkspaceJsonExportSummary>>;
   };
 };
 
@@ -2064,6 +2092,10 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.createManualBackup, input),
       listBackups: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackups, input)
+    },
+    export: {
+      exportWorkspaceJson: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportWorkspaceJson, input)
     }
   };
 }

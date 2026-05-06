@@ -1973,7 +1973,8 @@ a {
 }
 
 .category-management-panel,
-.backup-management-panel {
+.backup-management-panel,
+.export-management-panel {
   display: grid;
   max-width: 900px;
   gap: 16px;

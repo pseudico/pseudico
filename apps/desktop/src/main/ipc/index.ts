@@ -8,6 +8,7 @@ import { registerCollectionIpc } from "./registerCollectionIpc";
 import { registerContainerIpc } from "./registerContainerIpc";
 import { registerDashboardIpc } from "./registerDashboardIpc";
 import { registerDatabaseIpc } from "./registerDatabaseIpc";
+import { registerExportIpc } from "./registerExportIpc";
 import { registerFileIpc } from "./registerFileIpc";
 import { registerInboxIpc } from "./registerInboxIpc";
 import { registerItemIpc } from "./registerItemIpc";
@@ -43,6 +44,7 @@ export function registerDesktopIpc(
 ): void {
   registerWorkspaceIpc(services.workspaceService);
   registerBackupIpc(services.workspaceService);
+  registerExportIpc(services.workspaceService);
   registerDatabaseIpc(services.workspaceService);
   registerInboxIpc(services.workspaceService);
   registerProjectIpc(services.workspaceService);

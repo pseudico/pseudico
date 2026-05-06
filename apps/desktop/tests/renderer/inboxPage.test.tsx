@@ -425,6 +425,9 @@ function createMockApi(): LocalWorkOsApi {
     backup: {
       createManualBackup: async () => apiOk(null as never),
       listBackups: async () => apiOk([])
+    },
+    export: {
+      exportWorkspaceJson: async () => apiOk(null as never)
     }
   };
 }
