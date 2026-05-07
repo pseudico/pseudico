@@ -904,6 +904,50 @@ export type ActivitySummary = {
   description: string;
 };
 
+export type RelationshipObjectType = "container" | "item" | "list_item";
+
+export type RelationshipSummary = {
+  id: string;
+  workspaceId: string;
+  sourceType: RelationshipObjectType;
+  sourceId: string;
+  targetType: RelationshipObjectType;
+  targetId: string;
+  relationType: string;
+  label: string | null;
+  createdAt: string;
+  deletedAt: string | null;
+};
+
+export type LinkContactToProjectInput = {
+  workspaceId?: string;
+  contactId: string;
+  projectId: string;
+};
+
+export type ContactProjectRelationshipResult = {
+  relationship: RelationshipSummary;
+  changed: boolean;
+};
+
+export type RelatedContactSummary = {
+  relationshipId: string;
+  relationshipCreatedAt: string;
+  contact: ContactSummary;
+  openTaskCount: number;
+  recentActivityCount: number;
+  recentActivity: ActivitySummary[];
+};
+
+export type RelatedProjectSummary = {
+  relationshipId: string;
+  relationshipCreatedAt: string;
+  project: ProjectSummary;
+  openTaskCount: number;
+  recentActivityCount: number;
+  recentActivity: ActivitySummary[];
+};
+
 export type DashboardWidgetType =
   | "today"
   | "overdue"
@@ -1342,6 +1386,16 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     addField: "local-work-os:contacts:add-field",
     updateField: "local-work-os:contacts:update-field"
   },
+  relationships: {
+    linkContactToProject:
+      "local-work-os:relationships:link-contact-to-project",
+    unlinkContactFromProject:
+      "local-work-os:relationships:unlink-contact-from-project",
+    listContactsForProject:
+      "local-work-os:relationships:list-contacts-for-project",
+    listProjectsForContact:
+      "local-work-os:relationships:list-projects-for-contact"
+  },
   categories: {
     createCategory: "local-work-os:categories:create-category",
     updateCategory: "local-work-os:categories:update-category",
@@ -1598,6 +1652,22 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateField]: {
     input: UpdateContactFieldInput;
     result: ApiResult<ContactFieldSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.relationships.linkContactToProject]: {
+    input: LinkContactToProjectInput;
+    result: ApiResult<ContactProjectRelationshipResult>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.relationships.unlinkContactFromProject]: {
+    input: string;
+    result: ApiResult<ContactProjectRelationshipResult>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.relationships.listContactsForProject]: {
+    input: string;
+    result: ApiResult<RelatedContactSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.relationships.listProjectsForContact]: {
+    input: string;
+    result: ApiResult<RelatedProjectSummary[]>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.categories.createCategory]: {
     input: CreateCategoryInput;
@@ -1947,6 +2017,20 @@ export type LocalWorkOsApi = {
     getContact: (
       contactId: string
     ) => Promise<ApiResult<ContactDetailSummary | null>>;
+  };
+  relationships: {
+    linkContactToProject: (
+      input: LinkContactToProjectInput
+    ) => Promise<ApiResult<ContactProjectRelationshipResult>>;
+    unlinkContactFromProject: (
+      relationshipId: string
+    ) => Promise<ApiResult<ContactProjectRelationshipResult>>;
+    listContactsForProject: (
+      projectId: string
+    ) => Promise<ApiResult<RelatedContactSummary[]>>;
+    listProjectsForContact: (
+      contactId: string
+    ) => Promise<ApiResult<RelatedProjectSummary[]>>;
   };
   categories: {
     create: (input: CreateCategoryInput) => Promise<ApiResult<CategorySummary>>;
@@ -2306,6 +2390,28 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.listContacts, workspaceId),
       getContact: (contactId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.getContact, contactId)
+    },
+    relationships: {
+      linkContactToProject: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.relationships.linkContactToProject,
+          input
+        ),
+      unlinkContactFromProject: (relationshipId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.relationships.unlinkContactFromProject,
+          relationshipId
+        ),
+      listContactsForProject: (projectId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.relationships.listContactsForProject,
+          projectId
+        ),
+      listProjectsForContact: (contactId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.relationships.listProjectsForContact,
+          contactId
+        )
     },
     categories: {
       create: (input) =>

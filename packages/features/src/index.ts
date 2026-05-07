@@ -38,7 +38,12 @@ export {
 export type { ActivityEventView } from "./activity";
 export { BackupService, backupModuleContract, createBackupManifest } from "./backup";
 export { calendarModuleContract } from "./calendar";
-export { ContactService, contactsModuleContract } from "./contacts";
+export {
+  ContactRelationshipService,
+  ContactService,
+  PROJECT_CONTACT_RELATIONSHIP_LABEL,
+  contactsModuleContract
+} from "./contacts";
 export { CreateContainerCommand } from "./containers";
 export type {
   CreateContainerCommandIdFactory,
@@ -127,11 +132,16 @@ export type {
   AddContactFieldInput,
   ContactFieldInput,
   ContactMutableStatus,
+  ContactProjectRelationshipResult,
   ContactRecord,
   ContactServiceIdFactory,
   CreateContactInput,
   CreateContactResult,
   DeleteContactFieldInput,
+  LinkContactToProjectInput,
+  RelatedContactSummary,
+  RelatedProjectSummary,
+  UnlinkContactFromProjectInput,
   UpdateContactFieldInput,
   UpdateContactInput
 } from "./contacts";

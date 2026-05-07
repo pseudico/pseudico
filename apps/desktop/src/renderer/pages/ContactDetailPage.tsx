@@ -8,6 +8,7 @@ import {
   NoteCardContent,
   NoteEditor,
   RecentActivityList,
+  RelatedProjectsPanel,
   TaskCardContent,
   TaskQuickAdd,
   type ContactFieldDraft,
@@ -15,6 +16,7 @@ import {
   type NoteCardViewModel,
   type NoteEditorValues,
   type RecentActivityViewModel,
+  type RelatedProjectViewModel,
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel
@@ -27,6 +29,8 @@ import type {
   ContactSummary,
   LocalWorkOsApi,
   NoteSummary,
+  ProjectSummary,
+  RelatedProjectSummary,
   TaskSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
@@ -54,6 +58,8 @@ type ContactDetailPageProps = {
   initialCategories?: CategorySummary[];
   initialItems?: UniversalItemViewModel[];
   initialActivity?: RecentActivityViewModel[];
+  initialAvailableProjects?: ProjectSummary[];
+  initialRelatedProjects?: RelatedProjectSummary[];
 };
 
 const emptyContactItems: UniversalItemViewModel[] = [];
@@ -64,7 +70,9 @@ export function ContactDetailPage({
   initialContactDetail,
   initialCategories = [],
   initialItems = emptyContactItems,
-  initialActivity = []
+  initialActivity = [],
+  initialAvailableProjects = [],
+  initialRelatedProjects = []
 }: ContactDetailPageProps): React.JSX.Element {
   const { contactId } = useParams();
   const [contact, setContact] = useState<ContactSummary | null>(
@@ -81,6 +89,14 @@ export function ContactDetailPage({
     useState<CategorySummary[]>(initialCategories);
   const [activity, setActivity] =
     useState<RecentActivityViewModel[]>(initialActivity);
+  const [projects, setProjects] =
+    useState<ProjectSummary[]>(initialAvailableProjects);
+  const [relatedProjects, setRelatedProjects] = useState<RelatedProjectSummary[]>(
+    initialRelatedProjects
+  );
+  const [selectedProjectId, setSelectedProjectId] = useState("");
+  const [relationshipBusy, setRelationshipBusy] = useState(false);
+  const [relationshipError, setRelationshipError] = useState<string | null>(null);
   const [loading, setLoading] = useState(initialContactDetail === undefined);
   const [itemsLoading, setItemsLoading] = useState(false);
   const [savingField, setSavingField] = useState(false);
@@ -117,7 +133,9 @@ export function ContactDetailPage({
         categoriesResult,
         activityResult,
         tasksResult,
-        notesResult
+        notesResult,
+        projectsResult,
+        relatedProjectsResult
       ] = await Promise.all([
         apiClient.contacts.get(activeContactId),
         apiClient.categories.list(),
@@ -126,7 +144,9 @@ export function ContactDetailPage({
           targetId: activeContactId
         }),
         apiClient.tasks.listByContainer(activeContactId),
-        apiClient.notes.listByContainer(activeContactId)
+        apiClient.notes.listByContainer(activeContactId),
+        apiClient.projects.list(),
+        apiClient.relationships.listProjectsForContact(activeContactId)
       ]);
 
       if (!active) {
@@ -161,8 +181,24 @@ export function ContactDetailPage({
         return;
       }
 
+      if (!projectsResult.ok) {
+        setItemError(projectsResult.error.message);
+        return;
+      }
+
+      if (!relatedProjectsResult.ok) {
+        setItemError(relatedProjectsResult.error.message);
+        return;
+      }
+
       setContact(contactResult.data?.contact ?? null);
       setFields(contactResult.data?.fields ?? []);
+      setProjects(projectsResult.data);
+      setRelatedProjects(relatedProjectsResult.data);
+      setSelectedProjectId(selectFirstUnlinkedProjectId(
+        projectsResult.data,
+        relatedProjectsResult.data
+      ));
       setCategories(categoriesResult.data);
       setActivity(activityResult.data.map(toRecentActivityViewModel));
       setItems(mergeContactContent(tasksResult.data, notesResult.data, categoriesResult.data));
@@ -233,6 +269,75 @@ export function ContactDetailPage({
     }
 
     setActivity(result.data.map(toRecentActivityViewModel));
+  }
+
+  async function refreshRelatedProjects(activeContactId: string): Promise<void> {
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.listProjectsForContact(
+      activeContactId
+    );
+
+    if (!result.ok) {
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    setRelatedProjects(result.data);
+    setSelectedProjectId((current) =>
+      current.trim().length > 0 &&
+      !result.data.some((summary) => summary.project.id === current)
+        ? current
+        : selectFirstUnlinkedProjectId(projects, result.data)
+    );
+  }
+
+  async function linkSelectedProject(): Promise<void> {
+    if (contact === null || selectedProjectId.trim().length === 0) {
+      return;
+    }
+
+    setRelationshipBusy(true);
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.linkContactToProject({
+      workspaceId: contact.workspaceId,
+      contactId: contact.id,
+      projectId: selectedProjectId
+    });
+
+    if (!result.ok) {
+      setRelationshipBusy(false);
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    await refreshRelatedProjects(contact.id);
+    await refreshContactActivity(contact.id);
+    setRelationshipBusy(false);
+  }
+
+  async function unlinkRelatedProject(relationshipId: string): Promise<void> {
+    if (contact === null) {
+      return;
+    }
+
+    setRelationshipBusy(true);
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.unlinkContactFromProject(
+      relationshipId
+    );
+
+    if (!result.ok) {
+      setRelationshipBusy(false);
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    await refreshRelatedProjects(contact.id);
+    await refreshContactActivity(contact.id);
+    setRelationshipBusy(false);
   }
 
   async function addContactField(field: ContactFieldDraft): Promise<boolean> {
@@ -480,6 +585,18 @@ export function ContactDetailPage({
 
   const contactCategory =
     categories.find((category) => category.id === contact.categoryId) ?? null;
+  const relatedProjectIds = new Set(
+    relatedProjects.map((summary) => summary.project.id)
+  );
+  const availableProjects = projects
+    .filter((project) => !relatedProjectIds.has(project.id))
+    .map((project) => ({
+      id: project.id,
+      name: project.name
+    }));
+  const relatedProjectViewModels = relatedProjects.map(
+    toRelatedProjectViewModel
+  );
   const visibleItems = items.slice(0, visibleItemCount);
   const hasMoreItems = visibleItemCount < items.length;
 
@@ -529,6 +646,17 @@ export function ContactDetailPage({
         fields={fields.map(toContactFieldViewModel)}
         onAddField={addContactField}
         onUpdateField={updateContactField}
+      />
+
+      <RelatedProjectsPanel
+        availableProjects={availableProjects}
+        busy={relationshipBusy}
+        error={relationshipError}
+        relatedProjects={relatedProjectViewModels}
+        selectedProjectId={selectedProjectId}
+        onLinkProject={() => void linkSelectedProject()}
+        onSelectedProjectChange={setSelectedProjectId}
+        onUnlinkProject={(relationshipId) => void unlinkRelatedProject(relationshipId)}
       />
 
       <RecentActivityList
@@ -719,6 +847,36 @@ function toRecentActivityViewModel(
     description: activity.description,
     createdAt: activity.createdAt
   };
+}
+
+function toRelatedProjectViewModel(
+  summary: RelatedProjectSummary
+): RelatedProjectViewModel {
+  return {
+    relationshipId: summary.relationshipId,
+    projectId: summary.project.id,
+    name: summary.project.name,
+    description: summary.project.description,
+    status: summary.project.status,
+    openTaskCount: summary.openTaskCount,
+    recentActivityCount: summary.recentActivityCount,
+    recentActivity: summary.recentActivity.map((activity) => ({
+      id: activity.id,
+      description: activity.description,
+      createdAt: activity.createdAt
+    }))
+  };
+}
+
+function selectFirstUnlinkedProjectId(
+  projects: readonly ProjectSummary[],
+  relatedProjects: readonly RelatedProjectSummary[]
+): string {
+  const relatedIds = new Set(
+    relatedProjects.map((summary) => summary.project.id)
+  );
+
+  return projects.find((project) => !relatedIds.has(project.id))?.id ?? "";
 }
 
 function compareFeedItems(

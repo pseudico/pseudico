@@ -203,6 +203,19 @@ export {
   type RelatedItemsPanelProps
 } from "./components/RelatedItemsPanel";
 export {
+  RelatedContactsPanel,
+  type RelatedActivityViewModel,
+  type RelatedContactOption,
+  type RelatedContactViewModel,
+  type RelatedContactsPanelProps
+} from "./components/RelatedContactsPanel";
+export {
+  RelatedProjectsPanel,
+  type RelatedProjectOption,
+  type RelatedProjectViewModel,
+  type RelatedProjectsPanelProps
+} from "./components/RelatedProjectsPanel";
+export {
   DashboardWidget,
   type DashboardWidgetKind,
   type DashboardWidgetProps

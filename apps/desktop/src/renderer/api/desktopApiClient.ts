@@ -130,6 +130,18 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       getContact: (contactId) =>
         callApi(() => api.contacts.getContact(contactId))
     },
+    relationships: {
+      linkContactToProject: (input) =>
+        callApi(() => api.relationships.linkContactToProject(input)),
+      unlinkContactFromProject: (relationshipId) =>
+        callApi(() =>
+          api.relationships.unlinkContactFromProject(relationshipId)
+        ),
+      listContactsForProject: (projectId) =>
+        callApi(() => api.relationships.listContactsForProject(projectId)),
+      listProjectsForContact: (contactId) =>
+        callApi(() => api.relationships.listProjectsForContact(contactId))
+    },
     categories: {
       create: (input) => callApi(() => api.categories.create(input)),
       update: (input) => callApi(() => api.categories.update(input)),
@@ -377,6 +389,18 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().contacts.listContacts(workspaceId),
     getContact: (contactId) =>
       getDesktopApiClient().contacts.getContact(contactId)
+  },
+  relationships: {
+    linkContactToProject: (input) =>
+      getDesktopApiClient().relationships.linkContactToProject(input),
+    unlinkContactFromProject: (relationshipId) =>
+      getDesktopApiClient().relationships.unlinkContactFromProject(
+        relationshipId
+      ),
+    listContactsForProject: (projectId) =>
+      getDesktopApiClient().relationships.listContactsForProject(projectId),
+    listProjectsForContact: (contactId) =>
+      getDesktopApiClient().relationships.listProjectsForContact(contactId)
   },
   categories: {
     create: (input) => getDesktopApiClient().categories.create(input),
