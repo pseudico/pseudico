@@ -3,6 +3,7 @@ import {
   type ApiResult,
   type LocalWorkOsApi
 } from "../../preload/api";
+import { formatUserError } from "@local-work-os/ui";
 
 function getPreloadApi(): LocalWorkOsApi {
   if (typeof window === "undefined" || window.localWorkOs === undefined) {
@@ -20,7 +21,7 @@ async function callApi<T>(
   } catch (error) {
     return apiError(
       "IPC_ERROR",
-      error instanceof Error ? error.message : "Preload IPC call failed."
+      formatUserError(error)
     );
   }
 }

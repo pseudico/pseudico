@@ -2,6 +2,8 @@ import { RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  EmptyState,
+  ErrorState,
   TodayLane,
   type SnoozePreset,
   type TodayTaskCardViewModel
@@ -326,7 +328,10 @@ export function TodayPage({
           <div>
             <p className="top-eyebrow">Planning</p>
             <h2>Today</h2>
-            <p>Open a local workspace to see due and overdue tasks.</p>
+            <EmptyState
+              description="Open a local workspace to see due and overdue tasks."
+              title="No workspace open"
+            />
           </div>
         </div>
       </section>
@@ -355,11 +360,9 @@ export function TodayPage({
         </button>
       </div>
 
-      {error === null ? null : (
-        <p className="form-message form-message-error">{error}</p>
-      )}
+      {error === null ? null : <ErrorState error={error} title="Today error" />}
       {mutationError === null ? null : (
-        <p className="form-message form-message-error">{mutationError}</p>
+        <ErrorState error={mutationError} title="Task update failed" />
       )}
 
       <div className="today-lane-grid">

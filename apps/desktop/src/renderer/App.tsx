@@ -1,6 +1,7 @@
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ErrorBoundary } from "./shell/ErrorBoundary";
 import { AppShell } from "./shell/AppShell";
+import { ToastHost } from "./shell/toastStore";
 import { CollectionsPage } from "./pages/CollectionsPage";
 import { ContactsPage } from "./pages/ContactsPage";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -43,6 +44,7 @@ export function App(): React.JSX.Element {
       <HashRouter>
         <AppRoutes />
       </HashRouter>
+      <ToastHost />
     </ErrorBoundary>
   );
 }

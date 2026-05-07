@@ -1,5 +1,6 @@
 import { Activity, Database, FolderCheck, SearchCheck } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { EmptyState, ErrorState, renderLoadableState } from "@local-work-os/ui";
 import type {
   DatabaseHealthStatus,
   LocalWorkOsApi,
@@ -105,9 +106,11 @@ export function WorkspaceHealthSummary({
           <FolderCheck size={18} aria-hidden="true" />
           <h2>No workspace open</h2>
         </div>
-        <p className="muted-text">
-          Create or open a local workspace to view database health.
-        </p>
+        <EmptyState
+          description="Create or open a local workspace to view database health."
+          icon={<FolderCheck size={22} aria-hidden="true" />}
+          title="No workspace open"
+        />
       </section>
     );
   }
@@ -177,10 +180,11 @@ export function WorkspaceHealthSummary({
         )}
       </div>
 
-      {loading ? <p className="muted-text">Checking local database...</p> : null}
-      {error === null ? null : (
-        <p className="form-message form-message-error">{error}</p>
-      )}
+      {renderLoadableState({
+        loading,
+        loadingLabel: "Checking local database..."
+      })}
+      {error === null ? null : <ErrorState error={error} title="Database unavailable" />}
 
       <dl className="health-grid">
         {rows.map((row) => (
