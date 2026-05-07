@@ -11,6 +11,39 @@ Pagico’s public material describes the core appeal as having tasks, notes, doc
 
 ---
 
+## Current Implementation Snapshot
+
+As of the M6 documentation sync, the repository contains the local-only MVP
+foundation for workspace creation/opening, SQLite bootstrap and repositories,
+Inbox/project containers, tasks, lists, notes, links, file attachments,
+metadata, activity, search, saved views/collections, Today planning, dashboard
+widgets, project health, backup, export, import validation, smoke tests,
+packaging verification, performance guardrails, app-wide error/toast states,
+and data-integrity/search audit guidance.
+
+The implemented slice remains an MVP foundation, not the full product described
+below. Contacts, timeline, calendar, templates, workflow automation, browser
+capture, file versions, backup restore, full import execution, rich notes,
+custom dashboard editing, and advanced saved-view builder UX remain future work
+unless a later Linear issue explicitly brings them into scope.
+
+Known limitations for MVP release planning:
+
+- Contacts currently have module scaffolding and route placeholders rather than
+  full contact/client workflows.
+- Timeline and calendar services are placeholders for future local dated-work
+  projections.
+- Search is local and service-backed, but ranking, diagnostics, and rebuild UX
+  are intentionally basic.
+- Import validation exists for workspace JSON; executing a restore/import into
+  a new workspace remains future work.
+- Backups and exports are manual local actions. Automatic backup scheduling,
+  restore flows, and release-grade integrity reporting remain future work.
+- Packaged builds are development verification builds without installer,
+  signing, notarization, or auto-update support.
+
+---
+
 ## 1. Product definition
 
 ### 1.1 Product promise
@@ -2089,23 +2122,25 @@ Saved view = why the user is seeing the item now.
 
 MVP should prove the object graph and core usability.
 
-| Module | MVP scope |
-|---|---|
-| Workspace | Create/open local workspace |
-| App shell | Sidebar, top bar, main view |
-| Database | SQLite schema + migrations |
-| Containers | Inbox and projects |
-| Tasks | Create/edit/complete/due date |
-| Lists | Basic checklist |
-| Notes | Markdown notes |
-| Files | Attach/open local file items |
-| Tags | Inline `@tag` parsing |
-| Categories | Create/assign colour category |
-| Search | Global FTS search |
-| Today | Today + overdue |
-| Dashboard | Default overview |
-| Activity | Log core writes |
-| Backup/export | Manual backup + JSON export |
+| Module | MVP scope | Current status |
+|---|---|---|
+| Workspace | Create/open local workspace | Implemented with workspace folder layout, health checks, recent workspace state, and typed preload access. |
+| App shell | Sidebar, top bar, main view | Implemented with core routes, quick add, search entry, error boundary, and toast states. |
+| Database | SQLite schema + migrations | Implemented with initial schema, migration runner, bootstrap/seed services, repositories, and transaction helpers. |
+| Containers | Inbox and projects | Implemented for Inbox and project CRUD/feed surfaces; contact containers remain future-facing. |
+| Tasks | Create/edit/complete/due date | Implemented with services, repositories, UI flows, Today projections, snooze/reschedule, and activity/search integration. |
+| Lists | Basic checklist | Implemented with list service, checklist rows, parser, and project UI integration. |
+| Notes | Markdown notes | Implemented with note service, previews, project UI integration, and search projection. |
+| Files | Attach/open local file items | Implemented with safe workspace attachment storage, open/reveal/edit/missing-state UI, metadata, and search hydration. File versions remain future work. |
+| Links | Local URL/link items | Implemented with link service, link cards, and local metadata. Browser capture remains future work. |
+| Tags | Inline `@tag` parsing | Implemented through metadata services and tag/category browser surfaces. |
+| Categories | Create/assign colour category | Implemented for category creation/assignment and browsing. |
+| Search | Global FTS search | Implemented as local search projections and hydrators across projects, tasks, notes, links, files, and metadata. |
+| Saved views/collections | Basic saved query surfaces | Implemented for tag and keyword collections with bounded evaluation. Advanced builder UX remains future work. |
+| Today | Today + overdue | Implemented with due/overdue lanes, manual Today/Tomorrow planning, ordering, rollover, snooze, and reschedule. |
+| Dashboard | Default overview | Implemented with default widgets, widget data services, project health, recent activity, and source-object navigation. Custom widget editing remains future work. |
+| Activity | Log core writes | Implemented for core data-changing services and exposed through recent activity projections. |
+| Backup/export | Manual backup + JSON export | Implemented for manual backups, workspace JSON export, project Markdown export, task CSV/TSV export, and JSON import validation. Full restore/import execution remains future work. |
 
 ### 32.2 V1 — Pagico-like usability depth
 

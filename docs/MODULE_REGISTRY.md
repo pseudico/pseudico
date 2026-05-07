@@ -9,6 +9,27 @@ The placeholder contracts under `packages/features/src` are intentionally thin.
 They define homes for future application services without adding database
 schema, UI pages, filesystem behavior, or product logic early.
 
+## Current MVP Module Status
+
+Most MVP modules now have concrete feature services and repository-backed
+renderer flows. The registry remains the ownership map for future tickets, but
+new work should account for this implemented baseline:
+
+- Implemented MVP flows: Workspace, Inbox, Projects, Tasks, Lists, Notes,
+  Files, Links, Metadata, Search, Saved Views/Collections, Today, Dashboard,
+  Backup, Export, Import validation, Activity Log, Database, and diagnostics.
+- Future or placeholder-heavy flows: Contacts, Timeline, Calendar, Templates,
+  Workflows, file versions, full import/restore execution, custom dashboard
+  editing, advanced saved-view builder UX, local reminders, and browser
+  capture.
+- Cross-cutting services now include project health, recent activity,
+  integrity diagnostics, bounded pagination, app-wide error boundaries/toasts,
+  packaged smoke checks, and MVP smoke coverage.
+
+When adding a future module slice, prefer extending the owning feature service
+and matching repository/preload/client boundary rather than creating a parallel
+renderer-only implementation.
+
 ## Feature Module Map
 
 | Module | Purpose | Primary entities | Depends on | Feeds into | Priority |

@@ -55,6 +55,30 @@ Renderer components should depend on feature-facing APIs and UI components, not
 database internals. Database access should be hidden behind repositories and
 services so future schema changes do not leak across the UI.
 
+## Implemented MVP Architecture
+
+The current implementation follows the planned split:
+
+- Electron main owns workspace folder selection, safe file operations,
+  packaged-app smoke mode, SQLite connection/bootstrap, and narrow IPC
+  handlers.
+- Preload exposes typed APIs for workspace, project, item, metadata, search,
+  dashboard, backup, export, import validation, file, and package-smoke flows.
+- The renderer calls those APIs through `desktopApiClient` and renders routed
+  React pages for Inbox, projects, project detail, Today, dashboard,
+  collections, search, tags/categories, settings, contacts placeholder, and
+  workspace health.
+- `packages/db` owns schema, migrations, repositories, transaction helpers,
+  database health, activity logging, and search-index persistence.
+- `packages/features` owns application services for user workflows such as
+  project/task/list/note/link/file operations, search hydration, saved-view
+  evaluation, Today planning, dashboard widgets, backup, export, import
+  validation, and integrity diagnostics.
+
+Renderer code must continue to avoid direct Node filesystem APIs and direct
+SQLite imports. New native capabilities should extend typed main/preload APIs
+first, then expose feature-facing client methods to React.
+
 ## Local Workspace Boundary
 
 Each user workspace is a local folder. The workspace should contain its SQLite
@@ -109,6 +133,18 @@ The renderer is not trusted with direct filesystem or database access. Native
 capabilities stay in Electron main and are exposed through typed preload IPC.
 Any new IPC endpoint must have a narrow purpose, validate inputs, return typed
 results, and avoid exposing arbitrary filesystem paths or SQL.
+
+## Release And Verification Boundary
+
+Development packaging is verified with `pnpm package` and `pnpm package:smoke`.
+The package smoke path launches the unpacked Electron app in a main-process
+smoke mode, creates a temporary workspace, writes data through service layers,
+reopens SQLite, and confirms workspace data stays outside the application
+bundle.
+
+This is not a release installer pipeline. Code signing, notarization,
+installer generation, auto-update, and release-channel publishing remain
+future release-hardening work.
 
 ## Source Documents
 
