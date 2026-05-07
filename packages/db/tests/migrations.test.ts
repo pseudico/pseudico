@@ -24,6 +24,7 @@ const requiredTables = [
   "tags",
   "taggings",
   "categories",
+  "contact_fields",
   "relationships",
   "saved_views",
   "dashboards",
@@ -37,6 +38,7 @@ const requiredTables = [
 const requiredIndexes = [
   "idx_containers_workspace_type",
   "idx_container_tabs_container",
+  "idx_contact_fields_container_order",
   "idx_items_container_order",
   "idx_task_details_due",
   "idx_taggings_target",
@@ -47,7 +49,7 @@ const requiredIndexes = [
 let tempRoot: string;
 let connection: DatabaseConnection | null;
 
-describe("initial schema migration", () => {
+describe("schema migrations", () => {
   beforeEach(async () => {
     tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-db-"));
     connection = await createDatabaseConnection({
@@ -60,7 +62,7 @@ describe("initial schema migration", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version one", () => {
+  it("runs on an empty database and records schema version two", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -69,14 +71,19 @@ describe("initial schema migration", () => {
           version: 1,
           name: "initial_schema",
           checksum: "pse-16-initial-schema-v1"
+        },
+        {
+          version: 2,
+          name: "contact_fields",
+          checksum: "pse-68-contact-fields-v1"
         }
       ],
-      currentVersion: 1
+      currentVersion: 2
     });
-    expect(service.getCurrentSchemaVersion()).toBe(1);
+    expect(service.getCurrentSchemaVersion()).toBe(2);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 1
+      currentVersion: 2
     });
   });
 
@@ -104,7 +111,23 @@ describe("initial schema migration", () => {
           id, workspace_id, type, name, slug, created_at, updated_at
         ) values (?, ?, ?, ?, ?, ?, ?)`
       )
-      .run("container_1", "workspace_1", "project", "Project Alpha", "project-alpha", now, now);
+      .run("container_1", "workspace_1", "contact", "Alex Chen", "alex-chen", now, now);
+    connection!.sqlite
+      .prepare(
+        `insert into contact_fields (
+          id, workspace_id, container_id, label, value, type, created_at, updated_at
+        ) values (?, ?, ?, ?, ?, ?, ?, ?)`
+      )
+      .run(
+        "contact_field_1",
+        "workspace_1",
+        "container_1",
+        "Email",
+        "alex@example.com",
+        "email",
+        now,
+        now
+      );
     connection!.sqlite
       .prepare(
         `insert into container_tabs (
@@ -148,6 +171,11 @@ describe("initial schema migration", () => {
     expect(
       connection!.sqlite
         .prepare("select count(*) as count from activity_log where workspace_id = ?")
+        .get("workspace_1")
+    ).toMatchObject({ count: 1 });
+    expect(
+      connection!.sqlite
+        .prepare("select count(*) as count from contact_fields where workspace_id = ?")
         .get("workspace_1")
     ).toMatchObject({ count: 1 });
   });

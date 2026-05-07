@@ -29,8 +29,9 @@ unless a later Linear issue explicitly brings them into scope.
 
 Known limitations for MVP release planning:
 
-- Contacts currently have module scaffolding and route placeholders rather than
-  full contact/client workflows.
+- Contacts now have a repository/service foundation for local contact
+  containers and flexible profile fields; full renderer workflows remain
+  future work.
 - Timeline and calendar services are placeholders for future local dated-work
   projections.
 - Search is local and service-backed, but ranking, diagnostics, and rebuild UX

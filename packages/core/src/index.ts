@@ -58,6 +58,13 @@ export type {
 export { isSupportedLinkProtocol } from "./entities/Link";
 export type { LinkProtocol, LinkRecord } from "./entities/Link";
 export {
+  CONTACT_FIELD_TYPES,
+  CONTACT_STATUSES,
+  isContactFieldType,
+  isContactStatus
+} from "./entities/Contact";
+export type { ContactFieldType, ContactStatus } from "./entities/Contact";
+export {
   TAGGING_SOURCES,
   TAGGING_TARGET_TYPES,
   isTaggingSource,

@@ -27,6 +27,7 @@ export type SearchIndexTargetType = UpsertSearchIndexInput["targetType"];
 export type SearchIndexIdFactory = (prefix: string) => string;
 
 export type SearchProjectionInput = {
+  body?: string;
   id?: string;
   tags?: string | string[];
   category?: string | null;
@@ -109,7 +110,7 @@ export class SearchIndexService {
       targetType: "container",
       targetId: container.id,
       title: container.name,
-      body: container.description ?? "",
+      body: input.body ?? container.description ?? "",
       tags: tagProjection.tags,
       category:
         input.category ??
