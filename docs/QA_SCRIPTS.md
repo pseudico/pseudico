@@ -24,6 +24,15 @@ Manual verification for a temporary workspace:
 12. Quit and reopen the workspace.
 13. Confirm the project, completed task, note, category, backup, and exports persist.
 
+Known limitations to confirm during MVP QA:
+
+- Contact, timeline, calendar, template, workflow, reminder, browser-capture,
+  and file-version surfaces should not appear as completed MVP workflows.
+- Import validation may report whether a workspace JSON file is valid, but full
+  import/restore into a new workspace is still future work.
+- Packaged development builds should not contain user workspace databases,
+  attachments, backups, exports, or logs inside the app bundle.
+
 ## File Safety QA
 
 1. Attach a file.
@@ -34,6 +43,19 @@ Manual verification for a temporary workspace:
 6. Confirm the app shows a missing-file state.
 7. Attach a file with an unusual filename.
 8. Confirm the stored path remains inside the workspace.
+
+## Release Candidate Documentation Check
+
+1. Confirm `docs/PRODUCT_SPEC.md` contains current implemented and remaining
+   MVP notes.
+2. Confirm `docs/DATA_MODEL.md` reflects the current schema/repository/service
+   baseline without claiming future migrations are complete.
+3. Confirm `docs/ARCHITECTURE.md` describes the main/preload/renderer,
+   repository/service, and packaged-smoke boundaries.
+4. Confirm `docs/MODULE_REGISTRY.md` separates implemented MVP modules from
+   placeholder/future modules.
+5. Confirm `docs/RELEASE.md` lists the MVP release checklist and known
+   limitations.
 
 ## Packaged App Smoke Test
 
