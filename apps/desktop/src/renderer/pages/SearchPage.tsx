@@ -2,7 +2,10 @@ import { ListFilter, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
+  EmptyState,
+  ErrorState,
   SearchResultCard,
+  renderLoadableState,
   type SearchResultCardViewModel
 } from "@local-work-os/ui";
 import type {
@@ -228,9 +231,7 @@ export function SearchPage({
             <span>{results.length} result{results.length === 1 ? "" : "s"}</span>
           </div>
 
-          {error === null ? null : (
-            <p className="form-message form-message-error">{error}</p>
-          )}
+          {error === null ? null : <ErrorState error={error} title="Search error" />}
 
           {activeQuery.trim().length === 0 ? (
             <SearchEmptyState
@@ -238,7 +239,10 @@ export function SearchPage({
               description="Enter a query to find active indexed content."
             />
           ) : loading ? (
-            <p className="muted-text">Searching local index...</p>
+            renderLoadableState({
+              loading,
+              loadingLabel: "Searching local index..."
+            })
           ) : results.length === 0 ? (
             <SearchEmptyState
               title="No results"
@@ -269,10 +273,7 @@ function SearchEmptyState({
   title: string;
 }): React.JSX.Element {
   return (
-    <div className="item-feed-empty-state">
-      <h3>{title}</h3>
-      <p>{description}</p>
-    </div>
+    <EmptyState description={description} title={title} />
   );
 }
 

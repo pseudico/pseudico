@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
+import { EmptyState, renderLoadableState } from "@local-work-os/ui";
 import { WorkspaceHealthPanel } from "./WorkspaceHealthPanel";
 import {
   refreshCurrentWorkspace,
@@ -26,14 +27,21 @@ export function WorkspaceHomePage(): React.JSX.Element {
         </p>
       </div>
 
-      {loading && currentWorkspace === null ? (
-        <p className="muted-text">Checking current workspace...</p>
-      ) : null}
+      {renderLoadableState({
+        loading: loading && currentWorkspace === null,
+        loadingLabel: "Checking current workspace..."
+      })}
 
       {currentWorkspace === null ? (
-        <Link to="/welcome" className="primary-button page-action-link">
-          Open workspace
-        </Link>
+        <EmptyState
+          action={
+            <Link to="/welcome" className="primary-button page-action-link">
+              Open workspace
+            </Link>
+          }
+          description="Create or open a local workspace before using projects, tasks, files, and search."
+          title="No workspace open"
+        />
       ) : null}
 
       <WorkspaceHealthPanel workspace={currentWorkspace} />

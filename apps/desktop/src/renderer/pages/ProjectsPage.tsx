@@ -1,7 +1,13 @@
 import { FolderKanban, Plus, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ProjectForm, type ProjectFormValues } from "@local-work-os/ui";
+import {
+  EmptyState,
+  ErrorState,
+  ProjectForm,
+  renderLoadableState,
+  type ProjectFormValues
+} from "@local-work-os/ui";
 import type { LocalWorkOsApi, ProjectSummary } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
@@ -120,9 +126,7 @@ export function ProjectsPage({
         </button>
       </div>
 
-      {error === null ? null : (
-        <p className="form-message form-message-error">{error}</p>
-      )}
+      {error === null ? null : <ErrorState error={error} title="Projects error" />}
 
       <dialog className="project-dialog" open={createOpen}>
         <div className="project-dialog-header">
@@ -142,9 +146,11 @@ export function ProjectsPage({
       </dialog>
 
       <div className="project-list-panel" aria-busy={loading}>
-        {loading ? (
-          <p className="muted-text">Loading projects...</p>
-        ) : projects.length === 0 ? (
+        {renderLoadableState({
+          loading,
+          loadingLabel: "Loading projects..."
+        }) ??
+        (projects.length === 0 ? (
           <ProjectsEmptyState onCreate={() => setCreateOpen(true)} />
         ) : (
           <div className="project-list" aria-label="Projects">
@@ -152,7 +158,7 @@ export function ProjectsPage({
               <ProjectListRow key={project.id} project={project} />
             ))}
           </div>
-        )}
+        ))}
       </div>
     </section>
   );
@@ -164,18 +170,17 @@ function ProjectsEmptyState({
   onCreate: () => void;
 }): React.JSX.Element {
   return (
-    <div className="projects-empty-state">
-      <FolderKanban size={28} aria-hidden="true" />
-      <h3>No projects yet</h3>
-      <p>
-        Create the first local project container before adding mixed content to
-        it.
-      </p>
-      <button type="button" className="secondary-button" onClick={onCreate}>
-        <Plus size={17} aria-hidden="true" />
-        Create project
-      </button>
-    </div>
+    <EmptyState
+      action={
+        <button type="button" className="secondary-button" onClick={onCreate}>
+          <Plus size={17} aria-hidden="true" />
+          Create project
+        </button>
+      }
+      description="Create the first local project container before adding mixed content to it."
+      icon={<FolderKanban size={28} aria-hidden="true" />}
+      title="No projects yet"
+    />
   );
 }
 

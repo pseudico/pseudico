@@ -1,8 +1,10 @@
 import { FolderOpen, HardDrive, History } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { EmptyState, ErrorState, formatUserError } from "@local-work-os/ui";
 import type { LocalWorkOsApi, RecentWorkspace } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
+import { showToast } from "../shell/toastStore";
 import {
   useWorkspaceStore,
   workspaceStore
@@ -69,12 +71,22 @@ export function WelcomePage({
     setLoading(false);
 
     if (!result.ok) {
-      setError(result.error.message);
+      const message = formatUserError(result.error);
+      setError(message);
+      showToast(message, {
+        title: "Workspace unavailable",
+        tone: "error"
+      });
       return;
     }
 
     workspaceStore.setCurrentWorkspace(result.data);
-    setMessage(`${result.data.name} is open.`);
+    const message = `${result.data.name} is open.`;
+    setMessage(message);
+    showToast(message, {
+      title: "Workspace ready",
+      tone: "success"
+    });
     navigate("/workspace");
   }
 
@@ -114,9 +126,7 @@ export function WelcomePage({
                 onChange={(event) => setWorkspacePath(event.target.value)}
               />
             </label>
-            {error === null ? null : (
-              <p className="form-message form-message-error">{error}</p>
-            )}
+            {error === null ? null : <ErrorState error={error} title="Workspace action failed" />}
             {message === null ? null : (
               <p className="form-message form-message-ok">{message}</p>
             )}
@@ -149,7 +159,11 @@ export function WelcomePage({
               <h2>Recent workspaces</h2>
             </div>
             {recentWorkspaces.length === 0 ? (
-              <p className="muted-text">No recent workspaces yet.</p>
+              <EmptyState
+                description="Recently opened local workspace folders will appear here."
+                icon={<History size={22} aria-hidden="true" />}
+                title="No recent workspaces yet"
+              />
             ) : (
               <div className="recent-list">
                 {recentWorkspaces.map((recent) => (

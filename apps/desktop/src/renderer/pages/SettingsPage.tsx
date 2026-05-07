@@ -9,13 +9,19 @@ import {
   Trash2
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
-import { CategoryBadge } from "@local-work-os/ui";
+import {
+  CategoryBadge,
+  EmptyState,
+  ErrorState,
+  formatUserError
+} from "@local-work-os/ui";
 import { WorkspaceHealthPanel } from "./WorkspaceHealthPanel";
 import {
   refreshCurrentWorkspace,
   useWorkspaceStore
 } from "../state/workspaceStore";
 import { desktopApiClient } from "../api/desktopApiClient";
+import { showToast } from "../shell/toastStore";
 import type {
   BackupSnapshotSummary,
   CategorySummary,
@@ -52,6 +58,15 @@ export function SettingsPage({
   const [importSummary, setImportSummary] =
     useState<ImportValidationSummary | null>(null);
 
+  function setUserError(error: unknown, title = "Settings action failed"): void {
+    const message = formatUserError(error);
+    setError(message);
+    showToast(message, {
+      title,
+      tone: "error"
+    });
+  }
+
   useEffect(() => {
     void refreshCurrentWorkspace(apiClient);
   }, [apiClient]);
@@ -76,12 +91,12 @@ export function SettingsPage({
       }
 
       if (!categoryResult.ok) {
-        setError(categoryResult.error.message);
+        setUserError(categoryResult.error, "Categories unavailable");
         return;
       }
 
       if (!backupResult.ok) {
-        setError(backupResult.error.message);
+        setUserError(backupResult.error, "Backups unavailable");
         return;
       }
 
@@ -100,12 +115,12 @@ export function SettingsPage({
     event.preventDefault();
 
     if (currentWorkspace === null) {
-      setError("Open a workspace before creating categories.");
+      setUserError("Open a workspace before creating categories.");
       return;
     }
 
     if (name.trim().length === 0) {
-      setError("Category name is required.");
+      setUserError("Category name is required.");
       return;
     }
 
@@ -122,7 +137,7 @@ export function SettingsPage({
     setSaving(false);
 
     if (!result.ok) {
-      setError(result.error.message);
+      setUserError(result.error);
       return;
     }
 
@@ -130,6 +145,10 @@ export function SettingsPage({
     setName("");
     setDescription("");
     setColor(defaultCategoryColor);
+    showToast(`${result.data.name} category created.`, {
+      title: "Category ready",
+      tone: "success"
+    });
   }
 
   async function updateCategory(
@@ -147,7 +166,7 @@ export function SettingsPage({
     setBusyId(null);
 
     if (!result.ok) {
-      setError(result.error.message);
+      setUserError(result.error);
       return;
     }
 
@@ -169,7 +188,7 @@ export function SettingsPage({
     setBusyId(null);
 
     if (!result.ok) {
-      setError(result.error.message);
+      setUserError(result.error);
       return;
     }
 
@@ -180,7 +199,7 @@ export function SettingsPage({
 
   async function refreshBackups(): Promise<void> {
     if (currentWorkspace === null) {
-      setError("Open a workspace before listing backups.");
+      setUserError("Open a workspace before listing backups.");
       return;
     }
 
@@ -194,16 +213,20 @@ export function SettingsPage({
     setBackupBusy(false);
 
     if (!result.ok) {
-      setError(result.error.message);
+      setUserError(result.error, "Backups unavailable");
       return;
     }
 
     setBackups(result.data);
+    showToast("Backup list refreshed.", {
+      title: "Backups",
+      tone: "success"
+    });
   }
 
   async function createManualBackup(): Promise<void> {
     if (currentWorkspace === null) {
-      setError("Open a workspace before creating a backup.");
+      setUserError("Open a workspace before creating a backup.");
       return;
     }
 
@@ -218,7 +241,7 @@ export function SettingsPage({
     setBackupBusy(false);
 
     if (!result.ok) {
-      setError(result.error.message);
+      setUserError(result.error, "Backup failed");
       return;
     }
 
@@ -227,12 +250,17 @@ export function SettingsPage({
         compareBackups
       )
     );
-    setBackupMessage(`Backup created at ${result.data.relativePath}.`);
+    const message = `Backup created at ${result.data.relativePath}.`;
+    setBackupMessage(message);
+    showToast(message, {
+      title: "Backup complete",
+      tone: "success"
+    });
   }
 
   async function exportWorkspaceJson(): Promise<void> {
     if (currentWorkspace === null) {
-      setError("Open a workspace before exporting workspace JSON.");
+      setUserError("Open a workspace before exporting workspace JSON.");
       return;
     }
 
@@ -247,18 +275,21 @@ export function SettingsPage({
     setExportBusy(false);
 
     if (!result.ok) {
-      setError(result.error.message);
+      setUserError(result.error, "Export failed");
       return;
     }
 
-    setExportMessage(
-      `Workspace JSON export created at ${result.data.relativePath}.`
-    );
+    const message = `Workspace JSON export created at ${result.data.relativePath}.`;
+    setExportMessage(message);
+    showToast(message, {
+      title: "Export complete",
+      tone: "success"
+    });
   }
 
   async function exportTasks(format: "csv" | "tsv"): Promise<void> {
     if (currentWorkspace === null) {
-      setError("Open a workspace before exporting tasks.");
+      setUserError("Open a workspace before exporting tasks.");
       return;
     }
 
@@ -274,13 +305,16 @@ export function SettingsPage({
     setExportBusy(false);
 
     if (!result.ok) {
-      setError(result.error.message);
+      setUserError(result.error, "Export failed");
       return;
     }
 
-    setExportMessage(
-      `Task ${format.toUpperCase()} export created at ${result.data.relativePath}.`
-    );
+    const message = `Task ${format.toUpperCase()} export created at ${result.data.relativePath}.`;
+    setExportMessage(message);
+    showToast(message, {
+      title: "Export complete",
+      tone: "success"
+    });
   }
 
   async function validateWorkspaceImport(): Promise<void> {
@@ -293,11 +327,22 @@ export function SettingsPage({
     setImportBusy(false);
 
     if (!result.ok) {
-      setError(result.error.message);
+      setUserError(result.error, "Import validation failed");
       return;
     }
 
     setImportSummary(result.data);
+    if (result.data !== null) {
+      showToast(
+        result.data.valid
+          ? "Workspace export JSON is valid."
+          : "Workspace export JSON has blocking issues.",
+        {
+          title: "Import validation complete",
+          tone: result.data.valid ? "success" : "error"
+        }
+      );
+    }
   }
 
   return (
@@ -345,7 +390,10 @@ export function SettingsPage({
 
         <div className="backup-list" aria-label="Backup list">
           {backups.length === 0 ? (
-            <p className="muted-text">No backups yet.</p>
+            <EmptyState
+              description="Manual backup snapshots will appear after the first local backup completes."
+              title="No backups yet"
+            />
           ) : (
             backups.map((backup) => (
               <BackupListRow key={backup.id} backup={backup} />
@@ -390,7 +438,10 @@ export function SettingsPage({
         </div>
 
         {exportMessage === null ? (
-          <p className="muted-text">No workspace JSON export created this session.</p>
+          <EmptyState
+            description="JSON, CSV, and TSV export results will appear here for this session."
+            title="No export created this session"
+          />
         ) : (
           <p className="form-message">{exportMessage}</p>
         )}
@@ -414,9 +465,10 @@ export function SettingsPage({
         </div>
 
         {importSummary === null ? (
-          <p className="muted-text">
-            JSON imports are validated for a future new workspace only.
-          </p>
+          <EmptyState
+            description="JSON imports are validated for a future new workspace only."
+            title="No import selected"
+          />
         ) : (
           <ImportValidationSummaryPanel summary={importSummary} />
         )}
@@ -428,9 +480,7 @@ export function SettingsPage({
           </div>
         </div>
 
-        {error === null ? null : (
-          <p className="form-message form-message-error">{error}</p>
-        )}
+        {error === null ? null : <ErrorState error={error} title="Settings error" />}
 
         <form className="category-form" onSubmit={createCategory}>
           <label>

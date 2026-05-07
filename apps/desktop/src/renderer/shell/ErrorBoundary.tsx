@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { ErrorState, formatUserError } from "@local-work-os/ui";
 
 type ErrorBoundaryProps = {
   children: ReactNode;
@@ -18,7 +19,7 @@ export class ErrorBoundary extends Component<
 
   public static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return {
-      errorMessage: error.message
+      errorMessage: formatUserError(error)
     };
   }
 
@@ -33,7 +34,10 @@ export class ErrorBoundary extends Component<
           <section className="error-panel">
             <p className="top-eyebrow">Renderer error</p>
             <h1>Local Work OS could not render this view.</h1>
-            <p>{this.state.errorMessage}</p>
+            <ErrorState
+              error={this.state.errorMessage}
+              title="The current view stopped rendering"
+            />
           </section>
         </main>
       );

@@ -717,7 +717,7 @@ describe("workspace onboarding renderer", () => {
 
     expect(html).toContain("Create workspace");
     expect(html).toContain("Open workspace");
-    expect(html).toContain("No recent workspaces yet.");
+    expect(html).toContain("No recent workspaces yet");
   });
 
   it("renders workspace health from mocked API data", () => {
@@ -749,6 +749,7 @@ describe("workspace onboarding renderer", () => {
     );
 
     expect(html).toContain("Workspace operation failed.");
-    expect(html).toContain("form-message-error");
+    expect(html).toContain("Workspace action failed");
+    expect(html).toContain("error-state");
   });
 });

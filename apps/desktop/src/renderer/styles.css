@@ -779,6 +779,129 @@ a {
   color: #1f633b;
 }
 
+.empty-state,
+.error-state,
+.loading-state {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+  min-height: 112px;
+  padding: 16px;
+  border: 1px solid #dedbd1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.empty-state {
+  color: #514e49;
+}
+
+.empty-state-icon,
+.error-state > svg,
+.loading-state > svg {
+  color: #245c55;
+}
+
+.empty-state h3,
+.empty-state p,
+.error-state h3,
+.error-state p {
+  margin: 0;
+}
+
+.empty-state h3,
+.error-state h3 {
+  color: #262624;
+  font-size: 16px;
+}
+
+.empty-state p,
+.error-state p {
+  max-width: 58ch;
+  line-height: 1.5;
+}
+
+.empty-state-action,
+.error-state-action {
+  justify-self: start;
+}
+
+.error-state {
+  border-color: #dba58f;
+  background: #fff5ef;
+  color: #8b3219;
+}
+
+.error-state > svg {
+  color: #b55a3a;
+}
+
+.loading-state {
+  min-height: 54px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  color: #514e49;
+  font-weight: 700;
+}
+
+.toast-viewport {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 20;
+  display: grid;
+  width: min(360px, calc(100vw - 40px));
+  gap: 10px;
+}
+
+.toast {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid #d5d0c3;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 16px 34px rgba(38, 38, 36, 0.14);
+  color: #262624;
+}
+
+.toast-success {
+  border-color: #9fc7af;
+}
+
+.toast-error {
+  border-color: #dba58f;
+}
+
+.toast-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.toast-copy strong {
+  font-size: 13px;
+}
+
+.toast-copy span {
+  color: #514e49;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.toast-dismiss {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #514e49;
+}
+
 .welcome-actions {
   display: flex;
   flex-wrap: wrap;

@@ -6,9 +6,12 @@ import {
   CategoryPicker,
   ConfirmDialog,
   DashboardWidget,
+  EmptyState,
+  ErrorState,
   FavoriteProjectsWidget,
   FileCardContent,
   FileMetadataEditor,
+  formatUserError,
   ItemActionsMenu,
   ItemFeed,
   ItemInspectorPanel,
@@ -25,9 +28,11 @@ import {
   ProjectHealthWidget,
   RecentActivityList,
   RecentActivityWidget,
+  renderLoadableState,
   TodayWidget,
   TodayLane,
   TodayTaskCard,
+  ToastViewport,
   UniversalItemCard,
   type UniversalItemViewModel
 } from "../src";
@@ -169,6 +174,43 @@ describe("Universal item UI", () => {
     );
     expect(renderToStaticMarkup(<ItemFeed items={[taskItem]} />)).toContain(
       "Call accountant"
+    );
+  });
+
+  it("renders shared empty, error, loadable, and toast states", () => {
+    const emptyHtml = renderToStaticMarkup(
+      <EmptyState
+        description="Open a workspace before using this view."
+        title="No workspace open"
+      />
+    );
+    const errorHtml = renderToStaticMarkup(
+      <ErrorState
+        error={{ code: "WORKSPACE_ERROR", message: "Manifest missing." }}
+      />
+    );
+    const loadingHtml = renderToStaticMarkup(
+      <>{renderLoadableState({ loading: true, loadingLabel: "Checking..." })}</>
+    );
+    const toastHtml = renderToStaticMarkup(
+      <ToastViewport
+        toasts={[
+          {
+            id: "toast_1",
+            message: "Backup created.",
+            title: "Backup complete",
+            tone: "success"
+          }
+        ]}
+      />
+    );
+
+    expect(emptyHtml).toContain("No workspace open");
+    expect(errorHtml).toContain("Workspace problem: Manifest missing.");
+    expect(loadingHtml).toContain("Checking...");
+    expect(toastHtml).toContain("Backup complete");
+    expect(formatUserError({ code: "IPC_ERROR", message: "Bridge down." })).toBe(
+      "Local app bridge error: Bridge down."
     );
   });
 
