@@ -511,6 +511,10 @@ function createMockApi(
       createManualBackup: async () => apiOk(null as never),
       listBackups: async () => apiOk([])
     },
+    import: {
+      validateWorkspaceExportJson: async () => apiOk(null as never),
+      chooseAndValidateWorkspaceExportJson: async () => apiOk(null)
+    },
     export: {
       exportWorkspaceJson: async () => apiOk(null as never),
       exportProjectMarkdown: async () => apiOk(null as never),

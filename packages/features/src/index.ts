@@ -10,6 +10,7 @@ export const plannedFeatureAreas = [
   "lists",
   "notes",
   "files",
+  "import",
   "links",
   "metadata",
   "relationships",
@@ -57,6 +58,7 @@ export {
   WORKSPACE_EXPORT_SCHEMA_VERSION
 } from "./export";
 export { FileAttachmentService, filesModuleContract } from "./files";
+export { ImportValidationService, importModuleContract } from "./import";
 export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
 export { LinkService, linksModuleContract } from "./links";
@@ -161,6 +163,13 @@ export type {
   FileAttachmentMutationResult,
   FileAttachmentServiceIdFactory
 } from "./files";
+export type {
+  ImportValidationCounts,
+  ImportValidationFileSystemAdapter,
+  ImportValidationIssue,
+  ImportValidationSeverity,
+  ImportValidationSummary
+} from "./import";
 export type {
   InboxServiceIdFactory,
   MoveInboxItemToProjectInput

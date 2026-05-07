@@ -225,6 +225,12 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.backup.createManualBackup(input)),
       listBackups: (input) => callApi(() => api.backup.listBackups(input))
     },
+    import: {
+      validateWorkspaceExportJson: (input) =>
+        callApi(() => api.import.validateWorkspaceExportJson(input)),
+      chooseAndValidateWorkspaceExportJson: () =>
+        callApi(() => api.import.chooseAndValidateWorkspaceExportJson())
+    },
     export: {
       exportWorkspaceJson: (input) =>
         callApi(() => api.export.exportWorkspaceJson(input)),
@@ -448,6 +454,12 @@ export const desktopApiClient: LocalWorkOsApi = {
     createManualBackup: (input) =>
       getDesktopApiClient().backup.createManualBackup(input),
     listBackups: (input) => getDesktopApiClient().backup.listBackups(input)
+  },
+  import: {
+    validateWorkspaceExportJson: (input) =>
+      getDesktopApiClient().import.validateWorkspaceExportJson(input),
+    chooseAndValidateWorkspaceExportJson: () =>
+      getDesktopApiClient().import.chooseAndValidateWorkspaceExportJson()
   },
   export: {
     exportWorkspaceJson: (input) =>

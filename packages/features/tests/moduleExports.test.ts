@@ -12,6 +12,8 @@ import {
   ExportService,
   exportModuleContract,
   filesModuleContract,
+  ImportValidationService,
+  importModuleContract,
   inboxModuleContract,
   itemsModuleContract,
   linksModuleContract,
@@ -43,6 +45,7 @@ describe("feature module exports", () => {
       "lists",
       "notes",
       "files",
+      "import",
       "links",
       "metadata",
       "relationships",
@@ -69,6 +72,7 @@ describe("feature module exports", () => {
       listsModuleContract.module,
       notesModuleContract.module,
       filesModuleContract.module,
+      importModuleContract.module,
       linksModuleContract.module,
       tagsModuleContract.module,
       categoriesModuleContract.module,
@@ -94,6 +98,7 @@ describe("feature module exports", () => {
       "lists",
       "notes",
       "files",
+      "import",
       "links",
       "metadata.tags",
       "metadata.categories",
@@ -125,5 +130,9 @@ describe("feature module exports", () => {
 
   it("exports the workspace JSON export service implementation", () => {
     expect(ExportService).toBeDefined();
+  });
+
+  it("exports the import validation service implementation", () => {
+    expect(ImportValidationService).toBeDefined();
   });
 });
