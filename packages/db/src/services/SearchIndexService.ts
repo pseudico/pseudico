@@ -363,6 +363,10 @@ export class SearchIndexService {
       options.limit = input.limit;
     }
 
+    if (input.offset !== undefined) {
+      options.offset = input.offset;
+    }
+
     if (input.targetTypes !== undefined) {
       options.targetTypes = input.targetTypes;
     }

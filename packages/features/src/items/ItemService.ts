@@ -22,6 +22,7 @@ import {
 import type {
   CreateItemInput,
   ItemInspectorSnapshot,
+  ItemFeedPage,
   ItemMutationResult,
   ItemServiceIdFactory,
   ListItemsByContainerInput,
@@ -245,19 +246,19 @@ export class ItemService {
     });
   }
 
-  listItemsByContainer(input: ListItemsByContainerInput): ItemRecord[] {
+  listItemsByContainer(input: ListItemsByContainerInput): ItemFeedPage {
     validateNonEmptyString(input.containerId, "containerId");
 
-    return new ItemRepository(this.connection).listByContainer(input.containerId, {
+    return new ItemRepository(this.connection).listByContainerPage(input.containerId, {
       ...buildListItemsFilter(input)
     });
   }
 
-  listItemsByContainerTab(input: ListItemsByContainerTabInput): ItemRecord[] {
+  listItemsByContainerTab(input: ListItemsByContainerTabInput): ItemFeedPage {
     validateNonEmptyString(input.containerId, "containerId");
     validateNonEmptyString(input.containerTabId, "containerTabId");
 
-    return new ItemRepository(this.connection).listByContainerTab(
+    return new ItemRepository(this.connection).listByContainerTabPage(
       input.containerId,
       input.containerTabId,
       buildListItemsFilter(input)
@@ -410,6 +411,8 @@ function buildListItemsFilter(
       : { includeArchived: input.includeArchived }),
     ...(input.includeDeleted === undefined
       ? {}
-      : { includeDeleted: input.includeDeleted })
+      : { includeDeleted: input.includeDeleted }),
+    ...(input.limit === undefined ? {} : { limit: input.limit }),
+    ...(input.cursor === undefined ? {} : { cursor: input.cursor })
   };
 }

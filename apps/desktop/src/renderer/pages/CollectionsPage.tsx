@@ -29,6 +29,8 @@ type CollectionsPageProps = {
   initialProjects?: ProjectSummary[];
 };
 
+const COLLECTION_PAGE_SIZE = 50;
+
 export function CollectionsPage({
   apiClient = desktopApiClient,
   initialCollections,
@@ -107,7 +109,11 @@ export function CollectionsPage({
 
     setLoading(true);
     setError(null);
-    const result = await apiClient.collections.evaluateCollection(selectedCollectionId);
+    const result = await apiClient.collections.evaluateCollection({
+      collectionId: selectedCollectionId,
+      limit: COLLECTION_PAGE_SIZE,
+      offset: 0
+    });
     setLoading(false);
 
     if (!result.ok) {
@@ -117,6 +123,30 @@ export function CollectionsPage({
 
     setEvaluation(result.data);
   }, [apiClient, initialEvaluation, selectedCollectionId]);
+
+  async function loadMoreCollectionResults(): Promise<void> {
+    if (selectedCollectionId === null || evaluation === null || loading) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const result = await apiClient.collections.evaluateCollection({
+      collectionId: selectedCollectionId,
+      limit: COLLECTION_PAGE_SIZE,
+      offset: evaluation.results.length
+    });
+
+    setLoading(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setEvaluation(mergeCollectionEvaluation(evaluation, result.data));
+  }
 
   useEffect(() => {
     void loadCollections();
@@ -347,12 +377,59 @@ export function CollectionsPage({
                 onCompleteTask={(itemId) => void completeTask(itemId)}
                 onOpenResult={(path) => navigate(path)}
               />
+              {evaluation?.page?.hasMore === true ? (
+                <button
+                  className="secondary-button load-more-button"
+                  disabled={loading}
+                  type="button"
+                  onClick={() => void loadMoreCollectionResults()}
+                >
+                  {loading ? "Loading..." : "Load more"}
+                </button>
+              ) : null}
             </>
           )}
         </main>
       </div>
     </section>
   );
+}
+
+function mergeCollectionEvaluation(
+  current: CollectionEvaluationSummary,
+  next: CollectionEvaluationSummary
+): CollectionEvaluationSummary {
+  const results = [...current.results, ...next.results];
+  const groupsByKey = new Map(
+    current.groups.map((group) => [
+      group.key,
+      { ...group, results: [...group.results] }
+    ])
+  );
+
+  for (const group of next.groups) {
+    const existing = groupsByKey.get(group.key);
+
+    if (existing === undefined) {
+      groupsByKey.set(group.key, { ...group, results: [...group.results] });
+    } else {
+      existing.results.push(...group.results);
+    }
+  }
+
+  return {
+    ...next,
+    results,
+    groups: [...groupsByKey.values()],
+    page: {
+      ...(next.page ?? {
+        limit: results.length,
+        offset: 0,
+        hasMore: false
+      }),
+      offset: 0
+    }
+  };
 }
 
 function formatCollectionDetail(collection: CollectionSummary): string {

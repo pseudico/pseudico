@@ -55,6 +55,7 @@ export type RemoveWorkspaceSearchTargetsInput = {
 
 export type SearchIndexOptions = {
   limit?: number;
+  offset?: number;
   targetTypes?: string[];
   includeDeleted?: boolean;
 };
@@ -215,7 +216,7 @@ export class SearchIndexRepository {
       values.push(...options.targetTypes);
     }
 
-    values.push(options.limit ?? 25);
+    values.push(normalizeLimit(options.limit), normalizeOffset(options.offset));
 
     const rows = this.connection.sqlite
       .prepare<unknown[], SearchIndexRow>(
@@ -223,12 +224,29 @@ export class SearchIndexRepository {
          from search_index
          where ${where.join(" and ")}
          order by updated_at desc, title asc
-         limit ?`
+         limit ?
+         offset ?`
       )
       .all(...values);
 
     return rows.map(toSearchIndexRecord);
   }
+}
+
+function normalizeLimit(limit: number | undefined): number {
+  if (limit === undefined || !Number.isFinite(limit) || limit <= 0) {
+    return 25;
+  }
+
+  return Math.min(Math.floor(limit), 250);
+}
+
+function normalizeOffset(offset: number | undefined): number {
+  if (offset === undefined || !Number.isFinite(offset) || offset < 0) {
+    return 0;
+  }
+
+  return Math.floor(offset);
 }
 
 function escapeLikePattern(value: string): string {

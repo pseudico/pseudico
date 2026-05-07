@@ -82,6 +82,10 @@ export {
 } from "./components/MetadataFilterPanel";
 export { ItemFeed, type ItemFeedProps } from "./components/ItemFeed";
 export {
+  LoadMoreList,
+  type LoadMoreListProps
+} from "./components/LoadMoreList";
+export {
   getItemTypeLabel,
   ItemTypeIcon,
   type ItemTypeIconProps

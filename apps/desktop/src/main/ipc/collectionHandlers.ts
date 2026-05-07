@@ -17,6 +17,7 @@ import {
   type CreateKeywordCollectionInput,
   type CreateTagCollectionInput,
   type CreateTaskInCollectionInput,
+  type EvaluateCollectionInput,
   type ItemTagSummary,
   type TaskStatus,
   type TaskSummary,
@@ -107,15 +108,17 @@ export function createCollectionIpcHandlers(
     },
 
     async handleEvaluateCollection(input) {
-      if (!isNonEmptyString(input)) {
+      if (!isEvaluateCollectionInput(input)) {
         return apiError(
           "INVALID_INPUT",
-          "evaluateCollection requires a collectionId string."
+          "evaluateCollection requires a collectionId string and optional limit/offset."
         );
       }
 
       return await withCollectionService(workspaceService, async (context) => {
-        const result = context.collectionService.evaluateCollection(input);
+        const result = context.collectionService.evaluateCollection(
+          typeof input === "string" ? input : input
+        );
 
         if (result.collection.workspaceId !== context.workspace.id) {
           throw new Error("Collection workspace must match the current workspace.");
@@ -125,7 +128,8 @@ export function createCollectionIpcHandlers(
           collection: result.collection,
           total: result.total,
           results: result.results.map(toCollectionResultSummary),
-          groups: result.groups.map(toCollectionResultGroupSummary)
+          groups: result.groups.map(toCollectionResultGroupSummary),
+          page: result.page
         });
       });
     },
@@ -153,6 +157,18 @@ export function createCollectionIpcHandlers(
       });
     }
   };
+}
+
+function isEvaluateCollectionInput(
+  input: unknown
+): input is string | EvaluateCollectionInput {
+  return (
+    isNonEmptyString(input) ||
+    (isRecord(input) &&
+      isNonEmptyString(input.collectionId) &&
+      isOptionalPositiveInteger(input.limit) &&
+      isOptionalNonNegativeInteger(input.offset))
+  );
 }
 
 async function withCollectionService<T>(
@@ -355,6 +371,20 @@ function isOptionalBoolean(value: unknown): boolean {
 
 function isOptionalNumber(value: unknown): boolean {
   return value === undefined || value === null || typeof value === "number";
+}
+
+function isOptionalPositiveInteger(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (typeof value === "number" && Number.isInteger(value) && value > 0)
+  );
+}
+
+function isOptionalNonNegativeInteger(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (typeof value === "number" && Number.isInteger(value) && value >= 0)
+  );
 }
 
 function isOptionalActorType(value: unknown): boolean {

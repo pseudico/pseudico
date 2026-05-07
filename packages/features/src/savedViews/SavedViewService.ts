@@ -15,7 +15,11 @@ import {
   type SearchIndexRecord
 } from "@local-work-os/db";
 import type { FeatureModuleContract } from "../featureModuleContract";
-import { QueryEvaluator, type SavedViewEvaluationResult } from "./QueryEvaluator";
+import {
+  QueryEvaluator,
+  type SavedViewEvaluationOptions,
+  type SavedViewEvaluationResult
+} from "./QueryEvaluator";
 import {
   parseSavedViewQueryJson,
   stringifySavedViewQuery,
@@ -82,6 +86,8 @@ export class SavedViewService {
   evaluateSavedView(input: {
     workspaceId: string;
     query: SavedViewQuery | string;
+    limit?: number;
+    offset?: number;
   }): SavedViewEvaluationResult {
     validateNonEmptyString(input.workspaceId, "workspaceId");
     const query =
@@ -92,16 +98,30 @@ export class SavedViewService {
       input.workspaceId
     );
 
-    return new QueryEvaluator().evaluate(query, targets);
+    const options: SavedViewEvaluationOptions = {};
+
+    if (input.limit !== undefined) {
+      options.limit = input.limit;
+    }
+
+    if (input.offset !== undefined) {
+      options.offset = input.offset;
+    }
+
+    return new QueryEvaluator().evaluate(query, targets, options);
   }
 
-  evaluateSavedViewById(savedViewId: string): SavedViewEvaluationResult {
+  evaluateSavedViewById(
+    savedViewId: string,
+    options: SavedViewEvaluationOptions = {}
+  ): SavedViewEvaluationResult {
     validateNonEmptyString(savedViewId, "savedViewId");
     const savedView = this.requireSavedView(savedViewId);
 
     return this.evaluateSavedView({
       workspaceId: savedView.workspaceId,
-      query: savedView.queryJson
+      query: savedView.queryJson,
+      ...options
     });
   }
 

@@ -61,4 +61,39 @@ describe("ActivityLogRepository", () => {
       second
     ]);
   });
+
+  it("paginates recent activity with a descending cursor", () => {
+    const repository = new ActivityLogRepository(connection);
+
+    for (let index = 0; index < 6; index += 1) {
+      repository.create({
+        id: `activity_${index}`,
+        workspaceId: "workspace_1",
+        actorType: "local_user",
+        action: "item_updated",
+        targetType: "item",
+        targetId: `item_${index}`,
+        timestamp: `2026-05-01T0${index}:00:00.000Z`
+      });
+    }
+
+    const firstPage = repository.listRecentPage("workspace_1", { limit: 3 });
+    const secondPage = repository.listRecentPage("workspace_1", {
+      limit: 3,
+      cursor: firstPage.nextCursor
+    });
+
+    expect(firstPage.events.map((event) => event.id)).toEqual([
+      "activity_5",
+      "activity_4",
+      "activity_3"
+    ]);
+    expect(firstPage.hasMore).toBe(true);
+    expect(secondPage.events.map((event) => event.id)).toEqual([
+      "activity_2",
+      "activity_1",
+      "activity_0"
+    ]);
+    expect(secondPage.hasMore).toBe(false);
+  });
 });

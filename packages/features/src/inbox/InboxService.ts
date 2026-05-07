@@ -59,7 +59,7 @@ export class InboxService {
       now: this.now
     }).listItemsByContainer({
       containerId: inbox.id
-    });
+    }).items;
   }
 
   async moveInboxItemToProject(

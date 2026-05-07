@@ -43,6 +43,12 @@ export type CollectionEvaluationResult = SavedViewEvaluationResult & {
   collection: CollectionSummary;
 };
 
+export type EvaluateCollectionInput = {
+  collectionId: string;
+  limit?: number;
+  offset?: number;
+};
+
 export type CreateTagCollectionInput = {
   workspaceId: string;
   tagSlug: string;
@@ -138,11 +144,20 @@ export class CollectionService {
       .map(toCollectionSummary);
   }
 
-  evaluateCollection(collectionId: string): CollectionEvaluationResult {
+  evaluateCollection(
+    input: string | EvaluateCollectionInput
+  ): CollectionEvaluationResult {
+    const collectionId = typeof input === "string" ? input : input.collectionId;
     const collection = this.requireCollection(collectionId);
     const evaluation = this.savedViewService().evaluateSavedView({
       workspaceId: collection.workspaceId,
-      query: collection.queryJson
+      query: collection.queryJson,
+      ...(typeof input === "string" || input.limit === undefined
+        ? {}
+        : { limit: input.limit }),
+      ...(typeof input === "string" || input.offset === undefined
+        ? {}
+        : { offset: input.offset })
     });
 
     return {

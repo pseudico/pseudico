@@ -32,12 +32,23 @@ export type SavedViewEvaluationResult = {
   total: number;
   results: SavedViewResultRef[];
   groups: SavedViewResultGroup[];
+  page: {
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+};
+
+export type SavedViewEvaluationOptions = {
+  limit?: number;
+  offset?: number;
 };
 
 export class QueryEvaluator {
   evaluate(
     query: SavedViewQuery,
-    targets: SavedViewEvaluationTargetRecord[]
+    targets: SavedViewEvaluationTargetRecord[],
+    options: SavedViewEvaluationOptions = {}
   ): SavedViewEvaluationResult {
     const selectedTargets = new Set(query.targets ?? ["container", "item"]);
     const filtered = targets
@@ -46,14 +57,20 @@ export class QueryEvaluator {
       .filter((target) => query.includeDeleted === true || target.deletedAt === null)
       .filter((target) => this.matchesConditions(query, target));
     const sorted = this.sortTargets(filtered, query);
-    const limited =
-      query.limit === undefined ? sorted : sorted.slice(0, query.limit);
+    const limit = normalizeLimit(options.limit ?? query.limit);
+    const offset = normalizeOffset(options.offset);
+    const limited = sorted.slice(offset, offset + limit);
     const results = limited.map(toResultRef);
 
     return {
-      total: results.length,
+      total: sorted.length,
       results,
-      groups: groupResults(query.groupBy ?? "none", results)
+      groups: groupResults(query.groupBy ?? "none", results),
+      page: {
+        limit,
+        offset,
+        hasMore: offset + results.length < sorted.length
+      }
     };
   }
 
@@ -151,6 +168,22 @@ export class QueryEvaluator {
       return left.targetId.localeCompare(right.targetId);
     });
   }
+}
+
+function normalizeLimit(limit: number | undefined): number {
+  if (limit === undefined || !Number.isFinite(limit) || limit <= 0) {
+    return 50;
+  }
+
+  return Math.min(Math.floor(limit), 500);
+}
+
+function normalizeOffset(offset: number | undefined): number {
+  if (offset === undefined || !Number.isFinite(offset) || offset < 0) {
+    return 0;
+  }
+
+  return Math.floor(offset);
 }
 
 function matchesSet(actual: string, expected: string | string[]): boolean {

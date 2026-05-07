@@ -7,6 +7,7 @@ export {
 export type { AttachmentRecord } from "@local-work-os/core";
 export {
   ActivityLogRepository,
+  type ActivityLogPageResult,
   type ActivityLogRecord,
   type CreateActivityLogInput
 } from "./ActivityLogRepository";
@@ -64,6 +65,7 @@ export {
 export {
   ItemRepository,
   type CreateItemInput,
+  type ItemPageResult,
   type ItemRecord,
   type ListItemsFilter,
   type MoveItemInput,

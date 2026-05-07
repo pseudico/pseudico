@@ -78,6 +78,31 @@ validate input
 
 This keeps domain state, audit history, and search state aligned.
 
+## Performance Guardrails
+
+Local Work OS should treat long feeds as normal workspace data, not as an edge
+case. Service and repository APIs that read project feeds, search results,
+activity streams, and saved-view or collection results should expose bounded
+pagination before a renderer displays the data. Default pages should stay small
+enough for responsive desktop rendering, with hard caps at the service boundary
+to avoid accidental unbounded scans in large local workspaces.
+
+Current guardrails:
+
+- Item feed repository queries support stable cursor pagination ordered by
+  pinned state, sort order, creation time, and ID.
+- Search queries support `limit` and `offset` over the local search index.
+- Activity feeds support cursor pagination ordered by newest event first.
+- Saved-view and collection evaluation returns a total count plus bounded
+  `limit`/`offset` result pages.
+- Renderer feed surfaces should use load-more controls for long result sets.
+
+Virtualisation should be added only when measured UI rendering costs exceed the
+load-more threshold. The current project detail page still composes type-specific
+task/list/note/link/file feeds, so it uses a renderer load-more guard while the
+service-level paged item feed remains the foundation for a later unified mixed
+feed.
+
 ## Security Boundary
 
 The renderer is not trusted with direct filesystem or database access. Native
