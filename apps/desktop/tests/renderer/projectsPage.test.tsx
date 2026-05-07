@@ -7,6 +7,7 @@ import {
   type CategorySummary,
   type CollectionEvaluationSummary,
   type CollectionSummary,
+  type ContactSummary,
   type DatabaseHealthStatus,
   type DashboardViewModelSummary,
   type InboxSummary,
@@ -19,6 +20,7 @@ import {
   type NoteSummary,
   type ProjectHealthSummary,
   type ProjectSummary,
+  type RelatedContactSummary,
   type SearchResultSummary,
   type TaskSummary,
   type TodayViewModelSummary,
@@ -60,6 +62,33 @@ const project: ProjectSummary = {
   updatedAt: "2026-05-01T00:00:00.000Z",
   archivedAt: null,
   deletedAt: null
+};
+
+const contact: ContactSummary = {
+  id: "contact_1",
+  workspaceId: "workspace_1",
+  type: "contact",
+  name: "Alex Chen",
+  slug: "alex-chen",
+  description: "Client stakeholder",
+  status: "active",
+  categoryId: null,
+  color: "#2c6b8f",
+  isFavorite: false,
+  sortOrder: 0,
+  createdAt: "2026-05-01T00:00:00.000Z",
+  updatedAt: "2026-05-01T00:00:00.000Z",
+  archivedAt: null,
+  deletedAt: null
+};
+
+const relatedContact: RelatedContactSummary = {
+  relationshipId: "relationship_1",
+  relationshipCreatedAt: "2026-05-01T00:00:00.000Z",
+  contact,
+  openTaskCount: 1,
+  recentActivityCount: 1,
+  recentActivity: []
 };
 
 function projectHealthSummary(
@@ -388,6 +417,42 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
         apiOk({ ...project, id: "container_contact_1", type: "contact" }),
       listContacts: async () => apiOk([]),
       getContact: async () => apiOk(null)
+    },
+    relationships: {
+      linkContactToProject: async () =>
+        apiOk({
+          relationship: {
+            id: "relationship_1",
+            workspaceId: "workspace_1",
+            sourceType: "container",
+            sourceId: "container_contact_1",
+            targetType: "container",
+            targetId: "container_project_1",
+            relationType: "related",
+            label: "project_contact",
+            createdAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: null
+          },
+          changed: true
+        }),
+      unlinkContactFromProject: async () =>
+        apiOk({
+          relationship: {
+            id: "relationship_1",
+            workspaceId: "workspace_1",
+            sourceType: "container",
+            sourceId: "container_contact_1",
+            targetType: "container",
+            targetId: "container_project_1",
+            relationType: "related",
+            label: "project_contact",
+            createdAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: "2026-05-01T01:00:00.000Z"
+          },
+          changed: true
+        }),
+      listContactsForProject: async () => apiOk([]),
+      listProjectsForContact: async () => apiOk([])
     },
     categories: {
       create: async () => apiOk(category),
@@ -839,6 +904,8 @@ describe("Projects renderer pages", () => {
               <ProjectDetailPage
                 apiClient={createMockApi([project])}
                 initialActivity={[activitySummary()]}
+                initialAvailableContacts={[contact]}
+                initialRelatedContacts={[relatedContact]}
                 initialProject={project}
                 initialItems={[projectItem, projectNote, projectFile]}
               />
@@ -854,6 +921,9 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Tags");
     expect(html).toContain("Content feed");
     expect(html).toContain("Recent activity");
+    expect(html).toContain("Related contacts");
+    expect(html).toContain("Alex Chen");
+    expect(html).toContain("1 open follow-up");
     expect(html).toContain("Created project &quot;Launch Plan&quot;.");
     expect(html).toContain("Book launch venue");
     expect(html).toContain("Launch note");

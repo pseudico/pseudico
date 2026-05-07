@@ -25,6 +25,7 @@ import {
   type ProjectHealthSummary,
   type ProjectSummary,
   type RecentWorkspace,
+  type RelationshipSummary,
   type WorkspaceJsonExportSummary,
   type WorkspaceIntegritySummary,
   type TaskSummary,
@@ -246,6 +247,43 @@ function createMockApi(
           contact: contactSummary(),
           fields: [contactFieldSummary()]
         })
+    },
+    relationships: {
+      linkContactToProject: async () =>
+        apiOk({
+          relationship: relationshipSummary(),
+          changed: true
+        }),
+      unlinkContactFromProject: async () =>
+        apiOk({
+          relationship: {
+            ...relationshipSummary(),
+            deletedAt: "2026-04-30T01:00:00.000Z"
+          },
+          changed: true
+        }),
+      listContactsForProject: async () =>
+        apiOk([
+          {
+            relationshipId: "relationship_1",
+            relationshipCreatedAt: "2026-04-30T00:00:00.000Z",
+            contact: contactSummary(),
+            openTaskCount: 1,
+            recentActivityCount: 1,
+            recentActivity: [activitySummary()]
+          }
+        ]),
+      listProjectsForContact: async () =>
+        apiOk([
+          {
+            relationshipId: "relationship_1",
+            relationshipCreatedAt: "2026-04-30T00:00:00.000Z",
+            project: projectSummary(),
+            openTaskCount: 1,
+            recentActivityCount: 1,
+            recentActivity: [activitySummary()]
+          }
+        ])
     },
     categories: {
       create: async () => apiOk(categorySummary()),
@@ -515,6 +553,21 @@ function contactFieldSummary(): ContactFieldSummary {
     sortOrder: 0,
     createdAt: "2026-04-30T00:00:00.000Z",
     updatedAt: "2026-04-30T00:00:00.000Z",
+    deletedAt: null
+  };
+}
+
+function relationshipSummary(): RelationshipSummary {
+  return {
+    id: "relationship_1",
+    workspaceId: "workspace_1",
+    sourceType: "container",
+    sourceId: "container_contact_1",
+    targetType: "container",
+    targetId: "container_1",
+    relationType: "related",
+    label: "project_contact",
+    createdAt: "2026-04-30T00:00:00.000Z",
     deletedAt: null
   };
 }

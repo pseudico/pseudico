@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(91);
+    expect(channels).toHaveLength(95);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -52,6 +52,7 @@ describe("typed preload API", () => {
       "links",
       "projects",
       "contacts",
+      "relationships",
       "categories",
       "metadata",
       "search",
@@ -219,6 +220,56 @@ describe("typed preload API", () => {
           fieldId: "contact_field_1",
           value: "alex.revised@example.com"
         }
+      }
+    ]);
+  });
+
+  it("routes relationship calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.relationships.linkContactToProject({
+      workspaceId: "workspace_1",
+      contactId: "contact_1",
+      projectId: "project_1"
+    });
+    await api.relationships.listContactsForProject("project_1");
+    await api.relationships.listProjectsForContact("contact_1");
+    await api.relationships.unlinkContactFromProject("relationship_1");
+
+    expect(calls).toEqual([
+      {
+        channel:
+          LOCAL_WORK_OS_IPC_CHANNELS.relationships.linkContactToProject,
+        input: {
+          workspaceId: "workspace_1",
+          contactId: "contact_1",
+          projectId: "project_1"
+        }
+      },
+      {
+        channel:
+          LOCAL_WORK_OS_IPC_CHANNELS.relationships.listContactsForProject,
+        input: "project_1"
+      },
+      {
+        channel:
+          LOCAL_WORK_OS_IPC_CHANNELS.relationships.listProjectsForContact,
+        input: "contact_1"
+      },
+      {
+        channel:
+          LOCAL_WORK_OS_IPC_CHANNELS.relationships.unlinkContactFromProject,
+        input: "relationship_1"
       }
     ]);
   });

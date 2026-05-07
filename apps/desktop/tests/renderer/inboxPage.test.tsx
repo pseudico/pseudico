@@ -330,6 +330,42 @@ function createMockApi(): LocalWorkOsApi {
       listContacts: async () => apiOk([]),
       getContact: async () => apiOk(null)
     },
+    relationships: {
+      linkContactToProject: async () =>
+        apiOk({
+          relationship: {
+            id: "relationship_1",
+            workspaceId: "workspace_1",
+            sourceType: "container",
+            sourceId: "container_contact_1",
+            targetType: "container",
+            targetId: "container_project_1",
+            relationType: "related",
+            label: "project_contact",
+            createdAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: null
+          },
+          changed: true
+        }),
+      unlinkContactFromProject: async () =>
+        apiOk({
+          relationship: {
+            id: "relationship_1",
+            workspaceId: "workspace_1",
+            sourceType: "container",
+            sourceId: "container_contact_1",
+            targetType: "container",
+            targetId: "container_project_1",
+            relationType: "related",
+            label: "project_contact",
+            createdAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: "2026-05-01T01:00:00.000Z"
+          },
+          changed: true
+        }),
+      listContactsForProject: async () => apiOk([]),
+      listProjectsForContact: async () => apiOk([])
+    },
     categories: {
       create: async () => apiOk(categorySummary()),
       update: async () => apiOk(categorySummary()),

@@ -26,6 +26,7 @@ import {
   NoteEditor,
   ProjectHealthCard,
   RecentActivityList,
+  RelatedContactsPanel,
   TaskCardContent,
   TaskQuickAdd,
   type CreateListFormValues,
@@ -43,6 +44,7 @@ import {
   type NoteEditorValues,
   type ProjectHealthViewModel,
   type RecentActivityViewModel,
+  type RelatedContactViewModel,
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel
@@ -50,6 +52,7 @@ import {
 import type {
   ActivitySummary,
   CategorySummary,
+  ContactSummary,
   FileItemSummary,
   ItemSummary,
   LinkSummary,
@@ -59,6 +62,7 @@ import type {
   NoteSummary,
   ProjectSummary,
   ProjectHealthSummary,
+  RelatedContactSummary,
   TaskSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
@@ -102,6 +106,8 @@ type ProjectDetailPageProps = {
   initialItems?: UniversalItemViewModel[];
   initialActivity?: RecentActivityViewModel[];
   initialProjectHealth?: ProjectHealthViewModel | null;
+  initialAvailableContacts?: ContactSummary[];
+  initialRelatedContacts?: RelatedContactSummary[];
 };
 
 const emptyProjectItems: UniversalItemViewModel[] = [];
@@ -113,7 +119,9 @@ export function ProjectDetailPage({
   initialCategories = [],
   initialItems = emptyProjectItems,
   initialActivity = [],
-  initialProjectHealth = null
+  initialProjectHealth = null,
+  initialAvailableContacts = [],
+  initialRelatedContacts = []
 }: ProjectDetailPageProps): React.JSX.Element {
   const { projectId } = useParams();
   const [project, setProject] = useState<ProjectSummary | null>(
@@ -130,6 +138,14 @@ export function ProjectDetailPage({
   const [projectHealth, setProjectHealth] =
     useState<ProjectHealthViewModel | null>(initialProjectHealth);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [contacts, setContacts] =
+    useState<ContactSummary[]>(initialAvailableContacts);
+  const [relatedContacts, setRelatedContacts] = useState<RelatedContactSummary[]>(
+    initialRelatedContacts
+  );
+  const [selectedContactId, setSelectedContactId] = useState("");
+  const [relationshipBusy, setRelationshipBusy] = useState(false);
+  const [relationshipError, setRelationshipError] = useState<string | null>(null);
   const [loading, setLoading] = useState(initialProject === undefined);
   const [itemsLoading, setItemsLoading] = useState(false);
   const [moving, setMoving] = useState(false);
@@ -192,7 +208,9 @@ export function ProjectDetailPage({
         listsResult,
         notesResult,
         linksResult,
-        filesResult
+        filesResult,
+        contactsResult,
+        relatedContactsResult
       ] = await Promise.all([
         apiClient.projects.get(activeProjectId),
         apiClient.projects.list(),
@@ -206,7 +224,9 @@ export function ProjectDetailPage({
         apiClient.lists.listByContainer(activeProjectId),
         apiClient.notes.listByContainer(activeProjectId),
         apiClient.links.listByContainer(activeProjectId),
-        apiClient.files.listByContainer(activeProjectId)
+        apiClient.files.listByContainer(activeProjectId),
+        apiClient.contacts.list(),
+        apiClient.relationships.listContactsForProject(activeProjectId)
       ]);
 
       if (!active) {
@@ -266,8 +286,24 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!contactsResult.ok) {
+        setItemError(contactsResult.error.message);
+        return;
+      }
+
+      if (!relatedContactsResult.ok) {
+        setItemError(relatedContactsResult.error.message);
+        return;
+      }
+
       setProject(projectResult.data);
       setProjects(projectsResult.data);
+      setContacts(contactsResult.data);
+      setRelatedContacts(relatedContactsResult.data);
+      setSelectedContactId(selectFirstUnlinkedContactId(
+        contactsResult.data,
+        relatedContactsResult.data
+      ));
       setCategories(categoriesResult.data);
       setProjectActivity(activityResult.data.map(toRecentActivityViewModel));
       setProjectHealth(toProjectHealthViewModel(healthResult.data));
@@ -372,6 +408,75 @@ export function ProjectDetailPage({
     }
 
     setProjectHealth(toProjectHealthViewModel(result.data));
+  }
+
+  async function refreshRelatedContacts(activeProjectId: string): Promise<void> {
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.listContactsForProject(
+      activeProjectId
+    );
+
+    if (!result.ok) {
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    setRelatedContacts(result.data);
+    setSelectedContactId((current) =>
+      current.trim().length > 0 &&
+      !result.data.some((summary) => summary.contact.id === current)
+        ? current
+        : selectFirstUnlinkedContactId(contacts, result.data)
+    );
+  }
+
+  async function linkSelectedContact(): Promise<void> {
+    if (project === null || selectedContactId.trim().length === 0) {
+      return;
+    }
+
+    setRelationshipBusy(true);
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.linkContactToProject({
+      workspaceId: project.workspaceId,
+      contactId: selectedContactId,
+      projectId: project.id
+    });
+
+    if (!result.ok) {
+      setRelationshipBusy(false);
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    await refreshRelatedContacts(project.id);
+    await refreshProjectActivity(project.id);
+    setRelationshipBusy(false);
+  }
+
+  async function unlinkRelatedContact(relationshipId: string): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setRelationshipBusy(true);
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.unlinkContactFromProject(
+      relationshipId
+    );
+
+    if (!result.ok) {
+      setRelationshipBusy(false);
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    await refreshRelatedContacts(project.id);
+    await refreshProjectActivity(project.id);
+    setRelationshipBusy(false);
   }
 
   async function createProjectTask(
@@ -1082,6 +1187,18 @@ export function ProjectDetailPage({
         : "The item will be soft-deleted and removed from active feeds. The database row remains for audit and future recovery.";
   const projectCategory =
     categories.find((category) => category.id === project.categoryId) ?? null;
+  const relatedContactIds = new Set(
+    relatedContacts.map((summary) => summary.contact.id)
+  );
+  const availableContacts = contacts
+    .filter((contact) => !relatedContactIds.has(contact.id))
+    .map((contact) => ({
+      id: contact.id,
+      name: contact.name
+    }));
+  const relatedContactViewModels = relatedContacts.map(
+    toRelatedContactViewModel
+  );
   const visibleItems = items.slice(0, visibleItemCount);
   const hasMoreItems = visibleItemCount < items.length;
 
@@ -1137,6 +1254,17 @@ export function ProjectDetailPage({
           </dd>
         </div>
       </dl>
+
+      <RelatedContactsPanel
+        availableContacts={availableContacts}
+        busy={relationshipBusy}
+        error={relationshipError}
+        relatedContacts={relatedContactViewModels}
+        selectedContactId={selectedContactId}
+        onLinkContact={() => void linkSelectedContact()}
+        onSelectedContactChange={setSelectedContactId}
+        onUnlinkContact={(relationshipId) => void unlinkRelatedContact(relationshipId)}
+      />
 
       <RecentActivityList
         activity={projectActivity}
@@ -1583,6 +1711,36 @@ function toRecentActivityViewModel(
     description: activity.description,
     createdAt: activity.createdAt
   };
+}
+
+function toRelatedContactViewModel(
+  summary: RelatedContactSummary
+): RelatedContactViewModel {
+  return {
+    relationshipId: summary.relationshipId,
+    contactId: summary.contact.id,
+    name: summary.contact.name,
+    description: summary.contact.description,
+    status: summary.contact.status,
+    openTaskCount: summary.openTaskCount,
+    recentActivityCount: summary.recentActivityCount,
+    recentActivity: summary.recentActivity.map((activity) => ({
+      id: activity.id,
+      description: activity.description,
+      createdAt: activity.createdAt
+    }))
+  };
+}
+
+function selectFirstUnlinkedContactId(
+  contacts: readonly ContactSummary[],
+  relatedContacts: readonly RelatedContactSummary[]
+): string {
+  const relatedIds = new Set(
+    relatedContacts.map((summary) => summary.contact.id)
+  );
+
+  return contacts.find((contact) => !relatedIds.has(contact.id))?.id ?? "";
 }
 
 function toProjectHealthViewModel(
