@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   ContainerRepository,
+  ContactFieldRepository,
   AttachmentRepository,
   ItemRepository,
   ListRepository,
@@ -265,6 +266,44 @@ describe("SearchIndexService", () => {
         query: "launch"
       })
     ).toEqual([]);
+  });
+
+  it("rebuilds contact field values into contact container search records", () => {
+    const contact = new ContainerRepository(connection).create({
+      id: "container_contact_1",
+      workspaceId: "workspace_1",
+      type: "contact",
+      name: "Alex Chen",
+      slug: "alex-chen",
+      description: "Client stakeholder",
+      timestamp: TEST_TIMESTAMP
+    });
+    new ContactFieldRepository(connection).create({
+      id: "contact_field_1",
+      workspaceId: "workspace_1",
+      containerId: contact.id,
+      label: "Email",
+      value: "alex@example.com",
+      type: "email",
+      timestamp: TEST_TIMESTAMP
+    });
+    const service = createService();
+
+    service.rebuildWorkspaceIndex("workspace_1");
+
+    expect(
+      service.searchWorkspace({
+        workspaceId: "workspace_1",
+        query: "alex@example.com",
+        targetTypes: ["container"]
+      })
+    ).toMatchObject([
+      {
+        targetType: "container",
+        targetId: contact.id,
+        title: "Alex Chen"
+      }
+    ]);
   });
 
   it("reports missing, orphaned, and deleted-state health issues", () => {

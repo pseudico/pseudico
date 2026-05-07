@@ -3,6 +3,7 @@ import type { DatabaseConnection } from "../connection/createDatabaseConnection"
 import {
   ContainerRepository,
   type ContainerRecord,
+  ContactFieldRepository,
   AttachmentRepository,
   type AttachmentRecord,
   CategoryRepository,
@@ -110,7 +111,7 @@ export class SearchIndexService {
       targetType: "container",
       targetId: container.id,
       title: container.name,
-      body: input.body ?? container.description ?? "",
+      body: input.body ?? this.buildContainerSearchBody(container),
       tags: tagProjection.tags,
       category:
         input.category ??
@@ -653,6 +654,25 @@ export class SearchIndexService {
     }
 
     return category.name;
+  }
+
+  private buildContainerSearchBody(container: ContainerRecord): string {
+    if (container.type !== "contact") {
+      return container.description ?? "";
+    }
+
+    const fields = new ContactFieldRepository(this.connection).listForContact({
+      workspaceId: container.workspaceId,
+      containerId: container.id
+    });
+
+    return [
+      container.description ?? "",
+      ...fields.flatMap((field) => [field.label, field.value, field.type])
+    ]
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .join("\n");
   }
 }
 
