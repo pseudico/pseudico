@@ -39,6 +39,17 @@ export type CreateActivityLogInput = {
   timestamp: string;
 };
 
+export type ActivityLogPageOptions = {
+  limit?: number;
+  cursor?: string | null;
+};
+
+export type ActivityLogPageResult = {
+  events: ActivityLogRecord[];
+  nextCursor: string | null;
+  hasMore: boolean;
+};
+
 export class ActivityLogRepository {
   private readonly connection: DatabaseConnection;
 
@@ -120,6 +131,31 @@ export class ActivityLogRepository {
     return rows.map(toActivityLogRecord);
   }
 
+  listRecentPage(
+    workspaceId: string,
+    options: ActivityLogPageOptions = {}
+  ): ActivityLogPageResult {
+    const where = ["workspace_id = ?"];
+    const values: unknown[] = [workspaceId];
+
+    applyActivityCursorFilter(where, values, options.cursor);
+
+    const limit = normalizePageLimit(options.limit, 20);
+    values.push(limit + 1);
+
+    const rows = this.connection.sqlite
+      .prepare<unknown[], ActivityLogRow>(
+        `select *
+         from activity_log
+         where ${where.join(" and ")}
+         order by created_at desc, id desc
+         limit ?`
+      )
+      .all(...values);
+
+    return toActivityLogPage(rows, limit);
+  }
+
   listForTarget(
     targetType: string,
     targetId: string,
@@ -138,6 +174,92 @@ export class ActivityLogRepository {
 
     return rows.map(toActivityLogRecord);
   }
+
+  listForTargetPage(
+    targetType: string,
+    targetId: string,
+    options: ActivityLogPageOptions = {}
+  ): ActivityLogPageResult {
+    const where = ["target_type = ?", "target_id = ?"];
+    const values: unknown[] = [targetType, targetId];
+
+    applyActivityCursorFilter(where, values, options.cursor);
+
+    const limit = normalizePageLimit(options.limit, 20);
+    values.push(limit + 1);
+
+    const rows = this.connection.sqlite
+      .prepare<unknown[], ActivityLogRow>(
+        `select *
+         from activity_log
+         where ${where.join(" and ")}
+         order by created_at desc, id desc
+         limit ?`
+      )
+      .all(...values);
+
+    return toActivityLogPage(rows, limit);
+  }
+}
+
+function normalizePageLimit(limit: number | undefined, defaultLimit: number): number {
+  if (limit === undefined || !Number.isFinite(limit) || limit <= 0) {
+    return defaultLimit;
+  }
+
+  return Math.min(Math.floor(limit), 100);
+}
+
+function applyActivityCursorFilter(
+  where: string[],
+  values: unknown[],
+  cursor: string | null | undefined
+): void {
+  if (cursor === undefined || cursor === null || cursor.trim().length === 0) {
+    return;
+  }
+
+  const parsed = parseActivityCursor(cursor);
+
+  where.push("(created_at < ? or (created_at = ? and id < ?))");
+  values.push(parsed.createdAt, parsed.createdAt, parsed.id);
+}
+
+function toActivityLogPage(
+  rows: ActivityLogRow[],
+  limit: number
+): ActivityLogPageResult {
+  const pageRows = rows.slice(0, limit);
+  const last = pageRows.at(-1);
+
+  return {
+    events: pageRows.map(toActivityLogRecord),
+    hasMore: rows.length > limit,
+    nextCursor:
+      rows.length > limit && last !== undefined
+        ? createActivityCursor(last)
+        : null
+  };
+}
+
+function createActivityCursor(row: ActivityLogRow): string {
+  return [encodeURIComponent(row.created_at), encodeURIComponent(row.id)].join("|");
+}
+
+function parseActivityCursor(cursor: string): {
+  createdAt: string;
+  id: string;
+} {
+  const [createdAt, id] = cursor.split("|");
+
+  if (createdAt === undefined || id === undefined) {
+    throw new Error("Invalid activity pagination cursor.");
+  }
+
+  return {
+    createdAt: decodeURIComponent(createdAt),
+    id: decodeURIComponent(id)
+  };
 }
 
 function toActivityLogRecord(row: ActivityLogRow): ActivityLogRecord {

@@ -2,6 +2,7 @@ import type { ActivityActorType, ItemStatus, ItemType } from "@local-work-os/cor
 import type {
   ActivityLogRecord,
   ItemRecord,
+  ItemPageResult,
   ListItemsFilter,
   SearchIndexRecord
 } from "@local-work-os/db";
@@ -61,3 +62,5 @@ export type ItemInspectorSnapshot = {
   item: ItemRecord;
   activity: ActivityLogRecord[];
 };
+
+export type ItemFeedPage = ItemPageResult;

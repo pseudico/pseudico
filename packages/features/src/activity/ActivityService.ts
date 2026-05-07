@@ -2,6 +2,7 @@ import type { FeatureModuleContract } from "../featureModuleContract";
 import {
   ActivityLogRepository,
   type ActivityLogRecord,
+  type ActivityLogPageResult,
   type DatabaseConnection
 } from "@local-work-os/db";
 import {
@@ -26,6 +27,21 @@ export class ActivityService {
       .map(formatActivityEvent);
   }
 
+  listRecentActivityPage(input: {
+    workspaceId: string;
+    limit?: number;
+    cursor?: string | null;
+  }): ActivityEventPage {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+
+    return toActivityEventPage(
+      this.repository.listRecentPage(input.workspaceId, {
+        limit: normalizeLimit(input.limit ?? 20),
+        cursor: input.cursor ?? null
+      })
+    );
+  }
+
   listActivityForTarget(
     targetType: string,
     targetId: string,
@@ -37,6 +53,23 @@ export class ActivityService {
     return this.repository
       .listForTarget(targetType, targetId, normalizeLimit(limit))
       .map(formatActivityEvent);
+  }
+
+  listActivityForTargetPage(input: {
+    targetType: string;
+    targetId: string;
+    limit?: number;
+    cursor?: string | null;
+  }): ActivityEventPage {
+    validateNonEmptyString(input.targetType, "targetType");
+    validateNonEmptyString(input.targetId, "targetId");
+
+    return toActivityEventPage(
+      this.repository.listForTargetPage(input.targetType, input.targetId, {
+        limit: normalizeLimit(input.limit ?? 20),
+        cursor: input.cursor ?? null
+      })
+    );
   }
 }
 
@@ -50,6 +83,12 @@ export const activityModuleContract = {
   priority: "MVP"
 } as const satisfies FeatureModuleContract;
 
+export type ActivityEventPage = {
+  events: ActivityEventView[];
+  nextCursor: string | null;
+  hasMore: boolean;
+};
+
 export type { ActivityLogRecord, ActivityEventView };
 
 function normalizeLimit(limit: number): number {
@@ -58,6 +97,14 @@ function normalizeLimit(limit: number): number {
   }
 
   return Math.min(Math.floor(limit), 100);
+}
+
+function toActivityEventPage(page: ActivityLogPageResult): ActivityEventPage {
+  return {
+    events: page.events.map(formatActivityEvent),
+    nextCursor: page.nextCursor,
+    hasMore: page.hasMore
+  };
 }
 
 function validateNonEmptyString(value: string, fieldName: string): void {

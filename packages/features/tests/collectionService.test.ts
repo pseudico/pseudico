@@ -126,6 +126,52 @@ describe("CollectionService", () => {
     });
   });
 
+  it("paginates large collection evaluations while preserving total count", async () => {
+    const service = createService();
+
+    for (let index = 0; index < 75; index += 1) {
+      const hour = 1 + Math.floor(index / 60);
+      const minute = index % 60;
+      await new TaskService({
+        connection,
+        idFactory,
+        now: () =>
+          new Date(
+            `2026-05-03T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00.000Z`
+          )
+      }).createTask({
+        workspaceId: "workspace_1",
+        containerId: "container_project_1",
+        title: `Follow up ${index} @finance`
+      });
+    }
+
+    const collection = await service.createTagCollection({
+      workspaceId: "workspace_1",
+      tagSlug: "finance"
+    });
+    const firstPage = service.evaluateCollection({
+      collectionId: collection.id,
+      limit: 50,
+      offset: 0
+    });
+    const secondPage = service.evaluateCollection({
+      collectionId: collection.id,
+      limit: 50,
+      offset: firstPage.results.length
+    });
+
+    expect(firstPage.total).toBe(75);
+    expect(firstPage.results).toHaveLength(50);
+    expect(firstPage.page).toMatchObject({
+      limit: 50,
+      offset: 0,
+      hasMore: true
+    });
+    expect(secondPage.results).toHaveLength(25);
+    expect(secondPage.page.hasMore).toBe(false);
+  });
+
   it("creates tasks in tag collections with task, tag, activity, and search updates", async () => {
     const service = createService();
     const collection = await service.createTagCollection({

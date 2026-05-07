@@ -475,6 +475,7 @@ export type SearchWorkspaceInput = {
   query: string;
   kinds?: SearchResultKind[];
   limit?: number;
+  offset?: number;
   includeArchived?: boolean;
   includeDeleted?: boolean;
 };
@@ -542,6 +543,11 @@ export type CollectionEvaluationSummary = {
   total: number;
   results: CollectionResultSummary[];
   groups: CollectionResultGroupSummary[];
+  page?: {
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
 };
 
 export type TodayTaskSummary = {
@@ -665,6 +671,12 @@ export type CreateKeywordCollectionInput = {
 
 export type CreateTaskInCollectionInput = CreateTaskInput & {
   collectionId: string;
+};
+
+export type EvaluateCollectionInput = {
+  collectionId: string;
+  limit?: number;
+  offset?: number;
 };
 
 export type ListTargetsByMetadataInput = {
@@ -882,12 +894,14 @@ export type GetDefaultDashboardInput = {
 export type ListRecentActivityInput = {
   workspaceId?: string;
   limit?: number;
+  cursor?: string | null;
 };
 
 export type ListActivityForTargetInput = {
   targetType: string;
   targetId: string;
   limit?: number;
+  cursor?: string | null;
 };
 
 export type ItemInspectorSummary = {
@@ -1467,7 +1481,7 @@ export type LocalWorkOsIpcContracts = {
     result: ApiResult<CollectionSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.collections.evaluateCollection]: {
-    input: string;
+    input: string | EvaluateCollectionInput;
     result: ApiResult<CollectionEvaluationSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.collections.createTaskInCollection]: {
@@ -1776,7 +1790,7 @@ export type LocalWorkOsApi = {
       input: CreateKeywordCollectionInput
     ) => Promise<ApiResult<CollectionSummary>>;
     evaluateCollection: (
-      collectionId: string
+      input: string | EvaluateCollectionInput
     ) => Promise<ApiResult<CollectionEvaluationSummary>>;
     createTaskInCollection: (
       input: CreateTaskInCollectionInput
@@ -2115,10 +2129,10 @@ export function createLocalWorkOsApi(
           LOCAL_WORK_OS_IPC_CHANNELS.collections.createKeywordCollection,
           input
         ),
-      evaluateCollection: (collectionId) =>
+      evaluateCollection: (input) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.collections.evaluateCollection,
-          collectionId
+          input
         ),
       createTaskInCollection: (input) =>
         invoke(

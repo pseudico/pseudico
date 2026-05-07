@@ -1413,6 +1413,20 @@ a {
   gap: 8px;
 }
 
+.load-more-list {
+  display: grid;
+  gap: 8px;
+}
+
+.load-more-list-item {
+  min-width: 0;
+}
+
+.load-more-button {
+  justify-self: start;
+  margin-top: 12px;
+}
+
 .search-result-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

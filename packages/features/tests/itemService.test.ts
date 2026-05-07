@@ -98,11 +98,11 @@ describe("ItemService", () => {
     )).toMatchObject([{ id: "activity_3", action: "item_created" }]);
     expect(service.listItemsByContainer({
       containerId: "container_project_1"
-    })).toEqual([first.item, second.item]);
+    }).items).toEqual([first.item, second.item]);
     expect(service.listItemsByContainerTab({
       containerId: "container_project_1",
       containerTabId: "container_tab_1"
-    })).toEqual([first.item, second.item]);
+    }).items).toEqual([first.item, second.item]);
   });
 
   it("updates searchable item fields and records activity", async () => {
@@ -171,7 +171,7 @@ describe("ItemService", () => {
     });
     expect(service.listItemsByContainer({
       containerId: "container_project_1"
-    })).toEqual([]);
+    }).items).toEqual([]);
     expect(new ActivityLogRepository(connection).listForTarget(
       "item",
       source.item.id
@@ -203,12 +203,12 @@ describe("ItemService", () => {
     expect(deleted.item.deletedAt).toBe("2026-05-01T00:00:00.000Z");
     expect(service.listItemsByContainer({
       containerId: "container_project_1"
-    })).toEqual([]);
+    }).items).toEqual([]);
     expect(service.listItemsByContainer({
       containerId: "container_project_1",
       includeArchived: true,
       includeDeleted: true
-    })).toHaveLength(2);
+    }).items).toHaveLength(2);
     expect(new SearchIndexRepository(connection).search(
       "workspace_1",
       "delete"
@@ -256,6 +256,42 @@ describe("ItemService", () => {
         { action: "item_updated" }
       ]
     });
+  });
+
+  it("paginates long container feeds with stable cursors", async () => {
+    const service = createService();
+
+    for (let index = 0; index < 120; index += 1) {
+      await service.createItem({
+        workspaceId: "workspace_1",
+        containerId: "container_project_1",
+        type: "note",
+        title: `Large note ${index.toString().padStart(3, "0")}`
+      });
+    }
+
+    const firstPage = service.listItemsByContainer({
+      containerId: "container_project_1",
+      limit: 50
+    });
+    const secondPage = service.listItemsByContainer({
+      containerId: "container_project_1",
+      limit: 50,
+      cursor: firstPage.nextCursor
+    });
+    const thirdPage = service.listItemsByContainer({
+      containerId: "container_project_1",
+      limit: 50,
+      cursor: secondPage.nextCursor
+    });
+
+    expect(firstPage.items).toHaveLength(50);
+    expect(firstPage.hasMore).toBe(true);
+    expect(secondPage.items).toHaveLength(50);
+    expect(secondPage.items[0]?.title).toBe("Large note 050");
+    expect(thirdPage.items).toHaveLength(20);
+    expect(thirdPage.hasMore).toBe(false);
+    expect(thirdPage.nextCursor).toBeNull();
   });
 });
 

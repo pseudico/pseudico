@@ -32,6 +32,7 @@ export type SearchInput = {
   query: string;
   kinds?: SearchResultKind[];
   limit?: number;
+  offset?: number;
   includeArchived?: boolean;
   includeDeleted?: boolean;
 };
@@ -135,9 +136,9 @@ export class SearchService {
       searchWorkspaceInput.includeDeleted = input.includeDeleted;
     }
 
-    if (input.limit !== undefined) {
-      searchWorkspaceInput.limit = Math.max(input.limit * 3, input.limit);
-    }
+    const resultLimit = input.limit ?? 25;
+    const resultOffset = normalizeOffset(input.offset);
+    searchWorkspaceInput.limit = resultOffset + Math.max(resultLimit * 3, resultLimit);
 
     const records = this.searchIndexService.searchWorkspace(searchWorkspaceInput);
 
@@ -157,7 +158,7 @@ export class SearchService {
 
     return this.searchResultHydrator
       .hydrateSearchResults(records, hydrateOptions)
-      .slice(0, input.limit ?? 25);
+      .slice(resultOffset, resultOffset + resultLimit);
   }
 
   rebuildWorkspaceIndex(workspaceId: string): RebuildWorkspaceIndexResult {
@@ -167,6 +168,14 @@ export class SearchService {
   getSearchIndexHealth(workspaceId: string): SearchIndexHealthReport {
     return this.searchIndexOrchestrator.getSearchIndexHealth(workspaceId);
   }
+}
+
+function normalizeOffset(offset: number | undefined): number {
+  if (offset === undefined || !Number.isFinite(offset) || offset < 0) {
+    return 0;
+  }
+
+  return Math.floor(offset);
 }
 
 export const searchModuleContract = {

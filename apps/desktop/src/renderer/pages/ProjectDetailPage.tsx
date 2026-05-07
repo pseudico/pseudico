@@ -105,6 +105,7 @@ type ProjectDetailPageProps = {
 };
 
 const emptyProjectItems: UniversalItemViewModel[] = [];
+const PROJECT_FEED_PAGE_SIZE = 50;
 
 export function ProjectDetailPage({
   apiClient = desktopApiClient,
@@ -119,6 +120,9 @@ export function ProjectDetailPage({
     initialProject ?? null
   );
   const [items, setItems] = useState<ProjectFeedViewModel[]>(initialItems);
+  const [visibleItemCount, setVisibleItemCount] = useState(
+    Math.max(PROJECT_FEED_PAGE_SIZE, initialItems.length)
+  );
   const [categories, setCategories] =
     useState<CategorySummary[]>(initialCategories);
   const [projectActivity, setProjectActivity] =
@@ -267,16 +271,17 @@ export function ProjectDetailPage({
       setCategories(categoriesResult.data);
       setProjectActivity(activityResult.data.map(toRecentActivityViewModel));
       setProjectHealth(toProjectHealthViewModel(healthResult.data));
-      setItems(
-        mergeProjectContent(
-          tasksResult.data,
-          listsResult.data,
-          notesResult.data,
-          linksResult.data,
-          filesResult.data,
-          categoriesResult.data
-        )
+      const mergedItems = mergeProjectContent(
+        tasksResult.data,
+        listsResult.data,
+        notesResult.data,
+        linksResult.data,
+        filesResult.data,
+        categoriesResult.data
       );
+
+      setItems(mergedItems);
+      setVisibleItemCount(PROJECT_FEED_PAGE_SIZE);
     }
 
     void loadProject();
@@ -325,15 +330,18 @@ export function ProjectDetailPage({
       return;
     }
 
-    setItems(
-      mergeProjectContent(
-        tasksResult.data,
-        listsResult.data,
-        notesResult.data,
-        linksResult.data,
-        filesResult.data,
-        categories
-      )
+    const mergedItems = mergeProjectContent(
+      tasksResult.data,
+      listsResult.data,
+      notesResult.data,
+      linksResult.data,
+      filesResult.data,
+      categories
+    );
+
+    setItems(mergedItems);
+    setVisibleItemCount((current) =>
+      Math.min(Math.max(current, PROJECT_FEED_PAGE_SIZE), mergedItems.length)
     );
   }
 
@@ -1074,6 +1082,8 @@ export function ProjectDetailPage({
         : "The item will be soft-deleted and removed from active feeds. The database row remains for audit and future recovery.";
   const projectCategory =
     categories.find((category) => category.id === project.categoryId) ?? null;
+  const visibleItems = items.slice(0, visibleItemCount);
+  const hasMoreItems = visibleItemCount < items.length;
 
   return (
     <section className="project-detail-page">
@@ -1256,11 +1266,25 @@ export function ProjectDetailPage({
           emptyDescription="Tasks, checklists, notes, and files created for this project will appear here with inline controls."
           emptyTitle="No project content yet"
           error={itemError}
-          items={items}
+          items={visibleItems}
           loading={itemsLoading}
           renderContent={renderItemContent}
           onAction={handleItemAction}
         />
+        {hasMoreItems ? (
+          <button
+            className="secondary-button load-more-button"
+            disabled={itemsLoading}
+            type="button"
+            onClick={() =>
+              setVisibleItemCount((current) =>
+                Math.min(current + PROJECT_FEED_PAGE_SIZE, items.length)
+              )
+            }
+          >
+            Load more
+          </button>
+        ) : null}
       </section>
 
       {itemActionError === null ? null : (

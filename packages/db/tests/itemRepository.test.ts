@@ -154,6 +154,55 @@ describe("ItemRepository", () => {
     })).toBeNull();
   });
 
+  it("paginates container items by feed order", () => {
+    const repository = new ItemRepository(connection);
+
+    for (let index = 0; index < 12; index += 1) {
+      repository.create({
+        id: `item_${index}`,
+        workspaceId: "workspace_1",
+        containerId: "container_project_1",
+        type: "note",
+        title: `Item ${index}`,
+        sortOrder: index,
+        timestamp: `${TEST_TIMESTAMP.slice(0, 17)}${String(index).padStart(2, "0")}.000Z`
+      });
+    }
+
+    const firstPage = repository.listByContainerPage("container_project_1", {
+      limit: 5
+    });
+    const secondPage = repository.listByContainerPage("container_project_1", {
+      limit: 5,
+      cursor: firstPage.nextCursor
+    });
+    const thirdPage = repository.listByContainerPage("container_project_1", {
+      limit: 5,
+      cursor: secondPage.nextCursor
+    });
+
+    expect(firstPage.items.map((item) => item.id)).toEqual([
+      "item_0",
+      "item_1",
+      "item_2",
+      "item_3",
+      "item_4"
+    ]);
+    expect(firstPage.hasMore).toBe(true);
+    expect(secondPage.items.map((item) => item.id)).toEqual([
+      "item_5",
+      "item_6",
+      "item_7",
+      "item_8",
+      "item_9"
+    ]);
+    expect(thirdPage.items.map((item) => item.id)).toEqual([
+      "item_10",
+      "item_11"
+    ]);
+    expect(thirdPage.nextCursor).toBeNull();
+  });
+
   it("archives and soft deletes items while default lists exclude them", () => {
     const repository = new ItemRepository(connection);
     repository.create({

@@ -34,7 +34,7 @@ export function createSearchIpcHandlers(
       if (!isSearchWorkspaceInput(input)) {
         return apiError(
           "INVALID_INPUT",
-          "searchWorkspace requires a query string and optional kinds, limit, includeArchived, and includeDeleted fields."
+          "searchWorkspace requires a query string and optional kinds, limit, offset, includeArchived, and includeDeleted fields."
         );
       }
 
@@ -45,6 +45,7 @@ export function createSearchIpcHandlers(
           query: input.query,
           ...(input.kinds === undefined ? {} : { kinds: input.kinds }),
           ...(input.limit === undefined ? {} : { limit: input.limit }),
+          ...(input.offset === undefined ? {} : { offset: input.offset }),
           ...(input.includeArchived === undefined
             ? {}
             : { includeArchived: input.includeArchived }),
@@ -138,6 +139,7 @@ function isSearchWorkspaceInput(input: unknown): input is SearchWorkspaceInput {
     isOptionalString(input.workspaceId) &&
     isOptionalSearchResultKindArray(input.kinds) &&
     isOptionalPositiveInteger(input.limit) &&
+    isOptionalNonNegativeInteger(input.offset) &&
     isOptionalBoolean(input.includeArchived) &&
     isOptionalBoolean(input.includeDeleted)
   );
@@ -163,6 +165,13 @@ function isOptionalPositiveInteger(value: unknown): boolean {
   return (
     value === undefined ||
     (typeof value === "number" && Number.isInteger(value) && value > 0)
+  );
+}
+
+function isOptionalNonNegativeInteger(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (typeof value === "number" && Number.isInteger(value) && value >= 0)
   );
 }
 

@@ -60,6 +60,14 @@ export type ListItemsFilter = {
   status?: string;
   includeArchived?: boolean;
   includeDeleted?: boolean;
+  limit?: number;
+  cursor?: string | null;
+};
+
+export type ItemPageResult = {
+  items: ItemRecord[];
+  nextCursor: string | null;
+  hasMore: boolean;
 };
 
 export type UpdateItemPatch = {
@@ -106,6 +114,13 @@ export class ItemRepository {
     containerId: string,
     filters: ListItemsFilter = {}
   ): ItemRecord[] {
+    return this.listByContainerPage(containerId, filters).items;
+  }
+
+  listByContainerPage(
+    containerId: string,
+    filters: ListItemsFilter = {}
+  ): ItemPageResult {
     const where = ["container_id = ?"];
     const values: unknown[] = [containerId];
 
@@ -127,16 +142,22 @@ export class ItemRepository {
       where.push("deleted_at is null");
     }
 
+    applyItemCursorFilter(where, values, filters.cursor);
+
+    const limit = normalizePageLimit(filters.limit, 100);
+    values.push(limit + 1);
+
     const rows = this.connection.sqlite
       .prepare<unknown[], ItemRow>(
         `select *
          from items
          where ${where.join(" and ")}
-         order by pinned desc, sort_order asc, created_at asc`
+         order by pinned desc, sort_order asc, created_at asc, id asc
+         limit ?`
       )
       .all(...values);
 
-    return rows.map(toItemRecord);
+    return toItemPage(rows, limit);
   }
 
   listByContainerTab(
@@ -144,6 +165,14 @@ export class ItemRepository {
     containerTabId: string,
     filters: ListItemsFilter = {}
   ): ItemRecord[] {
+    return this.listByContainerTabPage(containerId, containerTabId, filters).items;
+  }
+
+  listByContainerTabPage(
+    containerId: string,
+    containerTabId: string,
+    filters: ListItemsFilter = {}
+  ): ItemPageResult {
     const where = ["container_id = ?", "container_tab_id = ?"];
     const values: unknown[] = [containerId, containerTabId];
 
@@ -165,16 +194,22 @@ export class ItemRepository {
       where.push("deleted_at is null");
     }
 
+    applyItemCursorFilter(where, values, filters.cursor);
+
+    const limit = normalizePageLimit(filters.limit, 100);
+    values.push(limit + 1);
+
     const rows = this.connection.sqlite
       .prepare<unknown[], ItemRow>(
         `select *
          from items
          where ${where.join(" and ")}
-         order by pinned desc, sort_order asc, created_at asc`
+         order by pinned desc, sort_order asc, created_at asc, id asc
+         limit ?`
       )
       .all(...values);
 
-    return rows.map(toItemRecord);
+    return toItemPage(rows, limit);
   }
 
   listByWorkspace(
@@ -207,7 +242,7 @@ export class ItemRepository {
         `select *
          from items
          where ${where.join(" and ")}
-         order by container_id asc, pinned desc, sort_order asc, created_at asc`
+         order by container_id asc, pinned desc, sort_order asc, created_at asc, id asc`
       )
       .all(...values);
 
@@ -434,6 +469,103 @@ export class ItemRepository {
 
     return toItemRecord(deleted);
   }
+}
+
+function normalizePageLimit(limit: number | undefined, defaultLimit: number): number {
+  if (limit === undefined || !Number.isFinite(limit) || limit <= 0) {
+    return defaultLimit;
+  }
+
+  return Math.min(Math.floor(limit), 500);
+}
+
+function applyItemCursorFilter(
+  where: string[],
+  values: unknown[],
+  cursor: string | null | undefined
+): void {
+  if (cursor === undefined || cursor === null || cursor.trim().length === 0) {
+    return;
+  }
+
+  const parsed = parseItemCursor(cursor);
+
+  where.push(
+    `(pinned < ?
+      or (pinned = ? and sort_order > ?)
+      or (pinned = ? and sort_order = ? and created_at > ?)
+      or (pinned = ? and sort_order = ? and created_at = ? and id > ?))`
+  );
+  values.push(
+    parsed.pinned,
+    parsed.pinned,
+    parsed.sortOrder,
+    parsed.pinned,
+    parsed.sortOrder,
+    parsed.createdAt,
+    parsed.pinned,
+    parsed.sortOrder,
+    parsed.createdAt,
+    parsed.id
+  );
+}
+
+function toItemPage(rows: ItemRow[], limit: number): ItemPageResult {
+  const pageRows = rows.slice(0, limit);
+  const items = pageRows.map(toItemRecord);
+  const last = pageRows.at(-1);
+
+  return {
+    items,
+    hasMore: rows.length > limit,
+    nextCursor:
+      rows.length > limit && last !== undefined ? createItemCursor(last) : null
+  };
+}
+
+function createItemCursor(row: ItemRow): string {
+  return [
+    row.pinned,
+    row.sort_order,
+    encodeURIComponent(row.created_at),
+    encodeURIComponent(row.id)
+  ].join("|");
+}
+
+function parseItemCursor(cursor: string): {
+  pinned: number;
+  sortOrder: number;
+  createdAt: string;
+  id: string;
+} {
+  const [pinned, sortOrder, createdAt, id] = cursor.split("|");
+
+  if (
+    pinned === undefined ||
+    sortOrder === undefined ||
+    createdAt === undefined ||
+    id === undefined
+  ) {
+    throw new Error("Invalid item pagination cursor.");
+  }
+
+  const parsedPinned = Number(pinned);
+  const parsedSortOrder = Number(sortOrder);
+
+  if (
+    !Number.isInteger(parsedPinned) ||
+    (parsedPinned !== 0 && parsedPinned !== 1) ||
+    !Number.isFinite(parsedSortOrder)
+  ) {
+    throw new Error("Invalid item pagination cursor.");
+  }
+
+  return {
+    pinned: parsedPinned,
+    sortOrder: parsedSortOrder,
+    createdAt: decodeURIComponent(createdAt),
+    id: decodeURIComponent(id)
+  };
 }
 
 function toItemRecord(row: ItemRow): ItemRecord {

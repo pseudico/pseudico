@@ -119,4 +119,52 @@ describe("SearchIndexRepository", () => {
 
     expect(repository.search("workspace_1", "active")).toEqual([]);
   });
+
+  it("applies limit and offset to large search result sets", () => {
+    const repository = new SearchIndexRepository(connection);
+
+    for (let index = 0; index < 40; index += 1) {
+      repository.upsert({
+        id: `search_${index}`,
+        workspaceId: "workspace_1",
+        targetType: "item",
+        targetId: `item_${index}`,
+        title: `Supplier result ${index.toString().padStart(2, "0")}`,
+        timestamp: `2026-05-01T00:${String(index).padStart(2, "0")}:00.000Z`
+      });
+    }
+
+    expect(
+      repository
+        .search("workspace_1", "supplier", { limit: 10, offset: 0 })
+        .map((record) => record.targetId)
+    ).toEqual([
+      "item_39",
+      "item_38",
+      "item_37",
+      "item_36",
+      "item_35",
+      "item_34",
+      "item_33",
+      "item_32",
+      "item_31",
+      "item_30"
+    ]);
+    expect(
+      repository
+        .search("workspace_1", "supplier", { limit: 10, offset: 10 })
+        .map((record) => record.targetId)
+    ).toEqual([
+      "item_29",
+      "item_28",
+      "item_27",
+      "item_26",
+      "item_25",
+      "item_24",
+      "item_23",
+      "item_22",
+      "item_21",
+      "item_20"
+    ]);
+  });
 });

@@ -37,7 +37,7 @@ export function createActivityIpcHandlers(
       if (!isListRecentActivityInput(input)) {
         return apiError(
           "INVALID_INPUT",
-          "listRecentActivity requires an optional workspaceId and limit."
+          "listRecentActivity requires an optional workspaceId, limit, and cursor."
         );
       }
 
@@ -49,7 +49,12 @@ export function createActivityIpcHandlers(
 
         return apiOk(
           context.activityService
-            .listRecentActivity(workspaceId, input?.limit)
+            .listRecentActivityPage({
+              workspaceId,
+              ...(input?.limit === undefined ? {} : { limit: input.limit }),
+              cursor: input?.cursor ?? null
+            })
+            .events
             .map(toActivitySummary)
         );
       });
@@ -59,14 +64,20 @@ export function createActivityIpcHandlers(
       if (!isListActivityForTargetInput(input)) {
         return apiError(
           "INVALID_INPUT",
-          "listActivityForTarget requires targetType and targetId strings."
+          "listActivityForTarget requires targetType, targetId, and optional limit/cursor."
         );
       }
 
       return await withActivityService(workspaceService, async (context) =>
         apiOk(
           context.activityService
-            .listActivityForTarget(input.targetType, input.targetId, input.limit)
+            .listActivityForTargetPage({
+              targetType: input.targetType,
+              targetId: input.targetId,
+              ...(input.limit === undefined ? {} : { limit: input.limit }),
+              cursor: input.cursor ?? null
+            })
+            .events
             .map(toActivitySummary)
         )
       );
@@ -149,7 +160,8 @@ function isListRecentActivityInput(
     input === undefined ||
     (isRecord(input) &&
       isOptionalNonEmptyString(input.workspaceId) &&
-      isOptionalNumber(input.limit))
+      isOptionalNumber(input.limit) &&
+      isOptionalNullableString(input.cursor))
   );
 }
 
@@ -160,7 +172,8 @@ function isListActivityForTargetInput(
     isRecord(input) &&
     isNonEmptyString(input.targetType) &&
     isNonEmptyString(input.targetId) &&
-    isOptionalNumber(input.limit)
+    isOptionalNumber(input.limit) &&
+    isOptionalNullableString(input.cursor)
   );
 }
 
@@ -178,4 +191,8 @@ function isOptionalNonEmptyString(value: unknown): boolean {
 
 function isOptionalNumber(value: unknown): boolean {
   return value === undefined || typeof value === "number";
+}
+
+function isOptionalNullableString(value: unknown): boolean {
+  return value === undefined || value === null || typeof value === "string";
 }

@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   EmptyState,
   ErrorState,
+  LoadMoreList,
   SearchResultCard,
   renderLoadableState,
   type SearchResultCardViewModel
@@ -33,6 +34,8 @@ const searchKindOptions = [
   { label: "Checklist rows", value: "list_item" }
 ] as const satisfies readonly { label: string; value: SearchResultKind }[];
 
+const SEARCH_PAGE_SIZE = 30;
+
 export function SearchPage({
   apiClient = desktopApiClient,
   initialQuery,
@@ -48,6 +51,9 @@ export function SearchPage({
   const [selectedKinds, setSelectedKinds] =
     useState<SearchResultKind[]>(initialKinds);
   const [results, setResults] = useState<SearchResultSummary[]>(initialResults);
+  const [hasMoreResults, setHasMoreResults] = useState(
+    initialResults.length >= SEARCH_PAGE_SIZE
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const activeQuery = initialQuery ?? queryFromRoute;
@@ -92,7 +98,8 @@ export function SearchPage({
       const input: SearchWorkspaceInput = {
         workspaceId,
         query: trimmedQuery,
-        limit: 30
+        limit: SEARCH_PAGE_SIZE,
+        offset: 0
       };
 
       if (selectedKinds.length > 0) {
@@ -113,6 +120,7 @@ export function SearchPage({
       }
 
       setResults(result.data);
+      setHasMoreResults(result.data.length === SEARCH_PAGE_SIZE);
     }
 
     void runSearch();
@@ -136,6 +144,44 @@ export function SearchPage({
     }
 
     setSearchParams(params);
+  }
+
+  async function loadMoreResults(): Promise<void> {
+    if (currentWorkspace === null || loading) {
+      return;
+    }
+
+    const trimmedQuery = activeQuery.trim();
+
+    if (trimmedQuery.length === 0) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const input: SearchWorkspaceInput = {
+      workspaceId: currentWorkspace.id,
+      query: trimmedQuery,
+      limit: SEARCH_PAGE_SIZE,
+      offset: results.length
+    };
+
+    if (selectedKinds.length > 0) {
+      input.kinds = selectedKinds;
+    }
+
+    const result = await apiClient.search.searchWorkspace(input);
+
+    setLoading(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setResults((current) => [...current, ...result.data]);
+    setHasMoreResults(result.data.length === SEARCH_PAGE_SIZE);
   }
 
   function toggleKind(kind: SearchResultKind): void {
@@ -249,15 +295,17 @@ export function SearchPage({
               description="Archived and deleted records are excluded by default."
             />
           ) : (
-            <div className="search-result-list" aria-label="Search results">
-              {visibleResults.map((result) => (
-                <SearchResultCard
-                  key={result.id}
-                  result={result}
-                  onOpen={openResult}
-                />
-              ))}
-            </div>
+            <LoadMoreList
+              ariaLabel="Search results"
+              getKey={(result) => result.id}
+              hasMore={hasMoreResults}
+              items={visibleResults}
+              loading={loading}
+              renderItem={(result) => (
+                <SearchResultCard result={result} onOpen={openResult} />
+              )}
+              onLoadMore={() => void loadMoreResults()}
+            />
           )}
         </section>
       </div>
