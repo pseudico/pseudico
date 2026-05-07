@@ -354,6 +354,52 @@ function createMockApi(
       getProject: async () => apiOk(null),
       getProjectHealth: async () => apiOk(projectHealthSummary())
     },
+    contacts: {
+      create: async () =>
+        apiOk({
+          contact: contactSummary(),
+          defaultTabId: "container_tab_contact_1",
+          fields: []
+        }),
+      update: async () => apiOk(contactSummary()),
+      list: async () => apiOk([]),
+      get: async () => apiOk(null),
+      addField: async () =>
+        apiOk({
+          id: "contact_field_1",
+          workspaceId: workspace.id,
+          containerId: "container_contact_1",
+          label: "Email",
+          value: "alex@example.com",
+          type: "email",
+          sortOrder: 0,
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z",
+          deletedAt: null
+        }),
+      updateField: async () =>
+        apiOk({
+          id: "contact_field_1",
+          workspaceId: workspace.id,
+          containerId: "container_contact_1",
+          label: "Email",
+          value: "alex@example.com",
+          type: "email",
+          sortOrder: 0,
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z",
+          deletedAt: null
+        }),
+      createContact: async () =>
+        apiOk({
+          contact: contactSummary(),
+          defaultTabId: "container_tab_contact_1",
+          fields: []
+        }),
+      updateContact: async () => apiOk(contactSummary()),
+      listContacts: async () => apiOk([]),
+      getContact: async () => apiOk(null)
+    },
     categories: {
       create: async () => apiOk(categorySummary()),
       update: async () => apiOk(categorySummary()),
@@ -536,6 +582,26 @@ function categorySummary(): CategorySummary {
     color: "#3b82f6",
     createdAt: "2026-05-01T00:00:00.000Z",
     updatedAt: "2026-05-01T00:00:00.000Z",
+    deletedAt: null
+  };
+}
+
+function contactSummary() {
+  return {
+    id: "container_contact_1",
+    workspaceId: "workspace_1",
+    type: "contact" as const,
+    name: "Alex Chen",
+    slug: "alex-chen",
+    description: "Client stakeholder",
+    status: "active" as const,
+    categoryId: null,
+    color: "#2c6b8f",
+    isFavorite: false,
+    sortOrder: 0,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z",
+    archivedAt: null,
     deletedAt: null
   };
 }

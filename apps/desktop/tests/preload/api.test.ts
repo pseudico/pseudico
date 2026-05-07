@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(85);
+    expect(channels).toHaveLength(91);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -51,6 +51,7 @@ describe("typed preload API", () => {
       "notes",
       "links",
       "projects",
+      "contacts",
       "categories",
       "metadata",
       "search",
@@ -158,6 +159,66 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.projects.getProjectHealth,
         input: "container_1"
+      }
+    ]);
+  });
+
+  it("routes contact calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.contacts.createContact({
+      workspaceId: "workspace_1",
+      name: "Alex Chen"
+    });
+    await api.contacts.getContact("container_1");
+    await api.contacts.addField({
+      contactId: "container_1",
+      label: "Email",
+      value: "alex@example.com",
+      type: "email"
+    });
+    await api.contacts.updateField({
+      fieldId: "contact_field_1",
+      value: "alex.revised@example.com"
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.contacts.createContact,
+        input: {
+          workspaceId: "workspace_1",
+          name: "Alex Chen"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.contacts.getContact,
+        input: "container_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.contacts.addField,
+        input: {
+          contactId: "container_1",
+          label: "Email",
+          value: "alex@example.com",
+          type: "email"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateField,
+        input: {
+          fieldId: "contact_field_1",
+          value: "alex.revised@example.com"
+        }
       }
     ]);
   });

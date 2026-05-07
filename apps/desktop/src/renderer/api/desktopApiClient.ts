@@ -116,6 +116,20 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       getProjectHealth: (projectId) =>
         callApi(() => api.projects.getProjectHealth(projectId))
     },
+    contacts: {
+      create: (input) => callApi(() => api.contacts.create(input)),
+      update: (input) => callApi(() => api.contacts.update(input)),
+      list: (workspaceId) => callApi(() => api.contacts.list(workspaceId)),
+      get: (contactId) => callApi(() => api.contacts.get(contactId)),
+      addField: (input) => callApi(() => api.contacts.addField(input)),
+      updateField: (input) => callApi(() => api.contacts.updateField(input)),
+      createContact: (input) => callApi(() => api.contacts.createContact(input)),
+      updateContact: (input) => callApi(() => api.contacts.updateContact(input)),
+      listContacts: (workspaceId) =>
+        callApi(() => api.contacts.listContacts(workspaceId)),
+      getContact: (contactId) =>
+        callApi(() => api.contacts.getContact(contactId))
+    },
     categories: {
       create: (input) => callApi(() => api.categories.create(input)),
       update: (input) => callApi(() => api.categories.update(input)),
@@ -347,6 +361,22 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().projects.getProject(projectId),
     getProjectHealth: (projectId) =>
       getDesktopApiClient().projects.getProjectHealth(projectId)
+  },
+  contacts: {
+    create: (input) => getDesktopApiClient().contacts.create(input),
+    update: (input) => getDesktopApiClient().contacts.update(input),
+    list: (workspaceId) => getDesktopApiClient().contacts.list(workspaceId),
+    get: (contactId) => getDesktopApiClient().contacts.get(contactId),
+    addField: (input) => getDesktopApiClient().contacts.addField(input),
+    updateField: (input) => getDesktopApiClient().contacts.updateField(input),
+    createContact: (input) =>
+      getDesktopApiClient().contacts.createContact(input),
+    updateContact: (input) =>
+      getDesktopApiClient().contacts.updateContact(input),
+    listContacts: (workspaceId) =>
+      getDesktopApiClient().contacts.listContacts(workspaceId),
+    getContact: (contactId) =>
+      getDesktopApiClient().contacts.getContact(contactId)
   },
   categories: {
     create: (input) => getDesktopApiClient().categories.create(input),

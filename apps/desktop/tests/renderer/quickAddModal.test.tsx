@@ -299,6 +299,54 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
       getProject: async () => apiOk(activeProject),
       getProjectHealth: async () => apiOk(projectHealthSummary(activeProject))
     },
+    contacts: {
+      create: async () =>
+        apiOk({
+          contact: { ...activeProject, id: "container_contact_1", type: "contact" },
+          defaultTabId: "container_tab_contact_1",
+          fields: []
+        }),
+      update: async () =>
+        apiOk({ ...activeProject, id: "container_contact_1", type: "contact" }),
+      list: async () => apiOk([]),
+      get: async () => apiOk(null),
+      addField: async () =>
+        apiOk({
+          id: "contact_field_1",
+          workspaceId: workspace.id,
+          containerId: "container_contact_1",
+          label: "Email",
+          value: "alex@example.com",
+          type: "email",
+          sortOrder: 0,
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z",
+          deletedAt: null
+        }),
+      updateField: async () =>
+        apiOk({
+          id: "contact_field_1",
+          workspaceId: workspace.id,
+          containerId: "container_contact_1",
+          label: "Email",
+          value: "alex@example.com",
+          type: "email",
+          sortOrder: 0,
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z",
+          deletedAt: null
+        }),
+      createContact: async () =>
+        apiOk({
+          contact: { ...activeProject, id: "container_contact_1", type: "contact" },
+          defaultTabId: "container_tab_contact_1",
+          fields: []
+        }),
+      updateContact: async () =>
+        apiOk({ ...activeProject, id: "container_contact_1", type: "contact" }),
+      listContacts: async () => apiOk([]),
+      getContact: async () => apiOk(null)
+    },
     categories: {
       create: async () => apiOk(categorySummary()),
       update: async () => apiOk(categorySummary()),

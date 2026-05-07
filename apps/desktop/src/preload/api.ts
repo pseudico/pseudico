@@ -291,6 +291,16 @@ export type DatabaseHealthStatus = {
 
 export type ProjectStatus = "active" | "waiting" | "completed" | "archived";
 export type ProjectMutableStatus = Exclude<ProjectStatus, "archived">;
+export type ContactStatus = "active" | "waiting" | "completed" | "archived";
+export type ContactMutableStatus = Exclude<ContactStatus, "archived">;
+export type ContactFieldType =
+  | "text"
+  | "email"
+  | "phone"
+  | "website"
+  | "address"
+  | "date"
+  | "custom";
 
 export type ProjectSummary = {
   id: string;
@@ -308,6 +318,42 @@ export type ProjectSummary = {
   updatedAt: string;
   archivedAt: string | null;
   deletedAt: string | null;
+};
+
+export type ContactSummary = {
+  id: string;
+  workspaceId: string;
+  type: "contact";
+  name: string;
+  slug: string;
+  description: string | null;
+  status: ContactStatus;
+  categoryId: string | null;
+  color: string | null;
+  isFavorite: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  archivedAt: string | null;
+  deletedAt: string | null;
+};
+
+export type ContactFieldSummary = {
+  id: string;
+  workspaceId: string;
+  containerId: string;
+  label: string;
+  value: string;
+  type: ContactFieldType;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
+export type ContactDetailSummary = {
+  contact: ContactSummary;
+  fields: ContactFieldSummary[];
 };
 
 export type ProjectHealthTaskSummary = {
@@ -780,6 +826,55 @@ export type UpdateProjectInput = {
   status?: ProjectMutableStatus;
 };
 
+export type ContactFieldInput = {
+  label: string;
+  value: string;
+  type?: ContactFieldType;
+  sortOrder?: number;
+};
+
+export type CreateContactInput = {
+  workspaceId?: string;
+  name: string;
+  categoryId?: string | null;
+  color?: string | null;
+  description?: string | null;
+  fields?: ContactFieldInput[];
+  isFavorite?: boolean;
+  slug?: string;
+  sortOrder?: number;
+};
+
+export type CreateContactResult = {
+  contact: ContactSummary;
+  defaultTabId: string;
+  fields: ContactFieldSummary[];
+};
+
+export type UpdateContactInput = {
+  contactId: string;
+  categoryId?: string | null;
+  color?: string | null;
+  description?: string | null;
+  isFavorite?: boolean;
+  name?: string;
+  slug?: string;
+  sortOrder?: number;
+  status?: ContactMutableStatus;
+};
+
+export type AddContactFieldInput = ContactFieldInput & {
+  contactId: string;
+};
+
+export type UpdateContactFieldInput = {
+  fieldId: string;
+  label?: string;
+  value?: string;
+  type?: ContactFieldType;
+  sortOrder?: number;
+};
+
 export type MoveInboxItemToProjectInput = {
   itemId: string;
   projectId: string;
@@ -1239,6 +1334,14 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     getProject: "local-work-os:projects:get-project",
     getProjectHealth: "local-work-os:projects:get-project-health"
   },
+  contacts: {
+    createContact: "local-work-os:contacts:create-contact",
+    updateContact: "local-work-os:contacts:update-contact",
+    listContacts: "local-work-os:contacts:list-contacts",
+    getContact: "local-work-os:contacts:get-contact",
+    addField: "local-work-os:contacts:add-field",
+    updateField: "local-work-os:contacts:update-field"
+  },
   categories: {
     createCategory: "local-work-os:categories:create-category",
     updateCategory: "local-work-os:categories:update-category",
@@ -1471,6 +1574,30 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.getProjectHealth]: {
     input: string;
     result: ApiResult<ProjectHealthSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.contacts.createContact]: {
+    input: CreateContactInput;
+    result: ApiResult<CreateContactResult>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateContact]: {
+    input: UpdateContactInput;
+    result: ApiResult<ContactSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.contacts.listContacts]: {
+    input: string | undefined;
+    result: ApiResult<ContactSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.contacts.getContact]: {
+    input: string;
+    result: ApiResult<ContactDetailSummary | null>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.contacts.addField]: {
+    input: AddContactFieldInput;
+    result: ApiResult<ContactFieldSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateField]: {
+    input: UpdateContactFieldInput;
+    result: ApiResult<ContactFieldSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.categories.createCategory]: {
     input: CreateCategoryInput;
@@ -1788,6 +1915,38 @@ export type LocalWorkOsApi = {
     getProjectHealth: (
       projectId: string
     ) => Promise<ApiResult<ProjectHealthSummary>>;
+  };
+  contacts: {
+    create: (
+      input: CreateContactInput
+    ) => Promise<ApiResult<CreateContactResult>>;
+    update: (
+      input: UpdateContactInput
+    ) => Promise<ApiResult<ContactSummary>>;
+    list: (
+      workspaceId?: string
+    ) => Promise<ApiResult<ContactSummary[]>>;
+    get: (
+      contactId: string
+    ) => Promise<ApiResult<ContactDetailSummary | null>>;
+    addField: (
+      input: AddContactFieldInput
+    ) => Promise<ApiResult<ContactFieldSummary>>;
+    updateField: (
+      input: UpdateContactFieldInput
+    ) => Promise<ApiResult<ContactFieldSummary>>;
+    createContact: (
+      input: CreateContactInput
+    ) => Promise<ApiResult<CreateContactResult>>;
+    updateContact: (
+      input: UpdateContactInput
+    ) => Promise<ApiResult<ContactSummary>>;
+    listContacts: (
+      workspaceId?: string
+    ) => Promise<ApiResult<ContactSummary[]>>;
+    getContact: (
+      contactId: string
+    ) => Promise<ApiResult<ContactDetailSummary | null>>;
   };
   categories: {
     create: (input: CreateCategoryInput) => Promise<ApiResult<CategorySummary>>;
@@ -2125,6 +2284,28 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.getProject, projectId),
       getProjectHealth: (projectId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.getProjectHealth, projectId)
+    },
+    contacts: {
+      create: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.createContact, input),
+      update: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateContact, input),
+      list: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.listContacts, workspaceId),
+      get: (contactId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.getContact, contactId),
+      addField: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.addField, input),
+      updateField: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateField, input),
+      createContact: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.createContact, input),
+      updateContact: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateContact, input),
+      listContacts: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.listContacts, workspaceId),
+      getContact: (contactId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.getContact, contactId)
     },
     categories: {
       create: (input) =>
