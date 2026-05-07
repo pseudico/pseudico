@@ -24,6 +24,7 @@ import {
   type ProjectSummary,
   type RecentWorkspace,
   type WorkspaceJsonExportSummary,
+  type WorkspaceIntegritySummary,
   type TaskSummary,
   type DailyPlanItemSummary,
   type DailyPlanSummary,
@@ -401,6 +402,9 @@ function createMockApi(
       exportWorkspaceJson: async () => apiOk(workspaceJsonExportSummary()),
       exportProjectMarkdown: async () => apiOk(textExportSummary("project_markdown")),
       exportTasksCsv: async () => apiOk(textExportSummary("tasks_csv"))
+    },
+    diagnostics: {
+      runWorkspaceIntegrityCheck: async () => apiOk(workspaceIntegritySummary())
     }
   };
 
@@ -741,6 +745,28 @@ function textExportSummary(kind: "project_markdown" | "tasks_csv" | "tasks_tsv")
     kind,
     sourceId: kind === "project_markdown" ? "container_1" : "workspace_1",
     rowCount: 1
+  };
+}
+
+function workspaceIntegritySummary(): WorkspaceIntegritySummary {
+  return {
+    workspaceId: "workspace_1",
+    generatedAt: "2026-05-01T00:00:00.000Z",
+    status: "healthy",
+    checkedCount: 6,
+    issueCount: 0,
+    errorCount: 0,
+    warningCount: 0,
+    sections: [
+      {
+        kind: "system_rows",
+        title: "System rows",
+        status: "healthy",
+        checkedCount: 2,
+        issueCount: 0,
+        issues: []
+      }
+    ]
   };
 }
 
@@ -1343,6 +1369,13 @@ describe("desktop API client", () => {
       data: {
         kind: "tasks_csv",
         rowCount: 1
+      }
+    });
+    await expect(client.diagnostics.runWorkspaceIntegrityCheck()).resolves.toMatchObject({
+      ok: true,
+      data: {
+        status: "healthy",
+        issueCount: 0
       }
     });
   });

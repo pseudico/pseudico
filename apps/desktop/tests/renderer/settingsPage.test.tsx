@@ -20,6 +20,9 @@ describe("SettingsPage", () => {
     const html = renderToString(<SettingsPage />);
 
     expect(html).toContain("Workspace settings");
+    expect(html).toContain("Diagnostics");
+    expect(html).toContain("Run audit");
+    expect(html).toContain("No diagnostics run");
     expect(html).toContain("Backups");
     expect(html).toContain("Create backup");
     expect(html).toContain("No backups yet");

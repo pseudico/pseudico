@@ -519,6 +519,9 @@ function createMockApi(
       exportWorkspaceJson: async () => apiOk(null as never),
       exportProjectMarkdown: async () => apiOk(null as never),
       exportTasksCsv: async () => apiOk(null as never)
+    },
+    diagnostics: {
+      runWorkspaceIntegrityCheck: async () => apiOk(null as never)
     }
   };
 }

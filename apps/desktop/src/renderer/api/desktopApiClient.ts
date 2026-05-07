@@ -239,6 +239,10 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.export.exportProjectMarkdown(input)),
       exportTasksCsv: (input) =>
         callApi(() => api.export.exportTasksCsv(input))
+    },
+    diagnostics: {
+      runWorkspaceIntegrityCheck: (input) =>
+        callApi(() => api.diagnostics.runWorkspaceIntegrityCheck(input))
     }
   };
 }
@@ -468,5 +472,9 @@ export const desktopApiClient: LocalWorkOsApi = {
     exportProjectMarkdown: (input) =>
       getDesktopApiClient().export.exportProjectMarkdown(input),
     exportTasksCsv: (input) => getDesktopApiClient().export.exportTasksCsv(input)
+  },
+  diagnostics: {
+    runWorkspaceIntegrityCheck: (input) =>
+      getDesktopApiClient().diagnostics.runWorkspaceIntegrityCheck(input)
   }
 };

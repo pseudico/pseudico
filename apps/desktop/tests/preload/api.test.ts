@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(84);
+    expect(channels).toHaveLength(85);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -63,7 +63,8 @@ describe("typed preload API", () => {
       "files",
       "backup",
       "import",
-      "export"
+      "export",
+      "diagnostics"
     ]);
     expect("ipcRenderer" in api).toBe(false);
     expect("send" in api).toBe(false);
@@ -1010,6 +1011,34 @@ describe("typed preload API", () => {
     expect(calls).toEqual([
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.dashboard.getDefault,
+        input: {
+          workspaceId: "workspace_1"
+        }
+      }
+    ]);
+  });
+
+  it("routes diagnostics calls through their named channel", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk([])) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.diagnostics.runWorkspaceIntegrityCheck({
+      workspaceId: "workspace_1"
+    });
+
+    expect(calls).toEqual([
+      {
+        channel:
+          LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runWorkspaceIntegrityCheck,
         input: {
           workspaceId: "workspace_1"
         }
