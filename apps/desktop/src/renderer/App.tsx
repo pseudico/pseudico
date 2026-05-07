@@ -4,6 +4,7 @@ import { AppShell } from "./shell/AppShell";
 import { ToastHost } from "./shell/toastStore";
 import { CollectionsPage } from "./pages/CollectionsPage";
 import { ContactsPage } from "./pages/ContactsPage";
+import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { InboxPage } from "./pages/InboxPage";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
@@ -27,6 +28,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
         <Route path="/contacts" element={<ContactsPage />} />
+        <Route path="/contacts/:contactId" element={<ContactDetailPage />} />
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/tags-categories" element={<TagsCategoriesPage />} />
         <Route path="/search" element={<SearchPage />} />

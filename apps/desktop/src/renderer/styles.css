@@ -414,6 +414,54 @@ a {
   background: #ffffff;
 }
 
+.contact-fields-editor {
+  display: grid;
+  gap: 12px;
+  max-width: 900px;
+  padding: 14px;
+  border: 1px solid #dedbd1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.contact-field-list {
+  display: grid;
+  gap: 10px;
+}
+
+.contact-field-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(180px, 2fr) minmax(120px, 160px) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.contact-field-row label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: #514e49;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.contact-field-row input,
+.contact-field-row select {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  border: 1px solid #d6d1c4;
+  border-radius: 7px;
+  padding: 9px 10px;
+  color: #262624;
+  background: #ffffff;
+}
+
+.contact-field-new {
+  padding-top: 12px;
+  border-top: 1px solid #ece8dc;
+}
+
 .note-create-button {
   justify-self: start;
 }
@@ -2848,6 +2896,7 @@ a {
     .item-inspector-metadata,
     .quick-add-form,
     .task-quick-add,
+    .contact-field-row,
     .create-list-form,
     .category-form,
     .category-list-row,

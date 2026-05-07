@@ -6,6 +6,8 @@ import {
   type CategorySummary,
   type CollectionEvaluationSummary,
   type CollectionSummary,
+  type ContactFieldSummary,
+  type ContactSummary,
   type DatabaseHealthStatus,
   type DashboardViewModelSummary,
   type FileAttachmentResultSummary,
@@ -210,6 +212,40 @@ function createMockApi(
       listProjects: async () => apiOk([projectSummary()]),
       getProject: async () => apiOk(projectSummary()),
       getProjectHealth: async () => apiOk(projectHealthSummary())
+    },
+    contacts: {
+      create: async () =>
+        apiOk({
+          contact: contactSummary(),
+          defaultTabId: "container_tab_2",
+          fields: [contactFieldSummary()]
+        }),
+      update: async () => apiOk(contactSummary()),
+      list: async () => apiOk([contactSummary()]),
+      get: async () =>
+        apiOk({
+          contact: contactSummary(),
+          fields: [contactFieldSummary()]
+        }),
+      addField: async () => apiOk(contactFieldSummary()),
+      updateField: async () =>
+        apiOk({
+          ...contactFieldSummary(),
+          value: "alex.revised@example.com"
+        }),
+      createContact: async () =>
+        apiOk({
+          contact: contactSummary(),
+          defaultTabId: "container_tab_2",
+          fields: [contactFieldSummary()]
+        }),
+      updateContact: async () => apiOk(contactSummary()),
+      listContacts: async () => apiOk([contactSummary()]),
+      getContact: async () =>
+        apiOk({
+          contact: contactSummary(),
+          fields: [contactFieldSummary()]
+        })
     },
     categories: {
       create: async () => apiOk(categorySummary()),
@@ -444,6 +480,41 @@ function projectSummary(): ProjectSummary {
     createdAt: "2026-04-30T00:00:00.000Z",
     updatedAt: "2026-04-30T00:00:00.000Z",
     archivedAt: null,
+    deletedAt: null
+  };
+}
+
+function contactSummary(): ContactSummary {
+  return {
+    id: "container_contact_1",
+    workspaceId: "workspace_1",
+    type: "contact",
+    name: "Alex Chen",
+    slug: "alex-chen",
+    description: "Client stakeholder",
+    status: "active",
+    categoryId: null,
+    color: "#2c6b8f",
+    isFavorite: false,
+    sortOrder: 0,
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z",
+    archivedAt: null,
+    deletedAt: null
+  };
+}
+
+function contactFieldSummary(): ContactFieldSummary {
+  return {
+    id: "contact_field_1",
+    workspaceId: "workspace_1",
+    containerId: "container_contact_1",
+    label: "Email",
+    value: "alex@example.com",
+    type: "email",
+    sortOrder: 0,
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z",
     deletedAt: null
   };
 }
@@ -1003,6 +1074,42 @@ describe("desktop API client", () => {
           type: "project"
         }
       ]
+    });
+    await expect(client.contacts.listContacts()).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: "container_contact_1",
+          type: "contact"
+        }
+      ]
+    });
+    await expect(client.contacts.getContact("container_contact_1")).resolves.toMatchObject({
+      ok: true,
+      data: {
+        contact: {
+          id: "container_contact_1"
+        },
+        fields: [
+          {
+            label: "Email",
+            value: "alex@example.com"
+          }
+        ]
+      }
+    });
+    await expect(
+      client.contacts.addField({
+        contactId: "container_contact_1",
+        label: "Phone",
+        value: "555-1000",
+        type: "phone"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        label: "Email"
+      }
     });
     await expect(client.tasks.listByContainer("container_1")).resolves.toMatchObject({
       ok: true,

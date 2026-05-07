@@ -4,6 +4,7 @@ import { registerCategoryIpc } from "./registerCategoryIpc";
 import { registerActivityIpc } from "./registerActivityIpc";
 import { registerBackupIpc } from "./registerBackupIpc";
 import { registerCollectionIpc } from "./registerCollectionIpc";
+import { registerContactIpc } from "./registerContactIpc";
 import { registerContainerIpc } from "./registerContainerIpc";
 import { registerDashboardIpc } from "./registerDashboardIpc";
 import { registerDatabaseIpc } from "./registerDatabaseIpc";
@@ -57,6 +58,7 @@ export function registerDesktopIpc(
   registerDatabaseIpc(services.workspaceService);
   registerInboxIpc(services.workspaceService);
   registerProjectIpc(services.workspaceService);
+  registerContactIpc(services.workspaceService);
   registerTaskIpc(services.workspaceService);
   registerListIpc(services.workspaceService);
   registerNoteIpc(services.workspaceService);

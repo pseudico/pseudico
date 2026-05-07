@@ -9,6 +9,13 @@ export {
   type ProjectFormValues
 } from "./forms/ProjectForm";
 export {
+  ContactForm,
+  validateContactFormValues,
+  type ContactFormErrors,
+  type ContactFormProps,
+  type ContactFormValues
+} from "./forms/ContactForm";
+export {
   QuickAddForm,
   type QuickAddFormProps,
   type QuickAddFormValues,
@@ -69,6 +76,12 @@ export {
   type CategoryBadgeProps,
   type CategoryBadgeViewModel
 } from "./components/CategoryBadge";
+export {
+  ContactFieldsEditor,
+  type ContactFieldDraft,
+  type ContactFieldsEditorProps,
+  type ContactFieldViewModel
+} from "./components/ContactFieldsEditor";
 export {
   CategoryPicker,
   type CategoryPickerOption,
