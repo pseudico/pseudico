@@ -14,7 +14,8 @@
     "typecheck": "pnpm --filter @local-work-os/core build && pnpm --filter @local-work-os/db build && pnpm -r --workspace-concurrency=1 typecheck",
     "test": "vitest run",
     "build": "pnpm -r --workspace-concurrency=1 build",
-    "package": "pnpm --filter @local-work-os/desktop package"
+    "package": "pnpm --filter @local-work-os/desktop package",
+    "package:smoke": "pnpm --filter @local-work-os/desktop package:smoke"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["better-sqlite3", "electron", "esbuild"]

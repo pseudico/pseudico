@@ -1,6 +1,5 @@
 import { DatabaseBootstrapService } from "@local-work-os/db";
 import { app } from "electron";
-import { join } from "node:path";
 import { registerCategoryIpc } from "./registerCategoryIpc";
 import { registerActivityIpc } from "./registerActivityIpc";
 import { registerBackupIpc } from "./registerBackupIpc";
@@ -22,6 +21,10 @@ import { registerSearchIpc } from "./registerSearchIpc";
 import { registerTaskIpc } from "./registerTaskIpc";
 import { registerTodayIpc } from "./registerTodayIpc";
 import { registerWorkspaceIpc } from "./registerWorkspaceIpc";
+import {
+  assertRuntimeDataPathOutsideAppBundle,
+  resolveUserDataPath
+} from "../services/mainProcessPaths";
 import { RecentWorkspacesService } from "../services/workspace/RecentWorkspacesService";
 import { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
 
@@ -34,7 +37,10 @@ export function createDesktopIpcServices(): DesktopIpcServices {
     workspaceService: new WorkspaceFileSystemService({
       databaseBootstrapService: new DatabaseBootstrapService(),
       recentWorkspacesService: new RecentWorkspacesService(
-        join(app.getPath("userData"), "recent-workspaces.json")
+        assertRuntimeDataPathOutsideAppBundle(
+          app,
+          resolveUserDataPath(app, "recent-workspaces.json")
+        )
       )
     })
   };

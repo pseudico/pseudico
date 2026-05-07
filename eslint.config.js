@@ -27,6 +27,21 @@ export default [
     }
   },
   {
+    files: ["apps/**/*.mjs", "packages/**/*.mjs", "*.mjs"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: {
+        Buffer: "readonly",
+        clearTimeout: "readonly",
+        console: "readonly",
+        process: "readonly",
+        setTimeout: "readonly",
+        URL: "readonly"
+      }
+    }
+  },
+  {
     files: ["**/*.d.ts"],
     rules: {
       "@typescript-eslint/consistent-type-definitions": "off"

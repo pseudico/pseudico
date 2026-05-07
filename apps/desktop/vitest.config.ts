@@ -16,6 +16,10 @@ export default defineConfig({
         currentDir,
         "../../packages/features/src/index.ts"
       ),
+      "@local-work-os/test-utils": resolve(
+        currentDir,
+        "../../packages/test-utils/src/index.ts"
+      ),
       "@local-work-os/ui": resolve(currentDir, "../../packages/ui/src/index.ts")
     }
   },
