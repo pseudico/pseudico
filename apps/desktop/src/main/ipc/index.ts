@@ -11,6 +11,7 @@ import { registerDatabaseIpc } from "./registerDatabaseIpc";
 import { registerExportIpc } from "./registerExportIpc";
 import { registerFileIpc } from "./registerFileIpc";
 import { registerInboxIpc } from "./registerInboxIpc";
+import { registerImportIpc } from "./registerImportIpc";
 import { registerItemIpc } from "./registerItemIpc";
 import { registerLinkIpc } from "./registerLinkIpc";
 import { registerListIpc } from "./registerListIpc";
@@ -45,6 +46,7 @@ export function registerDesktopIpc(
   registerWorkspaceIpc(services.workspaceService);
   registerBackupIpc(services.workspaceService);
   registerExportIpc(services.workspaceService);
+  registerImportIpc();
   registerDatabaseIpc(services.workspaceService);
   registerInboxIpc(services.workspaceService);
   registerProjectIpc(services.workspaceService);

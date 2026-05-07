@@ -9,6 +9,7 @@ import {
   type DatabaseHealthStatus,
   type DashboardViewModelSummary,
   type FileAttachmentResultSummary,
+  type ImportValidationSummary,
   type InboxSummary,
   type IpcModuleStatus,
   type ItemSummary,
@@ -391,6 +392,11 @@ function createMockApi(
       createManualBackup: async () => apiOk(backupSnapshotSummary()),
       listBackups: async () => apiOk([backupSnapshotSummary()])
     },
+    import: {
+      validateWorkspaceExportJson: async () => apiOk(importValidationSummary()),
+      chooseAndValidateWorkspaceExportJson: async () =>
+        apiOk(importValidationSummary())
+    },
     export: {
       exportWorkspaceJson: async () => apiOk(workspaceJsonExportSummary()),
       exportProjectMarkdown: async () => apiOk(textExportSummary("project_markdown")),
@@ -675,6 +681,50 @@ function workspaceJsonExportSummary(): WorkspaceJsonExportSummary {
     itemCount: 5,
     attachmentCount: 1,
     totalAttachmentBytes: 42
+  };
+}
+
+function importValidationSummary(): ImportValidationSummary {
+  return {
+    valid: true,
+    sourcePath: "C:\\exports\\workspace.json",
+    schemaVersion: 1,
+    exportedAt: "2026-05-01T00:00:00.000Z",
+    workspace: {
+      id: "workspace_1",
+      name: "Personal",
+      schemaVersion: 1
+    },
+    counts: {
+      containers: 1,
+      containerTabs: 1,
+      items: 5,
+      taskDetails: 1,
+      noteDetails: 1,
+      listDetails: 1,
+      listItems: 1,
+      linkDetails: 1,
+      tags: 1,
+      taggings: 1,
+      categories: 1,
+      relationships: 1,
+      savedViews: 1,
+      dashboards: 1,
+      dashboardWidgets: 1,
+      dailyPlans: 1,
+      dailyPlanItems: 1,
+      attachments: 1
+    },
+    attachmentManifest: {
+      attachmentCount: 1,
+      totalAttachmentBytes: 42
+    },
+    targetPolicy: {
+      mode: "new_workspace_only",
+      canApplyToActiveWorkspace: false,
+      message: "Validation only."
+    },
+    issues: []
   };
 }
 
@@ -1243,6 +1293,30 @@ describe("desktop API client", () => {
       data: {
         id: "backup_1",
         databaseSizeBytes: 2048
+      }
+    });
+    await expect(
+      client.import.validateWorkspaceExportJson({
+        filePath: "C:\\exports\\workspace.json"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        valid: true,
+        targetPolicy: {
+          mode: "new_workspace_only",
+          canApplyToActiveWorkspace: false
+        }
+      }
+    });
+    await expect(
+      client.import.chooseAndValidateWorkspaceExportJson()
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        counts: {
+          attachments: 1
+        }
       }
     });
     await expect(client.export.exportWorkspaceJson()).resolves.toMatchObject({

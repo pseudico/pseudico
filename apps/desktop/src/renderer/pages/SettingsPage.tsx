@@ -5,6 +5,7 @@ import {
   Plus,
   RefreshCw,
   ShieldCheck,
+  Upload,
   Trash2
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
@@ -18,6 +19,7 @@ import { desktopApiClient } from "../api/desktopApiClient";
 import type {
   BackupSnapshotSummary,
   CategorySummary,
+  ImportValidationSummary,
   LocalWorkOsApi
 } from "../../preload/api";
 
@@ -42,10 +44,13 @@ export function SettingsPage({
   const [saving, setSaving] = useState(false);
   const [backupBusy, setBackupBusy] = useState(false);
   const [exportBusy, setExportBusy] = useState(false);
+  const [importBusy, setImportBusy] = useState(false);
   const [backups, setBackups] = useState<BackupSnapshotSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const [importSummary, setImportSummary] =
+    useState<ImportValidationSummary | null>(null);
 
   useEffect(() => {
     void refreshCurrentWorkspace(apiClient);
@@ -278,6 +283,23 @@ export function SettingsPage({
     );
   }
 
+  async function validateWorkspaceImport(): Promise<void> {
+    setImportBusy(true);
+    setImportSummary(null);
+    setError(null);
+
+    const result = await apiClient.import.chooseAndValidateWorkspaceExportJson();
+
+    setImportBusy(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setImportSummary(result.data);
+  }
+
   return (
     <section className="settings-layout">
       <div className="page-heading">
@@ -373,6 +395,32 @@ export function SettingsPage({
           <p className="form-message">{exportMessage}</p>
         )}
       </section>
+      <section className="export-management-panel" aria-label="Imports">
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <h3>Imports</h3>
+          </div>
+          <div className="top-actions">
+            <button
+              className="primary-button compact-button"
+              disabled={importBusy}
+              type="button"
+              onClick={() => void validateWorkspaceImport()}
+            >
+              <Upload size={16} aria-hidden="true" />
+              Validate JSON import
+            </button>
+          </div>
+        </div>
+
+        {importSummary === null ? (
+          <p className="muted-text">
+            JSON imports are validated for a future new workspace only.
+          </p>
+        ) : (
+          <ImportValidationSummaryPanel summary={importSummary} />
+        )}
+      </section>
       <section className="category-management-panel" aria-label="Categories">
         <div className="panel-heading-actions">
           <div className="panel-heading">
@@ -446,6 +494,57 @@ export function SettingsPage({
         </div>
       </aside>
     </section>
+  );
+}
+
+function ImportValidationSummaryPanel({
+  summary
+}: {
+  summary: ImportValidationSummary;
+}): React.JSX.Element {
+  const errorCount = summary.issues.filter(
+    (issue) => issue.severity === "error"
+  ).length;
+  const warningCount = summary.issues.length - errorCount;
+
+  return (
+    <div className="backup-list" aria-label="Import validation summary">
+      <div className="backup-list-row">
+        <div>
+          <strong>{summary.valid ? "Valid export" : "Import blocked"}</strong>
+          <span>
+            {summary.workspace === null
+              ? "Workspace metadata unavailable"
+              : `${summary.workspace.name} (${summary.workspace.id})`}
+          </span>
+        </div>
+        <div className="backup-list-meta">
+          <span>{summary.counts.containers} containers</span>
+          <span>{summary.counts.items} items</span>
+          <span>{summary.counts.attachments} attachments</span>
+          <span>
+            {errorCount} errors, {warningCount} warnings
+          </span>
+        </div>
+      </div>
+      <p className="muted-text">{summary.targetPolicy.message}</p>
+      {summary.issues.length === 0 ? (
+        <p className="form-message">Validation passed.</p>
+      ) : (
+        summary.issues.slice(0, 5).map((issue) => (
+          <p
+            key={`${issue.path}:${issue.code}:${issue.message}`}
+            className={
+              issue.severity === "error"
+                ? "form-message form-message-error"
+                : "form-message"
+            }
+          >
+            {issue.path}: {issue.message}
+          </p>
+        ))
+      )}
+    </div>
   );
 }
 
