@@ -219,6 +219,46 @@ export type ImportValidationSummary = {
   issues: ImportValidationIssueSummary[];
 };
 
+export type RunWorkspaceIntegrityCheckInput = {
+  workspaceId?: string;
+};
+
+export type IntegrityCheckIssueSummary = {
+  severity: "error" | "warning";
+  code: string;
+  message: string;
+  targetType: string;
+  targetId: string;
+  relatedType: string | null;
+  relatedId: string | null;
+};
+
+export type IntegrityCheckSectionSummary = {
+  kind:
+    | "system_rows"
+    | "typed_item_details"
+    | "taggings"
+    | "relationships"
+    | "attachments"
+    | "search_index";
+  title: string;
+  status: "healthy" | "degraded";
+  checkedCount: number;
+  issueCount: number;
+  issues: IntegrityCheckIssueSummary[];
+};
+
+export type WorkspaceIntegritySummary = {
+  workspaceId: string;
+  generatedAt: string;
+  status: "healthy" | "degraded";
+  checkedCount: number;
+  issueCount: number;
+  errorCount: number;
+  warningCount: number;
+  sections: IntegrityCheckSectionSummary[];
+};
+
 export type ValidateWorkspaceExportJsonInput = {
   filePath: string;
 };
@@ -1276,6 +1316,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     exportWorkspaceJson: "local-work-os:export:export-workspace-json",
     exportProjectMarkdown: "local-work-os:export:export-project-markdown",
     exportTasksCsv: "local-work-os:export:export-tasks-csv"
+  },
+  diagnostics: {
+    runWorkspaceIntegrityCheck:
+      "local-work-os:diagnostics:run-workspace-integrity-check"
   }
 } as const;
 
@@ -1616,6 +1660,10 @@ export type LocalWorkOsIpcContracts = {
     input: ExportTasksCsvInput | undefined;
     result: ApiResult<TextExportSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runWorkspaceIntegrityCheck]: {
+    input: RunWorkspaceIntegrityCheckInput | undefined;
+    result: ApiResult<WorkspaceIntegritySummary>;
+  };
 };
 
 export type LocalWorkOsIpcChannel = keyof LocalWorkOsIpcContracts & string;
@@ -1908,6 +1956,11 @@ export type LocalWorkOsApi = {
     exportTasksCsv: (
       input?: ExportTasksCsvInput
     ) => Promise<ApiResult<TextExportSummary>>;
+  };
+  diagnostics: {
+    runWorkspaceIntegrityCheck: (
+      input?: RunWorkspaceIntegrityCheckInput
+    ) => Promise<ApiResult<WorkspaceIntegritySummary>>;
   };
 };
 
@@ -2241,6 +2294,13 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportProjectMarkdown, input),
       exportTasksCsv: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportTasksCsv, input)
+    },
+    diagnostics: {
+      runWorkspaceIntegrityCheck: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runWorkspaceIntegrityCheck,
+          input
+        )
     }
   };
 }

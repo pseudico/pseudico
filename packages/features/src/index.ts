@@ -22,7 +22,8 @@ export const plannedFeatureAreas = [
   "calendar",
   "backup",
   "export",
-  "activity"
+  "activity",
+  "diagnostics"
 ] as const;
 
 export type { FeatureModuleContract, FeatureModulePriority } from "./featureModuleContract";
@@ -59,6 +60,7 @@ export {
 } from "./export";
 export { FileAttachmentService, filesModuleContract } from "./files";
 export { ImportValidationService, importModuleContract } from "./import";
+export { IntegrityCheckService, diagnosticsModuleContract } from "./diagnostics";
 export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
 export { LinkService, linksModuleContract } from "./links";
@@ -170,6 +172,17 @@ export type {
   ImportValidationSeverity,
   ImportValidationSummary
 } from "./import";
+export type {
+  IntegrityCheckIssue,
+  IntegrityCheckKind,
+  IntegrityCheckSection,
+  IntegrityCheckServiceIdFactory,
+  IntegrityCheckStatus,
+  IntegrityFileSystemAdapter,
+  IntegrityIssueSeverity,
+  RepairSystemRowsResult,
+  WorkspaceIntegrityReport
+} from "./diagnostics";
 export type {
   InboxServiceIdFactory,
   MoveInboxItemToProjectInput

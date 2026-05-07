@@ -9,10 +9,12 @@ import {
   contactsModuleContract,
   dashboardModuleContract,
   DashboardService,
+  diagnosticsModuleContract,
   ExportService,
   exportModuleContract,
   filesModuleContract,
   ImportValidationService,
+  IntegrityCheckService,
   importModuleContract,
   inboxModuleContract,
   itemsModuleContract,
@@ -57,7 +59,8 @@ describe("feature module exports", () => {
       "calendar",
       "backup",
       "export",
-      "activity"
+      "activity",
+      "diagnostics"
     ]);
   });
 
@@ -85,7 +88,8 @@ describe("feature module exports", () => {
       calendarModuleContract.module,
       backupModuleContract.module,
       exportModuleContract.module,
-      activityModuleContract.module
+      activityModuleContract.module,
+      diagnosticsModuleContract.module
     ];
 
     expect(exportedModules).toEqual([
@@ -111,7 +115,8 @@ describe("feature module exports", () => {
       "calendar",
       "backup",
       "export",
-      "activity"
+      "activity",
+      "diagnostics"
     ]);
   });
 
@@ -134,5 +139,9 @@ describe("feature module exports", () => {
 
   it("exports the import validation service implementation", () => {
     expect(ImportValidationService).toBeDefined();
+  });
+
+  it("exports the diagnostics service implementation", () => {
+    expect(IntegrityCheckService).toBeDefined();
   });
 });

@@ -26,7 +26,8 @@ import type {
   BackupSnapshotSummary,
   CategorySummary,
   ImportValidationSummary,
-  LocalWorkOsApi
+  LocalWorkOsApi,
+  WorkspaceIntegritySummary
 } from "../../preload/api";
 
 type SettingsPageProps = {
@@ -55,6 +56,9 @@ export function SettingsPage({
   const [error, setError] = useState<string | null>(null);
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const [diagnosticsBusy, setDiagnosticsBusy] = useState(false);
+  const [diagnosticsReport, setDiagnosticsReport] =
+    useState<WorkspaceIntegritySummary | null>(null);
   const [importSummary, setImportSummary] =
     useState<ImportValidationSummary | null>(null);
 
@@ -258,6 +262,39 @@ export function SettingsPage({
     });
   }
 
+  async function runWorkspaceDiagnostics(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before running diagnostics.");
+      return;
+    }
+
+    setDiagnosticsBusy(true);
+    setDiagnosticsReport(null);
+    setError(null);
+
+    const result = await apiClient.diagnostics.runWorkspaceIntegrityCheck({
+      workspaceId: currentWorkspace.id
+    });
+
+    setDiagnosticsBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Diagnostics failed");
+      return;
+    }
+
+    setDiagnosticsReport(result.data);
+    showToast(
+      result.data.status === "healthy"
+        ? "Workspace diagnostics passed."
+        : `${result.data.issueCount} workspace diagnostics issue(s) found.`,
+      {
+        title: "Diagnostics complete",
+        tone: result.data.status === "healthy" ? "success" : "error"
+      }
+    );
+  }
+
   async function exportWorkspaceJson(): Promise<void> {
     if (currentWorkspace === null) {
       setUserError("Open a workspace before exporting workspace JSON.");
@@ -357,6 +394,33 @@ export function SettingsPage({
         </p>
       </div>
       <WorkspaceHealthPanel workspace={currentWorkspace} />
+      <section className="backup-management-panel" aria-label="Diagnostics">
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <h3>Diagnostics</h3>
+          </div>
+          <div className="top-actions">
+            <button
+              className="primary-button compact-button"
+              disabled={diagnosticsBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void runWorkspaceDiagnostics()}
+            >
+              <RefreshCw size={16} aria-hidden="true" />
+              Run audit
+            </button>
+          </div>
+        </div>
+
+        {diagnosticsReport === null ? (
+          <EmptyState
+            description="Integrity, attachment, and search-index results will appear here for this session."
+            title="No diagnostics run"
+          />
+        ) : (
+          <DiagnosticsSummaryPanel report={diagnosticsReport} />
+        )}
+      </section>
       <section className="backup-management-panel" aria-label="Backups">
         <div className="panel-heading-actions">
           <div className="panel-heading">
@@ -547,6 +611,60 @@ export function SettingsPage({
   );
 }
 
+function DiagnosticsSummaryPanel({
+  report
+}: {
+  report: WorkspaceIntegritySummary;
+}): React.JSX.Element {
+  return (
+    <div className="backup-list" aria-label="Diagnostics summary">
+      <div className="backup-list-row">
+        <div>
+          <strong>
+            {report.status === "healthy" ? "Workspace healthy" : "Issues found"}
+          </strong>
+          <span>{formatDiagnosticDate(report.generatedAt)}</span>
+        </div>
+        <div className="backup-list-meta">
+          <span>{report.checkedCount} records checked</span>
+          <span>{report.issueCount} issues</span>
+          <span>{report.errorCount} errors</span>
+          <span>{report.warningCount} warnings</span>
+        </div>
+      </div>
+
+      {report.sections.map((section) => (
+        <div className="backup-list-row" key={section.kind}>
+          <div>
+            <strong>{section.title}</strong>
+            <span>
+              {section.issueCount === 0
+                ? "Healthy"
+                : `${section.issueCount} issue(s)`}
+            </span>
+          </div>
+          <div className="backup-list-meta">
+            <span>{section.checkedCount} checked</span>
+            <span>{section.status}</span>
+          </div>
+          {section.issues.slice(0, 3).map((issue) => (
+            <p
+              className={
+                issue.severity === "error"
+                  ? "form-message form-message-error"
+                  : "form-message"
+              }
+              key={`${section.kind}:${issue.code}:${issue.targetId}:${issue.relatedId}`}
+            >
+              {issue.message}
+            </p>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ImportValidationSummaryPanel({
   summary
 }: {
@@ -688,6 +806,10 @@ function compareBackups(
 }
 
 function formatBackupDate(value: string): string {
+  return formatDiagnosticDate(value);
+}
+
+function formatDiagnosticDate(value: string): string {
   const date = new Date(value);
 
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
