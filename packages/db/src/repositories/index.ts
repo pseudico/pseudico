@@ -32,6 +32,13 @@ export {
   type CreateSystemInboxInput
 } from "./ContainerRepository";
 export {
+  ContactFieldRepository,
+  type ContactFieldRecord,
+  type CreateContactFieldInput,
+  type ListContactFieldsInput,
+  type UpdateContactFieldPatch
+} from "./ContactFieldRepository";
+export {
   ContainerTabRepository,
   type ContainerTabRecord,
   type CreateContainerTabInput,

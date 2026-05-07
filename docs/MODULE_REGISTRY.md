@@ -18,10 +18,10 @@ new work should account for this implemented baseline:
 - Implemented MVP flows: Workspace, Inbox, Projects, Tasks, Lists, Notes,
   Files, Links, Metadata, Search, Saved Views/Collections, Today, Dashboard,
   Backup, Export, Import validation, Activity Log, Database, and diagnostics.
-- Future or placeholder-heavy flows: Contacts, Timeline, Calendar, Templates,
-  Workflows, file versions, full import/restore execution, custom dashboard
-  editing, advanced saved-view builder UX, local reminders, and browser
-  capture.
+- Future or placeholder-heavy flows: Contacts renderer workflows, Timeline,
+  Calendar, Templates, Workflows, file versions, full import/restore execution,
+  custom dashboard editing, advanced saved-view builder UX, local reminders,
+  and browser capture.
 - Cross-cutting services now include project health, recent activity,
   integrity diagnostics, bounded pagination, app-wide error boundaries/toasts,
   packaged smoke checks, and MVP smoke coverage.

@@ -38,7 +38,7 @@ export {
 export type { ActivityEventView } from "./activity";
 export { BackupService, backupModuleContract, createBackupManifest } from "./backup";
 export { calendarModuleContract } from "./calendar";
-export { contactsModuleContract } from "./contacts";
+export { ContactService, contactsModuleContract } from "./contacts";
 export { CreateContainerCommand } from "./containers";
 export type {
   CreateContainerCommandIdFactory,
@@ -123,7 +123,18 @@ export type {
   ManualBackupSnapshot
 } from "./backup";
 export type { CalendarService } from "./calendar";
-export type { ContactService } from "./contacts";
+export type {
+  AddContactFieldInput,
+  ContactFieldInput,
+  ContactMutableStatus,
+  ContactRecord,
+  ContactServiceIdFactory,
+  CreateContactInput,
+  CreateContactResult,
+  DeleteContactFieldInput,
+  UpdateContactFieldInput,
+  UpdateContactInput
+} from "./contacts";
 export type {
   DashboardActivityWidgetItem,
   DashboardNavigationTarget,

@@ -2,6 +2,7 @@ export { activityLog } from "./activityLog";
 export { appSettings } from "./appSettings";
 export { attachments } from "./attachments";
 export { categories } from "./categories";
+export { contactFields } from "./contactFields";
 export { containerTabs } from "./containerTabs";
 export { containers } from "./containers";
 export { dailyPlanItems } from "./dailyPlanItems";
@@ -21,4 +22,4 @@ export { taggings } from "./taggings";
 export { taskDetails } from "./taskDetails";
 export { workspaces } from "./workspaces";
 
-export const schemaVersion = 1;
+export const schemaVersion = 2;

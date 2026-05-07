@@ -85,6 +85,8 @@ object graph:
   local preference/settings rows.
 - `containers` and `container_tabs` store Inbox, project, and contact surfaces
   plus early tab support.
+- `contact_fields` stores flexible labelled profile fields for contact
+  containers.
 - `items`, `task_details`, `list_details`, `list_items`, `note_details`,
   `links`, and `attachments` store mixed content and type-specific payloads.
 - `tags`, `taggings`, and `categories` store local metadata for cross-cutting
@@ -117,7 +119,7 @@ MVP object graph:
 - Container, item, task, list, note, link, attachment, tag, category,
   relationship, saved-view, dashboard, daily-plan, and search-index
   repositories.
-- Feature services for projects, Inbox, tasks, lists, notes, links, files,
+- Feature services for projects, contacts, Inbox, tasks, lists, notes, links, files,
   metadata, saved views/collections, Today planning, dashboards, project
   health, backup, export, import validation, diagnostics, and search
   hydration/orchestration.
@@ -127,11 +129,12 @@ Search remains a local projection table behind `SearchIndexService`,
 that are user-searchable and excludes derived export/search artifacts from the
 portable workspace export.
 
-The data model still intentionally reserves future shape for contact profile
-fields, timeline/calendar views, templates, workflow runs, file versions,
-backup restore/import execution, and richer saved-view builder state. Add those
-through scoped migrations and repository/service tickets rather than expanding
-the current schema opportunistically.
+The contact foundation now stores contact containers plus flexible profile
+fields behind repository and service APIs. The data model still intentionally
+reserves future shape for timeline/calendar views, templates, workflow runs,
+file versions, backup restore/import execution, and richer saved-view builder
+state. Add those through scoped migrations and repository/service tickets
+rather than expanding the current schema opportunistically.
 
 ## Source Documents
 

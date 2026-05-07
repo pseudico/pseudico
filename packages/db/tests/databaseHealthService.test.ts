@@ -47,7 +47,7 @@ describe("DatabaseHealthService", () => {
       databasePath: connection.databasePath,
       schemaVersion: 0,
       migrationTableAvailable: true,
-      pendingMigrationCount: 1,
+      pendingMigrationCount: 2,
       error: null
     });
   });
@@ -63,7 +63,7 @@ describe("DatabaseHealthService", () => {
     ).resolves.toEqual({
       connected: true,
       databasePath: connection.databasePath,
-      schemaVersion: 1,
+      schemaVersion: 2,
       migrationTableAvailable: true,
       pendingMigrationCount: 0,
       error: null
