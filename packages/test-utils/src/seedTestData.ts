@@ -15,3 +15,14 @@ export function seedTestData(
     timestamp: overrides.timestamp ?? TEST_SEED_TIMESTAMP
   };
 }
+
+export function seedSmokeData(
+  overrides: Partial<TestSeedData> = {}
+): TestSeedData {
+  return seedTestData({
+    workspaceId: "workspace_smoke",
+    workspaceName: "MVP Smoke Workspace",
+    timestamp: TEST_SEED_TIMESTAMP,
+    ...overrides
+  });
+}

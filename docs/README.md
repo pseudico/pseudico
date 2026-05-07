@@ -24,6 +24,7 @@ docs and the linked Linear issue.
   guardrails.
 - `ROADMAP.md` summarizes the staged implementation path.
 - `MODULE_REGISTRY.md` names planned product modules and their responsibilities.
+- `QA_SCRIPTS.md` lists manual and automated smoke checks for MVP workflows.
 - `DECISIONS/` stores accepted architecture decision records.
 
 ## Local-Only Rule

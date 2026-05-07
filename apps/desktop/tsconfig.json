@@ -20,6 +20,7 @@
     "../../packages/core/src/**/*.ts",
     "../../packages/db/src/**/*.ts",
     "../../packages/features/src/**/*.ts",
+    "../../packages/test-utils/src/**/*.ts",
     "../../packages/ui/src/**/*.ts",
     "../../packages/ui/src/**/*.tsx"
   ]

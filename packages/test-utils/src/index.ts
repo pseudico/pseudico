@@ -4,6 +4,7 @@ export {
 } from "./createTestDatabase";
 export {
   cleanupTestWorkspace,
+  createTempWorkspace,
   createTestWorkspace,
   createTestWorkspacePaths,
   TEST_WORKSPACE_DATABASE_FILE_NAME,
@@ -15,6 +16,7 @@ export {
 } from "./createTestWorkspace";
 export { makeTestIds, type TestIdFactory } from "./makeTestIds";
 export {
+  seedSmokeData,
   seedTestData,
   TEST_SEED_TIMESTAMP,
   type TestSeedData

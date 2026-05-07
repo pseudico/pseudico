@@ -90,6 +90,15 @@ export async function createTestWorkspace(
   };
 }
 
+export async function createTempWorkspace(
+  input: CreateTestWorkspaceInput = {}
+): Promise<TestWorkspaceHandle> {
+  return createTestWorkspace({
+    ...input,
+    rootPrefix: input.rootPrefix ?? "local-work-os-smoke-"
+  });
+}
+
 export function createTestWorkspacePaths(
   workspaceRootPath: string
 ): TestWorkspacePaths {
