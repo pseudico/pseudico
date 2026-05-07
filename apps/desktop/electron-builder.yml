@@ -19,6 +19,7 @@ asarUnpack:
   - "**/*.node"
 
 npmRebuild: true
+buildDependenciesFromSource: true
 publish: null
 
 win:

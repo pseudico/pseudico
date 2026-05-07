@@ -38,6 +38,9 @@ importers:
       '@local-work-os/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      better-sqlite3:
+        specifier: ^12.9.0
+        version: 12.9.0
       lucide-react:
         specifier: ^1.14.0
         version: 1.14.0(react@19.2.5)
@@ -51,6 +54,9 @@ importers:
         specifier: ^7.14.2
         version: 7.14.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
     devDependencies:
+      '@electron/rebuild':
+        specifier: ^4.0.4
+        version: 4.0.4
       '@types/node':
         specifier: ^25.6.0
         version: 25.6.0

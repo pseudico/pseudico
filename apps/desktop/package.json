@@ -10,19 +10,22 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --config vitest.config.ts --passWithNoTests",
     "build": "electron-vite build",
-    "package": "node scripts/package-development.mjs"
+    "package": "node scripts/package-development.mjs",
+    "package:smoke": "node scripts/run-package-smoke.mjs"
   },
   "dependencies": {
     "@local-work-os/core": "workspace:*",
     "@local-work-os/db": "workspace:*",
     "@local-work-os/features": "workspace:*",
     "@local-work-os/ui": "workspace:*",
+    "better-sqlite3": "^12.9.0",
     "lucide-react": "^1.14.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.14.2"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.4",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
