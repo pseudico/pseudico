@@ -101,6 +101,8 @@ object graph:
   project/contact container templates with tabs, tasks, lists, notes, link/file
   placeholders, contact fields, copied tag/category references, and relative day
   offsets for dated tasks/list rows.
+- `recurrence_rules` stores narrow local task recurrence definitions for daily
+  and weekly/custom-weekday repeating tasks.
 - `activity_log` records the activity trail used by later write services.
 - `search_index` is a normal SQLite table placeholder for local search
   projections; the search ticket may replace or augment it with FTS5 while
@@ -137,10 +139,13 @@ The contact foundation now stores contact containers plus flexible profile
 fields behind repository and service APIs. The reminder foundation now stores
 task reminder policies and scheduled reminder events in `reminder_policies` and
 `reminder_events`, with task rows pointing at the active local policy when one
-exists. The template foundation stores list templates and project/contact
+exists. The recurrence foundation now stores active daily and weekly/custom
+weekday rules in `recurrence_rules`, with task rows pointing at the active local
+rule when one exists and recurring completion rolling the same task to the next
+occurrence. The template foundation stores list templates and project/contact
 container templates; note/tab imports and portable template files remain future
 work. The data model still intentionally reserves future shape for
-timeline/calendar views, workflow runs, file versions, backup
+timeline/calendar views, workflow runs, monthly/yearly recurrence, file versions, backup
 restore/import execution, and richer saved-view builder state. Add those
 through scoped migrations and repository/service tickets rather than expanding
 the current schema opportunistically.

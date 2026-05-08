@@ -605,3 +605,61 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Untracked .playwright-mcp/ and gh installer remain excluded.
 Next actions: Stage scoped files; commit; push/open PR.
+
+## 2026-05-08T20:42:43+10:00
+Objective: Close PSE-77 end-to-end and prepare the next Codex Ready ticket.
+Decisions made:
+- Promoted only PSE-78 to Codex Ready after PSE-77 merged cleanly.
+- Left unrelated local untracked files untouched.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-78 includes migration/recurrence risk to plan next.
+Next actions: Start PSE-78; read recurrence docs; inspect tasks/db schema.
+## 2026-05-08T20:46:48.7905228+10:00
+Objective: Reconcile active Linear/GitHub work for next ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found for PSE project.
+- One Codex Ready issue found: PSE-78; no open GitHub PRs in pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing unrelated local .playwright-mcp/ and gh installer remain untouched.
+Next actions: Move PSE-78 to In Progress; read issue/docs/source; branch and implement.
+## 2026-05-08T20:48:50.2695619+10:00
+Objective: Plan PSE-78 recurrence implementation.
+Decisions made:
+- Scope stays narrow: daily, weekly interval, and selected weekday recurrence only.
+- Complete recurring tasks will roll the same task forward and log recurrence-specific activity.
+- Add repository/service/UI tests instead of broader renderer wiring.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Date math must avoid monthly/yearly behavior and stale reminders.
+Next actions: Add recurrence schema/repository/service; hook TaskService completion; add picker/tests.
+## 2026-05-08T21:02:36.8271796+10:00
+Objective: Implement and verify PSE-78 recurrence foundations.
+Decisions made:
+- Added schema version 6 recurrence_rules with repository/service coverage.
+- Task completion rolls active recurring tasks forward and updates search/activity.
+- RecurrencePicker added as shared UI component without broader renderer scope.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Manual desktop QA not run; automated full checks pass after sandbox-escalated reruns.
+Next actions: Review diff; stage/commit/push; open PR.
+## 2026-05-08T21:03:44.6784770+10:00
+Objective: Document PSE-78 recurrence behavior and recheck lint.
+Decisions made:
+- Updated data model/module registry for recurrence_rules and V2 recurrence module boundaries.
+- Left monthly/yearly RRULEs explicitly out of scope.
+Files changed:
+- docs/DATA_MODEL.md
+- docs/MODULE_REGISTRY.md
+- docs/session_log.md
+Open questions / risks: Full checks were run before docs-only update; lint rerun after docs update.
+Next actions: Review final diff; commit/push; open PR.
+## 2026-05-08T21:07:44.0673735+10:00
+Objective: Open PSE-78 PR and verify CI/review state.
+Decisions made:
+- Opened GitHub PR #75 and moved Linear PSE-78 to PR Open with PR link.
+- PR diff matches PSE-78 scope; no review threads; GitHub Actions lint/typecheck/test/build passed.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Manual interactive desktop QA remains not run in this environment.
+Next actions: Amend log into branch; merge PR; promote next Codex Ready issue.

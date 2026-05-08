@@ -15,6 +15,7 @@ export { listDetails } from "./listDetails";
 export { listItems } from "./listItems";
 export { noteDetails } from "./noteDetails";
 export { relationships } from "./relationships";
+export { recurrenceRules } from "./recurrenceRules";
 export { reminderEvents, reminderPolicies } from "./reminders";
 export { savedViews } from "./savedViews";
 export { searchIndex } from "./searchIndex";
@@ -24,4 +25,4 @@ export { taskDetails } from "./taskDetails";
 export { templates } from "./templates";
 export { workspaces } from "./workspaces";
 
-export const schemaVersion = 4;
+export const schemaVersion = 6;

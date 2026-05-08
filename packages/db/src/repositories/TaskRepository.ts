@@ -82,6 +82,7 @@ export type CreateTaskDetailsInput = {
   allDay?: boolean;
   timezone?: string | null;
   reminderPolicyId?: string | null;
+  recurrenceRuleId?: string | null;
   completedAt?: string | null;
 };
 
@@ -93,6 +94,7 @@ export type UpdateTaskDetailsPatch = {
   allDay?: boolean;
   timezone?: string | null;
   reminderPolicyId?: string | null;
+  recurrenceRuleId?: string | null;
   completedAt?: string | null;
   timestamp: string;
 };
@@ -191,10 +193,11 @@ export class TaskRepository {
           all_day,
           timezone,
           reminder_policy_id,
+          recurrence_rule_id,
           completed_at,
           created_at,
           updated_at
-        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
         input.itemId,
@@ -206,6 +209,7 @@ export class TaskRepository {
         input.allDay === false ? 0 : 1,
         input.timezone ?? null,
         input.reminderPolicyId ?? null,
+        input.recurrenceRuleId ?? null,
         input.completedAt ?? null,
         input.timestamp,
         input.timestamp
@@ -257,6 +261,11 @@ export class TaskRepository {
     if (patch.reminderPolicyId !== undefined) {
       assignments.push("reminder_policy_id = ?");
       values.push(patch.reminderPolicyId);
+    }
+
+    if (patch.recurrenceRuleId !== undefined) {
+      assignments.push("recurrence_rule_id = ?");
+      values.push(patch.recurrenceRuleId);
     }
 
     if (patch.completedAt !== undefined) {

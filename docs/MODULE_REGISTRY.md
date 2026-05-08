@@ -19,6 +19,9 @@ new work should account for this implemented baseline:
   Tasks, Lists, Notes, Files, Links, Metadata, Search, Saved Views/Collections,
   Today, Dashboard, Templates (list and project/contact container templates), Backup, Export, Import
   validation, Activity Log, Database, and diagnostics.
+- Local recurrence now has database and service foundations for daily and
+  weekly/custom-weekday task roll-forward behavior; monthly/yearly RRULEs remain
+  future work.
 - Future or placeholder-heavy flows: Timeline, Calendar, portable/broader Templates, Workflows,
   file versions, full import/restore execution,
   custom dashboard editing, advanced saved-view builder UX, and browser capture.
@@ -53,6 +56,7 @@ renderer-only implementation.
 | Today | Own daily planning, due/overdue task projections, and rollover planning flows. | Daily plans, planned task references, Today/Tomorrow lanes | Tasks, metadata, saved views, workspace | Dashboard, timeline, calendar | V1 |
 | Dashboard | Own workspace overview widgets, project health summaries, and saved-view widgets. | Dashboard widgets, summary cards, health summaries | Workspace, projects, tasks, search, saved views, today | Workspace home, planning views | V1 |
 | Reminders | Own local task reminder policies, reminder event state, and scheduler-facing projections. | Reminder policies, reminder events | Tasks, activity log, Electron main notifications | Today, dashboard, future calendar | V1 |
+| Recurrence | Own narrow local repeating-task rules and recurring task roll-forward behavior. | Recurrence rules, task recurrence pointers | Tasks, activity log, search, reminders | Today, timeline, calendar | V2 |
 | Timeline | Own timeline projections for dated work and project ranges. | Timeline entries, date ranges, grouped dated work | Tasks, projects, contacts, metadata, saved views | Calendar, dashboard, planning views | V1 |
 | Calendar | Own month/week/day calendar projections and date interactions. | Calendar entries, local dated work, local imports later | Tasks, timeline, metadata, workspace | Today, dashboard, planning views | V1 |
 | Backup | Own local backup orchestration and backup integrity checks. | Backup snapshots, manifests, integrity reports | Workspace, files, database services, Electron main/preload IPC | Maintenance, export, restore later | MVP |
@@ -486,6 +490,33 @@ Integration points:
 - Tasks for due-date changes and task context.
 - Activity log for all reminder writes.
 - Electron main for local notifications only.
+
+### Recurrence
+
+Owns:
+
+- Local task recurrence rules for daily, weekly, and custom weekday schedules.
+- Next-occurrence calculation and recurring task completion roll-forward.
+- Activity log coverage for recurrence set, clear, and advance writes.
+
+Does not own:
+
+- Monthly/yearly RRULE support.
+- Cloud calendars or external sync.
+- General task lifecycle rules outside recurrence hooks.
+
+Expected service methods:
+
+- `setRecurrenceRule`
+- `clearRecurrenceRule`
+- `calculateNextOccurrence`
+- `completeRecurringTask`
+
+Integration points:
+
+- Tasks for source records and due-date updates.
+- Search for changed task-date projections.
+- Reminders for relative reminder rescheduling after recurrence advance.
 
 ### Dashboard
 

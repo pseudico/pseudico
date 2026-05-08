@@ -14,6 +14,7 @@ export const plannedFeatureAreas = [
   "links",
   "metadata",
   "relationships",
+  "recurrence",
   "reminders",
   "search",
   "savedViews",
@@ -92,6 +93,7 @@ export {
   notesModuleContract
 } from "./notes";
 export { ProjectHealthService, ProjectService, projectsModuleContract } from "./projects";
+export { RecurrenceService, recurrenceModuleContract } from "./recurrence";
 export { RelationshipService, relationshipsModuleContract } from "./relationships";
 export { ReminderService, remindersModuleContract } from "./reminders";
 export {
@@ -303,6 +305,15 @@ export type {
   ProjectStatus,
   UpdateProjectInput
 } from "./projects";
+export type {
+  ClearRecurrenceRuleInput,
+  CompleteRecurringTaskInput,
+  RecurrenceRuleMutationResult,
+  RecurrenceServiceIdFactory,
+  RecurrenceWeekday,
+  RecurringTaskCompletionResult,
+  SetRecurrenceRuleInput
+} from "./recurrence";
 export type {
   CreateRelationshipInput,
   ListRelationshipsInput,

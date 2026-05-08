@@ -3,6 +3,7 @@ import { contactFieldsSql } from "./0002_contact_fields";
 import { remindersSql } from "./0003_reminders";
 import { templatesSql } from "./0004_templates";
 import { containerTemplatesSql } from "./0005_container_templates";
+import { recurrenceSql } from "./0006_recurrence";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -35,5 +36,11 @@ export const migrations: MigrationDefinition[] = [
     name: "container_templates",
     sql: containerTemplatesSql,
     checksum: "pse-77-container-templates-v1"
+  },
+  {
+    version: 6,
+    name: "recurrence",
+    sql: recurrenceSql,
+    checksum: "pse-78-recurrence-v1"
   }
 ];

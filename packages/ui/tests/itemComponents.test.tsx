@@ -28,6 +28,7 @@ import {
   ProjectHealthWidget,
   RecentActivityList,
   RecentActivityWidget,
+  RecurrencePicker,
   ReminderPicker,
   renderLoadableState,
   SmartListEditor,
@@ -430,6 +431,24 @@ describe("Universal item UI", () => {
     expect(html).toContain("1 hour before");
     expect(html).toContain("Clear");
     expect(html).toContain("data-reminder-mode=\"relative\"");
+  });
+
+  it("renders recurrence picker frequency and weekday controls", () => {
+    const html = renderToStaticMarkup(
+      <RecurrencePicker
+        value={{ frequency: "weekly", interval: 2, weekdays: [1, 3] }}
+        onClearRecurrence={() => undefined}
+        onSetRecurrence={() => undefined}
+      />
+    );
+
+    expect(html).toContain("Repeat");
+    expect(html).toContain("Weekly");
+    expect(html).toContain("week(s)");
+    expect(html).toContain("Mon");
+    expect(html).toContain("Wed");
+    expect(html).toContain("Clear repeat");
+    expect(html).toContain("data-recurrence-frequency=\"weekly\"");
   });
 
   it("renders dashboard widget states and rows", () => {
