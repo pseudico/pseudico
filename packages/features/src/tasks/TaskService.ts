@@ -37,6 +37,7 @@ import {
 } from "./TaskQueries";
 import { TagService } from "../metadata/TagService";
 import { ReminderService } from "../reminders/ReminderService";
+import { RecurrenceService } from "../recurrence/RecurrenceService";
 
 // Owns task-specific application operations.
 // Does not own container persistence or calendar rendering.
@@ -351,9 +352,18 @@ export class TaskService {
   ): Promise<TaskMutationResult> {
     validateNonEmptyString(itemId, "itemId");
 
-    return await this.transactionService.runInTransaction(() => {
+    return await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const before = this.requireTask(itemId);
+
+      if (before.task.recurrenceRuleId !== null) {
+        return await new RecurrenceService({
+          connection: this.connection,
+          idFactory: this.idFactory,
+          now: this.now
+        }).completeRecurringTask({ taskId: itemId, actorType });
+      }
+
       const item = new ItemRepository(this.connection).update(itemId, {
         status: "completed",
         completedAt: timestamp,
@@ -574,6 +584,7 @@ export class TaskService {
         allDay: task.allDay,
         timezone: task.timezone,
         completedAt: task.completedAt,
+        recurrenceRuleId: task.recurrenceRuleId,
         tagIds: tags.map((tag) => tag.id),
         tagSlugs,
         inlineTags: inlineTagSlugs,

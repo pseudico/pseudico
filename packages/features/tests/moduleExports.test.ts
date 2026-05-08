@@ -23,6 +23,8 @@ import {
   notesModuleContract,
   plannedFeatureAreas,
   projectsModuleContract,
+  recurrenceModuleContract,
+  RecurrenceService,
   CollectionService,
   SavedViewService,
   relationshipsModuleContract,
@@ -57,6 +59,7 @@ describe("feature module exports", () => {
       "links",
       "metadata",
       "relationships",
+      "recurrence",
       "reminders",
       "search",
       "savedViews",
@@ -89,6 +92,7 @@ describe("feature module exports", () => {
       tagsModuleContract.module,
       categoriesModuleContract.module,
       relationshipsModuleContract.module,
+      recurrenceModuleContract.module,
       remindersModuleContract.module,
       searchModuleContract.module,
       savedViewsModuleContract.module,
@@ -119,6 +123,7 @@ describe("feature module exports", () => {
       "metadata.tags",
       "metadata.categories",
       "relationships",
+      "recurrence",
       "reminders",
       "search",
       "savedViews",
@@ -166,6 +171,10 @@ describe("feature module exports", () => {
 
   it("exports the reminder service implementation", () => {
     expect(ReminderService).toBeDefined();
+  });
+
+  it("exports the recurrence service implementation", () => {
+    expect(RecurrenceService).toBeDefined();
   });
 
   it("exports the list template service implementation", () => {

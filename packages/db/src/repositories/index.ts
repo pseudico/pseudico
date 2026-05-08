@@ -144,6 +144,14 @@ export {
   type RelationshipRecord
 } from "./RelationshipRepository";
 export {
+  RecurrenceRepository,
+  type CreateRecurrenceRuleInput,
+  type RecurrenceFrequency,
+  type RecurrenceRuleRecord,
+  type RecurrenceRuleStatus,
+  type UpdateRecurrenceRulePatch
+} from "./RecurrenceRepository";
+export {
   ReminderRepository,
   type CreateReminderEventInput,
   type CreateReminderPolicyInput,

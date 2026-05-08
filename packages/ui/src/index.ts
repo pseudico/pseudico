@@ -166,6 +166,12 @@ export {
   type ReminderPickerValue
 } from "./components/ReminderPicker";
 export {
+  RecurrencePicker,
+  type RecurrencePickerFrequency,
+  type RecurrencePickerProps,
+  type RecurrencePickerValue
+} from "./components/RecurrencePicker";
+export {
   ChecklistEditor,
   type ChecklistEditorItem,
   type ChecklistEditorProps
