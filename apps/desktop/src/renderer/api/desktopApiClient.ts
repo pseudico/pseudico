@@ -222,6 +222,9 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       getViewModel: (input) =>
         callApi(() => api.timeline!.getViewModel(input))
     },
+    calendar: {
+      getMonth: (input) => callApi(() => api.calendar!.getMonth(input))
+    },
     dashboard: {
       getDefault: (input) => callApi(() => api.dashboard.getDefault(input))
     },
@@ -507,6 +510,9 @@ export const desktopApiClient: LocalWorkOsApi = {
   timeline: {
     getViewModel: (input) =>
       getDesktopApiClient().timeline!.getViewModel(input)
+  },
+  calendar: {
+    getMonth: (input) => getDesktopApiClient().calendar!.getMonth(input)
   },
   dashboard: {
     getDefault: (input) =>

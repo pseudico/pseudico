@@ -811,6 +811,68 @@ export type TimelineViewModelSummary = {
   groups: TimelineGroupSummary[];
 };
 
+export type CalendarMonthInput = {
+  workspaceId?: string;
+  month: string | Date;
+  includeCompleted?: boolean;
+};
+
+export type CalendarMonthRangeSummary = {
+  month: string;
+  startInclusive: string;
+  endExclusive: string;
+};
+
+export type CalendarNavigationTargetSummary = {
+  targetType: "item" | "list_item";
+  targetId: string;
+  containerId: string;
+  workspaceId: string;
+  sourceItemId: string | null;
+};
+
+export type CalendarItemSummary = {
+  id: string;
+  kind: "task" | "list_item";
+  workspaceId: string;
+  title: string;
+  body: string | null;
+  containerId: string;
+  containerName: string;
+  containerType: string;
+  containerColor: string | null;
+  categoryId: string | null;
+  categoryName: string | null;
+  categoryColor: string | null;
+  status: TaskStatus | ListItemStatus;
+  itemStatus: string | null;
+  priority: number | null;
+  startAt: string | null;
+  dueAt: string | null;
+  allDay: boolean;
+  completedAt: string | null;
+  updatedAt: string;
+  navigationTarget: CalendarNavigationTargetSummary;
+};
+
+export type CalendarDaySummary = {
+  date: string;
+  dayOfMonth: number;
+  weekday: number;
+  inCurrentMonth: boolean;
+  isToday: boolean;
+  items: CalendarItemSummary[];
+};
+
+export type CalendarMonthViewModelSummary = {
+  workspaceId: string;
+  generatedAt: string;
+  range: CalendarMonthRangeSummary;
+  includeCompleted: boolean;
+  totalCount: number;
+  days: CalendarDaySummary[];
+};
+
 export type CreateTagCollectionInput = {
   workspaceId?: string;
   tagSlug: string;
@@ -1610,6 +1672,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   timeline: {
     getViewModel: "local-work-os:timeline:get-view-model"
   },
+  calendar: {
+    getMonth: "local-work-os:calendar:get-month"
+  },
   dashboard: {
     getDefault: "local-work-os:dashboard:get-default"
   },
@@ -1972,6 +2037,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.timeline.getViewModel]: {
     input: TimelineViewModelInput;
     result: ApiResult<TimelineViewModelSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.calendar.getMonth]: {
+    input: CalendarMonthInput;
+    result: ApiResult<CalendarMonthViewModelSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.getDefault]: {
     input: GetDefaultDashboardInput | undefined;
@@ -2369,6 +2438,11 @@ export type LocalWorkOsApi = {
     getViewModel: (
       input: TimelineViewModelInput
     ) => Promise<ApiResult<TimelineViewModelSummary>>;
+  };
+  calendar?: {
+    getMonth: (
+      input: CalendarMonthInput
+    ) => Promise<ApiResult<CalendarMonthViewModelSummary>>;
   };
   dashboard: {
     getDefault: (
@@ -2794,6 +2868,10 @@ export function createLocalWorkOsApi(
     timeline: {
       getViewModel: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.timeline.getViewModel, input)
+    },
+    calendar: {
+      getMonth: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.calendar.getMonth, input)
     },
     dashboard: {
       getDefault: (input) =>

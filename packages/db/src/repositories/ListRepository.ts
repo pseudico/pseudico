@@ -61,6 +61,8 @@ type ListWithItemRow = {
   list_updated_at: string;
 };
 
+type ListItemWithListRow = ListItemRow & ListWithItemRow;
+
 export type ListDetailsRecord = {
   itemId: string;
   workspaceId: string;
@@ -93,6 +95,11 @@ export type ListItemRecord = {
 export type ListWithItemRecord = {
   item: ItemRecord;
   list: ListDetailsRecord;
+};
+
+export type ListItemWithListRecord = {
+  listItem: ListItemRecord;
+  list: ListWithItemRecord;
 };
 
 export type CreateListDetailsInput = {
@@ -333,6 +340,84 @@ export class ListRepository {
       .all(...values);
 
     return rows.map(toListItemRecord);
+  }
+
+  listDatedItemsBetween(input: {
+    workspaceId: string;
+    range: { startInclusive: string; endExclusive: string };
+    includeCompleted?: boolean;
+  }): ListItemWithListRecord[] {
+    const completedFilter =
+      input.includeCompleted === true
+        ? "li.status in ('open', 'waiting', 'done')"
+        : "li.status in ('open', 'waiting') and li.completed_at is null";
+    const rows = this.connection.sqlite
+      .prepare<[string, string, string], ListItemWithListRow>(
+        `select
+           li.id,
+           li.workspace_id,
+           li.list_item_parent_id,
+           li.list_id,
+           li.title,
+           li.body,
+           li.status,
+           li.depth,
+           li.sort_order,
+           li.start_at,
+           li.due_at,
+           li.completed_at,
+           li.created_at,
+           li.updated_at,
+           li.archived_at,
+           li.deleted_at,
+           i.id as item_id,
+           i.workspace_id as item_workspace_id,
+           i.container_id as item_container_id,
+           i.container_tab_id as item_container_tab_id,
+           i.type as item_type,
+           i.title as item_title,
+           i.body as item_body,
+           i.category_id as item_category_id,
+           i.status as item_status,
+           i.sort_order as item_sort_order,
+           i.pinned as item_pinned,
+           i.created_at as item_created_at,
+           i.updated_at as item_updated_at,
+           i.completed_at as item_completed_at,
+           i.archived_at as item_archived_at,
+           i.deleted_at as item_deleted_at,
+           ld.item_id as list_item_id,
+           ld.workspace_id as list_workspace_id,
+           ld.display_mode as list_display_mode,
+           ld.show_completed as list_show_completed,
+           ld.progress_mode as list_progress_mode,
+           ld.created_at as list_created_at,
+           ld.updated_at as list_updated_at
+         from list_items li
+         inner join list_details ld on ld.item_id = li.list_id
+         inner join items i on i.id = ld.item_id
+         where li.workspace_id = ?
+           and li.archived_at is null
+           and li.deleted_at is null
+           and i.archived_at is null
+           and i.deleted_at is null
+           and ${completedFilter}
+           and (li.start_at is not null or li.due_at is not null)
+           and coalesce(li.start_at, li.due_at) < ?
+           and coalesce(li.due_at, li.start_at) >= ?
+         order by
+           coalesce(li.start_at, li.due_at) asc,
+           coalesce(li.due_at, li.start_at) asc,
+           i.sort_order asc,
+           li.sort_order asc,
+           li.created_at asc`
+      )
+      .all(input.workspaceId, input.range.endExclusive, input.range.startInclusive);
+
+    return rows.map((row) => ({
+      listItem: toListItemRecord(row),
+      list: toListWithItemRecord(row)
+    }));
   }
 
   createListItem(input: CreateListItemInput): ListItemRecord {

@@ -39,7 +39,11 @@ export {
 } from "./activity";
 export type { ActivityEventView } from "./activity";
 export { BackupService, backupModuleContract, createBackupManifest } from "./backup";
-export { calendarModuleContract } from "./calendar";
+export {
+  CalendarService,
+  calendarModuleContract,
+  createCalendarMonthRange
+} from "./calendar";
 export {
   ContactRelationshipService,
   ContactService,
@@ -131,7 +135,14 @@ export type {
   ListBackupsInput,
   ManualBackupSnapshot
 } from "./backup";
-export type { CalendarService } from "./calendar";
+export type {
+  CalendarDay,
+  CalendarItem,
+  CalendarMonthInput,
+  CalendarMonthRange,
+  CalendarMonthViewModel,
+  CalendarNavigationTarget
+} from "./calendar";
 export type {
   AddContactFieldInput,
   ContactFieldInput,

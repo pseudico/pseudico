@@ -348,3 +348,52 @@ Decisions made: lint/typecheck/test/build all pass; unrelated untracked files re
 Files changed: docs/session_log.md
 Open questions / risks: GitHub CI/review still pending after PR.
 Next actions: stage scoped files; commit/push branch; open PR.
+## 2026-05-08T17:21:08.8121809+10:00
+Objective: Complete PSE-73 merge, Linear cleanup, and next-ticket promotion.
+Decisions made:
+- PR #70 was green/no review threads and was squash-merged; PSE-74 promoted as next M7 ticket.
+Files changed: docs/session_log.md
+Open questions / risks: Local untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi remain untouched.
+Next actions: Start PSE-74; reconcile before any new code; keep exactly one Codex Ready.
+
+### 2026-05-08T17:32:17.4761819+10:00
+Objective: Run the next Local Work OS ticket end-to-end.
+Decisions made:
+- Began Linear/GitHub reconciliation before new work.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing local untracked files may be unrelated.
+Next actions: Reconcile active Linear issues; inspect any open PR; implement next Codex Ready issue.
+
+### 2026-05-08T17:33:06.9869059+10:00
+Objective: Reconcile active Linear/GitHub work.
+Decisions made:
+- Found no PR Open or In Progress issues; selected PSE-74 as the sole Codex Ready ticket.
+- Moved PSE-74 to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing local untracked files remain unrelated until proven otherwise.
+Next actions: Read ticket/docs/source; branch for PSE-74; implement month calendar view.
+
+### 2026-05-08T17:54:46.7135673+10:00
+Objective: Implement PSE-74 local task month calendar view.
+Decisions made:
+- Added CalendarService month projection using task/list-item dated range queries.
+- Added Calendar page, MonthCalendar UI, IPC/preload/client wiring, and route/nav entry.
+Files changed:
+- packages/features/src/calendar/CalendarService.ts
+- packages/db/src/repositories/ListRepository.ts
+- apps/desktop/src/renderer/pages/CalendarPage.tsx
+Open questions / risks: Month day create saves new tasks to Inbox by default.
+Next actions: Run full checks; open PR; reconcile CI/merge and promote next ticket.
+
+### 2026-05-08T17:59:14.7457822+10:00
+Objective: Verify PSE-74 calendar implementation.
+Decisions made:
+- Full required checks passed after updating route smoke expectations.
+- Documented implemented calendar service methods in module README.
+Files changed:
+- packages/features/src/calendar/README.md
+- apps/desktop/tests/smoke/app-shell.test.tsx
+Open questions / risks: Manual Electron QA not run; automated build passed.
+Next actions: Stage/commit scoped files; push branch; open PR.
