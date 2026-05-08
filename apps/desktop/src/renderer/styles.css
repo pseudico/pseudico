@@ -1395,6 +1395,41 @@ a {
   font: inherit;
 }
 
+.reminder-picker {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.reminder-picker-field {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  color: #514e49;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.reminder-picker-field span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.reminder-picker-field input,
+.reminder-picker-field select {
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid #d5d0c3;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #262624;
+  font: inherit;
+}
+
 .reorder-controls {
   display: inline-flex;
   gap: 4px;

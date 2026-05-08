@@ -17,7 +17,7 @@ As of the M6 documentation sync, the repository contains the local-only MVP
 foundation for workspace creation/opening, SQLite bootstrap and repositories,
 Inbox/project containers, tasks, lists, notes, links, file attachments,
 metadata, activity, search, saved views/collections, Today planning, dashboard
-widgets, project health, backup, export, import validation, smoke tests,
+widgets, project health, local reminder foundations, backup, export, import validation, smoke tests,
 packaging verification, performance guardrails, app-wide error/toast states,
 and data-integrity/search audit guidance.
 
@@ -31,6 +31,9 @@ Known limitations for MVP release planning:
 
 - Contacts now have a repository/service foundation for local contact
   containers and flexible profile fields; full renderer workflows remain
+  future work.
+- Reminders now have tables, service operations, IPC, scheduler-facing events,
+  and a shared picker foundation; full renderer notification preferences remain
   future work.
 - Timeline and calendar services are placeholders for future local dated-work
   projections.

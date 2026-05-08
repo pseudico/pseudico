@@ -1134,6 +1134,7 @@ export type TaskSummary = ItemSummary & {
   dueAt: string | null;
   allDay: boolean;
   timezone: string | null;
+  reminderPolicyId?: string | null;
   taskCompletedAt: string | null;
   taskCreatedAt: string;
   taskUpdatedAt: string;
@@ -1188,6 +1189,67 @@ export type RescheduleTaskInput = {
   actorType?: "local_user" | "system" | "importer";
   startAt?: string | null;
   allDay?: boolean;
+};
+
+export type ReminderPolicySummary = {
+  id: string;
+  workspaceId: string;
+  taskItemId: string;
+  mode: "absolute" | "relative";
+  leadMinutes: number | null;
+  triggerAt: string;
+  status: "active" | "cleared";
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
+export type ReminderEventSummary = {
+  id: string;
+  workspaceId: string;
+  policyId: string;
+  taskItemId: string;
+  scheduledForAt: string;
+  firedAt: string | null;
+  dismissedAt: string | null;
+  snoozedUntil: string | null;
+  status: "scheduled" | "fired" | "dismissed" | "snoozed" | "cancelled";
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TaskReminderMutationSummary = {
+  policy: ReminderPolicySummary | null;
+  event: ReminderEventSummary | null;
+};
+
+export type ReminderEventMutationSummary = {
+  policy: ReminderPolicySummary;
+  event: ReminderEventSummary;
+};
+
+export type SetTaskReminderInput = {
+  workspaceId?: string;
+  taskId: string;
+  actorType?: "local_user" | "system" | "importer";
+  triggerAt?: string;
+  leadMinutes?: number;
+};
+
+export type ClearTaskReminderInput = {
+  taskId: string;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type DismissReminderInput = {
+  eventId: string;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type SnoozeReminderInput = {
+  eventId: string;
+  until: string;
+  actorType?: "local_user" | "system" | "importer";
 };
 
 export type ListItemSummary = {
@@ -1380,6 +1442,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     snoozeTask: "local-work-os:tasks:snooze-task",
     rescheduleTask: "local-work-os:tasks:reschedule-task",
     listByContainer: "local-work-os:tasks:list-by-container"
+  },
+  reminders: {
+    setTaskReminder: "local-work-os:reminders:set-task-reminder",
+    clearTaskReminder: "local-work-os:reminders:clear-task-reminder",
+    dismissReminder: "local-work-os:reminders:dismiss-reminder",
+    snoozeReminder: "local-work-os:reminders:snooze-reminder"
   },
   lists: {
     createList: "local-work-os:lists:create-list",
@@ -1583,6 +1651,22 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.tasks.listByContainer]: {
     input: string;
     result: ApiResult<TaskSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.reminders.setTaskReminder]: {
+    input: SetTaskReminderInput;
+    result: ApiResult<TaskReminderMutationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.reminders.clearTaskReminder]: {
+    input: ClearTaskReminderInput;
+    result: ApiResult<TaskReminderMutationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.reminders.dismissReminder]: {
+    input: DismissReminderInput;
+    result: ApiResult<ReminderEventMutationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.reminders.snoozeReminder]: {
+    input: SnoozeReminderInput;
+    result: ApiResult<ReminderEventMutationSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.lists.createList]: {
     input: CreateListInput;
@@ -1980,6 +2064,20 @@ export type LocalWorkOsApi = {
       input: RescheduleTaskInput
     ) => Promise<ApiResult<TaskSummary>>;
   };
+  reminders?: {
+    setTaskReminder: (
+      input: SetTaskReminderInput
+    ) => Promise<ApiResult<TaskReminderMutationSummary>>;
+    clearTaskReminder: (
+      input: ClearTaskReminderInput
+    ) => Promise<ApiResult<TaskReminderMutationSummary>>;
+    dismissReminder: (
+      input: DismissReminderInput
+    ) => Promise<ApiResult<ReminderEventMutationSummary>>;
+    snoozeReminder: (
+      input: SnoozeReminderInput
+    ) => Promise<ApiResult<ReminderEventMutationSummary>>;
+  };
   lists: {
     create: (input: CreateListInput) => Promise<ApiResult<ListSummary>>;
     addItem: (input: AddListItemInput) => Promise<ApiResult<ListItemSummary>>;
@@ -2373,6 +2471,16 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.snoozeTask, input),
       rescheduleTask: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tasks.rescheduleTask, input)
+    },
+    reminders: {
+      setTaskReminder: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.reminders.setTaskReminder, input),
+      clearTaskReminder: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.reminders.clearTaskReminder, input),
+      dismissReminder: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.reminders.dismissReminder, input),
+      snoozeReminder: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.reminders.snoozeReminder, input)
     },
     lists: {
       create: (input) =>

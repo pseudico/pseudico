@@ -26,6 +26,8 @@ import {
   CollectionService,
   SavedViewService,
   relationshipsModuleContract,
+  remindersModuleContract,
+  ReminderService,
   savedViewsModuleContract,
   searchModuleContract,
   tagsModuleContract,
@@ -53,6 +55,7 @@ describe("feature module exports", () => {
       "links",
       "metadata",
       "relationships",
+      "reminders",
       "search",
       "savedViews",
       "tabs",
@@ -83,6 +86,7 @@ describe("feature module exports", () => {
       tagsModuleContract.module,
       categoriesModuleContract.module,
       relationshipsModuleContract.module,
+      remindersModuleContract.module,
       searchModuleContract.module,
       savedViewsModuleContract.module,
       tabsModuleContract.module,
@@ -111,6 +115,7 @@ describe("feature module exports", () => {
       "metadata.tags",
       "metadata.categories",
       "relationships",
+      "reminders",
       "search",
       "savedViews",
       "tabs",
@@ -152,5 +157,9 @@ describe("feature module exports", () => {
 
   it("exports the tab service implementation", () => {
     expect(TabService).toBeDefined();
+  });
+
+  it("exports the reminder service implementation", () => {
+    expect(ReminderService).toBeDefined();
   });
 });

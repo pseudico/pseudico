@@ -120,7 +120,7 @@ MVP object graph:
   relationship, saved-view, dashboard, daily-plan, and search-index
   repositories.
 - Feature services for projects, contacts, Inbox, tasks, lists, notes, links, files,
-  metadata, saved views/collections, Today planning, dashboards, project
+  metadata, saved views/collections, Today planning, dashboards, reminders, project
   health, backup, export, import validation, diagnostics, and search
   hydration/orchestration.
 
@@ -130,11 +130,14 @@ that are user-searchable and excludes derived export/search artifacts from the
 portable workspace export.
 
 The contact foundation now stores contact containers plus flexible profile
-fields behind repository and service APIs. The data model still intentionally
-reserves future shape for timeline/calendar views, templates, workflow runs,
-file versions, backup restore/import execution, and richer saved-view builder
-state. Add those through scoped migrations and repository/service tickets
-rather than expanding the current schema opportunistically.
+fields behind repository and service APIs. The reminder foundation now stores
+task reminder policies and scheduled reminder events in `reminder_policies` and
+`reminder_events`, with task rows pointing at the active local policy when one
+exists. The data model still intentionally reserves future shape for
+timeline/calendar views, templates, workflow runs, file versions, backup
+restore/import execution, and richer saved-view builder state. Add those
+through scoped migrations and repository/service tickets rather than expanding
+the current schema opportunistically.
 
 ## Source Documents
 

@@ -14,6 +14,7 @@ export const plannedFeatureAreas = [
   "links",
   "metadata",
   "relationships",
+  "reminders",
   "search",
   "savedViews",
   "tabs",
@@ -87,6 +88,7 @@ export {
 } from "./notes";
 export { ProjectHealthService, ProjectService, projectsModuleContract } from "./projects";
 export { RelationshipService, relationshipsModuleContract } from "./relationships";
+export { ReminderService, remindersModuleContract } from "./reminders";
 export {
   QueryEvaluator,
   SAVED_VIEW_QUERY_VERSION,
@@ -283,6 +285,16 @@ export type {
   RelationshipServiceIdFactory,
   RemoveRelationshipInput
 } from "./relationships";
+export type {
+  ClearTaskReminderInput,
+  DismissReminderInput,
+  ReminderEventMutationResult,
+  ReminderServiceIdFactory,
+  RescheduleTaskReminderInput,
+  SetTaskReminderInput,
+  SnoozeReminderInput,
+  TaskReminderMutationResult
+} from "./reminders";
 export type {
   CreateSavedViewInput,
   CollectionEvaluationResult,

@@ -21,8 +21,10 @@ new work should account for this implemented baseline:
   and diagnostics.
 - Future or placeholder-heavy flows: Timeline, Calendar, Templates, Workflows,
   file versions, full import/restore execution,
-  custom dashboard editing, advanced saved-view builder UX, local reminders,
-  and browser capture.
+  custom dashboard editing, advanced saved-view builder UX, and browser capture.
+- Local reminders now have database, service, IPC, scheduler, and shared picker
+  foundations; deeper renderer workflows and notification preference UX remain
+  future work.
 - Cross-cutting services now include project health, recent activity,
   integrity diagnostics, bounded pagination, app-wide error boundaries/toasts,
   packaged smoke checks, and MVP smoke coverage.
@@ -50,6 +52,7 @@ renderer-only implementation.
 | Saved Views | Own collection and smart-list query definitions. | Saved views, collections, smart-list filters | Workspace, metadata, search, tasks, projects, contacts | Dashboard, Today filters, future reports | V1 |
 | Today | Own daily planning, due/overdue task projections, and rollover planning flows. | Daily plans, planned task references, Today/Tomorrow lanes | Tasks, metadata, saved views, workspace | Dashboard, timeline, calendar | V1 |
 | Dashboard | Own workspace overview widgets, project health summaries, and saved-view widgets. | Dashboard widgets, summary cards, health summaries | Workspace, projects, tasks, search, saved views, today | Workspace home, planning views | V1 |
+| Reminders | Own local task reminder policies, reminder event state, and scheduler-facing projections. | Reminder policies, reminder events | Tasks, activity log, Electron main notifications | Today, dashboard, future calendar | V1 |
 | Timeline | Own timeline projections for dated work and project ranges. | Timeline entries, date ranges, grouped dated work | Tasks, projects, contacts, metadata, saved views | Calendar, dashboard, planning views | V1 |
 | Calendar | Own month/week/day calendar projections and date interactions. | Calendar entries, local dated work, local imports later | Tasks, timeline, metadata, workspace | Today, dashboard, planning views | V1 |
 | Backup | Own local backup orchestration and backup integrity checks. | Backup snapshots, manifests, integrity reports | Workspace, files, database services, Electron main/preload IPC | Maintenance, export, restore later | MVP |
@@ -455,6 +458,34 @@ Integration points:
 - Tasks for source records.
 - Metadata and saved views for filters.
 - Dashboard, timeline, and calendar summaries.
+
+### Reminders
+
+Owns:
+
+- Local task reminder policy and reminder event persistence.
+- Set, clear, dismiss, snooze, and task-date rescheduling behavior.
+- Scheduler-facing event projections for Electron main-process notifications.
+
+Does not own:
+
+- Cloud push notifications, mobile notifications, or hosted accounts.
+- General task lifecycle rules outside reminder rescheduling hooks.
+- Full renderer notification preference or recurrence UX.
+
+Expected service methods:
+
+- `setTaskReminder`
+- `clearTaskReminder`
+- `dismissReminder`
+- `snoozeReminder`
+- `rescheduleReminderForTaskDateChange`
+
+Integration points:
+
+- Tasks for due-date changes and task context.
+- Activity log for all reminder writes.
+- Electron main for local notifications only.
 
 ### Dashboard
 

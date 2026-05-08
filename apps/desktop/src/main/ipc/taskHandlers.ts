@@ -252,6 +252,7 @@ function toTaskSummary(
     dueAt: task.dueAt,
     allDay: task.allDay,
     timezone: task.timezone,
+    reminderPolicyId: task.reminderPolicyId,
     taskCompletedAt: task.completedAt,
     taskCreatedAt: task.createdAt,
     taskUpdatedAt: task.updatedAt

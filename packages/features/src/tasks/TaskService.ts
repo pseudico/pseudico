@@ -36,6 +36,7 @@ import {
   type TaskRangeInput
 } from "./TaskQueries";
 import { TagService } from "../metadata/TagService";
+import { ReminderService } from "../reminders/ReminderService";
 
 // Owns task-specific application operations.
 // Does not own container persistence or calendar rendering.
@@ -281,6 +282,13 @@ export class TaskService {
         timestamp
       });
 
+      if (input.dueAt !== undefined) {
+        await this.rescheduleReminderForTaskDateChange({
+          itemId: item.id,
+          ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+        });
+      }
+
       this.upsertSearchRecord(item, task, timestamp);
       const inlineTags = await this.syncInlineTagsForTask({
         item,
@@ -483,7 +491,7 @@ export class TaskService {
     action: typeof ActivityAction[keyof typeof ActivityAction];
     summaryVerb: string;
   }): Promise<TaskMutationResult> {
-    return await this.transactionService.runInTransaction(() => {
+    return await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const before = this.requireActiveTaskForDateChange(input.itemId);
       const nextStartAt =
@@ -523,6 +531,11 @@ export class TaskService {
         summary: `${input.summaryVerb} task "${item.title}".`,
         before,
         timestamp
+      });
+
+      await this.rescheduleReminderForTaskDateChange({
+        itemId: item.id,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
       });
 
       const searchRecord = this.upsertSearchRecord(item, task, timestamp);
@@ -582,6 +595,20 @@ export class TaskService {
       itemId: input.item.id,
       title: input.item.title,
       body: input.item.body,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+  }
+
+  private async rescheduleReminderForTaskDateChange(input: {
+    itemId: string;
+    actorType?: ActivityActorType;
+  }): Promise<void> {
+    await new ReminderService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).rescheduleReminderForTaskDateChange({
+      taskId: input.itemId,
       ...(input.actorType === undefined ? {} : { actorType: input.actorType })
     });
   }

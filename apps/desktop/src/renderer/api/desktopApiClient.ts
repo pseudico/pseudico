@@ -65,6 +65,16 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       rescheduleTask: (input) =>
         callApi(() => api.tasks.rescheduleTask(input))
     },
+    reminders: {
+      setTaskReminder: (input) =>
+        callApi(() => api.reminders!.setTaskReminder(input)),
+      clearTaskReminder: (input) =>
+        callApi(() => api.reminders!.clearTaskReminder(input)),
+      dismissReminder: (input) =>
+        callApi(() => api.reminders!.dismissReminder(input)),
+      snoozeReminder: (input) =>
+        callApi(() => api.reminders!.snoozeReminder(input))
+    },
     lists: {
       create: (input) => callApi(() => api.lists.create(input)),
       addItem: (input) => callApi(() => api.lists.addItem(input)),
@@ -330,6 +340,16 @@ export const desktopApiClient: LocalWorkOsApi = {
     snoozeTask: (input) => getDesktopApiClient().tasks.snoozeTask(input),
     rescheduleTask: (input) =>
       getDesktopApiClient().tasks.rescheduleTask(input)
+  },
+  reminders: {
+    setTaskReminder: (input) =>
+      getDesktopApiClient().reminders!.setTaskReminder(input),
+    clearTaskReminder: (input) =>
+      getDesktopApiClient().reminders!.clearTaskReminder(input),
+    dismissReminder: (input) =>
+      getDesktopApiClient().reminders!.dismissReminder(input),
+    snoozeReminder: (input) =>
+      getDesktopApiClient().reminders!.snoozeReminder(input)
   },
   lists: {
     create: (input) => getDesktopApiClient().lists.create(input),

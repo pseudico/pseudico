@@ -20,6 +20,7 @@ import { registerMetadataIpc } from "./registerMetadataIpc";
 import { registerNoteIpc } from "./registerNoteIpc";
 import { registerProjectIpc } from "./registerProjectIpc";
 import { registerRelationshipIpc } from "./registerRelationshipIpc";
+import { registerReminderIpc } from "./registerReminderIpc";
 import { registerSearchIpc } from "./registerSearchIpc";
 import { registerTaskIpc } from "./registerTaskIpc";
 import { registerTabIpc } from "./registerTabIpc";
@@ -63,6 +64,7 @@ export function registerDesktopIpc(
   registerContactIpc(services.workspaceService);
   registerTabIpc(services.workspaceService);
   registerRelationshipIpc(services.workspaceService);
+  registerReminderIpc(services.workspaceService);
   registerTaskIpc(services.workspaceService);
   registerListIpc(services.workspaceService);
   registerNoteIpc(services.workspaceService);

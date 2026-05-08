@@ -220,3 +220,72 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: GitHub CI/review gate still pending.
 Next actions: push branch, open PR, run CI gate.
+
+## 2026-05-08T13:13:22.2338275+10:00
+Objective: Finish PSE-71 merge and queue handoff.
+Decisions made:
+- PR #68 merged after green GitHub CI and COMMENT review.
+- PSE-72 is the sole next Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final session-log entry is local after merge.
+Next actions: start PSE-72 only when requested.
+
+## 2026-05-08 13:23:38 +10:00
+Objective: Run next Local Work OS ticket end-to-end via Linear/GitHub reconcile-first workflow.
+Decisions made:
+- Start with reconciliation of Linear PR Open/In Progress/Codex Ready and local repo state.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing local modified/untracked files must not be overwritten.
+Next actions: Reconcile Linear/GitHub; inspect active PR if present; otherwise pick Codex Ready issue.
+
+## 2026-05-08 13:24:02 +10:00
+Objective: Reconcile active Linear/GitHub work before starting.
+Decisions made:
+- No PSE issues found in PR Open or In Progress.
+- One Codex Ready issue found: PSE-72; no open GitHub PRs found for repo.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local modified session log plus unrelated untracked files remain present.
+Next actions: Move PSE-72 to In Progress; read docs/source; create issue branch.
+
+## 2026-05-08 13:25:20 +10:00
+Objective: Start PSE-72 implementation branch.
+Decisions made:
+- Pulled main successfully; PSE-72 moved from Codex Ready to In Progress.
+- Created branch codex/PSE-72-reminders for the scoped reminders work.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Ticket is moderate and touches DB, services, Electron scheduling, and UI.
+Next actions: Inspect code structure; implement DB/service scheduler; add tests.
+
+## 2026-05-08 13:40:53 +10:00
+Objective: Implement PSE-72 reminder foundation and targeted verification.
+Decisions made:
+- Added reminder migration/schema/repository, service APIs, IPC surface, scheduler class, and ReminderPicker.
+- Relative reminders reschedule on task due-date changes; reminder writes log activity and do not mutate search.
+Files changed:
+- packages/db/src/migrations/0003_reminders.ts; packages/features/src/reminders/ReminderService.ts; apps/desktop/src/main/services/NotificationScheduler.ts
+Open questions / risks: Full checks and PR/CI/merge gate still pending.
+Next actions: Run typecheck/lint/full tests/build; update docs; open PR.
+
+## 2026-05-08 13:47:20 +10:00
+Objective: Complete local verification and docs for PSE-72.
+Decisions made:
+- pnpm lint/typecheck/test/build pass; test/build required escalated reruns due sandbox EPERM in Vite/esbuild.
+- Docs updated to reflect reminder DB/service/scheduler foundation and remaining UX limitations.
+Files changed:
+- docs/DATA_MODEL.md; docs/MODULE_REGISTRY.md; docs/PRODUCT_SPEC.md; docs/session_log.md
+Open questions / risks: Need PR creation, CI/review, merge, and next-ticket promotion.
+Next actions: Review diff; stage/commit/push; open PR.
+
+## 2026-05-08 13:48:40 +10:00
+Objective: Commit PSE-72 implementation.
+Decisions made:
+- Created commit 6e761ae feat(reminders): add local task reminders.
+- Staged scope excludes pre-existing .playwright-mcp/ and gh installer artifacts.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Commit needs amended with this log entry before push.
+Next actions: Amend commit; push branch; open PR.
