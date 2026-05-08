@@ -18,6 +18,7 @@ export const ActivityAction = {
   itemArchived: "item_archived",
   itemDeleted: "item_deleted",
   listCreated: "list_created",
+  listUpdated: "list_updated",
   listItemCreated: "list_item_created",
   listItemUpdated: "list_item_updated",
   listItemCompleted: "list_item_completed",

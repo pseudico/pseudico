@@ -29,6 +29,22 @@ export function registerListIpc(
     (_event, input) => handlers.handleReopenListItem(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.lists.enablePipelineMode,
+    (_event, input) => handlers.handleEnablePipelineMode(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.lists.disablePipelineMode,
+    (_event, input) => handlers.handleDisablePipelineMode(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.lists.getPipelineViewModel,
+    (_event, input) => handlers.handleGetPipelineViewModel(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.lists.movePipelineCard,
+    (_event, input) => handlers.handleMovePipelineCard(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems,
     (_event, input) => handlers.handleBulkAddListItems(input)
   );

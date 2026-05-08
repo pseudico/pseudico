@@ -1064,6 +1064,98 @@ export function ProjectDetailPage({
     setListBusyId(null);
   }
 
+  async function toggleListDisplayMode(
+    item: ListCardViewModel,
+    displayMode: "checklist" | "pipeline"
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result =
+      displayMode === "pipeline"
+        ? await apiClient.lists.enablePipelineMode(item.id)
+        : await apiClient.lists.disablePipelineMode(item.id);
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    setListBusyId(null);
+  }
+
+  async function addPipelineCard(
+    item: ListCardViewModel,
+    stage: ListCardItemViewModel,
+    title: string
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result = await apiClient.lists.addItem({
+      listId: item.id,
+      title,
+      depth: (stage.depth ?? 0) + 1,
+      listItemParentId: stage.id
+    });
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    setListBusyId(null);
+    return true;
+  }
+
+  async function movePipelineCard(
+    item: ListCardViewModel,
+    card: ListCardItemViewModel,
+    stage: ListCardItemViewModel
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const targetCards = item.listItems.filter(
+      (candidate) => candidate.listItemParentId === stage.id && candidate.id !== card.id
+    );
+    const maxSortOrder = targetCards.reduce(
+      (max, candidate) => Math.max(max, candidate.sortOrder ?? 0),
+      0
+    );
+    const result = await apiClient.lists.movePipelineCard({
+      listId: item.id,
+      cardId: card.id,
+      targetStageId: stage.id,
+      sortOrder: maxSortOrder + 1024
+    });
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    setListBusyId(null);
+  }
+
   async function saveListAsTemplate(item: ListCardViewModel): Promise<void> {
     if (project === null) {
       return;
@@ -1239,7 +1331,10 @@ export function ProjectDetailPage({
             item={item}
             onAddItem={addListItem}
             onBulkAddItems={bulkAddListItems}
+            onAddPipelineCard={addPipelineCard}
+            onMovePipelineCard={movePipelineCard}
             onSaveAsTemplate={saveListAsTemplate}
+            onToggleDisplayMode={toggleListDisplayMode}
             onToggleItem={toggleListItem}
           />
         </>
@@ -1702,6 +1797,7 @@ function toProjectListViewModel(
     createdAt: list.createdAt,
     updatedLabel: list.updatedAt,
     pinned: list.pinned,
+    displayMode: list.displayMode,
     progressMode: list.progressMode,
     showCompleted: list.showCompleted,
     tags: list.tags ?? [],
@@ -1800,6 +1896,7 @@ function toListCardItemViewModel(
     id: listItem.id,
     title: listItem.title,
     body: listItem.body,
+    listItemParentId: listItem.listItemParentId,
     status: listItem.status,
     depth: listItem.depth,
     sortOrder: listItem.sortOrder

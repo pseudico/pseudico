@@ -24,6 +24,7 @@ import {
   MoveToContainerDialog,
   NoteCardContent,
   NoteEditor,
+  PipelineView,
   ProjectHealthCard,
   ProjectHealthWidget,
   RecentActivityList,
@@ -630,6 +631,49 @@ describe("Universal item UI", () => {
     expect(html).toContain("Send update");
     expect(html).toContain("Bulk paste");
     expect(html).toContain("Add pasted");
+  });
+
+  it("renders pipeline content with stages, cards, and mode controls", () => {
+    const item = {
+      id: "item_list_1",
+      type: "list" as const,
+      title: "Publishing pipeline",
+      displayMode: "pipeline",
+      listItems: [
+        {
+          id: "list_item_stage_1",
+          title: "Idea",
+          status: "open",
+          depth: 0,
+          listItemParentId: null
+        },
+        {
+          id: "list_item_card_1",
+          title: "Draft article",
+          status: "open",
+          depth: 1,
+          listItemParentId: "list_item_stage_1"
+        }
+      ]
+    };
+    const cardHtml = renderToStaticMarkup(
+      <ListCardContent
+        item={item}
+        onAddItem={() => undefined}
+        onAddPipelineCard={() => undefined}
+        onMovePipelineCard={() => undefined}
+        onToggleDisplayMode={() => undefined}
+      />
+    );
+    const viewHtml = renderToStaticMarkup(
+      <PipelineView item={item} onAddStage={() => undefined} />
+    );
+
+    expect(cardHtml).toContain("Switch to checklist");
+    expect(cardHtml).toContain("Pipeline mode");
+    expect(cardHtml).toContain("Idea");
+    expect(cardHtml).toContain("Draft article");
+    expect(viewHtml).toContain("Top-level checklist rows are stages");
   });
 
   it("renders Markdown note previews without raw HTML injection", () => {

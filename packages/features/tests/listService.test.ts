@@ -328,6 +328,67 @@ describe("ListService", () => {
       ])
     );
   });
+
+  it("toggles pipeline mode, projects stages/cards, and moves cards with activity", async () => {
+    const service = createService();
+    const list = await service.createList({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Publishing pipeline"
+    });
+    const idea = await service.addListItem({
+      listId: list.item.id,
+      title: "Idea"
+    });
+    const review = await service.addListItem({
+      listId: list.item.id,
+      title: "Review"
+    });
+    const draft = await service.addListItem({
+      listId: list.item.id,
+      title: "Draft article",
+      listItemParentId: idea.listItem.id
+    });
+
+    const enabled = await service.enablePipelineMode(list.item.id);
+    const moved = await service.movePipelineCard({
+      listId: list.item.id,
+      cardId: draft.listItem.id,
+      targetStageId: review.listItem.id,
+      sortOrder: 4096
+    });
+    const viewModel = service.getPipelineViewModel(list.item.id);
+    const disabled = await service.disablePipelineMode(list.item.id);
+
+    expect(enabled.list.displayMode).toBe("pipeline");
+    expect(JSON.parse(enabled.searchRecord.metadataJson)).toMatchObject({
+      displayMode: "pipeline"
+    });
+    expect(moved.card).toMatchObject({
+      id: draft.listItem.id,
+      listItemParentId: review.listItem.id,
+      depth: 1,
+      sortOrder: 4096
+    });
+    expect(viewModel.stages.map((stage) => ({
+      title: stage.stage.title,
+      cards: stage.cards.map((card) => card.title)
+    }))).toEqual([
+      { title: "Idea", cards: [] },
+      { title: "Review", cards: ["Draft article"] }
+    ]);
+    expect(disabled.list.displayMode).toBe("checklist");
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("item", list.item.id)
+        .map((event) => event.action)
+    ).toEqual(["list_created", "list_updated", "list_updated"]);
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("list_item", draft.listItem.id)
+        .map((event) => event.action)
+    ).toEqual(["list_item_created", "list_item_reordered"]);
+  });
 });
 
 function createService(): ListService {

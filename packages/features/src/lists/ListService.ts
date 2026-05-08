@@ -30,6 +30,12 @@ import {
   assertTaskDateOrder,
   normalizeTaskDateTime
 } from "../tasks/TaskQueries";
+import {
+  PipelineService,
+  type MovePipelineCardInput,
+  type MovePipelineCardResult,
+  type PipelineViewModel
+} from "../pipelines";
 import { parseBulkListItems } from "./BulkListParser";
 
 // Owns checklist and structured-list application operations.
@@ -379,6 +385,50 @@ export class ListService {
 
       return results;
     });
+  }
+
+  async enablePipelineMode(
+    listId: string,
+    actorType: ActivityActorType = "local_user"
+  ): Promise<ListMutationResult> {
+    const result = await new PipelineService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).enablePipelineMode(listId, actorType);
+
+    return result;
+  }
+
+  async disablePipelineMode(
+    listId: string,
+    actorType: ActivityActorType = "local_user"
+  ): Promise<ListMutationResult> {
+    const result = await new PipelineService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).disablePipelineMode(listId, actorType);
+
+    return result;
+  }
+
+  getPipelineViewModel(listId: string): PipelineViewModel {
+    return new PipelineService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).getPipelineViewModel(listId);
+  }
+
+  async movePipelineCard(
+    input: MovePipelineCardInput
+  ): Promise<MovePipelineCardResult> {
+    return await new PipelineService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).movePipelineCard(input);
   }
 
   listItems(listId: string): ListItemRecord[] {

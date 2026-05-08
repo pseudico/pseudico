@@ -256,6 +256,12 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
           completedAt: "2026-05-01T01:00:00.000Z"
         }),
       reopenItem: async () => apiOk(listItemSummary()),
+      enablePipelineMode: async () =>
+        apiOk({ ...listSummary(), displayMode: "pipeline" }),
+      disablePipelineMode: async () => apiOk(listSummary()),
+      getPipelineViewModel: async () =>
+        apiOk({ list: listSummary(), stages: [] }),
+      movePipelineCard: async () => apiOk(listItemSummary()),
       bulkAddItems: async () => apiOk([listItemSummary()]),
       listByContainer: async () => apiOk([listSummary()]),
       createList: async () => apiOk(listSummary()),

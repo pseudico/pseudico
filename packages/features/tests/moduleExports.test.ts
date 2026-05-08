@@ -57,6 +57,7 @@ describe("feature module exports", () => {
       "files",
       "import",
       "links",
+      "pipelines",
       "metadata",
       "relationships",
       "recurrence",

@@ -1373,12 +1373,12 @@ describe("List IPC handlers", () => {
         status: "open"
       }
     });
-    await expect(
-      handlers.handleBulkAddListItems({
-        listId: createdList.data.id,
-        text: "- Send update\n[x] Confirm brief"
-      })
-    ).resolves.toMatchObject({
+    const bulkResult = await handlers.handleBulkAddListItems({
+      listId: createdList.data.id,
+      text: "- Send update\n[x] Confirm brief"
+    });
+
+    expect(bulkResult).toMatchObject({
       ok: true,
       data: [
         {
@@ -1390,6 +1390,68 @@ describe("List IPC handlers", () => {
           status: "done"
         }
       ]
+    });
+
+    if (!bulkResult.ok) {
+      throw new Error(bulkResult.error.message);
+    }
+
+    const pipelineCard = await handlers.handleAddListItem({
+      listId: createdList.data.id,
+      title: "Draft card",
+      listItemParentId: createdItem.data.id,
+      depth: 1
+    });
+
+    if (!pipelineCard.ok) {
+      throw new Error(pipelineCard.error.message);
+    }
+
+    await expect(
+      handlers.handleEnablePipelineMode(createdList.data.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: createdList.data.id,
+        displayMode: "pipeline"
+      }
+    });
+    await expect(
+      handlers.handleGetPipelineViewModel(createdList.data.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        stages: expect.arrayContaining([
+          expect.objectContaining({
+            stage: expect.objectContaining({ title: "Confirm copy" }),
+            cards: [expect.objectContaining({ title: "Draft card" })]
+          })
+        ])
+      }
+    });
+    await expect(
+      handlers.handleMovePipelineCard({
+        listId: createdList.data.id,
+        cardId: pipelineCard.data.id,
+        targetStageId: bulkResult.data[0]!.id,
+        sortOrder: 4096
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: pipelineCard.data.id,
+        listItemParentId: bulkResult.data[0]!.id,
+        depth: 1
+      }
+    });
+    await expect(
+      handlers.handleDisablePipelineMode(createdList.data.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: createdList.data.id,
+        displayMode: "checklist"
+      }
     });
 
     await expect(
@@ -1409,6 +1471,9 @@ describe("List IPC handlers", () => {
             },
             {
               title: "Confirm brief"
+            },
+            {
+              title: "Draft card"
             }
           ]
         }

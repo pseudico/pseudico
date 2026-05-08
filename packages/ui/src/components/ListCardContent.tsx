@@ -3,15 +3,18 @@ import {
   ChecklistEditor,
   type ChecklistEditorItem
 } from "./ChecklistEditor";
+import { PipelineView } from "./PipelineView";
 import { SaveAsTemplateAction } from "./SaveAsTemplateAction";
 
 export type ListCardItemViewModel = ChecklistEditorItem & {
   body?: string | null;
+  listItemParentId?: string | null;
   sortOrder?: number;
 };
 
 export type ListCardViewModel = UniversalItemViewModel & {
   listItems: readonly ListCardItemViewModel[];
+  displayMode?: string | null;
   progressMode?: string | null;
   showCompleted?: boolean | null;
 };
@@ -35,6 +38,20 @@ export type ListCardContentProps = {
   onSaveAsTemplate?: (
     item: ListCardViewModel
   ) => Promise<boolean | void> | boolean | void;
+  onToggleDisplayMode?: (
+    item: ListCardViewModel,
+    displayMode: "checklist" | "pipeline"
+  ) => Promise<boolean | void> | boolean | void;
+  onAddPipelineCard?: (
+    item: ListCardViewModel,
+    stage: ListCardItemViewModel,
+    title: string
+  ) => Promise<boolean | void> | boolean | void;
+  onMovePipelineCard?: (
+    item: ListCardViewModel,
+    card: ListCardItemViewModel,
+    stage: ListCardItemViewModel
+  ) => Promise<boolean | void> | boolean | void;
 };
 
 export function ListCardContent({
@@ -44,7 +61,10 @@ export function ListCardContent({
   onAddItem,
   onBulkAddItems,
   onToggleItem,
-  onSaveAsTemplate
+  onSaveAsTemplate,
+  onToggleDisplayMode,
+  onAddPipelineCard,
+  onMovePipelineCard
 }: ListCardContentProps): React.JSX.Element {
   const visibleItems =
     item.showCompleted === false
@@ -58,6 +78,7 @@ export function ListCardContent({
     totalCount === 0
       ? "0 items"
       : `${completedCount} of ${totalCount} complete`;
+  const displayMode = item.displayMode === "pipeline" ? "pipeline" : "checklist";
 
   return (
     <div className="list-card-content">
@@ -67,6 +88,21 @@ export function ListCardContent({
 
       <div className="list-progress" aria-label={`Checklist progress: ${progressLabel}`}>
         <span>{progressLabel}</span>
+        {onToggleDisplayMode === undefined ? null : (
+          <button
+            className="secondary-button compact-button"
+            disabled={disabled}
+            type="button"
+            onClick={() =>
+              onToggleDisplayMode(
+                item,
+                displayMode === "pipeline" ? "checklist" : "pipeline"
+              )
+            }
+          >
+            {displayMode === "pipeline" ? "Switch to checklist" : "Switch to pipeline"}
+          </button>
+        )}
         {onSaveAsTemplate === undefined ? null : (
           <SaveAsTemplateAction
             disabled={disabled}
@@ -76,15 +112,29 @@ export function ListCardContent({
         )}
       </div>
 
-      <ChecklistEditor
-        disabled={disabled}
-        emptyText="Add the first checklist item."
-        error={error}
-        items={visibleItems}
-        onAddItem={(title) => onAddItem?.(item, title)}
-        onBulkAddItems={(text) => onBulkAddItems?.(item, text)}
-        onToggleItem={(listItem) => onToggleItem?.(item, listItem)}
-      />
+      {displayMode === "pipeline" ? (
+        <PipelineView
+          disabled={disabled}
+          item={item}
+          onAddStage={(list, title) => onAddItem?.(list, title)}
+          {...(onAddPipelineCard === undefined
+            ? {}
+            : { onAddCard: onAddPipelineCard })}
+          {...(onMovePipelineCard === undefined
+            ? {}
+            : { onMoveCard: onMovePipelineCard })}
+        />
+      ) : (
+        <ChecklistEditor
+          disabled={disabled}
+          emptyText="Add the first checklist item."
+          error={error}
+          items={visibleItems}
+          onAddItem={(title) => onAddItem?.(item, title)}
+          onBulkAddItems={(text) => onBulkAddItems?.(item, text)}
+          onToggleItem={(listItem) => onToggleItem?.(item, listItem)}
+        />
+      )}
     </div>
   );
 }

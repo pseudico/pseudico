@@ -60,6 +60,36 @@ describe("ListRepository", () => {
     });
   });
 
+  it("updates list display preferences without a schema change", () => {
+    const listItem = createListItem();
+    const repository = new ListRepository(connection);
+    repository.createDetails({
+      itemId: listItem.id,
+      workspaceId: "workspace_1",
+      timestamp: TEST_TIMESTAMP
+    });
+
+    const updated = repository.updateDetails(listItem.id, {
+      displayMode: "pipeline",
+      showCompleted: false,
+      progressMode: "manual",
+      timestamp: TEST_TIMESTAMP_LATER
+    });
+
+    expect(updated).toMatchObject({
+      itemId: listItem.id,
+      displayMode: "pipeline",
+      showCompleted: false,
+      progressMode: "manual",
+      updatedAt: TEST_TIMESTAMP_LATER
+    });
+    expect(repository.getByItemId(listItem.id)?.list).toMatchObject({
+      displayMode: "pipeline",
+      showCompleted: false,
+      progressMode: "manual"
+    });
+  });
+
   it("creates, lists, and updates checklist rows", () => {
     createPersistedList();
     const repository = new ListRepository(connection);

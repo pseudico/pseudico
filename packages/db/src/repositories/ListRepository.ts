@@ -111,6 +111,13 @@ export type CreateListDetailsInput = {
   progressMode?: ListProgressMode;
 };
 
+export type UpdateListDetailsPatch = {
+  displayMode?: ListDisplayMode;
+  showCompleted?: boolean;
+  progressMode?: ListProgressMode;
+  timestamp: string;
+};
+
 export type CreateListItemInput = {
   id: string;
   workspaceId: string;
@@ -276,6 +283,48 @@ export class ListRepository {
     }
 
     return created;
+  }
+
+  updateDetails(
+    itemId: string,
+    patch: UpdateListDetailsPatch
+  ): ListDetailsRecord {
+    const assignments: string[] = [];
+    const values: unknown[] = [];
+
+    if (patch.displayMode !== undefined) {
+      assignments.push("display_mode = ?");
+      values.push(patch.displayMode);
+    }
+
+    if (patch.showCompleted !== undefined) {
+      assignments.push("show_completed = ?");
+      values.push(patch.showCompleted ? 1 : 0);
+    }
+
+    if (patch.progressMode !== undefined) {
+      assignments.push("progress_mode = ?");
+      values.push(patch.progressMode);
+    }
+
+    assignments.push("updated_at = ?");
+    values.push(patch.timestamp, itemId);
+
+    this.connection.sqlite
+      .prepare(
+        `update list_details
+         set ${assignments.join(", ")}
+         where item_id = ?`
+      )
+      .run(...values);
+
+    const updated = this.getDetailsByItemId(itemId);
+
+    if (updated === null) {
+      throw new Error(`List details row was not found: ${itemId}.`);
+    }
+
+    return updated;
   }
 
   getListItemById(id: string): ListItemRecord | null {

@@ -12,6 +12,7 @@ export const plannedFeatureAreas = [
   "files",
   "import",
   "links",
+  "pipelines",
   "metadata",
   "relationships",
   "recurrence",
@@ -92,6 +93,7 @@ export {
   generateNotePreview,
   notesModuleContract
 } from "./notes";
+export { PipelineService, pipelinesModuleContract } from "./pipelines";
 export { ProjectHealthService, ProjectService, projectsModuleContract } from "./projects";
 export { RecurrenceService, recurrenceModuleContract } from "./recurrence";
 export { RelationshipService, relationshipsModuleContract } from "./relationships";
@@ -266,6 +268,14 @@ export type {
   ReorderListItemsInput,
   UpdateListItemInput
 } from "./lists";
+export type {
+  ListDisplayModeMutationResult,
+  MovePipelineCardInput,
+  MovePipelineCardResult,
+  PipelineServiceIdFactory,
+  PipelineStageView,
+  PipelineViewModel
+} from "./pipelines";
 export type {
   AddTagToTargetInput,
   AssignCategoryToContainerInput,
