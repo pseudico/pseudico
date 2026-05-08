@@ -3,6 +3,7 @@ import {
   ChecklistEditor,
   type ChecklistEditorItem
 } from "./ChecklistEditor";
+import { SaveAsTemplateAction } from "./SaveAsTemplateAction";
 
 export type ListCardItemViewModel = ChecklistEditorItem & {
   body?: string | null;
@@ -31,6 +32,9 @@ export type ListCardContentProps = {
     item: ListCardViewModel,
     listItem: ListCardItemViewModel
   ) => Promise<boolean | void> | boolean | void;
+  onSaveAsTemplate?: (
+    item: ListCardViewModel
+  ) => Promise<boolean | void> | boolean | void;
 };
 
 export function ListCardContent({
@@ -39,7 +43,8 @@ export function ListCardContent({
   error = null,
   onAddItem,
   onBulkAddItems,
-  onToggleItem
+  onToggleItem,
+  onSaveAsTemplate
 }: ListCardContentProps): React.JSX.Element {
   const visibleItems =
     item.showCompleted === false
@@ -62,6 +67,13 @@ export function ListCardContent({
 
       <div className="list-progress" aria-label={`Checklist progress: ${progressLabel}`}>
         <span>{progressLabel}</span>
+        {onSaveAsTemplate === undefined ? null : (
+          <SaveAsTemplateAction
+            disabled={disabled}
+            itemTitle={item.title}
+            onSave={() => onSaveAsTemplate(item)}
+          />
+        )}
       </div>
 
       <ChecklistEditor

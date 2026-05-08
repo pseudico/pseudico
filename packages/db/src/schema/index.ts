@@ -21,6 +21,7 @@ export { searchIndex } from "./searchIndex";
 export { tags } from "./tags";
 export { taggings } from "./taggings";
 export { taskDetails } from "./taskDetails";
+export { templates } from "./templates";
 export { workspaces } from "./workspaces";
 
-export const schemaVersion = 3;
+export const schemaVersion = 4;

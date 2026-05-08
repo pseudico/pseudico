@@ -62,7 +62,9 @@ export const ActivityAction = {
   systemRowsRepaired: "system_rows_repaired",
   searchIndexRebuilt: "search_index_rebuilt",
   backupCreated: "backup_created",
-  exportCreated: "export_created"
+  exportCreated: "export_created",
+  templateCreated: "template_created",
+  templateApplied: "template_applied"
 } as const;
 
 export type ActivityAction =

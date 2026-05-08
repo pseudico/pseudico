@@ -18,7 +18,8 @@ export type ActivityTargetType =
   | "attachment"
   | "search_index"
   | "backup"
-  | "export";
+  | "export"
+  | "template";
 
 export type DomainEvent<TBefore = unknown, TAfter = unknown> = {
   workspaceId: string;

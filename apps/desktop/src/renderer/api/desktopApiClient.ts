@@ -86,7 +86,13 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       bulkAddItems: (input) => callApi(() => api.lists.bulkAddItems(input)),
       listByContainer: (containerId) =>
         callApi(() => api.lists.listByContainer(containerId)),
-      createList: (input) => callApi(() => api.lists.createList(input))
+      createList: (input) => callApi(() => api.lists.createList(input)),
+      saveAsTemplate: (input) =>
+        callApi(() => api.lists.saveAsTemplate(input)),
+      createFromTemplate: (input) =>
+        callApi(() => api.lists.createFromTemplate(input)),
+      listTemplates: (workspaceId) =>
+        callApi(() => api.lists.listTemplates(workspaceId))
     },
     notes: {
       create: (input) => callApi(() => api.notes.create(input)),
@@ -377,7 +383,13 @@ export const desktopApiClient: LocalWorkOsApi = {
     bulkAddItems: (input) => getDesktopApiClient().lists.bulkAddItems(input),
     listByContainer: (containerId) =>
       getDesktopApiClient().lists.listByContainer(containerId),
-    createList: (input) => getDesktopApiClient().lists.createList(input)
+    createList: (input) => getDesktopApiClient().lists.createList(input),
+    saveAsTemplate: (input) =>
+      getDesktopApiClient().lists.saveAsTemplate(input),
+    createFromTemplate: (input) =>
+      getDesktopApiClient().lists.createFromTemplate(input),
+    listTemplates: (workspaceId) =>
+      getDesktopApiClient().lists.listTemplates(workspaceId)
   },
   notes: {
     create: (input) => getDesktopApiClient().notes.create(input),

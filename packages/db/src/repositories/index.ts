@@ -171,3 +171,11 @@ export {
   type TaskWithItemRecord,
   type UpdateTaskDetailsPatch
 } from "./TaskRepository";
+export {
+  TemplateRepository,
+  type CreateTemplateInput,
+  type ListTemplatesInput,
+  type TemplateKind,
+  type TemplateRecord,
+  type TemplateSourceType
+} from "./TemplateRepository";

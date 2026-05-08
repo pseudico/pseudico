@@ -27,6 +27,7 @@ const requiredTables = [
   "contact_fields",
   "reminder_policies",
   "reminder_events",
+  "templates",
   "relationships",
   "saved_views",
   "dashboards",
@@ -43,6 +44,7 @@ const requiredIndexes = [
   "idx_contact_fields_container_order",
   "idx_reminder_policies_active_task",
   "idx_reminder_events_due",
+  "idx_templates_workspace_kind",
   "idx_items_container_order",
   "idx_task_details_due",
   "idx_taggings_target",
@@ -66,7 +68,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version three", () => {
+  it("runs on an empty database and records schema version four", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -85,14 +87,19 @@ describe("schema migrations", () => {
           version: 3,
           name: "reminders",
           checksum: "pse-72-reminders-v1"
+        },
+        {
+          version: 4,
+          name: "templates",
+          checksum: "pse-76-templates-v1"
         }
       ],
-      currentVersion: 3
+      currentVersion: 4
     });
-    expect(service.getCurrentSchemaVersion()).toBe(3);
+    expect(service.getCurrentSchemaVersion()).toBe(4);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 3
+      currentVersion: 4
     });
   });
 

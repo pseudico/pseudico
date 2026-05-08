@@ -1787,6 +1787,11 @@ Templates let users create repeatable project/contact/list structures.
 
 ### 25.3 Template contents
 
+Implemented baseline: list templates can be saved from an existing list and
+created back into a project/contact container. The saved payload copies the
+list title/body, category reference, tags, checklist rows, row tags, hierarchy,
+ordering, status, and relative day offsets for start/due dates.
+
 A project template may include:
 
 ```text
