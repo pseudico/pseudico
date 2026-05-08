@@ -117,11 +117,14 @@ export {
 } from "./search";
 export { TaskService, tasksModuleContract } from "./tasks";
 export {
+  ContainerTemplateService,
   ListTemplateService,
   TemplateService,
   TEMPLATE_JSON_VERSION,
+  applyContainerRelativeDates,
   applyRelativeDates,
   templatesModuleContract,
+  validateContainerTemplateJson,
   validateTemplateJson
 } from "./templates";
 export { TabService, tabsModuleContract } from "./tabs";
@@ -375,12 +378,23 @@ export type {
   UpdateTaskInput
 } from "./tasks";
 export type {
+  ContainerTemplateCreationResult,
+  CreateContainerFromTemplateInput,
   CreateListFromTemplateInput,
   ListTemplateCreationResult,
+  SaveContainerAsTemplateInput,
   SaveListAsTemplateInput,
+  TemplateContainerItemJsonV1,
+  TemplateContainerJsonV1,
+  TemplateContainerKind,
+  TemplateContainerSnapshotJsonV1,
+  TemplateContainerTabJsonV1,
+  TemplateContactFieldJsonV1,
   TemplateDateFields,
+  TemplateFileAttachmentPlaceholderJsonV1,
   TemplateJsonV1,
   TemplateKind,
+  TemplateListDefinitionJsonV1,
   TemplateListItemJsonV1,
   TemplateListJsonV1,
   TemplateServiceIdFactory,

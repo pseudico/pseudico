@@ -1534,10 +1534,10 @@ export type BulkAddListItemsInput = {
 export type TemplateSummary = {
   id: string;
   workspaceId: string;
-  kind: "list";
+  kind: "list" | "project" | "contact";
   name: string;
   description: string | null;
-  sourceType: "list";
+  sourceType: "list" | "project" | "contact";
   sourceId: string | null;
   templateJson: string;
   createdAt: string;
@@ -1561,6 +1561,29 @@ export type CreateListFromTemplateInput = {
   containerTabId?: string | null;
   baseDate?: string;
   actorType?: "local_user" | "system" | "importer";
+};
+
+export type SaveContainerAsTemplateInput = {
+  containerId: string;
+  name?: string;
+  description?: string | null;
+  baseDate?: string;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type CreateContainerFromTemplateInput = {
+  templateId: string;
+  workspaceId?: string;
+  name?: string;
+  baseDate?: string;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type ContainerTemplateCreationSummary = {
+  template: TemplateSummary;
+  container: ProjectSummary | ContactSummary;
+  tabs: ContainerTabSummary[];
+  itemIds: string[];
 };
 
 export type NoteSummary = ItemSummary & {
@@ -1694,6 +1717,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     saveAsTemplate: "local-work-os:lists:save-as-template",
     createFromTemplate: "local-work-os:lists:create-from-template",
     listTemplates: "local-work-os:lists:list-templates"
+  },
+  templates: {
+    saveContainerAsTemplate: "local-work-os:templates:save-container-as-template",
+    createContainerFromTemplate: "local-work-os:templates:create-container-from-template",
+    listTemplates: "local-work-os:templates:list-templates"
   },
   notes: {
     createNote: "local-work-os:notes:create-note",
@@ -1953,6 +1981,18 @@ export type LocalWorkOsIpcContracts = {
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.lists.listTemplates]: {
     input: string | undefined;
+    result: ApiResult<TemplateSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.templates.saveContainerAsTemplate]: {
+    input: SaveContainerAsTemplateInput;
+    result: ApiResult<TemplateSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.templates.createContainerFromTemplate]: {
+    input: CreateContainerFromTemplateInput;
+    result: ApiResult<ContainerTemplateCreationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.templates.listTemplates]: {
+    input: { workspaceId?: string; kind?: "project" | "contact" } | string | undefined;
     result: ApiResult<TemplateSummary[]>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.notes.createNote]: {
@@ -2384,6 +2424,17 @@ export type LocalWorkOsApi = {
     ) => Promise<ApiResult<ListSummary>>;
     listTemplates: (
       workspaceId?: string
+    ) => Promise<ApiResult<TemplateSummary[]>>;
+  };
+  templates?: {
+    saveContainerAsTemplate: (
+      input: SaveContainerAsTemplateInput
+    ) => Promise<ApiResult<TemplateSummary>>;
+    createContainerFromTemplate: (
+      input: CreateContainerFromTemplateInput
+    ) => Promise<ApiResult<ContainerTemplateCreationSummary>>;
+    listTemplates: (
+      input?: { workspaceId?: string; kind?: "project" | "contact" } | string
     ) => Promise<ApiResult<TemplateSummary[]>>;
   };
   notes: {
@@ -2819,6 +2870,14 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.createFromTemplate, input),
       listTemplates: (workspaceId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.listTemplates, workspaceId)
+    },
+    templates: {
+      saveContainerAsTemplate: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.saveContainerAsTemplate, input),
+      createContainerFromTemplate: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.createContainerFromTemplate, input),
+      listTemplates: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.listTemplates, input)
     },
     notes: {
       create: (input) =>

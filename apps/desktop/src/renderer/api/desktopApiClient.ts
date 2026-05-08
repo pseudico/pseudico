@@ -94,6 +94,14 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       listTemplates: (workspaceId) =>
         callApi(() => api.lists.listTemplates(workspaceId))
     },
+    templates: {
+      saveContainerAsTemplate: (input) =>
+        callApi(() => api.templates!.saveContainerAsTemplate(input)),
+      createContainerFromTemplate: (input) =>
+        callApi(() => api.templates!.createContainerFromTemplate(input)),
+      listTemplates: (input) =>
+        callApi(() => api.templates!.listTemplates(input))
+    },
     notes: {
       create: (input) => callApi(() => api.notes.create(input)),
       update: (input) => callApi(() => api.notes.update(input)),
@@ -390,6 +398,14 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().lists.createFromTemplate(input),
     listTemplates: (workspaceId) =>
       getDesktopApiClient().lists.listTemplates(workspaceId)
+  },
+  templates: {
+    saveContainerAsTemplate: (input) =>
+      getDesktopApiClient().templates!.saveContainerAsTemplate(input),
+    createContainerFromTemplate: (input) =>
+      getDesktopApiClient().templates!.createContainerFromTemplate(input),
+    listTemplates: (input) =>
+      getDesktopApiClient().templates!.listTemplates(input)
   },
   notes: {
     create: (input) => getDesktopApiClient().notes.create(input),

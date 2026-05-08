@@ -87,4 +87,36 @@ describe("TemplateRepository", () => {
       repository.listByWorkspace({ workspaceId: "workspace_2" }).map((template) => template.id)
     ).toEqual(["template_2"]);
   });
+
+  it("persists project and contact templates after the container-template migration", () => {
+    const repository = new TemplateRepository(connection);
+
+    const projectTemplate = repository.create({
+      id: "template_project_1",
+      workspaceId: "workspace_1",
+      kind: "project",
+      name: "Client launch project",
+      sourceType: "project",
+      sourceId: "container_project_1",
+      templateJson: JSON.stringify({ version: 1, kind: "project" }),
+      timestamp: TEST_TIMESTAMP
+    });
+    const contactTemplate = repository.create({
+      id: "template_contact_1",
+      workspaceId: "workspace_1",
+      kind: "contact",
+      name: "Client contact",
+      sourceType: "contact",
+      sourceId: "container_contact_1",
+      templateJson: JSON.stringify({ version: 1, kind: "contact" }),
+      timestamp: TEST_TIMESTAMP_LATER
+    });
+
+    expect(repository.listByWorkspace({ workspaceId: "workspace_1", kind: "project" })).toEqual([
+      projectTemplate
+    ]);
+    expect(repository.listByWorkspace({ workspaceId: "workspace_1", kind: "contact" })).toEqual([
+      contactTemplate
+    ]);
+  });
 });

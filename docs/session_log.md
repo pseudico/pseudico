@@ -546,3 +546,62 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI still needs to confirm the branch after push.
 Next actions: Stage scoped files; commit; push and open PR.
+## 2026-05-08 20:00:14 +10:00
+- Objective: Complete PSE-76 end-to-end and prepare next Codex Ready ticket.
+- Decisions made: PR #73 clean/green, squash-merged; PSE-77 promoted as next M8 dependency.
+- Files changed: docs/session_log.md
+- Open questions / risks: Local untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi remain unrelated.
+- Next actions: Start PSE-77; read LWO-M8-002 source ticket; keep one Codex Ready issue.
+
+## 2026-05-08T20:10:36.4529822+10:00
+Objective: Run next Local Work OS ticket end-to-end.
+Decisions made:
+- Reconcile Linear/GitHub before new implementation.
+- Use Linear as plan and GitHub as proof.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing local untracked/modified files may be unrelated.
+Next actions: Reconcile active Linear statuses; inspect active PR if present; implement one Codex Ready issue.
+
+## 2026-05-08T20:11:22.4663535+10:00
+Objective: Reconcile active Linear work and select ticket.
+Decisions made:
+- No PR Open or In Progress issues found for PSE project.
+- Selected PSE-77 as the single Codex Ready issue and moved it to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked files remain outside intended scope.
+Next actions: Read ticket/docs; create PSE branch; implement scoped template work.
+
+## 2026-05-08T20:13:24.5065682+10:00
+Objective: Plan PSE-77 implementation after reading docs/ticket/source.
+Decisions made:
+- Existing template foundation only supports list templates; PSE-77 needs container template expansion.
+- Implement repository/schema support plus service tests before wiring minimal UI actions.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Scope is estimate 8; keep implementation to project/contact tabs and core item types.
+Next actions: Update template schema/repository; add ContainerTemplateService; wire IPC/UI.
+
+## 2026-05-08T20:30:34.5193980+10:00
+Objective: Implement PSE-77 container template foundations and UI wiring.
+Decisions made:
+- Added schema migration for project/contact template kinds.
+- Added ContainerTemplateService with relative-date application and file placeholders.
+- Added minimal project/contact template library UI via preload IPC.
+Files changed:
+- packages/features/src/templates/TemplateService.ts
+- packages/db/src/migrations/0005_container_templates.ts
+- apps/desktop/src/renderer/pages/ProjectsPage.tsx
+Open questions / risks: UI is minimal library controls, not a full template manager.
+Next actions: Run full checks; fix failures; open PR.
+
+## 2026-05-08T20:35:03.1865340+10:00
+Objective: Verify PSE-77 implementation.
+Decisions made:
+- pnpm lint, typecheck, test, and build pass after updating migration/preload expectations.
+- Test/build commands required escalated reruns because sandbox blocked child-process spawns.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Untracked .playwright-mcp/ and gh installer remain excluded.
+Next actions: Stage scoped files; commit; push/open PR.

@@ -4,11 +4,14 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   EmptyState,
   ErrorState,
+  CreateFromTemplateDialog,
   ProjectForm,
+  TemplateLibrary,
   renderLoadableState,
+  type TemplateLibraryItem,
   type ProjectFormValues
 } from "@local-work-os/ui";
-import type { LocalWorkOsApi, ProjectSummary } from "../../preload/api";
+import type { LocalWorkOsApi, ProjectSummary, TemplateSummary } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
 
@@ -27,6 +30,10 @@ export function ProjectsPage({
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [templates, setTemplates] = useState<TemplateSummary[]>([]);
+  const [templateSavingId, setTemplateSavingId] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateSummary | null>(null);
+  const [applyingTemplateId, setApplyingTemplateId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,6 +62,16 @@ export function ProjectsPage({
       }
 
       setProjects(result.data);
+      if (apiClient.templates !== undefined) {
+        const templateResult = await apiClient.templates.listTemplates({
+          workspaceId,
+          kind: "project"
+        });
+
+        if (active && templateResult.ok) {
+          setTemplates(templateResult.data);
+        }
+      }
     }
 
     void loadProjects();
@@ -91,6 +108,66 @@ export function ProjectsPage({
     setCreateOpen(false);
     setProjects((current) => [result.data.project, ...current]);
     navigate(`/projects/${result.data.project.id}`);
+  }
+
+  async function saveProjectAsTemplate(project: ProjectSummary): Promise<void> {
+    setTemplateSavingId(project.id);
+    setError(null);
+
+    if (apiClient.templates === undefined) {
+      setError("Template library is unavailable.");
+      return;
+    }
+
+    const result = await apiClient.templates.saveContainerAsTemplate({
+      containerId: project.id,
+      name: `${project.name} template`
+    });
+
+    setTemplateSavingId(null);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setTemplates((current) => [result.data, ...current]);
+  }
+
+  async function createProjectFromTemplate(values: { name: string; baseDate: string }): Promise<void> {
+    if (currentWorkspace === null || selectedTemplate === null) {
+      return;
+    }
+
+    setApplyingTemplateId(selectedTemplate.id);
+    setError(null);
+
+    if (apiClient.templates === undefined) {
+      setError("Template library is unavailable.");
+      return;
+    }
+
+    const result = await apiClient.templates.createContainerFromTemplate({
+      templateId: selectedTemplate.id,
+      workspaceId: currentWorkspace.id,
+      baseDate: values.baseDate,
+      ...(values.name.trim().length === 0 ? {} : { name: values.name })
+    });
+
+    setApplyingTemplateId(null);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    const project = result.data.container;
+
+    if (project.type === "project") {
+      setSelectedTemplate(null);
+      setProjects((current) => [project, ...current]);
+      navigate(`/projects/${project.id}`);
+    }
   }
 
   if (currentWorkspace === null) {
@@ -145,6 +222,23 @@ export function ProjectsPage({
         <ProjectForm submitting={creating} onSubmit={createProject} />
       </dialog>
 
+      <CreateFromTemplateDialog
+        open={selectedTemplate !== null}
+        templateName={selectedTemplate?.name ?? "Template"}
+        submitting={applyingTemplateId !== null}
+        onClose={() => setSelectedTemplate(null)}
+        onSubmit={createProjectFromTemplate}
+      />
+
+      <TemplateLibrary
+        kind="project"
+        templates={templates.map(toTemplateLibraryItem)}
+        applyingTemplateId={applyingTemplateId}
+        onApplyTemplate={(template) =>
+          setSelectedTemplate(templates.find((entry) => entry.id === template.id) ?? null)
+        }
+      />
+
       <div className="project-list-panel" aria-busy={loading}>
         {renderLoadableState({
           loading,
@@ -155,7 +249,12 @@ export function ProjectsPage({
         ) : (
           <div className="project-list" aria-label="Projects">
             {projects.map((project) => (
-              <ProjectListRow key={project.id} project={project} />
+              <ProjectListRow
+                key={project.id}
+                project={project}
+                savingTemplate={templateSavingId === project.id}
+                onSaveTemplate={saveProjectAsTemplate}
+              />
             ))}
           </div>
         ))}
@@ -185,25 +284,49 @@ function ProjectsEmptyState({
 }
 
 function ProjectListRow({
-  project
+  project,
+  savingTemplate,
+  onSaveTemplate
 }: {
   project: ProjectSummary;
+  savingTemplate: boolean;
+  onSaveTemplate: (project: ProjectSummary) => void;
 }): React.JSX.Element {
   return (
-    <Link className="project-list-row" to={`/projects/${project.id}`}>
-      <span
-        className="project-list-color"
-        style={{ backgroundColor: project.color ?? "#245c55" }}
-        aria-hidden="true"
-      />
-      <span className="project-list-main">
-        <strong>{project.name}</strong>
-        <span>{project.description ?? "No description"}</span>
-      </span>
+    <div className="project-list-row">
+      <Link className="project-list-main" to={`/projects/${project.id}`}>
+        <span
+          className="project-list-color"
+          style={{ backgroundColor: project.color ?? "#245c55" }}
+          aria-hidden="true"
+        />
+        <span>
+          <strong>{project.name}</strong>
+          <span>{project.description ?? "No description"}</span>
+        </span>
+      </Link>
       <span className="project-list-meta">
         {project.isFavorite ? <Star size={16} aria-label="Pinned" /> : null}
         <span>{project.status}</span>
+        <button
+          type="button"
+          className="secondary-button compact-button"
+          disabled={savingTemplate}
+          onClick={() => onSaveTemplate(project)}
+        >
+          {savingTemplate ? "Saving..." : "Save as template"}
+        </button>
       </span>
-    </Link>
+    </div>
   );
+}
+
+function toTemplateLibraryItem(template: TemplateSummary): TemplateLibraryItem {
+  return {
+    id: template.id,
+    kind: "project",
+    name: template.name,
+    description: template.description,
+    updatedAt: template.updatedAt
+  };
 }
