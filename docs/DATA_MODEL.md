@@ -129,6 +129,10 @@ MVP object graph:
   metadata, saved views/collections, Today planning, dashboards, reminders, project
   health, templates, backup, export, import validation, diagnostics, and search
   hydration/orchestration.
+- File version snapshots now live in `attachment_versions`, keyed to local
+  attachments with monotonically increasing version numbers, workspace-relative
+  version storage paths, checksums, byte sizes, optional notes, and activity-log
+  coverage for snapshot and restore writes.
 
 Search remains a local projection table behind `SearchIndexService`,
 `SearchService`, and feature-level orchestrators. It indexes source records
@@ -145,7 +149,7 @@ rule when one exists and recurring completion rolling the same task to the next
 occurrence. The template foundation stores list templates and project/contact
 container templates; note/tab imports and portable template files remain future
 work. The data model still intentionally reserves future shape for
-timeline/calendar views, workflow runs, monthly/yearly recurrence, file versions, backup
+  timeline/calendar views, workflow runs, monthly/yearly recurrence, backup
 restore/import execution, and richer saved-view builder state. Add those
 through scoped migrations and repository/service tickets rather than expanding
 the current schema opportunistically.

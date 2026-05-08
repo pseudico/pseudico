@@ -21,6 +21,7 @@ const requiredTables = [
   "note_details",
   "links",
   "attachments",
+  "attachment_versions",
   "tags",
   "taggings",
   "categories",
@@ -48,6 +49,7 @@ const requiredIndexes = [
   "idx_reminder_policies_active_task",
   "idx_reminder_events_due",
   "idx_templates_workspace_kind",
+  "idx_attachment_versions_attachment",
   "idx_items_container_order",
   "idx_task_details_due",
   "idx_taggings_target",
@@ -71,7 +73,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version six", () => {
+  it("runs on an empty database and records schema version seven", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -105,14 +107,19 @@ describe("schema migrations", () => {
           version: 6,
           name: "recurrence",
           checksum: "pse-78-recurrence-v1"
+        },
+        {
+          version: 7,
+          name: "attachment_versions",
+          checksum: "pse-80-attachment-versions-v1"
         }
       ],
-      currentVersion: 6
+      currentVersion: 7
     });
-    expect(service.getCurrentSchemaVersion()).toBe(6);
+    expect(service.getCurrentSchemaVersion()).toBe(7);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 6
+      currentVersion: 7
     });
   });
 

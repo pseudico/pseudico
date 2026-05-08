@@ -635,6 +635,78 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
           itemId: "item_file_1",
           exists: true,
           storagePath: "attachments/2026/05/attachment_1/Brief.pdf"
+        }),
+      createFileSnapshot: async () =>
+        apiOk({
+          attachment: {
+            id: "attachment_1",
+            workspaceId: "workspace_1",
+            itemId: "item_file_1",
+            originalName: "Brief.pdf",
+            storedName: "Brief.pdf",
+            mimeType: null,
+            sizeBytes: 12,
+            checksum: "abc123",
+            storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
+            description: null,
+            createdAt: "2026-05-01T00:00:00.000Z",
+            updatedAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: null
+          },
+          version: {
+            id: "version_1",
+            workspaceId: "workspace_1",
+            attachmentId: "attachment_1",
+            versionNumber: 1,
+            originalName: "Brief.pdf",
+            storedName: "Brief.pdf",
+            sizeBytes: 12,
+            checksum: "abc123",
+            storagePath: "attachments/2026/05/attachment_1/versions/v1/Brief.pdf",
+            note: null,
+            createdAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: null
+          }
+        }),
+      listFileVersions: async () => apiOk([]),
+      openFileVersion: async () =>
+        apiOk({
+          versionId: "version_1",
+          attachmentId: "attachment_1",
+          exists: true,
+          storagePath: "attachments/2026/05/attachment_1/versions/v1/Brief.pdf"
+        }),
+      restoreFileVersion: async () =>
+        apiOk({
+          attachment: {
+            id: "attachment_1",
+            workspaceId: "workspace_1",
+            itemId: "item_file_1",
+            originalName: "Brief.pdf",
+            storedName: "Brief.pdf",
+            mimeType: null,
+            sizeBytes: 12,
+            checksum: "abc123",
+            storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
+            description: null,
+            createdAt: "2026-05-01T00:00:00.000Z",
+            updatedAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: null
+          },
+          version: {
+            id: "version_1",
+            workspaceId: "workspace_1",
+            attachmentId: "attachment_1",
+            versionNumber: 1,
+            originalName: "Brief.pdf",
+            storedName: "Brief.pdf",
+            sizeBytes: 12,
+            checksum: "abc123",
+            storagePath: "attachments/2026/05/attachment_1/versions/v1/Brief.pdf",
+            note: null,
+            createdAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: null
+          }
         })
     },
     backup: {

@@ -4,7 +4,9 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   calculateChecksum,
+  createAttachmentVersionSnapshot,
   copyFileIntoWorkspace,
+  restoreAttachmentFileFromVersion,
   resolveInsideWorkspace,
   validateWorkspaceRelativePath
 } from "../../src/main/services/safeFileSystem";
@@ -82,5 +84,51 @@ describe("safe file system attachment helpers", () => {
     await expect(stat(directoryPath).then((stats) => stats.isDirectory())).resolves.toBe(
       true
     );
+  });
+
+  it("creates version snapshots and restores attachment bytes safely", async () => {
+    const sourcePath = join(tempRoot, "source.txt");
+    await writeFile(sourcePath, "version one", "utf8");
+    const copied = await copyFileIntoWorkspace({
+      workspaceRootPath: join(tempRoot, "workspace"),
+      sourcePath,
+      attachmentId: "attachment_1",
+      createdAt: new Date("2026-05-04T00:00:00.000Z")
+    });
+
+    const snapshot = await createAttachmentVersionSnapshot({
+      workspaceRootPath: join(tempRoot, "workspace"),
+      attachmentStoragePath: copied.storagePath,
+      originalName: copied.originalName,
+      storedName: copied.storedName,
+      versionNumber: 1
+    });
+
+    expect(snapshot).toMatchObject({
+      originalName: "source.txt",
+      storedName: "source.txt",
+      storagePath: "attachments/2026/05/attachment_1/versions/v1/source.txt",
+      sizeBytes: 11
+    });
+
+    await writeFile(
+      join(tempRoot, "workspace", ...copied.storagePath.split("/")),
+      "changed bytes",
+      "utf8"
+    );
+
+    const restored = await restoreAttachmentFileFromVersion({
+      workspaceRootPath: join(tempRoot, "workspace"),
+      attachmentStoragePath: copied.storagePath,
+      versionStoragePath: snapshot.storagePath
+    });
+
+    expect(restored).toMatchObject({
+      sizeBytes: 11,
+      checksum: snapshot.checksum
+    });
+    await expect(
+      readFile(join(tempRoot, "workspace", ...copied.storagePath.split("/")), "utf8")
+    ).resolves.toBe("version one");
   });
 });

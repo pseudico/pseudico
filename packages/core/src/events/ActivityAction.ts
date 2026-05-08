@@ -63,6 +63,8 @@ export const ActivityAction = {
   savedViewUpdated: "saved_view_updated",
   savedViewDeleted: "saved_view_deleted",
   fileAttached: "file_attached",
+  fileVersionCreated: "file_version_created",
+  fileVersionRestored: "file_version_restored",
   systemRowsRepaired: "system_rows_repaired",
   searchIndexRebuilt: "search_index_rebuilt",
   backupCreated: "backup_created",

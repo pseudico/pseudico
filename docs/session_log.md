@@ -696,3 +696,52 @@ Next actions: Start PSE-79; read list pipeline docs; inspect list UI/service.
 - Files changed: apps/desktop/src; packages/core/src; packages/db/src; packages/features/src; packages/ui/src; docs/DATA_MODEL.md; docs/MODULE_REGISTRY.md
 - Open questions / risks: Manual desktop QA limited to automated build/tests in this run.
 - Next actions: Review diff; commit/push branch; open PR and update Linear.
+
+## 2026-05-09T06:47:06.6883912+10:00
+Objective: Finalize PSE-79 merge and promote the next Local Work OS issue.
+Decisions made:
+- Promoted PSE-80 as the single Codex Ready successor after PSE-79.
+- Left remaining M8 issues in Backlog.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-80 carries file-system risk and needs tests.
+Next actions: Start PSE-80; read file snapshot docs/source; keep one active issue.
+
+## 2026-05-09T06:51:42.8517409+10:00
+Objective: Run next Local Work OS ticket end-to-end.
+Decisions made:
+- Starting with reconciliation of Linear active states and GitHub PRs.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing local untracked files must be preserved.
+Next actions: Reconcile active Linear issues; inspect PRs; select or implement one ticket.
+
+## 2026-05-09T06:52:34.6007012+10:00
+Objective: Reconcile active Linear work and select the next ticket.
+Decisions made:
+- No PR Open or In Progress issues were active.
+- Selected sole Codex Ready issue PSE-80 and moved it to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need confirm file snapshot scope from source ticket docs.
+Next actions: Read docs; create PSE-80 branch; implement snapshots.
+
+## 2026-05-09T06:56:00.2864451+10:00
+Objective: Plan PSE-80 implementation.
+Decisions made:
+- Use schema version 7 because version 6 is already recurrence.
+- Keep filesystem copy/open/restore in Electron main and DB writes in repositories/services.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Restore must be cautious; snapshot current file before overwriting.
+Next actions: Add schema/repository/service; wire IPC/UI; add tests.
+
+## 2026-05-09T07:15:51.0642455+10:00
+Objective: Implement and verify PSE-80 locally.
+Decisions made:
+- Added attachment_versions schema, repository/service, IPC, UI history, and cautious restore.
+- Restore creates a safety snapshot before overwriting the current attachment file.
+Files changed:
+- packages/core; packages/db; packages/features; apps/desktop; packages/ui; docs
+Open questions / risks: Manual app QA not run in GUI; automated coverage added.
+Next actions: Review diff; commit/push; open PR.

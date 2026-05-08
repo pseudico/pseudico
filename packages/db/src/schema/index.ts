@@ -1,6 +1,7 @@
 export { activityLog } from "./activityLog";
 export { appSettings } from "./appSettings";
 export { attachments } from "./attachments";
+export { attachmentVersions } from "./attachmentVersions";
 export { categories } from "./categories";
 export { contactFields } from "./contactFields";
 export { containerTabs } from "./containerTabs";
@@ -25,4 +26,4 @@ export { taskDetails } from "./taskDetails";
 export { templates } from "./templates";
 export { workspaces } from "./workspaces";
 
-export const schemaVersion = 6;
+export const schemaVersion = 7;

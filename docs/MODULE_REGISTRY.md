@@ -22,11 +22,14 @@ new work should account for this implemented baseline:
 - The Lists/Pipelines slice now supports switching a list between checklist and
   pipeline display modes, projecting top-level rows as stages and child rows as
   movable cards.
+- The Files slice now supports local attachment version snapshots with
+  workspace-relative version paths, checksums, notes, history browsing, open,
+  and cautious restore.
 - Local recurrence now has database and service foundations for daily and
   weekly/custom-weekday task roll-forward behavior; monthly/yearly RRULEs remain
   future work.
 - Future or placeholder-heavy flows: Timeline, Calendar, portable/broader Templates, Workflows,
-  file versions, full import/restore execution,
+  full import/restore execution,
   custom dashboard editing, advanced saved-view builder UX, and browser capture.
 - Local reminders now have database, service, IPC, scheduler, and shared picker
   foundations; deeper renderer workflows and notification preference UX remain

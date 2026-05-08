@@ -4,6 +4,10 @@ import {
   FileMetadataEditor,
   type FileMetadataEditorValues
 } from "../forms/FileMetadataEditor";
+import {
+  FileVersionHistory,
+  type FileVersionViewModel
+} from "./FileVersionHistory";
 import type { UniversalItemViewModel } from "./ItemCard";
 
 export type FileAttachmentViewModel = {
@@ -24,6 +28,7 @@ export type FileCardViewModel = UniversalItemViewModel & {
   categoryId?: string | null;
   attachment: FileAttachmentViewModel;
   missing: boolean;
+  versions?: FileVersionViewModel[];
 };
 
 export type FileCardContentProps = {
@@ -36,6 +41,18 @@ export type FileCardContentProps = {
     item: FileCardViewModel,
     values: FileMetadataEditorValues
   ) => boolean | Promise<boolean>;
+  onCreateSnapshot?: (
+    item: FileCardViewModel,
+    note: string
+  ) => boolean | Promise<boolean>;
+  onOpenVersion?: (
+    item: FileCardViewModel,
+    version: FileVersionViewModel
+  ) => void | Promise<void>;
+  onRestoreVersion?: (
+    item: FileCardViewModel,
+    version: FileVersionViewModel
+  ) => void | Promise<void>;
 };
 
 export function FileCardContent({
@@ -44,7 +61,10 @@ export function FileCardContent({
   item,
   onOpen,
   onReveal,
-  onSave
+  onSave,
+  onCreateSnapshot,
+  onOpenVersion,
+  onRestoreVersion
 }: FileCardContentProps): React.JSX.Element {
   const [editing, setEditing] = useState(false);
 
@@ -137,6 +157,21 @@ export function FileCardContent({
           Edit
         </button>
       </div>
+      {onCreateSnapshot === undefined || onOpenVersion === undefined ? null : (
+        <FileVersionHistory
+          disabled={disabled || item.missing}
+          error={null}
+          versions={item.versions ?? []}
+          onCreateSnapshot={(note) => onCreateSnapshot(item, note)}
+          onOpenVersion={(version) => onOpenVersion(item, version)}
+          {...(onRestoreVersion === undefined
+            ? {}
+            : {
+                onRestoreVersion: (version: FileVersionViewModel) =>
+                  onRestoreVersion(item, version)
+              })}
+        />
+      )}
     </div>
   );
 }

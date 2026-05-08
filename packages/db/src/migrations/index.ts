@@ -4,6 +4,7 @@ import { remindersSql } from "./0003_reminders";
 import { templatesSql } from "./0004_templates";
 import { containerTemplatesSql } from "./0005_container_templates";
 import { recurrenceSql } from "./0006_recurrence";
+import { attachmentVersionsSql } from "./0007_attachment_versions";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -42,5 +43,11 @@ export const migrations: MigrationDefinition[] = [
     name: "recurrence",
     sql: recurrenceSql,
     checksum: "pse-78-recurrence-v1"
+  },
+  {
+    version: 7,
+    name: "attachment_versions",
+    sql: attachmentVersionsSql,
+    checksum: "pse-80-attachment-versions-v1"
   }
 ];
