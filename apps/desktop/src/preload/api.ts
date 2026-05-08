@@ -897,6 +897,76 @@ export type EvaluateCollectionInput = {
   offset?: number;
 };
 
+export type SmartListCriteriaInput = {
+  match?: "all" | "any";
+  includeItems?: boolean;
+  includeContainers?: boolean;
+  itemTypes?: string[];
+  containerTypes?: string[];
+  tagSlugs?: string[];
+  categoryIds?: string[];
+  categoryMode?: "any" | "is" | "isEmpty" | "isNotEmpty";
+  taskStatuses?: string[];
+  dueFilter?:
+    | "any"
+    | "overdue"
+    | "today"
+    | "tomorrow"
+    | "next7Days"
+    | "next30Days"
+    | "noDueDate"
+    | "hasDueDate"
+    | "customRange";
+  customDueFrom?: string;
+  customDueTo?: string;
+};
+
+export type SmartListSummary = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  description: string | null;
+  criteria: SmartListCriteriaInput | null;
+  query: unknown;
+  isFavorite: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SmartListPreviewSummary = {
+  query: unknown;
+  total: number;
+  results: CollectionResultSummary[];
+  groups: CollectionResultGroupSummary[];
+  page?: {
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+};
+
+export type CreateSmartListInput = {
+  workspaceId?: string;
+  name: string;
+  description?: string | null;
+  criteria: SmartListCriteriaInput;
+};
+
+export type UpdateSmartListInput = {
+  smartListId: string;
+  name?: string;
+  description?: string | null;
+  criteria?: SmartListCriteriaInput;
+  isFavorite?: boolean;
+};
+
+export type PreviewSmartListInput = {
+  workspaceId?: string;
+  criteria: SmartListCriteriaInput;
+  limit?: number;
+  offset?: number;
+};
+
 export type ListTargetsByMetadataInput = {
   workspaceId?: string;
   tagSlugs?: string[];
@@ -1659,7 +1729,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
       "local-work-os:collections:create-keyword-collection",
     evaluateCollection: "local-work-os:collections:evaluate-collection",
     createTaskInCollection:
-      "local-work-os:collections:create-task-in-collection"
+      "local-work-os:collections:create-task-in-collection",
+    listSmartLists: "local-work-os:collections:list-smart-lists",
+    createSmartList: "local-work-os:collections:create-smart-list",
+    updateSmartList: "local-work-os:collections:update-smart-list",
+    previewSmartList: "local-work-os:collections:preview-smart-list"
   },
   today: {
     getViewModel: "local-work-os:today:get-view-model",
@@ -2009,6 +2083,22 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.collections.createTaskInCollection]: {
     input: CreateTaskInCollectionInput;
     result: ApiResult<TaskSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.collections.listSmartLists]: {
+    input: string | undefined;
+    result: ApiResult<SmartListSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.collections.createSmartList]: {
+    input: CreateSmartListInput;
+    result: ApiResult<SmartListSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.collections.updateSmartList]: {
+    input: UpdateSmartListInput;
+    result: ApiResult<SmartListSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.collections.previewSmartList]: {
+    input: PreviewSmartListInput;
+    result: ApiResult<SmartListPreviewSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.today.getViewModel]: {
     input: TodayViewModelInput | undefined;
@@ -2415,6 +2505,18 @@ export type LocalWorkOsApi = {
     createTaskInCollection: (
       input: CreateTaskInCollectionInput
     ) => Promise<ApiResult<TaskSummary>>;
+    listSmartLists: (
+      workspaceId?: string
+    ) => Promise<ApiResult<SmartListSummary[]>>;
+    createSmartList: (
+      input: CreateSmartListInput
+    ) => Promise<ApiResult<SmartListSummary>>;
+    updateSmartList: (
+      input: UpdateSmartListInput
+    ) => Promise<ApiResult<SmartListSummary>>;
+    previewSmartList: (
+      input: PreviewSmartListInput
+    ) => Promise<ApiResult<SmartListPreviewSummary>>;
   };
   today: {
     getViewModel: (
@@ -2848,6 +2950,26 @@ export function createLocalWorkOsApi(
       createTaskInCollection: (input) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.collections.createTaskInCollection,
+          input
+        ),
+      listSmartLists: (workspaceId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.collections.listSmartLists,
+          workspaceId
+        ),
+      createSmartList: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.collections.createSmartList,
+          input
+        ),
+      updateSmartList: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.collections.updateSmartList,
+          input
+        ),
+      previewSmartList: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.collections.previewSmartList,
           input
         )
     },

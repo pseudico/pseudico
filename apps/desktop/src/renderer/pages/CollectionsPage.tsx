@@ -10,14 +10,21 @@ import { useNavigate } from "react-router-dom";
 import {
   CreateCollectionForm,
   GroupedResultsList,
+  SmartListEditor,
   type CreateCollectionFormValues,
-  type GroupedResultGroupViewModel
+  type GroupedResultGroupViewModel,
+  type SmartListEditorMetadataOption,
+  type SmartListEditorValues
 } from "@local-work-os/ui";
 import type {
+  CategoryCountSummary,
   CollectionEvaluationSummary,
   CollectionSummary,
   LocalWorkOsApi,
-  ProjectSummary
+  ProjectSummary,
+  SmartListPreviewSummary,
+  SmartListSummary,
+  TagCountSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
@@ -27,6 +34,7 @@ type CollectionsPageProps = {
   initialCollections?: CollectionSummary[];
   initialEvaluation?: CollectionEvaluationSummary | null;
   initialProjects?: ProjectSummary[];
+  initialSmartLists?: SmartListSummary[];
 };
 
 const COLLECTION_PAGE_SIZE = 50;
@@ -35,7 +43,8 @@ export function CollectionsPage({
   apiClient = desktopApiClient,
   initialCollections,
   initialEvaluation = null,
-  initialProjects
+  initialProjects,
+  initialSmartLists
 }: CollectionsPageProps): React.JSX.Element {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspaceStore();
@@ -43,6 +52,14 @@ export function CollectionsPage({
     initialCollections ?? []
   );
   const [projects, setProjects] = useState<ProjectSummary[]>(initialProjects ?? []);
+  const [smartLists, setSmartLists] = useState<SmartListSummary[]>(
+    initialSmartLists ?? []
+  );
+  const [tags, setTags] = useState<TagCountSummary[]>([]);
+  const [categories, setCategories] = useState<CategoryCountSummary[]>([]);
+  const [smartListPreview, setSmartListPreview] =
+    useState<SmartListPreviewSummary | null>(null);
+  const [smartListMessage, setSmartListMessage] = useState<string | null>(null);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(
     initialEvaluation?.collection.id ?? initialCollections?.[0]?.id ?? null
   );
@@ -65,6 +82,30 @@ export function CollectionsPage({
     () => evaluation?.groups.map(toGroupedResultGroupViewModel) ?? [],
     [evaluation]
   );
+  const smartListTagOptions = useMemo(
+    () =>
+      tags.map(
+        (tag): SmartListEditorMetadataOption => ({
+          id: tag.id,
+          label: `@${tag.name}`,
+          value: tag.slug,
+          count: tag.targetCount
+        })
+      ),
+    [tags]
+  );
+  const smartListCategoryOptions = useMemo(
+    () =>
+      categories.map(
+        (category): SmartListEditorMetadataOption => ({
+          id: category.id,
+          label: category.name,
+          value: category.id,
+          count: category.targetCount
+        })
+      ),
+    [categories]
+  );
 
   const loadCollections = useCallback(async () => {
     if (currentWorkspace === null || initialCollections !== undefined) {
@@ -74,9 +115,18 @@ export function CollectionsPage({
     setLoading(true);
     setError(null);
 
-    const [collectionResult, projectResult] = await Promise.all([
+    const [
+      collectionResult,
+      projectResult,
+      smartListResult,
+      tagResult,
+      categoryResult
+    ] = await Promise.all([
       apiClient.collections.listCollections(currentWorkspace.id),
-      apiClient.projects.listProjects(currentWorkspace.id)
+      apiClient.projects.listProjects(currentWorkspace.id),
+      apiClient.collections.listSmartLists(currentWorkspace.id),
+      apiClient.metadata.listTagsWithCounts(currentWorkspace.id),
+      apiClient.metadata.listCategoriesWithCounts(currentWorkspace.id)
     ]);
 
     setLoading(false);
@@ -93,6 +143,24 @@ export function CollectionsPage({
     } else {
       setProjects(projectResult.data);
       setTaskContainerId((current) => current || (projectResult.data[0]?.id ?? ""));
+    }
+
+    if (!smartListResult.ok) {
+      setError(smartListResult.error.message);
+    } else {
+      setSmartLists(smartListResult.data);
+    }
+
+    if (!tagResult.ok) {
+      setError(tagResult.error.message);
+    } else {
+      setTags(tagResult.data);
+    }
+
+    if (!categoryResult.ok) {
+      setError(categoryResult.error.message);
+    } else {
+      setCategories(categoryResult.data);
     }
 
     const firstCollectionId = collectionResult.data[0]?.id;
@@ -189,6 +257,63 @@ export function CollectionsPage({
     setEvaluation(null);
   }
 
+  async function previewSmartList(values: SmartListEditorValues): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
+    }
+
+    setSaving(true);
+    setSmartListMessage(null);
+    setError(null);
+
+    const result = await apiClient.collections.previewSmartList({
+      workspaceId: currentWorkspace.id,
+      criteria: toSmartListCriteria(values),
+      limit: COLLECTION_PAGE_SIZE,
+      offset: 0
+    });
+
+    setSaving(false);
+
+    if (!result.ok) {
+      setSmartListPreview(null);
+      setSmartListMessage(result.error.message);
+      return;
+    }
+
+    setSmartListPreview(result.data);
+    setSmartListMessage("Query is valid.");
+  }
+
+  async function saveSmartList(values: SmartListEditorValues): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
+    }
+
+    setSaving(true);
+    setSmartListMessage(null);
+    setError(null);
+
+    const result = await apiClient.collections.createSmartList({
+      workspaceId: currentWorkspace.id,
+      name: values.name.trim(),
+      description:
+        values.description.trim().length === 0 ? null : values.description.trim(),
+      criteria: toSmartListCriteria(values)
+    });
+
+    setSaving(false);
+
+    if (!result.ok) {
+      setSmartListMessage(result.error.message);
+      return;
+    }
+
+    setSmartLists((current) => [...current, result.data]);
+    setSmartListMessage(`Saved "${result.data.name}" as a smart list.`);
+    await previewSmartList(values);
+  }
+
   async function completeTask(itemId: string): Promise<void> {
     setError(null);
     const result = await apiClient.tasks.completeTask(itemId);
@@ -262,6 +387,36 @@ export function CollectionsPage({
       <div className="collections-layout">
         <aside className="collections-sidebar" aria-label="Collections">
           <CreateCollectionForm disabled={saving} onSubmit={createCollection} />
+
+          <SmartListEditor
+            categoryOptions={smartListCategoryOptions}
+            disabled={saving}
+            previewCount={smartListPreview?.total ?? null}
+            saving={saving}
+            tagOptions={smartListTagOptions}
+            validationMessage={smartListMessage}
+            onPreview={(values) => void previewSmartList(values)}
+            onSave={(values) => void saveSmartList(values)}
+          />
+
+          <div className="collection-list" aria-label="Smart lists">
+            {smartLists.length === 0 ? (
+              <div className="item-feed-empty-state">
+                <h3>No smart lists</h3>
+                <p>Use the criteria editor to save a smart list.</p>
+              </div>
+            ) : (
+              smartLists.map((smartList) => (
+                <div key={smartList.id} className="collection-list-item">
+                  <span>
+                    <strong>{smartList.name}</strong>
+                    <small>smart_list</small>
+                  </span>
+                  <span>{countSmartListConditions(smartList)} criteria</span>
+                </div>
+              ))
+            )}
+          </div>
 
           <div className="collection-list">
             {collections.length === 0 ? (
@@ -442,6 +597,38 @@ function formatCollectionDetail(collection: CollectionSummary): string {
   }
 
   return "Saved query";
+}
+
+function toSmartListCriteria(values: SmartListEditorValues) {
+  return {
+    match: values.match,
+    includeItems: values.includeItems,
+    includeContainers: values.includeContainers,
+    itemTypes: values.itemTypes,
+    containerTypes: values.containerTypes,
+    tagSlugs: values.tagSlugs,
+    categoryIds: values.categoryIds,
+    categoryMode: values.categoryMode,
+    taskStatuses: values.taskStatuses,
+    dueFilter: values.dueFilter,
+    customDueFrom: values.customDueFrom,
+    customDueTo: values.customDueTo
+  };
+}
+
+function countSmartListConditions(smartList: SmartListSummary): number {
+  const query = smartList.query;
+
+  if (
+    typeof query === "object" &&
+    query !== null &&
+    "conditions" in query &&
+    Array.isArray(query.conditions)
+  ) {
+    return query.conditions.length;
+  }
+
+  return 0;
 }
 
 function toGroupedResultGroupViewModel(

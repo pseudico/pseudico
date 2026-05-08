@@ -508,7 +508,12 @@ function createMockApi(
       }),
       evaluateCollection: async () =>
         apiOk({ collection: collectionSummary(), total: 0, results: [], groups: [] }),
-      createTaskInCollection: async () => apiOk(taskSummary())
+      createTaskInCollection: async () => apiOk(taskSummary()),
+      listSmartLists: async () => apiOk([]),
+      createSmartList: async () => apiOk(smartListSummary()),
+      updateSmartList: async () => apiOk(smartListSummary()),
+      previewSmartList: async () =>
+        apiOk({ query: {}, total: 0, results: [], groups: [] })
     },
     today: {
       getViewModel: async () => apiOk(todayViewModelSummary()),
@@ -694,6 +699,20 @@ function collectionSummary() {
     tagSlug: "finance",
     keyword: null,
     isFavorite: true,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z"
+  };
+}
+
+function smartListSummary() {
+  return {
+    id: "saved_view_smart_1",
+    workspaceId: "workspace_1",
+    name: "Waiting tasks",
+    description: null,
+    criteria: { itemTypes: ["task"] },
+    query: { version: 1, match: "all", conditions: [] },
+    isFavorite: false,
     createdAt: "2026-05-01T00:00:00.000Z",
     updatedAt: "2026-05-01T00:00:00.000Z"
   };

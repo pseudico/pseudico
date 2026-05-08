@@ -903,7 +903,52 @@ describe("Collection IPC handlers", () => {
             ]
           }
         ]
+        }
+      });
+
+    const preview = await handlers.handlePreviewSmartList({
+      criteria: {
+        itemTypes: ["task"],
+        taskStatuses: ["done"]
       }
+    });
+
+    expect(preview).toMatchObject({
+      ok: true,
+      data: {
+        total: 1,
+        results: [
+          {
+            targetId: task.data.id,
+            taskStatus: "done"
+          }
+        ]
+      }
+    });
+
+    const smartList = await handlers.handleCreateSmartList({
+      name: "Completed dated tasks",
+      criteria: {
+        itemTypes: ["task"],
+        taskStatuses: ["done"]
+      }
+    });
+
+    expect(smartList).toMatchObject({
+      ok: true,
+      data: {
+        name: "Completed dated tasks",
+        query: {
+          conditions: [
+            { field: "itemType", value: "task" },
+            { field: "taskStatus", value: "done" }
+          ]
+        }
+      }
+    });
+    await expect(handlers.handleListSmartLists(undefined)).resolves.toMatchObject({
+      ok: true,
+      data: [{ name: "Completed dated tasks" }]
     });
   });
 });

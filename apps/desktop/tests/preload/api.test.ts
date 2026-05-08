@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(106);
+    expect(channels).toHaveLength(110);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -987,6 +987,25 @@ describe("typed preload API", () => {
       containerId: "container_1",
       title: "Call accountant"
     });
+    await api.collections.listSmartLists("workspace_1");
+    await api.collections.createSmartList({
+      workspaceId: "workspace_1",
+      name: "Waiting tasks",
+      criteria: {
+        itemTypes: ["task"],
+        taskStatuses: ["waiting"]
+      }
+    });
+    await api.collections.updateSmartList({
+      smartListId: "saved_view_2",
+      name: "Due soon"
+    });
+    await api.collections.previewSmartList({
+      workspaceId: "workspace_1",
+      criteria: {
+        dueFilter: "next7Days"
+      }
+    });
 
     expect(calls).toEqual([
       {
@@ -1018,6 +1037,37 @@ describe("typed preload API", () => {
           collectionId: "saved_view_1",
           containerId: "container_1",
           title: "Call accountant"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.collections.listSmartLists,
+        input: "workspace_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.collections.createSmartList,
+        input: {
+          workspaceId: "workspace_1",
+          name: "Waiting tasks",
+          criteria: {
+            itemTypes: ["task"],
+            taskStatuses: ["waiting"]
+          }
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.collections.updateSmartList,
+        input: {
+          smartListId: "saved_view_2",
+          name: "Due soon"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.collections.previewSmartList,
+        input: {
+          workspaceId: "workspace_1",
+          criteria: {
+            dueFilter: "next7Days"
+          }
         }
       }
     ]);

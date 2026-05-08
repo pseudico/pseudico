@@ -397,3 +397,97 @@ Files changed:
 - apps/desktop/tests/smoke/app-shell.test.tsx
 Open questions / risks: Manual Electron QA not run; automated build passed.
 Next actions: Stage/commit scoped files; push branch; open PR.
+
+## 2026-05-08 19:08 AEST
+Objective: Close PSE-74 and prepare the next Local Work OS ticket.
+Decisions made:
+- Squash-merged PR #71 after local checks and GitHub CI passed.
+- Confirmed PSE-75 is the sole Codex Ready follow-up in M7 order.
+Files changed: docs/session_log.md
+Open questions / risks: Post-merge session log entry is local-only unless committed later.
+Next actions: Start PSE-75; keep other tickets out of Codex Ready; preserve local-only boundaries.
+
+## 2026-05-08T18:24:12.9861993+10:00
+Objective: Run the next Local Work OS ticket end-to-end.
+Decisions made:
+- Started with required reconcile before selecting new work.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need inspect Linear/GitHub state before implementation.
+Next actions:
+- Discover Linear/GitHub tools.
+- Reconcile active issues and PRs.
+- Select or fix exactly one issue.
+
+## 2026-05-08T18:25:29.1655114+10:00
+Objective: Reconcile active Linear/GitHub work and select the next ticket.
+Decisions made:
+- No PR Open or In Progress issues found; no open PRs in pseudico/pseudico.
+- Selected PSE-75 as the sole Codex Ready issue and moved it to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need derive full acceptance criteria from imported ticket file.
+Next actions:
+- Read ticket/docs/source code.
+- Create PSE-75 branch.
+- Implement scoped editor.
+
+## 2026-05-08T18:26:07.1932803+10:00
+Objective: Start isolated implementation branch for PSE-75.
+Decisions made:
+- Created branch codex/pse-75-smart-list-criteria-editor from main.
+- Keep unrelated existing artifacts out of the PR.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need identify existing saved-view APIs and UI seams.
+Next actions:
+- Inspect saved-view service/query evaluator.
+- Inspect Collections page and API client.
+- Add tests before publish.
+
+## 2026-05-08T18:39:32.8501989+10:00
+Objective: Implement PSE-75 smart-list editor/service slice.
+Decisions made:
+- Added SmartListService with criteria mapping, preview, create, update, and saved_view smart_list persistence.
+- Extended Collections page with SmartListEditor and smart-list IPC/API routes.
+Files changed:
+- packages/features/src/savedViews/SmartListService.ts
+- packages/ui/src/forms/SmartListEditor.tsx
+- apps/desktop/src/renderer/pages/CollectionsPage.tsx
+Open questions / risks:
+- Full app checks still pending; manual packaged QA likely limited by execution window.
+Next actions:
+- Run lint/typecheck/test/build.
+- Fix failures.
+- Open PR.
+
+## 2026-05-08T18:47:00.5464621+10:00
+Objective: Verify PSE-75 implementation before PR.
+Decisions made:
+- Ran targeted tests, lint, typecheck, full test suite, and build successfully.
+- Left unrelated .playwright-mcp and gh installer artifacts unstaged.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Manual temp-workspace reopen QA not executed.
+Next actions:
+- Commit scoped files.
+- Push branch and open PR.
+- Update Linear to PR Open.
+
+## 2026-05-08T18:49:08.3644805+10:00
+Objective: Publish PSE-75 proof PR and update Linear.
+Decisions made:
+- Committed c71b6a8 and pushed codex/pse-75-smart-list-criteria-editor.
+- Opened draft PR #72 and moved PSE-75 to PR Open.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Awaiting CI status; PR remains draft until clean/green review.
+Next actions:
+- Inspect PR diff/CI.
+- Fix any blockers or mark ready if green.
+- Promote next issue only after merge.
