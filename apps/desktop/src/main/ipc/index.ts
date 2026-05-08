@@ -22,6 +22,7 @@ import { registerProjectIpc } from "./registerProjectIpc";
 import { registerRelationshipIpc } from "./registerRelationshipIpc";
 import { registerSearchIpc } from "./registerSearchIpc";
 import { registerTaskIpc } from "./registerTaskIpc";
+import { registerTabIpc } from "./registerTabIpc";
 import { registerTodayIpc } from "./registerTodayIpc";
 import { registerWorkspaceIpc } from "./registerWorkspaceIpc";
 import {
@@ -60,6 +61,7 @@ export function registerDesktopIpc(
   registerInboxIpc(services.workspaceService);
   registerProjectIpc(services.workspaceService);
   registerContactIpc(services.workspaceService);
+  registerTabIpc(services.workspaceService);
   registerRelationshipIpc(services.workspaceService);
   registerTaskIpc(services.workspaceService);
   registerListIpc(services.workspaceService);

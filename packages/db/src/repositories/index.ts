@@ -43,7 +43,8 @@ export {
   type ContainerTabRecord,
   type CreateContainerTabInput,
   type CreateDefaultContainerTabInput,
-  type EnsureDefaultContainerTabInput
+  type EnsureDefaultContainerTabInput,
+  type UpdateContainerTabPatch
 } from "./ContainerTabRepository";
 export {
   DashboardRepository,

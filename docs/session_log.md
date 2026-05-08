@@ -157,3 +157,66 @@ Decisions made: Typecheck/lint passed; test/build EPERM were sandbox-only and pa
 Files changed: apps/desktop/tests/renderer/desktopApiClient.test.ts; docs/session_log.md
 Open questions / risks: Need review diff before commit; avoid staging unrelated .playwright/gh MSI.
 Next actions: Inspect diff; stage intended files; commit and push.
+
+## 2026-05-08T09:22:03.0004556+10:00
+Objective: Finish PSE-70 end-to-end workflow.
+Decisions made: PR #67 green and merged; Linear PSE-70 Done; PSE-71 promoted as sole Codex Ready issue.
+Files changed: docs/session_log.md
+Open questions / risks: Untracked .playwright-mcp/ and gh MSI remain unrelated local artifacts.
+Next actions: Start PSE-71 next run; keep GitHub proxy vars cleared; ignore unrelated untracked files.
+## 2026-05-08T09:23:30.3595144+10:00
+Objective: Run next Local Work OS ticket end-to-end.
+Decisions made: - Reconcile Linear/GitHub before coding; use repo workflow memory and AGENTS rules.
+Files changed: docs/session_log.md
+Open questions / risks: Live Linear/PR state and CI gate still unknown.
+Next actions: Query Linear active states; inspect any active PR; select or merge one ticket.
+## 2026-05-08T09:25:48.9844011+10:00
+Objective: Reconcile active work and select ticket.
+Decisions made: - No Linear PR Open/In Progress issues; PSE-71 was the single Codex Ready issue. - GitHub open PR list was empty. - Moved PSE-71 to In Progress.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-71 acceptance details still need extraction from ticket pack.
+Next actions: Read ticket/docs; branch from main; implement tabs slice.
+## 2026-05-08T12:53:01.5086601+10:00
+Objective: Explain stalled command and pause ticket flow.
+Decisions made: - Offline pnpm install recovery hung after Vitest dependency resolution failure. - Identified long-running node process from 09:41 likely associated with the stalled pnpm operation. - No further ticket work without user approval.
+Files changed: docs/session_log.md
+Open questions / risks: Long-running node PID 5044 may still need termination; command-line inspection was access-denied.
+Next actions: Ask user whether to kill PID 5044; resume only on instruction.
+## 2026-05-08T12:54:55.3002254+10:00
+Objective: Resume PSE-71 execution after stalled pnpm process.
+Decisions made: - Killed runaway node PID 5044 from stalled offline install. - Avoid dependency repair loops; proceed with scoped fixes and verification.
+Files changed: docs/session_log.md
+Open questions / risks: Local Vitest may remain blocked by node_modules resolution; CI can still prove tests on clean install.
+Next actions: Typecheck current patch; fix compile issues; run available checks.
+## 2026-05-08T13:02:14.4229398+10:00
+Objective: Verify PSE-71 tab implementation locally.
+Decisions made: - Restored dependencies once after aborted install. - Added TabService/repository mutations, IPC/preload API, and project/contact tab UI. - Full lint/typecheck/test/build pass; build required escalated spawn due sandbox EPERM.
+Files changed: apps/desktop/src; packages/core/src; packages/db/src; packages/features/src; tests; docs/session_log.md
+Open questions / risks: Need PR/CI review before merge; docs module registry still to sync.
+Next actions: Update docs; review diff; commit/push/PR.
+## 2026-05-08T13:04:18.7262757+10:00
+Objective: Complete local verification for PSE-71.
+Decisions made: - Fixed preload API test expectations and mock clients for tabs. - Added module-registry docs for Content Tabs. - Full lint, typecheck, test, and build pass.
+Files changed: apps/desktop/src; apps/desktop/tests; packages/core/src; packages/db; packages/features; docs/MODULE_REGISTRY.md; docs/session_log.md
+Open questions / risks: CI/review still required before merge.
+Next actions: Stage scoped files; commit/push; open PR.
+
+## 2026-05-08T13:06:31.0858446+10:00
+Objective: Resume PSE-71 end-to-end completion without further drift.
+Decisions made:
+- Continue from staged PSE-71 tab implementation and local green checks.
+- Do not touch unrelated untracked files.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI/review still must pass before merge.
+Next actions: commit, push/PR, CI merge/promote.
+
+## 2026-05-08T13:07:16.2728096+10:00
+Objective: Commit scoped PSE-71 tab implementation.
+Decisions made:
+- Commit includes service, IPC, project/contact UI, tests, docs, and session log.
+- Unrelated .playwright-mcp and gh installer remain untracked.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub CI/review gate still pending.
+Next actions: push branch, open PR, run CI gate.

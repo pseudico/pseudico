@@ -5,6 +5,7 @@ export type ActivityActorType = "system" | "local_user" | "importer";
 export type ActivityTargetType =
   | "workspace"
   | "container"
+  | "container_tab"
   | "contact_field"
   | "item"
   | "list_item"

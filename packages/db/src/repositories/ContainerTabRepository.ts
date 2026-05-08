@@ -48,6 +48,13 @@ export type CreateDefaultContainerTabInput = {
 
 export type EnsureDefaultContainerTabInput = CreateDefaultContainerTabInput;
 
+export type UpdateContainerTabPatch = {
+  name?: string;
+  description?: string | null;
+  sortOrder?: number;
+  timestamp: string;
+};
+
 export class ContainerTabRepository {
   private readonly connection: DatabaseConnection;
 
@@ -169,6 +176,95 @@ export class ContainerTabRepository {
     }
 
     return this.createDefaultTab(input);
+  }
+
+  update(id: string, patch: UpdateContainerTabPatch): ContainerTabRecord {
+    const assignments: string[] = [];
+    const values: unknown[] = [];
+
+    if (patch.name !== undefined) {
+      assignments.push("name = ?");
+      values.push(patch.name);
+    }
+
+    if (patch.description !== undefined) {
+      assignments.push("description = ?");
+      values.push(patch.description);
+    }
+
+    if (patch.sortOrder !== undefined) {
+      assignments.push("sort_order = ?");
+      values.push(patch.sortOrder);
+    }
+
+    if (assignments.length === 0) {
+      const current = this.getById(id);
+
+      if (current === null) {
+        throw new Error(`Container tab row was not found: ${id}.`);
+      }
+
+      return current;
+    }
+
+    assignments.push("updated_at = ?");
+    values.push(patch.timestamp, id);
+
+    this.connection.sqlite
+      .prepare(
+        `update container_tabs
+         set ${assignments.join(", ")}
+         where id = ?
+           and deleted_at is null`
+      )
+      .run(...values);
+
+    const updated = this.getById(id);
+
+    if (updated === null) {
+      throw new Error(`Container tab row was not found: ${id}.`);
+    }
+
+    return updated;
+  }
+
+  softDelete(id: string, timestamp: string): ContainerTabRecord {
+    this.connection.sqlite
+      .prepare(
+        `update container_tabs
+         set deleted_at = ?,
+             updated_at = ?
+         where id = ?
+           and deleted_at is null`
+      )
+      .run(timestamp, timestamp, id);
+
+    const deleted = this.connection.sqlite
+      .prepare<[string], ContainerTabRow>(
+        `select *
+         from container_tabs
+         where id = ?`
+      )
+      .get(id);
+
+    if (deleted === undefined) {
+      throw new Error(`Container tab row was not found: ${id}.`);
+    }
+
+    return toContainerTabRecord(deleted);
+  }
+
+  countActiveByContainer(containerId: string): number {
+    const row = this.connection.sqlite
+      .prepare<[string], { count: number }>(
+        `select count(*) as count
+         from container_tabs
+         where container_id = ?
+           and deleted_at is null`
+      )
+      .get(containerId);
+
+    return row?.count ?? 0;
   }
 }
 

@@ -24,6 +24,7 @@ import {
 import type {
   ActivitySummary,
   CategorySummary,
+  ContainerTabSummary,
   ContactDetailSummary,
   ContactFieldSummary,
   ContactSummary,
@@ -34,9 +35,11 @@ import type {
   TaskSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
+import { ContainerTabsPanel } from "../components/ContainerTabsPanel";
 
 type ContactTaskViewModel = TaskCardViewModel & {
   categoryId?: string | null;
+  containerTabId?: string | null;
   taskStatus?: TaskSummary["taskStatus"];
   dueAt?: string | null;
   priority?: number | null;
@@ -45,6 +48,7 @@ type ContactTaskViewModel = TaskCardViewModel & {
 };
 type ContactNoteViewModel = NoteCardViewModel & {
   categoryId?: string | null;
+  containerTabId?: string | null;
   format: NoteSummary["format"];
 };
 type ContactFeedViewModel =
@@ -58,6 +62,7 @@ type ContactDetailPageProps = {
   initialCategories?: CategorySummary[];
   initialItems?: UniversalItemViewModel[];
   initialActivity?: RecentActivityViewModel[];
+  initialTabs?: ContainerTabSummary[];
   initialAvailableProjects?: ProjectSummary[];
   initialRelatedProjects?: RelatedProjectSummary[];
 };
@@ -71,6 +76,7 @@ export function ContactDetailPage({
   initialCategories = [],
   initialItems = emptyContactItems,
   initialActivity = [],
+  initialTabs = [],
   initialAvailableProjects = [],
   initialRelatedProjects = []
 }: ContactDetailPageProps): React.JSX.Element {
@@ -89,6 +95,12 @@ export function ContactDetailPage({
     useState<CategorySummary[]>(initialCategories);
   const [activity, setActivity] =
     useState<RecentActivityViewModel[]>(initialActivity);
+  const [tabs, setTabs] = useState<ContainerTabSummary[]>(initialTabs);
+  const [activeTabId, setActiveTabId] = useState<string | null>(
+    selectInitialTabId(initialTabs)
+  );
+  const [tabBusy, setTabBusy] = useState(false);
+  const [tabError, setTabError] = useState<string | null>(null);
   const [projects, setProjects] =
     useState<ProjectSummary[]>(initialAvailableProjects);
   const [relatedProjects, setRelatedProjects] = useState<RelatedProjectSummary[]>(
@@ -132,6 +144,7 @@ export function ContactDetailPage({
         contactResult,
         categoriesResult,
         activityResult,
+        tabsResult,
         tasksResult,
         notesResult,
         projectsResult,
@@ -143,6 +156,7 @@ export function ContactDetailPage({
           targetType: "container",
           targetId: activeContactId
         }),
+        apiClient.tabs.list(activeContactId),
         apiClient.tasks.listByContainer(activeContactId),
         apiClient.notes.listByContainer(activeContactId),
         apiClient.projects.list(),
@@ -168,6 +182,11 @@ export function ContactDetailPage({
 
       if (!activityResult.ok) {
         setItemError(activityResult.error.message);
+        return;
+      }
+
+      if (!tabsResult.ok) {
+        setItemError(tabsResult.error.message);
         return;
       }
 
@@ -200,6 +219,10 @@ export function ContactDetailPage({
         relatedProjectsResult.data
       ));
       setCategories(categoriesResult.data);
+      setTabs(tabsResult.data);
+      setActiveTabId((current) =>
+        selectAvailableTabId(tabsResult.data, current)
+      );
       setActivity(activityResult.data.map(toRecentActivityViewModel));
       setItems(mergeContactContent(tasksResult.data, notesResult.data, categoriesResult.data));
       setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
@@ -269,6 +292,116 @@ export function ContactDetailPage({
     }
 
     setActivity(result.data.map(toRecentActivityViewModel));
+  }
+
+  async function refreshContactTabs(activeContactId: string): Promise<void> {
+    setTabError(null);
+
+    const result = await apiClient.tabs.list(activeContactId);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return;
+    }
+
+    setTabs(result.data);
+    setActiveTabId((current) => selectAvailableTabId(result.data, current));
+  }
+
+  async function createContactTab(name: string): Promise<boolean> {
+    if (contact === null) {
+      return false;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs.create({
+      containerId: contact.id,
+      name
+    });
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return false;
+    }
+
+    await refreshContactTabs(contact.id);
+    setActiveTabId(result.data.id);
+    await refreshContactActivity(contact.id);
+    return true;
+  }
+
+  async function renameContactTab(
+    tabId: string,
+    name: string
+  ): Promise<boolean> {
+    if (contact === null) {
+      return false;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs.rename({ tabId, name });
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return false;
+    }
+
+    await refreshContactTabs(contact.id);
+    await refreshContactActivity(contact.id);
+    return true;
+  }
+
+  async function reorderContactTabs(tabIds: string[]): Promise<void> {
+    if (contact === null) {
+      return;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs.reorder({
+      containerId: contact.id,
+      tabIds
+    });
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return;
+    }
+
+    setTabs(result.data);
+    await refreshContactActivity(contact.id);
+  }
+
+  async function deleteContactTab(tabId: string): Promise<void> {
+    if (contact === null) {
+      return;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs.delete(tabId);
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return;
+    }
+
+    await refreshContactTabs(contact.id);
+    await refreshContactActivity(contact.id);
   }
 
   async function refreshRelatedProjects(activeContactId: string): Promise<void> {
@@ -406,6 +539,7 @@ export function ContactDetailPage({
     const result = await apiClient.tasks.create({
       workspaceId: contact.workspaceId,
       containerId: contact.id,
+      containerTabId: activeTabId,
       title: values.title,
       dueAt: values.dueDate.length === 0 ? null : values.dueDate
     });
@@ -436,6 +570,7 @@ export function ContactDetailPage({
     const result = await apiClient.notes.create({
       workspaceId: contact.workspaceId,
       containerId: contact.id,
+      containerTabId: activeTabId,
       title: values.title,
       content: values.content
     });
@@ -597,8 +732,12 @@ export function ContactDetailPage({
   const relatedProjectViewModels = relatedProjects.map(
     toRelatedProjectViewModel
   );
-  const visibleItems = items.slice(0, visibleItemCount);
-  const hasMoreItems = visibleItemCount < items.length;
+  const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null;
+  const tabItems = items.filter((item) =>
+    isItemVisibleForTab(item, activeTab)
+  );
+  const visibleItems = tabItems.slice(0, visibleItemCount);
+  const hasMoreItems = visibleItemCount < tabItems.length;
 
   return (
     <section className="project-detail-page">
@@ -664,6 +803,21 @@ export function ContactDetailPage({
         emptyMessage="No contact activity recorded yet."
       />
 
+      <ContainerTabsPanel
+        activeTabId={activeTabId}
+        busy={tabBusy}
+        error={tabError}
+        tabs={tabs}
+        onCreateTab={createContactTab}
+        onDeleteTab={(tabId) => void deleteContactTab(tabId)}
+        onRenameTab={renameContactTab}
+        onReorderTabs={(tabIds) => void reorderContactTabs(tabIds)}
+        onSelectTab={(tabId) => {
+          setActiveTabId(tabId);
+          setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
+        }}
+      />
+
       <section className="project-content-section" aria-label="Contact content">
         <div className="panel-heading-actions">
           <div className="panel-heading">
@@ -721,7 +875,11 @@ export function ContactDetailPage({
         <ItemFeed
           ariaLabel="Contact content items"
           emptyDescription="Follow-up tasks and notes created for this contact will appear here with inline controls."
-          emptyTitle="No contact content yet"
+          emptyTitle={
+            activeTab === null
+              ? "No contact content yet"
+              : `No content in ${activeTab.name} yet`
+          }
           error={itemError}
           items={visibleItems}
           loading={itemsLoading}
@@ -769,6 +927,7 @@ function toContactTaskViewModel(
     body: task.body,
     status: task.taskStatus,
     categoryId: task.categoryId,
+    containerTabId: task.containerTabId,
     categoryLabel: findCategoryName(task.categoryId, categories),
     sortOrder: task.sortOrder,
     createdAt: task.createdAt,
@@ -800,6 +959,7 @@ function toContactNoteViewModel(
     body: note.preview,
     status: note.status,
     categoryId: note.categoryId,
+    containerTabId: note.containerTabId,
     categoryLabel: findCategoryName(note.categoryId, categories),
     sortOrder: note.sortOrder,
     createdAt: note.createdAt,
@@ -890,6 +1050,42 @@ function compareFeedItems(
   }
 
   return (left.createdAt ?? "").localeCompare(right.createdAt ?? "");
+}
+
+function selectInitialTabId(
+  tabs: readonly ContainerTabSummary[]
+): string | null {
+  return tabs.find((tab) => tab.isDefault)?.id ?? tabs[0]?.id ?? null;
+}
+
+function selectAvailableTabId(
+  tabs: readonly ContainerTabSummary[],
+  currentTabId: string | null
+): string | null {
+  if (
+    currentTabId !== null &&
+    tabs.some((tab) => tab.id === currentTabId)
+  ) {
+    return currentTabId;
+  }
+
+  return selectInitialTabId(tabs);
+}
+
+function isItemVisibleForTab(
+  item: ContactFeedViewModel,
+  tab: ContainerTabSummary | null
+): boolean {
+  if (tab === null) {
+    return true;
+  }
+
+  const itemTabId =
+    "containerTabId" in item && typeof item.containerTabId === "string"
+      ? item.containerTabId
+      : null;
+
+  return itemTabId === tab.id || (itemTabId === null && tab.isDefault);
 }
 
 function isTaskCardViewModel(
