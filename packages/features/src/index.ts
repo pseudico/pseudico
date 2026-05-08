@@ -24,6 +24,7 @@ export const plannedFeatureAreas = [
   "calendar",
   "backup",
   "export",
+  "templates",
   "activity",
   "diagnostics"
 ] as const;
@@ -115,6 +116,14 @@ export {
   searchModuleContract
 } from "./search";
 export { TaskService, tasksModuleContract } from "./tasks";
+export {
+  ListTemplateService,
+  TemplateService,
+  TEMPLATE_JSON_VERSION,
+  applyRelativeDates,
+  templatesModuleContract,
+  validateTemplateJson
+} from "./templates";
 export { TabService, tabsModuleContract } from "./tabs";
 export { TimelineService, timelineModuleContract } from "./timeline";
 export {
@@ -365,6 +374,18 @@ export type {
   TaskServiceIdFactory,
   UpdateTaskInput
 } from "./tasks";
+export type {
+  CreateListFromTemplateInput,
+  ListTemplateCreationResult,
+  SaveListAsTemplateInput,
+  TemplateDateFields,
+  TemplateJsonV1,
+  TemplateKind,
+  TemplateListItemJsonV1,
+  TemplateListJsonV1,
+  TemplateServiceIdFactory,
+  TemplateTagRef
+} from "./templates";
 export type {
   GroupTimelineItemsInput,
   TimelineDateRange,

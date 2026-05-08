@@ -17,9 +17,9 @@ new work should account for this implemented baseline:
 
 - Implemented MVP/V1 flows: Workspace, Inbox, Projects, Contacts, Content Tabs,
   Tasks, Lists, Notes, Files, Links, Metadata, Search, Saved Views/Collections,
-  Today, Dashboard, Backup, Export, Import validation, Activity Log, Database,
-  and diagnostics.
-- Future or placeholder-heavy flows: Timeline, Calendar, Templates, Workflows,
+  Today, Dashboard, Templates (list templates only), Backup, Export, Import
+  validation, Activity Log, Database, and diagnostics.
+- Future or placeholder-heavy flows: Timeline, Calendar, broader Templates, Workflows,
   file versions, full import/restore execution,
   custom dashboard editing, advanced saved-view builder UX, and browser capture.
 - Local reminders now have database, service, IPC, scheduler, and shared picker
@@ -64,7 +64,7 @@ renderer-only implementation.
 | --- | --- | --- | --- | --- | --- |
 | Database | Own SQLite setup, Drizzle schema, migrations, repositories, transaction helpers, and database health checks. | Schema, migrations, repositories, transactions | Core types | All data-backed modules | MVP |
 | Activity Log | Record meaningful data-changing operations in the same write flow as domain mutations. | Activity events, audit metadata | Database, domain services | Search, dashboard, maintenance | MVP |
-| Templates | Define reusable local project, contact, tab, list, note, and workflow templates. | Template definitions, template instances | Projects, contacts, lists, notes, metadata | Workflows, import/export | V2 |
+| Templates | Define reusable local project, contact, tab, list, note, and workflow templates; currently implements local list templates first. | Template definitions, template instances | Projects, contacts, lists, notes, metadata | Workflows, import/export | V2 |
 | Workflows | Provide safe local manual and scheduled workflow actions after core operations are stable. | Workflow definitions, runs, action history | Templates, activity log, all mutable modules | Automation views, maintenance | V2 |
 
 ## Module Boundaries

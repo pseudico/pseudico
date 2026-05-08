@@ -1,10 +1,11 @@
-import { ListService } from "@local-work-os/features";
+import { ListService, ListTemplateService } from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
   type DatabaseConnection,
   type ListItemRecord,
-  type ListWithItemRecord
+  type ListWithItemRecord,
+  type TemplateRecord
 } from "@local-work-os/db";
 import {
   apiError,
@@ -12,12 +13,15 @@ import {
   type AddListItemInput,
   type ApiResult,
   type BulkAddListItemsInput,
+  type CreateListFromTemplateInput,
   type CreateListInput,
   type ListDisplayMode,
   type ListItemStatus,
   type ListItemSummary,
   type ListProgressMode,
   type ListSummary,
+  type SaveListAsTemplateInput,
+  type TemplateSummary,
   type UpdateListItemInput,
   type WorkspaceSummary
 } from "../../preload/api";
@@ -40,6 +44,13 @@ type ListIpcHandlers = {
   handleListListsByContainer: (
     input: unknown
   ) => Promise<ApiResult<ListSummary[]>>;
+  handleSaveListAsTemplate: (
+    input: unknown
+  ) => Promise<ApiResult<TemplateSummary>>;
+  handleCreateListFromTemplate: (
+    input: unknown
+  ) => Promise<ApiResult<ListSummary>>;
+  handleListTemplates: (input: unknown) => Promise<ApiResult<TemplateSummary[]>>;
 };
 
 export function createListIpcHandlers(
@@ -171,6 +182,72 @@ export function createListIpcHandlers(
           )
         )
       );
+    },
+
+    async handleSaveListAsTemplate(input) {
+      if (!isSaveListAsTemplateInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "saveListAsTemplate requires a listId field."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) =>
+        apiOk(
+          toTemplateSummary(
+            await context.templateService.saveListAsTemplate(input)
+          )
+        )
+      );
+    },
+
+    async handleCreateListFromTemplate(input) {
+      if (!isCreateListFromTemplateInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "createListFromTemplate requires templateId and containerId fields."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const result = await context.templateService.createListFromTemplate({
+          ...input,
+          workspaceId
+        });
+
+        return apiOk(
+          toListSummary(
+            {
+              item: result.list.item,
+              list: result.list.list
+            },
+            result.listItems
+          )
+        );
+      });
+    },
+
+    async handleListTemplates(input) {
+      if (!isOptionalString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "listTemplates accepts an optional workspaceId string."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(
+          input as string | undefined,
+          context.workspace
+        );
+
+        return apiOk(
+          context.templateService
+            .listTemplates({ workspaceId })
+            .map(toTemplateSummary)
+        );
+      });
     }
   };
 }
@@ -180,6 +257,7 @@ async function withListService<T>(
   operation: (context: {
     connection: DatabaseConnection;
     listService: ListService;
+    templateService: ListTemplateService;
     workspace: WorkspaceSummary;
   }) => Promise<ApiResult<T>>
 ): Promise<ApiResult<T>> {
@@ -198,6 +276,7 @@ async function withListService<T>(
     return await operation({
       connection,
       listService: new ListService({ connection }),
+      templateService: new ListTemplateService({ connection }),
       workspace
     });
   } catch (error) {
@@ -281,6 +360,22 @@ function toListItemSummary(listItem: ListItemRecord): ListItemSummary {
   };
 }
 
+function toTemplateSummary(template: TemplateRecord): TemplateSummary {
+  return {
+    id: template.id,
+    workspaceId: template.workspaceId,
+    kind: template.kind,
+    name: template.name,
+    description: template.description,
+    sourceType: template.sourceType,
+    sourceId: template.sourceId,
+    templateJson: template.templateJson,
+    createdAt: template.createdAt,
+    updatedAt: template.updatedAt,
+    deletedAt: template.deletedAt
+  };
+}
+
 function isCreateListInput(input: unknown): input is CreateListInput {
   return (
     isRecord(input) &&
@@ -343,6 +438,34 @@ function isBulkAddListItemsInput(input: unknown): input is BulkAddListItemsInput
   );
 }
 
+function isSaveListAsTemplateInput(
+  input: unknown
+): input is SaveListAsTemplateInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.listId) &&
+    isOptionalString(input.name) &&
+    isOptionalNullableString(input.description) &&
+    isOptionalDateInput(input.baseDate) &&
+    isOptionalActorType(input.actorType)
+  );
+}
+
+function isCreateListFromTemplateInput(
+  input: unknown
+): input is CreateListFromTemplateInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.templateId) &&
+    isOptionalString(input.workspaceId) &&
+    isNonEmptyString(input.containerId) &&
+    isOptionalString(input.title) &&
+    isOptionalNullableString(input.containerTabId) &&
+    isOptionalDateInput(input.baseDate) &&
+    isOptionalActorType(input.actorType)
+  );
+}
+
 function hasListItemUpdateField(input: Record<string, unknown>): boolean {
   return [
     "body",
@@ -378,6 +501,10 @@ function isOptionalBoolean(value: unknown): boolean {
 
 function isOptionalNumber(value: unknown): boolean {
   return value === undefined || typeof value === "number";
+}
+
+function isOptionalDateInput(value: unknown): boolean {
+  return value === undefined || typeof value === "string" || value instanceof Date;
 }
 
 function isOptionalActorType(value: unknown): boolean {

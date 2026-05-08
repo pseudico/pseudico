@@ -36,4 +36,16 @@ export function registerListIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.lists.listByContainer,
     (_event, input) => handlers.handleListListsByContainer(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.lists.saveAsTemplate,
+    (_event, input) => handlers.handleSaveListAsTemplate(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.lists.createFromTemplate,
+    (_event, input) => handlers.handleCreateListFromTemplate(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.lists.listTemplates,
+    (_event, input) => handlers.handleListTemplates(input)
+  );
 }

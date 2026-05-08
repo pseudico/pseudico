@@ -2351,8 +2351,15 @@ a {
 .list-progress {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   color: #514e49;
   font-size: 13px;
+  font-weight: 700;
+}
+
+.save-as-template-action {
   font-weight: 700;
 }
 

@@ -97,6 +97,9 @@ object graph:
   dashboard foundations.
 - `daily_plans` and `daily_plan_items` store Today/Tomorrow/Backlog planning
   state.
+- `templates` stores local reusable definitions; the first implemented kind is
+  a list template JSON payload with source-list metadata, copied tag/category
+  references, list rows, and relative day offsets for dated rows.
 - `activity_log` records the activity trail used by later write services.
 - `search_index` is a normal SQLite table placeholder for local search
   projections; the search ticket may replace or augment it with FTS5 while
@@ -117,11 +120,11 @@ MVP object graph:
 - Workspace metadata, bootstrap, seed data, migration, health, transaction,
   and activity-log services.
 - Container, item, task, list, note, link, attachment, tag, category,
-  relationship, saved-view, dashboard, daily-plan, and search-index
+  relationship, saved-view, dashboard, daily-plan, template, and search-index
   repositories.
 - Feature services for projects, contacts, Inbox, tasks, lists, notes, links, files,
   metadata, saved views/collections, Today planning, dashboards, reminders, project
-  health, backup, export, import validation, diagnostics, and search
+  health, templates, backup, export, import validation, diagnostics, and search
   hydration/orchestration.
 
 Search remains a local projection table behind `SearchIndexService`,
@@ -133,8 +136,9 @@ The contact foundation now stores contact containers plus flexible profile
 fields behind repository and service APIs. The reminder foundation now stores
 task reminder policies and scheduled reminder events in `reminder_policies` and
 `reminder_events`, with task rows pointing at the active local policy when one
-exists. The data model still intentionally reserves future shape for
-timeline/calendar views, templates, workflow runs, file versions, backup
+exists. The template foundation now stores list templates only; broader
+project/contact/note/template types remain future work. The data model still intentionally reserves future shape for
+timeline/calendar views, workflow runs, file versions, backup
 restore/import execution, and richer saved-view builder state. Add those
 through scoped migrations and repository/service tickets rather than expanding
 the current schema opportunistically.

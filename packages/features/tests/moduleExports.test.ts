@@ -35,6 +35,8 @@ import {
   tabsModuleContract,
   tasksModuleContract,
   timelineModuleContract,
+  templatesModuleContract,
+  ListTemplateService,
   todayModuleContract,
   workspaceModuleContract
 } from "../src";
@@ -65,6 +67,7 @@ describe("feature module exports", () => {
       "calendar",
       "backup",
       "export",
+      "templates",
       "activity",
       "diagnostics"
     ]);
@@ -96,6 +99,7 @@ describe("feature module exports", () => {
       calendarModuleContract.module,
       backupModuleContract.module,
       exportModuleContract.module,
+      templatesModuleContract.module,
       activityModuleContract.module,
       diagnosticsModuleContract.module
     ];
@@ -125,6 +129,7 @@ describe("feature module exports", () => {
       "calendar",
       "backup",
       "export",
+      "templates",
       "activity",
       "diagnostics"
     ]);
@@ -161,5 +166,9 @@ describe("feature module exports", () => {
 
   it("exports the reminder service implementation", () => {
     expect(ReminderService).toBeDefined();
+  });
+
+  it("exports the list template service implementation", () => {
+    expect(ListTemplateService).toBeDefined();
   });
 });

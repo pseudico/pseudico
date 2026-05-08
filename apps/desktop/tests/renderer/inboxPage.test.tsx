@@ -225,7 +225,23 @@ function createMockApi(): LocalWorkOsApi {
       reopenItem: async () => apiOk(listItemSummary()),
       bulkAddItems: async () => apiOk([listItemSummary()]),
       listByContainer: async () => apiOk([listSummary()]),
-      createList: async () => apiOk(listSummary())
+      createList: async () => apiOk(listSummary()),
+      saveAsTemplate: async () =>
+        apiOk({
+          id: "template_1",
+          workspaceId: "workspace_1",
+          kind: "list",
+          name: "List template",
+          description: null,
+          sourceType: "list",
+          sourceId: "item_list_1",
+          templateJson: "{}",
+          createdAt: "2026-05-01T00:00:00.000Z",
+          updatedAt: "2026-05-01T00:00:00.000Z",
+          deletedAt: null
+        }),
+      createFromTemplate: async () => apiOk(listSummary()),
+      listTemplates: async () => apiOk([])
     },
     notes: {
       create: async () => apiOk(noteSummary()),

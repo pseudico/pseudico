@@ -177,6 +177,10 @@ export {
   type ListCardViewModel
 } from "./components/ListCardContent";
 export {
+  SaveAsTemplateAction,
+  type SaveAsTemplateActionProps
+} from "./components/SaveAsTemplateAction";
+export {
   NoteCardContent,
   type NoteCardContentProps,
   type NoteCardViewModel

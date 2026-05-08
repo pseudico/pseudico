@@ -1064,6 +1064,28 @@ export function ProjectDetailPage({
     setListBusyId(null);
   }
 
+  async function saveListAsTemplate(item: ListCardViewModel): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result = await apiClient.lists.saveAsTemplate({
+      listId: item.id,
+      name: `${item.title} template`
+    });
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return;
+    }
+
+    setListBusyId(null);
+  }
+
   function handleItemAction(action: ItemActionId, itemId: string): void {
     const item = items.find((candidate) => candidate.id === itemId);
 
@@ -1217,6 +1239,7 @@ export function ProjectDetailPage({
             item={item}
             onAddItem={addListItem}
             onBulkAddItems={bulkAddListItems}
+            onSaveAsTemplate={saveListAsTemplate}
             onToggleItem={toggleListItem}
           />
         </>

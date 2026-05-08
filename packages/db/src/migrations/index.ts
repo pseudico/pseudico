@@ -1,6 +1,7 @@
 import { initialSchemaSql } from "./0001_initial_schema";
 import { contactFieldsSql } from "./0002_contact_fields";
 import { remindersSql } from "./0003_reminders";
+import { templatesSql } from "./0004_templates";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -21,5 +22,11 @@ export const migrations: MigrationDefinition[] = [
     name: "reminders",
     sql: remindersSql,
     checksum: "pse-72-reminders-v1"
+  },
+  {
+    version: 4,
+    name: "templates",
+    sql: templatesSql,
+    checksum: "pse-76-templates-v1"
   }
 ];

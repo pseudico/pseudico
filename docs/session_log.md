@@ -491,3 +491,58 @@ Next actions:
 - Inspect PR diff/CI.
 - Fix any blockers or mark ready if green.
 - Promote next issue only after merge.
+
+## 2026-05-08T18:55:20+10:00
+Objective: Complete PSE-75 merge and prepare next Codex Ready issue.
+Decisions made:
+- PSE-75 merged via PR #72 at b7bd9a1 and moved to Done.
+- Promoted PSE-76 as the only Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Untracked .playwright-mcp and gh installer remain unrelated local artifacts.
+Next actions:
+- Start PSE-76 in the next run.
+
+## 2026-05-08T19:27:15.8583664+10:00
+Objective: Reconcile active Linear/GitHub work before selecting next ticket.
+Decisions made:
+- Found no PR Open or In Progress Linear issues and no open GitHub PRs.
+- Selected sole Codex Ready issue PSE-76 for implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked local artifacts must not be staged.
+Next actions: Move PSE-76 to In Progress; read scope/docs; implement on issue branch.
+
+## 2026-05-08T19:31:31.7859481+10:00
+Objective: Start PSE-76 implementation.
+Decisions made:
+- Moved PSE-76 to In Progress and created branch codex/PSE-76-templates-list.
+- Plan: add templates migration/repository, list template service, IPC/API, save-as-template UI action, and tests.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Relative date semantics will use day offsets from a base date.
+Next actions: Implement templates schema/service; add UI action; run checks.
+
+## 2026-05-08T19:43:41.4235886+10:00
+Objective: Implement PSE-76 core templates slice.
+Decisions made:
+- Added schema v4 templates table, repository, list template services, IPC/API, save-as-template UI action, and docs updates.
+- List templates copy category/tag references and convert row dates to base-date day offsets.
+Files changed:
+- packages/db/src/migrations/0004_templates.sql
+- packages/features/src/templates/TemplateService.ts
+- apps/desktop/src/preload/api.ts
+Open questions / risks: Typecheck may require API test mocks to add new list methods.
+Next actions: Run focused tests/typecheck; fix compile/test failures; open PR.
+
+## 2026-05-08T19:51:31.0219035+10:00
+Objective: Verify PSE-76 before publishing PR.
+Decisions made:
+- Full tests now pass after updating the preload IPC channel-count assertion.
+- Full lint, typecheck, and build pass.
+Files changed:
+- apps/desktop/tests/preload/api.test.ts
+- docs/session_log.md
+Open questions / risks: CI still needs to confirm the branch after push.
+Next actions: Stage scoped files; commit; push and open PR.
