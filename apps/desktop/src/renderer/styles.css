@@ -2930,3 +2930,76 @@ a {
     font-size: 38px;
   }
 }
+
+.container-tabs-panel {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #dedbd1;
+  border-radius: 18px;
+  background: #fffaf0;
+}
+
+.container-tab-create-form,
+.container-tab-rename-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.container-tab-create-form input,
+.container-tab-rename-form input {
+  min-width: 160px;
+}
+
+.container-tabs-list {
+  display: grid;
+  gap: 8px;
+}
+
+.container-tab-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid #e8e1d2;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.container-tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: #f2ecdf;
+  color: #3a362f;
+  padding: 8px 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.container-tab-pill.is-active {
+  border-color: #245c55;
+  background: #e3f0ec;
+  color: #18443f;
+}
+
+.container-tab-pill span {
+  border-radius: 999px;
+  background: #fff;
+  color: #6d6a62;
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+.container-tab-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}

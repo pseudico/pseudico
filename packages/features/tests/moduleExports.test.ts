@@ -29,6 +29,8 @@ import {
   savedViewsModuleContract,
   searchModuleContract,
   tagsModuleContract,
+  TabService,
+  tabsModuleContract,
   tasksModuleContract,
   timelineModuleContract,
   todayModuleContract,
@@ -53,6 +55,7 @@ describe("feature module exports", () => {
       "relationships",
       "search",
       "savedViews",
+      "tabs",
       "today",
       "dashboard",
       "timeline",
@@ -82,6 +85,7 @@ describe("feature module exports", () => {
       relationshipsModuleContract.module,
       searchModuleContract.module,
       savedViewsModuleContract.module,
+      tabsModuleContract.module,
       todayModuleContract.module,
       dashboardModuleContract.module,
       timelineModuleContract.module,
@@ -109,6 +113,7 @@ describe("feature module exports", () => {
       "relationships",
       "search",
       "savedViews",
+      "tabs",
       "today",
       "dashboard",
       "timeline",
@@ -143,5 +148,9 @@ describe("feature module exports", () => {
 
   it("exports the diagnostics service implementation", () => {
     expect(IntegrityCheckService).toBeDefined();
+  });
+
+  it("exports the tab service implementation", () => {
+    expect(TabService).toBeDefined();
   });
 });

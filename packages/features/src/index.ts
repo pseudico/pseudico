@@ -16,6 +16,7 @@ export const plannedFeatureAreas = [
   "relationships",
   "search",
   "savedViews",
+  "tabs",
   "today",
   "dashboard",
   "timeline",
@@ -105,6 +106,7 @@ export {
   searchModuleContract
 } from "./search";
 export { TaskService, tasksModuleContract } from "./tasks";
+export { TabService, tabsModuleContract } from "./tabs";
 export { timelineModuleContract } from "./timeline";
 export {
   DEFAULT_TODAY_BACKLOG_DAYS,
@@ -315,6 +317,13 @@ export type {
   UpsertListIndexResult,
   UpsertSearchTargetInput
 } from "./search";
+export type {
+  CreateTabInput,
+  DeleteTabInput,
+  RenameTabInput,
+  ReorderTabsInput,
+  TabServiceIdFactory
+} from "./tabs";
 export type {
   CreateTaskInput,
   TaskMutationResult,

@@ -875,6 +875,38 @@ export type UpdateContactFieldInput = {
   sortOrder?: number;
 };
 
+export type ContainerTabSummary = {
+  id: string;
+  workspaceId: string;
+  containerId: string;
+  name: string;
+  description: string | null;
+  sortOrder: number;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+  archivedAt: string | null;
+  deletedAt: string | null;
+};
+
+export type CreateContainerTabInput = {
+  containerId: string;
+  name: string;
+  description?: string | null;
+  sortOrder?: number;
+};
+
+export type RenameContainerTabInput = {
+  tabId: string;
+  name: string;
+  description?: string | null;
+};
+
+export type ReorderContainerTabsInput = {
+  containerId: string;
+  tabIds: string[];
+};
+
 export type MoveInboxItemToProjectInput = {
   itemId: string;
   projectId: string;
@@ -1386,6 +1418,13 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     addField: "local-work-os:contacts:add-field",
     updateField: "local-work-os:contacts:update-field"
   },
+  tabs: {
+    listTabs: "local-work-os:tabs:list-tabs",
+    createTab: "local-work-os:tabs:create-tab",
+    renameTab: "local-work-os:tabs:rename-tab",
+    reorderTabs: "local-work-os:tabs:reorder-tabs",
+    deleteTab: "local-work-os:tabs:delete-tab"
+  },
   relationships: {
     linkContactToProject:
       "local-work-os:relationships:link-contact-to-project",
@@ -1652,6 +1691,26 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateField]: {
     input: UpdateContactFieldInput;
     result: ApiResult<ContactFieldSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabs]: {
+    input: string;
+    result: ApiResult<ContainerTabSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTab]: {
+    input: CreateContainerTabInput;
+    result: ApiResult<ContainerTabSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.renameTab]: {
+    input: RenameContainerTabInput;
+    result: ApiResult<ContainerTabSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.reorderTabs]: {
+    input: ReorderContainerTabsInput;
+    result: ApiResult<ContainerTabSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.deleteTab]: {
+    input: string;
+    result: ApiResult<ContainerTabSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.relationships.linkContactToProject]: {
     input: LinkContactToProjectInput;
@@ -2017,6 +2076,32 @@ export type LocalWorkOsApi = {
     getContact: (
       contactId: string
     ) => Promise<ApiResult<ContactDetailSummary | null>>;
+  };
+  tabs: {
+    list: (containerId: string) => Promise<ApiResult<ContainerTabSummary[]>>;
+    create: (
+      input: CreateContainerTabInput
+    ) => Promise<ApiResult<ContainerTabSummary>>;
+    rename: (
+      input: RenameContainerTabInput
+    ) => Promise<ApiResult<ContainerTabSummary>>;
+    reorder: (
+      input: ReorderContainerTabsInput
+    ) => Promise<ApiResult<ContainerTabSummary[]>>;
+    delete: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
+    listTabs: (
+      containerId: string
+    ) => Promise<ApiResult<ContainerTabSummary[]>>;
+    createTab: (
+      input: CreateContainerTabInput
+    ) => Promise<ApiResult<ContainerTabSummary>>;
+    renameTab: (
+      input: RenameContainerTabInput
+    ) => Promise<ApiResult<ContainerTabSummary>>;
+    reorderTabs: (
+      input: ReorderContainerTabsInput
+    ) => Promise<ApiResult<ContainerTabSummary[]>>;
+    deleteTab: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
   };
   relationships: {
     linkContactToProject: (
@@ -2390,6 +2475,28 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.listContacts, workspaceId),
       getContact: (contactId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.getContact, contactId)
+    },
+    tabs: {
+      list: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabs, containerId),
+      create: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTab, input),
+      rename: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.renameTab, input),
+      reorder: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.reorderTabs, input),
+      delete: (tabId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.deleteTab, tabId),
+      listTabs: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabs, containerId),
+      createTab: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTab, input),
+      renameTab: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.renameTab, input),
+      reorderTabs: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.reorderTabs, input),
+      deleteTab: (tabId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.deleteTab, tabId)
     },
     relationships: {
       linkContactToProject: (input) =>

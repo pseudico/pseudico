@@ -52,6 +52,7 @@ import {
 import type {
   ActivitySummary,
   CategorySummary,
+  ContainerTabSummary,
   ContactSummary,
   FileItemSummary,
   ItemSummary,
@@ -66,9 +67,11 @@ import type {
   TaskSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
+import { ContainerTabsPanel } from "../components/ContainerTabsPanel";
 
 type ProjectTaskViewModel = TaskCardViewModel & {
   categoryId?: string | null;
+  containerTabId?: string | null;
   taskStatus?: TaskSummary["taskStatus"];
   dueAt?: string | null;
   priority?: number | null;
@@ -77,21 +80,28 @@ type ProjectTaskViewModel = TaskCardViewModel & {
 };
 type ProjectListViewModel = ListCardViewModel & {
   categoryId?: string | null;
+  containerTabId?: string | null;
   listItems: ListCardItemViewModel[];
 };
 type ProjectNoteViewModel = NoteCardViewModel & {
   categoryId?: string | null;
+  containerTabId?: string | null;
   format: NoteSummary["format"];
 };
 type ProjectLinkViewModel = LinkCardViewModel & {
   categoryId?: string | null;
+  containerTabId?: string | null;
+};
+type ProjectFileViewModel = FileCardViewModel & {
+  categoryId?: string | null;
+  containerTabId?: string | null;
 };
 type ProjectFeedViewModel =
   | ProjectTaskViewModel
   | ProjectListViewModel
   | ProjectNoteViewModel
   | ProjectLinkViewModel
-  | FileCardViewModel
+  | ProjectFileViewModel
   | UniversalItemViewModel;
 
 type PendingConfirmAction = {
@@ -105,6 +115,7 @@ type ProjectDetailPageProps = {
   initialCategories?: CategorySummary[];
   initialItems?: UniversalItemViewModel[];
   initialActivity?: RecentActivityViewModel[];
+  initialTabs?: ContainerTabSummary[];
   initialProjectHealth?: ProjectHealthViewModel | null;
   initialAvailableContacts?: ContactSummary[];
   initialRelatedContacts?: RelatedContactSummary[];
@@ -119,6 +130,7 @@ export function ProjectDetailPage({
   initialCategories = [],
   initialItems = emptyProjectItems,
   initialActivity = [],
+  initialTabs = [],
   initialProjectHealth = null,
   initialAvailableContacts = [],
   initialRelatedContacts = []
@@ -135,6 +147,12 @@ export function ProjectDetailPage({
     useState<CategorySummary[]>(initialCategories);
   const [projectActivity, setProjectActivity] =
     useState<RecentActivityViewModel[]>(initialActivity);
+  const [tabs, setTabs] = useState<ContainerTabSummary[]>(initialTabs);
+  const [activeTabId, setActiveTabId] = useState<string | null>(
+    selectInitialTabId(initialTabs)
+  );
+  const [tabBusy, setTabBusy] = useState(false);
+  const [tabError, setTabError] = useState<string | null>(null);
   const [projectHealth, setProjectHealth] =
     useState<ProjectHealthViewModel | null>(initialProjectHealth);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
@@ -203,6 +221,7 @@ export function ProjectDetailPage({
         projectsResult,
         categoriesResult,
         activityResult,
+        tabsResult,
         healthResult,
         tasksResult,
         listsResult,
@@ -219,6 +238,7 @@ export function ProjectDetailPage({
           targetType: "container",
           targetId: activeProjectId
         }),
+        apiClient.tabs.list(activeProjectId),
         apiClient.projects.getHealth(activeProjectId),
         apiClient.tasks.listByContainer(activeProjectId),
         apiClient.lists.listByContainer(activeProjectId),
@@ -258,6 +278,11 @@ export function ProjectDetailPage({
 
       if (!activityResult.ok) {
         setItemError(activityResult.error.message);
+        return;
+      }
+
+      if (!tabsResult.ok) {
+        setItemError(tabsResult.error.message);
         return;
       }
 
@@ -305,6 +330,10 @@ export function ProjectDetailPage({
         relatedContactsResult.data
       ));
       setCategories(categoriesResult.data);
+      setTabs(tabsResult.data);
+      setActiveTabId((current) =>
+        selectAvailableTabId(tabsResult.data, current)
+      );
       setProjectActivity(activityResult.data.map(toRecentActivityViewModel));
       setProjectHealth(toProjectHealthViewModel(healthResult.data));
       const mergedItems = mergeProjectContent(
@@ -410,6 +439,116 @@ export function ProjectDetailPage({
     setProjectHealth(toProjectHealthViewModel(result.data));
   }
 
+  async function refreshProjectTabs(activeProjectId: string): Promise<void> {
+    setTabError(null);
+
+    const result = await apiClient.tabs.list(activeProjectId);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return;
+    }
+
+    setTabs(result.data);
+    setActiveTabId((current) => selectAvailableTabId(result.data, current));
+  }
+
+  async function createProjectTab(name: string): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs.create({
+      containerId: project.id,
+      name
+    });
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectTabs(project.id);
+    setActiveTabId(result.data.id);
+    await refreshProjectActivity(project.id);
+    return true;
+  }
+
+  async function renameProjectTab(
+    tabId: string,
+    name: string
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs.rename({ tabId, name });
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectTabs(project.id);
+    await refreshProjectActivity(project.id);
+    return true;
+  }
+
+  async function reorderProjectTabs(tabIds: string[]): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs.reorder({
+      containerId: project.id,
+      tabIds
+    });
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return;
+    }
+
+    setTabs(result.data);
+    await refreshProjectActivity(project.id);
+  }
+
+  async function deleteProjectTab(tabId: string): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs.delete(tabId);
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return;
+    }
+
+    await refreshProjectTabs(project.id);
+    await refreshProjectActivity(project.id);
+  }
+
   async function refreshRelatedContacts(activeProjectId: string): Promise<void> {
     setRelationshipError(null);
 
@@ -492,6 +631,7 @@ export function ProjectDetailPage({
     const result = await apiClient.tasks.create({
       workspaceId: project.workspaceId,
       containerId: project.id,
+      containerTabId: activeTabId,
       title: values.title,
       dueAt: values.dueDate.length === 0 ? null : values.dueDate
     });
@@ -521,6 +661,7 @@ export function ProjectDetailPage({
     const result = await apiClient.lists.create({
       workspaceId: project.workspaceId,
       containerId: project.id,
+      containerTabId: activeTabId,
       title: values.title
     });
 
@@ -549,6 +690,7 @@ export function ProjectDetailPage({
     const result = await apiClient.notes.create({
       workspaceId: project.workspaceId,
       containerId: project.id,
+      containerTabId: activeTabId,
       title: values.title,
       content: values.content
     });
@@ -578,6 +720,7 @@ export function ProjectDetailPage({
     const result = await apiClient.links.create({
       workspaceId: project.workspaceId,
       containerId: project.id,
+      containerTabId: activeTabId,
       url: values.url,
       title: values.title.length === 0 ? null : values.title,
       description: values.description.length === 0 ? null : values.description
@@ -606,7 +749,8 @@ export function ProjectDetailPage({
 
     const result = await apiClient.files.chooseAndAttach({
       workspaceId: project.workspaceId,
-      containerId: project.id
+      containerId: project.id,
+      containerTabId: activeTabId
     });
 
     setSavingFile(false);
@@ -1199,8 +1343,12 @@ export function ProjectDetailPage({
   const relatedContactViewModels = relatedContacts.map(
     toRelatedContactViewModel
   );
-  const visibleItems = items.slice(0, visibleItemCount);
-  const hasMoreItems = visibleItemCount < items.length;
+  const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null;
+  const tabItems = items.filter((item) =>
+    isItemVisibleForTab(item, activeTab)
+  );
+  const visibleItems = tabItems.slice(0, visibleItemCount);
+  const hasMoreItems = visibleItemCount < tabItems.length;
 
   return (
     <section className="project-detail-page">
@@ -1269,6 +1417,21 @@ export function ProjectDetailPage({
       <RecentActivityList
         activity={projectActivity}
         emptyMessage="No project activity recorded yet."
+      />
+
+      <ContainerTabsPanel
+        activeTabId={activeTabId}
+        busy={tabBusy}
+        error={tabError}
+        tabs={tabs}
+        onCreateTab={createProjectTab}
+        onDeleteTab={(tabId) => void deleteProjectTab(tabId)}
+        onRenameTab={renameProjectTab}
+        onReorderTabs={(tabIds) => void reorderProjectTabs(tabIds)}
+        onSelectTab={(tabId) => {
+          setActiveTabId(tabId);
+          setVisibleItemCount(PROJECT_FEED_PAGE_SIZE);
+        }}
       />
 
       {projectHealth === null ? null : (
@@ -1392,7 +1555,11 @@ export function ProjectDetailPage({
         <ItemFeed
           ariaLabel="Project content items"
           emptyDescription="Tasks, checklists, notes, and files created for this project will appear here with inline controls."
-          emptyTitle="No project content yet"
+          emptyTitle={
+            activeTab === null
+              ? "No project content yet"
+              : `No content in ${activeTab.name} yet`
+          }
           error={itemError}
           items={visibleItems}
           loading={itemsLoading}
@@ -1474,6 +1641,7 @@ function toProjectTaskViewModel(
     body: task.body,
     status: task.taskStatus,
     categoryId: task.categoryId,
+    containerTabId: task.containerTabId,
     categoryLabel: findCategoryName(task.categoryId, categories),
     sortOrder: task.sortOrder,
     createdAt: task.createdAt,
@@ -1505,6 +1673,7 @@ function toProjectListViewModel(
     body: list.body,
     status: list.status,
     categoryId: list.categoryId,
+    containerTabId: list.containerTabId,
     categoryLabel: findCategoryName(list.categoryId, categories),
     sortOrder: list.sortOrder,
     createdAt: list.createdAt,
@@ -1528,6 +1697,7 @@ function toProjectNoteViewModel(
     body: note.preview,
     status: note.status,
     categoryId: note.categoryId,
+    containerTabId: note.containerTabId,
     categoryLabel: findCategoryName(note.categoryId, categories),
     sortOrder: note.sortOrder,
     createdAt: note.createdAt,
@@ -1543,7 +1713,7 @@ function toProjectNoteViewModel(
 function toProjectFileViewModel(
   file: FileItemSummary,
   categories: readonly CategorySummary[]
-): FileCardViewModel {
+): ProjectFileViewModel {
   return {
     id: file.id,
     type: "file",
@@ -1551,6 +1721,7 @@ function toProjectFileViewModel(
     body: file.body,
     status: file.status,
     categoryId: file.categoryId,
+    containerTabId: file.containerTabId,
     categoryLabel: findCategoryName(file.categoryId, categories),
     sortOrder: file.sortOrder,
     createdAt: file.createdAt,
@@ -1582,6 +1753,7 @@ function toProjectLinkViewModel(
     body: link.body,
     status: link.status,
     categoryId: link.categoryId,
+    containerTabId: link.containerTabId,
     categoryLabel: findCategoryName(link.categoryId, categories),
     sortOrder: link.sortOrder,
     createdAt: link.createdAt,
@@ -1771,6 +1943,42 @@ function compareFeedItems(
   }
 
   return (left.createdAt ?? "").localeCompare(right.createdAt ?? "");
+}
+
+function selectInitialTabId(
+  tabs: readonly ContainerTabSummary[]
+): string | null {
+  return tabs.find((tab) => tab.isDefault)?.id ?? tabs[0]?.id ?? null;
+}
+
+function selectAvailableTabId(
+  tabs: readonly ContainerTabSummary[],
+  currentTabId: string | null
+): string | null {
+  if (
+    currentTabId !== null &&
+    tabs.some((tab) => tab.id === currentTabId)
+  ) {
+    return currentTabId;
+  }
+
+  return selectInitialTabId(tabs);
+}
+
+function isItemVisibleForTab(
+  item: ProjectFeedViewModel,
+  tab: ContainerTabSummary | null
+): boolean {
+  if (tab === null) {
+    return true;
+  }
+
+  const itemTabId =
+    "containerTabId" in item && typeof item.containerTabId === "string"
+      ? item.containerTabId
+      : null;
+
+  return itemTabId === tab.id || (itemTabId === null && tab.isDefault);
 }
 
 function isTaskCardViewModel(

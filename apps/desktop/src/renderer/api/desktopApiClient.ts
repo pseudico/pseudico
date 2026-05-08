@@ -130,6 +130,18 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       getContact: (contactId) =>
         callApi(() => api.contacts.getContact(contactId))
     },
+    tabs: {
+      list: (containerId) => callApi(() => api.tabs.list(containerId)),
+      create: (input) => callApi(() => api.tabs.create(input)),
+      rename: (input) => callApi(() => api.tabs.rename(input)),
+      reorder: (input) => callApi(() => api.tabs.reorder(input)),
+      delete: (tabId) => callApi(() => api.tabs.delete(tabId)),
+      listTabs: (containerId) => callApi(() => api.tabs.listTabs(containerId)),
+      createTab: (input) => callApi(() => api.tabs.createTab(input)),
+      renameTab: (input) => callApi(() => api.tabs.renameTab(input)),
+      reorderTabs: (input) => callApi(() => api.tabs.reorderTabs(input)),
+      deleteTab: (tabId) => callApi(() => api.tabs.deleteTab(tabId))
+    },
     relationships: {
       linkContactToProject: (input) =>
         callApi(() => api.relationships.linkContactToProject(input)),
@@ -389,6 +401,18 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().contacts.listContacts(workspaceId),
     getContact: (contactId) =>
       getDesktopApiClient().contacts.getContact(contactId)
+  },
+  tabs: {
+    list: (containerId) => getDesktopApiClient().tabs.list(containerId),
+    create: (input) => getDesktopApiClient().tabs.create(input),
+    rename: (input) => getDesktopApiClient().tabs.rename(input),
+    reorder: (input) => getDesktopApiClient().tabs.reorder(input),
+    delete: (tabId) => getDesktopApiClient().tabs.delete(tabId),
+    listTabs: (containerId) => getDesktopApiClient().tabs.listTabs(containerId),
+    createTab: (input) => getDesktopApiClient().tabs.createTab(input),
+    renameTab: (input) => getDesktopApiClient().tabs.renameTab(input),
+    reorderTabs: (input) => getDesktopApiClient().tabs.reorderTabs(input),
+    deleteTab: (tabId) => getDesktopApiClient().tabs.deleteTab(tabId)
   },
   relationships: {
     linkContactToProject: (input) =>

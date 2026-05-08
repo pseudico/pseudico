@@ -15,11 +15,12 @@ Most MVP modules now have concrete feature services and repository-backed
 renderer flows. The registry remains the ownership map for future tickets, but
 new work should account for this implemented baseline:
 
-- Implemented MVP flows: Workspace, Inbox, Projects, Tasks, Lists, Notes,
-  Files, Links, Metadata, Search, Saved Views/Collections, Today, Dashboard,
-  Backup, Export, Import validation, Activity Log, Database, and diagnostics.
-- Future or placeholder-heavy flows: Contacts renderer workflows, Timeline,
-  Calendar, Templates, Workflows, file versions, full import/restore execution,
+- Implemented MVP/V1 flows: Workspace, Inbox, Projects, Contacts, Content Tabs,
+  Tasks, Lists, Notes, Files, Links, Metadata, Search, Saved Views/Collections,
+  Today, Dashboard, Backup, Export, Import validation, Activity Log, Database,
+  and diagnostics.
+- Future or placeholder-heavy flows: Timeline, Calendar, Templates, Workflows,
+  file versions, full import/restore execution,
   custom dashboard editing, advanced saved-view builder UX, local reminders,
   and browser capture.
 - Cross-cutting services now include project health, recent activity,
@@ -38,6 +39,7 @@ renderer-only implementation.
 | Inbox | Own quick capture and triage workflows before work is filed into another context. | Inbox container, captured items, triage actions | Workspace, projects, contacts, tasks, notes, files, links, metadata | Today, dashboard, search, saved views | MVP |
 | Projects | Own project container application behavior and project-level work context. | Project containers, project status, project item feeds | Workspace, tasks, lists, notes, files, links, metadata, search | Dashboard, timeline, calendar, saved views | MVP |
 | Contacts | Own contact/client container behavior and local CRM-style context. | Contact containers, contact fields, interaction context | Workspace, projects, tasks, notes, files, links, metadata | Dashboard, timeline, saved views | V1 |
+| Content Tabs | Own local project/contact content tab mutations and ordering. | Container tabs | Projects, contacts, items, activity log | Project/contact item feeds, templates later | V1 |
 | Tasks | Own task-specific application operations and task lifecycle behavior. | Task items, task status, dates, priority, completion | Workspace, projects, contacts, metadata, search | Today, timeline, calendar, dashboard, saved views | MVP |
 | Lists | Own checklist and structured-list application operations. | List items, list rows, checklist progress | Workspace, projects, tasks, metadata, search | Projects, dashboard, future pipeline views | MVP |
 | Notes | Own Markdown note application operations and note search projections. | Note items, Markdown content, previews | Workspace, projects, contacts, metadata, search | Search, saved views, dashboard | MVP |
@@ -174,6 +176,34 @@ Integration points:
 - Projects and relationship services.
 - Metadata, search, dashboard, and saved views.
 - Files, notes, links, and tasks for interaction history.
+
+### Content Tabs
+
+Owns:
+
+- Project/contact tab create, rename, reorder, and soft-delete operations.
+- Active-tab filtering in project/contact content feeds.
+- Activity events for user-visible tab writes.
+
+Does not own:
+
+- Item editor internals.
+- Templates that may later create default tab sets.
+- Raw database access from renderer code.
+
+Expected service methods:
+
+- `listTabs`
+- `createTab`
+- `renameTab`
+- `reorderTabs`
+- `deleteTab`
+
+Integration points:
+
+- Projects and contacts as editable tab containers.
+- Tasks, lists, notes, links, and files through `containerTabId`.
+- Activity log for tab write history.
 
 ### Tasks
 
