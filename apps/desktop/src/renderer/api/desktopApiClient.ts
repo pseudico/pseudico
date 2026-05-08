@@ -83,6 +83,14 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.lists.completeItem(listItemId)),
       reopenItem: (listItemId) =>
         callApi(() => api.lists.reopenItem(listItemId)),
+      enablePipelineMode: (listId) =>
+        callApi(() => api.lists.enablePipelineMode(listId)),
+      disablePipelineMode: (listId) =>
+        callApi(() => api.lists.disablePipelineMode(listId)),
+      getPipelineViewModel: (listId) =>
+        callApi(() => api.lists.getPipelineViewModel(listId)),
+      movePipelineCard: (input) =>
+        callApi(() => api.lists.movePipelineCard(input)),
       bulkAddItems: (input) => callApi(() => api.lists.bulkAddItems(input)),
       listByContainer: (containerId) =>
         callApi(() => api.lists.listByContainer(containerId)),
@@ -388,6 +396,14 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().lists.completeItem(listItemId),
     reopenItem: (listItemId) =>
       getDesktopApiClient().lists.reopenItem(listItemId),
+    enablePipelineMode: (listId) =>
+      getDesktopApiClient().lists.enablePipelineMode(listId),
+    disablePipelineMode: (listId) =>
+      getDesktopApiClient().lists.disablePipelineMode(listId),
+    getPipelineViewModel: (listId) =>
+      getDesktopApiClient().lists.getPipelineViewModel(listId),
+    movePipelineCard: (input) =>
+      getDesktopApiClient().lists.movePipelineCard(input),
     bulkAddItems: (input) => getDesktopApiClient().lists.bulkAddItems(input),
     listByContainer: (containerId) =>
       getDesktopApiClient().lists.listByContainer(containerId),

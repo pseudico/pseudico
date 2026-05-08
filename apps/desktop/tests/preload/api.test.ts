@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(116);
+    expect(channels).toHaveLength(120);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -666,6 +666,14 @@ describe("typed preload API", () => {
     });
     await api.lists.completeItem("list_item_1");
     await api.lists.reopenItem("list_item_1");
+    await api.lists.enablePipelineMode("item_list_1");
+    await api.lists.disablePipelineMode("item_list_1");
+    await api.lists.getPipelineViewModel("item_list_1");
+    await api.lists.movePipelineCard({
+      listId: "item_list_1",
+      cardId: "list_item_card_1",
+      targetStageId: "list_item_stage_1"
+    });
     await api.lists.bulkAddItems({
       listId: "item_list_1",
       text: "- Confirm copy"
@@ -695,6 +703,26 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.reopenItem,
         input: "list_item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.enablePipelineMode,
+        input: "item_list_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.disablePipelineMode,
+        input: "item_list_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.getPipelineViewModel,
+        input: "item_list_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.movePipelineCard,
+        input: {
+          listId: "item_list_1",
+          cardId: "list_item_card_1",
+          targetStageId: "list_item_stage_1"
+        }
       },
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems,

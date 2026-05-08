@@ -19,6 +19,9 @@ new work should account for this implemented baseline:
   Tasks, Lists, Notes, Files, Links, Metadata, Search, Saved Views/Collections,
   Today, Dashboard, Templates (list and project/contact container templates), Backup, Export, Import
   validation, Activity Log, Database, and diagnostics.
+- The Lists/Pipelines slice now supports switching a list between checklist and
+  pipeline display modes, projecting top-level rows as stages and child rows as
+  movable cards.
 - Local recurrence now has database and service foundations for daily and
   weekly/custom-weekday task roll-forward behavior; monthly/yearly RRULEs remain
   future work.

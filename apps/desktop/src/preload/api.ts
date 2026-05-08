@@ -1531,6 +1531,24 @@ export type BulkAddListItemsInput = {
   startSortOrder?: number;
 };
 
+export type MovePipelineCardInput = {
+  listId: string;
+  cardId: string;
+  targetStageId: string;
+  actorType?: "local_user" | "system" | "importer";
+  sortOrder?: number;
+};
+
+export type PipelineStageSummary = {
+  stage: ListItemSummary;
+  cards: ListItemSummary[];
+};
+
+export type PipelineViewModelSummary = {
+  list: ListSummary;
+  stages: PipelineStageSummary[];
+};
+
 export type TemplateSummary = {
   id: string;
   workspaceId: string;
@@ -1712,6 +1730,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     updateItem: "local-work-os:lists:update-item",
     completeItem: "local-work-os:lists:complete-item",
     reopenItem: "local-work-os:lists:reopen-item",
+    enablePipelineMode: "local-work-os:lists:enable-pipeline-mode",
+    disablePipelineMode: "local-work-os:lists:disable-pipeline-mode",
+    getPipelineViewModel: "local-work-os:lists:get-pipeline-view-model",
+    movePipelineCard: "local-work-os:lists:move-pipeline-card",
     bulkAddItems: "local-work-os:lists:bulk-add-items",
     listByContainer: "local-work-os:lists:list-by-container",
     saveAsTemplate: "local-work-os:lists:save-as-template",
@@ -1961,6 +1983,22 @@ export type LocalWorkOsIpcContracts = {
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.lists.reopenItem]: {
     input: string;
+    result: ApiResult<ListItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.enablePipelineMode]: {
+    input: string;
+    result: ApiResult<ListSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.disablePipelineMode]: {
+    input: string;
+    result: ApiResult<ListSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.getPipelineViewModel]: {
+    input: string;
+    result: ApiResult<PipelineViewModelSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.movePipelineCard]: {
+    input: MovePipelineCardInput;
     result: ApiResult<ListItemSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems]: {
@@ -2409,6 +2447,14 @@ export type LocalWorkOsApi = {
     ) => Promise<ApiResult<ListItemSummary>>;
     completeItem: (listItemId: string) => Promise<ApiResult<ListItemSummary>>;
     reopenItem: (listItemId: string) => Promise<ApiResult<ListItemSummary>>;
+    enablePipelineMode: (listId: string) => Promise<ApiResult<ListSummary>>;
+    disablePipelineMode: (listId: string) => Promise<ApiResult<ListSummary>>;
+    getPipelineViewModel: (
+      listId: string
+    ) => Promise<ApiResult<PipelineViewModelSummary>>;
+    movePipelineCard: (
+      input: MovePipelineCardInput
+    ) => Promise<ApiResult<ListItemSummary>>;
     bulkAddItems: (
       input: BulkAddListItemsInput
     ) => Promise<ApiResult<ListItemSummary[]>>;
@@ -2858,6 +2904,14 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.completeItem, listItemId),
       reopenItem: (listItemId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.reopenItem, listItemId),
+      enablePipelineMode: (listId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.enablePipelineMode, listId),
+      disablePipelineMode: (listId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.disablePipelineMode, listId),
+      getPipelineViewModel: (listId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.getPipelineViewModel, listId),
+      movePipelineCard: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.movePipelineCard, input),
       bulkAddItems: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems, input),
       listByContainer: (containerId) =>

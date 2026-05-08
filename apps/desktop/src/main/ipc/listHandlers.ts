@@ -20,6 +20,9 @@ import {
   type ListItemSummary,
   type ListProgressMode,
   type ListSummary,
+  type MovePipelineCardInput,
+  type PipelineStageSummary,
+  type PipelineViewModelSummary,
   type SaveListAsTemplateInput,
   type TemplateSummary,
   type UpdateListItemInput,
@@ -38,6 +41,12 @@ type ListIpcHandlers = {
   handleUpdateListItem: (input: unknown) => Promise<ApiResult<ListItemSummary>>;
   handleCompleteListItem: (input: unknown) => Promise<ApiResult<ListItemSummary>>;
   handleReopenListItem: (input: unknown) => Promise<ApiResult<ListItemSummary>>;
+  handleEnablePipelineMode: (input: unknown) => Promise<ApiResult<ListSummary>>;
+  handleDisablePipelineMode: (input: unknown) => Promise<ApiResult<ListSummary>>;
+  handleGetPipelineViewModel: (
+    input: unknown
+  ) => Promise<ApiResult<PipelineViewModelSummary>>;
+  handleMovePipelineCard: (input: unknown) => Promise<ApiResult<ListItemSummary>>;
   handleBulkAddListItems: (
     input: unknown
   ) => Promise<ApiResult<ListItemSummary[]>>;
@@ -145,6 +154,80 @@ export function createListIpcHandlers(
         apiOk(
           toListItemSummary(
             (await context.listService.reopenListItem(input)).listItem
+          )
+        )
+      );
+    },
+
+    async handleEnablePipelineMode(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "enablePipelineMode requires a list id string."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) => {
+        const result = await context.listService.enablePipelineMode(input);
+        const listItems = context.listService.listItems(result.item.id);
+
+        return apiOk(
+          toListSummary({ item: result.item, list: result.list }, listItems)
+        );
+      });
+    },
+
+    async handleDisablePipelineMode(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "disablePipelineMode requires a list id string."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) => {
+        const result = await context.listService.disablePipelineMode(input);
+        const listItems = context.listService.listItems(result.item.id);
+
+        return apiOk(
+          toListSummary({ item: result.item, list: result.list }, listItems)
+        );
+      });
+    },
+
+    async handleGetPipelineViewModel(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "getPipelineViewModel requires a list id string."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) => {
+        const viewModel = context.listService.getPipelineViewModel(input);
+
+        return apiOk({
+          list: toListSummary(
+            viewModel.list,
+            context.listService.listItems(viewModel.list.item.id)
+          ),
+          stages: viewModel.stages.map(toPipelineStageSummary)
+        });
+      });
+    },
+
+    async handleMovePipelineCard(input) {
+      if (!isMovePipelineCardInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "movePipelineCard requires listId, cardId, and targetStageId fields."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) =>
+        apiOk(
+          toListItemSummary(
+            (await context.listService.movePipelineCard(input)).card
           )
         )
       );
@@ -360,6 +443,16 @@ function toListItemSummary(listItem: ListItemRecord): ListItemSummary {
   };
 }
 
+function toPipelineStageSummary(input: {
+  stage: ListItemRecord;
+  cards: ListItemRecord[];
+}): PipelineStageSummary {
+  return {
+    stage: toListItemSummary(input.stage),
+    cards: input.cards.map(toListItemSummary)
+  };
+}
+
 function toTemplateSummary(template: TemplateRecord): TemplateSummary {
   return {
     id: template.id,
@@ -435,6 +528,19 @@ function isBulkAddListItemsInput(input: unknown): input is BulkAddListItemsInput
     isNonEmptyString(input.text) &&
     isOptionalActorType(input.actorType) &&
     isOptionalNumber(input.startSortOrder)
+  );
+}
+
+function isMovePipelineCardInput(
+  input: unknown
+): input is MovePipelineCardInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.listId) &&
+    isNonEmptyString(input.cardId) &&
+    isNonEmptyString(input.targetStageId) &&
+    isOptionalActorType(input.actorType) &&
+    isOptionalNumber(input.sortOrder)
   );
 }
 

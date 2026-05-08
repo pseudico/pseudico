@@ -663,3 +663,36 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Manual interactive desktop QA remains not run in this environment.
 Next actions: Amend log into branch; merge PR; promote next Codex Ready issue.
+## 2026-05-08T21:12:24.5137692+10:00
+Objective: Finish PSE-78 merge and prepare next ticket.
+Decisions made:
+- Squash-merged PR #75 at b7fe6f1 and deleted local/remote branch.
+- Moved PSE-78 to Done; promoted exactly PSE-79 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Post-merge session log entry is local-only to avoid direct main push.
+Next actions: Start PSE-79; read list pipeline docs; inspect list UI/service.
+## 2026-05-09T06:19:49
+- Objective: Run next Local Work OS ticket end-to-end.
+- Decisions made: Using Linear as plan and GitHub as proof; reconcile active states before coding.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need identify active Linear/PR state and ensure local tree safety.
+- Next actions: Check repo status; query Linear active states; inspect any active PR.
+## 2026-05-09T06:20:50
+- Objective: Reconcile active Linear/GitHub work.
+- Decisions made: No PR Open/In Progress issues existed; selected PSE-79 as the sole Codex Ready ticket and moved it to In Progress.
+- Files changed: docs/session_log.md
+- Open questions / risks: Existing untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi are unrelated and will be left untouched.
+- Next actions: Read PSE-79 ticket docs; create issue branch; implement pipeline display mode.
+## 2026-05-09T06:23:38
+- Objective: Plan PSE-79 implementation.
+- Decisions made: No schema change; implement PipelineService over list_details.display_mode and list_items parent/depth/sort_order; expose typed IPC/preload APIs.
+- Files changed: docs/session_log.md
+- Open questions / risks: HTML drag/drop will be minimal and local; unrelated workspace files remain untouched.
+- Next actions: Patch repository/service/API/UI; add tests; run checks.
+## 2026-05-09T06:40:04
+- Objective: Implement and verify PSE-79 pipeline mode.
+- Decisions made: Used existing list_details/list_items hierarchy; added typed pipeline IPC; no schema migration.
+- Files changed: apps/desktop/src; packages/core/src; packages/db/src; packages/features/src; packages/ui/src; docs/DATA_MODEL.md; docs/MODULE_REGISTRY.md
+- Open questions / risks: Manual desktop QA limited to automated build/tests in this run.
+- Next actions: Review diff; commit/push branch; open PR and update Linear.

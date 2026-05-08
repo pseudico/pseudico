@@ -150,6 +150,11 @@ restore/import execution, and richer saved-view builder state. Add those
 through scoped migrations and repository/service tickets rather than expanding
 the current schema opportunistically.
 
+List pipeline mode uses the existing `list_details.display_mode` and
+`list_items` hierarchy: top-level rows are stages, and child rows are cards.
+Moving a pipeline card updates the child row's parent, depth, and sort order
+through the list service boundary; it does not introduce separate board tables.
+
 ## Source Documents
 
 This direction is derived from `docs/PRODUCT_SPEC.md`,

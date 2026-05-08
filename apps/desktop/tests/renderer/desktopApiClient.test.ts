@@ -149,6 +149,25 @@ function createMockApi(
           completedAt: "2026-04-30T01:00:00.000Z"
         }),
       reopenItem: async () => apiOk(listItemSummary()),
+      enablePipelineMode: async () =>
+        apiOk({ ...listSummary(), displayMode: "pipeline" }),
+      disablePipelineMode: async () => apiOk(listSummary()),
+      getPipelineViewModel: async () =>
+        apiOk({
+          list: { ...listSummary(), displayMode: "pipeline" },
+          stages: [
+            {
+              stage: listItemSummary(),
+              cards: []
+            }
+          ]
+        }),
+      movePipelineCard: async () =>
+        apiOk({
+          ...listItemSummary(),
+          listItemParentId: "list_item_stage_1",
+          depth: 1
+        }),
       bulkAddItems: async () => apiOk([listItemSummary()]),
       listByContainer: async () => apiOk([listSummary()]),
       createList: async () => apiOk(listSummary()),

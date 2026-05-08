@@ -183,6 +183,14 @@ export {
   type ListCardViewModel
 } from "./components/ListCardContent";
 export {
+  PipelineView,
+  type PipelineViewProps
+} from "./components/PipelineView";
+export {
+  PipelineStageColumn,
+  type PipelineStageColumnProps
+} from "./components/PipelineStageColumn";
+export {
   SaveAsTemplateAction,
   type SaveAsTemplateActionProps
 } from "./components/SaveAsTemplateAction";
