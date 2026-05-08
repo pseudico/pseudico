@@ -26,6 +26,7 @@ import {
   type ProjectSummary,
   type RecentWorkspace,
   type RelationshipSummary,
+  type SmartListSummary,
   type WorkspaceJsonExportSummary,
   type WorkspaceIntegritySummary,
   type TaskSummary,
@@ -373,6 +374,21 @@ function createMockApi(
               source: "manual"
             }
           ]
+        }),
+      listSmartLists: async () => apiOk([smartListSummary()]),
+      createSmartList: async () => apiOk(smartListSummary()),
+      updateSmartList: async () => apiOk({ ...smartListSummary(), name: "Due soon" }),
+      previewSmartList: async () =>
+        apiOk({
+          query: smartListSummary().query,
+          total: 0,
+          results: [],
+          groups: [],
+          page: {
+            limit: 50,
+            offset: 0,
+            hasMore: false
+          }
         })
     },
     today: {
@@ -951,6 +967,28 @@ function collectionSummary(): CollectionSummary {
   };
 }
 
+function smartListSummary(): SmartListSummary {
+  return {
+    id: "saved_view_smart_1",
+    workspaceId: "workspace_1",
+    name: "Waiting tasks",
+    description: null,
+    criteria: {
+      itemTypes: ["task"],
+      taskStatuses: ["waiting"],
+      dueFilter: "today"
+    },
+    query: {
+      version: 1,
+      match: "all",
+      conditions: [{ field: "taskStatus", operator: "is", value: "waiting" }]
+    },
+    isFavorite: false,
+    createdAt: "2026-04-30T00:00:00.000Z",
+    updatedAt: "2026-04-30T00:00:00.000Z"
+  };
+}
+
 function collectionEvaluationSummary(): CollectionEvaluationSummary {
   return {
     collection: collectionSummary(),
@@ -1299,6 +1337,27 @@ describe("desktop API client", () => {
             slug: "finance"
           }
         ]
+      }
+    });
+    await expect(client.collections.listSmartLists()).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: "saved_view_smart_1",
+          name: "Waiting tasks"
+        }
+      ]
+    });
+    await expect(
+      client.collections.previewSmartList({
+        criteria: {
+          dueFilter: "today"
+        }
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        total: 0
       }
     });
     await expect(client.today.getViewModel()).resolves.toMatchObject({

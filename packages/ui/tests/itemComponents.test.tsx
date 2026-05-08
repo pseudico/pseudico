@@ -30,6 +30,7 @@ import {
   RecentActivityWidget,
   ReminderPicker,
   renderLoadableState,
+  SmartListEditor,
   TodayWidget,
   TodayLane,
   TodayTaskCard,
@@ -145,6 +146,41 @@ describe("Universal item UI", () => {
     expect(html).toContain("Any category");
     expect(html).toContain("Finance");
     expect(html).toContain("2");
+  });
+
+  it("renders the smart-list criteria editor", () => {
+    const html = renderToStaticMarkup(
+      <SmartListEditor
+        categoryOptions={[
+          {
+            id: "category_1",
+            label: "Finance",
+            value: "category_1",
+            count: 2
+          }
+        ]}
+        previewCount={3}
+        tagOptions={[
+          {
+            id: "tag_1",
+            label: "@Finance",
+            value: "finance",
+            count: 4
+          }
+        ]}
+        validationMessage="Query is valid."
+        onPreview={() => undefined}
+        onSave={() => undefined}
+      />
+    );
+
+    expect(html).toContain("Advanced criteria");
+    expect(html).toContain("Item type");
+    expect(html).toContain("Container type");
+    expect(html).toContain("Task status");
+    expect(html).toContain("Due relative filter");
+    expect(html).toContain("Save smart list");
+    expect(html).toContain("Preview found 3 results.");
   });
 
   it("renders a safe placeholder for unknown item types", () => {

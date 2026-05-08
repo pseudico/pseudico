@@ -52,6 +52,16 @@ export {
   type CreateCollectionFormValues,
   type CreateCollectionMode
 } from "./forms/CreateCollectionForm";
+export {
+  SmartListEditor,
+  type SmartListEditorContainerType,
+  type SmartListEditorDueFilter,
+  type SmartListEditorItemType,
+  type SmartListEditorMetadataOption,
+  type SmartListEditorProps,
+  type SmartListEditorTaskStatus,
+  type SmartListEditorValues
+} from "./forms/SmartListEditor";
 
 export {
   ItemActionsMenu,

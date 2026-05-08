@@ -28,4 +28,20 @@ export function registerCollectionIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.collections.createTaskInCollection,
     (_event, input) => handlers.handleCreateTaskInCollection(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.collections.listSmartLists,
+    (_event, input) => handlers.handleListSmartLists(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.collections.createSmartList,
+    (_event, input) => handlers.handleCreateSmartList(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.collections.updateSmartList,
+    (_event, input) => handlers.handleUpdateSmartList(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.collections.previewSmartList,
+    (_event, input) => handlers.handlePreviewSmartList(input)
+  );
 }

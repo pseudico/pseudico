@@ -9,6 +9,11 @@ export {
   toCollectionSummary
 } from "./CollectionService";
 export {
+  SmartListService,
+  mapFormToSavedViewQuery,
+  toSmartListSummary
+} from "./SmartListService";
+export {
   SAVED_VIEW_QUERY_VERSION,
   parseSavedViewQueryJson,
   stringifySavedViewQuery,
@@ -30,6 +35,16 @@ export type {
   CreateTagCollectionInput,
   CreateTaskInCollectionInput
 } from "./CollectionService";
+export type {
+  CreateSmartListInput,
+  PreviewSmartListInput,
+  SmartListContainerType,
+  SmartListCriteriaForm,
+  SmartListDueFilter,
+  SmartListPreviewResult,
+  SmartListSummary,
+  UpdateSmartListInput
+} from "./SmartListService";
 export type {
   SavedViewGroupBy,
   SavedViewQuery,

@@ -204,7 +204,15 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       evaluateCollection: (collectionId) =>
         callApi(() => api.collections.evaluateCollection(collectionId)),
       createTaskInCollection: (input) =>
-        callApi(() => api.collections.createTaskInCollection(input))
+        callApi(() => api.collections.createTaskInCollection(input)),
+      listSmartLists: (workspaceId) =>
+        callApi(() => api.collections.listSmartLists(workspaceId)),
+      createSmartList: (input) =>
+        callApi(() => api.collections.createSmartList(input)),
+      updateSmartList: (input) =>
+        callApi(() => api.collections.updateSmartList(input)),
+      previewSmartList: (input) =>
+        callApi(() => api.collections.previewSmartList(input))
     },
     today: {
       getViewModel: (input) =>
@@ -493,7 +501,15 @@ export const desktopApiClient: LocalWorkOsApi = {
     evaluateCollection: (collectionId) =>
       getDesktopApiClient().collections.evaluateCollection(collectionId),
     createTaskInCollection: (input) =>
-      getDesktopApiClient().collections.createTaskInCollection(input)
+      getDesktopApiClient().collections.createTaskInCollection(input),
+    listSmartLists: (workspaceId) =>
+      getDesktopApiClient().collections.listSmartLists(workspaceId),
+    createSmartList: (input) =>
+      getDesktopApiClient().collections.createSmartList(input),
+    updateSmartList: (input) =>
+      getDesktopApiClient().collections.updateSmartList(input),
+    previewSmartList: (input) =>
+      getDesktopApiClient().collections.previewSmartList(input)
   },
   today: {
     getViewModel: (input) =>

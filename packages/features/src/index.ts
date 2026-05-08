@@ -98,12 +98,15 @@ export {
   SAVED_VIEW_QUERY_VERSION,
   CollectionService,
   SavedViewService,
+  SmartListService,
   createKeywordCollectionQuery,
   createTagCollectionQuery,
+  mapFormToSavedViewQuery,
   parseSavedViewQueryJson,
   savedViewsModuleContract,
   stringifySavedViewQuery,
   toCollectionSummary,
+  toSmartListSummary,
   validateSavedViewQuery
 } from "./savedViews";
 export {
@@ -315,6 +318,8 @@ export type {
   CreateKeywordCollectionInput,
   CreateTagCollectionInput,
   CreateTaskInCollectionInput,
+  CreateSmartListInput,
+  PreviewSmartListInput,
   SavedViewEvaluationResult,
   SavedViewGroupBy,
   SavedViewMutationResult,
@@ -330,6 +335,12 @@ export type {
   SavedViewSort,
   SavedViewSortDirection,
   SavedViewSortField,
+  SmartListContainerType,
+  SmartListCriteriaForm,
+  SmartListDueFilter,
+  SmartListPreviewResult,
+  SmartListSummary,
+  UpdateSmartListInput,
   UpdateSavedViewInput
 } from "./savedViews";
 export type {
