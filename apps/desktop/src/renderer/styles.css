@@ -3038,3 +3038,146 @@ a {
   align-items: center;
   gap: 4px;
 }
+
+.timeline-page {
+  display: grid;
+  gap: 18px;
+}
+
+.timeline-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #e6dfcf;
+  border-radius: 18px;
+  background: #fffaf0;
+}
+
+.timeline-filter-bar label {
+  display: grid;
+  gap: 6px;
+  color: #5c574f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.timeline-filter-bar input,
+.timeline-filter-bar select {
+  min-height: 36px;
+  border: 1px solid #d8d0c1;
+  border-radius: 10px;
+  background: #fff;
+  color: #25221d;
+  padding: 0 10px;
+}
+
+.timeline-checkbox {
+  display: inline-flex !important;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  min-height: 36px;
+}
+
+.timeline-view {
+  display: grid;
+  gap: 16px;
+}
+
+.timeline-group {
+  display: grid;
+  gap: 12px;
+  border: 1px solid #dedbd1;
+  border-radius: 18px;
+  background: #fff;
+  padding: 16px;
+}
+
+.timeline-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.timeline-group-header div {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timeline-group-header h3 {
+  margin: 0;
+}
+
+.timeline-group-header span {
+  color: #6d6a62;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.timeline-group-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.timeline-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.timeline-list-item {
+  display: grid;
+  grid-template-columns: minmax(190px, 240px) 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.timeline-item-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #5c574f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.timeline-item-card {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  border: 1px solid #e8e1d2;
+  border-radius: 14px;
+  background: #fffaf0;
+  color: inherit;
+  cursor: pointer;
+  padding: 12px;
+  text-align: left;
+}
+
+.timeline-item-card:hover,
+.timeline-item-card:focus-visible {
+  border-color: #245c55;
+  outline: none;
+}
+
+.timeline-item-title {
+  font-weight: 900;
+}
+
+.timeline-item-meta,
+.timeline-item-body {
+  color: #6d6a62;
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .timeline-list-item {
+    grid-template-columns: 1fr;
+  }
+}

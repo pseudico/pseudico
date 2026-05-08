@@ -9,6 +9,7 @@ export type AppRouteId =
   | "tagsCategories"
   | "search"
   | "dashboard"
+  | "timeline"
   | "settings";
 
 export type AppRoute = {
@@ -99,6 +100,14 @@ export const appRoutes = [
     label: "Dashboard",
     title: "Dashboard",
     summary: "Workspace status widgets will appear here.",
+    nav: true
+  },
+  {
+    id: "timeline",
+    path: "/timeline",
+    label: "Timeline",
+    title: "Timeline",
+    summary: "Dated task workload grouped by project or category.",
     nav: true
   },
   {

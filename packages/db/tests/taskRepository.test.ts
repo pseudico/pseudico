@@ -168,12 +168,70 @@ describe("TaskRepository", () => {
       endExclusive: "2026-05-10T00:00:00.000Z"
     }).map((task) => task.item.id)).toEqual(["item_upcoming"]);
   });
+
+  it("lists timeline tasks overlapping a date range with optional completed tasks", () => {
+    const repository = new TaskRepository(connection);
+    createTaskProjection({
+      itemId: "item_due_inside",
+      title: "Due inside",
+      dueAt: "2026-05-02T08:00:00.000Z",
+      taskStatus: "open"
+    });
+    createTaskProjection({
+      itemId: "item_span_overlap",
+      title: "Span overlap",
+      startAt: "2026-05-01T08:00:00.000Z",
+      dueAt: "2026-05-04T08:00:00.000Z",
+      taskStatus: "waiting"
+    });
+    createTaskProjection({
+      itemId: "item_before",
+      title: "Before",
+      dueAt: "2026-05-01T08:00:00.000Z",
+      taskStatus: "open"
+    });
+    createTaskProjection({
+      itemId: "item_completed",
+      title: "Completed",
+      dueAt: "2026-05-02T10:00:00.000Z",
+      taskStatus: "done"
+    });
+    createTaskProjection({
+      itemId: "item_cancelled",
+      title: "Cancelled",
+      dueAt: "2026-05-02T11:00:00.000Z",
+      taskStatus: "cancelled"
+    });
+
+    const range = {
+      startInclusive: "2026-05-02T00:00:00.000Z",
+      endExclusive: "2026-05-03T00:00:00.000Z"
+    };
+
+    expect(repository.listTimelineBetween({
+      workspaceId: "workspace_1",
+      range
+    }).map((task) => task.item.id)).toEqual([
+      "item_span_overlap",
+      "item_due_inside"
+    ]);
+    expect(repository.listTimelineBetween({
+      workspaceId: "workspace_1",
+      range,
+      includeCompleted: true
+    }).map((task) => task.item.id)).toEqual([
+      "item_span_overlap",
+      "item_due_inside",
+      "item_completed"
+    ]);
+  });
 });
 
 function createTaskProjection(input: {
   itemId: string;
   title: string;
   dueAt: string;
+  startAt?: string | null;
   taskStatus: "open" | "done" | "waiting" | "cancelled";
 }) {
   const item = createTaskItem(input.itemId, input.title);
@@ -181,6 +239,7 @@ function createTaskProjection(input: {
     itemId: item.id,
     workspaceId: item.workspaceId,
     taskStatus: input.taskStatus,
+    startAt: input.startAt,
     dueAt: input.dueAt,
     timestamp: TEST_TIMESTAMP
   });

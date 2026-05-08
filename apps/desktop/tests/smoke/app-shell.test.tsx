@@ -15,6 +15,7 @@ const expectedRoutePaths = [
   "/tags-categories",
   "/search",
   "/dashboard",
+  "/timeline",
   "/settings"
 ];
 
@@ -33,6 +34,7 @@ describe("desktop shell routes", () => {
       "Tags & Categories",
       "Search",
       "Dashboard",
+      "Timeline",
       "Settings"
     ]);
   });

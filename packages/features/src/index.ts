@@ -109,7 +109,7 @@ export {
 } from "./search";
 export { TaskService, tasksModuleContract } from "./tasks";
 export { TabService, tabsModuleContract } from "./tabs";
-export { timelineModuleContract } from "./timeline";
+export { TimelineService, timelineModuleContract } from "./timeline";
 export {
   DEFAULT_TODAY_BACKLOG_DAYS,
   TODAY_BACKLOG_DAYS_SETTING_KEY,
@@ -343,7 +343,17 @@ export type {
   TaskServiceIdFactory,
   UpdateTaskInput
 } from "./tasks";
-export type { TimelineService } from "./timeline";
+export type {
+  GroupTimelineItemsInput,
+  TimelineDateRange,
+  TimelineGroup,
+  TimelineGroupBy,
+  TimelineItem,
+  TimelineItemsInput,
+  TimelineRangeInput,
+  TimelineTaskNavigationTarget,
+  TimelineViewModel
+} from "./timeline";
 export type {
   DailyPlanDateInput,
   DailyPlanServiceIdFactory,

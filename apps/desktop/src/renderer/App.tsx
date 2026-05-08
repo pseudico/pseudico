@@ -12,6 +12,7 @@ import { ProjectsPage } from "./pages/ProjectsPage";
 import { SearchPage } from "./pages/SearchPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { TagsCategoriesPage } from "./pages/TagsCategoriesPage";
+import { TimelinePage } from "./pages/TimelinePage";
 import { TodayPage } from "./pages/TodayPage";
 import { WelcomePage } from "./pages/WelcomePage";
 import { WorkspaceHomePage } from "./pages/WorkspaceHomePage";
@@ -33,6 +34,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/tags-categories" element={<TagsCategoriesPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/timeline" element={<TimelinePage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/welcome" replace />} />

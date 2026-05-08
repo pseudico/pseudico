@@ -321,6 +321,46 @@ export class TaskRepository {
     return this.listDueBetween(workspaceId, range);
   }
 
+  listTimelineBetween(input: {
+    workspaceId: string;
+    range: TaskDateRange;
+    includeCompleted?: boolean;
+  }): TaskWithItemRecord[] {
+    const statuses =
+      input.includeCompleted === true
+        ? "'open', 'waiting', 'done'"
+        : "'open', 'waiting'";
+    const completedFilter =
+      input.includeCompleted === true
+        ? ""
+        : "and i.completed_at is null and td.completed_at is null";
+    const rows = this.connection.sqlite
+      .prepare<[string, string, string], TaskWithItemRow>(
+        `${TASK_WITH_ITEM_SELECT}
+         where td.workspace_id = ?
+           and i.type = 'task'
+           and i.archived_at is null
+           and i.deleted_at is null
+           and td.task_status in (${statuses})
+           ${completedFilter}
+           and (td.start_at is not null or td.due_at is not null)
+           and coalesce(td.start_at, td.due_at) < ?
+           and coalesce(td.due_at, td.start_at) >= ?
+         order by
+           coalesce(td.start_at, td.due_at) asc,
+           coalesce(td.due_at, td.start_at) asc,
+           i.sort_order asc,
+           i.created_at asc`
+      )
+      .all(
+        input.workspaceId,
+        input.range.endExclusive,
+        input.range.startInclusive
+      );
+
+    return rows.map(toTaskWithItemRecord);
+  }
+
   listByContainer(containerId: string): TaskWithItemRecord[] {
     const rows = this.connection.sqlite
       .prepare<[string], TaskWithItemRow>(
