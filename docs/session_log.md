@@ -745,3 +745,12 @@ Files changed:
 - packages/core; packages/db; packages/features; apps/desktop; packages/ui; docs
 Open questions / risks: Manual app QA not run in GUI; automated coverage added.
 Next actions: Review diff; commit/push; open PR.
+
+## 2026-05-09T07:18:37.0971658+10:00
+Objective: Open PSE-80 PR and update Linear.
+Decisions made:
+- Opened PR #77 and moved PSE-80 to PR Open with the PR attached.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub CI is still in progress; no review threads yet.
+Next actions: Monitor CI; fix if needed; merge if clean.
