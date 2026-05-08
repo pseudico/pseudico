@@ -741,6 +741,76 @@ export type GetPlannedTasksInput = DailyPlanDateInput & {
   lane?: DailyPlanLane;
 };
 
+export type TimelineGroupBy = "project" | "category";
+
+export type TimelineDateRangeSummary = {
+  startInclusive: string;
+  endExclusive: string;
+};
+
+export type TimelineRangeInput = {
+  start: string | Date;
+  end: string | Date;
+};
+
+export type TimelineViewModelInput = TimelineRangeInput & {
+  workspaceId?: string;
+  includeCompleted?: boolean;
+  groupBy?: TimelineGroupBy;
+};
+
+export type TimelineNavigationTargetSummary = {
+  targetType: "item";
+  targetId: string;
+  containerId: string;
+  workspaceId: string;
+};
+
+export type TimelineItemSummary = {
+  itemId: string;
+  workspaceId: string;
+  title: string;
+  body: string | null;
+  containerId: string;
+  containerName: string;
+  containerType: string;
+  containerColor: string | null;
+  categoryId: string | null;
+  categoryName: string | null;
+  categoryColor: string | null;
+  taskStatus: TaskStatus;
+  itemStatus: string;
+  priority: number | null;
+  startAt: string | null;
+  dueAt: string | null;
+  timelineStartAt: string;
+  timelineEndAt: string;
+  allDay: boolean;
+  completedAt: string | null;
+  updatedAt: string;
+  navigationTarget: TimelineNavigationTargetSummary;
+};
+
+export type TimelineGroupSummary = {
+  key: string;
+  label: string;
+  groupBy: TimelineGroupBy;
+  color: string | null;
+  itemCount: number;
+  completedCount: number;
+  items: TimelineItemSummary[];
+};
+
+export type TimelineViewModelSummary = {
+  workspaceId: string;
+  generatedAt: string;
+  range: TimelineDateRangeSummary;
+  includeCompleted: boolean;
+  groupBy: TimelineGroupBy;
+  totalCount: number;
+  groups: TimelineGroupSummary[];
+};
+
 export type CreateTagCollectionInput = {
   workspaceId?: string;
   tagSlug: string;
@@ -1537,6 +1607,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     reorderPlannedTask: "local-work-os:today:reorder-planned-task",
     getPlannedTasks: "local-work-os:today:get-planned-tasks"
   },
+  timeline: {
+    getViewModel: "local-work-os:timeline:get-view-model"
+  },
   dashboard: {
     getDefault: "local-work-os:dashboard:get-default"
   },
@@ -1895,6 +1968,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.today.getPlannedTasks]: {
     input: GetPlannedTasksInput | undefined;
     result: ApiResult<PlannedTaskSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.timeline.getViewModel]: {
+    input: TimelineViewModelInput;
+    result: ApiResult<TimelineViewModelSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.getDefault]: {
     input: GetDefaultDashboardInput | undefined;
@@ -2287,6 +2364,11 @@ export type LocalWorkOsApi = {
     getPlannedTasks: (
       input?: GetPlannedTasksInput
     ) => Promise<ApiResult<PlannedTaskSummary[]>>;
+  };
+  timeline?: {
+    getViewModel: (
+      input: TimelineViewModelInput
+    ) => Promise<ApiResult<TimelineViewModelSummary>>;
   };
   dashboard: {
     getDefault: (
@@ -2708,6 +2790,10 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.reorderPlannedTask, input),
       getPlannedTasks: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.getPlannedTasks, input)
+    },
+    timeline: {
+      getViewModel: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.timeline.getViewModel, input)
     },
     dashboard: {
       getDefault: (input) =>

@@ -125,6 +125,12 @@ export {
   type TodayLaneProps
 } from "./components/TodayLane";
 export {
+  TimelineView,
+  type TimelineViewGroup,
+  type TimelineViewItem,
+  type TimelineViewProps
+} from "./components/TimelineView";
+export {
   TodayTaskCard,
   type TodayTaskCardProps,
   type TodayTaskCardViewModel
