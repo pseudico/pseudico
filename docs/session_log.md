@@ -289,3 +289,13 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Commit needs amended with this log entry before push.
 Next actions: Amend commit; push branch; open PR.
+
+## 2026-05-08 13:50:33 +10:00
+Objective: Open PSE-72 PR and update Linear.
+Decisions made:
+- Pushed branch codex/PSE-72-reminders and opened GitHub PR #69.
+- Moved PSE-72 to PR Open with PR attachment and check summary comment.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub CI/review/merge gate pending.
+Next actions: Check CI/review; merge if clean; promote next Codex Ready issue.
