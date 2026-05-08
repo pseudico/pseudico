@@ -10,6 +10,7 @@ export type AppRouteId =
   | "search"
   | "dashboard"
   | "timeline"
+  | "calendar"
   | "settings";
 
 export type AppRoute = {
@@ -108,6 +109,14 @@ export const appRoutes = [
     label: "Timeline",
     title: "Timeline",
     summary: "Dated task workload grouped by project or category.",
+    nav: true
+  },
+  {
+    id: "calendar",
+    path: "/calendar",
+    label: "Calendar",
+    title: "Calendar",
+    summary: "Month view of local dated tasks and list items.",
     nav: true
   },
   {

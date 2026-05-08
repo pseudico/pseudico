@@ -131,6 +131,12 @@ export {
   type TimelineViewProps
 } from "./components/TimelineView";
 export {
+  MonthCalendar,
+  type MonthCalendarDay,
+  type MonthCalendarItem,
+  type MonthCalendarProps
+} from "./components/MonthCalendar";
+export {
   TodayTaskCard,
   type TodayTaskCardProps,
   type TodayTaskCardViewModel

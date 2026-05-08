@@ -85,6 +85,7 @@ export {
   type CreateListItemInput,
   type ListDetailsRecord,
   type ListItemRecord,
+  type ListItemWithListRecord,
   type ListItemsFilter as ListRowItemsFilter,
   type ListWithItemRecord,
   type UpdateListItemPatch

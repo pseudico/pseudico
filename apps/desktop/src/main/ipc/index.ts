@@ -3,6 +3,7 @@ import { app } from "electron";
 import { registerCategoryIpc } from "./registerCategoryIpc";
 import { registerActivityIpc } from "./registerActivityIpc";
 import { registerBackupIpc } from "./registerBackupIpc";
+import { registerCalendarIpc } from "./registerCalendarIpc";
 import { registerCollectionIpc } from "./registerCollectionIpc";
 import { registerContactIpc } from "./registerContactIpc";
 import { registerContainerIpc } from "./registerContainerIpc";
@@ -78,6 +79,7 @@ export function registerDesktopIpc(
   registerCollectionIpc(services.workspaceService);
   registerTodayIpc(services.workspaceService);
   registerTimelineIpc(services.workspaceService);
+  registerCalendarIpc(services.workspaceService);
   registerDashboardIpc(services.workspaceService);
   registerContainerIpc();
   registerItemIpc(services.workspaceService);

@@ -3,6 +3,7 @@ import { ErrorBoundary } from "./shell/ErrorBoundary";
 import { AppShell } from "./shell/AppShell";
 import { ToastHost } from "./shell/toastStore";
 import { CollectionsPage } from "./pages/CollectionsPage";
+import { CalendarPage } from "./pages/CalendarPage";
 import { ContactsPage } from "./pages/ContactsPage";
 import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -35,6 +36,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/timeline" element={<TimelinePage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/welcome" replace />} />

@@ -121,6 +121,67 @@ describe("ListRepository", () => {
     ]);
     expect(repository.getMaxListItemSortOrder("item_list_1")).toBe(3072);
   });
+
+  it("lists dated checklist rows in a bounded range", () => {
+    createPersistedList();
+    const repository = new ListRepository(connection);
+    repository.createListItem({
+      id: "list_item_1",
+      workspaceId: "workspace_1",
+      listId: "item_list_1",
+      title: "Book venue",
+      dueAt: "2026-05-15T12:00:00.000Z",
+      timestamp: TEST_TIMESTAMP
+    });
+    repository.createListItem({
+      id: "list_item_2",
+      workspaceId: "workspace_1",
+      listId: "item_list_1",
+      title: "Completed prep",
+      dueAt: "2026-05-15T13:00:00.000Z",
+      status: "done",
+      completedAt: TEST_TIMESTAMP_LATER,
+      timestamp: TEST_TIMESTAMP
+    });
+    repository.createListItem({
+      id: "list_item_3",
+      workspaceId: "workspace_1",
+      listId: "item_list_1",
+      title: "Outside month",
+      dueAt: "2026-06-15T12:00:00.000Z",
+      timestamp: TEST_TIMESTAMP
+    });
+
+    const activeRows = repository.listDatedItemsBetween({
+      workspaceId: "workspace_1",
+      range: {
+        startInclusive: "2026-05-01T00:00:00.000Z",
+        endExclusive: "2026-06-01T00:00:00.000Z"
+      }
+    });
+    const allRows = repository.listDatedItemsBetween({
+      workspaceId: "workspace_1",
+      includeCompleted: true,
+      range: {
+        startInclusive: "2026-05-01T00:00:00.000Z",
+        endExclusive: "2026-06-01T00:00:00.000Z"
+      }
+    });
+
+    expect(activeRows.map((row) => row.listItem.title)).toEqual(["Book venue"]);
+    expect(allRows.map((row) => row.listItem.title)).toEqual([
+      "Book venue",
+      "Completed prep"
+    ]);
+    expect(activeRows[0]).toMatchObject({
+      list: {
+        item: {
+          id: "item_list_1",
+          containerId: "container_1"
+        }
+      }
+    });
+  });
 });
 
 function createPersistedList() {

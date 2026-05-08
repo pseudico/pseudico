@@ -14,9 +14,13 @@ Does not own:
 - Task lifecycle internals.
 - Timeline rendering.
 
+Implemented service methods:
+
+- `getCalendarMonth`
+- `getCalendarDayItems`
+
 Likely service methods later:
 
-- `listCalendarEntries`
 - `createTaskFromCalendarDate`
 - `moveEntryToDate`
 - `importLocalIcsFile`
