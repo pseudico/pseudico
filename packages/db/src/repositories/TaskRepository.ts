@@ -81,6 +81,7 @@ export type CreateTaskDetailsInput = {
   dueAt?: string | null;
   allDay?: boolean;
   timezone?: string | null;
+  reminderPolicyId?: string | null;
   completedAt?: string | null;
 };
 
@@ -91,6 +92,7 @@ export type UpdateTaskDetailsPatch = {
   dueAt?: string | null;
   allDay?: boolean;
   timezone?: string | null;
+  reminderPolicyId?: string | null;
   completedAt?: string | null;
   timestamp: string;
 };
@@ -188,10 +190,11 @@ export class TaskRepository {
           due_at,
           all_day,
           timezone,
+          reminder_policy_id,
           completed_at,
           created_at,
           updated_at
-        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
         input.itemId,
@@ -202,6 +205,7 @@ export class TaskRepository {
         input.dueAt ?? null,
         input.allDay === false ? 0 : 1,
         input.timezone ?? null,
+        input.reminderPolicyId ?? null,
         input.completedAt ?? null,
         input.timestamp,
         input.timestamp
@@ -248,6 +252,11 @@ export class TaskRepository {
     if (patch.timezone !== undefined) {
       assignments.push("timezone = ?");
       values.push(patch.timezone);
+    }
+
+    if (patch.reminderPolicyId !== undefined) {
+      assignments.push("reminder_policy_id = ?");
+      values.push(patch.reminderPolicyId);
     }
 
     if (patch.completedAt !== undefined) {

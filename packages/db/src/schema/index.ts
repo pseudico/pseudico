@@ -15,6 +15,7 @@ export { listDetails } from "./listDetails";
 export { listItems } from "./listItems";
 export { noteDetails } from "./noteDetails";
 export { relationships } from "./relationships";
+export { reminderEvents, reminderPolicies } from "./reminders";
 export { savedViews } from "./savedViews";
 export { searchIndex } from "./searchIndex";
 export { tags } from "./tags";
@@ -22,4 +23,4 @@ export { taggings } from "./taggings";
 export { taskDetails } from "./taskDetails";
 export { workspaces } from "./workspaces";
 
-export const schemaVersion = 2;
+export const schemaVersion = 3;

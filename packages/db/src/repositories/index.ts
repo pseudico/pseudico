@@ -143,6 +143,18 @@ export {
   type RelationshipRecord
 } from "./RelationshipRepository";
 export {
+  ReminderRepository,
+  type CreateReminderEventInput,
+  type CreateReminderPolicyInput,
+  type ReminderEventRecord,
+  type ReminderEventStatus,
+  type ReminderPolicyMode,
+  type ReminderPolicyRecord,
+  type ReminderPolicyStatus,
+  type UpdateReminderEventPatch,
+  type UpdateReminderPolicyPatch
+} from "./ReminderRepository";
+export {
   SavedViewRepository,
   type CreateSavedViewInput,
   type ListSavedViewsFilter,

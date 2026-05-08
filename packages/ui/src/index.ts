@@ -139,6 +139,11 @@ export {
   type SnoozePreset
 } from "./components/SnoozeMenu";
 export {
+  ReminderPicker,
+  type ReminderPickerProps,
+  type ReminderPickerValue
+} from "./components/ReminderPicker";
+export {
   ChecklistEditor,
   type ChecklistEditorItem,
   type ChecklistEditorProps

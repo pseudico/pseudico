@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(100);
+    expect(channels).toHaveLength(104);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -47,6 +47,7 @@ describe("typed preload API", () => {
       "database",
       "inbox",
       "tasks",
+      "reminders",
       "lists",
       "notes",
       "links",
@@ -582,6 +583,58 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.tasks.listByContainer,
         input: "container_1"
+      }
+    ]);
+  });
+
+  it("routes reminder calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.reminders!.setTaskReminder({
+      workspaceId: "workspace_1",
+      taskId: "item_1",
+      leadMinutes: 30
+    });
+    await api.reminders!.clearTaskReminder({ taskId: "item_1" });
+    await api.reminders!.dismissReminder({ eventId: "reminder_event_1" });
+    await api.reminders!.snoozeReminder({
+      eventId: "reminder_event_1",
+      until: "2026-05-02T11:00:00.000Z"
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.reminders.setTaskReminder,
+        input: {
+          workspaceId: "workspace_1",
+          taskId: "item_1",
+          leadMinutes: 30
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.reminders.clearTaskReminder,
+        input: { taskId: "item_1" }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.reminders.dismissReminder,
+        input: { eventId: "reminder_event_1" }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.reminders.snoozeReminder,
+        input: {
+          eventId: "reminder_event_1",
+          until: "2026-05-02T11:00:00.000Z"
+        }
       }
     ]);
   });

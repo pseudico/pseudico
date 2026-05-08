@@ -28,6 +28,7 @@ import {
   ProjectHealthWidget,
   RecentActivityList,
   RecentActivityWidget,
+  ReminderPicker,
   renderLoadableState,
   TodayWidget,
   TodayLane,
@@ -378,6 +379,21 @@ describe("Universal item UI", () => {
     expect(laneHtml).toContain("Today");
     expect(laneHtml).toContain("Tasks due today.");
     expect(laneHtml).toContain("Call accountant");
+  });
+
+  it("renders reminder picker presets and clear action", () => {
+    const html = renderToStaticMarkup(
+      <ReminderPicker
+        value={{ mode: "relative", leadMinutes: 60 }}
+        onClearReminder={() => undefined}
+        onSetReminder={() => undefined}
+      />
+    );
+
+    expect(html).toContain("Reminder");
+    expect(html).toContain("1 hour before");
+    expect(html).toContain("Clear");
+    expect(html).toContain("data-reminder-mode=\"relative\"");
   });
 
   it("renders dashboard widget states and rows", () => {
