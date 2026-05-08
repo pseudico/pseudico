@@ -216,6 +216,11 @@ export {
   type FileCardViewModel
 } from "./components/FileCardContent";
 export {
+  FileVersionHistory,
+  type FileVersionHistoryProps,
+  type FileVersionViewModel
+} from "./components/FileVersionHistory";
+export {
   LinkCardContent,
   type LinkCardContentProps,
   type LinkCardViewModel

@@ -304,7 +304,15 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       updateMetadata: (input) =>
         callApi(() => api.files.updateMetadata(input)),
       verifyAttachment: (attachmentId) =>
-        callApi(() => api.files.verifyAttachment(attachmentId))
+        callApi(() => api.files.verifyAttachment(attachmentId)),
+      createFileSnapshot: (input) =>
+        callApi(() => api.files.createFileSnapshot(input)),
+      listFileVersions: (attachmentId) =>
+        callApi(() => api.files.listFileVersions(attachmentId)),
+      openFileVersion: (versionId) =>
+        callApi(() => api.files.openFileVersion(versionId)),
+      restoreFileVersion: (input) =>
+        callApi(() => api.files.restoreFileVersion(input))
     },
     backup: {
       createManualBackup: (input) =>
@@ -625,7 +633,15 @@ export const desktopApiClient: LocalWorkOsApi = {
     updateMetadata: (input) =>
       getDesktopApiClient().files.updateMetadata(input),
     verifyAttachment: (attachmentId) =>
-      getDesktopApiClient().files.verifyAttachment(attachmentId)
+      getDesktopApiClient().files.verifyAttachment(attachmentId),
+    createFileSnapshot: (input) =>
+      getDesktopApiClient().files.createFileSnapshot(input),
+    listFileVersions: (attachmentId) =>
+      getDesktopApiClient().files.listFileVersions(attachmentId),
+    openFileVersion: (versionId) =>
+      getDesktopApiClient().files.openFileVersion(versionId),
+    restoreFileVersion: (input) =>
+      getDesktopApiClient().files.restoreFileVersion(input)
   },
   backup: {
     createManualBackup: (input) =>

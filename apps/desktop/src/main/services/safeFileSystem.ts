@@ -1,7 +1,11 @@
-import { createReadStream } from "node:fs";
+import { createReadStream, createWriteStream } from "node:fs";
 import { createHash } from "node:crypto";
 import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
-import { createAttachmentStorageRelativePath } from "@local-work-os/core";
+import { pipeline } from "node:stream/promises";
+import {
+  createAttachmentStorageRelativePath,
+  createAttachmentVersionStorageRelativePath
+} from "@local-work-os/core";
 import {
   basename,
   dirname,
@@ -21,6 +25,14 @@ export type CopyFileIntoWorkspaceInput = {
 
 export type CopiedWorkspaceFile = {
   attachmentId: string;
+  originalName: string;
+  storedName: string;
+  storagePath: string;
+  sizeBytes: number;
+  checksum: string;
+};
+
+export type CopiedWorkspaceFileVersion = {
   originalName: string;
   storedName: string;
   storagePath: string;
@@ -253,6 +265,96 @@ export async function copyFileIntoWorkspace(
     storedName,
     storagePath: validateWorkspaceRelativePath(storagePath),
     sizeBytes: copiedStats.size,
+    checksum: await calculateChecksum(destinationPath)
+  };
+}
+
+export async function createAttachmentVersionSnapshot(input: {
+  workspaceRootPath: string;
+  attachmentStoragePath: string;
+  originalName: string;
+  storedName: string;
+  versionNumber: number;
+}): Promise<CopiedWorkspaceFileVersion> {
+  if (!Number.isInteger(input.versionNumber) || input.versionNumber <= 0) {
+    throw new WorkspaceFileSystemError(
+      "INVALID_PATH",
+      "Version number must be a positive integer."
+    );
+  }
+
+  const sourcePath = resolveInsideWorkspace(
+    input.workspaceRootPath,
+    input.attachmentStoragePath
+  );
+  const sourceStats = await stat(sourcePath);
+
+  if (!sourceStats.isFile()) {
+    throw new WorkspaceFileSystemError(
+      "INVALID_PATH",
+      "Attachment path must point to a file."
+    );
+  }
+
+  const storagePath = validateWorkspaceRelativePath(
+    createAttachmentVersionStorageRelativePath({
+      attachmentStoragePath: input.attachmentStoragePath,
+      versionNumber: input.versionNumber,
+      storedName: input.storedName
+    })
+  );
+  const destinationPath = resolveInsideWorkspace(
+    input.workspaceRootPath,
+    storagePath
+  );
+
+  await ensureDirectory(dirname(destinationPath));
+  await pipeline(createReadStream(sourcePath), createWriteStream(destinationPath));
+
+  const copiedStats = await stat(destinationPath);
+
+  return {
+    originalName: input.originalName,
+    storedName: input.storedName,
+    storagePath,
+    sizeBytes: copiedStats.size,
+    checksum: await calculateChecksum(destinationPath)
+  };
+}
+
+export async function restoreAttachmentFileFromVersion(input: {
+  workspaceRootPath: string;
+  attachmentStoragePath: string;
+  versionStoragePath: string;
+}): Promise<{
+  sizeBytes: number;
+  checksum: string;
+}> {
+  const sourcePath = resolveInsideWorkspace(
+    input.workspaceRootPath,
+    input.versionStoragePath
+  );
+  const sourceStats = await stat(sourcePath);
+
+  if (!sourceStats.isFile()) {
+    throw new WorkspaceFileSystemError(
+      "INVALID_PATH",
+      "Attachment version path must point to a file."
+    );
+  }
+
+  const destinationPath = resolveInsideWorkspace(
+    input.workspaceRootPath,
+    input.attachmentStoragePath
+  );
+
+  await ensureDirectory(dirname(destinationPath));
+  await pipeline(createReadStream(sourcePath), createWriteStream(destinationPath));
+
+  const restoredStats = await stat(destinationPath);
+
+  return {
+    sizeBytes: restoredStats.size,
     checksum: await calculateChecksum(destinationPath)
   };
 }

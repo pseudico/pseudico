@@ -6,3 +6,11 @@ export type {
   FileAttachmentMutationResult,
   FileAttachmentServiceIdFactory
 } from "./FileAttachmentService";
+export { FileVersionService } from "./FileVersionService";
+export type {
+  CopiedAttachmentVersionFileInput,
+  CreateFileSnapshotInput,
+  FileVersionMutationResult,
+  FileVersionServiceIdFactory,
+  RestoreFileVersionInput
+} from "./FileVersionService";

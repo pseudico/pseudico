@@ -2,9 +2,14 @@ export {
   AttachmentRepository,
   type CreateAttachmentInput,
   type ListAttachmentsByWorkspaceInput,
-  type ListAttachmentsForItemInput
+  type ListAttachmentsForItemInput,
+  type UpdateAttachmentStorageMetadataPatch
 } from "./AttachmentRepository";
-export type { AttachmentRecord } from "@local-work-os/core";
+export type { AttachmentRecord, AttachmentVersionRecord } from "@local-work-os/core";
+export {
+  AttachmentVersionRepository,
+  type CreateAttachmentVersionInput
+} from "./AttachmentVersionRepository";
 export {
   ActivityLogRepository,
   type ActivityLogPageResult,

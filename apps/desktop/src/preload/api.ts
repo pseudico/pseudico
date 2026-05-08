@@ -473,6 +473,44 @@ export type UpdateFileMetadataInput = {
   actorType?: "local_user" | "system" | "importer";
 };
 
+export type AttachmentVersionSummary = {
+  id: string;
+  workspaceId: string;
+  attachmentId: string;
+  versionNumber: number;
+  originalName: string;
+  storedName: string;
+  sizeBytes: number;
+  checksum: string;
+  storagePath: string;
+  note: string | null;
+  createdAt: string;
+  deletedAt: string | null;
+};
+
+export type FileVersionMutationSummary = {
+  attachment: FileAttachmentSummary;
+  version: AttachmentVersionSummary;
+};
+
+export type CreateFileSnapshotInput = {
+  attachmentId: string;
+  note?: string | null;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type RestoreFileVersionInput = {
+  versionId: string;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type OpenFileVersionSummary = {
+  versionId: string;
+  attachmentId: string;
+  exists: boolean;
+  storagePath: string;
+};
+
 export type VerifyAttachmentSummary = {
   attachmentId: string;
   itemId: string;
@@ -1861,7 +1899,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     openAttachment: "local-work-os:files:open-attachment",
     revealAttachment: "local-work-os:files:reveal-attachment",
     updateMetadata: "local-work-os:files:update-metadata",
-    verifyAttachment: "local-work-os:files:verify-attachment"
+    verifyAttachment: "local-work-os:files:verify-attachment",
+    createFileSnapshot: "local-work-os:files:create-file-snapshot",
+    listFileVersions: "local-work-os:files:list-file-versions",
+    openFileVersion: "local-work-os:files:open-file-version",
+    restoreFileVersion: "local-work-os:files:restore-file-version"
   },
   backup: {
     createManualBackup: "local-work-os:backup:create-manual-backup",
@@ -2333,6 +2375,22 @@ export type LocalWorkOsIpcContracts = {
     input: string;
     result: ApiResult<VerifyAttachmentSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.createFileSnapshot]: {
+    input: CreateFileSnapshotInput;
+    result: ApiResult<FileVersionMutationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.listFileVersions]: {
+    input: string;
+    result: ApiResult<AttachmentVersionSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.openFileVersion]: {
+    input: string;
+    result: ApiResult<OpenFileVersionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.files.restoreFileVersion]: {
+    input: RestoreFileVersionInput;
+    result: ApiResult<FileVersionMutationSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.backup.createManualBackup]: {
     input: CreateManualBackupInput | undefined;
     result: ApiResult<ManualBackupSnapshotSummary>;
@@ -2766,6 +2824,18 @@ export type LocalWorkOsApi = {
     verifyAttachment: (
       attachmentId: string
     ) => Promise<ApiResult<VerifyAttachmentSummary>>;
+    createFileSnapshot: (
+      input: CreateFileSnapshotInput
+    ) => Promise<ApiResult<FileVersionMutationSummary>>;
+    listFileVersions: (
+      attachmentId: string
+    ) => Promise<ApiResult<AttachmentVersionSummary[]>>;
+    openFileVersion: (
+      versionId: string
+    ) => Promise<ApiResult<OpenFileVersionSummary>>;
+    restoreFileVersion: (
+      input: RestoreFileVersionInput
+    ) => Promise<ApiResult<FileVersionMutationSummary>>;
   };
   backup: {
     createManualBackup: (
@@ -3230,7 +3300,15 @@ export function createLocalWorkOsApi(
       updateMetadata: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.updateMetadata, input),
       verifyAttachment: (attachmentId) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.verifyAttachment, attachmentId)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.verifyAttachment, attachmentId),
+      createFileSnapshot: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.createFileSnapshot, input),
+      listFileVersions: (attachmentId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.listFileVersions, attachmentId),
+      openFileVersion: (versionId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.openFileVersion, versionId),
+      restoreFileVersion: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.files.restoreFileVersion, input)
     },
     backup: {
       createManualBackup: (input) =>

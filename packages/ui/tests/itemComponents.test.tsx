@@ -727,15 +727,31 @@ describe("Universal item UI", () => {
         originalName: "Brief.pdf",
         storedName: "Brief.pdf",
         sizeBytes: 2048,
+        checksum: "abc123",
         storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
         description: "Launch brief"
       },
-      missing: true
+      missing: true,
+      versions: [
+        {
+          id: "version_1",
+          versionNumber: 1,
+          originalName: "Brief.pdf",
+          sizeBytes: 2048,
+          checksum: "abc123def456",
+          storagePath:
+            "attachments/2026/05/attachment_1/versions/v1/Brief.pdf",
+          note: "Review copy",
+          createdAt: "2026-05-01T00:00:00.000Z"
+        }
+      ]
     };
     const cardHtml = renderToStaticMarkup(
       <FileCardContent
         item={fileItem}
+        onCreateSnapshot={() => true}
         onOpen={() => undefined}
+        onOpenVersion={() => undefined}
         onReveal={() => undefined}
         onSave={() => true}
       />
@@ -757,6 +773,8 @@ describe("Universal item UI", () => {
     expect(cardHtml).toContain("Open");
     expect(cardHtml).toContain("Reveal");
     expect(cardHtml).toContain("Edit");
+    expect(cardHtml).toContain("Versions (1)");
+    expect(cardHtml).toContain("Snapshot note");
     expect(editorHtml).toContain("File title");
     expect(editorHtml).toContain("Description");
     expect(editorHtml).toContain("Save file");

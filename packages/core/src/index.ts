@@ -49,10 +49,12 @@ export { NOTE_FORMATS, isNoteFormat } from "./entities/Note";
 export type { NoteFormat } from "./entities/Note";
 export {
   ATTACHMENT_STORAGE_ROOT,
-  createAttachmentStorageRelativePath
+  createAttachmentStorageRelativePath,
+  createAttachmentVersionStorageRelativePath
 } from "./entities/Attachment";
 export type {
   AttachmentRecord,
+  AttachmentVersionRecord,
   AttachmentStorageLayout
 } from "./entities/Attachment";
 export { isSupportedLinkProtocol } from "./entities/Link";

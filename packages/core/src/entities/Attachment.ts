@@ -14,6 +14,21 @@ export type AttachmentRecord = {
   deletedAt: string | null;
 };
 
+export type AttachmentVersionRecord = {
+  id: string;
+  workspaceId: string;
+  attachmentId: string;
+  versionNumber: number;
+  originalName: string;
+  storedName: string;
+  sizeBytes: number;
+  checksum: string;
+  storagePath: string;
+  note: string | null;
+  createdAt: string;
+  deletedAt: string | null;
+};
+
 export type AttachmentStorageLayout = {
   year: string;
   month: string;
@@ -31,6 +46,22 @@ export function createAttachmentStorageRelativePath(input: {
     input.layout.year,
     input.layout.month,
     input.layout.attachmentId,
+    input.storedName
+  ].join("/");
+}
+
+export function createAttachmentVersionStorageRelativePath(input: {
+  attachmentStoragePath: string;
+  versionNumber: number;
+  storedName: string;
+}): string {
+  const segments = input.attachmentStoragePath.replace(/\\/g, "/").split("/");
+  segments.pop();
+
+  return [
+    ...segments,
+    "versions",
+    `v${input.versionNumber}`,
     input.storedName
   ].join("/");
 }

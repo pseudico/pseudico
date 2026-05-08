@@ -32,6 +32,7 @@ import {
   type CreateListFormValues,
   type FileCardViewModel,
   type FileMetadataEditorValues,
+  type FileVersionViewModel,
   type ItemActionId,
   type ItemInspectorActivity,
   type ItemInspectorItem,
@@ -51,6 +52,7 @@ import {
 } from "@local-work-os/ui";
 import type {
   ActivitySummary,
+  AttachmentVersionSummary,
   CategorySummary,
   ContainerTabSummary,
   ContactSummary,
@@ -336,12 +338,17 @@ export function ProjectDetailPage({
       );
       setProjectActivity(activityResult.data.map(toRecentActivityViewModel));
       setProjectHealth(toProjectHealthViewModel(healthResult.data));
+      const hydratedFiles = await loadFileVersions(filesResult.data);
+      if (!hydratedFiles.ok) {
+        setItemError(hydratedFiles.error);
+        return;
+      }
       const mergedItems = mergeProjectContent(
         tasksResult.data,
         listsResult.data,
         notesResult.data,
         linksResult.data,
-        filesResult.data,
+        hydratedFiles.data,
         categoriesResult.data
       );
 
@@ -395,12 +402,19 @@ export function ProjectDetailPage({
       return;
     }
 
+    const hydratedFiles = await loadFileVersions(filesResult.data);
+
+    if (!hydratedFiles.ok) {
+      setItemError(hydratedFiles.error);
+      return;
+    }
+
     const mergedItems = mergeProjectContent(
       tasksResult.data,
       listsResult.data,
       notesResult.data,
       linksResult.data,
-      filesResult.data,
+      hydratedFiles.data,
       categories
     );
 
@@ -408,6 +422,38 @@ export function ProjectDetailPage({
     setVisibleItemCount((current) =>
       Math.min(Math.max(current, PROJECT_FEED_PAGE_SIZE), mergedItems.length)
     );
+  }
+
+  async function loadFileVersions(
+    files: readonly FileItemSummary[]
+  ): Promise<{
+    ok: true;
+    data: Array<FileItemSummary & { versions: AttachmentVersionSummary[] }>;
+  } | {
+    ok: false;
+    error: string;
+  }> {
+    const versionResults = await Promise.all(
+      files.map((file) => apiClient.files.listFileVersions(file.attachment.id))
+    );
+    const failed = versionResults.find((result) => !result.ok);
+
+    if (failed !== undefined && !failed.ok) {
+      return {
+        ok: false,
+        error: failed.error.message
+      };
+    }
+
+    return {
+      ok: true,
+      data: files.map((file, index) => ({
+        ...file,
+        versions: versionResults[index]?.ok === true
+          ? versionResults[index].data
+          : []
+      }))
+    };
   }
 
   async function refreshProjectActivity(activeProjectId: string): Promise<void> {
@@ -857,6 +903,76 @@ export function ProjectDetailPage({
     await refreshProjectActivity(project.id);
     setFileBusyId(null);
     return true;
+  }
+
+  async function createProjectFileSnapshot(
+    item: FileCardViewModel,
+    note: string
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setFileBusyId(item.id);
+    setFileError(null);
+
+    const result = await apiClient.files.createFileSnapshot({
+      attachmentId: item.attachment.id,
+      note: note.trim().length === 0 ? null : note
+    });
+
+    if (!result.ok) {
+      setFileBusyId(null);
+      setFileError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    setFileBusyId(null);
+    return true;
+  }
+
+  async function openProjectFileVersion(
+    item: FileCardViewModel,
+    version: FileVersionViewModel
+  ): Promise<void> {
+    setFileBusyId(item.id);
+    setFileError(null);
+
+    const result = await apiClient.files.openFileVersion(version.id);
+
+    setFileBusyId(null);
+
+    if (!result.ok) {
+      setFileError(result.error.message);
+    }
+  }
+
+  async function restoreProjectFileVersion(
+    item: FileCardViewModel,
+    version: FileVersionViewModel
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setFileBusyId(item.id);
+    setFileError(null);
+
+    const result = await apiClient.files.restoreFileVersion({
+      versionId: version.id
+    });
+
+    if (!result.ok) {
+      setFileBusyId(null);
+      setFileError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    setFileBusyId(null);
   }
 
   async function openProjectLink(item: LinkCardViewModel): Promise<void> {
@@ -1380,6 +1496,9 @@ export function ProjectDetailPage({
             onOpen={openProjectFile}
             onReveal={revealProjectFile}
             onSave={updateProjectFileMetadata}
+            onCreateSnapshot={createProjectFileSnapshot}
+            onOpenVersion={openProjectFileVersion}
+            onRestoreVersion={restoreProjectFileVersion}
           />
         </>
       );
@@ -1830,7 +1949,7 @@ function toProjectNoteViewModel(
 }
 
 function toProjectFileViewModel(
-  file: FileItemSummary,
+  file: FileItemSummary & { versions?: AttachmentVersionSummary[] },
   categories: readonly CategorySummary[]
 ): ProjectFileViewModel {
   return {
@@ -1857,7 +1976,23 @@ function toProjectFileViewModel(
       storagePath: file.attachment.storagePath,
       description: file.attachment.description
     },
-    missing: file.missing
+    missing: file.missing,
+    versions: (file.versions ?? []).map(toFileVersionViewModel)
+  };
+}
+
+function toFileVersionViewModel(
+  version: AttachmentVersionSummary
+): FileVersionViewModel {
+  return {
+    id: version.id,
+    versionNumber: version.versionNumber,
+    originalName: version.originalName,
+    sizeBytes: version.sizeBytes,
+    checksum: version.checksum,
+    storagePath: version.storagePath,
+    note: version.note,
+    createdAt: version.createdAt
   };
 }
 
@@ -1908,7 +2043,7 @@ function mergeProjectContent(
   lists: readonly ListSummary[],
   notes: readonly NoteSummary[],
   links: readonly LinkSummary[],
-  files: readonly FileItemSummary[],
+  files: ReadonlyArray<FileItemSummary & { versions?: AttachmentVersionSummary[] }>,
   categories: readonly CategorySummary[] = []
 ): ProjectFeedViewModel[] {
   return [

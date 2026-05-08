@@ -72,7 +72,7 @@ export {
   exportModuleContract,
   WORKSPACE_EXPORT_SCHEMA_VERSION
 } from "./export";
-export { FileAttachmentService, filesModuleContract } from "./files";
+export { FileAttachmentService, FileVersionService, filesModuleContract } from "./files";
 export { ImportValidationService, importModuleContract } from "./import";
 export { IntegrityCheckService, diagnosticsModuleContract } from "./diagnostics";
 export { InboxService, inboxModuleContract } from "./inbox";
@@ -217,8 +217,13 @@ export type {
   AttachFileToContainerInput,
   AttachFileToItemInput,
   CopiedAttachmentFileInput,
+  CopiedAttachmentVersionFileInput,
+  CreateFileSnapshotInput,
   FileAttachmentMutationResult,
-  FileAttachmentServiceIdFactory
+  FileAttachmentServiceIdFactory,
+  FileVersionMutationResult,
+  FileVersionServiceIdFactory,
+  RestoreFileVersionInput
 } from "./files";
 export type {
   ImportValidationCounts,

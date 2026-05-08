@@ -1,11 +1,15 @@
-import { createLocalId, type AttachmentRecord } from "@local-work-os/core";
+import {
+  createLocalId,
+  type AttachmentRecord,
+  type AttachmentVersionRecord
+} from "@local-work-os/core";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
   type DatabaseConnection,
   type ItemRecord
 } from "@local-work-os/db";
-import { FileAttachmentService } from "@local-work-os/features";
+import { FileAttachmentService, FileVersionService } from "@local-work-os/features";
 import {
   apiError,
   apiOk,
@@ -16,14 +20,21 @@ import {
   type FileAttachmentResultSummary,
   type FileItemSummary,
   type FileAttachmentSummary,
+  type AttachmentVersionSummary,
+  type CreateFileSnapshotInput,
+  type FileVersionMutationSummary,
   type ItemSummary,
+  type OpenFileVersionSummary,
   type OpenAttachmentSummary,
+  type RestoreFileVersionInput,
   type UpdateFileMetadataInput,
   type VerifyAttachmentSummary,
   type WorkspaceSummary
 } from "../../preload/api";
 import {
+  createAttachmentVersionSnapshot,
   copyFileIntoWorkspace,
+  restoreAttachmentFileFromVersion,
   localPathExists,
   resolveInsideWorkspace,
   type CopiedWorkspaceFile
@@ -60,6 +71,18 @@ type FileIpcHandlers = {
   handleVerifyAttachment: (
     input: unknown
   ) => Promise<ApiResult<VerifyAttachmentSummary>>;
+  handleCreateFileSnapshot: (
+    input: unknown
+  ) => Promise<ApiResult<FileVersionMutationSummary>>;
+  handleListFileVersions: (
+    input: unknown
+  ) => Promise<ApiResult<AttachmentVersionSummary[]>>;
+  handleOpenFileVersion: (
+    input: unknown
+  ) => Promise<ApiResult<OpenFileVersionSummary>>;
+  handleRestoreFileVersion: (
+    input: unknown
+  ) => Promise<ApiResult<FileVersionMutationSummary>>;
 };
 
 export type FileIpcPlatform = {
@@ -293,6 +316,140 @@ export function createFileIpcHandlers(
             )
           )
       );
+    },
+
+    async handleCreateFileSnapshot(input) {
+      if (!isCreateFileSnapshotInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "createFileSnapshot requires an attachmentId string."
+        );
+      }
+
+      return await withFileServices(workspaceService, async (context) => {
+        const attachment = context.fileAttachmentService.getAttachmentById(
+          input.attachmentId
+        );
+
+        if (attachment === null) {
+          return apiError("WORKSPACE_ERROR", "Attachment was not found.");
+        }
+
+        const versionNumber =
+          context.fileVersionService.getNextVersionNumber(attachment.id);
+        const versionFile = await createAttachmentVersionSnapshot({
+          workspaceRootPath: context.workspace.rootPath,
+          attachmentStoragePath: attachment.storagePath,
+          originalName: attachment.originalName,
+          storedName: attachment.storedName,
+          versionNumber
+        });
+        const result = await context.fileVersionService.createFileSnapshot({
+          attachmentId: attachment.id,
+          versionFile,
+          ...(input.note === undefined ? {} : { note: input.note }),
+          ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+        });
+
+        return apiOk(toFileVersionMutationSummary(result));
+      });
+    },
+
+    async handleListFileVersions(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "listFileVersions requires an attachmentId string."
+        );
+      }
+
+      return await withFileServices(workspaceService, async (context) =>
+        apiOk(
+          context.fileVersionService
+            .listFileVersions(input)
+            .map(toAttachmentVersionSummary)
+        )
+      );
+    },
+
+    async handleOpenFileVersion(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "openFileVersion requires a versionId string."
+        );
+      }
+
+      return await withResolvedFileVersion(
+        workspaceService,
+        input,
+        async (context) => {
+          if (!(await localPathExists(context.localPath))) {
+            return apiError("WORKSPACE_ERROR", "Attachment version file is missing.");
+          }
+
+          const error = await platform.openPath(context.localPath);
+
+          if (error.trim().length > 0) {
+            return apiError("WORKSPACE_ERROR", error);
+          }
+
+          return apiOk(toOpenFileVersionSummary(context.version, true));
+        }
+      );
+    },
+
+    async handleRestoreFileVersion(input) {
+      if (!isRestoreFileVersionInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "restoreFileVersion requires a versionId string."
+        );
+      }
+
+      return await withFileServices(workspaceService, async (context) => {
+        const version = context.fileVersionService.getFileVersion(input.versionId);
+
+        if (version === null) {
+          return apiError("WORKSPACE_ERROR", "Attachment version was not found.");
+        }
+
+        const attachment = context.fileAttachmentService.getAttachmentById(
+          version.attachmentId
+        );
+
+        if (attachment === null) {
+          return apiError("WORKSPACE_ERROR", "Attachment was not found.");
+        }
+
+        const backupVersionNumber =
+          context.fileVersionService.getNextVersionNumber(attachment.id);
+        const backupVersionFile = await createAttachmentVersionSnapshot({
+          workspaceRootPath: context.workspace.rootPath,
+          attachmentStoragePath: attachment.storagePath,
+          originalName: attachment.originalName,
+          storedName: attachment.storedName,
+          versionNumber: backupVersionNumber
+        });
+        await context.fileVersionService.createFileSnapshot({
+          attachmentId: attachment.id,
+          versionFile: backupVersionFile,
+          note: `Automatic safety snapshot before restoring version ${version.versionNumber}.`,
+          ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+        });
+        const restoredFile = await restoreAttachmentFileFromVersion({
+          workspaceRootPath: context.workspace.rootPath,
+          attachmentStoragePath: attachment.storagePath,
+          versionStoragePath: version.storagePath
+        });
+        const result = await context.fileVersionService.restoreFileVersion({
+          versionId: version.id,
+          restoredFile,
+          ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+        });
+
+        return apiOk(toFileVersionMutationSummary(result));
+      });
     }
   };
 }
@@ -332,6 +489,43 @@ async function withFileAttachmentService<T>(
   }
 }
 
+async function withFileServices<T>(
+  workspaceService: CurrentWorkspaceService,
+  operation: (context: {
+    connection: DatabaseConnection;
+    fileAttachmentService: FileAttachmentService;
+    fileVersionService: FileVersionService;
+    workspace: WorkspaceSummary;
+  }) => Promise<ApiResult<T>>
+): Promise<ApiResult<T>> {
+  const workspace = workspaceService.getCurrentWorkspace();
+
+  if (workspace === null) {
+    return apiError("WORKSPACE_ERROR", "No workspace is open.");
+  }
+
+  const connection = await createDatabaseConnection({
+    databasePath: resolveWorkspaceDatabasePath(workspace.rootPath),
+    fileMustExist: true
+  });
+
+  try {
+    return await operation({
+      connection,
+      fileAttachmentService: new FileAttachmentService({ connection }),
+      fileVersionService: new FileVersionService({ connection }),
+      workspace
+    });
+  } catch (error) {
+    return apiError(
+      "WORKSPACE_ERROR",
+      error instanceof Error ? error.message : "File version operation failed."
+    );
+  } finally {
+    connection.close();
+  }
+}
+
 async function withResolvedAttachment<T>(
   workspaceService: CurrentWorkspaceService,
   attachmentId: string,
@@ -358,6 +552,31 @@ async function withResolvedAttachment<T>(
   });
 }
 
+async function withResolvedFileVersion<T>(
+  workspaceService: CurrentWorkspaceService,
+  versionId: string,
+  operation: (context: {
+    version: AttachmentVersionSummary;
+    localPath: string;
+  }) => Promise<ApiResult<T>>
+): Promise<ApiResult<T>> {
+  return await withFileServices(workspaceService, async (context) => {
+    const version = context.fileVersionService.getFileVersion(versionId);
+
+    if (version === null) {
+      return apiError("WORKSPACE_ERROR", "Attachment version was not found.");
+    }
+
+    return await operation({
+      version: toAttachmentVersionSummary(version),
+      localPath: resolveInsideWorkspace(
+        context.workspace.rootPath,
+        version.storagePath
+      )
+    });
+  });
+}
+
 function toFileAttachmentResultSummary(input: {
   item: ItemRecord;
   attachment: AttachmentRecord;
@@ -365,6 +584,16 @@ function toFileAttachmentResultSummary(input: {
   return {
     item: toItemSummary(input.item),
     attachment: toFileAttachmentSummary(input.attachment)
+  };
+}
+
+function toFileVersionMutationSummary(input: {
+  attachment: AttachmentRecord;
+  version: AttachmentVersionRecord;
+}): FileVersionMutationSummary {
+  return {
+    attachment: toFileAttachmentSummary(input.attachment),
+    version: toAttachmentVersionSummary(input.version)
   };
 }
 
@@ -406,6 +635,37 @@ function toFileAttachmentSummary(
     createdAt: attachment.createdAt,
     updatedAt: attachment.updatedAt,
     deletedAt: attachment.deletedAt
+  };
+}
+
+function toAttachmentVersionSummary(
+  version: AttachmentVersionRecord
+): AttachmentVersionSummary {
+  return {
+    id: version.id,
+    workspaceId: version.workspaceId,
+    attachmentId: version.attachmentId,
+    versionNumber: version.versionNumber,
+    originalName: version.originalName,
+    storedName: version.storedName,
+    sizeBytes: version.sizeBytes,
+    checksum: version.checksum,
+    storagePath: version.storagePath,
+    note: version.note,
+    createdAt: version.createdAt,
+    deletedAt: version.deletedAt
+  };
+}
+
+function toOpenFileVersionSummary(
+  version: AttachmentVersionSummary,
+  exists: boolean
+): OpenFileVersionSummary {
+  return {
+    versionId: version.id,
+    attachmentId: version.attachmentId,
+    exists,
+    storagePath: version.storagePath
   };
 }
 
@@ -481,6 +741,27 @@ function isUpdateFileMetadataInput(
     isOptionalNullableString(input.description) &&
     isOptionalActorType(input.actorType) &&
     (input.title !== undefined || input.description !== undefined)
+  );
+}
+
+function isCreateFileSnapshotInput(
+  input: unknown
+): input is CreateFileSnapshotInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.attachmentId) &&
+    isOptionalNullableString(input.note) &&
+    isOptionalActorType(input.actorType)
+  );
+}
+
+function isRestoreFileVersionInput(
+  input: unknown
+): input is RestoreFileVersionInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.versionId) &&
+    isOptionalActorType(input.actorType)
   );
 }
 

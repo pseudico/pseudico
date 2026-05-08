@@ -47,6 +47,12 @@ export type UpdateAttachmentPatch = {
   timestamp: string;
 };
 
+export type UpdateAttachmentStorageMetadataPatch = {
+  checksum: string;
+  sizeBytes: number;
+  timestamp: string;
+};
+
 export class AttachmentRepository {
   private readonly connection: DatabaseConnection;
 
@@ -171,6 +177,30 @@ export class AttachmentRepository {
            and deleted_at is null`
       )
       .run(...values);
+
+    const updated = this.getById(id);
+
+    if (updated === null) {
+      throw new Error(`Attachment row was not found: ${id}.`);
+    }
+
+    return updated;
+  }
+
+  updateStorageMetadata(
+    id: string,
+    patch: UpdateAttachmentStorageMetadataPatch
+  ): AttachmentRecord {
+    this.connection.sqlite
+      .prepare(
+        `update attachments
+         set size_bytes = ?,
+             checksum = ?,
+             updated_at = ?
+         where id = ?
+           and deleted_at is null`
+      )
+      .run(patch.sizeBytes, patch.checksum, patch.timestamp, id);
 
     const updated = this.getById(id);
 

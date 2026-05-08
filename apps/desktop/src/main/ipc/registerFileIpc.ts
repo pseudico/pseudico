@@ -55,4 +55,20 @@ export function registerFileIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.files.verifyAttachment,
     (_event, input) => handlers.handleVerifyAttachment(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.files.createFileSnapshot,
+    (_event, input) => handlers.handleCreateFileSnapshot(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.files.listFileVersions,
+    (_event, input) => handlers.handleListFileVersions(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.files.openFileVersion,
+    (_event, input) => handlers.handleOpenFileVersion(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.files.restoreFileVersion,
+    (_event, input) => handlers.handleRestoreFileVersion(input)
+  );
 }

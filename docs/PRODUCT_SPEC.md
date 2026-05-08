@@ -23,7 +23,7 @@ and data-integrity/search audit guidance.
 
 The implemented slice remains an MVP foundation, not the full product described
 below. Contacts, timeline, calendar, templates, workflow automation, browser
-capture, file versions, backup restore, full import execution, rich notes,
+capture, backup restore, full import execution, rich notes,
 custom dashboard editing, and advanced saved-view builder UX remain future work
 unless a later Linear issue explicitly brings them into scope.
 
@@ -2140,7 +2140,7 @@ MVP should prove the object graph and core usability.
 | Tasks | Create/edit/complete/due date | Implemented with services, repositories, UI flows, Today projections, snooze/reschedule, and activity/search integration. |
 | Lists | Basic checklist | Implemented with list service, checklist rows, parser, and project UI integration. |
 | Notes | Markdown notes | Implemented with note service, previews, project UI integration, and search projection. |
-| Files | Attach/open local file items | Implemented with safe workspace attachment storage, open/reveal/edit/missing-state UI, metadata, and search hydration. File versions remain future work. |
+| Files | Attach/open local file items | Implemented with safe workspace attachment storage, open/reveal/edit/missing-state UI, metadata, search hydration, and local version snapshots. |
 | Links | Local URL/link items | Implemented with link service, link cards, and local metadata. Browser capture remains future work. |
 | Tags | Inline `@tag` parsing | Implemented through metadata services and tag/category browser surfaces. |
 | Categories | Create/assign colour category | Implemented for category creation/assignment and browsing. |

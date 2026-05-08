@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -189,7 +189,7 @@ describe("database IPC handlers", () => {
       ok: true,
       data: {
         connected: true,
-          schemaVersion: 6,
+          schemaVersion: 7,
         workspaceExists: true,
         inboxExists: true,
         defaultDashboardExists: true,
@@ -395,6 +395,78 @@ describe("file IPC handlers", () => {
         }
       }
     });
+    await writeFile(
+      join(tempRoot, ...attached.data.attachment.storagePath.split("/")),
+      "snapshot contents",
+      "utf8"
+    );
+    const snapshot = await handlers.handleCreateFileSnapshot({
+      attachmentId: attached.data.attachment.id,
+      note: "Review copy"
+    });
+
+    expect(snapshot).toMatchObject({
+      ok: true,
+      data: {
+        attachment: {
+          id: attached.data.attachment.id
+        },
+        version: {
+          versionNumber: 1,
+          note: "Review copy",
+          storagePath: expect.stringContaining("/versions/v1/")
+        }
+      }
+    });
+
+    if (!snapshot.ok) {
+      throw new Error(snapshot.error.message);
+    }
+
+    await expect(
+      handlers.handleListFileVersions(attached.data.attachment.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          id: snapshot.data.version.id,
+          versionNumber: 1
+        }
+      ]
+    });
+    await expect(
+      handlers.handleOpenFileVersion(snapshot.data.version.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        versionId: snapshot.data.version.id,
+        exists: true
+      }
+    });
+    await writeFile(
+      join(tempRoot, ...attached.data.attachment.storagePath.split("/")),
+      "changed after snapshot",
+      "utf8"
+    );
+    await expect(
+      handlers.handleRestoreFileVersion({
+        versionId: snapshot.data.version.id
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        attachment: {
+          id: attached.data.attachment.id,
+          sizeBytes: 17
+        },
+        version: {
+          id: snapshot.data.version.id
+        }
+      }
+    });
+    await expect(
+      readFile(join(tempRoot, ...attached.data.attachment.storagePath.split("/")), "utf8")
+    ).resolves.toBe("snapshot contents");
     await expect(
       handlers.handleChooseAndAttach({
         workspaceId: "workspace_1",
