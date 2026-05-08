@@ -17,9 +17,9 @@ new work should account for this implemented baseline:
 
 - Implemented MVP/V1 flows: Workspace, Inbox, Projects, Contacts, Content Tabs,
   Tasks, Lists, Notes, Files, Links, Metadata, Search, Saved Views/Collections,
-  Today, Dashboard, Templates (list templates only), Backup, Export, Import
+  Today, Dashboard, Templates (list and project/contact container templates), Backup, Export, Import
   validation, Activity Log, Database, and diagnostics.
-- Future or placeholder-heavy flows: Timeline, Calendar, broader Templates, Workflows,
+- Future or placeholder-heavy flows: Timeline, Calendar, portable/broader Templates, Workflows,
   file versions, full import/restore execution,
   custom dashboard editing, advanced saved-view builder UX, and browser capture.
 - Local reminders now have database, service, IPC, scheduler, and shared picker

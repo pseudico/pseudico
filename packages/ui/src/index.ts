@@ -181,6 +181,16 @@ export {
   type SaveAsTemplateActionProps
 } from "./components/SaveAsTemplateAction";
 export {
+  TemplateLibrary,
+  type TemplateLibraryItem,
+  type TemplateLibraryProps
+} from "./components/TemplateLibrary";
+export {
+  CreateFromTemplateDialog,
+  type CreateFromTemplateDialogProps,
+  type CreateFromTemplateDialogValues
+} from "./forms/CreateFromTemplateDialog";
+export {
   NoteCardContent,
   type NoteCardContentProps,
   type NoteCardViewModel

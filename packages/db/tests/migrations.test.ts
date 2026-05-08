@@ -68,7 +68,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version four", () => {
+  it("runs on an empty database and records schema version five", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -92,14 +92,19 @@ describe("schema migrations", () => {
           version: 4,
           name: "templates",
           checksum: "pse-76-templates-v1"
+        },
+        {
+          version: 5,
+          name: "container_templates",
+          checksum: "pse-77-container-templates-v1"
         }
       ],
-      currentVersion: 4
+      currentVersion: 5
     });
-    expect(service.getCurrentSchemaVersion()).toBe(4);
+    expect(service.getCurrentSchemaVersion()).toBe(5);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 4
+      currentVersion: 5
     });
   });
 

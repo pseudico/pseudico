@@ -1,7 +1,7 @@
 import type { DatabaseConnection } from "../connection/createDatabaseConnection";
 
-export type TemplateKind = "list";
-export type TemplateSourceType = "list";
+export type TemplateKind = "list" | "project" | "contact";
+export type TemplateSourceType = "list" | "project" | "contact";
 
 type TemplateRow = {
   id: string;

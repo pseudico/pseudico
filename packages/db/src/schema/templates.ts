@@ -31,7 +31,7 @@ export const templates = sqliteTable(
       table.sourceType,
       table.sourceId
     ),
-    check("ck_templates_kind", sql`${table.kind} in ('list')`),
-    check("ck_templates_source_type", sql`${table.sourceType} in ('list')`)
+    check("ck_templates_kind", sql`${table.kind} in ('list', 'project', 'contact')`),
+    check("ck_templates_source_type", sql`${table.sourceType} in ('list', 'project', 'contact')`)
   ]
 );

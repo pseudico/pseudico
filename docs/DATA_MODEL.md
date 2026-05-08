@@ -97,9 +97,10 @@ object graph:
   dashboard foundations.
 - `daily_plans` and `daily_plan_items` store Today/Tomorrow/Backlog planning
   state.
-- `templates` stores local reusable definitions; the first implemented kind is
-  a list template JSON payload with source-list metadata, copied tag/category
-  references, list rows, and relative day offsets for dated rows.
+- `templates` stores local reusable definitions. It supports list templates and
+  project/contact container templates with tabs, tasks, lists, notes, link/file
+  placeholders, contact fields, copied tag/category references, and relative day
+  offsets for dated tasks/list rows.
 - `activity_log` records the activity trail used by later write services.
 - `search_index` is a normal SQLite table placeholder for local search
   projections; the search ticket may replace or augment it with FTS5 while
@@ -136,8 +137,9 @@ The contact foundation now stores contact containers plus flexible profile
 fields behind repository and service APIs. The reminder foundation now stores
 task reminder policies and scheduled reminder events in `reminder_policies` and
 `reminder_events`, with task rows pointing at the active local policy when one
-exists. The template foundation now stores list templates only; broader
-project/contact/note/template types remain future work. The data model still intentionally reserves future shape for
+exists. The template foundation stores list templates and project/contact
+container templates; note/tab imports and portable template files remain future
+work. The data model still intentionally reserves future shape for
 timeline/calendar views, workflow runs, file versions, backup
 restore/import execution, and richer saved-view builder state. Add those
 through scoped migrations and repository/service tickets rather than expanding

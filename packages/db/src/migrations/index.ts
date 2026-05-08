@@ -2,6 +2,7 @@ import { initialSchemaSql } from "./0001_initial_schema";
 import { contactFieldsSql } from "./0002_contact_fields";
 import { remindersSql } from "./0003_reminders";
 import { templatesSql } from "./0004_templates";
+import { containerTemplatesSql } from "./0005_container_templates";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -28,5 +29,11 @@ export const migrations: MigrationDefinition[] = [
     name: "templates",
     sql: templatesSql,
     checksum: "pse-76-templates-v1"
+  },
+  {
+    version: 5,
+    name: "container_templates",
+    sql: containerTemplatesSql,
+    checksum: "pse-77-container-templates-v1"
   }
 ];

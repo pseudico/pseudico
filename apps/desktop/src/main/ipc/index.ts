@@ -25,6 +25,7 @@ import { registerReminderIpc } from "./registerReminderIpc";
 import { registerSearchIpc } from "./registerSearchIpc";
 import { registerTaskIpc } from "./registerTaskIpc";
 import { registerTabIpc } from "./registerTabIpc";
+import { registerTemplateIpc } from "./registerTemplateIpc";
 import { registerTimelineIpc } from "./registerTimelineIpc";
 import { registerTodayIpc } from "./registerTodayIpc";
 import { registerWorkspaceIpc } from "./registerWorkspaceIpc";
@@ -69,6 +70,7 @@ export function registerDesktopIpc(
   registerReminderIpc(services.workspaceService);
   registerTaskIpc(services.workspaceService);
   registerListIpc(services.workspaceService);
+  registerTemplateIpc(services.workspaceService);
   registerNoteIpc(services.workspaceService);
   registerLinkIpc(services.workspaceService);
   registerCategoryIpc(services.workspaceService);

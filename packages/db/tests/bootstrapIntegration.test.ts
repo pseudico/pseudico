@@ -43,7 +43,7 @@ describe("database bootstrap integration", () => {
       workspaceName: seed.workspaceName
     });
 
-    expect(bootstrap.schemaVersion).toBe(4);
+    expect(bootstrap.schemaVersion).toBe(5);
     expect(bootstrap.seed.systemInbox.created).toBe(true);
     expect(bootstrap.seed.workspaceCreatedActivity.created).toBe(true);
 
@@ -68,7 +68,7 @@ describe("database bootstrap integration", () => {
     expect(workspace).toMatchObject({
       id: seed.workspaceId,
       name: seed.workspaceName,
-      schemaVersion: 4
+      schemaVersion: 5
     });
     expect(inbox).toMatchObject({
       workspaceId: seed.workspaceId,
@@ -85,7 +85,7 @@ describe("database bootstrap integration", () => {
     });
     expect(health).toMatchObject({
       connected: true,
-      schemaVersion: 4,
+      schemaVersion: 5,
       migrationTableAvailable: true,
       pendingMigrationCount: 0,
       error: null

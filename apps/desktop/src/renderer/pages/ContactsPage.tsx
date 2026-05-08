@@ -3,12 +3,15 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ContactForm,
+  CreateFromTemplateDialog,
   EmptyState,
   ErrorState,
+  TemplateLibrary,
   renderLoadableState,
-  type ContactFormValues
+  type ContactFormValues,
+  type TemplateLibraryItem
 } from "@local-work-os/ui";
-import type { ContactSummary, LocalWorkOsApi } from "../../preload/api";
+import type { ContactSummary, LocalWorkOsApi, TemplateSummary } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
 
@@ -27,6 +30,10 @@ export function ContactsPage({
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [templates, setTemplates] = useState<TemplateSummary[]>([]);
+  const [templateSavingId, setTemplateSavingId] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateSummary | null>(null);
+  const [applyingTemplateId, setApplyingTemplateId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,6 +62,16 @@ export function ContactsPage({
       }
 
       setContacts(result.data);
+      if (apiClient.templates !== undefined) {
+        const templateResult = await apiClient.templates.listTemplates({
+          workspaceId,
+          kind: "contact"
+        });
+
+        if (active && templateResult.ok) {
+          setTemplates(templateResult.data);
+        }
+      }
     }
 
     void loadContacts();
@@ -91,6 +108,66 @@ export function ContactsPage({
     setCreateOpen(false);
     setContacts((current) => [result.data.contact, ...current]);
     navigate(`/contacts/${result.data.contact.id}`);
+  }
+
+  async function saveContactAsTemplate(contact: ContactSummary): Promise<void> {
+    setTemplateSavingId(contact.id);
+    setError(null);
+
+    if (apiClient.templates === undefined) {
+      setError("Template library is unavailable.");
+      return;
+    }
+
+    const result = await apiClient.templates.saveContainerAsTemplate({
+      containerId: contact.id,
+      name: `${contact.name} template`
+    });
+
+    setTemplateSavingId(null);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setTemplates((current) => [result.data, ...current]);
+  }
+
+  async function createContactFromTemplate(values: { name: string; baseDate: string }): Promise<void> {
+    if (currentWorkspace === null || selectedTemplate === null) {
+      return;
+    }
+
+    setApplyingTemplateId(selectedTemplate.id);
+    setError(null);
+
+    if (apiClient.templates === undefined) {
+      setError("Template library is unavailable.");
+      return;
+    }
+
+    const result = await apiClient.templates.createContainerFromTemplate({
+      templateId: selectedTemplate.id,
+      workspaceId: currentWorkspace.id,
+      baseDate: values.baseDate,
+      ...(values.name.trim().length === 0 ? {} : { name: values.name })
+    });
+
+    setApplyingTemplateId(null);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    const contact = result.data.container;
+
+    if (contact.type === "contact") {
+      setSelectedTemplate(null);
+      setContacts((current) => [contact, ...current]);
+      navigate(`/contacts/${contact.id}`);
+    }
   }
 
   if (currentWorkspace === null) {
@@ -145,6 +222,23 @@ export function ContactsPage({
         <ContactForm submitting={creating} onSubmit={createContact} />
       </dialog>
 
+      <CreateFromTemplateDialog
+        open={selectedTemplate !== null}
+        templateName={selectedTemplate?.name ?? "Template"}
+        submitting={applyingTemplateId !== null}
+        onClose={() => setSelectedTemplate(null)}
+        onSubmit={createContactFromTemplate}
+      />
+
+      <TemplateLibrary
+        kind="contact"
+        templates={templates.map(toTemplateLibraryItem)}
+        applyingTemplateId={applyingTemplateId}
+        onApplyTemplate={(template) =>
+          setSelectedTemplate(templates.find((entry) => entry.id === template.id) ?? null)
+        }
+      />
+
       <div className="project-list-panel" aria-busy={loading}>
         {renderLoadableState({
           loading,
@@ -155,7 +249,12 @@ export function ContactsPage({
         ) : (
           <div className="project-list" aria-label="Contacts">
             {contacts.map((contact) => (
-              <ContactListRow key={contact.id} contact={contact} />
+              <ContactListRow
+                key={contact.id}
+                contact={contact}
+                savingTemplate={templateSavingId === contact.id}
+                onSaveTemplate={saveContactAsTemplate}
+              />
             ))}
           </div>
         ))}
@@ -185,25 +284,49 @@ function ContactsEmptyState({
 }
 
 function ContactListRow({
-  contact
+  contact,
+  savingTemplate,
+  onSaveTemplate
 }: {
   contact: ContactSummary;
+  savingTemplate: boolean;
+  onSaveTemplate: (contact: ContactSummary) => void;
 }): React.JSX.Element {
   return (
-    <Link className="project-list-row" to={`/contacts/${contact.id}`}>
-      <span
-        className="project-list-color"
-        style={{ backgroundColor: contact.color ?? "#2c6b8f" }}
-        aria-hidden="true"
-      />
-      <span className="project-list-main">
-        <strong>{contact.name}</strong>
-        <span>{contact.description ?? "No description"}</span>
-      </span>
+    <div className="project-list-row">
+      <Link className="project-list-main" to={`/contacts/${contact.id}`}>
+        <span
+          className="project-list-color"
+          style={{ backgroundColor: contact.color ?? "#2c6b8f" }}
+          aria-hidden="true"
+        />
+        <span>
+          <strong>{contact.name}</strong>
+          <span>{contact.description ?? "No description"}</span>
+        </span>
+      </Link>
       <span className="project-list-meta">
         {contact.isFavorite ? <Star size={16} aria-label="Pinned" /> : null}
         <span>{contact.status}</span>
+        <button
+          type="button"
+          className="secondary-button compact-button"
+          disabled={savingTemplate}
+          onClick={() => onSaveTemplate(contact)}
+        >
+          {savingTemplate ? "Saving..." : "Save as template"}
+        </button>
       </span>
-    </Link>
+    </div>
   );
+}
+
+function toTemplateLibraryItem(template: TemplateSummary): TemplateLibraryItem {
+  return {
+    id: template.id,
+    kind: "contact",
+    name: template.name,
+    description: template.description,
+    updatedAt: template.updatedAt
+  };
 }
