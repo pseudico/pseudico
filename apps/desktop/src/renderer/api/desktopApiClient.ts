@@ -210,7 +210,11 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       listCategoriesWithCounts: (workspaceId) =>
         callApi(() => api.metadata.listCategoriesWithCounts(workspaceId)),
       listTargetsByMetadata: (input) =>
-        callApi(() => api.metadata.listTargetsByMetadata(input))
+        callApi(() => api.metadata.listTargetsByMetadata(input)),
+      addTagToTarget: (input) =>
+        callApi(() => api.metadata.addTagToTarget(input)),
+      removeTagFromTarget: (input) =>
+        callApi(() => api.metadata.removeTagFromTarget(input))
     },
     search: {
       searchWorkspace: (input) =>
@@ -571,7 +575,11 @@ export const desktopApiClient: LocalWorkOsApi = {
     listCategoriesWithCounts: (workspaceId) =>
       getDesktopApiClient().metadata.listCategoriesWithCounts(workspaceId),
     listTargetsByMetadata: (input) =>
-      getDesktopApiClient().metadata.listTargetsByMetadata(input)
+      getDesktopApiClient().metadata.listTargetsByMetadata(input),
+    addTagToTarget: (input) =>
+      getDesktopApiClient().metadata.addTagToTarget(input),
+    removeTagFromTarget: (input) =>
+      getDesktopApiClient().metadata.removeTagFromTarget(input)
   },
   search: {
     searchWorkspace: (input) =>

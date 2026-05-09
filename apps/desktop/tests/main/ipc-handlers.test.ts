@@ -817,6 +817,32 @@ describe("Metadata browser IPC handlers", () => {
         }
       ]
     });
+
+    await expect(
+      handlers.handleAddTagToTarget({
+        targetType: "item",
+        targetId: createdItem.item.id,
+        name: "urgent"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        slug: "urgent",
+        source: "manual"
+      }
+    });
+    await expect(
+      handlers.handleRemoveTagFromTarget({
+        targetType: "item",
+        targetId: createdItem.item.id,
+        name: "urgent"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        slug: "urgent"
+      }
+    });
   });
 });
 

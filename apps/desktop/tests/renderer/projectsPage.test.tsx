@@ -525,7 +525,11 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
             targetCount: 1
           }
         ]),
-      listTargetsByMetadata: async () => apiOk([metadataTarget])
+      listTargetsByMetadata: async () => apiOk([metadataTarget]),
+      addTagToTarget: async () =>
+        apiOk({ id: "tag_1", name: "Launch", slug: "launch", source: "manual" }),
+      removeTagFromTarget: async () =>
+        apiOk({ id: "tag_1", name: "Launch", slug: "launch", source: "manual" })
     },
     search: {
       searchWorkspace: async () => apiOk([])

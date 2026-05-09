@@ -1378,3 +1378,87 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Remote push/PR/CI still pending.
 Next actions: Amend log into commit; push branch; open PR.
+
+## 2026-05-09T20:07:38.9986067+10:00
+Objective: Complete PSE-93 merge and next-ticket promotion.
+Decisions made:
+- Squash-merged PR #88 at 887ffa9f956611e74ce48b5f16c9e34cb6f12f0a.
+- Moved PSE-93 to Done and promoted PSE-94 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final log entry is local after merge.
+Next actions: Start PSE-94 in next run; leave unrelated untracked files untouched.
+
+## 2026-05-09T20:11:13.4157569+10:00
+Objective: Reconcile active Linear/GitHub work.
+Decisions made:
+- Found no PSE issues in PR Open or In Progress.
+- Found PSE-94 as the single Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need confirm no stray open PR exists and inspect PSE-94 scope.
+Next actions: Check open PRs; move PSE-94 In Progress; plan implementation.
+
+## 2026-05-09T20:12:38.4145213+10:00
+Objective: Start PSE-94 implementation.
+Decisions made:
+- No open GitHub PRs were found for the repo.
+- Moved PSE-94 from Codex Ready to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need source ticket details and exact UI integration points.
+Next actions: Read docs/ticket source; create branch; inspect relevant source.
+
+## 2026-05-09T20:13:28.4706222+10:00
+Objective: Capture PSE-94 scope and branch.
+Decisions made:
+- Ticket scope is a right-side universal inspector for containers/items/list rows.
+- Created branch codex/pse-94-universal-object-inspector after .git ref escalation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need locate current selection/edit service APIs.
+Next actions: Inspect UI/data contracts; implement targeted MVP; add tests.
+
+## 2026-05-09T20:25:41.6002014+10:00
+Objective: Implement PSE-94 inspector foundation.
+Decisions made:
+- Added core InspectorTarget contract and expanded universal inspector UI sections.
+- Routed inspector tag/category/date edits through existing IPC/services; typecheck passes.
+Files changed:
+- packages/core/src/entities/Inspector.ts
+- packages/ui/src/components/ItemInspector.tsx
+- apps/desktop/src/preload/api.ts
+Open questions / risks: Need full lint/test/build and PR review.
+Next actions: Run checks; fix failures; open PR.
+
+## 2026-05-09T20:31:01.6674461+10:00
+Objective: Verify PSE-94 locally.
+Decisions made:
+- pnpm lint and pnpm typecheck passed.
+- pnpm test and pnpm build passed after required EPERM escalations.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need review final diff, commit, push, and CI.
+Next actions: Review diff; commit/push; open ready PR.
+
+## 2026-05-09T20:35:51.8004585+10:00
+Objective: Re-verify PSE-94 after test additions.
+Decisions made:
+- Added focused inspector target and metadata tag mutation coverage.
+- Re-ran lint, typecheck, and full test suite successfully.
+Files changed:
+- apps/desktop/tests/main/ipc-handlers.test.ts
+- packages/core/tests/inspectorTarget.test.ts
+- packages/ui/tests/itemComponents.test.tsx
+Open questions / risks: CI still pending after PR.
+Next actions: Stage intended files; commit; push/open PR.
+
+## 2026-05-09T20:37:11.1146380+10:00
+Objective: Commit PSE-94 implementation.
+Decisions made:
+- Created commit 1230fdf for universal object inspector changes.
+- Left unrelated untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi untouched.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Push/PR/CI still pending.
+Next actions: Amend log into commit; push branch; open PR.
