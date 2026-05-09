@@ -192,3 +192,15 @@ export {
   type TemplateRecord,
   type TemplateSourceType
 } from "./TemplateRepository";
+export {
+  WorkflowRepository,
+  type CreateWorkflowDefinitionInput,
+  type CreateWorkflowRunInput,
+  type ListWorkflowDefinitionsInput,
+  type UpdateWorkflowRunInput,
+  type WorkflowDefinitionRecord,
+  type WorkflowDefinitionStatus,
+  type WorkflowRunRecord,
+  type WorkflowRunStatus,
+  type WorkflowTriggerType
+} from "./WorkflowRepository";

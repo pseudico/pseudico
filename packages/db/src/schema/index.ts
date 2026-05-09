@@ -24,6 +24,7 @@ export { tags } from "./tags";
 export { taggings } from "./taggings";
 export { taskDetails } from "./taskDetails";
 export { templates } from "./templates";
+export { workflowDefinitions, workflowRuns } from "./workflows";
 export { workspaces } from "./workspaces";
 
-export const schemaVersion = 7;
+export const schemaVersion = 8;

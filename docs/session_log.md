@@ -754,3 +754,58 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: GitHub CI is still in progress; no review threads yet.
 Next actions: Monitor CI; fix if needed; merge if clean.
+## 2026-05-09T07:26:54.9503317+10:00
+Objective: Complete PSE-80 end-to-end and prepare next Codex Ready ticket.
+Decisions made: PSE-80 merged after green CI; PSE-81 promoted as the single next Codex Ready issue.
+Files changed: docs/session_log.md
+Open questions / risks: Final session log entry is local-only after merge; unrelated untracked files remain untouched.
+Next actions: Start PSE-81; keep only one Codex Ready issue; preserve local-only scope.
+
+## 2026-05-09T07:28:48.5557257+10:00
+- Objective: Start end-to-end Local Work OS ticket workflow.
+- Decisions made: Begin with Linear/GitHub reconciliation before local changes.
+- Files changed: docs/session_log.md
+- Open questions / risks: Active PR state and next ticket are not yet known.
+- Next actions: Check Linear statuses; inspect any active PR; choose one Codex Ready issue.
+
+## 2026-05-09T07:30:14.1858968+10:00
+- Objective: Reconcile active Linear/GitHub work and start one ticket.
+- Decisions made: No PR Open or In Progress issues found; selected PSE-81; moved PSE-81 to In Progress; synced main.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need full ticket acceptance criteria from repo docs/source ticket.
+- Next actions: Read linked docs; create PSE-81 branch; implement scoped workflow preview.
+
+## 2026-05-09T09:51:54.9832754+10:00
+- Objective: Explain prior stop and resume PSE-81 implementation.
+- Decisions made: No external blocker exists; continue from codex/pse-81-manual-workflows.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need fit workflow engine into existing services without scope creep.
+- Next actions: Inspect schema/services; implement workflow persistence; add tests.
+
+## 2026-05-09T10:03:16.6420359+10:00
+- Objective: Implement PSE-81 workflow engine foundation.
+- Decisions made: Added schema v8 with workflow_definitions/workflow_runs; manual-only actions run through existing services; failures persist failed run after rollback.
+- Files changed: packages/core/src/events/ActivityAction.ts; packages/core/src/events/DomainEvent.ts; packages/db/src/migrations/0008_workflows.*; packages/db/src/schema/workflows.ts; packages/db/src/repositories/WorkflowRepository.ts; packages/features/src/workflows/*; packages/ui/src/forms/WorkflowEditor.tsx
+- Open questions / risks: Desktop IPC/route wiring still needed for visible in-app workflow access.
+- Next actions: Add IPC/API/page wiring; update docs; run full checks.
+
+## 2026-05-09T10:05:50.2723913+10:00
+- Objective: Verify PSE-81 implementation.
+- Decisions made: Updated schema-version tests to v8; documented workflow data model and module status.
+- Files changed: docs/session_log.md; docs/DATA_MODEL.md; docs/MODULE_REGISTRY.md; packages/db/tests/*; apps/desktop/tests/*; packages/features/tests/*
+- Open questions / risks: Workflow UI is a reusable form foundation, not a fully routed desktop page.
+- Next actions: Commit branch; push PR; update Linear.
+
+## 2026-05-09T10:07:53.1314600+10:00
+- Objective: Publish PSE-81 PR and update Linear.
+- Decisions made: Created draft PR #78; moved PSE-81 to PR Open with PR attachment; CI is in progress.
+- Files changed: docs/session_log.md
+- Open questions / risks: Await CI; PR notes lack full routed workflow page/manual QA.
+- Next actions: Inspect CI result; review diff; merge only if clean.
+
+## 2026-05-09T10:12:25.4544341+10:00
+- Objective: Review/merge PSE-81 PR after CI.
+- Decisions made: CI passed; merge is blocked because PR #78 is draft and connector ready mutation fails; documented blocker in GitHub and Linear.
+- Files changed: docs/session_log.md
+- Open questions / risks: PR must be marked ready before squash merge; no next ticket promoted while PSE-81 remains PR Open.
+- Next actions: Mark PR ready; squash-merge PR #78; then move PSE-81 Done and promote one next issue.

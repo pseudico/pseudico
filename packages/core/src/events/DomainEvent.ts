@@ -19,7 +19,8 @@ export type ActivityTargetType =
   | "search_index"
   | "backup"
   | "export"
-  | "template";
+  | "template"
+  | "workflow";
 
 export type DomainEvent<TBefore = unknown, TAfter = unknown> = {
   workspaceId: string;

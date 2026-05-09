@@ -62,6 +62,13 @@ export {
   type SmartListEditorTaskStatus,
   type SmartListEditorValues
 } from "./forms/SmartListEditor";
+export {
+  WorkflowEditor,
+  type WorkflowEditorAction,
+  type WorkflowEditorPreviewAction,
+  type WorkflowEditorProps,
+  type WorkflowEditorValues
+} from "./forms/WorkflowEditor";
 
 export {
   ItemActionsMenu,

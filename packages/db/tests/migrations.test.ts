@@ -22,6 +22,8 @@ const requiredTables = [
   "links",
   "attachments",
   "attachment_versions",
+  "workflow_definitions",
+  "workflow_runs",
   "tags",
   "taggings",
   "categories",
@@ -50,6 +52,8 @@ const requiredIndexes = [
   "idx_reminder_events_due",
   "idx_templates_workspace_kind",
   "idx_attachment_versions_attachment",
+  "idx_workflow_definitions_workspace_status",
+  "idx_workflow_runs_workspace_created",
   "idx_items_container_order",
   "idx_task_details_due",
   "idx_taggings_target",
@@ -73,7 +77,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version seven", () => {
+  it("runs on an empty database and records schema version eight", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -112,14 +116,19 @@ describe("schema migrations", () => {
           version: 7,
           name: "attachment_versions",
           checksum: "pse-80-attachment-versions-v1"
+        },
+        {
+          version: 8,
+          name: "workflows",
+          checksum: "pse-81-workflows-v1"
         }
       ],
-      currentVersion: 7
+      currentVersion: 8
     });
-    expect(service.getCurrentSchemaVersion()).toBe(7);
+    expect(service.getCurrentSchemaVersion()).toBe(8);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 7
+      currentVersion: 8
     });
   });
 

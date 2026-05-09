@@ -28,9 +28,12 @@ new work should account for this implemented baseline:
 - Local recurrence now has database and service foundations for daily and
   weekly/custom-weekday task roll-forward behavior; monthly/yearly RRULEs remain
   future work.
-- Future or placeholder-heavy flows: Timeline, Calendar, portable/broader Templates, Workflows,
+- Future or placeholder-heavy flows: Timeline, Calendar, portable/broader Templates,
   full import/restore execution,
   custom dashboard editing, advanced saved-view builder UX, and browser capture.
+- Workflows now have a manual-only service foundation with persisted local
+  definitions/runs, preview, and service-backed add-tag, set-category,
+  move-item, and create-task actions; scheduling remains future work.
 - Local reminders now have database, service, IPC, scheduler, and shared picker
   foundations; deeper renderer workflows and notification preference UX remain
   future work.
