@@ -6,6 +6,7 @@ import {
   QuickAddModal,
   type QuickAddContext
 } from "../components/QuickAddModal";
+import { useNavigationHistory } from "../navigation/useNavigationHistory";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
@@ -15,6 +16,7 @@ export function AppShell(): React.JSX.Element {
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [quickAddContext, setQuickAddContext] = useState<QuickAddContext>({});
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const navigationHistory = useNavigationHistory({ workspace: currentWorkspace });
   const openQuickAdd = useCallback((context?: QuickAddContext) => {
     setQuickAddContext(context ?? {});
     setQuickAddOpen(true);
@@ -37,6 +39,12 @@ export function AppShell(): React.JSX.Element {
       <Sidebar />
       <div className="app-frame">
         <TopBar
+          canGoBack={navigationHistory.canGoBack}
+          canGoForward={navigationHistory.canGoForward}
+          recentTargets={navigationHistory.recentTargets}
+          onGoBack={navigationHistory.goBack}
+          onGoForward={navigationHistory.goForward}
+          onNavigateRecent={navigationHistory.navigateToRecent}
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
           onQuickAdd={openQuickAdd}
         />

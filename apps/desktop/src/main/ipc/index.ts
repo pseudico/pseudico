@@ -18,6 +18,7 @@ import { registerItemIpc } from "./registerItemIpc";
 import { registerLinkIpc } from "./registerLinkIpc";
 import { registerListIpc } from "./registerListIpc";
 import { registerMetadataIpc } from "./registerMetadataIpc";
+import { registerNavigationIpc } from "./registerNavigationIpc";
 import { registerNoteIpc } from "./registerNoteIpc";
 import { registerProjectIpc } from "./registerProjectIpc";
 import { registerRelationshipIpc } from "./registerRelationshipIpc";
@@ -76,6 +77,7 @@ export function registerDesktopIpc(
   registerCategoryIpc(services.workspaceService);
   registerActivityIpc(services.workspaceService);
   registerMetadataIpc(services.workspaceService);
+  registerNavigationIpc(services.workspaceService);
   registerSearchIpc(services.workspaceService);
   registerDiagnosticsIpc(services.workspaceService);
   registerCollectionIpc(services.workspaceService);

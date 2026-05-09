@@ -23,6 +23,8 @@ import {
   itemsModuleContract,
   linksModuleContract,
   listsModuleContract,
+  navigationHistoryModuleContract,
+  NavigationHistoryService,
   notesModuleContract,
   plannedFeatureAreas,
   projectsModuleContract,
@@ -66,6 +68,7 @@ describe("feature module exports", () => {
       "capture",
       "pipelines",
       "metadata",
+      "navigationHistory",
       "relationships",
       "recurrence",
       "reminders",
@@ -102,6 +105,7 @@ describe("feature module exports", () => {
       captureModuleContract.module,
       tagsModuleContract.module,
       categoriesModuleContract.module,
+      navigationHistoryModuleContract.module,
       relationshipsModuleContract.module,
       recurrenceModuleContract.module,
       remindersModuleContract.module,
@@ -135,6 +139,7 @@ describe("feature module exports", () => {
       "capture",
       "metadata.tags",
       "metadata.categories",
+      "navigation-history",
       "relationships",
       "recurrence",
       "reminders",
@@ -202,6 +207,10 @@ describe("feature module exports", () => {
 
   it("exports the workflow service implementation", () => {
     expect(WorkflowService).toBeDefined();
+  });
+
+  it("exports the navigation history service implementation", () => {
+    expect(NavigationHistoryService).toBeDefined();
   });
 
   it("exports Quick Start action providers", () => {

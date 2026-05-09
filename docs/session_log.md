@@ -999,3 +999,40 @@ Files changed:
 - tsconfig.base.json
 Open questions / risks: Await refreshed GitHub CI.
 Next actions: Commit/push CI fix; re-check PR; merge if green.
+## 2026-05-09 13:59:27 +10:00
+Objective: Merge PSE-87 and prepare the next Codex Ready issue.
+Decisions made:
+- PR #82 CI passed and was squash-merged as 545bfbbc63271a71b370ecc1de14c0571367a98b.
+- PSE-87 moved Done; PSE-88 promoted as the only Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final session log entry is local-only unless included in future work.
+Next actions: Start PSE-88 in next run; keep other issues out of Codex Ready.
+## 2026-05-09T14:02:41.1503470+10:00
+Objective: Start end-to-end Local Work OS ticket run and reconcile Linear/GitHub state.
+Decisions made:
+- Using structured Linear and GitHub tools before local implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Active PR or issue state not yet reconciled.
+Next actions: Inspect active PRs/issues; update or merge if safe; otherwise implement one Codex Ready issue.
+## 2026-05-09T14:03:33.0737374+10:00
+Objective: Start implementation for PSE-88 after reconciliation found no active PR.
+Decisions made:
+- PSE-88 moved from Codex Ready to In Progress.
+- Main was confirmed up to date before branching.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Ticket scope needs details from source markdown and product docs.
+Next actions: Read docs/ticket source; map navigation code; implement and test.
+## 2026-05-09T14:17:55.0474241+10:00
+Objective: Implement and verify PSE-88 navigation history and recents.
+Decisions made:
+- Persist recents in workspace app_settings via NavigationHistoryService.
+- Use renderer route stack for local back/forward controls and recent menu.
+Files changed:
+- packages/features/src/navigation/NavigationHistoryService.ts
+- apps/desktop/src/renderer/navigation/useNavigationHistory.ts
+- apps/desktop/src/renderer/shell/TopBar.tsx
+Open questions / risks: No true Playwright Electron E2E exists; covered with unit/renderer tests and manual QA notes.
+Next actions: Finalize docs; commit/push PR; check CI.
