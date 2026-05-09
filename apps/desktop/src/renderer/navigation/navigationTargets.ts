@@ -74,6 +74,37 @@ export function createNavigationTargetFromLocation(input: {
   };
 }
 
+export function createAppTabTargetFromLocation(input: {
+  pathname: string;
+  search?: string;
+}): NavigationRouteTarget | null {
+  const target = createNavigationTargetFromLocation(input);
+
+  if (target === null) {
+    return null;
+  }
+
+  if (target.targetType === "item") {
+    return target;
+  }
+
+  if (target.targetType === "container") {
+    return target;
+  }
+
+  if (
+    target.targetType === "view" &&
+    (target.targetId === "projects" ||
+      target.targetId === "contacts" ||
+      target.targetId === "search" ||
+      target.targetId === "collections")
+  ) {
+    return target;
+  }
+
+  return null;
+}
+
 export function getRecentTargetDestination(
   target: NavigationRecentTargetSummary
 ): string {

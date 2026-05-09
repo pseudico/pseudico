@@ -402,6 +402,94 @@ a {
   font-style: normal;
 }
 
+
+.app-tab-strip {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 28px;
+  border-bottom: 1px solid #dedbd1;
+  background: #f4efe5;
+}
+
+.app-tab {
+  display: inline-flex;
+  min-width: 180px;
+  max-width: 260px;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #d5d0c3;
+  border-radius: 12px;
+  background: #fbfaf7;
+  color: #262624;
+  box-shadow: 0 1px 0 rgba(38, 38, 36, 0.03);
+}
+
+.app-tab-active {
+  border-color: #927a45;
+  background: #fff8e8;
+}
+
+.app-tab-target {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.app-tab-target span,
+.app-tab-target small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-tab-target span {
+  font-weight: 800;
+}
+
+.app-tab-target small {
+  color: #6d6a62;
+  font-size: 11px;
+}
+
+.app-tab-reorder {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.app-tab-reorder button,
+.app-tab-close {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #6d6a62;
+}
+
+.app-tab-reorder button:disabled {
+  opacity: 0.35;
+}
+
+.app-tab-target:hover,
+.app-tab-target:focus-visible,
+.app-tab-reorder button:hover:not(:disabled),
+.app-tab-reorder button:focus-visible,
+.app-tab-close:hover,
+.app-tab-close:focus-visible {
+  background: #ede5d4;
+  outline: none;
+}
+
 .main-content {
   min-width: 0;
   padding: 28px;

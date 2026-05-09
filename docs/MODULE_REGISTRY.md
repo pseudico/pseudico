@@ -40,7 +40,7 @@ new work should account for this implemented baseline:
 - Cross-cutting services now include project health, recent activity,
   integrity diagnostics, bounded pagination, app-wide error boundaries/toasts,
   command palette navigation/actions, workspace-scoped recent navigation,
-  back/forward route history, packaged smoke checks, and MVP smoke coverage.
+  back/forward route history, top-level app tabs for open project/contact/search/collection views, packaged smoke checks, and MVP smoke coverage.
 
 When adding a future module slice, prefer extending the owning feature service
 and matching repository/preload/client boundary rather than creating a parallel
@@ -64,6 +64,7 @@ renderer-only implementation.
 | Quick Start Actions | Own context-aware local action registration for one-step creation into the current container/tab or Inbox. | Quick Start action descriptors, target resolution, create-action UI | Inbox, projects, contacts, tasks, notes, lists, files, links, command palette | Top bar, project/contact pages, fast capture | V1 |
 | Command Palette | Own central local action registration, command matching, keyboard execution, and palette navigation. | Action descriptors, route actions, local UI commands | App shell, navigation, feature services | Fast navigation, quick capture, future shortcut registry | V1 |
 | Navigation History | Own workspace-scoped recent content persistence and app back/forward route stacks. | Recent navigation targets, route stack entries | App shell, app settings, projects, contacts, items, saved views | Top bar recent menu, fast content restore | V1 |
+| App Tabs | Own top-level open-view tab session state, active tab selection, and tab order. | App tab route targets, active tab id | App shell, app settings, navigation history | Fast switching among open projects, contacts, search, and collections | V1 |
 | Metadata | Own tags and categories as local classification systems. | Tags, categories, taggings, category assignments | Workspace, search | Saved views, dashboard, today, all content modules | MVP |
 | Search | Own local searchable projections, query behavior, and reindexing entry points. | Search records, indexed content, search diagnostics | Workspace, content modules, database/search repository | Global search, saved views, dashboard, maintenance | MVP |
 | Saved Views | Own collection and smart-list query definitions. | Saved views, collections, smart-list filters | Workspace, metadata, search, tasks, projects, contacts | Dashboard, Today filters, future reports | V1 |
@@ -249,6 +250,34 @@ Integration points:
 - App shell and route registry for navigation actions.
 - Quick Add and future feature services for local commands.
 - Shortcut registry once configurable shortcuts are introduced.
+
+### App Tabs
+
+Owns:
+
+- Workspace-scoped open app tab session state persisted in app settings.
+- Active tab selection for project/contact/search/collection route targets.
+- Close and reorder behavior for top-level app tabs.
+
+Does not own:
+
+- Project/contact content tabs inside a container.
+- Browser tabs, cloud sync, or cross-device session state.
+- Domain content writes beyond recording existing navigation history targets.
+
+Expected service methods:
+
+- `listTabs`
+- `openTab`
+- `closeTab`
+- `reorderTabs`
+- `setActiveTab`
+
+Integration points:
+
+- App shell tab strip for user-facing switching.
+- Navigation history recent targets when tabs are opened.
+- App settings repository for local-only session persistence.
 
 ### Content Tabs
 

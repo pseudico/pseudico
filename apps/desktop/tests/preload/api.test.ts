@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(130);
+    expect(channels).toHaveLength(135);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -1417,6 +1417,25 @@ describe("typed preload API", () => {
       }
     });
     await api.navigation.listPinnedFavorites("workspace_1");
+    await api.navigation.listAppTabs("workspace_1");
+    await api.navigation.openAppTab({
+      workspaceId: "workspace_1",
+      target: {
+        targetType: "container",
+        targetId: "project_1",
+        path: "/projects/project_1",
+        label: "Project"
+      }
+    });
+    await api.navigation.closeAppTab({ workspaceId: "workspace_1", tabId: "tab_1" });
+    await api.navigation.reorderAppTabs({
+      workspaceId: "workspace_1",
+      tabIds: ["tab_2", "tab_1"]
+    });
+    await api.navigation.setActiveAppTab({
+      workspaceId: "workspace_1",
+      tabId: "tab_2"
+    });
 
     expect(calls).toEqual([
       {
@@ -1438,6 +1457,40 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.navigation.listPinnedFavorites,
         input: "workspace_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.navigation.listAppTabs,
+        input: "workspace_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.navigation.openAppTab,
+        input: {
+          workspaceId: "workspace_1",
+          target: {
+            targetType: "container",
+            targetId: "project_1",
+            path: "/projects/project_1",
+            label: "Project"
+          }
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.navigation.closeAppTab,
+        input: { workspaceId: "workspace_1", tabId: "tab_1" }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.navigation.reorderAppTabs,
+        input: {
+          workspaceId: "workspace_1",
+          tabIds: ["tab_2", "tab_1"]
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.navigation.setActiveAppTab,
+        input: {
+          workspaceId: "workspace_1",
+          tabId: "tab_2"
+        }
       }
     ]);
   });

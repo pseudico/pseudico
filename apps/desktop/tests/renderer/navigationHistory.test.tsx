@@ -1,7 +1,10 @@
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { NavigationRecentTargetSummary } from "../../src/preload/api";
-import { createNavigationTargetFromLocation } from "../../src/renderer/navigation/navigationTargets";
+import {
+  createAppTabTargetFromLocation,
+  createNavigationTargetFromLocation
+} from "../../src/renderer/navigation/navigationTargets";
 import { RecentNavigationMenu } from "../../src/renderer/shell/TopBar";
 
 describe("navigation history renderer helpers", () => {
@@ -30,6 +33,24 @@ describe("navigation history renderer helpers", () => {
       targetId: "today",
       label: "Today"
     });
+  });
+
+  it("limits app tab targets to project, contact, search, and collection views", () => {
+    expect(
+      createAppTabTargetFromLocation({ pathname: "/projects/project_1" })
+    ).toMatchObject({
+      targetType: "container",
+      targetId: "project_1",
+      label: "Project"
+    });
+    expect(
+      createAppTabTargetFromLocation({ pathname: "/search", search: "?q=launch" })
+    ).toMatchObject({
+      targetType: "view",
+      targetId: "search",
+      path: "/search?q=launch"
+    });
+    expect(createAppTabTargetFromLocation({ pathname: "/today" })).toBeNull();
   });
 
   it("renders the recent menu button with recent target metadata", () => {

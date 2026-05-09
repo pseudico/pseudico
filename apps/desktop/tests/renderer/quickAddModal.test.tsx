@@ -684,7 +684,17 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
     navigation: {
       listRecentTargets: async () => apiOk([]),
       recordTarget: async () => apiOk([]),
-      listPinnedFavorites: async () => apiOk([])
+      listPinnedFavorites: async () => apiOk([]),
+      listAppTabs: async () =>
+        apiOk({ workspaceId: "workspace_1", tabs: [], activeTabId: null }),
+      openAppTab: async () =>
+        apiOk({ workspaceId: "workspace_1", tabs: [], activeTabId: null }),
+      closeAppTab: async () =>
+        apiOk({ workspaceId: "workspace_1", tabs: [], activeTabId: null }),
+      reorderAppTabs: async () =>
+        apiOk({ workspaceId: "workspace_1", tabs: [], activeTabId: null }),
+      setActiveAppTab: async () =>
+        apiOk({ workspaceId: "workspace_1", tabs: [], activeTabId: null })
     }
   };
 }
