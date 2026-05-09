@@ -12,6 +12,7 @@ export const plannedFeatureAreas = [
   "files",
   "import",
   "links",
+  "capture",
   "pipelines",
   "metadata",
   "relationships",
@@ -78,6 +79,7 @@ export { ImportValidationService, importModuleContract } from "./import";
 export { IntegrityCheckService, diagnosticsModuleContract } from "./diagnostics";
 export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
+export { CaptureService, captureModuleContract } from "./capture";
 export { LinkService, linksModuleContract } from "./links";
 export { ListService, listsModuleContract, parseBulkListItems } from "./lists";
 export {
@@ -270,6 +272,15 @@ export type {
   LinkServiceIdFactory,
   UpdateLinkInput
 } from "./links";
+export type {
+  BrowserCapturePayload,
+  CaptureLinkResult,
+  CaptureServiceIdFactory,
+  CaptureTaskResult,
+  CreateInboxLinkFromCaptureInput,
+  CreateInboxTaskFromCaptureInput,
+  NormalizedBrowserCapture
+} from "./capture";
 export type {
   AddListItemInput,
   BulkCreateListItemsInput,

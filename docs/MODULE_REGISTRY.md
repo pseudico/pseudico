@@ -59,6 +59,7 @@ renderer-only implementation.
 | Notes | Own Markdown note application operations and note search projections. | Note items, Markdown content, previews | Workspace, projects, contacts, metadata, search | Search, saved views, dashboard | MVP |
 | Files | Own local attachment item behavior and safe attachment metadata workflows. | File items, attachments, attachment metadata | Workspace, Electron main/preload IPC, search, backup, export | Projects, contacts, dashboard, search | MVP |
 | Links | Own URL/link item behavior and local metadata for captured links. | Link items, URL metadata, browser-capture results later | Workspace, projects, contacts, metadata, search | Search, saved views, dashboard | MVP |
+| Browser Capture | Own the local-only browser capture payload contract and safe disabled bridge prototype. | Browser capture payloads, Inbox link/task capture requests | Links, tasks, Inbox, Electron main/preload security | Future browser extension/native messaging intake | V2 |
 | Metadata | Own tags and categories as local classification systems. | Tags, categories, taggings, category assignments | Workspace, search | Saved views, dashboard, today, all content modules | MVP |
 | Search | Own local searchable projections, query behavior, and reindexing entry points. | Search records, indexed content, search diagnostics | Workspace, content modules, database/search repository | Global search, saved views, dashboard, maintenance | MVP |
 | Saved Views | Own collection and smart-list query definitions. | Saved views, collections, smart-list filters | Workspace, metadata, search, tasks, projects, contacts | Dashboard, Today filters, future reports | V1 |
@@ -192,6 +193,32 @@ Integration points:
 - Projects and relationship services.
 - Metadata, search, dashboard, and saved views.
 - Files, notes, links, and tasks for interaction history.
+
+### Browser Capture
+
+Owns:
+
+- Local-only browser capture payload normalization.
+- Conversion of captured web pages into Inbox links and tasks through existing services.
+- Disabled-by-default bridge design for future native messaging or localhost experiments.
+
+Does not own:
+
+- Browser extension publication or installation.
+- Cloud capture, hosted previews, telemetry, or remote storage.
+- Direct database/filesystem access from renderer or browser-originated code.
+
+Expected service methods:
+
+- `captureWebPage`
+- `createInboxLinkFromCapture`
+- `createInboxTaskFromCapture`
+
+Integration points:
+
+- Links and tasks for persisted Inbox items.
+- Activity log and search through existing write services.
+- Electron main/preload security for any future bridge enablement.
 
 ### Content Tabs
 

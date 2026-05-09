@@ -809,3 +809,52 @@ Next actions: Start PSE-81; keep only one Codex Ready issue; preserve local-only
 - Files changed: docs/session_log.md
 - Open questions / risks: PR must be marked ready before squash merge; no next ticket promoted while PSE-81 remains PR Open.
 - Next actions: Mark PR ready; squash-merge PR #78; then move PSE-81 Done and promote one next issue.
+
+## 2026-05-09T10:41:27.1072008+10:00
+- Objective: Start end-to-end Local Work OS ticket run.
+- Decisions made: Using Linear as plan and GitHub as proof; reconciling active PSE statuses first.
+- Files changed: docs/session_log.md
+- Open questions / risks: Existing PSE-81 PR may still block new ticket promotion.
+- Next actions: Check Linear statuses; inspect PR state; merge/fix before new work.
+
+## 2026-05-09T10:43:31.1962129+10:00
+- Objective: Reconcile active PSE-81 PR.
+- Decisions made: PR #78 scope matches workflow ticket; CI run #176 green; no reviews/threads; marked PR ready via gh.
+- Files changed: docs/session_log.md
+- Open questions / risks: Local session log entry is uncommitted and not part of PR #78.
+- Next actions: Squash merge PR; update Linear Done; pull main.
+
+## 2026-05-09T10:45:52.8478382+10:00
+- Objective: Finish PSE-81 merge and prepare next ticket.
+- Decisions made: Squash-merged PR #78; moved PSE-81 Done; promoted only PSE-82 to Codex Ready.
+- Files changed: docs/session_log.md
+- Open questions / risks: Untracked .playwright-mcp/ and gh installer remain unrelated local files.
+- Next actions: Start PSE-82 in next run; keep other issues Backlog/Spec Ready; monitor CI if needed.
+
+## 2026-05-09T10:47:35.2968331+10:00
+- Objective: Respond to concern about no coding changes.
+- Decisions made: Acknowledge only PR reconciliation/merge was completed; continue into PSE-82 implementation now.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need keep exactly one active Codex Ready/In Progress issue while moving PSE-82 forward.
+- Next actions: Move PSE-82 In Progress; read issue/docs; implement scoped changes.
+
+## 2026-05-09T10:54:50.8132904+10:00
+- Objective: Implement PSE-82 browser capture bridge prototype.
+- Decisions made: Added CaptureService using existing Inbox/Link/Task services; bridge stub remains disabled by default; documented native messaging preference.
+- Files changed: packages/features/src/capture/*; apps/desktop/src/main/services/CaptureBridge.ts; docs/DECISIONS/ADR-browser-capture-local-bridge.md; docs/MODULE_REGISTRY.md; tests
+- Open questions / risks: No browser extension is published; localhost bridge only a disabled fallback stub.
+- Next actions: Run full checks; fix failures; publish PR.
+
+## 2026-05-09T10:56:58.7399483+10:00
+- Objective: Verify PSE-82 implementation.
+- Decisions made: Full lint/typecheck/test/build pass after rerunning sandbox-blocked test/build with escalation.
+- Files changed: docs/session_log.md; docs/DECISIONS/ADR-browser-capture-local-bridge.md; docs/MODULE_REGISTRY.md; packages/features/src/capture/*; apps/desktop/src/main/services/CaptureBridge.ts; tests
+- Open questions / risks: Manual browser QA not applicable because no extension/listener is enabled.
+- Next actions: Commit scoped files; push branch; open PR and update Linear.
+
+## 2026-05-09T10:58:35.7983081+10:00
+- Objective: Publish PSE-82 PR.
+- Decisions made: Created draft PR #79; moved PSE-82 to PR Open; linked PR in Linear.
+- Files changed: docs/session_log.md
+- Open questions / risks: CI pending; PR is draft until CI/review checks pass.
+- Next actions: Inspect CI; review diff; merge only if clean.
