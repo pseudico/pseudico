@@ -26,6 +26,8 @@ export type CreateAppSettingInput = {
   timestamp: string;
 };
 
+export type UpsertAppSettingInput = CreateAppSettingInput;
+
 export class AppSettingsRepository {
   private readonly connection: DatabaseConnection;
 
@@ -81,6 +83,43 @@ export class AppSettingsRepository {
     }
 
     return created;
+  }
+
+  upsert(input: UpsertAppSettingInput): AppSettingRecord {
+    this.connection.sqlite
+      .prepare(
+        `insert into app_settings (
+          id,
+          workspace_id,
+          setting_key,
+          value_json,
+          created_at,
+          updated_at
+        ) values (?, ?, ?, ?, ?, ?)
+        on conflict(workspace_id, setting_key)
+        do update set
+          value_json = excluded.value_json,
+          updated_at = excluded.updated_at`
+      )
+      .run(
+        input.id,
+        input.workspaceId,
+        input.settingKey,
+        input.valueJson,
+        input.timestamp,
+        input.timestamp
+      );
+
+    const updated = this.findByKey({
+      workspaceId: input.workspaceId,
+      settingKey: input.settingKey
+    });
+
+    if (updated === null) {
+      throw new Error(`App setting was not saved: ${input.settingKey}.`);
+    }
+
+    return updated;
   }
 }
 

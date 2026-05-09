@@ -680,6 +680,10 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
     },
     diagnostics: {
       runWorkspaceIntegrityCheck: async () => apiOk(null as never)
+    },
+    navigation: {
+      listRecentTargets: async () => apiOk([]),
+      recordTarget: async () => apiOk([])
     }
   };
 }

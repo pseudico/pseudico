@@ -170,6 +170,12 @@ a {
   gap: 10px;
 }
 
+.navigation-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .search-control {
   display: flex;
   width: min(32vw, 340px);
@@ -217,6 +223,51 @@ a {
   border: 1px solid #d5d0c3;
   background: #ffffff;
   color: #262624;
+}
+
+.compact-icon-button {
+  padding-inline: 9px;
+}
+
+.recent-navigation-menu {
+  position: relative;
+}
+
+.recent-navigation-popover {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  width: min(320px, 70vw);
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #d5d0c3;
+  border-radius: 12px;
+  background: #fffdf7;
+  box-shadow: 0 16px 40px rgb(38 38 36 / 18%);
+}
+
+.recent-navigation-popover button {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #262624;
+  text-align: left;
+}
+
+.recent-navigation-popover button:hover,
+.recent-navigation-popover button:focus-visible {
+  border-color: #d5d0c3;
+  background: #f7f2e8;
+  outline: none;
+}
+
+.recent-navigation-popover small {
+  color: #6d6a62;
 }
 
 .icon-button kbd,

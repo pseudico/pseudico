@@ -1794,6 +1794,33 @@ export type IpcModuleStatus = {
   message: string;
 };
 
+export type NavigationTargetType =
+  | "view"
+  | "container"
+  | "item"
+  | "saved_view";
+
+export type NavigationRecentTargetSummary = {
+  targetType: NavigationTargetType;
+  targetId: string | null;
+  workspaceId: string;
+  path: string;
+  label: string;
+  subtitle: string | null;
+  viewedAt: string;
+};
+
+export type RecordNavigationTargetInput = {
+  workspaceId?: string;
+  target: {
+    targetType: NavigationTargetType;
+    targetId?: string | null;
+    path: string;
+    label: string;
+    subtitle?: string | null;
+  };
+};
+
 export const LOCAL_WORK_OS_IPC_CHANNELS = {
   workspace: {
     createWorkspace: "local-work-os:workspace:create-workspace",
@@ -1991,6 +2018,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   diagnostics: {
     runWorkspaceIntegrityCheck:
       "local-work-os:diagnostics:run-workspace-integrity-check"
+  },
+  navigation: {
+    listRecentTargets: "local-work-os:navigation:list-recent-targets",
+    recordTarget: "local-work-os:navigation:record-target"
   }
 } as const;
 
@@ -2503,6 +2534,14 @@ export type LocalWorkOsIpcContracts = {
     input: RunWorkspaceIntegrityCheckInput | undefined;
     result: ApiResult<WorkspaceIntegritySummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.navigation.listRecentTargets]: {
+    input: string | undefined;
+    result: ApiResult<NavigationRecentTargetSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.navigation.recordTarget]: {
+    input: RecordNavigationTargetInput;
+    result: ApiResult<NavigationRecentTargetSummary[]>;
+  };
 };
 
 export type LocalWorkOsIpcChannel = keyof LocalWorkOsIpcContracts & string;
@@ -2957,6 +2996,14 @@ export type LocalWorkOsApi = {
     runWorkspaceIntegrityCheck: (
       input?: RunWorkspaceIntegrityCheckInput
     ) => Promise<ApiResult<WorkspaceIntegritySummary>>;
+  };
+  navigation: {
+    listRecentTargets: (
+      workspaceId?: string
+    ) => Promise<ApiResult<NavigationRecentTargetSummary[]>>;
+    recordTarget: (
+      input: RecordNavigationTargetInput
+    ) => Promise<ApiResult<NavigationRecentTargetSummary[]>>;
   };
 };
 
@@ -3443,6 +3490,15 @@ export function createLocalWorkOsApi(
           LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runWorkspaceIntegrityCheck,
           input
         )
+    },
+    navigation: {
+      listRecentTargets: (workspaceId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.navigation.listRecentTargets,
+          workspaceId
+        ),
+      recordTarget: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.navigation.recordTarget, input)
     }
   };
 }

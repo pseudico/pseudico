@@ -26,7 +26,8 @@ export {
 export {
   AppSettingsRepository,
   type AppSettingRecord,
-  type CreateAppSettingInput
+  type CreateAppSettingInput,
+  type UpsertAppSettingInput
 } from "./AppSettingsRepository";
 export {
   ContainerRepository,

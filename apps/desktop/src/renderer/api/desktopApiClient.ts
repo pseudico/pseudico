@@ -342,6 +342,12 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
     diagnostics: {
       runWorkspaceIntegrityCheck: (input) =>
         callApi(() => api.diagnostics.runWorkspaceIntegrityCheck(input))
+    },
+    navigation: {
+      listRecentTargets: (workspaceId) =>
+        callApi(() => api.navigation.listRecentTargets(workspaceId)),
+      recordTarget: (input) =>
+        callApi(() => api.navigation.recordTarget(input))
     }
   };
 }
@@ -676,5 +682,11 @@ export const desktopApiClient: LocalWorkOsApi = {
   diagnostics: {
     runWorkspaceIntegrityCheck: (input) =>
       getDesktopApiClient().diagnostics.runWorkspaceIntegrityCheck(input)
+  },
+  navigation: {
+    listRecentTargets: (workspaceId) =>
+      getDesktopApiClient().navigation.listRecentTargets(workspaceId),
+    recordTarget: (input) =>
+      getDesktopApiClient().navigation.recordTarget(input)
   }
 };

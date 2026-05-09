@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(127);
+    expect(channels).toHaveLength(129);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -71,7 +71,8 @@ describe("typed preload API", () => {
       "backup",
       "import",
       "export",
-      "diagnostics"
+      "diagnostics",
+      "navigation"
     ]);
     expect("ipcRenderer" in api).toBe(false);
     expect("send" in api).toBe(false);
@@ -1387,6 +1388,50 @@ describe("typed preload API", () => {
           LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runWorkspaceIntegrityCheck,
         input: {
           workspaceId: "workspace_1"
+        }
+      }
+    ]);
+  });
+
+  it("routes navigation calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk([])) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.navigation.listRecentTargets("workspace_1");
+    await api.navigation.recordTarget({
+      workspaceId: "workspace_1",
+      target: {
+        targetType: "view",
+        targetId: "today",
+        path: "/today",
+        label: "Today"
+      }
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.navigation.listRecentTargets,
+        input: "workspace_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.navigation.recordTarget,
+        input: {
+          workspaceId: "workspace_1",
+          target: {
+            targetType: "view",
+            targetId: "today",
+            path: "/today",
+            label: "Today"
+          }
         }
       }
     ]);

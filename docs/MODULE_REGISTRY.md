@@ -39,8 +39,8 @@ new work should account for this implemented baseline:
   future work.
 - Cross-cutting services now include project health, recent activity,
   integrity diagnostics, bounded pagination, app-wide error boundaries/toasts,
-  command palette navigation/actions, packaged smoke checks, and MVP smoke
-  coverage.
+  command palette navigation/actions, workspace-scoped recent navigation,
+  back/forward route history, packaged smoke checks, and MVP smoke coverage.
 
 When adding a future module slice, prefer extending the owning feature service
 and matching repository/preload/client boundary rather than creating a parallel
@@ -63,6 +63,7 @@ renderer-only implementation.
 | Browser Capture | Own the local-only browser capture payload contract and safe disabled bridge prototype. | Browser capture payloads, Inbox link/task capture requests | Links, tasks, Inbox, Electron main/preload security | Future browser extension/native messaging intake | V2 |
 | Quick Start Actions | Own context-aware local action registration for one-step creation into the current container/tab or Inbox. | Quick Start action descriptors, target resolution, create-action UI | Inbox, projects, contacts, tasks, notes, lists, files, links, command palette | Top bar, project/contact pages, fast capture | V1 |
 | Command Palette | Own central local action registration, command matching, keyboard execution, and palette navigation. | Action descriptors, route actions, local UI commands | App shell, navigation, feature services | Fast navigation, quick capture, future shortcut registry | V1 |
+| Navigation History | Own workspace-scoped recent content persistence and app back/forward route stacks. | Recent navigation targets, route stack entries | App shell, app settings, projects, contacts, items, saved views | Top bar recent menu, fast content restore | V1 |
 | Metadata | Own tags and categories as local classification systems. | Tags, categories, taggings, category assignments | Workspace, search | Saved views, dashboard, today, all content modules | MVP |
 | Search | Own local searchable projections, query behavior, and reindexing entry points. | Search records, indexed content, search diagnostics | Workspace, content modules, database/search repository | Global search, saved views, dashboard, maintenance | MVP |
 | Saved Views | Own collection and smart-list query definitions. | Saved views, collections, smart-list filters | Workspace, metadata, search, tasks, projects, contacts | Dashboard, Today filters, future reports | V1 |

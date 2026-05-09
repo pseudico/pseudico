@@ -15,6 +15,7 @@ export const plannedFeatureAreas = [
   "capture",
   "pipelines",
   "metadata",
+  "navigationHistory",
   "relationships",
   "recurrence",
   "reminders",
@@ -115,6 +116,14 @@ export {
   generateNotePreview,
   notesModuleContract
 } from "./notes";
+export {
+  DEFAULT_RECENT_NAVIGATION_LIMIT,
+  RECENT_NAVIGATION_TARGETS_SETTING_KEY,
+  NavigationHistoryService,
+  mergeRecentTarget,
+  navigationHistoryModuleContract,
+  resolveNavigationTargetPath
+} from "./navigation";
 export { PipelineService, pipelinesModuleContract } from "./pipelines";
 export { ProjectHealthService, ProjectService, projectsModuleContract } from "./projects";
 export { RecurrenceService, recurrenceModuleContract } from "./recurrence";
@@ -358,6 +367,11 @@ export type {
   TaggingTargetInput,
   UpdateCategoryInput
 } from "./metadata";
+export type {
+  NavigationRecentTarget,
+  NavigationTargetType,
+  RecordNavigationTargetInput
+} from "./navigation";
 export type {
   CreateNoteInput,
   GenerateNotePreviewOptions,

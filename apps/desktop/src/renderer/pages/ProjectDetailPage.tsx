@@ -9,7 +9,7 @@ import {
   Tag
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   CategoryBadge,
   CategoryPicker,
@@ -139,6 +139,9 @@ export function ProjectDetailPage({
   initialRelatedContacts = []
 }: ProjectDetailPageProps): React.JSX.Element {
   const { projectId } = useParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const selectedItemId = searchParams.get("item");
   const [project, setProject] = useState<ProjectSummary | null>(
     initialProject ?? null
   );
@@ -363,6 +366,19 @@ export function ProjectDetailPage({
       active = false;
     };
   }, [apiClient, projectId]);
+
+  useEffect(() => {
+    if (
+      selectedItemId === null ||
+      selectedItemId.trim().length === 0 ||
+      inspector?.item.id === selectedItemId ||
+      !items.some((item) => item.id === selectedItemId)
+    ) {
+      return;
+    }
+
+    void openInspector(selectedItemId);
+  }, [inspector?.item.id, items, selectedItemId]);
 
   async function refreshProjectContent(activeProjectId: string): Promise<void> {
     setItemsLoading(true);
@@ -1316,7 +1332,11 @@ export function ProjectDetailPage({
     }
 
     if (action === "inspect") {
-      void openInspector(item.id);
+      if (projectId !== undefined) {
+        navigate(
+          `/projects/${encodeURIComponent(projectId)}?item=${encodeURIComponent(item.id)}`
+        );
+      }
     }
   }
 
@@ -1875,7 +1895,14 @@ export function ProjectDetailPage({
           activity={inspector.activity}
           item={inspector.item}
           open
-          onClose={() => setInspector(null)}
+          onClose={() => {
+            setInspector(null);
+            if (projectId !== undefined) {
+              navigate(`/projects/${encodeURIComponent(projectId)}`, {
+                replace: true
+              });
+            }
+          }}
         />
       )}
     </section>

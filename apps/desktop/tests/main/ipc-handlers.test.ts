@@ -21,6 +21,7 @@ import { createItemIpcHandlers } from "../../src/main/ipc/itemHandlers";
 import { createLinkIpcHandlers } from "../../src/main/ipc/linkHandlers";
 import { createListIpcHandlers } from "../../src/main/ipc/listHandlers";
 import { createMetadataIpcHandlers } from "../../src/main/ipc/metadataHandlers";
+import { createNavigationIpcHandlers } from "../../src/main/ipc/navigationHandlers";
 import { handleGetModuleStatus } from "../../src/main/ipc/moduleStatusHandlers";
 import { createNoteIpcHandlers } from "../../src/main/ipc/noteHandlers";
 import { createProjectIpcHandlers } from "../../src/main/ipc/projectHandlers";
@@ -212,6 +213,69 @@ describe("placeholder module IPC handlers", () => {
         implemented: true,
         message: "File IPC supports safe local attachment imports."
       }
+    });
+  });
+});
+
+describe("navigation IPC handlers", () => {
+  let tempRoot: string | null = null;
+
+  afterEach(async () => {
+    if (tempRoot !== null) {
+      await rm(tempRoot, { force: true, recursive: true });
+      tempRoot = null;
+    }
+  });
+
+  it("records and lists workspace recent targets", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-navigation-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+    const handlers = createNavigationIpcHandlers({
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: tempRoot!,
+        openedAt: "2026-05-09T04:00:00.000Z",
+        schemaVersion: 8
+      })
+    });
+
+    await expect(
+      handlers.handleRecordTarget({
+        workspaceId: "workspace_1",
+        target: {
+          targetType: "view",
+          targetId: "today",
+          path: "/today",
+          label: "Today"
+        }
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          targetType: "view",
+          targetId: "today",
+          path: "/today",
+          label: "Today"
+        }
+      ]
+    });
+
+    await expect(
+      handlers.handleListRecentTargets("workspace_1")
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          targetId: "today"
+        }
+      ]
     });
   });
 });

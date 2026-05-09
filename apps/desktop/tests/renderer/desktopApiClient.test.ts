@@ -593,6 +593,10 @@ function createMockApi(
     },
     diagnostics: {
       runWorkspaceIntegrityCheck: async () => apiOk(workspaceIntegritySummary())
+    },
+    navigation: {
+      listRecentTargets: async () => apiOk([]),
+      recordTarget: async () => apiOk([])
     }
   };
 
