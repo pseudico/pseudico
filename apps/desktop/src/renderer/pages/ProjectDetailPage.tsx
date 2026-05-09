@@ -37,6 +37,7 @@ import {
   type ItemActionId,
   type ItemInspectorActivity,
   type ItemInspectorItem,
+  type InspectorCategoryOption,
   type LinkCardViewModel,
   type LinkEditorValues,
   type ListCardItemViewModel,
@@ -47,10 +48,12 @@ import {
   type ProjectHealthViewModel,
   type RecentActivityViewModel,
   type RelatedContactViewModel,
+  type TagBadgeViewModel,
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel
 } from "@local-work-os/ui";
+import type { InspectorTarget } from "@local-work-os/core";
 import type {
   ActivitySummary,
   AttachmentVersionSummary,
@@ -1624,9 +1627,130 @@ export function ProjectDetailPage({
     }
 
     setInspector({
-      item: toInspectorItem(result.data.item),
+      item: toInspectorItem(
+        result.data.item,
+        categories,
+        items.find((item) => item.id === itemId)
+      ),
       activity: result.data.activity.map(toInspectorActivity)
     });
+  }
+
+  async function refreshOpenInspector(targetId: string): Promise<void> {
+    if (inspector?.item.id !== targetId) {
+      return;
+    }
+
+    await openInspector(targetId);
+  }
+
+  async function changeInspectorCategory(
+    target: InspectorTarget,
+    categoryId: string | null
+  ): Promise<void> {
+    if (target.type === "container") {
+      await assignProjectCategory(categoryId);
+      return;
+    }
+
+    if (target.type !== "item") {
+      setItemActionError("Category editing is not available for this target yet.");
+      return;
+    }
+
+    await assignItemCategory(target.id, categoryId);
+    await refreshOpenInspector(target.id);
+  }
+
+  async function addInspectorTag(
+    target: InspectorTarget,
+    name: string
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setItemActionError(null);
+    const result = await apiClient.metadata.addTagToTarget({
+      workspaceId: project.workspaceId,
+      targetType: target.type,
+      targetId: target.id,
+      name
+    });
+
+    if (!result.ok) {
+      setItemActionError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    await refreshOpenInspector(target.id);
+  }
+
+  async function removeInspectorTag(
+    target: InspectorTarget,
+    tag: TagBadgeViewModel
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setItemActionError(null);
+    const result = await apiClient.metadata.removeTagFromTarget({
+      workspaceId: project.workspaceId,
+      targetType: target.type,
+      targetId: target.id,
+      ...(tag.id === undefined || tag.id === null
+        ? { name: tag.name ?? tag.slug }
+        : { tagId: tag.id })
+    });
+
+    if (!result.ok) {
+      setItemActionError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    await refreshOpenInspector(target.id);
+  }
+
+  async function changeInspectorDate(
+    target: InspectorTarget,
+    field: "startAt" | "dueAt",
+    value: string
+  ): Promise<void> {
+    if (project === null || target.type !== "item") {
+      return;
+    }
+
+    const item = items.find((candidate) => candidate.id === target.id);
+
+    if (item === undefined || !isTaskCardViewModel(item)) {
+      setItemActionError("Date editing is available for task items.");
+      return;
+    }
+
+    setTaskBusyId(target.id);
+    setTaskError(null);
+
+    const result = await apiClient.tasks.update({
+      itemId: target.id,
+      [field]: value.length === 0 ? null : value
+    });
+
+    if (!result.ok) {
+      setTaskBusyId(null);
+      setTaskError(result.error.message);
+      setItemActionError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectHealth(project.id);
+    await refreshOpenInspector(target.id);
+    setTaskBusyId(null);
   }
 
   async function assignProjectCategory(categoryId: string | null): Promise<void> {
@@ -2133,8 +2257,12 @@ export function ProjectDetailPage({
       {inspector === null ? null : (
         <ItemInspectorPanel
           activity={inspector.activity}
+          categories={categories.map(toInspectorCategoryOption)}
+          error={itemActionError}
           item={inspector.item}
           open
+          onAddTag={addInspectorTag}
+          onCategoryChange={changeInspectorCategory}
           onClose={() => {
             setInspector(null);
             if (projectId !== undefined) {
@@ -2143,6 +2271,8 @@ export function ProjectDetailPage({
               });
             }
           }}
+          onDateChange={changeInspectorDate}
+          onRemoveTag={removeInspectorTag}
         />
       )}
     </section>
@@ -2346,13 +2476,20 @@ function toMoveTarget(project: ProjectSummary): MoveTargetContainer {
   };
 }
 
-function toInspectorItem(item: ItemSummary): ItemInspectorItem {
+function toInspectorItem(
+  item: ItemSummary,
+  categories: readonly CategorySummary[],
+  sourceItem?: ProjectFeedViewModel
+): ItemInspectorItem {
   return {
     id: item.id,
     type: item.type,
     title: item.title,
     body: item.body,
-    categoryLabel: item.categoryId,
+    categoryId: sourceItem !== undefined && "categoryId" in sourceItem
+      ? sourceItem.categoryId
+      : item.categoryId,
+    categoryLabel: sourceItem?.categoryLabel ?? findCategoryName(item.categoryId, categories),
     containerId: item.containerId,
     containerTabId: item.containerTabId,
     status: item.status,
@@ -2360,8 +2497,28 @@ function toInspectorItem(item: ItemSummary): ItemInspectorItem {
     pinned: item.pinned,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
+    completedAt: item.completedAt,
     archivedAt: item.archivedAt,
-    deletedAt: item.deletedAt
+    deletedAt: item.deletedAt,
+    startAt:
+      sourceItem !== undefined && "startAt" in sourceItem
+        ? sourceItem.startAt
+        : null,
+    dueAt:
+      sourceItem !== undefined && "dueAt" in sourceItem
+        ? sourceItem.dueAt
+        : null,
+    tags: sourceItem?.tags
+  };
+}
+
+function toInspectorCategoryOption(
+  category: CategorySummary
+): InspectorCategoryOption {
+  return {
+    id: category.id,
+    name: category.name,
+    color: category.color
   };
 }
 

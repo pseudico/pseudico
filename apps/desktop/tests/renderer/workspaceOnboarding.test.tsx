@@ -514,7 +514,11 @@ function createMockApi(
     metadata: {
       listTagsWithCounts: async () => apiOk([]),
       listCategoriesWithCounts: async () => apiOk([]),
-      listTargetsByMetadata: async () => apiOk([])
+      listTargetsByMetadata: async () => apiOk([]),
+      addTagToTarget: async () =>
+        apiOk({ id: "tag_1", name: "Setup", slug: "setup", source: "manual" }),
+      removeTagFromTarget: async () =>
+        apiOk({ id: "tag_1", name: "Setup", slug: "setup", source: "manual" })
     },
     search: {
       searchWorkspace: async () => apiOk([])

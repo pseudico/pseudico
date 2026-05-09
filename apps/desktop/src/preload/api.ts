@@ -590,6 +590,23 @@ export type ItemTagSummary = {
   source: "inline" | "manual" | "imported";
 };
 
+export type TaggingTargetType = "container" | "item" | "list_item";
+
+export type AddTagToTargetInput = {
+  workspaceId?: string;
+  targetType: TaggingTargetType;
+  targetId: string;
+  name: string;
+};
+
+export type RemoveTagFromTargetInput = {
+  workspaceId?: string;
+  targetType: TaggingTargetType;
+  targetId: string;
+  name?: string;
+  tagId?: string;
+};
+
 export type CategorySummary = {
   id: string;
   workspaceId: string;
@@ -2016,7 +2033,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     listTagsWithCounts: "local-work-os:metadata:list-tags-with-counts",
     listCategoriesWithCounts:
       "local-work-os:metadata:list-categories-with-counts",
-    listTargetsByMetadata: "local-work-os:metadata:list-targets-by-metadata"
+    listTargetsByMetadata: "local-work-os:metadata:list-targets-by-metadata",
+    addTagToTarget: "local-work-os:metadata:add-tag-to-target",
+    removeTagFromTarget: "local-work-os:metadata:remove-tag-from-target"
   },
   search: {
     searchWorkspace: "local-work-os:search:search-workspace"
@@ -2426,6 +2445,14 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTargetsByMetadata]: {
     input: ListTargetsByMetadataInput;
     result: ApiResult<MetadataTargetSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.metadata.addTagToTarget]: {
+    input: AddTagToTargetInput;
+    result: ApiResult<ItemTagSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.metadata.removeTagFromTarget]: {
+    input: RemoveTagFromTargetInput;
+    result: ApiResult<ItemTagSummary | null>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.search.searchWorkspace]: {
     input: SearchWorkspaceInput;
@@ -2962,6 +2989,12 @@ export type LocalWorkOsApi = {
     listTargetsByMetadata: (
       input: ListTargetsByMetadataInput
     ) => Promise<ApiResult<MetadataTargetSummary[]>>;
+    addTagToTarget: (
+      input: AddTagToTargetInput
+    ) => Promise<ApiResult<ItemTagSummary>>;
+    removeTagFromTarget: (
+      input: RemoveTagFromTargetInput
+    ) => Promise<ApiResult<ItemTagSummary | null>>;
   };
   search: {
     searchWorkspace: (
@@ -3477,7 +3510,11 @@ export function createLocalWorkOsApi(
           workspaceId
         ),
       listTargetsByMetadata: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTargetsByMetadata, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTargetsByMetadata, input),
+      addTagToTarget: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.addTagToTarget, input),
+      removeTagFromTarget: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.removeTagFromTarget, input)
     },
     search: {
       searchWorkspace: (input) =>

@@ -407,6 +407,74 @@ describe("Universal item UI", () => {
     expect(inspectorHtml).toContain("Moved task.");
   });
 
+  it("renders universal inspector target switching and edit sections", () => {
+    const html = renderToStaticMarkup(
+      <ItemInspectorPanel
+        activity={[]}
+        availableTargets={[
+          {
+            id: "container_project_1",
+            type: "container",
+            kind: "project",
+            title: "Launch Plan"
+          },
+          {
+            id: "item_1",
+            type: "item",
+            kind: "task",
+            title: "Call accountant"
+          }
+        ]}
+        categories={[
+          {
+            id: "category_1",
+            name: "Finance",
+            color: "#2c6b8f"
+          }
+        ]}
+        target={{
+          id: "item_1",
+          type: "item",
+          kind: "task",
+          title: "Call accountant",
+          categoryId: "category_1",
+          categoryLabel: "Finance",
+          dueAt: "2026-05-09T00:00:00.000Z",
+          startAt: "2026-05-08T00:00:00.000Z",
+          tags: [
+            {
+              id: "tag_1",
+              name: "Finance",
+              slug: "finance",
+              source: "manual"
+            }
+          ]
+        }}
+        open
+        onAddTag={() => undefined}
+        onCategoryChange={() => undefined}
+        onClose={() => undefined}
+        onDateChange={() => undefined}
+        onRemoveTag={() => undefined}
+        onTargetChange={() => undefined}
+      />
+    );
+
+    expect(html).toContain("Inspect object");
+    expect(html).toContain("Container: Launch Plan");
+    expect(html).toContain("Item: Call accountant");
+    expect(html).toContain("Dates");
+    expect(html).toContain("Tags");
+    expect(html).toContain("Category");
+    expect(html).toContain("Relationships");
+    expect(html).toContain("Attachments");
+    expect(html).toContain("Comments");
+    expect(html).toContain("value=\"2026-05-09\"");
+    expect(html).toContain("@Finance");
+    expect(html).toContain("Add tag");
+    expect(html).toContain("Change category");
+  });
+
   it("renders recent activity rows with formatted labels", () => {
     const html = renderToStaticMarkup(
       <RecentActivityList

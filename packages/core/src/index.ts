@@ -120,6 +120,14 @@ export {
 } from "./entities/Tag";
 export type { TaggingSource, TaggingTargetType } from "./entities/Tag";
 export {
+  INSPECTOR_TARGET_TYPES,
+  createInspectorTargetKey,
+  inspectorTargetToTaggingTargetType,
+  isInspectorTarget,
+  isInspectorTargetType
+} from "./entities/Inspector";
+export type { InspectorTarget, InspectorTargetType } from "./entities/Inspector";
+export {
   normalizeTagName,
   parseInlineTagSlugs,
   parseInlineTags,

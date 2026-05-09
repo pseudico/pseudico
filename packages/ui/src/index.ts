@@ -274,6 +274,15 @@ export {
   ItemInspectorPanel,
   type ItemInspectorActivity,
   type ItemInspectorItem,
+  type InspectorAttachmentViewModel,
+  type InspectorCategoryChangeHandler,
+  type InspectorCategoryOption,
+  type InspectorCommentViewModel,
+  type InspectorDateChangeHandler,
+  type InspectorTagAddHandler,
+  type InspectorTagRemoveHandler,
+  type InspectorTargetChangeHandler,
+  type InspectorTargetViewModel,
   type ItemInspectorProps
 } from "./components/ItemInspector";
 export {

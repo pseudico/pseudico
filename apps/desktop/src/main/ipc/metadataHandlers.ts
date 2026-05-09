@@ -1,4 +1,4 @@
-import { MetadataBrowserService } from "@local-work-os/features";
+import { MetadataBrowserService, TagService } from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -10,11 +10,13 @@ import {
 import {
   apiError,
   apiOk,
+  type AddTagToTargetInput,
   type ApiResult,
   type CategoryCountSummary,
   type ItemTagSummary,
   type ListTargetsByMetadataInput,
   type MetadataTargetSummary,
+  type RemoveTagFromTargetInput,
   type TagCountSummary,
   type WorkspaceSummary
 } from "../../preload/api";
@@ -35,6 +37,10 @@ type MetadataIpcHandlers = {
   handleListTargetsByMetadata: (
     input: unknown
   ) => Promise<ApiResult<MetadataTargetSummary[]>>;
+  handleAddTagToTarget: (input: unknown) => Promise<ApiResult<ItemTagSummary>>;
+  handleRemoveTagFromTarget: (
+    input: unknown
+  ) => Promise<ApiResult<ItemTagSummary | null>>;
 };
 
 export function createMetadataIpcHandlers(
@@ -96,6 +102,44 @@ export function createMetadataIpcHandlers(
             .map(toMetadataTargetSummary)
         );
       });
+    },
+
+    async handleAddTagToTarget(input) {
+      if (!isAddTagToTargetInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "addTagToTarget requires targetType, targetId, and name strings."
+        );
+      }
+
+      return await withMetadataBrowserService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const result = await context.tagService.addTagToTarget({
+          ...input,
+          workspaceId
+        });
+
+        return apiOk(toItemTagSummaryFromTag(result.tag));
+      });
+    },
+
+    async handleRemoveTagFromTarget(input) {
+      if (!isRemoveTagFromTargetInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "removeTagFromTarget requires targetType, targetId, and a name or tagId."
+        );
+      }
+
+      return await withMetadataBrowserService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const result = await context.tagService.removeTagFromTarget({
+          ...input,
+          workspaceId
+        });
+
+        return apiOk(result === null ? null : toItemTagSummaryFromTag(result.tag));
+      });
     }
   };
 }
@@ -105,6 +149,7 @@ async function withMetadataBrowserService<T>(
   operation: (context: {
     connection: DatabaseConnection;
     metadataBrowserService: MetadataBrowserService;
+    tagService: TagService;
     workspace: WorkspaceSummary;
   }) => Promise<ApiResult<T>>
 ): Promise<ApiResult<T>> {
@@ -123,6 +168,7 @@ async function withMetadataBrowserService<T>(
     return await operation({
       connection,
       metadataBrowserService: new MetadataBrowserService({ connection }),
+      tagService: new TagService({ connection }),
       workspace
     });
   } catch (error) {
@@ -133,6 +179,19 @@ async function withMetadataBrowserService<T>(
   } finally {
     connection.close();
   }
+}
+
+function toItemTagSummaryFromTag(tag: {
+  id: string;
+  name: string;
+  slug: string;
+}): ItemTagSummary {
+  return {
+    id: tag.id,
+    name: tag.name,
+    slug: tag.slug,
+    source: "manual"
+  };
 }
 
 function resolveWorkspaceId(
@@ -222,6 +281,30 @@ function isListTargetsByMetadataInput(
   );
 }
 
+function isAddTagToTargetInput(input: unknown): input is AddTagToTargetInput {
+  return (
+    isRecord(input) &&
+    isOptionalString(input.workspaceId) &&
+    isTaggingTargetType(input.targetType) &&
+    isNonEmptyString(input.targetId) &&
+    isNonEmptyString(input.name)
+  );
+}
+
+function isRemoveTagFromTargetInput(
+  input: unknown
+): input is RemoveTagFromTargetInput {
+  return (
+    isRecord(input) &&
+    isOptionalString(input.workspaceId) &&
+    isTaggingTargetType(input.targetType) &&
+    isNonEmptyString(input.targetId) &&
+    isOptionalString(input.name) &&
+    isOptionalString(input.tagId) &&
+    (isNonEmptyString(input.name) || isNonEmptyString(input.tagId))
+  );
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -244,4 +327,10 @@ function isOptionalBoolean(value: unknown): boolean {
 
 function isOptionalStringArray(value: unknown): boolean {
   return value === undefined || (Array.isArray(value) && value.every(isNonEmptyString));
+}
+
+function isTaggingTargetType(
+  value: unknown
+): value is AddTagToTargetInput["targetType"] {
+  return value === "container" || value === "item" || value === "list_item";
 }

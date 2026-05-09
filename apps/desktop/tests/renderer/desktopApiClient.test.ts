@@ -384,7 +384,11 @@ function createMockApi(
             targetCount: 2
           }
         ]),
-      listTargetsByMetadata: async () => apiOk([metadataTargetSummary()])
+      listTargetsByMetadata: async () => apiOk([metadataTargetSummary()]),
+      addTagToTarget: async () =>
+        apiOk({ id: "tag_1", name: "Finance", slug: "finance", source: "manual" }),
+      removeTagFromTarget: async () =>
+        apiOk({ id: "tag_1", name: "Finance", slug: "finance", source: "manual" })
     },
     search: {
       searchWorkspace: async () => apiOk([])
