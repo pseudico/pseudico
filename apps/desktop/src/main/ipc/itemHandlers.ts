@@ -1,4 +1,9 @@
-import { formatActivityEvent, ItemService } from "@local-work-os/features";
+import {
+  BulkActionService,
+  formatActivityEvent,
+  ItemService,
+  type BulkActionResult
+} from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -11,6 +16,11 @@ import {
   apiOk,
   type ActivitySummary,
   type ApiResult,
+  type BulkActionSummary,
+  type BulkBaseItemsInput,
+  type BulkCategorizeItemsInput,
+  type BulkMoveItemsInput,
+  type BulkTagItemsInput,
   type ItemInspectorSummary,
   type ItemSummary,
   type MoveItemInput,
@@ -33,6 +43,23 @@ type ItemIpcHandlers = {
   handleOpenItemInspector: (
     input: unknown
   ) => Promise<ApiResult<ItemInspectorSummary>>;
+  handleBulkMoveItems: (input: unknown) => Promise<ApiResult<BulkActionSummary>>;
+  handleBulkTagItems: (input: unknown) => Promise<ApiResult<BulkActionSummary>>;
+  handleBulkCategorizeItems: (
+    input: unknown
+  ) => Promise<ApiResult<BulkActionSummary>>;
+  handleBulkArchiveItems: (
+    input: unknown
+  ) => Promise<ApiResult<BulkActionSummary>>;
+  handleBulkDeleteItems: (
+    input: unknown
+  ) => Promise<ApiResult<BulkActionSummary>>;
+  handleBulkCompleteTasks: (
+    input: unknown
+  ) => Promise<ApiResult<BulkActionSummary>>;
+  handleBulkExportItems: (
+    input: unknown
+  ) => Promise<ApiResult<BulkActionSummary>>;
 };
 
 export function createItemIpcHandlers(
@@ -107,6 +134,97 @@ export function createItemIpcHandlers(
           activity: snapshot.activity.map(toActivitySummary)
         });
       });
+    },
+
+    async handleBulkMoveItems(input) {
+      if (!isBulkMoveItemsInput(input)) {
+        return apiError("INVALID_INPUT", "bulkMoveItems requires itemIds and targetContainerId.");
+      }
+
+      return await withItemService(workspaceService, async (context) =>
+        apiOk(toBulkActionSummary(await context.bulkActionService.moveItems({
+          ...input,
+          workspaceId: input.workspaceId ?? context.workspace.id
+        })))
+      );
+    },
+
+    async handleBulkTagItems(input) {
+      if (!isBulkTagItemsInput(input)) {
+        return apiError("INVALID_INPUT", "bulkTagItems requires itemIds and tagName.");
+      }
+
+      return await withItemService(workspaceService, async (context) =>
+        apiOk(toBulkActionSummary(await context.bulkActionService.tagItems({
+          ...input,
+          workspaceId: input.workspaceId ?? context.workspace.id
+        })))
+      );
+    },
+
+    async handleBulkCategorizeItems(input) {
+      if (!isBulkCategorizeItemsInput(input)) {
+        return apiError("INVALID_INPUT", "bulkCategorizeItems requires itemIds and categoryId.");
+      }
+
+      return await withItemService(workspaceService, async (context) =>
+        apiOk(toBulkActionSummary(await context.bulkActionService.categorizeItems({
+          ...input,
+          workspaceId: input.workspaceId ?? context.workspace.id
+        })))
+      );
+    },
+
+    async handleBulkArchiveItems(input) {
+      if (!isBulkBaseItemsInput(input)) {
+        return apiError("INVALID_INPUT", "bulkArchiveItems requires itemIds.");
+      }
+
+      return await withItemService(workspaceService, async (context) =>
+        apiOk(toBulkActionSummary(await context.bulkActionService.archiveItems({
+          ...input,
+          workspaceId: input.workspaceId ?? context.workspace.id
+        })))
+      );
+    },
+
+    async handleBulkDeleteItems(input) {
+      if (!isBulkBaseItemsInput(input)) {
+        return apiError("INVALID_INPUT", "bulkDeleteItems requires itemIds.");
+      }
+
+      return await withItemService(workspaceService, async (context) =>
+        apiOk(toBulkActionSummary(await context.bulkActionService.deleteItems({
+          ...input,
+          workspaceId: input.workspaceId ?? context.workspace.id
+        })))
+      );
+    },
+
+    async handleBulkCompleteTasks(input) {
+      if (!isBulkBaseItemsInput(input)) {
+        return apiError("INVALID_INPUT", "bulkCompleteTasks requires itemIds.");
+      }
+
+      return await withItemService(workspaceService, async (context) =>
+        apiOk(toBulkActionSummary(await context.bulkActionService.completeTasks({
+          ...input,
+          workspaceId: input.workspaceId ?? context.workspace.id
+        })))
+      );
+    },
+
+    async handleBulkExportItems(input) {
+      if (!isBulkBaseItemsInput(input)) {
+        return apiError("INVALID_INPUT", "bulkExportItems requires itemIds.");
+      }
+
+      return await withItemService(workspaceService, async (context) =>
+        apiOk(toBulkActionSummary(await context.bulkActionService.exportItems({
+          ...input,
+          workspaceId: input.workspaceId ?? context.workspace.id
+        })))
+      );
     }
   };
 }
@@ -115,6 +233,7 @@ async function withItemService<T>(
   workspaceService: CurrentWorkspaceService,
   operation: (context: {
     connection: DatabaseConnection;
+    bulkActionService: BulkActionService;
     itemService: ItemService;
     workspace: WorkspaceSummary;
   }) => Promise<ApiResult<T>>
@@ -133,6 +252,7 @@ async function withItemService<T>(
   try {
     return await operation({
       connection,
+      bulkActionService: new BulkActionService({ connection }),
       itemService: new ItemService({ connection }),
       workspace
     });
@@ -188,6 +308,24 @@ function toActivitySummary(activity: ActivityLogRecord): ActivitySummary {
   };
 }
 
+function toBulkActionSummary(result: BulkActionResult): BulkActionSummary {
+  return {
+    workspaceId: result.workspaceId,
+    operation: result.operation,
+    requestedCount: result.requestedCount,
+    changedCount: result.changedCount,
+    skippedCount: result.skippedCount,
+    items: result.items.map((item) => ({
+      itemId: item.itemId,
+      ok: item.ok,
+      ...(item.item === undefined ? {} : { item: toItemSummary(item.item) }),
+      ...(item.reason === undefined ? {} : { reason: item.reason })
+    })),
+    activityId: result.activityId,
+    ...(result.export === undefined ? {} : { export: result.export })
+  };
+}
+
 function isMoveItemInput(input: unknown): input is MoveItemInput {
   return (
     isRecord(input) &&
@@ -195,6 +333,39 @@ function isMoveItemInput(input: unknown): input is MoveItemInput {
     isNonEmptyString(input.targetContainerId) &&
     isOptionalNullableString(input.targetContainerTabId) &&
     (input.sortOrder === undefined || typeof input.sortOrder === "number")
+  );
+}
+
+function isBulkBaseItemsInput(input: unknown): input is BulkBaseItemsInput {
+  return (
+    isRecord(input) &&
+    (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)) &&
+    Array.isArray(input.itemIds) &&
+    input.itemIds.every(isNonEmptyString)
+  );
+}
+
+function isBulkMoveItemsInput(input: unknown): input is BulkMoveItemsInput {
+  const record = input as Record<string, unknown>;
+  return (
+    isBulkBaseItemsInput(input) &&
+    isNonEmptyString(record.targetContainerId) &&
+    isOptionalNullableString(record.targetContainerTabId)
+  );
+}
+
+function isBulkTagItemsInput(input: unknown): input is BulkTagItemsInput {
+  const record = input as Record<string, unknown>;
+  return isBulkBaseItemsInput(input) && isNonEmptyString(record.tagName);
+}
+
+function isBulkCategorizeItemsInput(
+  input: unknown
+): input is BulkCategorizeItemsInput {
+  const record = input as Record<string, unknown>;
+  return (
+    isBulkBaseItemsInput(input) &&
+    (record.categoryId === null || isNonEmptyString(record.categoryId))
   );
 }
 

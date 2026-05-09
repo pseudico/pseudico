@@ -4,6 +4,7 @@ import {
   getItemTypeLabel,
   CategoryBadge,
   CategoryPicker,
+  BulkSelectionToolbar,
   ConfirmDialog,
   ContextMenu,
   DashboardWidget,
@@ -216,6 +217,32 @@ describe("Universal item UI", () => {
     expect(renderToStaticMarkup(<ItemFeed items={[taskItem]} />)).toContain(
       "Call accountant"
     );
+    expect(
+      renderToStaticMarkup(
+        <ItemFeed
+          items={[taskItem]}
+          selectedItemIds={["item_1"]}
+          onSelectionChange={() => undefined}
+        />
+      )
+    ).toContain("checked=\"\"");
+  });
+
+  it("renders the bulk selection toolbar with disabled actions", () => {
+    const html = renderToStaticMarkup(
+      <BulkSelectionToolbar
+        disabledActions={["delete"]}
+        selectedCount={3}
+        onAction={() => undefined}
+        onClear={() => undefined}
+      />
+    );
+
+    expect(html).toContain("3 selected");
+    expect(html).toContain("Move");
+    expect(html).toContain("Complete");
+    expect(html).toContain("Export");
+    expect(html).toContain("disabled=\"\"");
   });
 
   it("renders shared empty, error, loadable, and toast states", () => {

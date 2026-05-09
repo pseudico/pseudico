@@ -1462,3 +1462,44 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Push/PR/CI still pending.
 Next actions: Amend log into commit; push branch; open PR.
+## 2026-05-09 20:43:32 +10:00
+Objective: Complete PSE-94 merge and prepare next Local Work OS ticket.
+Decisions made:
+- Squash-merged PR #89 after green local checks and GitHub CI.
+- Moved PSE-94 to Done and promoted PSE-95 as the single Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final session log entry remains local on main unless separately committed.
+Next actions: Start PSE-95; keep other issues out of Codex Ready; preserve unrelated untracked files.
+
+## 2026-05-09T20:45:59.3806252+10:00
+Objective: Reconcile active Linear/GitHub work and start next ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found; one Codex Ready issue found: PSE-95.
+- No open GitHub PRs found for pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing modified session_log and untracked local files are unrelated and will be preserved.
+Next actions: Move PSE-95 to In Progress; read docs; implement scoped ticket.
+
+## 2026-05-09T20:48:54.6018762+10:00
+Objective: Plan PSE-95 bulk selection/actions implementation.
+Decisions made:
+- Branch created: codex/PSE-95-bulk-selection-actions.
+- Scope will add a feature-layer SelectionStore/BulkActionService plus reusable UI selection toolbar and desktop IPC/API hooks.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Full E2E may be limited by existing app test coverage; local checks will verify behavior.
+Next actions: Implement service/UI; add tests; run checks.
+
+## 2026-05-09T21:02:17.7975866+10:00
+Objective: Verify PSE-95 bulk selection/action implementation.
+Decisions made:
+- Added service-layer bulk move/tag/category/archive/delete/complete/export with grouped activity events and search refresh.
+- Added reusable UI selection affordances and toolbar plus desktop IPC/API bindings.
+Files changed:
+- packages/features/src/bulkActions/**
+- packages/ui/src/components/**
+- apps/desktop/src/**
+Open questions / risks: Existing untracked .playwright-mcp/ and gh installer remain untouched.
+Next actions: Commit; push; open PR.

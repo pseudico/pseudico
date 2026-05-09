@@ -18,24 +18,38 @@ export type SearchResultCardViewModel = {
 
 export type SearchResultCardProps = {
   result: SearchResultCardViewModel;
+  selected?: boolean;
   onOpen?: (resultId: string) => void;
+  onSelectionChange?: (resultId: string, selected: boolean) => void;
 };
 
 export function SearchResultCard({
   result,
-  onOpen
+  selected = false,
+  onOpen,
+  onSelectionChange
 }: SearchResultCardProps): React.JSX.Element {
   const typeLabel = formatKindLabel(result.kind);
   const tags = result.tags?.filter((tag) => tag.slug.trim().length > 0) ?? [];
 
   return (
-    <button
-      type="button"
-      className="search-result-card"
+    <div
+      className={`search-result-card${selected ? " search-result-card-selected" : ""}`}
       data-search-result-id={result.id}
-      disabled={result.disabled === true || onOpen === undefined}
-      onClick={() => onOpen?.(result.id)}
     >
+      {onSelectionChange === undefined ? null : (
+        <label className="selection-checkbox">
+          <input
+            type="checkbox"
+            checked={selected}
+            disabled={result.disabled === true}
+            aria-label={`Select ${result.title}`}
+            onChange={(event) =>
+              onSelectionChange(result.id, event.currentTarget.checked)
+            }
+          />
+        </label>
+      )}
       <span className="search-result-card-main">
         <span className="search-result-card-title">
           <span className="item-type-badge">
@@ -67,8 +81,16 @@ export function SearchResultCard({
           </span>
         )}
       </span>
-      <ArrowUpRight size={17} aria-hidden="true" />
-    </button>
+      <button
+        type="button"
+        className="icon-button"
+        disabled={result.disabled === true || onOpen === undefined}
+        aria-label={`Open ${result.title}`}
+        onClick={() => onOpen?.(result.id)}
+      >
+        <ArrowUpRight size={17} aria-hidden="true" />
+      </button>
+    </div>
   );
 }
 

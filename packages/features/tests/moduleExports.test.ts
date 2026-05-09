@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   backupModuleContract,
   BackupService,
+  BulkActionService,
+  bulkActionsModuleContract,
   RestoreService,
   activityModuleContract,
   calendarModuleContract,
@@ -87,6 +89,7 @@ describe("feature module exports", () => {
       "timeline",
       "calendar",
       "backup",
+      "bulkActions",
       "export",
       "templates",
       "workflows",
@@ -126,6 +129,7 @@ describe("feature module exports", () => {
       timelineModuleContract.module,
       calendarModuleContract.module,
       backupModuleContract.module,
+      bulkActionsModuleContract.module,
       exportModuleContract.module,
       templatesModuleContract.module,
       workflowsModuleContract.module,
@@ -162,6 +166,7 @@ describe("feature module exports", () => {
       "timeline",
       "calendar",
       "backup",
+      "bulkActions",
       "export",
       "templates",
       "workflows",
@@ -194,6 +199,10 @@ describe("feature module exports", () => {
 
   it("exports the workspace JSON export service implementation", () => {
     expect(ExportService).toBeDefined();
+  });
+
+  it("exports the bulk action service implementation", () => {
+    expect(BulkActionService).toBeDefined();
   });
 
   it("exports the import validation service implementation", () => {

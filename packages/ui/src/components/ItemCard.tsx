@@ -37,14 +37,22 @@ export type UniversalItemViewModel = {
 export type UniversalItemCardProps = {
   item: UniversalItemViewModel;
   disabledActions?: readonly ItemActionId[];
+  selection?: {
+    selected: boolean;
+    disabled?: boolean;
+    label?: string;
+  };
   onAction?: ItemActionHandler;
+  onSelectionChange?: (itemId: string, selected: boolean) => void;
   renderContent?: (item: UniversalItemViewModel) => ReactNode;
 };
 
 export function UniversalItemCard({
   item,
   disabledActions,
+  selection,
   onAction,
+  onSelectionChange,
   renderContent
 }: UniversalItemCardProps): React.JSX.Element {
   const knownType = isItemType(item.type);
@@ -70,15 +78,30 @@ export function UniversalItemCard({
       onAction={(actionId) => onAction?.(actionId, item.id)}
     >
       <article
-        className="universal-item-card"
+        className={`universal-item-card${selection?.selected === true ? " universal-item-card-selected" : ""}`}
         data-item-id={item.id}
         data-item-type={knownType ? item.type : "unknown"}
       >
         <header className="universal-item-card-header">
-          <span className="item-type-badge">
-            <ItemTypeIcon itemType={item.type} />
-            <span>{typeLabel}</span>
-          </span>
+          <div className="universal-item-card-heading">
+            {selection === undefined ? null : (
+              <label className="selection-checkbox">
+                <input
+                  type="checkbox"
+                  checked={selection.selected}
+                  disabled={selection.disabled === true}
+                  aria-label={selection.label ?? `Select ${item.title}`}
+                  onChange={(event) =>
+                    onSelectionChange?.(item.id, event.currentTarget.checked)
+                  }
+                />
+              </label>
+            )}
+            <span className="item-type-badge">
+              <ItemTypeIcon itemType={item.type} />
+              <span>{typeLabel}</span>
+            </span>
+          </div>
           <ItemActionsMenu
             itemId={item.id}
             itemTitle={item.title}
