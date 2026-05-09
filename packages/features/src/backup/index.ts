@@ -1,5 +1,6 @@
 export { BackupService, backupModuleContract } from "./BackupService";
 export { createBackupManifest } from "./BackupManifest";
+export { RestoreService } from "./RestoreService";
 export type {
   BackupFileSystemAdapter,
   BackupServiceIdFactory,
@@ -13,3 +14,13 @@ export type {
   BackupManifestAttachment,
   CreateBackupManifestInput
 } from "./BackupManifest";
+export type {
+  RestoreBackupToNewWorkspaceInput,
+  RestoreExportToNewWorkspaceInput,
+  RestoreIssue,
+  RestoreResult,
+  RestoreServiceIdFactory,
+  RestoreSourceType,
+  RestoreValidationSummary,
+  ValidateRestoreSourceInput
+} from "./RestoreService";

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   backupModuleContract,
   BackupService,
+  RestoreService,
   activityModuleContract,
   calendarModuleContract,
   CaptureService,
@@ -166,6 +167,7 @@ describe("feature module exports", () => {
 
   it("exports the backup service implementation", () => {
     expect(BackupService).toBeDefined();
+    expect(RestoreService).toBeDefined();
   });
 
   it("exports the workspace JSON export service implementation", () => {

@@ -27,6 +27,7 @@ import type {
   CategorySummary,
   ImportValidationSummary,
   LocalWorkOsApi,
+  RestoreWorkspaceSummary,
   WorkspaceIntegritySummary
 } from "../../preload/api";
 
@@ -52,10 +53,16 @@ export function SettingsPage({
   const [backupBusy, setBackupBusy] = useState(false);
   const [exportBusy, setExportBusy] = useState(false);
   const [importBusy, setImportBusy] = useState(false);
+  const [restoreBusy, setRestoreBusy] = useState(false);
   const [backups, setBackups] = useState<BackupSnapshotSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
+  const [restoreTargetPath, setRestoreTargetPath] = useState("");
+  const [restoreExportPath, setRestoreExportPath] = useState("");
+  const [restoreSummary, setRestoreSummary] =
+    useState<RestoreWorkspaceSummary | null>(null);
   const [diagnosticsBusy, setDiagnosticsBusy] = useState(false);
   const [diagnosticsReport, setDiagnosticsReport] =
     useState<WorkspaceIntegritySummary | null>(null);
@@ -382,6 +389,77 @@ export function SettingsPage({
     }
   }
 
+  async function restoreBackup(backup: BackupSnapshotSummary): Promise<void> {
+    if (restoreTargetPath.trim().length === 0) {
+      setUserError("Enter a new target workspace folder before restoring.");
+      return;
+    }
+
+    setRestoreBusy(true);
+    setRestoreMessage(null);
+    setRestoreSummary(null);
+    setError(null);
+
+    const result = await apiClient.backup.restoreBackupToNewWorkspace({
+      backupRelativePath: backup.relativePath,
+      targetRootPath: restoreTargetPath.trim()
+    });
+
+    setRestoreBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Restore failed");
+      return;
+    }
+
+    setRestoreSummary(result.data);
+    const message = `Backup restored into ${result.data.targetWorkspaceRootPath}.`;
+    setRestoreMessage(message);
+    showToast(message, {
+      title: "Restore complete",
+      tone: "success"
+    });
+    void refreshCurrentWorkspace(apiClient);
+  }
+
+  async function restoreWorkspaceExport(): Promise<void> {
+    if (restoreExportPath.trim().length === 0) {
+      setUserError("Enter a workspace export JSON file path before restoring.");
+      return;
+    }
+
+    if (restoreTargetPath.trim().length === 0) {
+      setUserError("Enter a new target workspace folder before restoring.");
+      return;
+    }
+
+    setRestoreBusy(true);
+    setRestoreMessage(null);
+    setRestoreSummary(null);
+    setError(null);
+
+    const result = await apiClient.backup.restoreExportToNewWorkspace({
+      filePath: restoreExportPath.trim(),
+      targetRootPath: restoreTargetPath.trim()
+    });
+
+    setRestoreBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Restore failed");
+      return;
+    }
+
+    setRestoreSummary(result.data);
+    const message = `Workspace export restored into ${result.data.targetWorkspaceRootPath}.`;
+    setRestoreMessage(message);
+    showToast(message, {
+      title: "Restore complete",
+      tone: "success"
+    });
+    void refreshCurrentWorkspace(apiClient);
+  }
+
   return (
     <section className="settings-layout">
       <div className="page-heading">
@@ -452,6 +530,18 @@ export function SettingsPage({
           <p className="form-message">{backupMessage}</p>
         )}
 
+        <div className="category-form" aria-label="Restore target">
+          <label>
+            <span>Restore target folder</span>
+            <input
+              disabled={restoreBusy}
+              placeholder="C:\\Users\\you\\Local Work OS Restored"
+              value={restoreTargetPath}
+              onChange={(event) => setRestoreTargetPath(event.target.value)}
+            />
+          </label>
+        </div>
+
         <div className="backup-list" aria-label="Backup list">
           {backups.length === 0 ? (
             <EmptyState
@@ -460,7 +550,12 @@ export function SettingsPage({
             />
           ) : (
             backups.map((backup) => (
-              <BackupListRow key={backup.id} backup={backup} />
+              <BackupListRow
+                key={backup.id}
+                backup={backup}
+                restoreBusy={restoreBusy}
+                onRestore={restoreBackup}
+              />
             ))
           )}
         </div>
@@ -527,6 +622,34 @@ export function SettingsPage({
             </button>
           </div>
         </div>
+
+        <div className="category-form" aria-label="Restore workspace export">
+          <label>
+            <span>Workspace export JSON path</span>
+            <input
+              disabled={restoreBusy}
+              placeholder="C:\\Users\\you\\Local Work OS\\exports\\workspace.json"
+              value={restoreExportPath}
+              onChange={(event) => setRestoreExportPath(event.target.value)}
+            />
+          </label>
+          <button
+            className="secondary-button"
+            disabled={restoreBusy}
+            type="button"
+            onClick={() => void restoreWorkspaceExport()}
+          >
+            <Upload size={17} aria-hidden="true" />
+            Restore export to new workspace
+          </button>
+        </div>
+
+        {restoreMessage === null ? null : (
+          <p className="form-message form-message-ok">{restoreMessage}</p>
+        )}
+        {restoreSummary === null ? null : (
+          <RestoreSummaryPanel summary={restoreSummary} />
+        )}
 
         {importSummary === null ? (
           <EmptyState
@@ -716,6 +839,34 @@ function ImportValidationSummaryPanel({
   );
 }
 
+function RestoreSummaryPanel({
+  summary
+}: {
+  summary: RestoreWorkspaceSummary;
+}): React.JSX.Element {
+  const warningCount = summary.issues.filter(
+    (issue) => issue.severity === "warning"
+  ).length;
+
+  return (
+    <div className="backup-list" aria-label="Restore summary">
+      <div className="backup-list-row">
+        <div>
+          <strong>Restored new workspace</strong>
+          <span>{summary.targetWorkspaceRootPath}</span>
+        </div>
+        <div className="backup-list-meta">
+          <span>{summary.counts.items} items</span>
+          <span>{summary.copiedAttachmentCount} attachments copied</span>
+          <span>{summary.missingAttachmentCount} missing attachments</span>
+          <span>{warningCount} warnings</span>
+        </div>
+      </div>
+      <p className="muted-text">{summary.targetPolicy.message}</p>
+    </div>
+  );
+}
+
 function CategoryListRow({
   busy,
   category,
@@ -775,9 +926,13 @@ function compareCategories(left: CategorySummary, right: CategorySummary): numbe
 }
 
 function BackupListRow({
-  backup
+  backup,
+  onRestore,
+  restoreBusy
 }: {
   backup: BackupSnapshotSummary;
+  onRestore: (backup: BackupSnapshotSummary) => Promise<void>;
+  restoreBusy: boolean;
 }): React.JSX.Element {
   return (
     <div className="backup-list-row">
@@ -793,6 +948,18 @@ function BackupListRow({
             ? "Database copy missing"
             : `${formatBytes(backup.databaseSizeBytes)} database`}
         </span>
+        <button
+          className="secondary-button compact-button"
+          disabled={
+            restoreBusy ||
+            backup.databaseRelativePath === null ||
+            backup.manifestRelativePath === null
+          }
+          type="button"
+          onClick={() => void onRestore(backup)}
+        >
+          Restore to new workspace
+        </button>
       </div>
     </div>
   );

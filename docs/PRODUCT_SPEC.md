@@ -39,10 +39,11 @@ Known limitations for MVP release planning:
   projections.
 - Search is local and service-backed, but ranking, diagnostics, and rebuild UX
   are intentionally basic.
-- Import validation exists for workspace JSON; executing a restore/import into
-  a new workspace remains future work.
-- Backups and exports are manual local actions. Automatic backup scheduling,
-  restore flows, and release-grade integrity reporting remain future work.
+- Import validation exists for workspace JSON, and valid workspace JSON exports
+  can now be restored into a separate new workspace folder where feasible.
+- Backups and exports are manual local actions. Manual backup restore into a new
+  workspace is available; automatic backup scheduling and release-grade
+  integrity reporting remain future work.
 - Packaged builds are development verification builds without installer,
   signing, notarization, or auto-update support.
 
@@ -2149,7 +2150,7 @@ MVP should prove the object graph and core usability.
 | Today | Today + overdue | Implemented with due/overdue lanes, manual Today/Tomorrow planning, ordering, rollover, snooze, and reschedule. |
 | Dashboard | Default overview | Implemented with default widgets, widget data services, project health, recent activity, and source-object navigation. Custom widget editing remains future work. |
 | Activity | Log core writes | Implemented for core data-changing services and exposed through recent activity projections. |
-| Backup/export | Manual backup + JSON export | Implemented for manual backups, workspace JSON export, project Markdown export, task CSV/TSV export, and JSON import validation. Full restore/import execution remains future work. |
+| Backup/export | Manual backup + JSON export | Implemented for manual backups, backup restore into a new workspace, workspace JSON export/restore where feasible, project Markdown export, task CSV/TSV export, and JSON import validation. |
 
 ### 32.2 V1 — Pagico-like usability depth
 

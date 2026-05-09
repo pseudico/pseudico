@@ -43,7 +43,12 @@ export {
   formatTargetLabel
 } from "./activity";
 export type { ActivityEventView } from "./activity";
-export { BackupService, backupModuleContract, createBackupManifest } from "./backup";
+export {
+  BackupService,
+  RestoreService,
+  backupModuleContract,
+  createBackupManifest
+} from "./backup";
 export {
   CalendarService,
   calendarModuleContract,
@@ -162,7 +167,15 @@ export type {
   CreateBackupManifestInput,
   CreateManualBackupInput,
   ListBackupsInput,
-  ManualBackupSnapshot
+  ManualBackupSnapshot,
+  RestoreBackupToNewWorkspaceInput,
+  RestoreExportToNewWorkspaceInput,
+  RestoreIssue,
+  RestoreResult,
+  RestoreServiceIdFactory,
+  RestoreSourceType,
+  RestoreValidationSummary,
+  ValidateRestoreSourceInput
 } from "./backup";
 export type {
   CalendarDay,

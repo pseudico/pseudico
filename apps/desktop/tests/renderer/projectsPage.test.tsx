@@ -711,7 +711,10 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
     },
     backup: {
       createManualBackup: async () => apiOk(null as never),
-      listBackups: async () => apiOk([])
+      listBackups: async () => apiOk([]),
+      validateRestoreSource: async () => apiOk(null as never),
+      restoreBackupToNewWorkspace: async () => apiOk(null as never),
+      restoreExportToNewWorkspace: async () => apiOk(null as never)
     },
     import: {
       validateWorkspaceExportJson: async () => apiOk(null as never),

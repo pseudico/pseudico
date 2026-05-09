@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(124);
+    expect(channels).toHaveLength(127);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -421,6 +421,18 @@ describe("typed preload API", () => {
     const api = createLocalWorkOsApi(invoke);
     await api.backup.createManualBackup({ workspaceId: "workspace_1" });
     await api.backup.listBackups({ workspaceId: "workspace_1" });
+    await api.backup.validateRestoreSource({
+      sourceType: "backup",
+      backupRelativePath: "backups/snapshot"
+    });
+    await api.backup.restoreBackupToNewWorkspace({
+      backupRelativePath: "backups/snapshot",
+      targetRootPath: "C:\\restored"
+    });
+    await api.backup.restoreExportToNewWorkspace({
+      filePath: "C:\\exports\\workspace.json",
+      targetRootPath: "C:\\restored-export"
+    });
 
     expect(calls).toEqual([
       {
@@ -433,6 +445,27 @@ describe("typed preload API", () => {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackups,
         input: {
           workspaceId: "workspace_1"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.validateRestoreSource,
+        input: {
+          sourceType: "backup",
+          backupRelativePath: "backups/snapshot"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreBackupToNewWorkspace,
+        input: {
+          backupRelativePath: "backups/snapshot",
+          targetRootPath: "C:\\restored"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreExportToNewWorkspace,
+        input: {
+          filePath: "C:\\exports\\workspace.json",
+          targetRootPath: "C:\\restored-export"
         }
       }
     ]);
