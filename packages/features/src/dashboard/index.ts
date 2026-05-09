@@ -6,6 +6,7 @@ export type {
 } from "./DashboardService";
 export type {
   DashboardActivityWidgetItem,
+  DashboardFavoriteWidgetItem,
   DashboardNavigationTarget,
   DashboardProjectHealthWidgetItem,
   DashboardProjectWidgetItem,

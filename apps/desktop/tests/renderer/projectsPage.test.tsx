@@ -730,7 +730,8 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
     },
     navigation: {
       listRecentTargets: async () => apiOk([]),
-      recordTarget: async () => apiOk([])
+      recordTarget: async () => apiOk([]),
+      listPinnedFavorites: async () => apiOk([])
     }
   };
 }

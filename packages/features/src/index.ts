@@ -120,8 +120,10 @@ export {
   DEFAULT_RECENT_NAVIGATION_LIMIT,
   RECENT_NAVIGATION_TARGETS_SETTING_KEY,
   NavigationHistoryService,
+  PinnedFavoritesService,
   mergeRecentTarget,
   navigationHistoryModuleContract,
+  pinnedFavoritesModuleContract,
   resolveNavigationTargetPath
 } from "./navigation";
 export { PipelineService, pipelinesModuleContract } from "./pipelines";
@@ -227,6 +229,7 @@ export type {
 } from "./contacts";
 export type {
   DashboardActivityWidgetItem,
+  DashboardFavoriteWidgetItem,
   DashboardNavigationTarget,
   DashboardProjectHealthWidgetItem,
   DashboardProjectWidgetItem,
@@ -368,8 +371,11 @@ export type {
   UpdateCategoryInput
 } from "./metadata";
 export type {
+  ListPinnedFavoritesInput,
   NavigationRecentTarget,
   NavigationTargetType,
+  PinnedFavoriteTarget,
+  PinnedFavoriteTargetType,
   RecordNavigationTargetInput
 } from "./navigation";
 export type {

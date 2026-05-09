@@ -17,8 +17,17 @@ export {
   mergeRecentTarget,
   resolveNavigationTargetPath
 } from "./NavigationHistoryService";
+export {
+  PinnedFavoritesService,
+  pinnedFavoritesModuleContract
+} from "./PinnedFavoritesService";
 export type {
   NavigationRecentTarget,
   NavigationTargetType,
   RecordNavigationTargetInput
 } from "./NavigationHistoryService";
+export type {
+  ListPinnedFavoritesInput,
+  PinnedFavoriteTarget,
+  PinnedFavoriteTargetType
+} from "./PinnedFavoritesService";

@@ -524,7 +524,7 @@ describe("Universal item UI", () => {
     expect(emptyHtml).toContain("Nothing to show");
     expect(todayHtml).toContain("Call accountant");
     expect(todayHtml).toContain("P2");
-    expect(projectsHtml).toContain("Favorite Projects");
+    expect(projectsHtml).toContain("Pinned &amp; Favorites");
     expect(projectsHtml).toContain("Launch Plan");
     expect(activityHtml).toContain("Container Created");
     expect(activityHtml).toContain("Created project.");

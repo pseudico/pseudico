@@ -6,7 +6,9 @@ import {
 } from "@local-work-os/db";
 import {
   NavigationHistoryService,
+  PinnedFavoritesService,
   type NavigationRecentTarget,
+  type PinnedFavoriteTarget,
   type RecordNavigationTargetInput
 } from "@local-work-os/features";
 import {
@@ -14,6 +16,7 @@ import {
   apiOk,
   type ApiResult,
   type NavigationRecentTargetSummary,
+  type PinnedFavoriteTargetSummary,
   type WorkspaceSummary
 } from "../../preload/api";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
@@ -30,6 +33,9 @@ type NavigationIpcHandlers = {
   handleRecordTarget: (
     input: unknown
   ) => Promise<ApiResult<NavigationRecentTargetSummary[]>>;
+  handleListPinnedFavorites: (
+    input: unknown
+  ) => Promise<ApiResult<PinnedFavoriteTargetSummary[]>>;
 };
 
 export function createNavigationIpcHandlers(
@@ -73,6 +79,25 @@ export function createNavigationIpcHandlers(
               workspaceId
             })
             .map(toNavigationRecentTargetSummary)
+        );
+      });
+    },
+
+    async handleListPinnedFavorites(input) {
+      if (input !== undefined && !isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "listPinnedFavorites requires an optional workspaceId string."
+        );
+      }
+
+      return await withNavigationService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input, context.workspace);
+
+        return apiOk(
+          new PinnedFavoritesService({ connection: context.connection })
+            .listPinnedFavorites({ workspaceId })
+            .map(toPinnedFavoriteTargetSummary)
         );
       });
     }
@@ -133,6 +158,12 @@ function resolveWorkspaceId(
 function toNavigationRecentTargetSummary(
   target: NavigationRecentTarget
 ): NavigationRecentTargetSummary {
+  return { ...target };
+}
+
+function toPinnedFavoriteTargetSummary(
+  target: PinnedFavoriteTarget
+): PinnedFavoriteTargetSummary {
   return { ...target };
 }
 

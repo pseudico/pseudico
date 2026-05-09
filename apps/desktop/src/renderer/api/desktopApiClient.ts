@@ -347,7 +347,9 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       listRecentTargets: (workspaceId) =>
         callApi(() => api.navigation.listRecentTargets(workspaceId)),
       recordTarget: (input) =>
-        callApi(() => api.navigation.recordTarget(input))
+        callApi(() => api.navigation.recordTarget(input)),
+      listPinnedFavorites: (workspaceId) =>
+        callApi(() => api.navigation.listPinnedFavorites(workspaceId))
     }
   };
 }
@@ -687,6 +689,8 @@ export const desktopApiClient: LocalWorkOsApi = {
     listRecentTargets: (workspaceId) =>
       getDesktopApiClient().navigation.listRecentTargets(workspaceId),
     recordTarget: (input) =>
-      getDesktopApiClient().navigation.recordTarget(input)
+      getDesktopApiClient().navigation.recordTarget(input),
+    listPinnedFavorites: (workspaceId) =>
+      getDesktopApiClient().navigation.listPinnedFavorites(workspaceId)
   }
 };

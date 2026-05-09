@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(129);
+    expect(channels).toHaveLength(130);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -1416,6 +1416,7 @@ describe("typed preload API", () => {
         label: "Today"
       }
     });
+    await api.navigation.listPinnedFavorites("workspace_1");
 
     expect(calls).toEqual([
       {
@@ -1433,6 +1434,10 @@ describe("typed preload API", () => {
             label: "Today"
           }
         }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.navigation.listPinnedFavorites,
+        input: "workspace_1"
       }
     ]);
   });
