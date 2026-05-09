@@ -851,3 +851,10 @@ Next actions: Start PSE-81; keep only one Codex Ready issue; preserve local-only
 - Files changed: docs/session_log.md; docs/DECISIONS/ADR-browser-capture-local-bridge.md; docs/MODULE_REGISTRY.md; packages/features/src/capture/*; apps/desktop/src/main/services/CaptureBridge.ts; tests
 - Open questions / risks: Manual browser QA not applicable because no extension/listener is enabled.
 - Next actions: Commit scoped files; push branch; open PR and update Linear.
+
+## 2026-05-09T10:58:35.7983081+10:00
+- Objective: Publish PSE-82 PR.
+- Decisions made: Created draft PR #79; moved PSE-82 to PR Open; linked PR in Linear.
+- Files changed: docs/session_log.md
+- Open questions / risks: CI pending; PR is draft until CI/review checks pass.
+- Next actions: Inspect CI; review diff; merge only if clean.
