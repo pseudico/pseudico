@@ -1320,6 +1320,40 @@ export function ProjectDetailPage({
 
     setItemActionError(null);
 
+    if (action === "open") {
+      if (isFileCardViewModel(item)) {
+        void openProjectFile(item);
+        return;
+      }
+
+      if (isLinkCardViewModel(item)) {
+        void openProjectLink(item);
+        return;
+      }
+
+      if (projectId !== undefined) {
+        navigate(
+          `/projects/${encodeURIComponent(projectId)}?item=${encodeURIComponent(item.id)}`
+        );
+      }
+      return;
+    }
+
+    if (action === "reveal") {
+      if (isFileCardViewModel(item)) {
+        void revealProjectFile(item);
+        return;
+      }
+
+      setItemActionError("Reveal in folder is only available for local file items.");
+      return;
+    }
+
+    if (action === "copyLink") {
+      void copyLocalItemLink(item);
+      return;
+    }
+
     if (action === "move") {
       setMoveError(null);
       setMovingItem(item);
@@ -1337,6 +1371,23 @@ export function ProjectDetailPage({
           `/projects/${encodeURIComponent(projectId)}?item=${encodeURIComponent(item.id)}`
         );
       }
+      return;
+    }
+
+    setItemActionError("That context menu action is not available in this view yet.");
+  }
+
+  async function copyLocalItemLink(item: ProjectFeedViewModel): Promise<void> {
+    if (projectId === undefined) {
+      return;
+    }
+
+    const path = `/projects/${encodeURIComponent(projectId)}?item=${encodeURIComponent(item.id)}`;
+
+    try {
+      await navigator.clipboard.writeText(path);
+    } catch {
+      setItemActionError("Could not copy the local item link.");
     }
   }
 
@@ -1833,6 +1884,7 @@ export function ProjectDetailPage({
               : `No content in ${activeTab.name} yet`
           }
           error={itemError}
+          getDisabledActions={getDisabledActionsForProjectItem}
           items={visibleItems}
           loading={itemsLoading}
           renderContent={renderItemContent}
@@ -2306,6 +2358,18 @@ function isLinkCardViewModel(
   item: UniversalItemViewModel
 ): item is LinkCardViewModel {
   return item.type === "link" && "normalizedUrl" in item;
+}
+
+function getDisabledActionsForProjectItem(
+  item: UniversalItemViewModel
+): readonly ItemActionId[] {
+  const disabled: ItemActionId[] = ["edit", "tag", "pin", "duplicate"];
+
+  if (item.type !== "file") {
+    disabled.push("reveal");
+  }
+
+  return disabled;
 }
 
 function formatDateLabel(value: string | null | undefined): string | null {

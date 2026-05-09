@@ -1,5 +1,11 @@
 import { ListFilter, Tags } from "lucide-react";
+import {
+  resolveContextMenuActions,
+  type ContextMenuActionId,
+  type ContextMenuTarget
+} from "@local-work-os/core";
 import { CategoryBadge, type CategoryBadgeViewModel } from "./CategoryBadge";
+import { ContextMenu, type ContextMenuActionViewModel } from "./ContextMenu";
 
 export type MetadataTagFilterOption = {
   id: string;
@@ -19,6 +25,10 @@ export type MetadataFilterPanelProps = {
   selectedTagSlugs: readonly string[];
   tags: readonly MetadataTagFilterOption[];
   disabled?: boolean;
+  onContextAction?: (
+    actionId: ContextMenuActionId,
+    target: ContextMenuTarget
+  ) => void;
   onClear: () => void;
   onSelectCategory: (categoryId: string | null) => void;
   onToggleTag: (tagSlug: string) => void;
@@ -30,6 +40,7 @@ export function MetadataFilterPanel({
   selectedCategoryId,
   selectedTagSlugs,
   tags,
+  onContextAction,
   onClear,
   onSelectCategory,
   onToggleTag
@@ -53,17 +64,24 @@ export function MetadataFilterPanel({
             <p className="muted-text">No tags</p>
           ) : (
             tags.map((tag) => (
-              <button
+              <ContextMenu
+                actions={metadataActions("tag", tag.id, tag.name)}
                 key={tag.id}
-                type="button"
-                className="metadata-chip"
-                aria-pressed={selectedTags.has(tag.slug)}
-                disabled={disabled}
-                onClick={() => onToggleTag(tag.slug)}
+                label={`Context menu for @${tag.name}`}
+                target={metadataTarget("tag", tag.id, tag.name, tag.slug)}
+                {...(onContextAction === undefined ? {} : { onAction: onContextAction })}
               >
-                <span>@{tag.name}</span>
-                <span>{tag.targetCount}</span>
-              </button>
+                <button
+                  type="button"
+                  className="metadata-chip"
+                  aria-pressed={selectedTags.has(tag.slug)}
+                  disabled={disabled}
+                  onClick={() => onToggleTag(tag.slug)}
+                >
+                  <span>@{tag.name}</span>
+                  <span>{tag.targetCount}</span>
+                </button>
+              </ContextMenu>
             ))
           )}
         </div>
@@ -88,17 +106,24 @@ export function MetadataFilterPanel({
             <CategoryBadge category={null} fallbackLabel="Any category" />
           </button>
           {categories.map((category) => (
-            <button
+            <ContextMenu
+              actions={metadataActions("category", category.id, category.name)}
               key={category.id}
-              type="button"
-              className="metadata-category-option"
-              aria-pressed={selectedCategoryId === category.id}
-              disabled={disabled}
-              onClick={() => onSelectCategory(category.id)}
+              label={`Context menu for ${category.name}`}
+              target={metadataTarget("category", category.id, category.name, null)}
+              {...(onContextAction === undefined ? {} : { onAction: onContextAction })}
             >
-              <CategoryBadge category={category} />
-              <span>{category.targetCount}</span>
-            </button>
+              <button
+                type="button"
+                className="metadata-category-option"
+                aria-pressed={selectedCategoryId === category.id}
+                disabled={disabled}
+                onClick={() => onSelectCategory(category.id)}
+              >
+                <CategoryBadge category={category} />
+                <span>{category.targetCount}</span>
+              </button>
+            </ContextMenu>
           ))}
         </div>
       </section>
@@ -113,4 +138,39 @@ export function MetadataFilterPanel({
       </button>
     </aside>
   );
+}
+
+function metadataTarget(
+  type: "tag" | "category",
+  id: string,
+  label: string,
+  kind: string | null
+): ContextMenuTarget {
+  return {
+    id,
+    type,
+    label,
+    kind,
+    capabilities: {
+      edit: false,
+      delete: false
+    }
+  };
+}
+
+function metadataActions(
+  type: "tag" | "category",
+  id: string,
+  label: string
+): ContextMenuActionViewModel[] {
+  return resolveContextMenuActions({
+    target: metadataTarget(type, id, label, null),
+    hideDisabled: false
+  }).map((action) => ({
+    id: action.id,
+    title: action.title,
+    group: action.group,
+    disabledReason: action.disabledReason,
+    danger: action.danger
+  }));
 }

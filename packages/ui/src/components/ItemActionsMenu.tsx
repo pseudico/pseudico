@@ -1,80 +1,92 @@
+import { MoreHorizontal } from "lucide-react";
 import {
-  Archive,
-  Eye,
-  FolderInput,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  type LucideIcon
-} from "lucide-react";
+  resolveContextMenuActions,
+  type ContextMenuActionId,
+  type ContextMenuTarget
+} from "@local-work-os/core";
+import { ContextMenu, type ContextMenuActionViewModel } from "./ContextMenu";
 
 export const ITEM_ACTIONS = [
+  "open",
   "edit",
   "move",
+  "tag",
+  "category",
+  "pin",
   "archive",
-  "delete",
-  "inspect"
-] as const;
+  "duplicate",
+  "reveal",
+  "copyLink",
+  "inspect",
+  "delete"
+] as const satisfies readonly ContextMenuActionId[];
 
 export type ItemActionId = (typeof ITEM_ACTIONS)[number];
 
 export type ItemActionHandler = (action: ItemActionId, itemId: string) => void;
 
-type ItemActionConfig = {
-  id: ItemActionId;
-  label: string;
-  icon: LucideIcon;
-};
-
-const itemActionConfigs: readonly ItemActionConfig[] = [
-  { id: "edit", label: "Edit", icon: Pencil },
-  { id: "move", label: "Move", icon: FolderInput },
-  { id: "archive", label: "Archive", icon: Archive },
-  { id: "delete", label: "Delete", icon: Trash2 },
-  { id: "inspect", label: "Inspect", icon: Eye }
-];
-
 export type ItemActionsMenuProps = {
   itemId: string;
   itemTitle: string;
+  itemType?: string | null;
   disabledActions?: readonly ItemActionId[];
+  hiddenActions?: readonly ItemActionId[];
   onAction?: ItemActionHandler;
 };
 
 export function ItemActionsMenu({
   itemId,
   itemTitle,
+  itemType = null,
   disabledActions = [],
+  hiddenActions = [],
   onAction
 }: ItemActionsMenuProps): React.JSX.Element {
+  const target = toItemContextMenuTarget(itemId, itemTitle, itemType, disabledActions);
   const menuLabel = `Actions for ${itemTitle}`;
+  const actions = resolveContextMenuActions({
+    target,
+    hideDisabled: false
+  })
+    .filter((action) => !hiddenActions.includes(action.id))
+    .map<ContextMenuActionViewModel>((action) => ({
+      id: action.id,
+      title: action.title,
+      group: action.group,
+      disabledReason: action.disabledReason,
+      danger: action.danger
+    }));
 
   return (
-    <details className="item-actions-menu">
-      <summary className="item-actions-trigger" aria-label={menuLabel}>
-        <MoreHorizontal size={18} aria-hidden="true" />
-        <span className="sr-only">{menuLabel}</span>
-      </summary>
-      <div className="item-actions-list" role="menu" aria-label={menuLabel}>
-        {itemActionConfigs.map((action) => {
-          const Icon = action.icon;
-          const disabled = disabledActions.includes(action.id);
-
-          return (
-            <button
-              className="item-action-button"
-              disabled={disabled}
-              key={action.id}
-              role="menuitem"
-              type="button"
-              onClick={() => onAction?.(action.id, itemId)}
-            >
-              <Icon size={16} aria-hidden="true" />
-              <span>{action.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </details>
+    <ContextMenu
+      actions={actions}
+      label={menuLabel}
+      target={target}
+      trigger={
+        <>
+          <MoreHorizontal size={18} aria-hidden="true" />
+          <span className="sr-only">{menuLabel}</span>
+        </>
+      }
+      onAction={(actionId) => onAction?.(actionId, itemId)}
+    />
   );
 }
+
+function toItemContextMenuTarget(
+  itemId: string,
+  itemTitle: string,
+  itemType: string | null,
+  disabledActions: readonly ItemActionId[]
+): ContextMenuTarget {
+  return {
+    id: itemId,
+    type: itemType === "file" ? "file" : "item",
+    label: itemTitle,
+    kind: itemType,
+    capabilities: Object.fromEntries(
+      disabledActions.map((action) => [action, false])
+    )
+  };
+}
+

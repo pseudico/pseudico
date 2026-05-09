@@ -5,6 +5,7 @@ import {
   CategoryBadge,
   CategoryPicker,
   ConfirmDialog,
+  ContextMenu,
   DashboardWidget,
   EmptyState,
   ErrorState,
@@ -38,6 +39,7 @@ import {
   TodayTaskCard,
   ToastViewport,
   UniversalItemCard,
+  groupContextActions,
   type UniversalItemViewModel
 } from "../src";
 
@@ -258,11 +260,55 @@ describe("Universal item UI", () => {
       <ItemActionsMenu itemId="item_1" itemTitle="Call accountant" />
     );
 
+    expect(html).toContain("Open");
     expect(html).toContain("Edit");
     expect(html).toContain("Move");
+    expect(html).toContain("Tags");
+    expect(html).toContain("Category");
+    expect(html).toContain("Pin or favorite");
     expect(html).toContain("Archive");
+    expect(html).toContain("Duplicate");
+    expect(html).toContain("Copy local link");
     expect(html).toContain("Delete");
     expect(html).toContain("Inspect");
+  });
+
+  it("renders the shared context menu with grouped disabled actions", () => {
+    const actions = [
+      {
+        id: "open" as const,
+        title: "Open",
+        group: "Open",
+        disabledReason: null,
+        danger: false
+      },
+      {
+        id: "delete" as const,
+        title: "Delete",
+        group: "Danger",
+        disabledReason: "Unavailable for this target.",
+        danger: true
+      }
+    ];
+    const html = renderToStaticMarkup(
+      <ContextMenu
+        actions={actions}
+        label="Context menu for Call accountant"
+        target={{ id: "item_1", type: "item", label: "Call accountant" }}
+      >
+        <article>Call accountant</article>
+      </ContextMenu>
+    );
+
+    expect(groupContextActions(actions).map((group) => group.group)).toEqual([
+      "Open",
+      "Danger"
+    ]);
+    expect(html).toContain("Context menu for Call accountant");
+    expect(html).toContain("Open");
+    expect(html).toContain("Delete");
+    expect(html).toContain("disabled=\"\"");
+    expect(html).toContain("data-context-target-type=\"item\"");
   });
 
   it("renders the move-to-container dialog with project options", () => {

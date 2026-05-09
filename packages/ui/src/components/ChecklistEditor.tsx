@@ -1,6 +1,8 @@
 import { ClipboardList, Plus } from "lucide-react";
 import type { ClipboardEvent, FormEvent } from "react";
 import { useState } from "react";
+import { resolveContextMenuActions } from "@local-work-os/core";
+import { ContextMenu } from "./ContextMenu";
 
 export type ChecklistEditorItem = {
   id: string;
@@ -105,6 +107,34 @@ export function ChecklistEditor({
         <ul className="checklist-items">
           {items.map((item) => {
             const completed = item.status === "done";
+            const target = {
+              id: item.id,
+              type: "listItem" as const,
+              label: item.title,
+              kind: "checklist-row",
+              capabilities: {
+                edit: false,
+                move: false,
+                tag: false,
+                category: false,
+                pin: false,
+                archive: false,
+                duplicate: false,
+                copyLink: false,
+                inspect: false,
+                delete: false
+              }
+            };
+            const actions = resolveContextMenuActions({
+              target,
+              hideDisabled: false
+            }).map((action) => ({
+              id: action.id,
+              title: action.title,
+              group: action.group,
+              disabledReason: action.disabledReason,
+              danger: action.danger
+            }));
 
             return (
               <li
@@ -113,17 +143,23 @@ export function ChecklistEditor({
                 key={item.id}
                 style={{ paddingInlineStart: `${(item.depth ?? 0) * 18}px` }}
               >
-                <label>
-                  <input
-                    checked={completed}
-                    disabled={disabled}
-                    type="checkbox"
-                    onChange={() => {
-                      void onToggleItem(item);
-                    }}
-                  />
-                  <span>{item.title}</span>
-                </label>
+                <ContextMenu
+                  actions={actions}
+                  label={`Context menu for ${item.title}`}
+                  target={target}
+                >
+                  <label>
+                    <input
+                      checked={completed}
+                      disabled={disabled}
+                      type="checkbox"
+                      onChange={() => {
+                        void onToggleItem(item);
+                      }}
+                    />
+                    <span>{item.title}</span>
+                  </label>
+                </ContextMenu>
               </li>
             );
           })}

@@ -40,7 +40,9 @@ new work should account for this implemented baseline:
 - Cross-cutting services now include project health, recent activity,
   integrity diagnostics, bounded pagination, app-wide error boundaries/toasts,
   command palette navigation/actions, workspace-scoped recent navigation,
-  back/forward route history, top-level app tabs for open project/contact/search/collection views, packaged smoke checks, and MVP smoke coverage.
+  back/forward route history, top-level app tabs for open project/contact/search/collection views,
+  unified context menu action providers for local targets, packaged smoke checks,
+  and MVP smoke coverage.
 
 When adding a future module slice, prefer extending the owning feature service
 and matching repository/preload/client boundary rather than creating a parallel
@@ -63,6 +65,7 @@ renderer-only implementation.
 | Browser Capture | Own the local-only browser capture payload contract and safe disabled bridge prototype. | Browser capture payloads, Inbox link/task capture requests | Links, tasks, Inbox, Electron main/preload security | Future browser extension/native messaging intake | V2 |
 | Quick Start Actions | Own context-aware local action registration for one-step creation into the current container/tab or Inbox. | Quick Start action descriptors, target resolution, create-action UI | Inbox, projects, contacts, tasks, notes, lists, files, links, command palette | Top bar, project/contact pages, fast capture | V1 |
 | Command Palette | Own central local action registration, command matching, keyboard execution, and palette navigation. | Action descriptors, route actions, local UI commands | App shell, navigation, feature services | Fast navigation, quick capture, future shortcut registry | V1 |
+| Context Menus | Own local right-click/keyboard menu target contracts and action filtering for containers, items, list rows, metadata, files, and saved views. | Context menu targets, action descriptors, grouped menu UI | Action registry, items, projects, metadata, files, saved views | Project/contact feeds, metadata browser, saved views, future shortcuts | V1 |
 | Navigation History | Own workspace-scoped recent content persistence and app back/forward route stacks. | Recent navigation targets, route stack entries | App shell, app settings, projects, contacts, items, saved views | Top bar recent menu, fast content restore | V1 |
 | App Tabs | Own top-level open-view tab session state, active tab selection, and tab order. | App tab route targets, active tab id | App shell, app settings, navigation history | Fast switching among open projects, contacts, search, and collections | V1 |
 | Metadata | Own tags and categories as local classification systems. | Tags, categories, taggings, category assignments | Workspace, search | Saved views, dashboard, today, all content modules | MVP |
@@ -250,6 +253,32 @@ Integration points:
 - App shell and route registry for navigation actions.
 - Quick Add and future feature services for local commands.
 - Shortcut registry once configurable shortcuts are introduced.
+
+### Context Menus
+
+Owns:
+
+- Shared `ContextMenuTarget` and context action provider contracts.
+- Filtering, grouping, and disabled-state handling for right-click and keyboard menus.
+- Reusable renderer menu primitives for local containers, items, list rows, metadata, files, and saved views.
+
+Does not own:
+
+- Domain mutations that bypass existing feature services/repositories.
+- Operating system shell menu implementation.
+- Cloud sharing, public links, or remote clipboard/sync behavior.
+
+Expected service methods:
+
+- `getContextMenuActions`
+- `resolveContextMenuActions`
+- `createContextMenuActionRegistry`
+
+Integration points:
+
+- Action registry descriptors for command consistency.
+- Project/Inbox item feeds, metadata browser, file actions, and saved-view lists.
+- Existing IPC-backed file open/reveal flows and service-backed item writes.
 
 ### App Tabs
 

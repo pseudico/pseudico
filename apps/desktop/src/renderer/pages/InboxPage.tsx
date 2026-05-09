@@ -230,6 +230,16 @@ export function InboxPage({
 
     setItemActionError(null);
 
+    if (action === "open" || action === "inspect") {
+      void openInspector(item.id);
+      return;
+    }
+
+    if (action === "copyLink") {
+      void copyInboxItemLink(item.id);
+      return;
+    }
+
     if (action === "move") {
       setMoveError(null);
       setMovingItem(item);
@@ -241,8 +251,16 @@ export function InboxPage({
       return;
     }
 
-    if (action === "inspect") {
-      void openInspector(item.id);
+    setItemActionError("That context menu action is not available in Inbox yet.");
+  }
+
+  async function copyInboxItemLink(itemId: string): Promise<void> {
+    const path = `/inbox?item=${encodeURIComponent(itemId)}`;
+
+    try {
+      await navigator.clipboard.writeText(path);
+    } catch {
+      setItemActionError("Could not copy the local item link.");
     }
   }
 
@@ -610,6 +628,7 @@ export function InboxPage({
           emptyDescription="Captured work will appear here before it is moved into a project."
           emptyTitle="Inbox is clear"
           error={error}
+          getDisabledActions={getDisabledActionsForInboxItem}
           items={items.map(toItemViewModel)}
           loading={loading}
           renderContent={renderItemContent}
@@ -832,6 +851,10 @@ function isListCardViewModel(
   item: UniversalItemViewModel
 ): item is ListCardViewModel {
   return item.type === "list" && "listItems" in item;
+}
+
+function getDisabledActionsForInboxItem(): readonly ItemActionId[] {
+  return ["edit", "tag", "category", "pin", "duplicate", "reveal"];
 }
 
 function formatDateLabel(value: string | null | undefined): string | null {
