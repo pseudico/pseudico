@@ -990,3 +990,12 @@ Files changed:
 - packages/features/src/quickStart/QuickStartActionProvider.ts; packages/ui/src/components/QuickStartMenu.tsx; apps/desktop/src/renderer/components/QuickAddModal.tsx
 Open questions / risks: File action depends on existing OS file picker availability.
 Next actions: Commit; push branch; open PR and move Linear to PR Open.
+## 2026-05-09 13:53:13 +10:00
+Objective: Fix PR #82 CI type resolution failure.
+Decisions made:
+- Added tsconfig path alias for the Quick Start feature subpath used by renderer.
+- Re-ran lint, typecheck, test, and build after the fix.
+Files changed:
+- tsconfig.base.json
+Open questions / risks: Await refreshed GitHub CI.
+Next actions: Commit/push CI fix; re-check PR; merge if green.
