@@ -78,6 +78,11 @@ export {
   type ItemActionsMenuProps
 } from "./components/ItemActionsMenu";
 export {
+  BulkSelectionToolbar,
+  type BulkSelectionActionId,
+  type BulkSelectionToolbarProps
+} from "./components/BulkSelectionToolbar";
+export {
   ContextMenu,
   groupContextActions,
   type ContextMenuActionViewModel,

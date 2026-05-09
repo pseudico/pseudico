@@ -23,14 +23,18 @@ export type GroupedResultGroupViewModel = {
 
 export type GroupedResultsListProps = {
   groups: readonly GroupedResultGroupViewModel[];
+  selectedResultIds?: readonly string[];
   onCompleteTask?: (itemId: string) => void;
   onOpenResult?: (path: string) => void;
+  onSelectionChange?: (resultId: string, selected: boolean) => void;
 };
 
 export function GroupedResultsList({
   groups,
+  selectedResultIds = [],
   onCompleteTask,
-  onOpenResult
+  onOpenResult,
+  onSelectionChange
 }: GroupedResultsListProps): React.JSX.Element {
   if (groups.length === 0 || groups.every((group) => group.results.length === 0)) {
     return (
@@ -53,8 +57,20 @@ export function GroupedResultsList({
             {group.results.map((result) => (
               <article
                 key={`${result.targetType}:${result.targetId}`}
-                className="grouped-result-item"
+                className={`grouped-result-item${selectedResultIds.includes(result.targetId) ? " grouped-result-item-selected" : ""}`}
               >
+                {onSelectionChange === undefined || result.targetType !== "item" ? null : (
+                  <label className="selection-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedResultIds.includes(result.targetId)}
+                      aria-label={`Select ${result.title}`}
+                      onChange={(event) =>
+                        onSelectionChange(result.targetId, event.currentTarget.checked)
+                      }
+                    />
+                  </label>
+                )}
                 <div className="grouped-result-main">
                   <div className="grouped-result-title">
                     <span className="item-type-badge">

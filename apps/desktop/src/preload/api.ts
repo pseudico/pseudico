@@ -1473,6 +1473,62 @@ export type ItemInspectorSummary = {
   activity: ActivitySummary[];
 };
 
+export type BulkActionOperation =
+  | "move"
+  | "tag"
+  | "category"
+  | "archive"
+  | "delete"
+  | "complete"
+  | "export";
+
+export type BulkActionItemSummary = {
+  itemId: string;
+  ok: boolean;
+  item?: ItemSummary;
+  reason?: string;
+};
+
+export type BulkActionSummary = {
+  workspaceId: string;
+  operation: BulkActionOperation;
+  requestedCount: number;
+  changedCount: number;
+  skippedCount: number;
+  items: BulkActionItemSummary[];
+  activityId: string | null;
+  export?: {
+    format: "markdown";
+    contents: string;
+    itemCount: number;
+  };
+};
+
+export type BulkMoveItemsInput = {
+  workspaceId?: string;
+  itemIds: string[];
+  targetContainerId: string;
+  targetContainerTabId?: string | null;
+};
+
+export type BulkTagItemsInput = {
+  workspaceId?: string;
+  itemIds: string[];
+  tagName: string;
+};
+
+export type BulkCategorizeItemsInput = {
+  workspaceId?: string;
+  itemIds: string[];
+  categoryId: string | null;
+};
+
+export type BulkBaseItemsInput = {
+  workspaceId?: string;
+  itemIds: string[];
+};
+
+
 export type TaskStatus = "open" | "done" | "waiting" | "cancelled";
 export type ListItemStatus = "open" | "done" | "waiting" | "cancelled";
 export type ListDisplayMode = "checklist" | "pipeline";
@@ -2083,7 +2139,14 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     archiveItem: "local-work-os:items:archive-item",
     softDeleteItem: "local-work-os:items:soft-delete-item",
     getItemActivity: "local-work-os:items:get-item-activity",
-    openItemInspector: "local-work-os:items:open-item-inspector"
+    openItemInspector: "local-work-os:items:open-item-inspector",
+    bulkMoveItems: "local-work-os:items:bulk-move-items",
+    bulkTagItems: "local-work-os:items:bulk-tag-items",
+    bulkCategorizeItems: "local-work-os:items:bulk-categorize-items",
+    bulkArchiveItems: "local-work-os:items:bulk-archive-items",
+    bulkDeleteItems: "local-work-os:items:bulk-delete-items",
+    bulkCompleteTasks: "local-work-os:items:bulk-complete-tasks",
+    bulkExportItems: "local-work-os:items:bulk-export-items"
   },
   dragDrop: {
     reorderItems: "local-work-os:drag-drop:reorder-items",
@@ -2565,6 +2628,34 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector]: {
     input: string;
     result: ApiResult<ItemInspectorSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.bulkMoveItems]: {
+    input: BulkMoveItemsInput;
+    result: ApiResult<BulkActionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.bulkTagItems]: {
+    input: BulkTagItemsInput;
+    result: ApiResult<BulkActionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.bulkCategorizeItems]: {
+    input: BulkCategorizeItemsInput;
+    result: ApiResult<BulkActionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.bulkArchiveItems]: {
+    input: BulkBaseItemsInput;
+    result: ApiResult<BulkActionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.bulkDeleteItems]: {
+    input: BulkBaseItemsInput;
+    result: ApiResult<BulkActionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.bulkCompleteTasks]: {
+    input: BulkBaseItemsInput;
+    result: ApiResult<BulkActionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.bulkExportItems]: {
+    input: BulkBaseItemsInput;
+    result: ApiResult<BulkActionSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderItems]: {
     input: ReorderContainerItemsInput;
@@ -3098,6 +3189,15 @@ export type LocalWorkOsApi = {
     openItemInspector: (
       itemId: string
     ) => Promise<ApiResult<ItemInspectorSummary>>;
+    bulkMoveItems?: (input: BulkMoveItemsInput) => Promise<ApiResult<BulkActionSummary>>;
+    bulkTagItems?: (input: BulkTagItemsInput) => Promise<ApiResult<BulkActionSummary>>;
+    bulkCategorizeItems?: (
+      input: BulkCategorizeItemsInput
+    ) => Promise<ApiResult<BulkActionSummary>>;
+    bulkArchiveItems?: (input: BulkBaseItemsInput) => Promise<ApiResult<BulkActionSummary>>;
+    bulkDeleteItems?: (input: BulkBaseItemsInput) => Promise<ApiResult<BulkActionSummary>>;
+    bulkCompleteTasks?: (input: BulkBaseItemsInput) => Promise<ApiResult<BulkActionSummary>>;
+    bulkExportItems?: (input: BulkBaseItemsInput) => Promise<ApiResult<BulkActionSummary>>;
   };
   dragDrop?: {
     reorderItems: (
@@ -3629,7 +3729,21 @@ export function createLocalWorkOsApi(
       getItemActivity: (itemId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.getItemActivity, itemId),
       openItemInspector: (itemId) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector, itemId)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector, itemId),
+      bulkMoveItems: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.bulkMoveItems, input),
+      bulkTagItems: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.bulkTagItems, input),
+      bulkCategorizeItems: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.bulkCategorizeItems, input),
+      bulkArchiveItems: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.bulkArchiveItems, input),
+      bulkDeleteItems: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.bulkDeleteItems, input),
+      bulkCompleteTasks: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.bulkCompleteTasks, input),
+      bulkExportItems: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.bulkExportItems, input)
     },
     dragDrop: {
       reorderItems: (input) =>

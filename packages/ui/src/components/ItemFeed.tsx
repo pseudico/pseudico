@@ -21,8 +21,11 @@ export type ItemFeedProps = Pick<
   emptyTitle?: string;
   error?: string | null;
   loading?: boolean;
+  selectedItemIds?: readonly string[];
   getDisabledActions?: (item: UniversalItemViewModel) => readonly ItemActionId[];
+  isItemSelectionDisabled?: (item: UniversalItemViewModel) => boolean;
   renderEmptyAction?: () => ReactNode;
+  onSelectionChange?: (itemId: string, selected: boolean) => void;
   onReorderItem?: (
     draggedItemId: string,
     targetItemId: string
@@ -42,9 +45,12 @@ export function ItemFeed({
   error = null,
   getDisabledActions,
   loading = false,
+  selectedItemIds = [],
   onAction,
   onDropFilesOnItem,
   onReorderItem,
+  onSelectionChange,
+  isItemSelectionDisabled,
   renderContent,
   renderEmptyAction
 }: ItemFeedProps): React.JSX.Element {
@@ -82,6 +88,14 @@ export function ItemFeed({
         {items.map((item) => {
           const itemDisabledActions =
             getDisabledActions?.(item) ?? disabledActions;
+          const selected = selectedItemIds.includes(item.id);
+          const selection =
+            onSelectionChange === undefined
+              ? undefined
+              : {
+                  selected,
+                  disabled: isItemSelectionDisabled?.(item) ?? false
+                };
 
           return (
             <div
@@ -147,7 +161,11 @@ export function ItemFeed({
                 {...(itemDisabledActions === undefined
                   ? {}
                   : { disabledActions: itemDisabledActions })}
+                {...(selection === undefined ? {} : { selection })}
                 {...(onAction === undefined ? {} : { onAction })}
+                {...(onSelectionChange === undefined
+                  ? {}
+                  : { onSelectionChange })}
                 {...(renderContent === undefined ? {} : { renderContent })}
               />
             </div>

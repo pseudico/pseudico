@@ -30,6 +30,7 @@ export const plannedFeatureAreas = [
   "timeline",
   "calendar",
   "backup",
+  "bulkActions",
   "export",
   "templates",
   "workflows",
@@ -54,6 +55,11 @@ export {
   backupModuleContract,
   createBackupManifest
 } from "./backup";
+export {
+  BulkActionService,
+  SelectionStore,
+  bulkActionsModuleContract
+} from "./bulkActions";
 export {
   CalendarService,
   calendarModuleContract,
@@ -220,6 +226,22 @@ export type {
   RestoreValidationSummary,
   ValidateRestoreSourceInput
 } from "./backup";
+export type {
+  BulkActionItemResult,
+  BulkActionOperation,
+  BulkActionResult,
+  BulkActionServiceIdFactory,
+  BulkBaseInput,
+  BulkCategorizeItemsInput,
+  BulkExportItemsInput,
+  BulkExportResult,
+  BulkMoveItemsInput,
+  BulkTagItemsInput,
+  SelectionChangeListener,
+  SelectionSnapshot,
+  SelectionTarget,
+  SelectionTargetType
+} from "./bulkActions";
 export type {
   CalendarDay,
   CalendarItem,

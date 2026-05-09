@@ -289,7 +289,21 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       getItemActivity: (itemId) =>
         callApi(() => api.items.getItemActivity(itemId)),
       openItemInspector: (itemId) =>
-        callApi(() => api.items.openItemInspector(itemId))
+        callApi(() => api.items.openItemInspector(itemId)),
+      bulkMoveItems: (input) =>
+        callApi(() => api.items.bulkMoveItems!(input)),
+      bulkTagItems: (input) =>
+        callApi(() => api.items.bulkTagItems!(input)),
+      bulkCategorizeItems: (input) =>
+        callApi(() => api.items.bulkCategorizeItems!(input)),
+      bulkArchiveItems: (input) =>
+        callApi(() => api.items.bulkArchiveItems!(input)),
+      bulkDeleteItems: (input) =>
+        callApi(() => api.items.bulkDeleteItems!(input)),
+      bulkCompleteTasks: (input) =>
+        callApi(() => api.items.bulkCompleteTasks!(input)),
+      bulkExportItems: (input) =>
+        callApi(() => api.items.bulkExportItems!(input))
     },
     dragDrop: {
       reorderItems: (input) => callApi(() => api.dragDrop!.reorderItems(input)),
@@ -656,7 +670,21 @@ export const desktopApiClient: LocalWorkOsApi = {
     getItemActivity: (itemId) =>
       getDesktopApiClient().items.getItemActivity(itemId),
     openItemInspector: (itemId) =>
-      getDesktopApiClient().items.openItemInspector(itemId)
+      getDesktopApiClient().items.openItemInspector(itemId),
+    bulkMoveItems: (input) =>
+      getDesktopApiClient().items.bulkMoveItems!(input),
+    bulkTagItems: (input) =>
+      getDesktopApiClient().items.bulkTagItems!(input),
+    bulkCategorizeItems: (input) =>
+      getDesktopApiClient().items.bulkCategorizeItems!(input),
+    bulkArchiveItems: (input) =>
+      getDesktopApiClient().items.bulkArchiveItems!(input),
+    bulkDeleteItems: (input) =>
+      getDesktopApiClient().items.bulkDeleteItems!(input),
+    bulkCompleteTasks: (input) =>
+      getDesktopApiClient().items.bulkCompleteTasks!(input),
+    bulkExportItems: (input) =>
+      getDesktopApiClient().items.bulkExportItems!(input)
   },
   dragDrop: {
     reorderItems: (input) =>
