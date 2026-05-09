@@ -1163,3 +1163,138 @@ Open questions / risks:
 - PR CI/review status pending.
 Next actions:
 - Inspect PR status, merge if clean and green.
+
+## 2026-05-09T15:31:31
+Objective: Merge PSE-89 and sync main.
+Decisions made:
+- PR #84 was green and merged via squash commit 763a4e9.
+- Deleted only merged branch codex/pse-89-pinned-favourites and pulled main.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Final session log entry is local-only after merge.
+Next actions:
+- Move PSE-89 to Done, promote exactly one next issue.
+
+## 2026-05-09T15:54:15
+Objective: Promote next ticket after PSE-89.
+Decisions made:
+- Promoted PSE-90 to Codex Ready as the single next issue.
+- Left other backlog/spec issues unchanged.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Post-merge session log entries remain local-only on main.
+Next actions:
+- Next run should start PSE-90 from Codex Ready.
+
+## 2026-05-09 15:58:11 +10:00
+Objective: Reconcile Linear/GitHub before starting next ticket.
+Decisions made:
+- Found no PR Open/In Progress Linear issues and no open GitHub PRs.
+- Selected PSE-90 as the sole Codex Ready issue to pull next.
+Files changed: docs/session_log.md
+Open questions / risks: Existing unrelated local files remain unstaged.
+Next actions: Move PSE-90 to In Progress; sync main; inspect scope.
+
+## 2026-05-09 15:58:50 +10:00
+Objective: Start PSE-90 implementation.
+Decisions made:
+- Moved PSE-90 to In Progress and synced main.
+- Created branch codex/PSE-90-top-level-app-tabs from main.
+Files changed: docs/session_log.md
+Open questions / risks: Need confirm exact tab UX from ticket docs.
+Next actions: Read ticket docs; inspect app shell; implement scoped tabs.
+
+## 2026-05-09 16:12:29 +10:00
+Objective: Implement PSE-90 top-level app tabs.
+Decisions made:
+- Added AppTabStore persisted via app_settings and IPC navigation endpoints.
+- Added AppTabStrip and renderer hook for project/contact/search/collection tabs.
+Files changed: packages/features/src/navigation/AppTabStore.ts; apps/desktop/src/renderer/navigation/useAppTabs.ts; packages/ui/src/components/AppTabStrip.tsx; docs/MODULE_REGISTRY.md
+Open questions / risks: Full Playwright E2E not yet run; local tests cover service/UI/IPC paths.
+Next actions: Run full checks; fix failures; open PR.
+
+## 2026-05-09 16:16:34 +10:00
+Objective: Verify PSE-90 implementation.
+Decisions made:
+- Fixed renderer boundary by keeping AppTabStore in main/features and local reorder helper in renderer.
+- Full lint, typecheck, test, and build pass after sandbox EPERM reruns.
+Files changed: apps/desktop/src/renderer/navigation/useAppTabs.ts; docs/session_log.md
+Open questions / risks: GitHub CI still required as proof before merge.
+Next actions: Review diff; commit/push; open ready PR.
+
+## 2026-05-09 16:22:21 +10:00
+Objective: Merge PSE-90 and prepare next ticket.
+Decisions made:
+- PR #85 passed CI and was squash-merged as c2ee82e.
+- Deleted merged branch and moved PSE-90 to Done.
+- Promoted PSE-91 as the sole Codex Ready issue.
+Files changed: docs/session_log.md
+Open questions / risks: Session log remains local-only and unstaged.
+Next actions: Next run should start PSE-91 from Codex Ready.
+## 2026-05-09 17:13:21 +10:00
+Objective: Reconcile active Local Work OS queue.
+Decisions made:
+- Found no PR Open or In Progress Linear issues and no open GitHub PRs.
+- Identified PSE-91 as the sole Codex Ready issue.
+Files changed: docs/session_log.md
+Open questions / risks: Existing untracked .playwright-mcp/ and gh installer remain untouched.
+Next actions: Move PSE-91 to In Progress; sync main; inspect ticket scope.
+## 2026-05-09 17:14:27 +10:00
+Objective: Start PSE-91 implementation.
+Decisions made:
+- Moved PSE-91 to In Progress and confirmed main is current.
+- Created branch codex/PSE-91-unified-context-menus from main.
+Files changed: docs/session_log.md
+Open questions / risks: Need confirm context menu scope from ticket docs.
+Next actions: Read linked docs; inspect item UI/actions; implement menu primitives.
+## 2026-05-09 17:17:35 +10:00
+Objective: Plan PSE-91 unified context menus.
+Decisions made:
+- Scoped framework to core action provider contracts plus reusable UI menu primitive.
+- Will adapt item card menus first and wire file open/reveal through existing IPC-backed services.
+Files changed: docs/session_log.md
+Open questions / risks: Some future actions may be framework-visible before all target handlers exist.
+Next actions: Add core resolver; add UI components/tests; wire project item handlers.
+## 2026-05-09 17:32:00 +10:00
+Objective: Implement and verify PSE-91 context menus.
+Decisions made:
+- Added core/features context-menu action providers and reusable UI right-click menu primitive.
+- Wired item, file, list-row, container, metadata, and saved-view menu surfaces with disabled states.
+Files changed: packages/core/src/actions/ContextMenuActions.ts; packages/ui/src/components/ContextMenu.tsx; packages/features/src/contextMenus/index.ts; apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; docs/MODULE_REGISTRY.md
+Open questions / risks: Some menu actions are framework-visible but disabled until future service handlers land.
+Next actions: Review diff; commit/push; open PR.
+
+## 2026-05-09T00:00:00+10:00
+Objective: Merge PSE-91 and prepare the next Local Work OS ticket.
+Decisions made:
+- PR #86 merged at af42ba1 after local checks and CI passed.
+- PSE-91 moved to Done; PSE-92 promoted as the sole Codex Ready issue.
+Files changed: docs/session_log.md
+Open questions / risks: local session log and unrelated untracked files remain intentionally uncommitted.
+Next actions: start PSE-92; keep only one Codex Ready; preserve local-only scope.
+- 2026-05-09 18:47:40 +10:00
+- Objective: Start end-to-end Local Work OS ticket workflow and reconcile active work.
+- Decisions made: Use Linear/GitHub structured tools; read AGENTS and docs map first.
+- Files changed: docs/session_log.md
+- Open questions / risks: Active PR/issue state unknown until reconciliation completes.
+- Next actions: Check Linear states; inspect any active PR; select implementation issue.
+- 2026-05-09 18:48:21 +10:00
+- Objective: Reconcile active Linear/GitHub work and claim a ticket.
+- Decisions made: No PR Open/In Progress issues or open user PRs; selected sole Codex Ready issue PSE-92.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need inspect source ticket for exact acceptance criteria.
+- Next actions: Pull main; branch for PSE-92; read related docs/source.
+- 2026-05-09 18:58:28 +10:00
+- Objective: Implement PSE-92 shortcut registry and read-only preferences help.
+- Decisions made: Added shared default ShortcutRegistry; global shortcuts avoid editable fields; Settings exposes read-only groups.
+- Files changed: packages/core/src/shortcuts/*; apps/desktop/src/renderer/*; docs/MODULE_REGISTRY.md; tests
+- Open questions / risks: Need typecheck/test to catch shortcut/action typing and SSR render regressions.
+- Next actions: Run targeted tests; fix failures; run full checks.
+- 2026-05-09 19:01:48 +10:00
+- Objective: Verify PSE-92 implementation locally.
+- Decisions made: Sandbox EPERM on Vite/esbuild was resolved by approved escalation; full lint/typecheck/test/build passed.
+- Files changed: packages/core/src/shortcuts/*; apps/desktop/src/renderer/shortcuts/*; apps/desktop/tests/*; docs/session_log.md
+- Open questions / risks: Need PR creation and remote CI/review confirmation.
+- Next actions: Review diff; commit and push; open PR.

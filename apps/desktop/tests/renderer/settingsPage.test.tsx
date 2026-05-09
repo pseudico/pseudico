@@ -34,6 +34,11 @@ describe("SettingsPage", () => {
     expect(html).toContain("Imports");
     expect(html).toContain("Validate JSON import");
     expect(html).toContain("Restore export to new workspace");
+    expect(html).toContain("Keyboard shortcuts");
+    expect(html).toContain("Quick task");
+    expect(html).toContain("Ctrl/Cmd N");
+    expect(html).toContain("New note");
+    expect(html).toContain("Ctrl/Cmd Shift N");
     expect(html).toContain("Categories");
   });
 });

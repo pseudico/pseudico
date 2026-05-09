@@ -2,12 +2,18 @@ import {
   Archive,
   FileJson,
   FileSpreadsheet,
+  Keyboard,
   Plus,
   RefreshCw,
   ShieldCheck,
   Upload,
   Trash2
 } from "lucide-react";
+import {
+  createShortcutRegistry,
+  defaultShortcutDescriptors,
+  type RegisteredShortcut
+} from "@local-work-os/core";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   CategoryBadge,
@@ -37,6 +43,9 @@ type SettingsPageProps = {
 };
 
 const defaultCategoryColor = "#2c6b8f";
+const shortcutGroups = groupShortcuts(
+  createShortcutRegistry(defaultShortcutDescriptors).list()
+);
 
 export function SettingsPage({
   apiClient = desktopApiClient,
@@ -472,6 +481,35 @@ export function SettingsPage({
         </p>
       </div>
       <WorkspaceHealthPanel workspace={currentWorkspace} />
+
+      <section className="backup-management-panel" aria-label="Keyboard shortcuts">
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <h3>Keyboard shortcuts</h3>
+            <p className="muted-text">
+              Read-only defaults for local navigation, capture, and editor flows.
+            </p>
+          </div>
+          <Keyboard size={20} aria-hidden="true" />
+        </div>
+        <div className="shortcut-help-list" data-testid="shortcut-help-list">
+          {shortcutGroups.map((group) => (
+            <div className="shortcut-help-group" key={group.category}>
+              <h4>{group.category}</h4>
+              {group.shortcuts.map((shortcut) => (
+                <div className="shortcut-help-row" key={shortcut.id}>
+                  <div>
+                    <strong>{shortcut.title}</strong>
+                    <span>{shortcut.description}</span>
+                    <small>{formatShortcutScope(shortcut.scope)}</small>
+                  </div>
+                  <kbd>{shortcut.displayLabel}</kbd>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </section>
       <section className="backup-management-panel" aria-label="Diagnostics">
         <div className="panel-heading-actions">
           <div className="panel-heading">
@@ -992,4 +1030,30 @@ function formatBytes(value: number): string {
   }
 
   return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function groupShortcuts(shortcuts: readonly RegisteredShortcut[]): Array<{
+  category: string;
+  shortcuts: RegisteredShortcut[];
+}> {
+  const groups = new Map<string, RegisteredShortcut[]>();
+
+  for (const shortcut of shortcuts) {
+    groups.set(shortcut.category, [
+      ...(groups.get(shortcut.category) ?? []),
+      shortcut
+    ]);
+  }
+
+  return [...groups.entries()].map(([category, groupedShortcuts]) => ({
+    category,
+    shortcuts: groupedShortcuts
+  }));
+}
+
+function formatShortcutScope(scope: RegisteredShortcut["scope"]): string {
+  return scope
+    .split("-")
+    .map((part) => part.charAt(0).toLocaleUpperCase() + part.slice(1))
+    .join(" ");
 }

@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight, Clock3, Command, Plus, Search } from "lucide-rea
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { QuickAddContext } from "../components/QuickAddModal";
-import { getQuickAddContext } from "../components/CommandPaletteHost";
+import { getQuickAddContext } from "../shortcuts/appShortcuts";
 import { getRouteByPath } from "../routes";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import type { NavigationRecentTargetSummary } from "../../preload/api";

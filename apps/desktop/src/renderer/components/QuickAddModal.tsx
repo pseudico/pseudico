@@ -34,6 +34,7 @@ export const QUICK_START_OPEN_EVENT = "local-work-os:open-quick-start";
 export type QuickAddContext = QuickStartContext & {
   projectId?: string | null;
   contactId?: string | null;
+  initialActionId?: QuickStartActionKind;
 };
 
 export type QuickAddTargetResolution = {
@@ -154,6 +155,7 @@ export function QuickAddModal({
       return;
     }
 
+    setSelectedActionId(context?.initialActionId ?? "task");
     setSuccess(null);
 
     if (workspace === null) {

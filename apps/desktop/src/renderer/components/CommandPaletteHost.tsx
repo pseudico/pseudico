@@ -1,4 +1,6 @@
 import {
+  APP_SHORTCUT_IDS,
+  type ShortcutKeyboardEventLike,
   createActionRegistry,
   type ActionDescriptor,
   type ActionRegistry,
@@ -8,6 +10,12 @@ import { CommandPalette, type CommandPaletteAction } from "@local-work-os/ui";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { appRoutes } from "../routes";
+import type { QuickStartActionKind } from "@local-work-os/features/quickStart";
+import {
+  getQuickAddContext,
+  resolveGlobalAppShortcut,
+  shortcutToActionShortcut
+} from "../shortcuts/appShortcuts";
 import type { QuickAddContext } from "./QuickAddModal";
 
 export type AppActionContext = {
@@ -21,13 +29,6 @@ export type AppActionRegistryOptions = {
 };
 
 const workspaceRequiredMessage = "Open a local workspace first.";
-const paletteShortcut = {
-  key: "k",
-  ctrl: true,
-  meta: true,
-  label: "Ctrl/⌘ K"
-};
-
 export function CommandPaletteHost({
   open,
   onClose,
@@ -148,7 +149,11 @@ export function createAppActionRegistry(
       };
 
       if (route.id === "search") {
-        action.shortcut = { key: "f", ctrl: true, label: "Ctrl F" };
+        action.shortcut = shortcutToActionShortcut(APP_SHORTCUT_IDS.focusSearch);
+      }
+
+      if (route.id === "today") {
+        action.shortcut = shortcutToActionShortcut(APP_SHORTCUT_IDS.goToday);
       }
 
       return action;
@@ -162,56 +167,58 @@ export function createAppActionRegistry(
       group: "Capture",
       subtitle: "Create a task, note, list, file, link, project, or contact.",
       keywords: ["capture", "quick start", "new task", "note", "list", "file", "link", "project", "contact", "inbox"],
-      shortcut: { key: "n", ctrl: true, label: "Ctrl N" },
+      shortcut: shortcutToActionShortcut(APP_SHORTCUT_IDS.quickTask),
       disabled: (context) =>
         context.workspaceOpen ? false : workspaceRequiredMessage,
       execute: (context) => {
-        options.openQuickAdd(getQuickAddContext(context.currentPathname));
+        options.openQuickAdd({
+          ...getQuickAddContext(context.currentPathname),
+          initialActionId: "task"
+        });
       }
     },
+    quickStartAction("quick-add.note", "New note", "Create a markdown note in the current container or Inbox.", "note", APP_SHORTCUT_IDS.quickNote, options),
+    quickStartAction("quick-add.list", "New list", "Create a checklist in the current container or Inbox.", "list", APP_SHORTCUT_IDS.quickList, options),
     {
       id: "palette.open",
       title: "Open command palette",
       group: "Navigation",
       subtitle: "Search for routes and actions.",
       keywords: ["commands", "shortcuts", "actions"],
-      shortcut: paletteShortcut,
+      shortcut: shortcutToActionShortcut(APP_SHORTCUT_IDS.openCommandPalette),
       execute: () => undefined
     }
   ]);
 }
 
-export function isPaletteShortcut(
-  event: Pick<KeyboardEvent, "key" | "ctrlKey" | "metaKey">
-): boolean {
-  return (
-    event.key.toLocaleLowerCase() === "k" && (event.ctrlKey || event.metaKey)
-  );
+export function isPaletteShortcut(event: ShortcutKeyboardEventLike): boolean {
+  return resolveGlobalAppShortcut(event)?.id === APP_SHORTCUT_IDS.openCommandPalette;
 }
 
-export function getQuickAddContext(pathname: string): QuickAddContext {
-  const projectMatch = /^\/projects\/([^/]+)$/.exec(pathname);
-  const projectId = projectMatch?.[1];
-  const contactMatch = /^\/contacts\/([^/]+)$/.exec(pathname);
-  const contactId = contactMatch?.[1];
-
-  if (projectId !== undefined) {
-    return {
-      projectId,
-      containerId: projectId,
-      containerType: "project"
-    };
-  }
-
-  if (contactId !== undefined) {
-    return {
-      contactId,
-      containerId: contactId,
-      containerType: "contact"
-    };
-  }
-
-  return {};
+function quickStartAction(
+  id: string,
+  title: string,
+  subtitle: string,
+  initialActionId: QuickStartActionKind,
+  shortcutId: Parameters<typeof shortcutToActionShortcut>[0],
+  options: AppActionRegistryOptions
+): ActionDescriptor<AppActionContext> {
+  return {
+    id,
+    title,
+    group: "Capture",
+    subtitle,
+    keywords: ["capture", title, initialActionId, "quick start"],
+    shortcut: shortcutToActionShortcut(shortcutId),
+    disabled: (context) =>
+      context.workspaceOpen ? false : workspaceRequiredMessage,
+    execute: (context) => {
+      options.openQuickAdd({
+        ...getQuickAddContext(context.currentPathname),
+        initialActionId
+      });
+    }
+  };
 }
 
 function toCommandPaletteAction(
@@ -234,3 +241,4 @@ function toCommandPaletteAction(
 
   return viewModel;
 }
+export { getQuickAddContext } from "../shortcuts/appShortcuts";
