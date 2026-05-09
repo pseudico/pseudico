@@ -70,7 +70,10 @@ export const ActivityAction = {
   backupCreated: "backup_created",
   exportCreated: "export_created",
   templateCreated: "template_created",
-  templateApplied: "template_applied"
+  templateApplied: "template_applied",
+  workflowCreated: "workflow_created",
+  workflowRunCompleted: "workflow_run_completed",
+  workflowRunFailed: "workflow_run_failed"
 } as const;
 
 export type ActivityAction =

@@ -27,6 +27,7 @@ export const plannedFeatureAreas = [
   "backup",
   "export",
   "templates",
+  "workflows",
   "activity",
   "diagnostics"
 ] as const;
@@ -131,6 +132,13 @@ export {
   validateContainerTemplateJson,
   validateTemplateJson
 } from "./templates";
+export {
+  WorkflowActionExecutor,
+  WorkflowService,
+  parseWorkflowActions,
+  stringifyWorkflowActions,
+  workflowsModuleContract
+} from "./workflows";
 export { TabService, tabsModuleContract } from "./tabs";
 export { TimelineService, timelineModuleContract } from "./timeline";
 export {
@@ -426,6 +434,18 @@ export type {
   TemplateServiceIdFactory,
   TemplateTagRef
 } from "./templates";
+export type {
+  CreateWorkflowInput,
+  PreviewWorkflowRunInput,
+  RunManualWorkflowInput,
+  WorkflowAction,
+  WorkflowActionExecutionContext,
+  WorkflowActionExecutionResult,
+  WorkflowActionPreview,
+  WorkflowPreviewResult,
+  WorkflowRunResult,
+  WorkflowServiceIdFactory
+} from "./workflows";
 export type {
   GroupTimelineItemsInput,
   TimelineDateRange,

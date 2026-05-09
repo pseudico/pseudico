@@ -40,6 +40,8 @@ import {
   templatesModuleContract,
   ListTemplateService,
   todayModuleContract,
+  workflowsModuleContract,
+  WorkflowService,
   workspaceModuleContract
 } from "../src";
 
@@ -72,6 +74,7 @@ describe("feature module exports", () => {
       "backup",
       "export",
       "templates",
+      "workflows",
       "activity",
       "diagnostics"
     ]);
@@ -105,6 +108,7 @@ describe("feature module exports", () => {
       backupModuleContract.module,
       exportModuleContract.module,
       templatesModuleContract.module,
+      workflowsModuleContract.module,
       activityModuleContract.module,
       diagnosticsModuleContract.module
     ];
@@ -136,6 +140,7 @@ describe("feature module exports", () => {
       "backup",
       "export",
       "templates",
+      "workflows",
       "activity",
       "diagnostics"
     ]);
@@ -180,5 +185,9 @@ describe("feature module exports", () => {
 
   it("exports the list template service implementation", () => {
     expect(ListTemplateService).toBeDefined();
+  });
+
+  it("exports the workflow service implementation", () => {
+    expect(WorkflowService).toBeDefined();
   });
 });

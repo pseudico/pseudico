@@ -189,7 +189,7 @@ describe("database IPC handlers", () => {
       ok: true,
       data: {
         connected: true,
-          schemaVersion: 7,
+          schemaVersion: 8,
         workspaceExists: true,
         inboxExists: true,
         defaultDashboardExists: true,
