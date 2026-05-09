@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(152);
+    expect(channels).toHaveLength(155);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -67,6 +67,7 @@ describe("typed preload API", () => {
       "activity",
       "containers",
       "items",
+      "trash",
       "dragDrop",
       "files",
       "backup",
@@ -370,6 +371,48 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.items.redoActivity,
         input: { activityId: "activity_1" }
+      }
+    ]);
+  });
+
+
+  it("routes trash calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.trash!.listTrash({ workspaceId: "workspace_1" });
+    await api.trash!.restoreTrash({
+      workspaceId: "workspace_1",
+      targetType: "item",
+      targetId: "item_1"
+    });
+    await api.trash!.clearTrash({ workspaceId: "workspace_1", confirmed: true });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.trash.listTrash,
+        input: { workspaceId: "workspace_1" }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.trash.restoreTrash,
+        input: {
+          workspaceId: "workspace_1",
+          targetType: "item",
+          targetId: "item_1"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.trash.clearTrash,
+        input: { workspaceId: "workspace_1", confirmed: true }
       }
     ]);
   });

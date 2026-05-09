@@ -11,6 +11,7 @@ import {
   Settings,
   Star,
   Tags,
+  Trash2,
   Workflow
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -29,7 +30,8 @@ const routeIcons: Partial<Record<AppRouteId, LucideIcon>> = {
   tagsCategories: Tags,
   search: Search,
   dashboard: LayoutDashboard,
-  settings: Settings
+  settings: Settings,
+  trash: Trash2
 };
 
 type SidebarProps = {

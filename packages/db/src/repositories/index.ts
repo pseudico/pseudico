@@ -205,3 +205,10 @@ export {
   type WorkflowRunStatus,
   type WorkflowTriggerType
 } from "./WorkflowRepository";
+
+export {
+  TrashRepository,
+  type ClearTrashCounts,
+  type TrashEntryRecord,
+  type TrashTargetType
+} from "./TrashRepository";

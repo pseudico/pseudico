@@ -15,6 +15,7 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { TagsCategoriesPage } from "./pages/TagsCategoriesPage";
 import { TimelinePage } from "./pages/TimelinePage";
 import { TodayPage } from "./pages/TodayPage";
+import { TrashPage } from "./pages/TrashPage";
 import { WelcomePage } from "./pages/WelcomePage";
 import { WorkspaceHomePage } from "./pages/WorkspaceHomePage";
 
@@ -38,6 +39,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/timeline" element={<TimelinePage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/trash" element={<TrashPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/welcome" replace />} />
     </Routes>

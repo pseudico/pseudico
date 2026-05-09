@@ -17,7 +17,8 @@ const expectedRoutePaths = [
   "/dashboard",
   "/timeline",
   "/calendar",
-  "/settings"
+  "/settings",
+  "/trash"
 ];
 
 describe("desktop shell routes", () => {
@@ -37,7 +38,8 @@ describe("desktop shell routes", () => {
       "Dashboard",
       "Timeline",
       "Calendar",
-      "Settings"
+      "Settings",
+      "Trash"
     ]);
   });
 
