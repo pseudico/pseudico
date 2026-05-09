@@ -130,3 +130,25 @@ export const localOnlyBoundary: LocalOnlyBoundary = {
   hostedAccounts: false,
   telemetry: false
 };
+
+export {
+  ShortcutRegistry,
+  createShortcutRegistry,
+  formatShortcutBinding,
+  getShortcutEventTargetKind,
+  matchesShortcutBinding,
+  normalizeShortcutKey
+} from "./shortcuts/ShortcutRegistry";
+export type {
+  RegisteredShortcut,
+  ShortcutBinding,
+  ShortcutCategory,
+  ShortcutDescriptor,
+  ShortcutEventTargetKind,
+  ShortcutKeyboardEventLike,
+  ShortcutMatchContext,
+  ShortcutModifier,
+  ShortcutScope
+} from "./shortcuts/ShortcutRegistry";
+export { APP_SHORTCUT_IDS, defaultShortcutDescriptors } from "./shortcuts/defaultShortcuts";
+export type { AppShortcutId } from "./shortcuts/defaultShortcuts";

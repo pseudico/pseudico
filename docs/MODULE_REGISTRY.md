@@ -234,6 +234,7 @@ Owns:
 
 - Central action descriptors and local action matching.
 - App-shell palette UI and keyboard execution for registered actions.
+- Shared default shortcut registry and read-only shortcut help surface.
 - Navigation and safe local UI commands such as opening Quick Add.
 
 Does not own:
@@ -252,7 +253,8 @@ Integration points:
 
 - App shell and route registry for navigation actions.
 - Quick Add and future feature services for local commands.
-- Shortcut registry once configurable shortcuts are introduced.
+- Settings > Keyboard shortcuts for discoverable read-only defaults.
+- Future preferences storage when configurable shortcuts are introduced.
 
 ### Context Menus
 

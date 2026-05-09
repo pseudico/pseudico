@@ -85,8 +85,42 @@ describe("desktop command palette actions", () => {
       {
         projectId: "project_1",
         containerId: "project_1",
-        containerType: "project"
+        containerType: "project",
+        initialActionId: "task"
       }
     ]);
   });
+
+  it("registers discoverable shortcuts for note and list capture", async () => {
+    const quickAddContexts: unknown[] = [];
+    const registry = createAppActionRegistry({
+      navigate: () => undefined,
+      openQuickAdd: (context) => quickAddContexts.push(context)
+    });
+    const context: AppActionContext = {
+      currentPathname: "/contacts/contact_1",
+      workspaceOpen: true
+    };
+
+    await registry.get("quick-add.note")?.execute(context);
+    await registry.get("quick-add.list")?.execute(context);
+
+    expect(registry.get("quick-add.note")?.shortcut?.label).toBe("Ctrl/Cmd Shift N");
+    expect(registry.get("quick-add.list")?.shortcut?.label).toBe("Ctrl/Cmd Shift L");
+    expect(quickAddContexts).toEqual([
+      {
+        contactId: "contact_1",
+        containerId: "contact_1",
+        containerType: "contact",
+        initialActionId: "note"
+      },
+      {
+        contactId: "contact_1",
+        containerId: "contact_1",
+        containerType: "contact",
+        initialActionId: "list"
+      }
+    ]);
+  });
+
 });

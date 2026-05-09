@@ -3906,3 +3906,50 @@ a {
   min-height: 6rem;
   resize: vertical;
 }
+
+.shortcut-help-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.shortcut-help-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.shortcut-help-group h4 {
+  margin: 0;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.shortcut-help-row {
+  align-items: center;
+  border: 1px solid #dbe4ef;
+  border-radius: 12px;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.75rem;
+}
+
+.shortcut-help-row div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.shortcut-help-row span,
+.shortcut-help-row small {
+  color: #64748b;
+}
+
+.shortcut-help-row kbd {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #1d4ed8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.3rem 0.45rem;
+  white-space: nowrap;
+}

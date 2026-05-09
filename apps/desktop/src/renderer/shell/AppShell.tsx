@@ -1,5 +1,5 @@
 import { AppTabStrip } from "@local-work-os/ui";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { CommandPaletteHost } from "../components/CommandPaletteHost";
 import {
@@ -11,10 +11,16 @@ import { useAppTabs } from "../navigation/useAppTabs";
 import { useNavigationHistory } from "../navigation/useNavigationHistory";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import { Sidebar } from "./Sidebar";
+import {
+  resolveGlobalAppShortcut,
+  runGlobalAppShortcut
+} from "../shortcuts/appShortcuts";
 import { TopBar } from "./TopBar";
 
 export function AppShell(): React.JSX.Element {
   const { currentWorkspace } = useWorkspaceStore();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [quickAddContext, setQuickAddContext] = useState<QuickAddContext>({});
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -24,6 +30,35 @@ export function AppShell(): React.JSX.Element {
     setQuickAddContext(context ?? {});
     setQuickAddOpen(true);
   }, []);
+
+
+  useEffect(() => {
+    function handleGlobalShortcut(event: KeyboardEvent): void {
+      const shortcut = resolveGlobalAppShortcut(event);
+
+      if (shortcut === null) {
+        return;
+      }
+
+      const handled = runGlobalAppShortcut(shortcut, {
+        currentPathname: location.pathname,
+        navigate,
+        openCommandPalette: () => setCommandPaletteOpen(true),
+        openQuickAdd,
+        workspaceOpen: currentWorkspace !== null
+      });
+
+      if (handled) {
+        event.preventDefault();
+      }
+    }
+
+    window.addEventListener("keydown", handleGlobalShortcut);
+
+    return () => {
+      window.removeEventListener("keydown", handleGlobalShortcut);
+    };
+  }, [currentWorkspace, location.pathname, navigate, openQuickAdd]);
 
   useEffect(() => {
     function handleOpenQuickStart(event: Event): void {
