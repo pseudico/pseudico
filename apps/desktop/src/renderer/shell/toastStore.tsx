@@ -8,6 +8,7 @@ import {
 type ToastInput = {
   title?: string;
   tone?: ToastTone;
+  action?: ToastViewModel["action"];
 };
 
 const listeners = new Set<() => void>();
@@ -42,6 +43,10 @@ export function showToast(message: string, input: ToastInput = {}): string {
 
   if (input.title !== undefined) {
     toast.title = input.title;
+  }
+
+  if (input.action !== undefined) {
+    toast.action = input.action;
   }
 
   toasts = [

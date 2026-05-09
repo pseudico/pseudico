@@ -1528,6 +1528,26 @@ export type BulkBaseItemsInput = {
   itemIds: string[];
 };
 
+export type UndoActivityInput = {
+  activityId: string;
+};
+
+export type UndoApplySummary = {
+  ok: boolean;
+  mode: "undo" | "redo";
+  operation: {
+    activityId: string;
+    action: string;
+    targetType: string;
+    targetId: string;
+    kind: string;
+    label: string;
+  };
+  activityId: string | null;
+  conflict: boolean;
+  message: string;
+};
+
 
 export type TaskStatus = "open" | "done" | "waiting" | "cancelled";
 export type ListItemStatus = "open" | "done" | "waiting" | "cancelled";
@@ -2146,7 +2166,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     bulkArchiveItems: "local-work-os:items:bulk-archive-items",
     bulkDeleteItems: "local-work-os:items:bulk-delete-items",
     bulkCompleteTasks: "local-work-os:items:bulk-complete-tasks",
-    bulkExportItems: "local-work-os:items:bulk-export-items"
+    bulkExportItems: "local-work-os:items:bulk-export-items",
+    undoActivity: "local-work-os:items:undo-activity",
+    redoActivity: "local-work-os:items:redo-activity"
   },
   dragDrop: {
     reorderItems: "local-work-os:drag-drop:reorder-items",
@@ -2656,6 +2678,14 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.items.bulkExportItems]: {
     input: BulkBaseItemsInput;
     result: ApiResult<BulkActionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.undoActivity]: {
+    input: UndoActivityInput;
+    result: ApiResult<UndoApplySummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.items.redoActivity]: {
+    input: UndoActivityInput;
+    result: ApiResult<UndoApplySummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderItems]: {
     input: ReorderContainerItemsInput;
@@ -3198,6 +3228,8 @@ export type LocalWorkOsApi = {
     bulkDeleteItems?: (input: BulkBaseItemsInput) => Promise<ApiResult<BulkActionSummary>>;
     bulkCompleteTasks?: (input: BulkBaseItemsInput) => Promise<ApiResult<BulkActionSummary>>;
     bulkExportItems?: (input: BulkBaseItemsInput) => Promise<ApiResult<BulkActionSummary>>;
+    undoActivity?: (input: UndoActivityInput) => Promise<ApiResult<UndoApplySummary>>;
+    redoActivity?: (input: UndoActivityInput) => Promise<ApiResult<UndoApplySummary>>;
   };
   dragDrop?: {
     reorderItems: (
@@ -3743,7 +3775,11 @@ export function createLocalWorkOsApi(
       bulkCompleteTasks: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.bulkCompleteTasks, input),
       bulkExportItems: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.bulkExportItems, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.bulkExportItems, input),
+      undoActivity: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.undoActivity, input),
+      redoActivity: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.redoActivity, input)
     },
     dragDrop: {
       reorderItems: (input) =>

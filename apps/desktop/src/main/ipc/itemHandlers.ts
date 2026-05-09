@@ -2,6 +2,9 @@ import {
   BulkActionService,
   formatActivityEvent,
   ItemService,
+  UndoService,
+  type UndoApplyResult,
+  type UndoSessionState,
   type BulkActionResult
 } from "@local-work-os/features";
 import {
@@ -24,6 +27,8 @@ import {
   type ItemInspectorSummary,
   type ItemSummary,
   type MoveItemInput,
+  type UndoActivityInput,
+  type UndoApplySummary,
   type WorkspaceSummary
 } from "../../preload/api";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
@@ -60,7 +65,11 @@ type ItemIpcHandlers = {
   handleBulkExportItems: (
     input: unknown
   ) => Promise<ApiResult<BulkActionSummary>>;
+  handleUndoActivity: (input: unknown) => Promise<ApiResult<UndoApplySummary>>;
+  handleRedoActivity: (input: unknown) => Promise<ApiResult<UndoApplySummary>>;
 };
+
+const undoSessions = new Map<string, UndoSessionState>();
 
 export function createItemIpcHandlers(
   workspaceService: CurrentWorkspaceService
@@ -225,6 +234,26 @@ export function createItemIpcHandlers(
           workspaceId: input.workspaceId ?? context.workspace.id
         })))
       );
+    },
+
+    async handleUndoActivity(input) {
+      if (!isUndoActivityInput(input)) {
+        return apiError("INVALID_INPUT", "undoActivity requires an activityId string.");
+      }
+
+      return await withItemService(workspaceService, async (context) =>
+        apiOk(toUndoApplySummary(await context.undoService.undoActivity(input.activityId)))
+      );
+    },
+
+    async handleRedoActivity(input) {
+      if (!isUndoActivityInput(input)) {
+        return apiError("INVALID_INPUT", "redoActivity requires an activityId string.");
+      }
+
+      return await withItemService(workspaceService, async (context) =>
+        apiOk(toUndoApplySummary(await context.undoService.redoActivity(input.activityId)))
+      );
     }
   };
 }
@@ -235,6 +264,7 @@ async function withItemService<T>(
     connection: DatabaseConnection;
     bulkActionService: BulkActionService;
     itemService: ItemService;
+    undoService: UndoService;
     workspace: WorkspaceSummary;
   }) => Promise<ApiResult<T>>
 ): Promise<ApiResult<T>> {
@@ -254,6 +284,10 @@ async function withItemService<T>(
       connection,
       bulkActionService: new BulkActionService({ connection }),
       itemService: new ItemService({ connection }),
+      undoService: new UndoService({
+        connection,
+        session: getUndoSession(workspace.id)
+      }),
       workspace
     });
   } catch (error) {
@@ -264,6 +298,16 @@ async function withItemService<T>(
   } finally {
     connection.close();
   }
+}
+
+function getUndoSession(workspaceId: string): UndoSessionState {
+  const existing = undoSessions.get(workspaceId);
+  if (existing !== undefined) {
+    return existing;
+  }
+  const session: UndoSessionState = { undoStack: [], redoStack: [] };
+  undoSessions.set(workspaceId, session);
+  return session;
 }
 
 function toItemSummary(item: ItemRecord): ItemSummary {
@@ -326,6 +370,17 @@ function toBulkActionSummary(result: BulkActionResult): BulkActionSummary {
   };
 }
 
+function toUndoApplySummary(result: UndoApplyResult): UndoApplySummary {
+  return {
+    ok: result.ok,
+    mode: result.mode,
+    operation: result.operation,
+    activityId: result.activityId,
+    conflict: result.conflict,
+    message: result.message
+  };
+}
+
 function isMoveItemInput(input: unknown): input is MoveItemInput {
   return (
     isRecord(input) &&
@@ -367,6 +422,10 @@ function isBulkCategorizeItemsInput(
     isBulkBaseItemsInput(input) &&
     (record.categoryId === null || isNonEmptyString(record.categoryId))
   );
+}
+
+function isUndoActivityInput(input: unknown): input is UndoActivityInput {
+  return isRecord(input) && isNonEmptyString(input.activityId);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

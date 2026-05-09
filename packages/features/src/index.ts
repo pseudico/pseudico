@@ -34,6 +34,7 @@ export const plannedFeatureAreas = [
   "export",
   "templates",
   "workflows",
+  "undo",
   "quickStart",
   "activity",
   "diagnostics"
@@ -177,6 +178,7 @@ export {
   searchModuleContract
 } from "./search";
 export { TaskService, tasksModuleContract } from "./tasks";
+export { UndoService, undoModuleContract } from "./undo";
 export {
   ContainerTemplateService,
   ListTemplateService,
@@ -540,6 +542,13 @@ export type {
   TaskServiceIdFactory,
   UpdateTaskInput
 } from "./tasks";
+export type {
+  UndoApplyResult,
+  UndoServiceIdFactory,
+  UndoSessionState,
+  UndoableOperation,
+  UndoableOperationKind
+} from "./undo";
 export type {
   ContainerTemplateCreationResult,
   CreateContainerFromTemplateInput,

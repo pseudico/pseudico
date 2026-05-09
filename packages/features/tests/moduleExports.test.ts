@@ -52,6 +52,8 @@ import {
   templatesModuleContract,
   ListTemplateService,
   todayModuleContract,
+  UndoService,
+  undoModuleContract,
   workflowsModuleContract,
   WorkflowService,
   workspaceModuleContract
@@ -93,6 +95,7 @@ describe("feature module exports", () => {
       "export",
       "templates",
       "workflows",
+      "undo",
       "quickStart",
       "activity",
       "diagnostics"
@@ -133,6 +136,7 @@ describe("feature module exports", () => {
       exportModuleContract.module,
       templatesModuleContract.module,
       workflowsModuleContract.module,
+      undoModuleContract.module,
       activityModuleContract.module,
       diagnosticsModuleContract.module
     ];
@@ -170,6 +174,7 @@ describe("feature module exports", () => {
       "export",
       "templates",
       "workflows",
+      "undo",
       "activity",
       "diagnostics"
     ]);
@@ -231,6 +236,10 @@ describe("feature module exports", () => {
 
   it("exports the workflow service implementation", () => {
     expect(WorkflowService).toBeDefined();
+  });
+
+  it("exports the undo service implementation", () => {
+    expect(UndoService).toBeDefined();
   });
 
   it("exports the navigation history service implementation", () => {

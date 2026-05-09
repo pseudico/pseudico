@@ -60,4 +60,12 @@ export function registerItemIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.items.bulkExportItems,
     (_event, input) => handlers.handleBulkExportItems(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.items.undoActivity,
+    (_event, input) => handlers.handleUndoActivity(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.items.redoActivity,
+    (_event, input) => handlers.handleRedoActivity(input)
+  );
 }
