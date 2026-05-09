@@ -4,6 +4,7 @@ import {
   apiOk,
   type ApiResult,
   type CategorySummary,
+  type ContactSummary,
   type DatabaseHealthStatus,
   type InboxSummary,
   type IpcModuleStatus,
@@ -70,6 +71,14 @@ const activeProject: ProjectSummary = {
   deletedAt: null
 };
 
+const activeContact: ContactSummary = {
+  ...activeProject,
+  id: "container_contact_1",
+  type: "contact",
+  name: "Ada Lovelace",
+  slug: "ada-lovelace"
+};
+
 function projectHealthSummary(
   sourceProject: ProjectSummary
 ): ProjectHealthSummary {
@@ -115,14 +124,31 @@ describe("QuickAddModal", () => {
           status: "waiting"
         },
         activeProject
-      ]
+      ],
+      contacts: [activeContact]
     });
 
     expect(resolution.defaultContainerId).toBe(activeProject.id);
     expect(resolution.targets.map((target) => target.name)).toEqual([
       "Inbox",
-      "Launch Plan"
+      "Launch Plan",
+      "Ada Lovelace"
     ]);
+  });
+
+  it("preselects the current active contact when context has a contact id", () => {
+    const resolution = resolveDefaultCaptureContainerFromTargets({
+      context: {
+        contactId: activeContact.id,
+        containerTabId: "tab_contact_main"
+      },
+      inbox,
+      projects: [activeProject],
+      contacts: [activeContact]
+    });
+
+    expect(resolution.defaultContainerId).toBe(activeContact.id);
+    expect(resolution.defaultContainerTabId).toBe("tab_contact_main");
   });
 
   it("loads default capture targets through the typed API client", async () => {
@@ -160,6 +186,7 @@ describe("QuickAddModal", () => {
       {
         workspaceId: workspace.id,
         containerId: activeProject.id,
+        containerTabId: null,
         title: "Call supplier",
         dueAt: "2026-05-04"
       }
@@ -171,7 +198,7 @@ describe("QuickAddModal", () => {
       <QuickAddModal open workspace={null} onClose={() => undefined} />
     );
 
-    expect(html).toContain("Quick add");
+    expect(html).toContain("Quick Start");
     expect(html).toContain("Open or create a local workspace");
   });
 });

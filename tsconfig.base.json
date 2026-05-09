@@ -17,6 +17,9 @@
       "@local-work-os/core": ["./packages/core/src/index.ts"],
       "@local-work-os/db": ["./packages/db/src/index.ts"],
       "@local-work-os/features": ["./packages/features/src/index.ts"],
+      "@local-work-os/features/quickStart": [
+        "./packages/features/src/quickStart/index.ts"
+      ],
       "@local-work-os/ui": ["./packages/ui/src/index.ts"],
       "@local-work-os/test-utils": ["./packages/test-utils/src/index.ts"]
     }

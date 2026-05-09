@@ -66,7 +66,14 @@ describe("desktop command palette actions", () => {
       false
     );
     expect(getQuickAddContext("/projects/project_1")).toEqual({
-      projectId: "project_1"
+      projectId: "project_1",
+      containerId: "project_1",
+      containerType: "project"
+    });
+    expect(getQuickAddContext("/contacts/contact_1")).toEqual({
+      contactId: "contact_1",
+      containerId: "contact_1",
+      containerType: "contact"
     });
 
     await registry.get("quick-add.task")?.execute({
@@ -74,6 +81,12 @@ describe("desktop command palette actions", () => {
       workspaceOpen: true
     });
 
-    expect(quickAddContexts).toEqual([{ projectId: "project_1" }]);
+    expect(quickAddContexts).toEqual([
+      {
+        projectId: "project_1",
+        containerId: "project_1",
+        containerType: "project"
+      }
+    ]);
   });
 });

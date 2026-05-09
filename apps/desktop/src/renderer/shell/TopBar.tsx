@@ -72,11 +72,11 @@ export function TopBar({
           type="button"
           className="icon-button"
           disabled={currentWorkspace === null}
-          aria-label="Quick add"
+          aria-label="Quick Start"
           onClick={() => onQuickAdd(getQuickAddContext(location.pathname))}
         >
           <Plus size={18} aria-hidden="true" />
-          <span>Quick add</span>
+          <span>Quick Start</span>
         </button>
       </div>
     </header>

@@ -12,6 +12,10 @@ export default defineConfig({
         "../../packages/core/src/index.ts"
       ),
       "@local-work-os/db": resolve(currentDir, "../../packages/db/src/index.ts"),
+      "@local-work-os/features/quickStart": resolve(
+        currentDir,
+        "../../packages/features/src/quickStart/index.ts"
+      ),
       "@local-work-os/features": resolve(
         currentDir,
         "../../packages/features/src/index.ts"

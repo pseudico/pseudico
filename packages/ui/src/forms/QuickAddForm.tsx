@@ -4,7 +4,7 @@ import { CalendarPlus, Plus } from "lucide-react";
 export type QuickAddTargetOption = {
   id: string;
   name: string;
-  type: "inbox" | "project";
+  type: "inbox" | "project" | "contact";
   description?: string | null;
 };
 

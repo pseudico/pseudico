@@ -26,6 +26,7 @@ import {
   notesModuleContract,
   plannedFeatureAreas,
   projectsModuleContract,
+  quickStartActionProviders,
   recurrenceModuleContract,
   RecurrenceService,
   CollectionService,
@@ -79,6 +80,7 @@ describe("feature module exports", () => {
       "export",
       "templates",
       "workflows",
+      "quickStart",
       "activity",
       "diagnostics"
     ]);
@@ -200,5 +202,17 @@ describe("feature module exports", () => {
 
   it("exports the workflow service implementation", () => {
     expect(WorkflowService).toBeDefined();
+  });
+
+  it("exports Quick Start action providers", () => {
+    expect(quickStartActionProviders.map((provider) => provider.module)).toEqual([
+      "tasks",
+      "notes",
+      "lists",
+      "files",
+      "links",
+      "projects",
+      "contacts"
+    ]);
   });
 });
