@@ -5,6 +5,8 @@ import {
   BackupService,
   activityModuleContract,
   calendarModuleContract,
+  CaptureService,
+  captureModuleContract,
   categoriesModuleContract,
   contactsModuleContract,
   dashboardModuleContract,
@@ -59,6 +61,7 @@ describe("feature module exports", () => {
       "files",
       "import",
       "links",
+      "capture",
       "pipelines",
       "metadata",
       "relationships",
@@ -93,6 +96,7 @@ describe("feature module exports", () => {
       filesModuleContract.module,
       importModuleContract.module,
       linksModuleContract.module,
+      captureModuleContract.module,
       tagsModuleContract.module,
       categoriesModuleContract.module,
       relationshipsModuleContract.module,
@@ -125,6 +129,7 @@ describe("feature module exports", () => {
       "files",
       "import",
       "links",
+      "capture",
       "metadata.tags",
       "metadata.categories",
       "relationships",
@@ -144,6 +149,10 @@ describe("feature module exports", () => {
       "activity",
       "diagnostics"
     ]);
+  });
+
+  it("exports the capture service implementation", () => {
+    expect(CaptureService).toBeDefined();
   });
 
   it("exports the saved-view and collection service implementations", () => {
