@@ -11,7 +11,8 @@ export type AppRouteId =
   | "dashboard"
   | "timeline"
   | "calendar"
-  | "settings";
+  | "settings"
+  | "trash";
 
 export type AppRoute = {
   id: AppRouteId;
@@ -125,6 +126,14 @@ export const appRoutes = [
     label: "Settings",
     title: "Settings",
     summary: "Local workspace and app settings will appear here.",
+    nav: true
+  },
+  {
+    id: "trash",
+    path: "/trash",
+    label: "Trash",
+    title: "Trash",
+    summary: "Restore soft-deleted local records or clear Trash after backup.",
     nav: true
   }
 ] as const satisfies readonly AppRoute[];

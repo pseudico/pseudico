@@ -30,6 +30,7 @@ import { registerTabIpc } from "./registerTabIpc";
 import { registerTemplateIpc } from "./registerTemplateIpc";
 import { registerTimelineIpc } from "./registerTimelineIpc";
 import { registerTodayIpc } from "./registerTodayIpc";
+import { registerTrashIpc } from "./registerTrashIpc";
 import { registerWorkspaceIpc } from "./registerWorkspaceIpc";
 import {
   assertRuntimeDataPathOutsideAppBundle,
@@ -89,5 +90,6 @@ export function registerDesktopIpc(
   registerDashboardIpc(services.workspaceService);
   registerContainerIpc();
   registerItemIpc(services.workspaceService);
+  registerTrashIpc(services.workspaceService);
   registerFileIpc(services.workspaceService);
 }

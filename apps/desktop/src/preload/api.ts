@@ -2000,6 +2000,59 @@ export type SetActiveAppTabInput = {
   tabId: string;
 };
 
+
+export type TrashTargetTypeSummary = "container" | "item" | "list_item" | "attachment";
+
+export type TrashEntrySummary = {
+  id: string;
+  workspaceId: string;
+  targetType: TrashTargetTypeSummary;
+  title: string;
+  subtitle: string | null;
+  deletedAt: string;
+  originalContainerId: string | null;
+  originalContainerName: string | null;
+  parentItemId: string | null;
+  parentItemTitle: string | null;
+};
+
+export type ListTrashInput = {
+  workspaceId?: string;
+};
+
+export type RestoreTrashInput = {
+  workspaceId?: string;
+  targetType: TrashTargetTypeSummary;
+  targetId: string;
+};
+
+export type TrashSearchIndexSummary = {
+  indexedContainerCount: number;
+  indexedItemCount: number;
+  indexedListItemCount: number;
+  indexedAttachmentCount: number;
+};
+
+export type RestoreTrashSummary = {
+  entry: TrashEntrySummary;
+  searchIndex: TrashSearchIndexSummary;
+};
+
+export type ClearTrashCountsSummary = Record<TrashTargetTypeSummary, number>;
+
+export type ClearTrashInput = {
+  workspaceId?: string;
+  confirmed: boolean;
+};
+
+export type ClearTrashSummary = {
+  workspaceId: string;
+  backupSnapshotId: string;
+  counts: ClearTrashCountsSummary;
+  clearedCount: number;
+  searchIndex: TrashSearchIndexSummary;
+};
+
 export const LOCAL_WORK_OS_IPC_CHANNELS = {
   workspace: {
     createWorkspace: "local-work-os:workspace:create-workspace",
@@ -2169,6 +2222,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     bulkExportItems: "local-work-os:items:bulk-export-items",
     undoActivity: "local-work-os:items:undo-activity",
     redoActivity: "local-work-os:items:redo-activity"
+  },
+  trash: {
+    listTrash: "local-work-os:trash:list-trash",
+    restoreTrash: "local-work-os:trash:restore-trash",
+    clearTrash: "local-work-os:trash:clear-trash"
   },
   dragDrop: {
     reorderItems: "local-work-os:drag-drop:reorder-items",
@@ -2686,6 +2744,19 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.items.redoActivity]: {
     input: UndoActivityInput;
     result: ApiResult<UndoApplySummary>;
+  };
+
+  [LOCAL_WORK_OS_IPC_CHANNELS.trash.listTrash]: {
+    input: ListTrashInput | undefined;
+    result: ApiResult<TrashEntrySummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.trash.restoreTrash]: {
+    input: RestoreTrashInput;
+    result: ApiResult<RestoreTrashSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.trash.clearTrash]: {
+    input: ClearTrashInput;
+    result: ApiResult<ClearTrashSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderItems]: {
     input: ReorderContainerItemsInput;
@@ -3230,6 +3301,12 @@ export type LocalWorkOsApi = {
     bulkExportItems?: (input: BulkBaseItemsInput) => Promise<ApiResult<BulkActionSummary>>;
     undoActivity?: (input: UndoActivityInput) => Promise<ApiResult<UndoApplySummary>>;
     redoActivity?: (input: UndoActivityInput) => Promise<ApiResult<UndoApplySummary>>;
+  };
+
+  trash?: {
+    listTrash: (input?: ListTrashInput) => Promise<ApiResult<TrashEntrySummary[]>>;
+    restoreTrash: (input: RestoreTrashInput) => Promise<ApiResult<RestoreTrashSummary>>;
+    clearTrash: (input: ClearTrashInput) => Promise<ApiResult<ClearTrashSummary>>;
   };
   dragDrop?: {
     reorderItems: (
@@ -3780,6 +3857,15 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.undoActivity, input),
       redoActivity: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.redoActivity, input)
+    },
+
+    trash: {
+      listTrash: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.trash.listTrash, input),
+      restoreTrash: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.trash.restoreTrash, input),
+      clearTrash: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.trash.clearTrash, input)
     },
     dragDrop: {
       reorderItems: (input) =>

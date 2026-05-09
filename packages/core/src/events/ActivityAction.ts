@@ -84,7 +84,9 @@ export const ActivityAction = {
   workflowRunCompleted: "workflow_run_completed",
   workflowRunFailed: "workflow_run_failed",
   operationUndone: "operation_undone",
-  operationRedone: "operation_redone"
+  operationRedone: "operation_redone",
+  trashRestored: "trash_restored",
+  trashCleared: "trash_cleared"
 } as const;
 
 export type ActivityAction =

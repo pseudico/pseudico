@@ -35,6 +35,7 @@ export const plannedFeatureAreas = [
   "templates",
   "workflows",
   "undo",
+  "trash",
   "quickStart",
   "activity",
   "diagnostics"
@@ -179,6 +180,7 @@ export {
 } from "./search";
 export { TaskService, tasksModuleContract } from "./tasks";
 export { UndoService, undoModuleContract } from "./undo";
+export { TrashService, trashModuleContract } from "./trash";
 export {
   ContainerTemplateService,
   ListTemplateService,
@@ -542,6 +544,14 @@ export type {
   TaskServiceIdFactory,
   UpdateTaskInput
 } from "./tasks";
+export type {
+  ClearTrashInput,
+  ClearTrashResult,
+  ListTrashInput,
+  RestoreTrashInput,
+  RestoreTrashResult,
+  TrashServiceIdFactory
+} from "./trash";
 export type {
   UndoApplyResult,
   UndoServiceIdFactory,

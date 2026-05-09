@@ -1521,3 +1521,47 @@ Next actions: Commit; push; open PR.
 - Files changed: packages/features/src/undo/UndoService.ts; packages/features/tests/undoService.test.ts; apps/desktop/src/preload/api.ts
 - Open questions / risks: Page-specific Undo toast usage can expand in follow-up tickets.
 - Next actions: Commit; open PR; monitor CI.
+- Timestamp: 2026-05-09T21:27:30.0526885+10:00
+- Objective: Close PSE-100 and prepare next ticket.
+- Decisions made: Merged PR #91; moved PSE-100 to Done; promoted PSE-96 as sole Codex Ready.
+- Files changed: docs/session_log.md
+- Open questions / risks: PSE-96 purge controls must preserve soft-delete guardrails.
+- Next actions: Start PSE-96 in next run; verify no active PRs; keep one Codex Ready.
+
+## 2026-05-10 06:23:22 +10:00
+Objective: Reconcile active Linear/GitHub work and select next ticket.
+Decisions made:
+- No PR Open or In Progress issues found; PSE-96 is sole Codex Ready issue.
+- Synced main with origin before starting implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Existing unrelated local/untracked files remain untouched.
+Next actions:
+- Move PSE-96 to In Progress and implement scoped trash controls.
+
+## 2026-05-10 06:26:42 +10:00
+Objective: Start PSE-96 implementation after reading scope/docs.
+Decisions made:
+- Moved PSE-96 to In Progress and created branch codex/pse-96-trash-view-restore-purge.
+- Plan: TrashRepository/TrashService, IPC/preload/client API, renderer Trash page, tests.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Clear-trash must hard-delete only already soft-deleted rows after backup preflight.
+Next actions:
+- Implement service and UI; run focused tests.
+
+## 2026-05-10 06:43:40 +10:00
+Objective: Implement and verify PSE-96 Trash workflow.
+Decisions made:
+- Added TrashRepository/TrashService, IPC/preload/client API, route/sidebar Trash UI.
+- Clear Trash creates a manual backup via IPC before permanent purge.
+Files changed:
+- packages/db/src/repositories/TrashRepository.ts
+- packages/features/src/trash/TrashService.ts
+- apps/desktop/src/renderer/pages/TrashPage.tsx
+Open questions / risks:
+- Manual desktop QA still limited to automated build/test in this run.
+Next actions:
+- Commit, push, open ready PR, then inspect CI/reviews.

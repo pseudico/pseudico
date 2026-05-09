@@ -96,6 +96,7 @@ describe("feature module exports", () => {
       "templates",
       "workflows",
       "undo",
+      "trash",
       "quickStart",
       "activity",
       "diagnostics"

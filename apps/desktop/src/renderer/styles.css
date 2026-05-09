@@ -4117,3 +4117,82 @@ a {
   padding: 0.3rem 0.45rem;
   white-space: nowrap;
 }
+
+
+.trash-page .page-header {
+  align-items: flex-start;
+}
+
+.trash-toolbar,
+.trash-confirm-row,
+.trash-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.trash-toolbar,
+.trash-confirm-row,
+.trash-row,
+.trash-group {
+  border: 1px solid #dedbd1;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.trash-toolbar {
+  margin-bottom: 12px;
+  padding: 16px;
+}
+
+.trash-toolbar p,
+.trash-row p {
+  margin: 4px 0 0;
+  color: #6d6a62;
+}
+
+.trash-confirm-row {
+  justify-content: flex-start;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  color: #514e49;
+}
+
+.trash-groups {
+  display: grid;
+  gap: 18px;
+}
+
+.trash-group {
+  padding: 16px;
+}
+
+.trash-group h3 {
+  margin: 0 0 12px;
+}
+
+.trash-list {
+  display: grid;
+  gap: 10px;
+}
+
+.trash-row {
+  padding: 14px;
+  background: #fbfaf7;
+}
+
+.trash-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  color: #6d6a62;
+  font-size: 12px;
+}
+
+.trash-row-meta span {
+  border-radius: 999px;
+  background: #edebe3;
+  padding: 3px 8px;
+}

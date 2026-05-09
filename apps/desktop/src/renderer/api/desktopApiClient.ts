@@ -309,7 +309,14 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       redoActivity: (input) =>
         callApi(() => api.items.redoActivity!(input))
     },
-    dragDrop: {
+
+    trash: {
+      listTrash: (input) => callApi(() => api.trash!.listTrash(input)),
+      restoreTrash: (input) => callApi(() => api.trash!.restoreTrash(input)),
+      clearTrash: (input) => callApi(() => api.trash!.clearTrash(input))
+    },
+
+  dragDrop: {
       reorderItems: (input) => callApi(() => api.dragDrop!.reorderItems(input)),
       moveItem: (input) => callApi(() => api.dragDrop!.moveItem(input)),
       reorderListItems: (input) =>
@@ -693,6 +700,11 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().items.undoActivity!(input),
     redoActivity: (input) =>
       getDesktopApiClient().items.redoActivity!(input)
+  },
+  trash: {
+    listTrash: (input) => getDesktopApiClient().trash!.listTrash(input),
+    restoreTrash: (input) => getDesktopApiClient().trash!.restoreTrash(input),
+    clearTrash: (input) => getDesktopApiClient().trash!.clearTrash(input)
   },
   dragDrop: {
     reorderItems: (input) =>
