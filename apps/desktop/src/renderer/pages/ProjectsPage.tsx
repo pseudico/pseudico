@@ -1,7 +1,9 @@
 import { FolderKanban, Plus, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { resolveContextMenuActions, type ContextMenuTarget } from "@local-work-os/core";
 import {
+  ContextMenu,
   EmptyState,
   ErrorState,
   CreateFromTemplateDialog,
@@ -292,33 +294,68 @@ function ProjectListRow({
   savingTemplate: boolean;
   onSaveTemplate: (project: ProjectSummary) => void;
 }): React.JSX.Element {
+  const target = toProjectContextMenuTarget(project);
+  const actions = resolveContextMenuActions({
+    target,
+    hideDisabled: false
+  }).map((action) => ({
+    id: action.id,
+    title: action.title,
+    group: action.group,
+    disabledReason: action.disabledReason,
+    danger: action.danger
+  }));
+
   return (
-    <div className="project-list-row">
-      <Link className="project-list-main" to={`/projects/${project.id}`}>
-        <span
-          className="project-list-color"
-          style={{ backgroundColor: project.color ?? "#245c55" }}
-          aria-hidden="true"
-        />
-        <span>
-          <strong>{project.name}</strong>
-          <span>{project.description ?? "No description"}</span>
+    <ContextMenu actions={actions} label={`Context menu for ${project.name}`} target={target}>
+      <div className="project-list-row">
+        <Link className="project-list-main" to={`/projects/${project.id}`}>
+          <span
+            className="project-list-color"
+            style={{ backgroundColor: project.color ?? "#245c55" }}
+            aria-hidden="true"
+          />
+          <span>
+            <strong>{project.name}</strong>
+            <span>{project.description ?? "No description"}</span>
+          </span>
+        </Link>
+        <span className="project-list-meta">
+          {project.isFavorite ? <Star size={16} aria-label="Pinned" /> : null}
+          <span>{project.status}</span>
+          <button
+            type="button"
+            className="secondary-button compact-button"
+            disabled={savingTemplate}
+            onClick={() => onSaveTemplate(project)}
+          >
+            {savingTemplate ? "Saving..." : "Save as template"}
+          </button>
         </span>
-      </Link>
-      <span className="project-list-meta">
-        {project.isFavorite ? <Star size={16} aria-label="Pinned" /> : null}
-        <span>{project.status}</span>
-        <button
-          type="button"
-          className="secondary-button compact-button"
-          disabled={savingTemplate}
-          onClick={() => onSaveTemplate(project)}
-        >
-          {savingTemplate ? "Saving..." : "Save as template"}
-        </button>
-      </span>
-    </div>
+      </div>
+    </ContextMenu>
   );
+}
+
+function toProjectContextMenuTarget(project: ProjectSummary): ContextMenuTarget {
+  return {
+    id: project.id,
+    type: "container",
+    label: project.name,
+    kind: project.type,
+    capabilities: {
+      edit: false,
+      move: false,
+      tag: false,
+      category: false,
+      pin: false,
+      archive: false,
+      duplicate: false,
+      copyLink: false,
+      inspect: false,
+      delete: false
+    }
+  };
 }
 
 function toTemplateLibraryItem(template: TemplateSummary): TemplateLibraryItem {

@@ -10,6 +10,8 @@ import {
   captureModuleContract,
   categoriesModuleContract,
   contactsModuleContract,
+  contextMenuActionProviders,
+  contextMenusModuleContract,
   dashboardModuleContract,
   DashboardService,
   diagnosticsModuleContract,
@@ -67,6 +69,7 @@ describe("feature module exports", () => {
       "links",
       "capture",
       "pipelines",
+      "contextMenus",
       "metadata",
       "navigationHistory",
       "appTabs",
@@ -104,6 +107,7 @@ describe("feature module exports", () => {
       importModuleContract.module,
       linksModuleContract.module,
       captureModuleContract.module,
+      contextMenusModuleContract.module,
       tagsModuleContract.module,
       categoriesModuleContract.module,
       navigationHistoryModuleContract.module,
@@ -138,6 +142,7 @@ describe("feature module exports", () => {
       "import",
       "links",
       "capture",
+      "context-menus",
       "metadata.tags",
       "metadata.categories",
       "navigation-history",
@@ -223,6 +228,12 @@ describe("feature module exports", () => {
       "links",
       "projects",
       "contacts"
+    ]);
+  });
+
+  it("exports Context Menu action providers", () => {
+    expect(contextMenuActionProviders.map((provider) => provider.module)).toEqual([
+      "context-menus.default"
     ]);
   });
 });

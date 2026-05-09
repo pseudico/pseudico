@@ -7,7 +7,9 @@ import {
   type FormEvent
 } from "react";
 import { useNavigate } from "react-router-dom";
+import { resolveContextMenuActions, type ContextMenuTarget } from "@local-work-os/core";
 import {
+  ContextMenu,
   CreateCollectionForm,
   GroupedResultsList,
   SmartListEditor,
@@ -407,13 +409,20 @@ export function CollectionsPage({
               </div>
             ) : (
               smartLists.map((smartList) => (
-                <div key={smartList.id} className="collection-list-item">
-                  <span>
-                    <strong>{smartList.name}</strong>
-                    <small>smart_list</small>
-                  </span>
-                  <span>{countSmartListConditions(smartList)} criteria</span>
-                </div>
+                <ContextMenu
+                  actions={savedViewActions(toSavedViewTarget(smartList.id, smartList.name, "smart_list"))}
+                  key={smartList.id}
+                  label={`Context menu for ${smartList.name}`}
+                  target={toSavedViewTarget(smartList.id, smartList.name, "smart_list")}
+                >
+                  <div className="collection-list-item">
+                    <span>
+                      <strong>{smartList.name}</strong>
+                      <small>smart_list</small>
+                    </span>
+                    <span>{countSmartListConditions(smartList)} criteria</span>
+                  </div>
+                </ContextMenu>
               ))
             )}
           </div>
@@ -426,22 +435,28 @@ export function CollectionsPage({
               </div>
             ) : (
               collections.map((collection) => (
-                <button
+                <ContextMenu
+                  actions={savedViewActions(toSavedViewTarget(collection.id, collection.name, collection.kind))}
                   key={collection.id}
-                  type="button"
-                  className="collection-list-item"
-                  aria-pressed={collection.id === selectedCollectionId}
-                  onClick={() => {
-                    setSelectedCollectionId(collection.id);
-                    setEvaluation(null);
-                  }}
+                  label={`Context menu for ${collection.name}`}
+                  target={toSavedViewTarget(collection.id, collection.name, collection.kind)}
                 >
-                  <span>
-                    <strong>{collection.name}</strong>
-                    <small>{formatCollectionDetail(collection)}</small>
-                  </span>
-                  <span>{collection.kind}</span>
-                </button>
+                  <button
+                    type="button"
+                    className="collection-list-item"
+                    aria-pressed={collection.id === selectedCollectionId}
+                    onClick={() => {
+                      setSelectedCollectionId(collection.id);
+                      setEvaluation(null);
+                    }}
+                  >
+                    <span>
+                      <strong>{collection.name}</strong>
+                      <small>{formatCollectionDetail(collection)}</small>
+                    </span>
+                    <span>{collection.kind}</span>
+                  </button>
+                </ContextMenu>
               ))
             )}
           </div>
@@ -629,6 +644,42 @@ function countSmartListConditions(smartList: SmartListSummary): number {
   }
 
   return 0;
+}
+
+function toSavedViewTarget(
+  id: string,
+  label: string,
+  kind: string
+): ContextMenuTarget {
+  return {
+    id,
+    type: "savedView",
+    label,
+    kind,
+    capabilities: {
+      edit: false,
+      move: false,
+      pin: false,
+      archive: false,
+      duplicate: false,
+      copyLink: false,
+      inspect: false,
+      delete: false
+    }
+  };
+}
+
+function savedViewActions(target: ContextMenuTarget) {
+  return resolveContextMenuActions({
+    target,
+    hideDisabled: false
+  }).map((action) => ({
+    id: action.id,
+    title: action.title,
+    group: action.group,
+    disabledReason: action.disabledReason,
+    danger: action.danger
+  }));
 }
 
 function toGroupedResultGroupViewModel(

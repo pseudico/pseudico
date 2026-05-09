@@ -4,6 +4,7 @@ import {
   type UniversalItemCardProps,
   type UniversalItemViewModel
 } from "./ItemCard";
+import type { ItemActionId } from "./ItemActionsMenu";
 
 export type ItemFeedProps = Pick<
   UniversalItemCardProps,
@@ -15,6 +16,7 @@ export type ItemFeedProps = Pick<
   emptyTitle?: string;
   error?: string | null;
   loading?: boolean;
+  getDisabledActions?: (item: UniversalItemViewModel) => readonly ItemActionId[];
   renderEmptyAction?: () => ReactNode;
 };
 
@@ -25,6 +27,7 @@ export function ItemFeed({
   emptyDescription = "Create the first item to start building this feed.",
   emptyTitle = "No items yet",
   error = null,
+  getDisabledActions,
   loading = false,
   onAction,
   renderContent,
@@ -61,15 +64,22 @@ export function ItemFeed({
   return (
     <section className="item-feed" aria-label={ariaLabel}>
       <div className="item-feed-list">
-        {items.map((item) => (
-          <UniversalItemCard
-            item={item}
-            key={item.id}
-            {...(disabledActions === undefined ? {} : { disabledActions })}
-            {...(onAction === undefined ? {} : { onAction })}
-            {...(renderContent === undefined ? {} : { renderContent })}
-          />
-        ))}
+        {items.map((item) => {
+          const itemDisabledActions =
+            getDisabledActions?.(item) ?? disabledActions;
+
+          return (
+            <UniversalItemCard
+              item={item}
+              key={item.id}
+              {...(itemDisabledActions === undefined
+                ? {}
+                : { disabledActions: itemDisabledActions })}
+              {...(onAction === undefined ? {} : { onAction })}
+              {...(renderContent === undefined ? {} : { renderContent })}
+            />
+          );
+        })}
       </div>
     </section>
   );

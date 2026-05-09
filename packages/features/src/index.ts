@@ -14,6 +14,7 @@ export const plannedFeatureAreas = [
   "links",
   "capture",
   "pipelines",
+  "contextMenus",
   "metadata",
   "navigationHistory",
   "appTabs",
@@ -88,6 +89,12 @@ export { IntegrityCheckService, diagnosticsModuleContract } from "./diagnostics"
 export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
 export { CaptureService, captureModuleContract } from "./capture";
+export {
+  contextMenuActionProviders,
+  contextMenusModuleContract,
+  defaultContextMenuActionProvider,
+  getContextMenuActions
+} from "./contextMenus";
 export {
   contactQuickStartActionProvider,
   fileQuickStartActionProvider,
@@ -326,6 +333,10 @@ export type {
   CreateInboxTaskFromCaptureInput,
   NormalizedBrowserCapture
 } from "./capture";
+export type {
+  ContextMenuActionProvider,
+  ContextMenuActionProviderContext
+} from "./contextMenus";
 export type {
   QuickStartAction,
   QuickStartActionKind,

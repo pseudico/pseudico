@@ -78,6 +78,12 @@ export {
   type ItemActionsMenuProps
 } from "./components/ItemActionsMenu";
 export {
+  ContextMenu,
+  groupContextActions,
+  type ContextMenuActionViewModel,
+  type ContextMenuProps
+} from "./components/ContextMenu";
+export {
   UniversalItemCard,
   type UniversalItemCardProps,
   type UniversalItemMetadata,

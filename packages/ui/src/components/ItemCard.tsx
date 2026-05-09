@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
-import { isItemType } from "@local-work-os/core";
+import {
+  isItemType,
+  resolveContextMenuActions,
+  type ContextMenuTarget
+} from "@local-work-os/core";
+import { ContextMenu, type ContextMenuActionViewModel } from "./ContextMenu";
 import {
   ItemActionsMenu,
   type ItemActionHandler,
@@ -45,47 +50,66 @@ export function UniversalItemCard({
   const knownType = isItemType(item.type);
   const typeLabel = getItemTypeLabel(item.type);
   const metadata = buildItemMetadata(item);
+  const contextTarget = toItemContextMenuTarget(item, disabledActions ?? []);
+  const contextActions = resolveContextMenuActions({
+    target: contextTarget,
+    hideDisabled: false
+  }).map<ContextMenuActionViewModel>((action) => ({
+    id: action.id,
+    title: action.title,
+    group: action.group,
+    disabledReason: action.disabledReason,
+    danger: action.danger
+  }));
 
   return (
-    <article
-      className="universal-item-card"
-      data-item-id={item.id}
-      data-item-type={knownType ? item.type : "unknown"}
+    <ContextMenu
+      actions={contextActions}
+      label={`Context menu for ${item.title}`}
+      target={contextTarget}
+      onAction={(actionId) => onAction?.(actionId, item.id)}
     >
-      <header className="universal-item-card-header">
-        <span className="item-type-badge">
-          <ItemTypeIcon itemType={item.type} />
-          <span>{typeLabel}</span>
-        </span>
-        <ItemActionsMenu
-          itemId={item.id}
-          itemTitle={item.title}
-          {...(disabledActions === undefined ? {} : { disabledActions })}
-          {...(onAction === undefined ? {} : { onAction })}
-        />
-      </header>
+      <article
+        className="universal-item-card"
+        data-item-id={item.id}
+        data-item-type={knownType ? item.type : "unknown"}
+      >
+        <header className="universal-item-card-header">
+          <span className="item-type-badge">
+            <ItemTypeIcon itemType={item.type} />
+            <span>{typeLabel}</span>
+          </span>
+          <ItemActionsMenu
+            itemId={item.id}
+            itemTitle={item.title}
+            itemType={item.type}
+            {...(disabledActions === undefined ? {} : { disabledActions })}
+            {...(onAction === undefined ? {} : { onAction })}
+          />
+        </header>
 
-      <div className="universal-item-card-main">
-        <h4>{item.title}</h4>
-        {renderContent === undefined ? (
-          <DefaultItemContent item={item} knownType={knownType} />
-        ) : (
-          renderContent(item)
+        <div className="universal-item-card-main">
+          <h4>{item.title}</h4>
+          {renderContent === undefined ? (
+            <DefaultItemContent item={item} knownType={knownType} />
+          ) : (
+            renderContent(item)
+          )}
+          <ItemTagBadges tags={item.tags} />
+        </div>
+
+        {metadata.length === 0 ? null : (
+          <dl className="universal-item-metadata">
+            {metadata.map((entry) => (
+              <div key={`${entry.label}:${entry.value}`}>
+                <dt>{entry.label}</dt>
+                <dd>{entry.value}</dd>
+              </div>
+            ))}
+          </dl>
         )}
-        <ItemTagBadges tags={item.tags} />
-      </div>
-
-      {metadata.length === 0 ? null : (
-        <dl className="universal-item-metadata">
-          {metadata.map((entry) => (
-            <div key={`${entry.label}:${entry.value}`}>
-              <dt>{entry.label}</dt>
-              <dd>{entry.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-    </article>
+      </article>
+    </ContextMenu>
   );
 }
 
@@ -162,4 +186,19 @@ function appendMetadata(
   }
 
   metadata.push({ label, value });
+}
+
+function toItemContextMenuTarget(
+  item: UniversalItemViewModel,
+  disabledActions: readonly ItemActionId[]
+): ContextMenuTarget {
+  return {
+    id: item.id,
+    type: item.type === "file" ? "file" : "item",
+    label: item.title,
+    kind: item.type,
+    capabilities: Object.fromEntries(
+      disabledActions.map((action) => [action, false])
+    )
+  };
 }

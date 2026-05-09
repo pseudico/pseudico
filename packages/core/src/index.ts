@@ -13,6 +13,22 @@ export type {
   ActionShortcut,
   ResolvedAction
 } from "./actions/ActionRegistry";
+export {
+  CONTEXT_MENU_ACTION_IDS,
+  CONTEXT_MENU_TARGET_TYPES,
+  createContextMenuActionRegistry,
+  defaultContextMenuActions,
+  resolveContextMenuActions
+} from "./actions/ContextMenuActions";
+export type {
+  ContextMenuActionContext,
+  ContextMenuActionDescriptor,
+  ContextMenuActionId,
+  ContextMenuTarget,
+  ContextMenuTargetType,
+  ResolvedContextMenuAction,
+  ResolveContextMenuActionsOptions
+} from "./actions/ContextMenuActions";
 export { LocalWorkOsError } from "./errors";
 export type { LocalWorkOsErrorCode } from "./errors";
 export { ActivityAction } from "./events/ActivityAction";
