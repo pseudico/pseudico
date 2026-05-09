@@ -36,6 +36,7 @@ import type {
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { ContainerTabsPanel } from "../components/ContainerTabsPanel";
+import { openQuickStartFromContainer } from "../components/QuickAddModal";
 
 type ContactTaskViewModel = TaskCardViewModel & {
   categoryId?: string | null;
@@ -832,6 +833,20 @@ export function ContactDetailPage({
           >
             <RefreshCw size={16} aria-hidden="true" />
             Refresh
+          </button>
+          <button
+            className="primary-button compact-button"
+            disabled={itemsLoading}
+            type="button"
+            onClick={() =>
+              openQuickStartFromContainer({
+                containerId: contact.id,
+                containerType: "contact",
+                containerTabId: activeTabId
+              })
+            }
+          >
+            Quick Start
           </button>
         </div>
 

@@ -134,6 +134,11 @@ export {
   type CommandPaletteProps
 } from "./components/CommandPalette";
 export {
+  QuickStartMenu,
+  type QuickStartMenuAction,
+  type QuickStartMenuProps
+} from "./components/QuickStartMenu";
+export {
   GroupedResultsList,
   type GroupedResultGroupViewModel,
   type GroupedResultViewModel,

@@ -8,6 +8,9 @@ const workspacePackageAliases = {
   "@local-work-os/db": fileURLToPath(
     new URL("./packages/db/src/index.ts", import.meta.url)
   ),
+  "@local-work-os/features/quickStart": fileURLToPath(
+    new URL("./packages/features/src/quickStart/index.ts", import.meta.url)
+  ),
   "@local-work-os/features": fileURLToPath(
     new URL("./packages/features/src/index.ts", import.meta.url)
   ),

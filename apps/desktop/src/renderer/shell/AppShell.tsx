@@ -1,7 +1,11 @@
 import { Outlet } from "react-router-dom";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CommandPaletteHost } from "../components/CommandPaletteHost";
-import { QuickAddModal, type QuickAddContext } from "../components/QuickAddModal";
+import {
+  QUICK_START_OPEN_EVENT,
+  QuickAddModal,
+  type QuickAddContext
+} from "../components/QuickAddModal";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
@@ -15,6 +19,18 @@ export function AppShell(): React.JSX.Element {
     setQuickAddContext(context ?? {});
     setQuickAddOpen(true);
   }, []);
+
+  useEffect(() => {
+    function handleOpenQuickStart(event: Event): void {
+      openQuickAdd((event as CustomEvent<QuickAddContext>).detail);
+    }
+
+    window.addEventListener(QUICK_START_OPEN_EVENT, handleOpenQuickStart);
+
+    return () => {
+      window.removeEventListener(QUICK_START_OPEN_EVENT, handleOpenQuickStart);
+    };
+  }, [openQuickAdd]);
 
   return (
     <div className="app-shell">

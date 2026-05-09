@@ -29,6 +29,7 @@ export const plannedFeatureAreas = [
   "export",
   "templates",
   "workflows",
+  "quickStart",
   "activity",
   "diagnostics"
 ] as const;
@@ -85,6 +86,19 @@ export { IntegrityCheckService, diagnosticsModuleContract } from "./diagnostics"
 export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
 export { CaptureService, captureModuleContract } from "./capture";
+export {
+  contactQuickStartActionProvider,
+  fileQuickStartActionProvider,
+  getQuickStartActions,
+  isContentQuickStartAction,
+  linkQuickStartActionProvider,
+  listQuickStartActionProvider,
+  noteQuickStartActionProvider,
+  projectQuickStartActionProvider,
+  quickStartActionProviders,
+  resolveQuickStartTargets,
+  taskQuickStartActionProvider
+} from "./quickStart";
 export { LinkService, linksModuleContract } from "./links";
 export { ListService, listsModuleContract, parseBulkListItems } from "./lists";
 export {
@@ -294,6 +308,17 @@ export type {
   CreateInboxTaskFromCaptureInput,
   NormalizedBrowserCapture
 } from "./capture";
+export type {
+  QuickStartAction,
+  QuickStartActionKind,
+  QuickStartActionProvider,
+  QuickStartActionProviderContext,
+  QuickStartContext,
+  QuickStartTarget,
+  QuickStartTargetResolution,
+  QuickStartTargetType,
+  ResolveQuickStartTargetsInput
+} from "./quickStart";
 export type {
   AddListItemInput,
   BulkCreateListItemsInput,

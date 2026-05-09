@@ -158,10 +158,10 @@ export function createAppActionRegistry(
     ...navigationActions,
     {
       id: "quick-add.task",
-      title: "Quick add task",
+      title: "Quick Start",
       group: "Capture",
-      subtitle: "Capture a local task into Inbox or the current project.",
-      keywords: ["capture", "new task", "inbox", "project"],
+      subtitle: "Create a task, note, list, file, link, project, or contact.",
+      keywords: ["capture", "quick start", "new task", "note", "list", "file", "link", "project", "contact", "inbox"],
       shortcut: { key: "n", ctrl: true, label: "Ctrl N" },
       disabled: (context) =>
         context.workspaceOpen ? false : workspaceRequiredMessage,
@@ -192,8 +192,26 @@ export function isPaletteShortcut(
 export function getQuickAddContext(pathname: string): QuickAddContext {
   const projectMatch = /^\/projects\/([^/]+)$/.exec(pathname);
   const projectId = projectMatch?.[1];
+  const contactMatch = /^\/contacts\/([^/]+)$/.exec(pathname);
+  const contactId = contactMatch?.[1];
 
-  return projectId === undefined ? {} : { projectId };
+  if (projectId !== undefined) {
+    return {
+      projectId,
+      containerId: projectId,
+      containerType: "project"
+    };
+  }
+
+  if (contactId !== undefined) {
+    return {
+      contactId,
+      containerId: contactId,
+      containerType: "contact"
+    };
+  }
+
+  return {};
 }
 
 function toCommandPaletteAction(
