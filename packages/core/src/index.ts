@@ -1,5 +1,18 @@
 export const corePackageName = "@local-work-os/core";
 
+export {
+  ActionRegistry,
+  createActionRegistry,
+  normalizeActionQuery,
+  resolveAction
+} from "./actions/ActionRegistry";
+export type {
+  ActionDescriptor,
+  ActionDisabledState,
+  ActionMatchOptions,
+  ActionShortcut,
+  ResolvedAction
+} from "./actions/ActionRegistry";
 export { LocalWorkOsError } from "./errors";
 export type { LocalWorkOsErrorCode } from "./errors";
 export { ActivityAction } from "./events/ActivityAction";

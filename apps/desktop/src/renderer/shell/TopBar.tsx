@@ -1,18 +1,23 @@
-import { Plus, Search } from "lucide-react";
+import { Command, Plus, Search } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { QuickAddModal, type QuickAddContext } from "../components/QuickAddModal";
+import type { QuickAddContext } from "../components/QuickAddModal";
+import { getQuickAddContext } from "../components/CommandPaletteHost";
 import { getRouteByPath } from "../routes";
 import { useWorkspaceStore } from "../state/workspaceStore";
 
-export function TopBar(): React.JSX.Element {
+export function TopBar({
+  onOpenCommandPalette = () => undefined,
+  onQuickAdd = () => undefined
+}: {
+  onOpenCommandPalette?: () => void;
+  onQuickAdd?: (context?: QuickAddContext) => void;
+}): React.JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
   const route = getRouteByPath(location.pathname);
   const { currentWorkspace } = useWorkspaceStore();
   const [searchQuery, setSearchQuery] = useState("");
-  const [quickAddOpen, setQuickAddOpen] = useState(false);
-  const [quickAddContext, setQuickAddContext] = useState<QuickAddContext>({});
 
   useEffect(() => {
     if (location.pathname !== "/search") {
@@ -21,11 +26,6 @@ export function TopBar(): React.JSX.Element {
 
     setSearchQuery(new URLSearchParams(location.search).get("q") ?? "");
   }, [location.pathname, location.search]);
-
-  function openQuickAdd(context?: QuickAddContext): void {
-    setQuickAddContext(context ?? {});
-    setQuickAddOpen(true);
-  }
 
   function submitSearch(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -45,6 +45,16 @@ export function TopBar(): React.JSX.Element {
       </div>
 
       <div className="top-actions">
+        <button
+          type="button"
+          className="icon-button"
+          aria-label="Open command palette"
+          onClick={onOpenCommandPalette}
+        >
+          <Command size={18} aria-hidden="true" />
+          <span>Commands</span>
+          <kbd>Ctrl/⌘ K</kbd>
+        </button>
         <form className="search-control" role="search" onSubmit={submitSearch}>
           <label>
             <Search size={16} aria-hidden="true" />
@@ -63,26 +73,12 @@ export function TopBar(): React.JSX.Element {
           className="icon-button"
           disabled={currentWorkspace === null}
           aria-label="Quick add"
-          onClick={() => openQuickAdd(getQuickAddContext(location.pathname))}
+          onClick={() => onQuickAdd(getQuickAddContext(location.pathname))}
         >
           <Plus size={18} aria-hidden="true" />
           <span>Quick add</span>
         </button>
       </div>
-
-      <QuickAddModal
-        context={quickAddContext}
-        open={quickAddOpen}
-        workspace={currentWorkspace}
-        onClose={() => setQuickAddOpen(false)}
-      />
     </header>
   );
-}
-
-function getQuickAddContext(pathname: string): QuickAddContext {
-  const projectMatch = /^\/projects\/([^/]+)$/.exec(pathname);
-  const projectId = projectMatch?.[1];
-
-  return projectId === undefined ? {} : { projectId };
 }

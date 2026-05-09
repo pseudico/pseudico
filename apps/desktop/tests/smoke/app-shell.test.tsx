@@ -63,5 +63,7 @@ describe("desktop shell routes", () => {
     expect(html).toContain("Primary navigation");
     expect(html).toContain("Today");
     expect(html).toContain("Quick add");
+    expect(html).toContain("Commands");
+    expect(html).toContain("Ctrl/⌘ K");
   });
 });
