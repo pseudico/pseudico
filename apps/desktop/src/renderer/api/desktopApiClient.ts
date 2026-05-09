@@ -287,6 +287,18 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       openItemInspector: (itemId) =>
         callApi(() => api.items.openItemInspector(itemId))
     },
+    dragDrop: {
+      reorderItems: (input) => callApi(() => api.dragDrop!.reorderItems(input)),
+      moveItem: (input) => callApi(() => api.dragDrop!.moveItem(input)),
+      reorderListItems: (input) =>
+        callApi(() => api.dragDrop!.reorderListItems(input)),
+      reorderTabs: (input) => callApi(() => api.dragDrop!.reorderTabs(input)),
+      attachFilesToContainer: (input) =>
+        callApi(() => api.dragDrop!.attachFilesToContainer(input)),
+      attachFilesToItem: (input) =>
+        callApi(() => api.dragDrop!.attachFilesToItem(input)),
+      getDroppedFilePaths: (files) => api.dragDrop!.getDroppedFilePaths(files)
+    },
     files: {
       getStatus: () => callApi(() => api.files.getStatus()),
       attachFileToContainer: (input) =>
@@ -637,6 +649,20 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().items.getItemActivity(itemId),
     openItemInspector: (itemId) =>
       getDesktopApiClient().items.openItemInspector(itemId)
+  },
+  dragDrop: {
+    reorderItems: (input) =>
+      getDesktopApiClient().dragDrop!.reorderItems(input),
+    moveItem: (input) => getDesktopApiClient().dragDrop!.moveItem(input),
+    reorderListItems: (input) =>
+      getDesktopApiClient().dragDrop!.reorderListItems(input),
+    reorderTabs: (input) => getDesktopApiClient().dragDrop!.reorderTabs(input),
+    attachFilesToContainer: (input) =>
+      getDesktopApiClient().dragDrop!.attachFilesToContainer(input),
+    attachFilesToItem: (input) =>
+      getDesktopApiClient().dragDrop!.attachFilesToItem(input),
+    getDroppedFilePaths: (files) =>
+      getDesktopApiClient().dragDrop!.getDroppedFilePaths(files)
   },
   files: {
     getStatus: () => getDesktopApiClient().files.getStatus(),

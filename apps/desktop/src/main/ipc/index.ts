@@ -10,6 +10,7 @@ import { registerContainerIpc } from "./registerContainerIpc";
 import { registerDashboardIpc } from "./registerDashboardIpc";
 import { registerDatabaseIpc } from "./registerDatabaseIpc";
 import { registerDiagnosticsIpc } from "./registerDiagnosticsIpc";
+import { registerDragDropIpc } from "./registerDragDropIpc";
 import { registerExportIpc } from "./registerExportIpc";
 import { registerFileIpc } from "./registerFileIpc";
 import { registerInboxIpc } from "./registerInboxIpc";
@@ -80,6 +81,7 @@ export function registerDesktopIpc(
   registerNavigationIpc(services.workspaceService);
   registerSearchIpc(services.workspaceService);
   registerDiagnosticsIpc(services.workspaceService);
+  registerDragDropIpc(services.workspaceService);
   registerCollectionIpc(services.workspaceService);
   registerTodayIpc(services.workspaceService);
   registerTimelineIpc(services.workspaceService);

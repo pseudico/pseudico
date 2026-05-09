@@ -1,7 +1,12 @@
 import { ClipboardList, Plus } from "lucide-react";
 import type { ClipboardEvent, FormEvent } from "react";
 import { useState } from "react";
-import { resolveContextMenuActions } from "@local-work-os/core";
+import {
+  LOCAL_WORK_OS_DRAG_MIME_TYPE,
+  encodeDragPayload,
+  parseDragPayload,
+  resolveContextMenuActions
+} from "@local-work-os/core";
 import { ContextMenu } from "./ContextMenu";
 
 export type ChecklistEditorItem = {
@@ -21,6 +26,11 @@ export type ChecklistEditorProps = {
   onToggleItem: (
     item: ChecklistEditorItem
   ) => Promise<boolean | void> | boolean | void;
+  onReorderItem?: (
+    draggedItemId: string,
+    targetItemId: string
+  ) => Promise<boolean | void> | boolean | void;
+  listId?: string;
 };
 
 export function ChecklistEditor({
@@ -30,6 +40,8 @@ export function ChecklistEditor({
   error = null,
   onAddItem,
   onBulkAddItems,
+  onReorderItem,
+  listId,
   onToggleItem
 }: ChecklistEditorProps): React.JSX.Element {
   const [title, setTitle] = useState("");
@@ -140,8 +152,50 @@ export function ChecklistEditor({
               <li
                 className="checklist-item"
                 data-checklist-item-status={item.status}
+                draggable={onReorderItem !== undefined}
                 key={item.id}
                 style={{ paddingInlineStart: `${(item.depth ?? 0) * 18}px` }}
+                onDragOver={(event) => {
+                  if (onReorderItem !== undefined) {
+                    event.preventDefault();
+                  }
+                }}
+                onDragStart={(event) => {
+                  if (onReorderItem === undefined || listId === undefined) {
+                    return;
+                  }
+
+                  event.dataTransfer.effectAllowed = "move";
+                  event.dataTransfer.setData(
+                    LOCAL_WORK_OS_DRAG_MIME_TYPE,
+                    encodeDragPayload({
+                      type: "list_item",
+                      listId,
+                      listItemId: item.id
+                    })
+                  );
+                  event.dataTransfer.setData("text/plain", item.id);
+                }}
+                onDrop={(event) => {
+                  if (onReorderItem === undefined) {
+                    return;
+                  }
+
+                  const payload = parseDragPayload(
+                    event.dataTransfer.getData(LOCAL_WORK_OS_DRAG_MIME_TYPE)
+                  );
+
+                  if (
+                    payload?.type !== "list_item" ||
+                    payload.listItemId === item.id ||
+                    (listId !== undefined && payload.listId !== listId)
+                  ) {
+                    return;
+                  }
+
+                  event.preventDefault();
+                  void onReorderItem(payload.listItemId, item.id);
+                }}
               >
                 <ContextMenu
                   actions={actions}

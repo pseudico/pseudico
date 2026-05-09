@@ -1,5 +1,10 @@
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import {
+  LOCAL_WORK_OS_DRAG_MIME_TYPE,
+  encodeDragPayload,
+  parseDragPayload
+} from "@local-work-os/core";
 import type { ContainerTabSummary } from "../../preload/api";
 
 type ContainerTabsPanelProps = {
@@ -81,6 +86,30 @@ export function ContainerTabsPanel({
     void onReorderTabs(nextIds);
   }
 
+  function reorderTabBefore(draggedTabId: string, targetTabId: string): void {
+    if (draggedTabId === targetTabId) {
+      return;
+    }
+
+    const nextIds = tabs.map((tab) => tab.id);
+    const fromIndex = nextIds.indexOf(draggedTabId);
+    const toIndex = nextIds.indexOf(targetTabId);
+
+    if (fromIndex < 0 || toIndex < 0) {
+      return;
+    }
+
+    const [movedId] = nextIds.splice(fromIndex, 1);
+
+    if (movedId === undefined) {
+      return;
+    }
+
+    const nextTargetIndex = nextIds.indexOf(targetTabId);
+    nextIds.splice(nextTargetIndex, 0, movedId);
+    void onReorderTabs(nextIds);
+  }
+
   return (
     <section className="container-tabs-panel" aria-label="Content tabs">
       <div className="panel-heading-actions">
@@ -146,9 +175,40 @@ export function ContainerTabsPanel({
                 <>
                   <button
                     className={selected ? "container-tab-pill is-active" : "container-tab-pill"}
+                    draggable={!busy}
                     role="tab"
                     aria-selected={selected}
                     type="button"
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                    }}
+                    onDragStart={(event) => {
+                      event.dataTransfer.effectAllowed = "move";
+                      event.dataTransfer.setData(
+                        LOCAL_WORK_OS_DRAG_MIME_TYPE,
+                        encodeDragPayload({
+                          type: "container_tab",
+                          containerId: tab.containerId,
+                          tabId: tab.id
+                        })
+                      );
+                      event.dataTransfer.setData("text/plain", tab.id);
+                    }}
+                    onDrop={(event) => {
+                      const payload = parseDragPayload(
+                        event.dataTransfer.getData(LOCAL_WORK_OS_DRAG_MIME_TYPE)
+                      );
+
+                      if (
+                        payload?.type !== "container_tab" ||
+                        payload.containerId !== tab.containerId
+                      ) {
+                        return;
+                      }
+
+                      event.preventDefault();
+                      reorderTabBefore(payload.tabId, tab.id);
+                    }}
                     onClick={() => onSelectTab(tab.id)}
                   >
                     {tab.name}

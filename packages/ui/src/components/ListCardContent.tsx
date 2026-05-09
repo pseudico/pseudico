@@ -52,6 +52,11 @@ export type ListCardContentProps = {
     card: ListCardItemViewModel,
     stage: ListCardItemViewModel
   ) => Promise<boolean | void> | boolean | void;
+  onReorderListItem?: (
+    item: ListCardViewModel,
+    draggedItemId: string,
+    targetItemId: string
+  ) => Promise<boolean | void> | boolean | void;
 };
 
 export function ListCardContent({
@@ -64,7 +69,8 @@ export function ListCardContent({
   onSaveAsTemplate,
   onToggleDisplayMode,
   onAddPipelineCard,
-  onMovePipelineCard
+  onMovePipelineCard,
+  onReorderListItem
 }: ListCardContentProps): React.JSX.Element {
   const visibleItems =
     item.showCompleted === false
@@ -130,8 +136,12 @@ export function ListCardContent({
           emptyText="Add the first checklist item."
           error={error}
           items={visibleItems}
+          listId={item.id}
           onAddItem={(title) => onAddItem?.(item, title)}
           onBulkAddItems={(text) => onBulkAddItems?.(item, text)}
+          onReorderItem={(draggedItemId, targetItemId) =>
+            onReorderListItem?.(item, draggedItemId, targetItemId)
+          }
           onToggleItem={(listItem) => onToggleItem?.(item, listItem)}
         />
       )}

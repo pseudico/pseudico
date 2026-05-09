@@ -26,6 +26,7 @@ export const plannedFeatureAreas = [
   "tabs",
   "today",
   "dashboard",
+  "dragDrop",
   "timeline",
   "calendar",
   "backup",
@@ -75,6 +76,10 @@ export {
   WidgetDataService,
   dashboardModuleContract
 } from "./dashboard";
+export {
+  DragDropService,
+  dragDropModuleContract
+} from "./dragDrop";
 export {
   ExportService,
   ProjectMarkdownExporter,
@@ -255,6 +260,15 @@ export type {
   GetDefaultDashboardInput,
   WidgetDataQueryInput
 } from "./dashboard";
+export type {
+  AttachDroppedCopiedFileToContainerInput,
+  AttachDroppedCopiedFileToItemInput,
+  DragDropServiceIdFactory,
+  MoveDraggedItemInput,
+  ReorderContainerItemsInput,
+  ReorderDraggedListItemsInput,
+  ReorderDraggedTabsInput
+} from "./dragDrop";
 export type {
   BuildProjectMarkdownInput,
   BuildTaskDelimitedExportInput,

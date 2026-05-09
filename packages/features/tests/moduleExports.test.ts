@@ -15,6 +15,8 @@ import {
   dashboardModuleContract,
   DashboardService,
   diagnosticsModuleContract,
+  DragDropService,
+  dragDropModuleContract,
   ExportService,
   exportModuleContract,
   filesModuleContract,
@@ -81,6 +83,7 @@ describe("feature module exports", () => {
       "tabs",
       "today",
       "dashboard",
+      "dragDrop",
       "timeline",
       "calendar",
       "backup",
@@ -119,6 +122,7 @@ describe("feature module exports", () => {
       tabsModuleContract.module,
       todayModuleContract.module,
       dashboardModuleContract.module,
+      dragDropModuleContract.module,
       timelineModuleContract.module,
       calendarModuleContract.module,
       backupModuleContract.module,
@@ -154,6 +158,7 @@ describe("feature module exports", () => {
       "tabs",
       "today",
       "dashboard",
+      "dragDrop",
       "timeline",
       "calendar",
       "backup",
@@ -176,6 +181,10 @@ describe("feature module exports", () => {
 
   it("exports the dashboard service implementation", () => {
     expect(DashboardService).toBeDefined();
+  });
+
+  it("exports the drag/drop service implementation", () => {
+    expect(DragDropService).toBeDefined();
   });
 
   it("exports the backup service implementation", () => {
