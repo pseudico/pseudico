@@ -1,3 +1,4 @@
+import { AppTabStrip } from "@local-work-os/ui";
 import { Outlet } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { CommandPaletteHost } from "../components/CommandPaletteHost";
@@ -6,6 +7,7 @@ import {
   QuickAddModal,
   type QuickAddContext
 } from "../components/QuickAddModal";
+import { useAppTabs } from "../navigation/useAppTabs";
 import { useNavigationHistory } from "../navigation/useNavigationHistory";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import { Sidebar } from "./Sidebar";
@@ -17,6 +19,7 @@ export function AppShell(): React.JSX.Element {
   const [quickAddContext, setQuickAddContext] = useState<QuickAddContext>({});
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const navigationHistory = useNavigationHistory({ workspace: currentWorkspace });
+  const appTabs = useAppTabs({ workspace: currentWorkspace });
   const openQuickAdd = useCallback((context?: QuickAddContext) => {
     setQuickAddContext(context ?? {});
     setQuickAddOpen(true);
@@ -47,6 +50,13 @@ export function AppShell(): React.JSX.Element {
           onNavigateRecent={navigationHistory.navigateToRecent}
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
           onQuickAdd={openQuickAdd}
+        />
+        <AppTabStrip
+          activeTabId={appTabs.activeTabId}
+          tabs={appTabs.tabs}
+          onCloseTab={appTabs.closeTab}
+          onMoveTab={appTabs.moveTab}
+          onSelectTab={appTabs.selectTab}
         />
         <main className="main-content" aria-label="Workspace content">
           <Outlet />

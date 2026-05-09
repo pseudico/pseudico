@@ -69,6 +69,7 @@ describe("feature module exports", () => {
       "pipelines",
       "metadata",
       "navigationHistory",
+      "appTabs",
       "relationships",
       "recurrence",
       "reminders",

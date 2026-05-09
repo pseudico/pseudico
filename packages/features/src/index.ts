@@ -16,6 +16,7 @@ export const plannedFeatureAreas = [
   "pipelines",
   "metadata",
   "navigationHistory",
+  "appTabs",
   "relationships",
   "recurrence",
   "reminders",
@@ -117,10 +118,15 @@ export {
   notesModuleContract
 } from "./notes";
 export {
+  APP_TABS_SETTING_KEY,
+  DEFAULT_APP_TAB_LIMIT,
   DEFAULT_RECENT_NAVIGATION_LIMIT,
   RECENT_NAVIGATION_TARGETS_SETTING_KEY,
+  AppTabStore,
   NavigationHistoryService,
   PinnedFavoritesService,
+  appTabsModuleContract,
+  moveAppTab,
   mergeRecentTarget,
   navigationHistoryModuleContract,
   pinnedFavoritesModuleContract,
@@ -371,12 +377,19 @@ export type {
   UpdateCategoryInput
 } from "./metadata";
 export type {
+  AppTab,
+  AppTabRouteTarget,
+  AppTabSession,
+  CloseAppTabInput,
   ListPinnedFavoritesInput,
   NavigationRecentTarget,
+  OpenAppTabInput,
   NavigationTargetType,
   PinnedFavoriteTarget,
   PinnedFavoriteTargetType,
-  RecordNavigationTargetInput
+  RecordNavigationTargetInput,
+  ReorderAppTabsInput,
+  SetActiveAppTabInput
 } from "./navigation";
 export type {
   CreateNoteInput,

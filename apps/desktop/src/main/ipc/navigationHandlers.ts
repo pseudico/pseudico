@@ -5,16 +5,25 @@ import {
   type DatabaseConnection
 } from "@local-work-os/db";
 import {
+  AppTabStore,
   NavigationHistoryService,
   PinnedFavoritesService,
-  type NavigationRecentTarget,
+  type AppTab,
+  type AppTabSession,
+  type CloseAppTabInput,
+  type OpenAppTabInput,
   type PinnedFavoriteTarget,
-  type RecordNavigationTargetInput
+  type RecordNavigationTargetInput,
+  type ReorderAppTabsInput,
+  type SetActiveAppTabInput,
+  type NavigationRecentTarget
 } from "@local-work-os/features";
 import {
   apiError,
   apiOk,
   type ApiResult,
+  type AppTabSessionSummary,
+  type AppTabSummary,
   type NavigationRecentTargetSummary,
   type PinnedFavoriteTargetSummary,
   type WorkspaceSummary
@@ -36,6 +45,11 @@ type NavigationIpcHandlers = {
   handleListPinnedFavorites: (
     input: unknown
   ) => Promise<ApiResult<PinnedFavoriteTargetSummary[]>>;
+  handleListAppTabs: (input: unknown) => Promise<ApiResult<AppTabSessionSummary>>;
+  handleOpenAppTab: (input: unknown) => Promise<ApiResult<AppTabSessionSummary>>;
+  handleCloseAppTab: (input: unknown) => Promise<ApiResult<AppTabSessionSummary>>;
+  handleReorderAppTabs: (input: unknown) => Promise<ApiResult<AppTabSessionSummary>>;
+  handleSetActiveAppTab: (input: unknown) => Promise<ApiResult<AppTabSessionSummary>>;
 };
 
 export function createNavigationIpcHandlers(
@@ -100,6 +114,99 @@ export function createNavigationIpcHandlers(
             .map(toPinnedFavoriteTargetSummary)
         );
       });
+    },
+
+    async handleListAppTabs(input) {
+      if (input !== undefined && !isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "listAppTabs requires an optional workspaceId string."
+        );
+      }
+
+      return await withNavigationService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input, context.workspace);
+
+        return apiOk(toAppTabSessionSummary(context.appTabStore.listTabs(workspaceId)));
+      });
+    },
+
+    async handleOpenAppTab(input) {
+      if (!isOpenAppTabInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "openAppTab requires a target type, path, and label."
+        );
+      }
+
+      return await withNavigationService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const session = context.appTabStore.openTab({
+          workspaceId,
+          target: input.target
+        });
+
+        context.navigationHistoryService.recordTarget({
+          workspaceId,
+          target: input.target
+        });
+
+        return apiOk(toAppTabSessionSummary(session));
+      });
+    },
+
+    async handleCloseAppTab(input) {
+      if (!isCloseAppTabInput(input)) {
+        return apiError("INVALID_INPUT", "closeAppTab requires a tabId.");
+      }
+
+      return await withNavigationService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+
+        return apiOk(
+          toAppTabSessionSummary(
+            context.appTabStore.closeTab({ workspaceId, tabId: input.tabId })
+          )
+        );
+      });
+    },
+
+    async handleReorderAppTabs(input) {
+      if (!isReorderAppTabsInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "reorderAppTabs requires a non-empty tabIds array."
+        );
+      }
+
+      return await withNavigationService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+
+        return apiOk(
+          toAppTabSessionSummary(
+            context.appTabStore.reorderTabs({
+              workspaceId,
+              tabIds: input.tabIds
+            })
+          )
+        );
+      });
+    },
+
+    async handleSetActiveAppTab(input) {
+      if (!isSetActiveAppTabInput(input)) {
+        return apiError("INVALID_INPUT", "setActiveAppTab requires a tabId.");
+      }
+
+      return await withNavigationService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+
+        return apiOk(
+          toAppTabSessionSummary(
+            context.appTabStore.setActiveTab({ workspaceId, tabId: input.tabId })
+          )
+        );
+      });
     }
   };
 }
@@ -107,6 +214,7 @@ export function createNavigationIpcHandlers(
 async function withNavigationService<T>(
   workspaceService: CurrentWorkspaceService,
   operation: (context: {
+    appTabStore: AppTabStore;
     connection: DatabaseConnection;
     navigationHistoryService: NavigationHistoryService;
     workspace: WorkspaceSummary;
@@ -122,12 +230,14 @@ async function withNavigationService<T>(
     databasePath: resolveWorkspaceDatabasePath(workspace.rootPath),
     fileMustExist: true
   });
+  const appSettingsRepository = new AppSettingsRepository(connection);
 
   try {
     return await operation({
+      appTabStore: new AppTabStore({ appSettingsRepository }),
       connection,
       navigationHistoryService: new NavigationHistoryService({
-        appSettingsRepository: new AppSettingsRepository(connection)
+        appSettingsRepository
       }),
       workspace
     });
@@ -167,6 +277,18 @@ function toPinnedFavoriteTargetSummary(
   return { ...target };
 }
 
+function toAppTabSessionSummary(session: AppTabSession): AppTabSessionSummary {
+  return {
+    workspaceId: session.workspaceId,
+    activeTabId: session.activeTabId,
+    tabs: session.tabs.map(toAppTabSummary)
+  };
+}
+
+function toAppTabSummary(tab: AppTab): AppTabSummary {
+  return { ...tab };
+}
+
 function isRecordNavigationTargetInput(
   input: unknown
 ): input is RecordNavigationTargetInput {
@@ -185,6 +307,32 @@ function isRecordNavigationTargetInput(
       input.target.subtitle === null ||
       typeof input.target.subtitle === "string")
   );
+}
+
+function isOpenAppTabInput(input: unknown): input is OpenAppTabInput {
+  return isRecordNavigationTargetInput(input);
+}
+
+function isCloseAppTabInput(input: unknown): input is CloseAppTabInput {
+  return (
+    isRecord(input) &&
+    (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)) &&
+    isNonEmptyString(input.tabId)
+  );
+}
+
+function isReorderAppTabsInput(input: unknown): input is ReorderAppTabsInput {
+  return (
+    isRecord(input) &&
+    (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)) &&
+    Array.isArray(input.tabIds) &&
+    input.tabIds.length > 0 &&
+    input.tabIds.every(isNonEmptyString)
+  );
+}
+
+function isSetActiveAppTabInput(input: unknown): input is SetActiveAppTabInput {
+  return isCloseAppTabInput(input);
 }
 
 function isNavigationTargetType(value: unknown): boolean {

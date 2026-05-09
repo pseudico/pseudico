@@ -349,7 +349,15 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       recordTarget: (input) =>
         callApi(() => api.navigation.recordTarget(input)),
       listPinnedFavorites: (workspaceId) =>
-        callApi(() => api.navigation.listPinnedFavorites(workspaceId))
+        callApi(() => api.navigation.listPinnedFavorites(workspaceId)),
+      listAppTabs: (workspaceId) =>
+        callApi(() => api.navigation.listAppTabs(workspaceId)),
+      openAppTab: (input) => callApi(() => api.navigation.openAppTab(input)),
+      closeAppTab: (input) => callApi(() => api.navigation.closeAppTab(input)),
+      reorderAppTabs: (input) =>
+        callApi(() => api.navigation.reorderAppTabs(input)),
+      setActiveAppTab: (input) =>
+        callApi(() => api.navigation.setActiveAppTab(input))
     }
   };
 }
@@ -691,6 +699,16 @@ export const desktopApiClient: LocalWorkOsApi = {
     recordTarget: (input) =>
       getDesktopApiClient().navigation.recordTarget(input),
     listPinnedFavorites: (workspaceId) =>
-      getDesktopApiClient().navigation.listPinnedFavorites(workspaceId)
+      getDesktopApiClient().navigation.listPinnedFavorites(workspaceId),
+    listAppTabs: (workspaceId) =>
+      getDesktopApiClient().navigation.listAppTabs(workspaceId),
+    openAppTab: (input) =>
+      getDesktopApiClient().navigation.openAppTab(input),
+    closeAppTab: (input) =>
+      getDesktopApiClient().navigation.closeAppTab(input),
+    reorderAppTabs: (input) =>
+      getDesktopApiClient().navigation.reorderAppTabs(input),
+    setActiveAppTab: (input) =>
+      getDesktopApiClient().navigation.setActiveAppTab(input)
   }
 };

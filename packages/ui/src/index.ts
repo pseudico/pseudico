@@ -176,6 +176,11 @@ export {
   type ReorderControlsProps
 } from "./components/ReorderControls";
 export {
+  AppTabStrip,
+  type AppTabStripProps,
+  type AppTabStripTab
+} from "./components/AppTabStrip";
+export {
   SnoozeMenu,
   type SnoozeMenuProps,
   type SnoozePreset

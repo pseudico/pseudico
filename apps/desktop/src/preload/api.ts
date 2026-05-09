@@ -1843,6 +1843,44 @@ export type RecordNavigationTargetInput = {
   };
 };
 
+export type AppTabSummary = {
+  id: string;
+  workspaceId: string;
+  targetType: NavigationTargetType;
+  targetId: string | null;
+  path: string;
+  label: string;
+  subtitle: string | null;
+  openedAt: string;
+  updatedAt: string;
+};
+
+export type AppTabSessionSummary = {
+  workspaceId: string;
+  tabs: AppTabSummary[];
+  activeTabId: string | null;
+};
+
+export type OpenAppTabInput = {
+  workspaceId?: string;
+  target: RecordNavigationTargetInput["target"];
+};
+
+export type CloseAppTabInput = {
+  workspaceId?: string;
+  tabId: string;
+};
+
+export type ReorderAppTabsInput = {
+  workspaceId?: string;
+  tabIds: string[];
+};
+
+export type SetActiveAppTabInput = {
+  workspaceId?: string;
+  tabId: string;
+};
+
 export const LOCAL_WORK_OS_IPC_CHANNELS = {
   workspace: {
     createWorkspace: "local-work-os:workspace:create-workspace",
@@ -2044,7 +2082,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   navigation: {
     listRecentTargets: "local-work-os:navigation:list-recent-targets",
     recordTarget: "local-work-os:navigation:record-target",
-    listPinnedFavorites: "local-work-os:navigation:list-pinned-favorites"
+    listPinnedFavorites: "local-work-os:navigation:list-pinned-favorites",
+    listAppTabs: "local-work-os:navigation:list-app-tabs",
+    openAppTab: "local-work-os:navigation:open-app-tab",
+    closeAppTab: "local-work-os:navigation:close-app-tab",
+    reorderAppTabs: "local-work-os:navigation:reorder-app-tabs",
+    setActiveAppTab: "local-work-os:navigation:set-active-app-tab"
   }
 } as const;
 
@@ -2569,6 +2612,26 @@ export type LocalWorkOsIpcContracts = {
     input: string | undefined;
     result: ApiResult<PinnedFavoriteTargetSummary[]>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.navigation.listAppTabs]: {
+    input: string | undefined;
+    result: ApiResult<AppTabSessionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.navigation.openAppTab]: {
+    input: OpenAppTabInput;
+    result: ApiResult<AppTabSessionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.navigation.closeAppTab]: {
+    input: CloseAppTabInput;
+    result: ApiResult<AppTabSessionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.navigation.reorderAppTabs]: {
+    input: ReorderAppTabsInput;
+    result: ApiResult<AppTabSessionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.navigation.setActiveAppTab]: {
+    input: SetActiveAppTabInput;
+    result: ApiResult<AppTabSessionSummary>;
+  };
 };
 
 export type LocalWorkOsIpcChannel = keyof LocalWorkOsIpcContracts & string;
@@ -3034,6 +3097,11 @@ export type LocalWorkOsApi = {
     listPinnedFavorites: (
       workspaceId?: string
     ) => Promise<ApiResult<PinnedFavoriteTargetSummary[]>>;
+    listAppTabs: (workspaceId?: string) => Promise<ApiResult<AppTabSessionSummary>>;
+    openAppTab: (input: OpenAppTabInput) => Promise<ApiResult<AppTabSessionSummary>>;
+    closeAppTab: (input: CloseAppTabInput) => Promise<ApiResult<AppTabSessionSummary>>;
+    reorderAppTabs: (input: ReorderAppTabsInput) => Promise<ApiResult<AppTabSessionSummary>>;
+    setActiveAppTab: (input: SetActiveAppTabInput) => Promise<ApiResult<AppTabSessionSummary>>;
   };
 };
 
@@ -3533,7 +3601,17 @@ export function createLocalWorkOsApi(
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.navigation.listPinnedFavorites,
           workspaceId
-        )
+        ),
+      listAppTabs: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.navigation.listAppTabs, workspaceId),
+      openAppTab: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.navigation.openAppTab, input),
+      closeAppTab: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.navigation.closeAppTab, input),
+      reorderAppTabs: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.navigation.reorderAppTabs, input),
+      setActiveAppTab: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.navigation.setActiveAppTab, input)
     }
   };
 }
