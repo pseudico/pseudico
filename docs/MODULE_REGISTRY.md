@@ -39,7 +39,8 @@ new work should account for this implemented baseline:
   future work.
 - Cross-cutting services now include project health, recent activity,
   integrity diagnostics, bounded pagination, app-wide error boundaries/toasts,
-  packaged smoke checks, and MVP smoke coverage.
+  command palette navigation/actions, packaged smoke checks, and MVP smoke
+  coverage.
 
 When adding a future module slice, prefer extending the owning feature service
 and matching repository/preload/client boundary rather than creating a parallel
@@ -60,6 +61,7 @@ renderer-only implementation.
 | Files | Own local attachment item behavior and safe attachment metadata workflows. | File items, attachments, attachment metadata | Workspace, Electron main/preload IPC, search, backup, export | Projects, contacts, dashboard, search | MVP |
 | Links | Own URL/link item behavior and local metadata for captured links. | Link items, URL metadata, browser-capture results later | Workspace, projects, contacts, metadata, search | Search, saved views, dashboard | MVP |
 | Browser Capture | Own the local-only browser capture payload contract and safe disabled bridge prototype. | Browser capture payloads, Inbox link/task capture requests | Links, tasks, Inbox, Electron main/preload security | Future browser extension/native messaging intake | V2 |
+| Command Palette | Own central local action registration, command matching, keyboard execution, and palette navigation. | Action descriptors, route actions, local UI commands | App shell, navigation, feature services | Fast navigation, quick capture, future shortcut registry | V1 |
 | Metadata | Own tags and categories as local classification systems. | Tags, categories, taggings, category assignments | Workspace, search | Saved views, dashboard, today, all content modules | MVP |
 | Search | Own local searchable projections, query behavior, and reindexing entry points. | Search records, indexed content, search diagnostics | Workspace, content modules, database/search repository | Global search, saved views, dashboard, maintenance | MVP |
 | Saved Views | Own collection and smart-list query definitions. | Saved views, collections, smart-list filters | Workspace, metadata, search, tasks, projects, contacts | Dashboard, Today filters, future reports | V1 |
@@ -219,6 +221,32 @@ Integration points:
 - Links and tasks for persisted Inbox items.
 - Activity log and search through existing write services.
 - Electron main/preload security for any future bridge enablement.
+
+### Command Palette
+
+Owns:
+
+- Central action descriptors and local action matching.
+- App-shell palette UI and keyboard execution for registered actions.
+- Navigation and safe local UI commands such as opening Quick Add.
+
+Does not own:
+
+- Persisted keyboard shortcut customization.
+- Data-changing writes that bypass existing feature services.
+- Cloud commands or remote command execution.
+
+Expected service methods:
+
+- `registerAction`
+- `searchActions`
+- `executeAction`
+
+Integration points:
+
+- App shell and route registry for navigation actions.
+- Quick Add and future feature services for local commands.
+- Shortcut registry once configurable shortcuts are introduced.
 
 ### Content Tabs
 

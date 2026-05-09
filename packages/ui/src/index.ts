@@ -126,6 +126,14 @@ export {
   type SearchResultCardViewModel
 } from "./components/SearchResultCard";
 export {
+  CommandPalette,
+  getCommandPaletteKey,
+  getNextCommandPaletteIndex,
+  type CommandPaletteAction,
+  type CommandPaletteKey,
+  type CommandPaletteProps
+} from "./components/CommandPalette";
+export {
   GroupedResultsList,
   type GroupedResultGroupViewModel,
   type GroupedResultViewModel,
