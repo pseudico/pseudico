@@ -103,6 +103,11 @@ export function WelcomePage({
             A private desktop shell for projects, contacts, inbox work, search,
             planning, files, and local maintenance.
           </p>
+          <p className="muted-text">
+            To restore a backup or workspace JSON export, open the source
+            workspace and use Settings → Backups/Imports to create a separate
+            new workspace folder.
+          </p>
 
           <form
             className="workspace-form"

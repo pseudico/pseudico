@@ -26,6 +26,8 @@ import {
   type ProjectSummary,
   type RecentWorkspace,
   type RelationshipSummary,
+  type RestoreValidationSummary,
+  type RestoreWorkspaceSummary,
   type SmartListSummary,
   type WorkspaceJsonExportSummary,
   type WorkspaceIntegritySummary,
@@ -574,7 +576,10 @@ function createMockApi(
     },
     backup: {
       createManualBackup: async () => apiOk(backupSnapshotSummary()),
-      listBackups: async () => apiOk([backupSnapshotSummary()])
+      listBackups: async () => apiOk([backupSnapshotSummary()]),
+      validateRestoreSource: async () => apiOk(restoreValidationSummary()),
+      restoreBackupToNewWorkspace: async () => apiOk(restoreWorkspaceSummary()),
+      restoreExportToNewWorkspace: async () => apiOk(restoreWorkspaceSummary())
     },
     import: {
       validateWorkspaceExportJson: async () => apiOk(importValidationSummary()),
@@ -962,6 +967,47 @@ function importValidationSummary(): ImportValidationSummary {
       message: "Validation only."
     },
     issues: []
+  };
+}
+
+function restoreValidationSummary(): RestoreValidationSummary {
+  return {
+    valid: true,
+    sourceType: "backup",
+    sourcePath: "backups/2026-05-01T00-00-00-000Z",
+    workspace: {
+      id: "workspace_1",
+      name: "Personal",
+      schemaVersion: 1
+    },
+    counts: {
+      containers: 1,
+      items: 5,
+      listItems: 1,
+      attachments: 1
+    },
+    targetPolicy: {
+      mode: "new_workspace_only",
+      canApplyToActiveWorkspace: false,
+      message: "Restore creates a new workspace."
+    },
+    issues: []
+  };
+}
+
+function restoreWorkspaceSummary(): RestoreWorkspaceSummary {
+  return {
+    ...restoreValidationSummary(),
+    restoredAt: "2026-05-01T00:00:00.000Z",
+    targetWorkspaceRootPath: "C:\\restored-workspace",
+    copiedAttachmentCount: 1,
+    missingAttachmentCount: 0,
+    searchIndex: {
+      indexedContainerCount: 1,
+      indexedItemCount: 5,
+      indexedListItemCount: 1,
+      indexedAttachmentCount: 1
+    }
   };
 }
 
@@ -1631,6 +1677,30 @@ describe("desktop API client", () => {
       data: {
         id: "backup_1",
         databaseSizeBytes: 2048
+      }
+    });
+    await expect(
+      client.backup.validateRestoreSource({
+        sourceType: "backup",
+        backupRelativePath: "backups/2026-05-01T00-00-00-000Z"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        valid: true,
+        sourceType: "backup"
+      }
+    });
+    await expect(
+      client.backup.restoreBackupToNewWorkspace({
+        backupRelativePath: "backups/2026-05-01T00-00-00-000Z",
+        targetRootPath: "C:\\restored-workspace"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        copiedAttachmentCount: 1,
+        targetWorkspaceRootPath: "C:\\restored-workspace"
       }
     });
     await expect(

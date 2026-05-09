@@ -25,6 +25,7 @@ describe("SettingsPage", () => {
     expect(html).toContain("No diagnostics run");
     expect(html).toContain("Backups");
     expect(html).toContain("Create backup");
+    expect(html).toContain("Restore target folder");
     expect(html).toContain("No backups yet");
     expect(html).toContain("Exports");
     expect(html).toContain("Export JSON");
@@ -32,6 +33,7 @@ describe("SettingsPage", () => {
     expect(html).toContain("Export tasks TSV");
     expect(html).toContain("Imports");
     expect(html).toContain("Validate JSON import");
+    expect(html).toContain("Restore export to new workspace");
     expect(html).toContain("Categories");
   });
 });

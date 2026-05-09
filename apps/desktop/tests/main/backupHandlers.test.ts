@@ -1,4 +1,4 @@
-import { mkdtemp, rm, stat } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -151,6 +151,127 @@ describe("backup IPC handlers", () => {
       ).toMatchObject([{ action: "backup_created" }]);
     } finally {
       verifyConnection.close();
+    }
+  });
+
+  it("restores a manual backup into a separate workspace folder", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-restore-ipc-"));
+    const sourceRoot = join(tempRoot, "source");
+    const targetRoot = join(tempRoot, "restored");
+    const databasePath = resolveWorkspaceDatabasePath(sourceRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+    await mkdir(join(sourceRoot, "attachments", "2026", "05", "attachment_1"), {
+      recursive: true
+    });
+    await writeFile(
+      join(sourceRoot, "attachments", "2026", "05", "attachment_1", "Brief.pdf"),
+      "brief"
+    );
+    const connection = await createDatabaseConnection({
+      databasePath,
+      fileMustExist: true
+    });
+
+    try {
+      new ContainerRepository(connection).create({
+        id: "container_project_1",
+        workspaceId: "workspace_1",
+        type: "project",
+        name: "Launch Plan",
+        slug: "launch-plan",
+        timestamp: "2026-05-01T00:00:00.000Z"
+      });
+      const item = new ItemRepository(connection).create({
+        id: "item_file_1",
+        workspaceId: "workspace_1",
+        containerId: "container_project_1",
+        type: "file",
+        title: "Brief.pdf",
+        timestamp: "2026-05-01T00:00:00.000Z"
+      });
+      new AttachmentRepository(connection).create({
+        id: "attachment_1",
+        workspaceId: "workspace_1",
+        itemId: item.id,
+        originalName: "Brief.pdf",
+        storedName: "Brief.pdf",
+        sizeBytes: 5,
+        checksum: "a".repeat(64),
+        storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
+        timestamp: "2026-05-01T00:00:00.000Z"
+      });
+    } finally {
+      connection.close();
+    }
+
+    let openedPath: string | null = null;
+    const handlers = createBackupIpcHandlers(
+      {
+        getCurrentWorkspace: () => ({
+          id: "workspace_1",
+          name: "Personal",
+          rootPath: sourceRoot,
+          openedAt: "2026-05-01T00:00:00.000Z",
+          schemaVersion: 1
+        }),
+        openWorkspace: async ({ rootPath }) => {
+          openedPath = rootPath;
+
+          return {
+            id: "workspace_1",
+            name: "Personal",
+            rootPath,
+            openedAt: "2026-05-01T00:00:00.000Z",
+            schemaVersion: 8
+          };
+        }
+      },
+      () => new Date("2026-05-01T00:00:00.000Z")
+    );
+    const created = await handlers.handleCreateManualBackup({
+      workspaceId: "workspace_1"
+    });
+
+    if (!created.ok) {
+      throw new Error(created.error.message);
+    }
+
+    const restored = await handlers.handleRestoreBackupToNewWorkspace({
+      backupRelativePath: created.data.relativePath,
+      targetRootPath: targetRoot
+    });
+
+    expect(restored).toMatchObject({
+      ok: true,
+      data: {
+        targetWorkspaceRootPath: targetRoot,
+        copiedAttachmentCount: 1,
+        missingAttachmentCount: 0
+      }
+    });
+    expect(openedPath).toBe(targetRoot);
+    await expect(
+      stat(join(targetRoot, "attachments", "2026", "05", "attachment_1", "Brief.pdf"))
+    ).resolves.toMatchObject({ size: 5 });
+
+    const restoredConnection = await createDatabaseConnection({
+      databasePath: resolveWorkspaceDatabasePath(targetRoot),
+      fileMustExist: true
+    });
+
+    try {
+      expect(
+        new ActivityLogRepository(restoredConnection).listForTarget(
+          "backup",
+          created.data.id
+        )
+      ).toMatchObject([{ action: "backup_restored" }]);
+    } finally {
+      restoredConnection.close();
     }
   });
 });

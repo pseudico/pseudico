@@ -1,12 +1,16 @@
-import { copyFile, readdir, stat } from "node:fs/promises";
-import { basename } from "node:path";
+import { copyFile, readFile, readdir, stat } from "node:fs/promises";
+import { basename, resolve } from "node:path";
 import {
   BackupService,
+  RestoreService,
   type BackupManifest,
+  type BackupManifestAttachment,
+  type WorkspaceExportV1,
   type BackupSnapshotSummary as FeatureBackupSnapshotSummary
 } from "@local-work-os/features";
 import {
   createDatabaseConnection,
+  MigrationService,
   resolveWorkspaceDatabasePath,
   type DatabaseConnection
 } from "@local-work-os/db";
@@ -17,15 +21,24 @@ import {
   type BackupSnapshotSummary,
   type CreateManualBackupInput,
   type ListBackupsInput,
-  type ManualBackupSnapshotSummary
+  type ManualBackupSnapshotSummary,
+  type RestoreBackupToNewWorkspaceInput,
+  type RestoreValidationSummary,
+  type RestoreWorkspaceSummary,
+  type RestoreExportToNewWorkspaceInput,
+  type ValidateRestoreSourceInput
 } from "../../preload/api";
 import {
   WORKSPACE_DATABASE_RELATIVE_PATH,
-  createIsoTimestamp
+  createIsoTimestamp,
+  createWorkspaceManifest
 } from "../services/workspace/WorkspaceManifest";
 import {
+  assertSafeWorkspaceRootPath,
+  ensureDirectory,
   ensureDirectoryInsideWorkspace,
   localPathExists,
+  normalizeLocalPath,
   readTextFileInsideWorkspace,
   resolveInsideWorkspace,
   writeTextFileInsideWorkspace
@@ -35,7 +48,8 @@ import type { WorkspaceFileSystemService } from "../services/workspace/Workspace
 type CurrentWorkspaceService = Pick<
   WorkspaceFileSystemService,
   "getCurrentWorkspace"
->;
+> &
+  Partial<Pick<WorkspaceFileSystemService, "openWorkspace">>;
 
 export type BackupIpcHandlers = {
   handleCreateManualBackup: (
@@ -44,6 +58,15 @@ export type BackupIpcHandlers = {
   handleListBackups: (
     input: unknown
   ) => Promise<ApiResult<BackupSnapshotSummary[]>>;
+  handleValidateRestoreSource: (
+    input: unknown
+  ) => Promise<ApiResult<RestoreValidationSummary>>;
+  handleRestoreBackupToNewWorkspace: (
+    input: unknown
+  ) => Promise<ApiResult<RestoreWorkspaceSummary>>;
+  handleRestoreExportToNewWorkspace: (
+    input: unknown
+  ) => Promise<ApiResult<RestoreWorkspaceSummary>>;
 };
 
 export function createBackupIpcHandlers(
@@ -113,6 +136,235 @@ export function createBackupIpcHandlers(
           return apiOk(service.listBackups({ workspaceId, backups }));
         }
       );
+    },
+
+    async handleValidateRestoreSource(input) {
+      if (!isValidateRestoreSourceInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "validateRestoreSource requires a backupRelativePath or filePath source."
+        );
+      }
+
+      return await withCurrentWorkspace(workspaceService, async (workspace) => {
+        if (input.sourceType === "backup") {
+          const snapshot = await readBackupSnapshot(
+            workspace.rootPath,
+            input.backupRelativePath
+          );
+
+          if (snapshot.manifest === null) {
+            return apiError(
+              "WORKSPACE_ERROR",
+              "Backup manifest is missing or invalid."
+            );
+          }
+
+          const connection = await createDatabaseConnection({
+            databasePath: resolveWorkspaceDatabasePath(workspace.rootPath),
+            fileMustExist: true
+          });
+
+          try {
+            return apiOk(
+              new RestoreService({ connection }).validateRestoreSource({
+                sourceType: "backup",
+                sourcePath: input.backupRelativePath,
+                manifest: snapshot.manifest,
+                databaseSizeBytes: snapshot.databaseSizeBytes
+              })
+            );
+          } finally {
+            connection.close();
+          }
+        }
+
+        const exportData = JSON.parse(
+          await readFile(normalizeLocalPath(input.filePath), "utf8")
+        ) as unknown;
+        const connection = await createDatabaseConnection({
+          databasePath: resolveWorkspaceDatabasePath(workspace.rootPath),
+          fileMustExist: true
+        });
+
+        try {
+          return apiOk(
+            new RestoreService({ connection }).validateRestoreSource({
+              sourceType: "workspace_export",
+              sourcePath: normalizeLocalPath(input.filePath),
+              exportData
+            })
+          );
+        } finally {
+          connection.close();
+        }
+      });
+    },
+
+    async handleRestoreBackupToNewWorkspace(input) {
+      if (!isRestoreBackupToNewWorkspaceInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "restoreBackupToNewWorkspace requires backupRelativePath and targetRootPath."
+        );
+      }
+
+      return await withCurrentWorkspace(workspaceService, async (workspace) => {
+        const snapshot = await readBackupSnapshot(
+          workspace.rootPath,
+          input.backupRelativePath
+        );
+
+        if (snapshot.manifest === null || snapshot.databaseRelativePath === null) {
+          return apiError(
+            "WORKSPACE_ERROR",
+            "Backup restore requires a manifest and database copy."
+          );
+        }
+
+        const targetRootPath = await prepareRestoreTarget(
+          input.targetRootPath,
+          workspace.rootPath
+        );
+        await createRestoreWorkspaceStructure(targetRootPath);
+        await copyFile(
+          resolveInsideWorkspace(workspace.rootPath, snapshot.databaseRelativePath),
+          resolveInsideWorkspace(targetRootPath, WORKSPACE_DATABASE_RELATIVE_PATH)
+        );
+        const attachmentCopy = await copyRestoreAttachments({
+          sourceWorkspaceRootPath: workspace.rootPath,
+          targetWorkspaceRootPath: targetRootPath,
+          attachments: snapshot.manifest.attachments
+        });
+        await writeTextFileInsideWorkspace(
+          targetRootPath,
+          "workspace.json",
+          `${JSON.stringify(
+            createWorkspaceManifest({
+              id: snapshot.manifest.workspaceId,
+              name: snapshot.manifest.workspaceName,
+              createdAt: now()
+            }),
+            null,
+            2
+          )}\n`
+        );
+
+        const connection = await createDatabaseConnection({
+          databasePath: resolveWorkspaceDatabasePath(targetRootPath),
+          fileMustExist: true
+        });
+
+        try {
+          const result = await new RestoreService({
+            connection,
+            now
+          }).restoreBackupToNewWorkspace({
+            manifest: snapshot.manifest,
+            sourcePath: input.backupRelativePath,
+            targetWorkspaceRootPath: targetRootPath,
+            copiedAttachmentCount: attachmentCopy.copiedAttachmentCount,
+            missingAttachmentCount: attachmentCopy.missingAttachmentCount
+          });
+          connection.close();
+          if (workspaceService.openWorkspace !== undefined) {
+            await workspaceService.openWorkspace({ rootPath: targetRootPath });
+          }
+
+          return apiOk(result);
+        } finally {
+          connection.close();
+        }
+      });
+    },
+
+    async handleRestoreExportToNewWorkspace(input) {
+      if (!isRestoreExportToNewWorkspaceInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "restoreExportToNewWorkspace requires filePath and targetRootPath."
+        );
+      }
+
+      return await withCurrentWorkspace(workspaceService, async (workspace) => {
+        const filePath = normalizeLocalPath(input.filePath);
+        const exportData = JSON.parse(
+          await readFile(filePath, "utf8")
+        ) as WorkspaceExportV1;
+        const validationConnection = await createDatabaseConnection({
+          databasePath: resolveWorkspaceDatabasePath(workspace.rootPath),
+          fileMustExist: true
+        });
+
+        try {
+          const validation = new RestoreService({
+            connection: validationConnection
+          }).validateRestoreSource({
+            sourceType: "workspace_export",
+            sourcePath: filePath,
+            exportData
+          });
+
+          if (!validation.valid || validation.workspace === null) {
+            return apiError(
+              "INVALID_INPUT",
+              "Workspace export has blocking restore issues."
+            );
+          }
+        } finally {
+          validationConnection.close();
+        }
+
+        const targetRootPath = await prepareRestoreTarget(
+          input.targetRootPath,
+          workspace.rootPath
+        );
+        await createRestoreWorkspaceStructure(targetRootPath);
+        await writeTextFileInsideWorkspace(
+          targetRootPath,
+          "workspace.json",
+          `${JSON.stringify(
+            createWorkspaceManifest({
+              id: exportData.workspace.id,
+              name: exportData.workspace.name,
+              createdAt: now()
+            }),
+            null,
+            2
+          )}\n`
+        );
+
+        const connection = await createDatabaseConnection({
+          databasePath: resolveWorkspaceDatabasePath(targetRootPath)
+        });
+
+        try {
+          new MigrationService({ connection }).runPendingMigrations();
+          const attachmentCopy = await copyRestoreAttachments({
+            sourceWorkspaceRootPath: workspace.rootPath,
+            targetWorkspaceRootPath: targetRootPath,
+            attachments: exportData.attachmentManifest.attachments
+          });
+          const result = await new RestoreService({
+            connection,
+            now
+          }).restoreExportToNewWorkspace({
+            exportData,
+            sourcePath: filePath,
+            targetWorkspaceRootPath: targetRootPath,
+            copiedAttachmentCount: attachmentCopy.copiedAttachmentCount,
+            missingAttachmentCount: attachmentCopy.missingAttachmentCount
+          });
+          connection.close();
+          if (workspaceService.openWorkspace !== undefined) {
+            await workspaceService.openWorkspace({ rootPath: targetRootPath });
+          }
+
+          return apiOk(result);
+        } finally {
+          connection.close();
+        }
+      });
     }
   };
 }
@@ -179,6 +431,132 @@ async function withBackupService<T>(
   } finally {
     connection.close();
   }
+}
+
+async function withCurrentWorkspace<T>(
+  workspaceService: CurrentWorkspaceService,
+  operation: (
+    workspace: NonNullable<ReturnType<CurrentWorkspaceService["getCurrentWorkspace"]>>
+  ) => Promise<ApiResult<T>>
+): Promise<ApiResult<T>> {
+  const workspace = workspaceService.getCurrentWorkspace();
+
+  if (workspace === null) {
+    return apiError("WORKSPACE_ERROR", "No workspace is open.");
+  }
+
+  try {
+    return await operation(workspace);
+  } catch (error) {
+    return apiError(
+      "WORKSPACE_ERROR",
+      error instanceof Error ? error.message : "Restore operation failed."
+    );
+  }
+}
+
+async function prepareRestoreTarget(
+  requestedRootPath: string,
+  activeWorkspaceRootPath: string
+): Promise<string> {
+  const targetRootPath = assertSafeWorkspaceRootPath(requestedRootPath);
+
+  if (resolve(targetRootPath) === resolve(activeWorkspaceRootPath)) {
+    throw new Error("Restore target cannot be the active workspace.");
+  }
+
+  if (await localPathExists(resolveInsideWorkspace(targetRootPath, "workspace.json"))) {
+    throw new Error("Restore target already contains a workspace.json file.");
+  }
+
+  if (
+    await localPathExists(
+      resolveInsideWorkspace(targetRootPath, WORKSPACE_DATABASE_RELATIVE_PATH)
+    )
+  ) {
+    throw new Error("Restore target already contains a workspace database.");
+  }
+
+  return targetRootPath;
+}
+
+async function createRestoreWorkspaceStructure(
+  targetRootPath: string
+): Promise<void> {
+  await ensureDirectory(targetRootPath);
+  await Promise.all(
+    ["data", "attachments", "backups", "exports", "logs"].map((directory) =>
+      ensureDirectoryInsideWorkspace(targetRootPath, directory)
+    )
+  );
+}
+
+async function copyRestoreAttachments(input: {
+  sourceWorkspaceRootPath: string;
+  targetWorkspaceRootPath: string;
+  attachments: BackupManifestAttachment[];
+}): Promise<{ copiedAttachmentCount: number; missingAttachmentCount: number }> {
+  let copiedAttachmentCount = 0;
+  let missingAttachmentCount = 0;
+
+  for (const attachment of input.attachments) {
+    const sourcePath = resolveInsideWorkspace(
+      input.sourceWorkspaceRootPath,
+      attachment.storagePath
+    );
+
+    if (!(await localPathExists(sourcePath))) {
+      missingAttachmentCount += 1;
+      continue;
+    }
+
+    await ensureDirectoryInsideWorkspace(
+      input.targetWorkspaceRootPath,
+      dirnameRelativePath(attachment.storagePath)
+    );
+    await copyFile(
+      sourcePath,
+      resolveInsideWorkspace(input.targetWorkspaceRootPath, attachment.storagePath)
+    );
+    copiedAttachmentCount += 1;
+  }
+
+  return { copiedAttachmentCount, missingAttachmentCount };
+}
+
+async function readBackupSnapshot(
+  workspaceRootPath: string,
+  backupRelativePath: string
+): Promise<{
+  manifest: BackupManifest | null;
+  databaseRelativePath: string | null;
+  databaseSizeBytes: number | null;
+}> {
+  const normalizedBackupPath = backupRelativePath.replace(/\\/g, "/");
+
+  if (
+    !normalizedBackupPath.startsWith("backups/") ||
+    normalizedBackupPath.split("/").some((segment) => segment === "." || segment === "..")
+  ) {
+    throw new Error("Backup source must stay inside workspace backups.");
+  }
+
+  const manifestRelativePath = `${normalizedBackupPath}/attachment-manifest.json`;
+  const databaseRelativePath = `${normalizedBackupPath}/local-work-os.sqlite`;
+  const manifest = await readBackupManifestIfPresent(
+    workspaceRootPath,
+    manifestRelativePath
+  );
+  const databaseSizeBytes = await readFileSizeIfPresent(
+    workspaceRootPath,
+    databaseRelativePath
+  );
+
+  return {
+    manifest,
+    databaseRelativePath: databaseSizeBytes === null ? null : databaseRelativePath,
+    databaseSizeBytes
+  };
 }
 
 async function listBackupSnapshots(
@@ -289,6 +667,37 @@ function isOptionalListBackupsInput(
     input === undefined ||
     (isRecord(input) &&
       (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)))
+  );
+}
+
+function isValidateRestoreSourceInput(
+  input: unknown
+): input is ValidateRestoreSourceInput {
+  return (
+    isRecord(input) &&
+    ((input.sourceType === "backup" &&
+      isNonEmptyString(input.backupRelativePath)) ||
+      (input.sourceType === "workspace_export" && isNonEmptyString(input.filePath)))
+  );
+}
+
+function isRestoreBackupToNewWorkspaceInput(
+  input: unknown
+): input is RestoreBackupToNewWorkspaceInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.backupRelativePath) &&
+    isNonEmptyString(input.targetRootPath)
+  );
+}
+
+function isRestoreExportToNewWorkspaceInput(
+  input: unknown
+): input is RestoreExportToNewWorkspaceInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.filePath) &&
+    isNonEmptyString(input.targetRootPath)
   );
 }
 

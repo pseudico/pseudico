@@ -130,6 +130,69 @@ export type ListBackupsInput = {
   workspaceId?: string;
 };
 
+export type RestoreIssueSummary = {
+  severity: "error" | "warning";
+  code: string;
+  path: string;
+  message: string;
+};
+
+export type RestoreValidationSummary = {
+  valid: boolean;
+  sourceType: "backup" | "workspace_export";
+  sourcePath: string | null;
+  workspace: {
+    id: string;
+    name: string;
+    schemaVersion: number | null;
+  } | null;
+  counts: {
+    containers: number;
+    items: number;
+    listItems: number;
+    attachments: number;
+  };
+  targetPolicy: {
+    mode: "new_workspace_only";
+    canApplyToActiveWorkspace: false;
+    message: string;
+  };
+  issues: RestoreIssueSummary[];
+};
+
+export type RestoreWorkspaceSummary = RestoreValidationSummary & {
+  restoredAt: string;
+  targetWorkspaceRootPath: string;
+  copiedAttachmentCount: number;
+  missingAttachmentCount: number;
+  searchIndex: {
+    indexedContainerCount: number;
+    indexedItemCount: number;
+    indexedListItemCount: number;
+    indexedAttachmentCount: number;
+  };
+};
+
+export type RestoreBackupToNewWorkspaceInput = {
+  backupRelativePath: string;
+  targetRootPath: string;
+};
+
+export type RestoreExportToNewWorkspaceInput = {
+  filePath: string;
+  targetRootPath: string;
+};
+
+export type ValidateRestoreSourceInput =
+  | {
+      sourceType: "backup";
+      backupRelativePath: string;
+    }
+  | {
+      sourceType: "workspace_export";
+      filePath: string;
+    };
+
 export type WorkspaceJsonExportSummary = {
   id: string;
   workspaceId: string;
@@ -1907,7 +1970,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   },
   backup: {
     createManualBackup: "local-work-os:backup:create-manual-backup",
-    listBackups: "local-work-os:backup:list-backups"
+    listBackups: "local-work-os:backup:list-backups",
+    validateRestoreSource: "local-work-os:backup:validate-restore-source",
+    restoreBackupToNewWorkspace:
+      "local-work-os:backup:restore-backup-to-new-workspace",
+    restoreExportToNewWorkspace:
+      "local-work-os:backup:restore-export-to-new-workspace"
   },
   import: {
     validateWorkspaceExportJson:
@@ -2399,6 +2467,18 @@ export type LocalWorkOsIpcContracts = {
     input: ListBackupsInput | undefined;
     result: ApiResult<BackupSnapshotSummary[]>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.validateRestoreSource]: {
+    input: ValidateRestoreSourceInput;
+    result: ApiResult<RestoreValidationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreBackupToNewWorkspace]: {
+    input: RestoreBackupToNewWorkspaceInput;
+    result: ApiResult<RestoreWorkspaceSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreExportToNewWorkspace]: {
+    input: RestoreExportToNewWorkspaceInput;
+    result: ApiResult<RestoreWorkspaceSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.import.validateWorkspaceExportJson]: {
     input: ValidateWorkspaceExportJsonInput;
     result: ApiResult<ImportValidationSummary>;
@@ -2844,6 +2924,15 @@ export type LocalWorkOsApi = {
     listBackups: (
       input?: ListBackupsInput
     ) => Promise<ApiResult<BackupSnapshotSummary[]>>;
+    validateRestoreSource: (
+      input: ValidateRestoreSourceInput
+    ) => Promise<ApiResult<RestoreValidationSummary>>;
+    restoreBackupToNewWorkspace: (
+      input: RestoreBackupToNewWorkspaceInput
+    ) => Promise<ApiResult<RestoreWorkspaceSummary>>;
+    restoreExportToNewWorkspace: (
+      input: RestoreExportToNewWorkspaceInput
+    ) => Promise<ApiResult<RestoreWorkspaceSummary>>;
   };
   import: {
     validateWorkspaceExportJson: (
@@ -3314,7 +3403,19 @@ export function createLocalWorkOsApi(
       createManualBackup: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.createManualBackup, input),
       listBackups: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackups, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackups, input),
+      validateRestoreSource: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.validateRestoreSource, input),
+      restoreBackupToNewWorkspace: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreBackupToNewWorkspace,
+          input
+        ),
+      restoreExportToNewWorkspace: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreExportToNewWorkspace,
+          input
+        )
     },
     import: {
       validateWorkspaceExportJson: (input) =>

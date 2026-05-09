@@ -29,7 +29,7 @@ new work should account for this implemented baseline:
   weekly/custom-weekday task roll-forward behavior; monthly/yearly RRULEs remain
   future work.
 - Future or placeholder-heavy flows: Timeline, Calendar, portable/broader Templates,
-  full import/restore execution,
+  broader import execution beyond workspace JSON restore,
   custom dashboard editing, advanced saved-view builder UX, and browser capture.
 - Workflows now have a manual-only service foundation with persisted local
   definitions/runs, preview, and service-backed add-tag, set-category,
@@ -69,7 +69,7 @@ renderer-only implementation.
 | Recurrence | Own narrow local repeating-task rules and recurring task roll-forward behavior. | Recurrence rules, task recurrence pointers | Tasks, activity log, search, reminders | Today, timeline, calendar | V2 |
 | Timeline | Own timeline projections for dated work and project ranges. | Timeline entries, date ranges, grouped dated work | Tasks, projects, contacts, metadata, saved views | Calendar, dashboard, planning views | V1 |
 | Calendar | Own month/week/day calendar projections and date interactions. | Calendar entries, local dated work, local imports later | Tasks, timeline, metadata, workspace | Today, dashboard, planning views | V1 |
-| Backup | Own local backup orchestration and backup integrity checks. | Backup snapshots, manifests, integrity reports | Workspace, files, database services, Electron main/preload IPC | Maintenance, export, restore later | MVP |
+| Backup | Own local backup orchestration, restore into a new workspace, and backup integrity checks. | Backup snapshots, manifests, restore summaries, integrity reports | Workspace, files, database services, Electron main/preload IPC | Maintenance, export/import, restore | MVP |
 | Export | Own local export orchestration and portable archive outputs. | JSON exports, Markdown exports, CSV/TSV exports, manifests | Workspace, files, metadata, projects, contacts, tasks, notes | Backup, import later, maintenance | MVP |
 
 ## Platform And Future Modules

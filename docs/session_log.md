@@ -858,3 +858,57 @@ Next actions: Start PSE-81; keep only one Codex Ready issue; preserve local-only
 - Files changed: docs/session_log.md
 - Open questions / risks: CI pending; PR is draft until CI/review checks pass.
 - Next actions: Inspect CI; review diff; merge only if clean.
+
+## 2026-05-09T11:02:05.1347947+10:00
+- Objective: Merge PSE-82 and prepare next ticket.
+- Decisions made: CI #179 green; PR #79 marked ready and squash-merged; PSE-82 Done; PSE-83 promoted Codex Ready.
+- Files changed: docs/session_log.md
+- Open questions / risks: Local branch still needs main pull/delete; session log update is post-merge local only unless committed separately.
+- Next actions: Pull main; delete branch; verify only one Codex Ready.
+
+## 2026-05-09T11:03:26.7914822+10:00
+- Objective: Explain branch deletion and recent workflow failures.
+- Decisions made: Clarify branch deletion followed merge/delete-branch rule and preserved merged code on main.
+- Files changed: docs/session_log.md
+- Open questions / risks: User trust impacted by prior incomplete first response and tooling/sandbox friction.
+- Next actions: Be explicit before branch cleanup; continue from Linear active-state reconciliation; avoid stopping after reconciliation.
+
+## 2026-05-09T11:14:56
+Objective: Reconcile active Linear/GitHub work and select next Local Work OS ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found; one Codex Ready issue selected: PSE-83.
+- No open GitHub PRs found in pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need verify local main and implement restore scope.
+Next actions: Move PSE-83 to In Progress; sync main; read docs/source.
+
+## 2026-05-09T11:15:57
+Objective: Start implementation for PSE-83 restore-into-new-workspace ticket.
+Decisions made:
+- Moved PSE-83 to In Progress and created codex/PSE-83-restore-new-workspace.
+- Synced main before branching; unrelated untracked files left untouched.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need locate backup/export implementation and acceptance criteria.
+Next actions: Read docs/ticket spec; inspect backup/workspace code; implement tests.
+
+## 2026-05-09T11:32:39
+Objective: Implement PSE-83 backup/export restore into a new workspace.
+Decisions made:
+- Added RestoreService with source validation, restore audit logging, and search-index rebuilds.
+- Restores always target a separate workspace path; active workspace overwrite is blocked.
+Files changed:
+- packages/features/src/backup/RestoreService.ts; apps/desktop/src/main/ipc/backupHandlers.ts; apps/desktop/src/renderer/pages/SettingsPage.tsx
+Open questions / risks: JSON export restore is limited to fields present in current export schema; missing attachments are summarized.
+Next actions: Run full lint/typecheck/test/build; open PR if green.
+
+## 2026-05-09T11:35:46
+Objective: Verify PSE-83 implementation before PR.
+Decisions made:
+- Full lint/typecheck/test/build passed; test/build needed non-sandbox reruns after EPERM spawn errors.
+- Fixed diff whitespace before staging.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need PR CI and review before merge.
+Next actions: Stage/commit; push branch; open ready PR linked to PSE-83.
