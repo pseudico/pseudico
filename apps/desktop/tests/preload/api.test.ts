@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(150);
+    expect(channels).toHaveLength(152);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -336,6 +336,8 @@ describe("typed preload API", () => {
     await api.items.softDelete("item_1");
     await api.items.getActivity("item_1");
     await api.items.openInspector("item_1");
+    await api.items.undoActivity?.({ activityId: "activity_1" });
+    await api.items.redoActivity?.({ activityId: "activity_1" });
 
     expect(calls).toEqual([
       {
@@ -360,6 +362,14 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector,
         input: "item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.items.undoActivity,
+        input: { activityId: "activity_1" }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.items.redoActivity,
+        input: { activityId: "activity_1" }
       }
     ]);
   });

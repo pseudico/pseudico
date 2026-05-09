@@ -7,6 +7,10 @@ export type ToastViewModel = {
   message: string;
   title?: string;
   tone: ToastTone;
+  action?: {
+    label: string;
+    onClick: () => void | Promise<void>;
+  };
 };
 
 export type ToastProps = {
@@ -30,6 +34,17 @@ export function Toast({ onDismiss, toast }: ToastProps): React.JSX.Element {
         {toast.title === undefined ? null : <strong>{toast.title}</strong>}
         <span>{toast.message}</span>
       </div>
+      {toast.action === undefined ? null : (
+        <button
+          type="button"
+          className="toast-action"
+          onClick={() => {
+            void toast.action?.onClick();
+          }}
+        >
+          {toast.action.label}
+        </button>
+      )}
       {onDismiss === undefined ? null : (
         <button
           type="button"

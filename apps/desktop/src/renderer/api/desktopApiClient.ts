@@ -303,7 +303,11 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       bulkCompleteTasks: (input) =>
         callApi(() => api.items.bulkCompleteTasks!(input)),
       bulkExportItems: (input) =>
-        callApi(() => api.items.bulkExportItems!(input))
+        callApi(() => api.items.bulkExportItems!(input)),
+      undoActivity: (input) =>
+        callApi(() => api.items.undoActivity!(input)),
+      redoActivity: (input) =>
+        callApi(() => api.items.redoActivity!(input))
     },
     dragDrop: {
       reorderItems: (input) => callApi(() => api.dragDrop!.reorderItems(input)),
@@ -684,7 +688,11 @@ export const desktopApiClient: LocalWorkOsApi = {
     bulkCompleteTasks: (input) =>
       getDesktopApiClient().items.bulkCompleteTasks!(input),
     bulkExportItems: (input) =>
-      getDesktopApiClient().items.bulkExportItems!(input)
+      getDesktopApiClient().items.bulkExportItems!(input),
+    undoActivity: (input) =>
+      getDesktopApiClient().items.undoActivity!(input),
+    redoActivity: (input) =>
+      getDesktopApiClient().items.redoActivity!(input)
   },
   dragDrop: {
     reorderItems: (input) =>

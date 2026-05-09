@@ -82,7 +82,9 @@ export const ActivityAction = {
   templateApplied: "template_applied",
   workflowCreated: "workflow_created",
   workflowRunCompleted: "workflow_run_completed",
-  workflowRunFailed: "workflow_run_failed"
+  workflowRunFailed: "workflow_run_failed",
+  operationUndone: "operation_undone",
+  operationRedone: "operation_redone"
 } as const;
 
 export type ActivityAction =

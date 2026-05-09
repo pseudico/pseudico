@@ -1503,3 +1503,21 @@ Files changed:
 - apps/desktop/src/**
 Open questions / risks: Existing untracked .playwright-mcp/ and gh installer remain untouched.
 Next actions: Commit; push; open PR.
+- Timestamp: 2026-05-09T21:09:11.4479557+10:00
+- Objective: Promote next M9 ticket after PSE-95 merge.
+- Decisions made: Promoted PSE-100 (LWO-M9-011) as the single next Codex Ready issue.
+- Files changed: docs/session_log.md
+- Open questions / risks: Undo/redo scope may require careful snapshot boundaries.
+- Next actions: Start PSE-100; implement scoped undo foundation; run checks.
+- Timestamp: 2026-05-09T21:17:19.2753310+10:00
+- Objective: Implement PSE-100 undo/redo foundation.
+- Decisions made: Use activity before/after snapshots; keep bounded in-memory session stacks; expose activity undo/redo IPC.
+- Files changed: packages/features/src/undo/UndoService.ts; packages/features/tests/undoService.test.ts; apps/desktop/src/preload/api.ts
+- Open questions / risks: Full workflow-wide toast integration is foundational, not exhaustive per page.
+- Next actions: Run tests; fix type/runtime failures; open PR.
+- Timestamp: 2026-05-09T21:21:46.6978552+10:00
+- Objective: Verify PSE-100 undo/redo implementation.
+- Decisions made: Added activity snapshot undo/redo service; added IPC hooks; added toast action support.
+- Files changed: packages/features/src/undo/UndoService.ts; packages/features/tests/undoService.test.ts; apps/desktop/src/preload/api.ts
+- Open questions / risks: Page-specific Undo toast usage can expand in follow-up tickets.
+- Next actions: Commit; open PR; monitor CI.

@@ -57,6 +57,19 @@ export class ActivityLogRepository {
     this.connection = connection;
   }
 
+  getById(id: string): ActivityLogRecord | null {
+    const row = this.connection.sqlite
+      .prepare<[string], ActivityLogRow>(
+        `select *
+         from activity_log
+         where id = ?
+         limit 1`
+      )
+      .get(id);
+
+    return row === undefined ? null : toActivityLogRecord(row);
+  }
+
   findWorkspaceCreated(workspaceId: string): ActivityLogRecord | null {
     const row = this.connection.sqlite
       .prepare<[string], ActivityLogRow>(

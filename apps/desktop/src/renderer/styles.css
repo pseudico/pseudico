@@ -1353,6 +1353,18 @@ a {
   color: #514e49;
 }
 
+.toast-action {
+  align-self: center;
+  border: 1px solid #a19a8b;
+  border-radius: 999px;
+  background: #fffaf0;
+  color: #3f3b34;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0.28rem 0.65rem;
+}
+
 .welcome-actions {
   display: flex;
   flex-wrap: wrap;
