@@ -1151,3 +1151,15 @@ Open questions / risks:
 - Post-commit session log entry is local-only unless included later.
 Next actions:
 - Open PR, update Linear to PR Open, check CI.
+
+## 2026-05-09T15:26:50
+Objective: Open PR for PSE-89.
+Decisions made:
+- Created ready PR #84 for PSE-89 against main.
+- Moving Linear issue to PR Open with PR link/comment.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- PR CI/review status pending.
+Next actions:
+- Inspect PR status, merge if clean and green.
