@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
 import {
+  LOCAL_WORK_OS_DRAG_MIME_TYPE,
+  encodeDragPayload,
+  parseDragPayload
+} from "@local-work-os/core";
+import {
   UniversalItemCard,
   type UniversalItemCardProps,
   type UniversalItemViewModel
@@ -18,6 +23,14 @@ export type ItemFeedProps = Pick<
   loading?: boolean;
   getDisabledActions?: (item: UniversalItemViewModel) => readonly ItemActionId[];
   renderEmptyAction?: () => ReactNode;
+  onReorderItem?: (
+    draggedItemId: string,
+    targetItemId: string
+  ) => Promise<boolean | void> | boolean | void;
+  onDropFilesOnItem?: (
+    itemId: string,
+    files: readonly File[]
+  ) => Promise<boolean | void> | boolean | void;
 };
 
 export function ItemFeed({
@@ -30,6 +43,8 @@ export function ItemFeed({
   getDisabledActions,
   loading = false,
   onAction,
+  onDropFilesOnItem,
+  onReorderItem,
   renderContent,
   renderEmptyAction
 }: ItemFeedProps): React.JSX.Element {
@@ -69,15 +84,73 @@ export function ItemFeed({
             getDisabledActions?.(item) ?? disabledActions;
 
           return (
-            <UniversalItemCard
-              item={item}
+            <div
+              className="item-feed-draggable"
+              draggable={onReorderItem !== undefined}
               key={item.id}
-              {...(itemDisabledActions === undefined
-                ? {}
-                : { disabledActions: itemDisabledActions })}
-              {...(onAction === undefined ? {} : { onAction })}
-              {...(renderContent === undefined ? {} : { renderContent })}
-            />
+              onDragOver={(event) => {
+                if (
+                  onReorderItem !== undefined ||
+                  (onDropFilesOnItem !== undefined &&
+                    Array.from(event.dataTransfer.types).includes("Files"))
+                ) {
+                  event.preventDefault();
+                }
+              }}
+              onDragStart={(event) => {
+                if (onReorderItem === undefined) {
+                  return;
+                }
+
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData(
+                  LOCAL_WORK_OS_DRAG_MIME_TYPE,
+                  encodeDragPayload({
+                    type: "item",
+                    itemId: item.id
+                  })
+                );
+                event.dataTransfer.setData("text/plain", item.id);
+              }}
+              onDrop={(event) => {
+                if (
+                  onDropFilesOnItem !== undefined &&
+                  Array.from(event.dataTransfer.types).includes("Files")
+                ) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  void onDropFilesOnItem(
+                    item.id,
+                    Array.from(event.dataTransfer.files)
+                  );
+                  return;
+                }
+
+                if (onReorderItem === undefined) {
+                  return;
+                }
+
+                const payload = parseDragPayload(
+                  event.dataTransfer.getData(LOCAL_WORK_OS_DRAG_MIME_TYPE)
+                );
+
+                if (payload?.type !== "item" || payload.itemId === item.id) {
+                  return;
+                }
+
+                event.preventDefault();
+                void onReorderItem(payload.itemId, item.id);
+              }}
+            >
+              <UniversalItemCard
+                item={item}
+                {...(itemDisabledActions === undefined
+                  ? {}
+                  : { disabledActions: itemDisabledActions })}
+                {...(onAction === undefined ? {} : { onAction })}
+                {...(renderContent === undefined ? {} : { renderContent })}
+              />
+            </div>
           );
         })}
       </div>

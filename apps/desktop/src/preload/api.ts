@@ -1222,6 +1222,32 @@ export type MoveItemInput = {
   sortOrder?: number;
 };
 
+export type ReorderContainerItemsInput = {
+  containerId: string;
+  itemIds: string[];
+  containerTabId?: string | null;
+};
+
+export type ReorderListItemsByIdInput = {
+  listId: string;
+  listItemIds: string[];
+};
+
+export type AttachDroppedFilesToContainerInput = {
+  containerId: string;
+  sourcePaths: string[];
+  workspaceId?: string;
+  containerTabId?: string | null;
+  description?: string | null;
+  startSortOrder?: number;
+};
+
+export type AttachDroppedFilesToItemInput = {
+  itemId: string;
+  sourcePaths: string[];
+  description?: string | null;
+};
+
 export type ActivitySummary = {
   id: string;
   workspaceId: string;
@@ -2040,6 +2066,15 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     getItemActivity: "local-work-os:items:get-item-activity",
     openItemInspector: "local-work-os:items:open-item-inspector"
   },
+  dragDrop: {
+    reorderItems: "local-work-os:drag-drop:reorder-items",
+    moveItem: "local-work-os:drag-drop:move-item",
+    reorderListItems: "local-work-os:drag-drop:reorder-list-items",
+    reorderTabs: "local-work-os:drag-drop:reorder-tabs",
+    attachFilesToContainer:
+      "local-work-os:drag-drop:attach-files-to-container",
+    attachFilesToItem: "local-work-os:drag-drop:attach-files-to-item"
+  },
   files: {
     getStatus: "local-work-os:files:get-status",
     attachFileToContainer: "local-work-os:files:attach-file-to-container",
@@ -2503,6 +2538,30 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector]: {
     input: string;
     result: ApiResult<ItemInspectorSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderItems]: {
+    input: ReorderContainerItemsInput;
+    result: ApiResult<ItemSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.moveItem]: {
+    input: MoveItemInput;
+    result: ApiResult<ItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderListItems]: {
+    input: ReorderListItemsByIdInput;
+    result: ApiResult<ListItemSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderTabs]: {
+    input: ReorderContainerTabsInput;
+    result: ApiResult<ContainerTabSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.attachFilesToContainer]: {
+    input: AttachDroppedFilesToContainerInput;
+    result: ApiResult<FileAttachmentResultSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.attachFilesToItem]: {
+    input: AttachDroppedFilesToItemInput;
+    result: ApiResult<FileAttachmentResultSummary[]>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.files.getStatus]: {
     input: undefined;
@@ -3006,6 +3065,25 @@ export type LocalWorkOsApi = {
     openItemInspector: (
       itemId: string
     ) => Promise<ApiResult<ItemInspectorSummary>>;
+  };
+  dragDrop?: {
+    reorderItems: (
+      input: ReorderContainerItemsInput
+    ) => Promise<ApiResult<ItemSummary[]>>;
+    moveItem: (input: MoveItemInput) => Promise<ApiResult<ItemSummary>>;
+    reorderListItems: (
+      input: ReorderListItemsByIdInput
+    ) => Promise<ApiResult<ListItemSummary[]>>;
+    reorderTabs: (
+      input: ReorderContainerTabsInput
+    ) => Promise<ApiResult<ContainerTabSummary[]>>;
+    attachFilesToContainer: (
+      input: AttachDroppedFilesToContainerInput
+    ) => Promise<ApiResult<FileAttachmentResultSummary[]>>;
+    attachFilesToItem: (
+      input: AttachDroppedFilesToItemInput
+    ) => Promise<ApiResult<FileAttachmentResultSummary[]>>;
+    getDroppedFilePaths: (files: readonly File[]) => string[];
   };
   files: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
@@ -3515,6 +3593,21 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.getItemActivity, itemId),
       openItemInspector: (itemId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector, itemId)
+    },
+    dragDrop: {
+      reorderItems: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderItems, input),
+      moveItem: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.moveItem, input),
+      reorderListItems: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderListItems, input),
+      reorderTabs: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderTabs, input),
+      attachFilesToContainer: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.attachFilesToContainer, input),
+      attachFilesToItem: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.attachFilesToItem, input),
+      getDroppedFilePaths: () => []
     },
     files: {
       getStatus: () =>

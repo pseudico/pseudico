@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
 import {
   createLocalWorkOsApi,
   type LocalWorkOsIpcChannel,
@@ -15,4 +15,16 @@ const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
     LocalWorkOsIpcResult<Channel>
   >;
 
-contextBridge.exposeInMainWorld("localWorkOs", createLocalWorkOsApi(invoke));
+const api = createLocalWorkOsApi(invoke);
+
+contextBridge.exposeInMainWorld("localWorkOs", {
+  ...api,
+  dragDrop: {
+    ...api.dragDrop,
+    getDroppedFilePaths(files: readonly File[]): string[] {
+      return files
+        .map((file) => webUtils.getPathForFile(file))
+        .filter((path) => path.trim().length > 0);
+    }
+  }
+});

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { moveIdBeforeTarget } from "@local-work-os/core";
 import {
   CategoryBadge,
   CategoryPicker,
@@ -1415,6 +1416,179 @@ export function ProjectDetailPage({
     await refreshProjectContent(project.id);
   }
 
+  async function reorderProjectItem(
+    draggedItemId: string,
+    targetItemId: string
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null;
+    const scopedItems = items.filter((item) =>
+      isItemVisibleForTab(item, activeTab)
+    );
+
+    if (
+      !scopedItems.some((item) => item.id === draggedItemId) ||
+      !scopedItems.some((item) => item.id === targetItemId)
+    ) {
+      return;
+    }
+
+    setItemsLoading(true);
+    setItemError(null);
+
+    if (apiClient.dragDrop === undefined) {
+      setItemsLoading(false);
+      setItemError("Drag/drop is not available in this runtime.");
+      return;
+    }
+
+    const result = await apiClient.dragDrop.reorderItems({
+      containerId: project.id,
+      containerTabId: activeTabId,
+      itemIds: moveIdBeforeTarget(
+        scopedItems.map((item) => item.id),
+        draggedItemId,
+        targetItemId
+      )
+    });
+
+    setItemsLoading(false);
+
+    if (!result.ok) {
+      setItemError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+  }
+
+  async function reorderProjectListItem(
+    list: ListCardViewModel,
+    draggedItemId: string,
+    targetItemId: string
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setListBusyId(list.id);
+    setListError(null);
+
+    if (apiClient.dragDrop === undefined) {
+      setListBusyId(null);
+      setListError("Drag/drop is not available in this runtime.");
+      return;
+    }
+
+    const result = await apiClient.dragDrop.reorderListItems({
+      listId: list.id,
+      listItemIds: moveIdBeforeTarget(
+        list.listItems.map((item) => item.id),
+        draggedItemId,
+        targetItemId
+      )
+    });
+
+    setListBusyId(null);
+
+    if (!result.ok) {
+      setListError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+  }
+
+  async function attachDroppedProjectFiles(
+    event: React.DragEvent<HTMLElement>
+  ): Promise<void> {
+    if (project === null || !Array.from(event.dataTransfer.types).includes("Files")) {
+      return;
+    }
+
+    event.preventDefault();
+    setSavingFile(true);
+    setFileError(null);
+
+    if (apiClient.dragDrop === undefined) {
+      setSavingFile(false);
+      setFileError("Drag/drop is not available in this runtime.");
+      return;
+    }
+
+    const sourcePaths = apiClient.dragDrop.getDroppedFilePaths(
+      Array.from(event.dataTransfer.files)
+    );
+
+    if (sourcePaths.length === 0) {
+      setSavingFile(false);
+      setFileError("Dropped files could not be read by the local file bridge.");
+      return;
+    }
+
+    const result = await apiClient.dragDrop.attachFilesToContainer({
+      containerId: project.id,
+      containerTabId: activeTabId,
+      sourcePaths
+    });
+
+    setSavingFile(false);
+
+    if (!result.ok) {
+      setFileError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+  }
+
+  async function attachDroppedFilesToItem(
+    itemId: string,
+    files: readonly File[]
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setFileBusyId(itemId);
+    setFileError(null);
+
+    if (apiClient.dragDrop === undefined) {
+      setFileBusyId(null);
+      setFileError("Drag/drop is not available in this runtime.");
+      return;
+    }
+
+    const sourcePaths = apiClient.dragDrop.getDroppedFilePaths(files);
+
+    if (sourcePaths.length === 0) {
+      setFileBusyId(null);
+      setFileError("Dropped files could not be read by the local file bridge.");
+      return;
+    }
+
+    const result = await apiClient.dragDrop.attachFilesToItem({
+      itemId,
+      sourcePaths
+    });
+
+    setFileBusyId(null);
+
+    if (!result.ok) {
+      setFileError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+  }
+
   async function confirmItemAction(): Promise<void> {
     if (project === null || confirmAction === null) {
       return;
@@ -1521,6 +1695,7 @@ export function ProjectDetailPage({
             onBulkAddItems={bulkAddListItems}
             onAddPipelineCard={addPipelineCard}
             onMovePipelineCard={movePipelineCard}
+            onReorderListItem={reorderProjectListItem}
             onSaveAsTemplate={saveListAsTemplate}
             onToggleDisplayMode={toggleListDisplayMode}
             onToggleItem={toggleListItem}
@@ -1756,7 +1931,18 @@ export function ProjectDetailPage({
         />
       </div>
 
-      <section className="project-content-section" aria-label="Project content">
+      <section
+        className="project-content-section"
+        aria-label="Project content"
+        onDragOver={(event) => {
+          if (Array.from(event.dataTransfer.types).includes("Files")) {
+            event.preventDefault();
+          }
+        }}
+        onDrop={(event) => {
+          void attachDroppedProjectFiles(event);
+        }}
+      >
         <div className="panel-heading-actions">
           <div className="panel-heading">
             <FolderKanban size={17} aria-hidden="true" />
@@ -1889,6 +2075,8 @@ export function ProjectDetailPage({
           loading={itemsLoading}
           renderContent={renderItemContent}
           onAction={handleItemAction}
+          onDropFilesOnItem={attachDroppedFilesToItem}
+          onReorderItem={reorderProjectItem}
         />
         {hasMoreItems ? (
           <button

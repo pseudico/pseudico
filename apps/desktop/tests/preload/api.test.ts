@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(135);
+    expect(channels).toHaveLength(141);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -67,6 +67,7 @@ describe("typed preload API", () => {
       "activity",
       "containers",
       "items",
+      "dragDrop",
       "files",
       "backup",
       "import",
@@ -359,6 +360,93 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.items.openItemInspector,
         input: "item_1"
+      }
+    ]);
+  });
+
+  it("routes drag/drop calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.dragDrop!.reorderItems({
+      containerId: "container_1",
+      containerTabId: "tab_1",
+      itemIds: ["item_2", "item_1"]
+    });
+    await api.dragDrop!.moveItem({
+      itemId: "item_1",
+      targetContainerId: "container_2"
+    });
+    await api.dragDrop!.reorderListItems({
+      listId: "list_1",
+      listItemIds: ["row_2", "row_1"]
+    });
+    await api.dragDrop!.reorderTabs({
+      containerId: "container_1",
+      tabIds: ["tab_2", "tab_1"]
+    });
+    await api.dragDrop!.attachFilesToContainer({
+      containerId: "container_1",
+      sourcePaths: ["C:\\source\\Brief.pdf"]
+    });
+    await api.dragDrop!.attachFilesToItem({
+      itemId: "item_1",
+      sourcePaths: ["C:\\source\\Sketch.png"]
+    });
+
+    expect(api.dragDrop!.getDroppedFilePaths([])).toEqual([]);
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderItems,
+        input: {
+          containerId: "container_1",
+          containerTabId: "tab_1",
+          itemIds: ["item_2", "item_1"]
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.moveItem,
+        input: {
+          itemId: "item_1",
+          targetContainerId: "container_2"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderListItems,
+        input: {
+          listId: "list_1",
+          listItemIds: ["row_2", "row_1"]
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.reorderTabs,
+        input: {
+          containerId: "container_1",
+          tabIds: ["tab_2", "tab_1"]
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.attachFilesToContainer,
+        input: {
+          containerId: "container_1",
+          sourcePaths: ["C:\\source\\Brief.pdf"]
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.attachFilesToItem,
+        input: {
+          itemId: "item_1",
+          sourcePaths: ["C:\\source\\Sketch.png"]
+        }
       }
     ]);
   });

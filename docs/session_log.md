@@ -1298,3 +1298,83 @@ Next actions: start PSE-92; keep only one Codex Ready; preserve local-only scope
 - Files changed: packages/core/src/shortcuts/*; apps/desktop/src/renderer/shortcuts/*; apps/desktop/tests/*; docs/session_log.md
 - Open questions / risks: Need PR creation and remote CI/review confirmation.
 - Next actions: Review diff; commit and push; open PR.
+- 2026-05-09 19:12:37 +10:00
+- Objective: Merge PSE-92 and prepare next ticket.
+- Decisions made: PR #87 passed CI and was squash-merged as ca839d3; deleted feature branch; PSE-93 promoted as sole Codex Ready issue.
+- Files changed: docs/session_log.md
+- Open questions / risks: Post-merge session log entry remains local-only; unrelated untracked files still untouched.
+- Next actions: Next run should start PSE-93; keep drag/drop scope local-only; verify no duplicate Codex Ready issues.
+
+## 2026-05-09T19:29:15.9879283+10:00
+Objective: Start end-to-end Local Work OS ticket run.
+Decisions made:
+- Use structured Linear/GitHub tools where available.
+- Reconcile active PR/In Progress/Codex Ready before coding.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Active PR/CI state unknown until reconciliation.
+Next actions: Reconcile Linear states; inspect active PR; pick next issue.
+
+## 2026-05-09T19:29:39.3030727+10:00
+Objective: Record Linear reconciliation result.
+Decisions made:
+- No Linear issues found in PR Open or In Progress.
+- Selected PSE-93 as the only Codex Ready issue to pull next.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need confirm local checkout state and issue scope.
+Next actions: Move PSE-93 In Progress; read docs; create branch.
+
+## 2026-05-09T19:35:05.2441290+10:00
+Objective: Plan PSE-93 unified drag/drop implementation.
+Decisions made:
+- Add typed drag payload helpers and DragDropService over existing item/list/tab/file services.
+- Expose reorder/list/file-drop IPC without renderer filesystem access.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Native file drops need Electron-safe path extraction.
+Next actions: Patch core/features/IPC/UI; add tests; run checks.
+
+## 2026-05-09T19:48:17.1099636+10:00
+Objective: Implement PSE-93 drag/drop foundation.
+Decisions made:
+- Added core drag payload helpers and DragDropService orchestration.
+- Added drag/drop IPC and project feed/list/tab/file-drop UI hooks.
+Files changed:
+- packages/core/src/actions/DragDrop.ts
+- packages/features/src/dragDrop/DragDropService.ts
+- apps/desktop/src/preload/api.ts
+Open questions / risks: Typecheck may reveal test mock/API surface gaps.
+Next actions: Run focused tests; fix type/lint issues; run full checks.
+
+## 2026-05-09T19:57:15.4862205+10:00
+Objective: Verify PSE-93 implementation locally.
+Decisions made:
+- Full lint, typecheck, test, and build passed after required EPERM escalations.
+- Focused drag/drop tests passed before full suite.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need inspect final diff before commit/PR.
+Next actions: Review diff; commit/push; open ready PR.
+
+## 2026-05-09T20:00:47.7155135+10:00
+Objective: Finalize verified PSE-93 changes for PR.
+Decisions made:
+- Added item-level file drop in addition to container drops.
+- Re-ran typecheck, lint, full tests, and build successfully.
+Files changed:
+- packages/ui/src/components/ItemFeed.tsx
+- apps/desktop/src/renderer/pages/ProjectDetailPage.tsx
+- docs/session_log.md
+Open questions / risks: CI/review still pending after PR creation.
+Next actions: Stage intended files; commit; push/open PR.
+
+## 2026-05-09T20:01:50.9131310+10:00
+Objective: Commit PSE-93 implementation.
+Decisions made:
+- Created commit 9197748 for unified drag/drop changes.
+- Left unrelated untracked files untouched.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Remote push/PR/CI still pending.
+Next actions: Amend log into commit; push branch; open PR.

@@ -20,6 +20,23 @@ export {
   defaultContextMenuActions,
   resolveContextMenuActions
 } from "./actions/ContextMenuActions";
+export {
+  DRAG_PAYLOAD_TYPES,
+  LOCAL_WORK_OS_DRAG_MIME_TYPE,
+  createSequentialSortOrders,
+  encodeDragPayload,
+  isDragPayload,
+  moveIdBeforeTarget,
+  parseDragPayload
+} from "./actions/DragDrop";
+export type {
+  ContainerTabDragPayload,
+  DragPayloadType,
+  ExternalFileDragPayload,
+  ItemDragPayload,
+  ListItemDragPayload,
+  LocalWorkOsDragPayload
+} from "./actions/DragDrop";
 export type {
   ContextMenuActionContext,
   ContextMenuActionDescriptor,
