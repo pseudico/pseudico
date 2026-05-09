@@ -16,4 +16,8 @@ export function registerNavigationIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.navigation.recordTarget,
     (_event, input) => handlers.handleRecordTarget(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.navigation.listPinnedFavorites,
+    (_event, input) => handlers.handleListPinnedFavorites(input)
+  );
 }

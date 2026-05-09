@@ -195,8 +195,9 @@ describe("DashboardService", () => {
             widgetType: "favorites",
             items: [
               expect.objectContaining({
-                kind: "project",
-                name: "Favorite Project"
+                kind: "favorite",
+                targetType: "container",
+                title: "Favorite Project"
               })
             ]
           })

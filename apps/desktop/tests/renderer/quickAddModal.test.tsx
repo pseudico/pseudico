@@ -683,7 +683,8 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
     },
     navigation: {
       listRecentTargets: async () => apiOk([]),
-      recordTarget: async () => apiOk([])
+      recordTarget: async () => apiOk([]),
+      listPinnedFavorites: async () => apiOk([])
     }
   };
 }

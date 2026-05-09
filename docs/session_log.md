@@ -1036,3 +1036,106 @@ Files changed:
 - apps/desktop/src/renderer/shell/TopBar.tsx
 Open questions / risks: No true Playwright Electron E2E exists; covered with unit/renderer tests and manual QA notes.
 Next actions: Finalize docs; commit/push PR; check CI.
+## 2026-05-09T14:24:48.1542240+10:00
+Objective: Complete PSE-88 end-to-end and prepare next Codex Ready ticket.
+Decisions made: merged PR #83 after local checks and CI passed; promoted only PSE-89 to Codex Ready.
+Files changed: docs/session_log.md
+Open questions / risks: unrelated untracked local files remain untouched.
+Next actions: Start PSE-89; keep only one Codex Ready issue; maintain local-only scope.
+
+## 2026-05-09T15:05:57
+Objective: Start end-to-end Local Work OS ticket workflow.
+Decisions made:
+- Use Linear as plan and GitHub as proof per operating rule.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Active Linear/PR state not yet reconciled.
+Next actions:
+- Reconcile Linear statuses and open PRs.
+
+## 2026-05-09T15:07:35
+Objective: Reconcile active work before starting PSE-89.
+Decisions made:
+- No open GitHub PRs, PR Open, or In Progress Linear issues found.
+- PSE-89 is the single Codex Ready issue and will be started.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- git pull initially hit sandbox permission on .git/FETCH_HEAD.
+Next actions:
+- Sync main, branch for PSE-89, inspect ticket scope.
+
+## 2026-05-09T15:08:01
+Objective: Start PSE-89 implementation setup.
+Decisions made:
+- Moved PSE-89 from Codex Ready to In Progress.
+- Branch creation with codex/ prefix hit local ref path conflict; inspect branches before retry.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Individual source ticket file path from Linear is absent; use ticket pack section as source.
+Next actions:
+- Create alternate key-named branch and inspect pinned/favourites code.
+
+## 2026-05-09T15:17:04
+Objective: Implement PSE-89 pinned/favorites expansion.
+Decisions made:
+- Reused existing is_favorite and pinned fields; no schema migration needed.
+- Added aggregate pinned/favorites projection for sidebar and dashboard.
+Files changed:
+- packages/features/src/navigation/PinnedFavoritesService.ts
+- packages/features/src/dashboard/WidgetDataService.ts
+- apps/desktop/src/renderer/shell/Sidebar.tsx
+Open questions / risks:
+- Typecheck may expose mock API updates needed.
+Next actions:
+- Run focused tests, fix compile issues, then full checks.
+
+## 2026-05-09T15:17:38
+Objective: Verify focused PSE-89 changes.
+Decisions made:
+- Sandbox Vitest run hit EPERM; reran with approved escalation as instructed.
+- Focused PSE-89 tests passed: 6 files, 65 tests.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Full lint/typecheck/test/build still pending.
+Next actions:
+- Run full required checks and fix failures.
+
+## 2026-05-09T15:19:31
+Objective: Run full local verification for PSE-89.
+Decisions made:
+- pnpm lint and pnpm typecheck passed.
+- Full pnpm test passed after updating IPC test expectations for expanded favorites.
+Files changed:
+- apps/desktop/tests/main/ipc-handlers.test.ts
+- docs/session_log.md
+Open questions / risks:
+- Build still pending.
+Next actions:
+- Run build, review diff, commit/push/PR.
+
+## 2026-05-09T15:20:06
+Objective: Complete local checks for PSE-89.
+Decisions made:
+- Build initially hit Electron/Vite/esbuild EPERM; reran with escalation.
+- pnpm build passed after escalation.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need final diff review before commit.
+Next actions:
+- Review diff, stage, commit, push, open PR.
+
+## 2026-05-09T15:20:42
+Objective: Stage PSE-89 changes.
+Decisions made:
+- Staged only ticket-related files; left unrelated untracked local files untouched.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Last session-log entry was appended after staging and needs staging before commit.
+Next actions:
+- Stage final log entry, commit, push, open PR.

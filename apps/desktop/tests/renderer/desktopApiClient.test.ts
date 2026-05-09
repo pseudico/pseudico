@@ -596,7 +596,8 @@ function createMockApi(
     },
     navigation: {
       listRecentTargets: async () => apiOk([]),
-      recordTarget: async () => apiOk([])
+      recordTarget: async () => apiOk([]),
+      listPinnedFavorites: async () => apiOk([])
     }
   };
 

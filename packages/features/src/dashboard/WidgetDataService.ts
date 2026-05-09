@@ -5,17 +5,18 @@ import {
 } from "@local-work-os/core";
 import type { DatabaseConnection } from "@local-work-os/db";
 import { ActivityService } from "../activity";
-import { ProjectHealthService, ProjectService } from "../projects";
+import { ProjectHealthService } from "../projects";
+import { PinnedFavoritesService } from "../navigation";
 import { TaskService } from "../tasks";
 import { TodayService, toTodayTaskView } from "../today";
 import {
   toActivityWidgetItem,
+  toFavoriteWidgetItem,
   toProjectHealthWidgetItem,
-  toProjectWidgetItem,
   toTaskWidgetItem,
   type DashboardActivityWidgetItem,
+  type DashboardFavoriteWidgetItem,
   type DashboardProjectHealthWidgetItem,
-  type DashboardProjectWidgetItem,
   type DashboardTaskWidgetItem,
   type DashboardWidgetData,
   type DashboardWidgetPage,
@@ -99,13 +100,12 @@ export class WidgetDataService {
     input: WidgetDataQueryInput
   ): DashboardWidgetData {
     const normalized = this.normalizeInput(input);
-    const items = new ProjectService({
-      connection: this.connection,
-      now: this.now
-    })
-      .listProjects(normalized.workspaceId)
-      .filter((project) => project.isFavorite)
-      .map(toProjectWidgetItem);
+    const items = new PinnedFavoritesService({ connection: this.connection })
+      .listPinnedFavorites({
+        workspaceId: normalized.workspaceId,
+        limit: normalized.limit + normalized.offset
+      })
+      .map(toFavoriteWidgetItem);
 
     return {
       widgetType: "favorites",
@@ -166,7 +166,7 @@ export class WidgetDataService {
 function pageItems<
   TItem extends
     | DashboardTaskWidgetItem
-    | DashboardProjectWidgetItem
+    | DashboardFavoriteWidgetItem
     | DashboardProjectHealthWidgetItem
     | DashboardActivityWidgetItem
 >(

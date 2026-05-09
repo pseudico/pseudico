@@ -16,7 +16,7 @@ describe("Dashboard renderer page", () => {
     expect(html).toContain("Today");
     expect(html).toContain("Overdue");
     expect(html).toContain("Upcoming");
-    expect(html).toContain("Favorite Projects");
+    expect(html).toContain("Pinned &amp; Favorites");
     expect(html).toContain("Project Health");
     expect(html).toContain("Recent Activity");
     expect(html).toContain("Call accountant");
@@ -59,15 +59,24 @@ function dashboardViewModel(): DashboardViewModelSummary {
           page: page(1),
           items: [
             {
-              kind: "project",
-              projectId: "container_project_1",
-              name: "Launch Plan",
-              status: "active",
-              color: "#245c55",
+              kind: "favorite",
+              targetType: "container",
+              targetId: "container_project_1",
+              workspaceId: "workspace_1",
+              title: "Launch Plan",
+              subtitle: "Project - active",
+              path: "/projects/container_project_1",
+              source: "favorite",
+              targetKind: "project",
+              containerId: "container_project_1",
+              containerType: "project",
+              containerTitle: "Launch Plan",
+              updatedAt: "2026-05-04T08:00:00.000Z",
               navigationTarget: {
                 targetType: "container",
                 targetId: "container_project_1",
-                workspaceId: "workspace_1"
+                workspaceId: "workspace_1",
+                path: "/projects/container_project_1"
               }
             }
           ]

@@ -319,6 +319,7 @@ export {
 } from "./components/widgets/UpcomingWidget";
 export {
   FavoriteProjectsWidget,
+  type DashboardFavoriteWidgetItem,
   type DashboardProjectWidgetItem,
   type FavoriteProjectsWidgetProps
 } from "./components/widgets/FavoriteProjectsWidget";

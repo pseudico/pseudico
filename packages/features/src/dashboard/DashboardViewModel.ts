@@ -6,6 +6,7 @@ import type {
 import type { ActivityEventView } from "../activity";
 import type { ProjectHealthSummary, ProjectRecord } from "../projects";
 import type { TodayTaskView } from "../today";
+import type { PinnedFavoriteTarget } from "../navigation";
 
 export type DashboardNavigationTarget = {
   targetType: string;
@@ -40,6 +41,13 @@ export type DashboardProjectWidgetItem = {
   navigationTarget: DashboardNavigationTarget;
 };
 
+export type DashboardFavoriteWidgetItem = PinnedFavoriteTarget & {
+  kind: "favorite";
+  navigationTarget: DashboardNavigationTarget & {
+    path: string;
+  };
+};
+
 export type DashboardProjectHealthWidgetItem = ProjectHealthSummary & {
   kind: "project_health";
   navigationTarget: DashboardNavigationTarget;
@@ -65,7 +73,7 @@ export type DashboardWidgetData =
       widgetType: "favorites";
       generatedAt: string;
       page: DashboardWidgetPage;
-      items: DashboardProjectWidgetItem[];
+      items: DashboardFavoriteWidgetItem[];
     }
   | {
       widgetType: "project_health";
@@ -151,6 +159,21 @@ export function toProjectWidgetItem(
       targetType: "container",
       targetId: project.id,
       workspaceId: project.workspaceId
+    }
+  };
+}
+
+export function toFavoriteWidgetItem(
+  target: PinnedFavoriteTarget
+): DashboardFavoriteWidgetItem {
+  return {
+    ...target,
+    kind: "favorite",
+    navigationTarget: {
+      targetType: target.targetType,
+      targetId: target.targetId,
+      workspaceId: target.workspaceId,
+      path: target.path
     }
   };
 }

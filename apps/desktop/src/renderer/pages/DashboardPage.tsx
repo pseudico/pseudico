@@ -9,14 +9,14 @@ import {
   TodayWidget,
   UpcomingWidget,
   type DashboardActivityWidgetItem,
-  type DashboardProjectWidgetItem,
+  type DashboardFavoriteWidgetItem,
   type DashboardTaskWidgetItem,
   type ProjectHealthViewModel
 } from "@local-work-os/ui";
 import type {
   DashboardActivityWidgetItemSummary,
+  DashboardFavoriteWidgetItemSummary,
   DashboardProjectHealthWidgetItemSummary,
-  DashboardProjectWidgetItemSummary,
   DashboardTaskWidgetItemSummary,
   DashboardViewModelSummary,
   DashboardWidgetDataSummary,
@@ -106,12 +106,12 @@ export function DashboardPage({
     setDashboard(result.data);
   }
 
-  function openProject(project: DashboardProjectWidgetItem): void {
+  function openProjectHealth(project: ProjectHealthViewModel): void {
     navigate(`/projects/${project.projectId}`);
   }
 
-  function openProjectHealth(project: ProjectHealthViewModel): void {
-    navigate(`/projects/${project.projectId}`);
+  function openFavorite(favorite: DashboardFavoriteWidgetItem): void {
+    navigate(favorite.path);
   }
 
   function openTask(task: DashboardTaskWidgetItem): void {
@@ -185,8 +185,8 @@ export function DashboardPage({
         />
         <FavoriteProjectsWidget
           loading={loading && dashboard === null}
-          projects={getProjectWidgetItems(widgets)}
-          onOpenProject={openProject}
+          favorites={getFavoriteWidgetItems(widgets)}
+          onOpenFavorite={openFavorite}
         />
         <ProjectHealthWidget
           loading={loading && dashboard === null}
@@ -221,16 +221,16 @@ function getTaskWidgetItems(
   return data.items.map(toDashboardTaskWidgetItem);
 }
 
-function getProjectWidgetItems(
+function getFavoriteWidgetItems(
   widgets: readonly DashboardWidgetSummary[]
-): DashboardProjectWidgetItem[] {
+): DashboardFavoriteWidgetItem[] {
   const data = findWidgetData(widgets, "favorites");
 
   if (data?.widgetType !== "favorites") {
     return [];
   }
 
-  return data.items.map(toDashboardProjectWidgetItem);
+  return data.items.map(toDashboardFavoriteWidgetItem);
 }
 
 function getProjectHealthWidgetItems(
@@ -277,14 +277,21 @@ function toDashboardTaskWidgetItem(
   };
 }
 
-function toDashboardProjectWidgetItem(
-  project: DashboardProjectWidgetItemSummary
-): DashboardProjectWidgetItem {
+function toDashboardFavoriteWidgetItem(
+  favorite: DashboardFavoriteWidgetItemSummary
+): DashboardFavoriteWidgetItem {
   return {
-    projectId: project.projectId,
-    name: project.name,
-    status: project.status,
-    color: project.color
+    targetType: favorite.targetType,
+    targetId: favorite.targetId,
+    workspaceId: favorite.workspaceId,
+    title: favorite.title,
+    subtitle: favorite.subtitle,
+    path: favorite.path,
+    source: favorite.source,
+    targetKind: favorite.targetKind,
+    containerId: favorite.containerId,
+    containerType: favorite.containerType,
+    containerTitle: favorite.containerTitle
   };
 }
 

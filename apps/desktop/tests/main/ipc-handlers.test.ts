@@ -2289,12 +2289,13 @@ describe("Dashboard IPC handlers", () => {
             widget: expect.objectContaining({ type: "favorites" }),
             data: expect.objectContaining({
               widgetType: "favorites",
-              items: [
+              items: expect.arrayContaining([
                 expect.objectContaining({
-                  name: "Launch Plan",
-                  projectId: projectResult.data.project.id
+                  title: "Launch Plan",
+                  targetId: projectResult.data.project.id,
+                  targetType: "container"
                 })
-              ]
+              ])
             })
           })
         ])

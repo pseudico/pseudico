@@ -1351,6 +1351,13 @@ export type DashboardProjectWidgetItemSummary = {
   navigationTarget: DashboardNavigationTargetSummary;
 };
 
+export type DashboardFavoriteWidgetItemSummary = PinnedFavoriteTargetSummary & {
+  kind: "favorite";
+  navigationTarget: DashboardNavigationTargetSummary & {
+    path: string;
+  };
+};
+
 export type DashboardActivityWidgetItemSummary = {
   kind: "activity";
   activityId: string;
@@ -1376,7 +1383,7 @@ export type DashboardWidgetDataSummary =
       widgetType: "favorites";
       generatedAt: string;
       page: DashboardWidgetPageSummary;
-      items: DashboardProjectWidgetItemSummary[];
+      items: DashboardFavoriteWidgetItemSummary[];
     }
   | {
       widgetType: "project_health";
@@ -1810,6 +1817,21 @@ export type NavigationRecentTargetSummary = {
   viewedAt: string;
 };
 
+export type PinnedFavoriteTargetSummary = {
+  targetType: "container" | "item" | "saved_view";
+  targetId: string;
+  workspaceId: string;
+  title: string;
+  subtitle: string;
+  path: string;
+  source: "favorite" | "pinned";
+  targetKind: string;
+  containerId: string | null;
+  containerType: string | null;
+  containerTitle: string | null;
+  updatedAt: string;
+};
+
 export type RecordNavigationTargetInput = {
   workspaceId?: string;
   target: {
@@ -2021,7 +2043,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   },
   navigation: {
     listRecentTargets: "local-work-os:navigation:list-recent-targets",
-    recordTarget: "local-work-os:navigation:record-target"
+    recordTarget: "local-work-os:navigation:record-target",
+    listPinnedFavorites: "local-work-os:navigation:list-pinned-favorites"
   }
 } as const;
 
@@ -2542,6 +2565,10 @@ export type LocalWorkOsIpcContracts = {
     input: RecordNavigationTargetInput;
     result: ApiResult<NavigationRecentTargetSummary[]>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.navigation.listPinnedFavorites]: {
+    input: string | undefined;
+    result: ApiResult<PinnedFavoriteTargetSummary[]>;
+  };
 };
 
 export type LocalWorkOsIpcChannel = keyof LocalWorkOsIpcContracts & string;
@@ -3004,6 +3031,9 @@ export type LocalWorkOsApi = {
     recordTarget: (
       input: RecordNavigationTargetInput
     ) => Promise<ApiResult<NavigationRecentTargetSummary[]>>;
+    listPinnedFavorites: (
+      workspaceId?: string
+    ) => Promise<ApiResult<PinnedFavoriteTargetSummary[]>>;
   };
 };
 
@@ -3498,7 +3528,12 @@ export function createLocalWorkOsApi(
           workspaceId
         ),
       recordTarget: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.navigation.recordTarget, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.navigation.recordTarget, input),
+      listPinnedFavorites: (workspaceId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.navigation.listPinnedFavorites,
+          workspaceId
+        )
     }
   };
 }

@@ -638,7 +638,8 @@ function createMockApi(): LocalWorkOsApi {
     },
     navigation: {
       listRecentTargets: async () => apiOk([]),
-      recordTarget: async () => apiOk([])
+      recordTarget: async () => apiOk([]),
+      listPinnedFavorites: async () => apiOk([])
     }
   };
 }
