@@ -2184,3 +2184,45 @@ Decisions made: - Added generic project/contact archive, complete, restore servi
 Files changed: packages/core/src/events/ActivityAction.ts; packages/db/src/repositories/ContainerRepository.ts; packages/db/src/services/SearchIndexService.ts; packages/features/src/containers/ContainerLifecycleService.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/main/ipc/projectHandlers.ts; apps/desktop/src/main/ipc/contactHandlers.ts; apps/desktop/src/renderer/pages/ProjectsPage.tsx; apps/desktop/src/renderer/pages/ContactsPage.tsx
 Open questions / risks: Full Electron E2E remains represented by service/preload/renderer coverage in current test stack.
 Next actions: Run full checks; commit; open PR.
+
+## 2026-05-10T21:05:51.2736631+10:00
+Objective: Merge PSE-112 and prepare next ticket.
+Decisions made: - Squash-merged PR #107 after CI passed. - Moved PSE-112 to Done and promoted PSE-113 to Codex Ready.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-113 not started; exactly one Codex Ready issue is queued.
+Next actions: Start PSE-113; read ticket/docs; implement template file format.
+
+2026-05-10 21:08:29 +10:00
+Objective: Run next Local Work OS ticket end-to-end from Linear through GitHub proof.
+Decisions made: - Start with required reconciliation of Linear/GitHub active work.
+Files changed: docs/session_log.md
+Open questions / risks: Active PR/CI/review state unknown.
+Next actions: Reconcile active issues; inspect PRs; implement next scoped ticket if unblocked.
+
+2026-05-10 21:09:42 +10:00
+Objective: Reconcile active Linear/GitHub work and select the next ticket.
+Decisions made: - No PR Open or In Progress issues found. - Selected PSE-113 and moved it to In Progress.
+Files changed: docs/session_log.md
+Open questions / risks: Ticket detail beyond imported stub still needs source docs review.
+Next actions: Read linked docs; branch for PSE-113; implement scoped format.
+
+2026-05-10 21:12:37 +10:00
+Objective: Plan PSE-113 implementation after docs/source review.
+Decisions made: - Add versioned .lwo-template envelope around existing template JSON. - Implement pure export builder/writer plus import validator; no schema migration.
+Files changed: docs/session_log.md
+Open questions / risks: Full template import execution may remain future scope; validation must be explicit.
+Next actions: Add services/types; add fixture/tests; update docs exports.
+
+2026-05-10 21:21:30 +10:00
+Objective: Complete PSE-113 implementation and local verification.
+Decisions made: - Implemented TemplateExportService and TemplateImportValidator. - Added v1 fixture and docs; no DB migration needed.
+Files changed: docs/TEMPLATE_FILE_FORMAT.md; docs/README.md; docs/DATA_MODEL.md; packages/features/src/templates/TemplateFileFormat.ts; packages/features/tests/templateFileFormat.test.ts
+Open questions / risks: Template file validation is implemented; full imported-template persistence remains future UI/IPC scope.
+Next actions: Review diff; commit/push; open PR.
+
+2026-05-10 21:24:45 +10:00
+Objective: Publish PSE-113 proof to GitHub and Linear.
+Decisions made: - Committed 689e41e and opened ready PR #108. - Moved PSE-113 to PR Open with PR link/comment.
+Files changed: docs/session_log.md
+Open questions / risks: CI still in progress; merge pending green checks.
+Next actions: Wait for CI; merge if green; promote next ticket.

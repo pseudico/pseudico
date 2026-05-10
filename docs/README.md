@@ -22,6 +22,8 @@ docs and the linked Linear issue.
   database work, Electron IPC, renderer work, and release checks.
 - `SECURITY.md` records local-only, Electron, filesystem, database, and privacy
   guardrails.
+- `TEMPLATE_FILE_FORMAT.md` defines the versioned `.lwo-template` JSON
+  envelope for portable local templates.
 - `ROADMAP.md` summarizes the staged implementation path.
 - `MODULE_REGISTRY.md` names planned product modules and their responsibilities.
 - `QA_SCRIPTS.md` lists manual and automated smoke checks for MVP workflows.

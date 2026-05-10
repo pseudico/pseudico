@@ -139,6 +139,10 @@ MVP object graph:
   attachments with monotonically increasing version numbers, workspace-relative
   version storage paths, checksums, byte sizes, optional notes, and activity-log
   coverage for snapshot and restore writes.
+- Portable template files use a versioned `.lwo-template` JSON envelope around
+  the existing template JSON payload. The envelope records capabilities,
+  portable tag/category references, source metadata, and file-version
+  information while keeping binary attachments as placeholders.
 
 Search remains a local projection table behind `SearchIndexService`,
 `SearchService`, and feature-level orchestrators. It indexes source records
