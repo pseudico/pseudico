@@ -531,6 +531,7 @@ export class ContactService {
       metadata: {
         contactFieldIds: fields.map((field) => field.id),
         contactFieldLabels: fields.map((field) => field.label),
+        contactFieldValues: fields.map((field) => field.value),
         contactFieldTypes: fields.map((field) => field.type)
       },
       timestamp

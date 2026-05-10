@@ -7,6 +7,7 @@ import {
   type CategorySummary,
   type CollectionEvaluationSummary,
   type CollectionSummary,
+  type ContactLabelBrowserSummary,
   type ContactSummary,
   type DatabaseHealthStatus,
   type DashboardViewModelSummary,
@@ -27,6 +28,7 @@ import {
   type WorkspaceSummary
 } from "../../src/preload/api";
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
+import { ContactLabelBrowserPage } from "../../src/renderer/pages/ContactLabelBrowserPage";
 import { ProjectTagBrowserPage } from "../../src/renderer/pages/ProjectTagBrowserPage";
 import { ProjectsPage } from "../../src/renderer/pages/ProjectsPage";
 import { CollectionsPage } from "../../src/renderer/pages/CollectionsPage";
@@ -530,6 +532,7 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
         ]),
       listTargetsByMetadata: async () => apiOk([metadataTarget]),
       getProjectTagBrowser: async () => apiOk(projectTagBrowserSummary()),
+      getContactLabelBrowser: async () => apiOk(contactLabelBrowserSummary()),
       addTagToTarget: async () =>
         apiOk({ id: "tag_1", name: "Launch", slug: "launch", source: "manual" }),
       removeTagFromTarget: async () =>
@@ -1127,6 +1130,150 @@ function projectTagBrowserSummary() {
   };
 }
 
+function contactLabelBrowserSummary(): ContactLabelBrowserSummary {
+  return {
+    workspaceId: "workspace_1",
+    generatedAt: "2026-05-01T00:00:00.000Z",
+    filters: {
+      fieldFilters: [{ labelKey: "company", valueKey: "acme" }],
+      company: "acme",
+      role: null,
+      location: null,
+      emailDomain: "acme.test",
+      tagSlugs: ["vip"],
+      categoryId: "category_1",
+      status: "active",
+      groupBy: "company",
+      fieldGroupLabel: "company"
+    },
+    selectedTags: [
+      {
+        id: "tag_vip",
+        workspaceId: "workspace_1",
+        name: "VIP",
+        slug: "vip",
+        createdAt: "2026-05-01T00:00:00.000Z",
+        updatedAt: "2026-05-01T00:00:00.000Z",
+        deletedAt: null
+      }
+    ],
+    fieldFacets: [
+      {
+        label: "Company",
+        labelKey: "company",
+        value: "Acme",
+        valueKey: "acme",
+        type: "text",
+        contactCount: 1
+      },
+      {
+        label: "Email",
+        labelKey: "email",
+        value: "alex@acme.test",
+        valueKey: "alex@acme.test",
+        type: "email",
+        contactCount: 1
+      }
+    ],
+    companyFacets: [{ value: "Acme", valueKey: "acme", contactCount: 1 }],
+    roleFacets: [{ value: "Decision Maker", valueKey: "decision maker", contactCount: 1 }],
+    locationFacets: [{ value: "Melbourne", valueKey: "melbourne", contactCount: 1 }],
+    emailDomainFacets: [{ value: "acme.test", valueKey: "acme.test", contactCount: 1 }],
+    tagFacets: [
+      {
+        id: "tag_vip",
+        workspaceId: "workspace_1",
+        name: "VIP",
+        slug: "vip",
+        createdAt: "2026-05-01T00:00:00.000Z",
+        updatedAt: "2026-05-01T00:00:00.000Z",
+        deletedAt: null,
+        contactCount: 1
+      }
+    ],
+    categoryFacets: [{ ...category, contactCount: 1 }],
+    statusFacets: [{ status: "active", contactCount: 1 }],
+    contacts: [
+      {
+        ...contact,
+        category: {
+          id: "category_1",
+          name: "Finance",
+          slug: "finance",
+          color: "#2c6b8f"
+        },
+        fields: [
+          {
+            id: "field_1",
+            workspaceId: "workspace_1",
+            containerId: contact.id,
+            label: "Company",
+            labelKey: "company",
+            value: "Acme",
+            valueKey: "acme",
+            type: "text",
+            sortOrder: 0,
+            createdAt: "2026-05-01T00:00:00.000Z",
+            updatedAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: null
+          },
+          {
+            id: "field_2",
+            workspaceId: "workspace_1",
+            containerId: contact.id,
+            label: "Email",
+            labelKey: "email",
+            value: "alex@acme.test",
+            valueKey: "alex@acme.test",
+            type: "email",
+            sortOrder: 1,
+            createdAt: "2026-05-01T00:00:00.000Z",
+            updatedAt: "2026-05-01T00:00:00.000Z",
+            deletedAt: null
+          }
+        ],
+        tags: [{ id: "tag_vip", name: "VIP", slug: "vip", source: "manual" }]
+      }
+    ],
+    groups: [
+      {
+        key: "Acme",
+        label: "Acme",
+        contactCount: 1,
+        contacts: [
+          {
+            ...contact,
+            category: {
+              id: "category_1",
+              name: "Finance",
+              slug: "finance",
+              color: "#2c6b8f"
+            },
+            fields: [
+              {
+                id: "field_1",
+                workspaceId: "workspace_1",
+                containerId: contact.id,
+                label: "Company",
+                labelKey: "company",
+                value: "Acme",
+                valueKey: "acme",
+                type: "text",
+                sortOrder: 0,
+                createdAt: "2026-05-01T00:00:00.000Z",
+                updatedAt: "2026-05-01T00:00:00.000Z",
+                deletedAt: null
+              }
+            ],
+            tags: [{ id: "tag_vip", name: "VIP", slug: "vip", source: "manual" }]
+          }
+        ]
+      }
+    ],
+    totalContactCount: 1
+  };
+}
+
 describe("Projects renderer pages", () => {
   afterEach(() => {
     workspaceStore.reset();
@@ -1246,6 +1393,26 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("@urgent");
     expect(html).toContain("Matching projects");
     expect(html).toContain("Launch Plan");
+    expect(html).toContain("data-tag-source=\"manual\"");
+  });
+
+  it("renders the contact label browser with label facets and grouped contacts", () => {
+    workspaceStore.setCurrentWorkspace(workspace);
+
+    const html = renderToString(
+      <MemoryRouter initialEntries={["/contact-labels?field=Company:Acme&company=acme&emailDomain=acme.test&tags=vip&categoryId=category_1&status=active"]}>
+        <ContactLabelBrowserPage
+          apiClient={createMockApi([project])}
+          initialViewModel={contactLabelBrowserSummary()}
+        />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Contact Label Browser");
+    expect(html).toContain("Company: Acme");
+    expect(html).toContain("Email domain: acme.test");
+    expect(html).toContain("Matching contacts");
+    expect(html).toContain("Alex Chen");
     expect(html).toContain("data-tag-source=\"manual\"");
   });
 

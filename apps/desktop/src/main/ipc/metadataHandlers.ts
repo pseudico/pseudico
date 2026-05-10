@@ -1,4 +1,9 @@
-import { MetadataBrowserService, ProjectTagBrowserService, TagService } from "@local-work-os/features";
+import {
+  ContactLabelBrowserService,
+  MetadataBrowserService,
+  ProjectTagBrowserService,
+  TagService
+} from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -13,6 +18,8 @@ import {
   type AddTagToTargetInput,
   type ApiResult,
   type CategoryCountSummary,
+  type ContactLabelBrowserInput,
+  type ContactLabelBrowserSummary,
   type ItemTagSummary,
   type ListTargetsByMetadataInput,
   type MetadataTargetSummary,
@@ -42,6 +49,9 @@ type MetadataIpcHandlers = {
   handleGetProjectTagBrowser: (
     input: unknown
   ) => Promise<ApiResult<ProjectTagBrowserSummary>>;
+  handleGetContactLabelBrowser: (
+    input: unknown
+  ) => Promise<ApiResult<ContactLabelBrowserSummary>>;
   handleAddTagToTarget: (input: unknown) => Promise<ApiResult<ItemTagSummary>>;
   handleRemoveTagFromTarget: (
     input: unknown
@@ -126,6 +136,23 @@ export function createMetadataIpcHandlers(
       });
     },
 
+    async handleGetContactLabelBrowser(input) {
+      if (!isContactLabelBrowserInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "getContactLabelBrowser requires optional workspaceId, fieldFilters, company, role, location, emailDomain, tagSlugs, categoryId, status, groupBy, and fieldGroupLabel fields."
+        );
+      }
+
+      return await withMetadataBrowserService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+
+        return apiOk(toContactLabelBrowserSummary(
+          context.contactLabelBrowserService.getViewModel({ ...input, workspaceId })
+        ));
+      });
+    },
+
     async handleAddTagToTarget(input) {
       if (!isAddTagToTargetInput(input)) {
         return apiError(
@@ -172,6 +199,7 @@ async function withMetadataBrowserService<T>(
     connection: DatabaseConnection;
     metadataBrowserService: MetadataBrowserService;
     projectTagBrowserService: ProjectTagBrowserService;
+    contactLabelBrowserService: ContactLabelBrowserService;
     tagService: TagService;
     workspace: WorkspaceSummary;
   }) => Promise<ApiResult<T>>
@@ -192,6 +220,7 @@ async function withMetadataBrowserService<T>(
       connection,
       metadataBrowserService: new MetadataBrowserService({ connection }),
       projectTagBrowserService: new ProjectTagBrowserService({ connection }),
+      contactLabelBrowserService: new ContactLabelBrowserService({ connection }),
       tagService: new TagService({ connection }),
       workspace
     });
@@ -354,6 +383,99 @@ function toProjectTagBrowserSummary(
   };
 }
 
+function toContactLabelBrowserSummary(
+  viewModel: ReturnType<ContactLabelBrowserService["getViewModel"]>
+): ContactLabelBrowserSummary {
+  return {
+    workspaceId: viewModel.workspaceId,
+    generatedAt: viewModel.generatedAt,
+    filters: viewModel.filters,
+    selectedTags: viewModel.selectedTags.map((tag) => ({
+      id: tag.id,
+      workspaceId: tag.workspaceId,
+      name: tag.name,
+      slug: tag.slug,
+      createdAt: tag.createdAt,
+      updatedAt: tag.updatedAt,
+      deletedAt: tag.deletedAt
+    })),
+    fieldFacets: viewModel.fieldFacets,
+    companyFacets: viewModel.companyFacets,
+    roleFacets: viewModel.roleFacets,
+    locationFacets: viewModel.locationFacets,
+    emailDomainFacets: viewModel.emailDomainFacets,
+    tagFacets: viewModel.tagFacets.map((tag) => ({
+      id: tag.id,
+      workspaceId: tag.workspaceId,
+      name: tag.name,
+      slug: tag.slug,
+      createdAt: tag.createdAt,
+      updatedAt: tag.updatedAt,
+      deletedAt: tag.deletedAt,
+      contactCount: tag.contactCount
+    })),
+    categoryFacets: viewModel.categoryFacets.map((category) => ({
+      id: category.id,
+      workspaceId: category.workspaceId,
+      name: category.name,
+      slug: category.slug,
+      color: category.color,
+      description: category.description,
+      createdAt: category.createdAt,
+      updatedAt: category.updatedAt,
+      deletedAt: category.deletedAt,
+      contactCount: category.contactCount
+    })),
+    statusFacets: viewModel.statusFacets,
+    contacts: viewModel.contacts.map(toContactLabelBrowserContactSummary),
+    groups: viewModel.groups.map((group) => ({
+      key: group.key,
+      label: group.label,
+      contactCount: group.contactCount,
+      contacts: group.contacts.map(toContactLabelBrowserContactSummary)
+    })),
+    totalContactCount: viewModel.totalContactCount
+  };
+}
+
+function toContactLabelBrowserContactSummary(
+  contact: ReturnType<ContactLabelBrowserService["getViewModel"]>["contacts"][number]
+): ContactLabelBrowserSummary["contacts"][number] {
+  return {
+    id: contact.id,
+    workspaceId: contact.workspaceId,
+    type: "contact",
+    name: contact.name,
+    slug: contact.slug,
+    description: contact.description,
+    status: contact.status as ContactLabelBrowserSummary["contacts"][number]["status"],
+    categoryId: contact.categoryId,
+    color: contact.color,
+    isFavorite: contact.isFavorite,
+    sortOrder: contact.sortOrder,
+    createdAt: contact.createdAt,
+    updatedAt: contact.updatedAt,
+    archivedAt: contact.archivedAt,
+    deletedAt: contact.deletedAt,
+    category: contact.category,
+    fields: contact.fields.map((field) => ({
+      id: field.id,
+      workspaceId: field.workspaceId,
+      containerId: field.containerId,
+      label: field.label,
+      labelKey: field.labelKey,
+      value: field.value,
+      valueKey: field.valueKey,
+      type: field.type,
+      sortOrder: field.sortOrder,
+      createdAt: field.createdAt,
+      updatedAt: field.updatedAt,
+      deletedAt: field.deletedAt
+    })),
+    tags: contact.tags.map(toItemTagSummary)
+  };
+}
+
 function isListTargetsByMetadataInput(
   input: unknown
 ): input is ListTargetsByMetadataInput {
@@ -381,6 +503,46 @@ function isProjectTagBrowserInput(input: unknown): input is ProjectTagBrowserInp
       input.status === "waiting" ||
       input.status === "completed" ||
       input.status === "archived")
+  );
+}
+
+function isContactLabelBrowserInput(
+  input: unknown
+): input is ContactLabelBrowserInput {
+  return (
+    isRecord(input) &&
+    isOptionalString(input.workspaceId) &&
+    (input.fieldFilters === undefined ||
+      (Array.isArray(input.fieldFilters) &&
+        input.fieldFilters.every(
+          (filter) =>
+            isRecord(filter) &&
+            isNonEmptyString(filter.label) &&
+            isNonEmptyString(filter.value)
+        ))) &&
+    isOptionalNullableString(input.company) &&
+    isOptionalNullableString(input.role) &&
+    isOptionalNullableString(input.location) &&
+    isOptionalNullableString(input.emailDomain) &&
+    isOptionalStringArray(input.tagSlugs) &&
+    isOptionalNullableString(input.categoryId) &&
+    (input.status === undefined ||
+      input.status === null ||
+      input.status === "active" ||
+      input.status === "waiting" ||
+      input.status === "completed" ||
+      input.status === "archived") &&
+    (input.groupBy === undefined ||
+      input.groupBy === null ||
+      input.groupBy === "company" ||
+      input.groupBy === "role" ||
+      input.groupBy === "location" ||
+      input.groupBy === "emailDomain" ||
+      input.groupBy === "category" ||
+      input.groupBy === "tag" ||
+      input.groupBy === "status" ||
+      input.groupBy === "field") &&
+    isOptionalNullableString(input.fieldGroupLabel)
   );
 }
 

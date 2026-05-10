@@ -25,6 +25,10 @@ export function registerMetadataIpc(
     (_event, input) => handlers.handleGetProjectTagBrowser(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.metadata.getContactLabelBrowser,
+    (_event, input) => handlers.handleGetContactLabelBrowser(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.metadata.addTagToTarget,
     (_event, input) => handlers.handleAddTagToTarget(input)
   );

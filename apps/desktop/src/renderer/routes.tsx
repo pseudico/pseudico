@@ -6,6 +6,7 @@ export type AppRouteId =
   | "projects"
   | "projectTags"
   | "contacts"
+  | "contactLabels"
   | "collections"
   | "tagsCategories"
   | "search"
@@ -82,6 +83,14 @@ export const appRoutes = [
     nav: true
   },
   {
+    id: "contactLabels",
+    path: "/contact-labels",
+    label: "Contact Labels",
+    title: "Contact Label Browser",
+    summary: "Facet and grouped browser for contact custom labels and CRM fields.",
+    nav: true
+  },
+  {
     id: "collections",
     path: "/collections",
     label: "Collections",
@@ -154,6 +163,8 @@ export function getRouteByPath(pathname: string): AppRoute {
     appRoutes.find((route) => route.path === pathname) ??
     (pathname.startsWith("/projects/")
       ? appRoutes.find((route) => route.path === "/projects")
+      : pathname.startsWith("/contacts/")
+        ? appRoutes.find((route) => route.path === "/contacts")
       : undefined) ??
     appRoutes.find((route) => route.path === "/welcome")!
   );

@@ -201,6 +201,9 @@ export function ContactsPage({
           <Plus size={18} aria-hidden="true" />
           New contact
         </button>
+        <Link className="secondary-button" to="/contact-labels">
+          Browse labels
+        </Link>
       </div>
 
       {error === null ? null : <ErrorState error={error} title="Contacts error" />}
