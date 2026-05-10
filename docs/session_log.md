@@ -2247,3 +2247,57 @@ Decisions made: - Fixed module export expectations and desktop test mocks. - Rer
 Files changed: packages/features/tests/moduleExports.test.ts; apps/desktop/tests/renderer/*.tsx; docs/session_log.md
 Open questions / risks: CI still required after push; manual UI reopen QA documented for PR.
 Next actions: Commit; push branch; open PR.
+
+2026-05-10 22:01:33 +10:00
+Objective: Merge PSE-114 and prepare the next ticket.
+Decisions made: - Squash-merged PR #109 at 30ff93c. - Moved PSE-114 to Done. - Promoted PSE-115 to Codex Ready only.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-115 not started; no other active Linear issues found.
+Next actions: Start PSE-115 in the next run; keep CI/review gate for future PRs.
+## 2026-05-11 05:30:55 +10:00
+Objective: Reconcile active Linear/GitHub work and select next Local Work OS ticket.
+Decisions made:
+- No PR Open or In Progress issues found; one Codex Ready issue found: PSE-115.
+- Proceeding with PSE-115 under the project workflow.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need inspect ticket details and existing source before implementation.
+Next actions: Move PSE-115 to In Progress; read docs/source; create branch.
+## 2026-05-11 05:31:51 +10:00
+Objective: Start PSE-115 implementation.
+Decisions made:
+- Moved PSE-115 from Codex Ready to In Progress.
+- Created branch codex/PSE-115-automatic-project-contact-grouping.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need derive acceptance criteria from source ticket docs.
+Next actions: Read linked ticket/docs; inspect project/contact grouping code; plan edits.
+## 2026-05-11 05:33:52 +10:00
+Objective: Plan PSE-115 automatic grouping implementation.
+Decisions made:
+- Use feature-level ContainerGroupingService backed by app_settings; no schema migration needed.
+- Add local grouping controls to Projects/Contacts plus collapsed group state.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need keep grouping queries performant for large seeded sets.
+Next actions: Implement service/repository; wire IPC/API; add tests.
+## 2026-05-11 05:50:05 +10:00
+Objective: Implement PSE-115 automatic grouping slice.
+Decisions made:
+- Added batched ContainerGroupingRepository and app-settings-backed ContainerGroupingService.
+- Wired IPC/preload/client APIs and Projects/Contacts library grouping controls.
+Files changed:
+- packages/db/src/repositories/ContainerGroupingRepository.ts
+- packages/features/src/containers/ContainerGroupingService.ts
+- apps/desktop/src/renderer/pages/ProjectsPage.tsx
+Open questions / risks: Full lint/test/build still pending.
+Next actions: Run lint/test/build; fix regressions; open PR.
+## 2026-05-11 05:53:51 +10:00
+Objective: Verify PSE-115 before PR.
+Decisions made:
+- pnpm lint, pnpm typecheck, pnpm test, and pnpm build pass after sandbox EPERM reruns where needed.
+- Updated module registry and IPC channel count tests for new grouping APIs.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI and review still required after PR opens.
+Next actions: Stage/commit; push branch; open ready PR.

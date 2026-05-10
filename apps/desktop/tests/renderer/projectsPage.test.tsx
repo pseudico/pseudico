@@ -29,6 +29,7 @@ import {
 } from "../../src/preload/api";
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
 import { ContactLabelBrowserPage } from "../../src/renderer/pages/ContactLabelBrowserPage";
+import { ContactsPage } from "../../src/renderer/pages/ContactsPage";
 import { ProjectTagBrowserPage } from "../../src/renderer/pages/ProjectTagBrowserPage";
 import { ProjectsPage } from "../../src/renderer/pages/ProjectsPage";
 import { CollectionsPage } from "../../src/renderer/pages/CollectionsPage";
@@ -635,6 +636,52 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
           defaultQuickAddType: input.defaultQuickAddType ?? "task",
           summaryFirst: input.summaryFirst ?? false,
           compactMode: input.compactMode ?? false
+        }),
+      getGrouping: async (input) =>
+        apiOk({
+          workspaceId: input.workspaceId ?? "workspace_1",
+          containerType: input.containerType,
+          mode: input.mode ?? (input.containerType === "project" ? "status" : "company"),
+          generatedAt: "2026-05-10T10:01:00.000Z",
+          staleAfterDays: 30,
+          totalCount: projects.length,
+          facets: [],
+          preferences: {
+            workspaceId: input.workspaceId ?? "workspace_1",
+            containerType: input.containerType,
+            mode: input.mode ?? (input.containerType === "project" ? "status" : "company"),
+            collapsedGroupKeys: [],
+            updatedAt: null
+          },
+          groups: [
+            {
+              key: "all",
+              label: input.containerType === "project" ? "All projects" : "All contacts",
+              count: projects.length,
+              collapsed: false,
+              targets: projects.map((entry) => ({
+                ...entry,
+                categoryName: null,
+                tags: []
+              }))
+            }
+          ]
+        }),
+      getGroupingPreferences: async (input) =>
+        apiOk({
+          workspaceId: input.workspaceId ?? "workspace_1",
+          containerType: input.containerType,
+          mode: input.containerType === "project" ? "status" : "company",
+          collapsedGroupKeys: [],
+          updatedAt: null
+        }),
+      updateGroupingPreferences: async (input) =>
+        apiOk({
+          workspaceId: input.workspaceId ?? "workspace_1",
+          containerType: input.containerType,
+          mode: input.mode ?? (input.containerType === "project" ? "status" : "company"),
+          collapsedGroupKeys: input.collapsedGroupKeys ?? [],
+          updatedAt: "2026-05-10T10:01:00.000Z"
         })
     },
     items: {
@@ -1338,6 +1385,23 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Projects");
     expect(html).toContain("No projects yet");
     expect(html).toContain("Create project");
+    expect(html).toContain("Library grouping");
+    expect(html).toContain("Status");
+  });
+
+  it("renders contact grouping controls for the contacts library", () => {
+    workspaceStore.setCurrentWorkspace(workspace);
+
+    const html = renderToString(
+      <MemoryRouter>
+        <ContactsPage apiClient={createMockApi()} />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Contacts");
+    expect(html).toContain("Library grouping");
+    expect(html).toContain("Company");
+    expect(html).toContain("Browse labels");
   });
 
   it("renders project detail metadata placeholders", () => {

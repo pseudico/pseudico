@@ -16,7 +16,9 @@ import {
 } from "@local-work-os/ui";
 import type {
   CategorySummary,
+  ContainerGroupingViewModelSummary,
   LocalWorkOsApi,
+  ProjectLibraryGroupingMode,
   ProjectMutableStatus,
   ProjectSummary,
   TemplateSummary
@@ -46,6 +48,11 @@ export function ProjectsPage({
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [categories, setCategories] = useState<CategorySummary[]>([]);
   const [boardGrouping, setBoardGrouping] = useState<ProjectBoardGrouping>("status");
+  const [libraryGrouping, setLibraryGrouping] =
+    useState<ProjectLibraryGroupingMode>("status");
+  const [groupingView, setGroupingView] =
+    useState<ContainerGroupingViewModelSummary | null>(null);
+  const [savingGrouping, setSavingGrouping] = useState(false);
   const [visibilityFilter, setVisibilityFilter] = useState<ContainerVisibilityFilter>("active");
   const [movingProjectId, setMovingProjectId] = useState<string | null>(null);
   const [cloningProjectId, setCloningProjectId] = useState<string | null>(null);
@@ -105,6 +112,18 @@ export function ProjectsPage({
       if (active && categoryResult.ok) {
         setCategories(categoryResult.data);
       }
+
+      const groupingResult = await apiClient.containers.getGrouping({
+        workspaceId,
+        containerType: "project",
+        mode: libraryGrouping,
+        includeArchived: visibilityFilter === "archived"
+      });
+
+      if (active && groupingResult.ok) {
+        setGroupingView(groupingResult.data);
+        setLibraryGrouping(groupingResult.data.mode as ProjectLibraryGroupingMode);
+      }
     }
 
     void loadProjects();
@@ -112,7 +131,66 @@ export function ProjectsPage({
     return () => {
       active = false;
     };
-  }, [apiClient, currentWorkspace, visibilityFilter]);
+  }, [apiClient, currentWorkspace, libraryGrouping, visibilityFilter]);
+
+  async function changeLibraryGrouping(mode: ProjectLibraryGroupingMode): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
+    }
+
+    setLibraryGrouping(mode);
+    setSavingGrouping(true);
+    setError(null);
+
+    const result = await apiClient.containers.updateGroupingPreferences({
+      workspaceId: currentWorkspace.id,
+      containerType: "project",
+      mode,
+      collapsedGroupKeys: []
+    });
+
+    setSavingGrouping(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+    }
+  }
+
+  async function toggleProjectGroup(groupKey: string): Promise<void> {
+    if (currentWorkspace === null || groupingView === null) {
+      return;
+    }
+
+    const currentKeys = new Set(groupingView.preferences.collapsedGroupKeys);
+
+    if (currentKeys.has(groupKey)) {
+      currentKeys.delete(groupKey);
+    } else {
+      currentKeys.add(groupKey);
+    }
+
+    const collapsedGroupKeys = [...currentKeys].sort();
+    setGroupingView({
+      ...groupingView,
+      preferences: {
+        ...groupingView.preferences,
+        collapsedGroupKeys
+      },
+      groups: groupingView.groups.map((group) =>
+        group.key === groupKey ? { ...group, collapsed: !group.collapsed } : group
+      )
+    });
+
+    const result = await apiClient.containers.updateGroupingPreferences({
+      workspaceId: currentWorkspace.id,
+      containerType: "project",
+      collapsedGroupKeys
+    });
+
+    if (!result.ok) {
+      setError(result.error.message);
+    }
+  }
 
   async function createProject(values: ProjectFormValues): Promise<void> {
     if (currentWorkspace === null) {
@@ -427,6 +505,23 @@ export function ProjectsPage({
             <option value="archived">Archived projects</option>
           </select>
         </label>
+        <label>
+          Library grouping
+          <select
+            value={libraryGrouping}
+            disabled={savingGrouping}
+            onChange={(event) =>
+              void changeLibraryGrouping(event.currentTarget.value as ProjectLibraryGroupingMode)
+            }
+          >
+            <option value="none">No grouping</option>
+            <option value="status">Status</option>
+            <option value="category">Category</option>
+            <option value="tag">Tag</option>
+            <option value="favorite">Favourite</option>
+            <option value="stale">Stale</option>
+          </select>
+        </label>
       </div>
 
       {visibilityFilter === "active" ? (
@@ -450,21 +545,18 @@ export function ProjectsPage({
       ) : null}
 
       <div className="project-list-panel project-list-secondary" aria-label="Project list">
-        <div className="project-list">
-          {projects.map((project) => (
-            <ProjectListRow
-              key={project.id}
-              project={project}
-              savingTemplate={templateSavingId === project.id}
-              cloning={cloningProjectId === project.id}
-              transitioning={transitioningProjectId === project.id}
-              visibilityFilter={visibilityFilter}
-              onSaveTemplate={saveProjectAsTemplate}
-              onClone={cloneProject}
-              onLifecycle={(entry, action) => setPendingLifecycle({ project: entry, action })}
-            />
-          ))}
-        </div>
+        <GroupedProjectList
+          groupingView={groupingView}
+          projects={projects}
+          savingTemplateId={templateSavingId}
+          cloningProjectId={cloningProjectId}
+          transitioningProjectId={transitioningProjectId}
+          visibilityFilter={visibilityFilter}
+          onSaveTemplate={saveProjectAsTemplate}
+          onClone={cloneProject}
+          onLifecycle={(entry, action) => setPendingLifecycle({ project: entry, action })}
+          onToggleGroup={(groupKey) => void toggleProjectGroup(groupKey)}
+        />
       </div>
     </section>
   );
@@ -487,6 +579,88 @@ function ProjectsEmptyState({
       icon={<FolderKanban size={28} aria-hidden="true" />}
       title="No projects yet"
     />
+  );
+}
+
+function GroupedProjectList({
+  groupingView,
+  projects,
+  savingTemplateId,
+  cloningProjectId,
+  transitioningProjectId,
+  visibilityFilter,
+  onSaveTemplate,
+  onClone,
+  onLifecycle,
+  onToggleGroup
+}: {
+  groupingView: ContainerGroupingViewModelSummary | null;
+  projects: ProjectSummary[];
+  savingTemplateId: string | null;
+  cloningProjectId: string | null;
+  transitioningProjectId: string | null;
+  visibilityFilter: ContainerVisibilityFilter;
+  onSaveTemplate: (project: ProjectSummary) => void;
+  onClone: (project: ProjectSummary) => void;
+  onLifecycle: (project: ProjectSummary, action: ProjectLifecycleAction) => void;
+  onToggleGroup: (groupKey: string) => void;
+}): React.JSX.Element {
+  const groups =
+    groupingView?.groups.map((group) => ({
+      key: group.key,
+      label: group.label,
+      count: group.count,
+      collapsed: group.collapsed,
+      projects: group.targets
+        .filter((target) => target.type === "project")
+        .map(toProjectSummaryFromGroupingTarget)
+    })) ?? [
+      {
+        key: "all",
+        label: "All projects",
+        count: projects.length,
+        collapsed: false,
+        projects
+      }
+    ];
+
+  return (
+    <div className="grouped-results-list" aria-label="Grouped projects">
+      {groups.map((group) => (
+        <section className="grouped-results-group" key={group.key}>
+          <button
+            type="button"
+            className="grouped-results-heading"
+            aria-expanded={!group.collapsed}
+            onClick={() => onToggleGroup(group.key)}
+          >
+            <span>
+              <h3>{group.label}</h3>
+              <span>
+                {group.count} project{group.count === 1 ? "" : "s"}
+              </span>
+            </span>
+          </button>
+          {group.collapsed ? null : (
+            <div className="project-list grouped-result-items">
+              {group.projects.map((project) => (
+                <ProjectListRow
+                  key={`${group.key}:${project.id}`}
+                  project={project}
+                  savingTemplate={savingTemplateId === project.id}
+                  cloning={cloningProjectId === project.id}
+                  transitioning={transitioningProjectId === project.id}
+                  visibilityFilter={visibilityFilter}
+                  onSaveTemplate={onSaveTemplate}
+                  onClone={onClone}
+                  onLifecycle={onLifecycle}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      ))}
+    </div>
   );
 }
 
@@ -712,6 +886,28 @@ function toTemplateLibraryItem(template: TemplateSummary): TemplateLibraryItem {
     name: template.name,
     description: template.description,
     updatedAt: template.updatedAt
+  };
+}
+
+function toProjectSummaryFromGroupingTarget(
+  target: ContainerGroupingViewModelSummary["groups"][number]["targets"][number]
+): ProjectSummary {
+  return {
+    id: target.id,
+    workspaceId: target.workspaceId,
+    type: "project",
+    name: target.name,
+    slug: target.slug,
+    description: target.description,
+    status: target.status as ProjectSummary["status"],
+    categoryId: target.categoryId,
+    color: target.color,
+    isFavorite: target.isFavorite,
+    sortOrder: target.sortOrder,
+    createdAt: target.createdAt,
+    updatedAt: target.updatedAt,
+    archivedAt: target.archivedAt,
+    deletedAt: target.deletedAt
   };
 }
 

@@ -378,7 +378,12 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       getPreferences: (containerId) =>
         callApi(() => api.containers.getPreferences(containerId)),
       updatePreferences: (input) =>
-        callApi(() => api.containers.updatePreferences(input))
+        callApi(() => api.containers.updatePreferences(input)),
+      getGrouping: (input) => callApi(() => api.containers.getGrouping(input)),
+      getGroupingPreferences: (input) =>
+        callApi(() => api.containers.getGroupingPreferences(input)),
+      updateGroupingPreferences: (input) =>
+        callApi(() => api.containers.updateGroupingPreferences(input))
     },
     items: {
       getStatus: () => callApi(() => api.items.getStatus()),
@@ -878,7 +883,13 @@ export const desktopApiClient: LocalWorkOsApi = {
     getPreferences: (containerId) =>
       getDesktopApiClient().containers.getPreferences(containerId),
     updatePreferences: (input) =>
-      getDesktopApiClient().containers.updatePreferences(input)
+      getDesktopApiClient().containers.updatePreferences(input),
+    getGrouping: (input) =>
+      getDesktopApiClient().containers.getGrouping(input),
+    getGroupingPreferences: (input) =>
+      getDesktopApiClient().containers.getGroupingPreferences(input),
+    updateGroupingPreferences: (input) =>
+      getDesktopApiClient().containers.updateGroupingPreferences(input)
   },
   items: {
     getStatus: () => getDesktopApiClient().items.getStatus(),

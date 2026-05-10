@@ -11,7 +11,13 @@ import {
   type ContactFormValues,
   type TemplateLibraryItem
 } from "@local-work-os/ui";
-import type { ContactSummary, LocalWorkOsApi, TemplateSummary } from "../../preload/api";
+import type {
+  ContactLibraryGroupingMode,
+  ContactSummary,
+  ContainerGroupingViewModelSummary,
+  LocalWorkOsApi,
+  TemplateSummary
+} from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
 
@@ -34,6 +40,11 @@ export function ContactsPage({
   const [creating, setCreating] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
+  const [libraryGrouping, setLibraryGrouping] =
+    useState<ContactLibraryGroupingMode>("company");
+  const [groupingView, setGroupingView] =
+    useState<ContainerGroupingViewModelSummary | null>(null);
+  const [savingGrouping, setSavingGrouping] = useState(false);
   const [templateSavingId, setTemplateSavingId] = useState<string | null>(null);
   const [cloningContactId, setCloningContactId] = useState<string | null>(null);
   const [transitioningContactId, setTransitioningContactId] = useState<string | null>(null);
@@ -86,6 +97,18 @@ export function ContactsPage({
           setTemplates(templateResult.data);
         }
       }
+
+      const groupingResult = await apiClient.containers.getGrouping({
+        workspaceId,
+        containerType: "contact",
+        mode: libraryGrouping,
+        includeArchived: visibilityFilter === "archived"
+      });
+
+      if (active && groupingResult.ok) {
+        setGroupingView(groupingResult.data);
+        setLibraryGrouping(groupingResult.data.mode as ContactLibraryGroupingMode);
+      }
     }
 
     void loadContacts();
@@ -93,7 +116,66 @@ export function ContactsPage({
     return () => {
       active = false;
     };
-  }, [apiClient, currentWorkspace, visibilityFilter]);
+  }, [apiClient, currentWorkspace, libraryGrouping, visibilityFilter]);
+
+  async function changeLibraryGrouping(mode: ContactLibraryGroupingMode): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
+    }
+
+    setLibraryGrouping(mode);
+    setSavingGrouping(true);
+    setError(null);
+
+    const result = await apiClient.containers.updateGroupingPreferences({
+      workspaceId: currentWorkspace.id,
+      containerType: "contact",
+      mode,
+      collapsedGroupKeys: []
+    });
+
+    setSavingGrouping(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+    }
+  }
+
+  async function toggleContactGroup(groupKey: string): Promise<void> {
+    if (currentWorkspace === null || groupingView === null) {
+      return;
+    }
+
+    const currentKeys = new Set(groupingView.preferences.collapsedGroupKeys);
+
+    if (currentKeys.has(groupKey)) {
+      currentKeys.delete(groupKey);
+    } else {
+      currentKeys.add(groupKey);
+    }
+
+    const collapsedGroupKeys = [...currentKeys].sort();
+    setGroupingView({
+      ...groupingView,
+      preferences: {
+        ...groupingView.preferences,
+        collapsedGroupKeys
+      },
+      groups: groupingView.groups.map((group) =>
+        group.key === groupKey ? { ...group, collapsed: !group.collapsed } : group
+      )
+    });
+
+    const result = await apiClient.containers.updateGroupingPreferences({
+      workspaceId: currentWorkspace.id,
+      containerType: "contact",
+      collapsedGroupKeys
+    });
+
+    if (!result.ok) {
+      setError(result.error.message);
+    }
+  }
 
   async function createContact(values: ContactFormValues): Promise<void> {
     if (currentWorkspace === null) {
@@ -359,6 +441,22 @@ export function ContactsPage({
             <option value="archived">Archived contacts</option>
           </select>
         </label>
+        <label>
+          Library grouping
+          <select
+            value={libraryGrouping}
+            disabled={savingGrouping}
+            onChange={(event) =>
+              void changeLibraryGrouping(event.currentTarget.value as ContactLibraryGroupingMode)
+            }
+          >
+            <option value="none">No grouping</option>
+            <option value="company">Company</option>
+            <option value="label">Label</option>
+            <option value="tag">Tag</option>
+            <option value="category">Category</option>
+          </select>
+        </label>
       </div>
 
       <div className="project-list-panel" aria-busy={loading}>
@@ -369,21 +467,18 @@ export function ContactsPage({
         (contacts.length === 0 ? (
           <ContactsEmptyState onCreate={() => setCreateOpen(true)} />
         ) : (
-          <div className="project-list" aria-label="Contacts">
-            {contacts.map((contact) => (
-              <ContactListRow
-                key={contact.id}
-                contact={contact}
-                savingTemplate={templateSavingId === contact.id}
-                cloning={cloningContactId === contact.id}
-                transitioning={transitioningContactId === contact.id}
-                visibilityFilter={visibilityFilter}
-                onSaveTemplate={saveContactAsTemplate}
-                onClone={cloneContact}
-                onLifecycle={(entry, action) => setPendingLifecycle({ contact: entry, action })}
-              />
-            ))}
-          </div>
+          <GroupedContactList
+            contacts={contacts}
+            groupingView={groupingView}
+            savingTemplateId={templateSavingId}
+            cloningContactId={cloningContactId}
+            transitioningContactId={transitioningContactId}
+            visibilityFilter={visibilityFilter}
+            onSaveTemplate={saveContactAsTemplate}
+            onClone={cloneContact}
+            onLifecycle={(entry, action) => setPendingLifecycle({ contact: entry, action })}
+            onToggleGroup={(groupKey) => void toggleContactGroup(groupKey)}
+          />
         ))}
       </div>
     </section>
@@ -407,6 +502,88 @@ function ContactsEmptyState({
       icon={<Contact size={28} aria-hidden="true" />}
       title="No contacts yet"
     />
+  );
+}
+
+function GroupedContactList({
+  contacts,
+  groupingView,
+  savingTemplateId,
+  cloningContactId,
+  transitioningContactId,
+  visibilityFilter,
+  onSaveTemplate,
+  onClone,
+  onLifecycle,
+  onToggleGroup
+}: {
+  contacts: ContactSummary[];
+  groupingView: ContainerGroupingViewModelSummary | null;
+  savingTemplateId: string | null;
+  cloningContactId: string | null;
+  transitioningContactId: string | null;
+  visibilityFilter: ContainerVisibilityFilter;
+  onSaveTemplate: (contact: ContactSummary) => void;
+  onClone: (contact: ContactSummary) => void;
+  onLifecycle: (contact: ContactSummary, action: ContactLifecycleAction) => void;
+  onToggleGroup: (groupKey: string) => void;
+}): React.JSX.Element {
+  const groups =
+    groupingView?.groups.map((group) => ({
+      key: group.key,
+      label: group.label,
+      count: group.count,
+      collapsed: group.collapsed,
+      contacts: group.targets
+        .filter((target) => target.type === "contact")
+        .map(toContactSummaryFromGroupingTarget)
+    })) ?? [
+      {
+        key: "all",
+        label: "All contacts",
+        count: contacts.length,
+        collapsed: false,
+        contacts
+      }
+    ];
+
+  return (
+    <div className="grouped-results-list" aria-label="Grouped contacts">
+      {groups.map((group) => (
+        <section className="grouped-results-group" key={group.key}>
+          <button
+            type="button"
+            className="grouped-results-heading"
+            aria-expanded={!group.collapsed}
+            onClick={() => onToggleGroup(group.key)}
+          >
+            <span>
+              <h3>{group.label}</h3>
+              <span>
+                {group.count} contact{group.count === 1 ? "" : "s"}
+              </span>
+            </span>
+          </button>
+          {group.collapsed ? null : (
+            <div className="project-list grouped-result-items">
+              {group.contacts.map((contact) => (
+                <ContactListRow
+                  key={`${group.key}:${contact.id}`}
+                  contact={contact}
+                  savingTemplate={savingTemplateId === contact.id}
+                  cloning={cloningContactId === contact.id}
+                  transitioning={transitioningContactId === contact.id}
+                  visibilityFilter={visibilityFilter}
+                  onSaveTemplate={onSaveTemplate}
+                  onClone={onClone}
+                  onLifecycle={onLifecycle}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      ))}
+    </div>
   );
 }
 
@@ -595,5 +772,27 @@ function toTemplateLibraryItem(template: TemplateSummary): TemplateLibraryItem {
     name: template.name,
     description: template.description,
     updatedAt: template.updatedAt
+  };
+}
+
+function toContactSummaryFromGroupingTarget(
+  target: ContainerGroupingViewModelSummary["groups"][number]["targets"][number]
+): ContactSummary {
+  return {
+    id: target.id,
+    workspaceId: target.workspaceId,
+    type: "contact",
+    name: target.name,
+    slug: target.slug,
+    description: target.description,
+    status: target.status as ContactSummary["status"],
+    categoryId: target.categoryId,
+    color: target.color,
+    isFavorite: target.isFavorite,
+    sortOrder: target.sortOrder,
+    createdAt: target.createdAt,
+    updatedAt: target.updatedAt,
+    archivedAt: target.archivedAt,
+    deletedAt: target.deletedAt
   };
 }
