@@ -231,6 +231,24 @@ export type ExportTasksCsvInput = {
   format?: "csv" | "tsv";
 };
 
+export type PrintPdfInput = {
+  workspaceId?: string;
+  title?: string;
+  itemIds?: string[];
+  containerId?: string;
+};
+
+export type PrintPdfSummary = {
+  id: string;
+  workspaceId: string;
+  createdAt: string;
+  relativePath: string;
+  sizeBytes: number;
+  sourceType: "selected_items" | "container" | "view";
+  sourceId: string;
+  itemCount: number;
+};
+
 export type ImportValidationIssueSummary = {
   severity: "error" | "warning";
   code: string;
@@ -2272,6 +2290,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     exportProjectMarkdown: "local-work-os:export:export-project-markdown",
     exportTasksCsv: "local-work-os:export:export-tasks-csv"
   },
+  print: {
+    printPdf: "local-work-os:print:print-pdf"
+  },
   diagnostics: {
     runWorkspaceIntegrityCheck:
       "local-work-os:diagnostics:run-workspace-integrity-check"
@@ -2874,6 +2895,10 @@ export type LocalWorkOsIpcContracts = {
     input: ExportTasksCsvInput | undefined;
     result: ApiResult<TextExportSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.print.printPdf]: {
+    input: PrintPdfInput;
+    result: ApiResult<PrintPdfSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runWorkspaceIntegrityCheck]: {
     input: RunWorkspaceIntegrityCheckInput | undefined;
     result: ApiResult<WorkspaceIntegritySummary>;
@@ -3401,6 +3426,9 @@ export type LocalWorkOsApi = {
     exportTasksCsv: (
       input?: ExportTasksCsvInput
     ) => Promise<ApiResult<TextExportSummary>>;
+  };
+  print?: {
+    printPdf: (input: PrintPdfInput) => Promise<ApiResult<PrintPdfSummary>>;
   };
   diagnostics: {
     runWorkspaceIntegrityCheck: (
@@ -3947,6 +3975,10 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportProjectMarkdown, input),
       exportTasksCsv: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportTasksCsv, input)
+    },
+    print: {
+      printPdf: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.print.printPdf, input)
     },
     diagnostics: {
       runWorkspaceIntegrityCheck: (input) =>

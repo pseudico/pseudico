@@ -33,6 +33,8 @@ import {
   NavigationHistoryService,
   notesModuleContract,
   plannedFeatureAreas,
+  PrintService,
+  printingModuleContract,
   projectsModuleContract,
   quickStartActionProviders,
   recurrenceModuleContract,
@@ -93,6 +95,7 @@ describe("feature module exports", () => {
       "backup",
       "bulkActions",
       "export",
+      "printing",
       "templates",
       "workflows",
       "undo",
@@ -135,6 +138,7 @@ describe("feature module exports", () => {
       backupModuleContract.module,
       bulkActionsModuleContract.module,
       exportModuleContract.module,
+      printingModuleContract.module,
       templatesModuleContract.module,
       workflowsModuleContract.module,
       undoModuleContract.module,
@@ -173,6 +177,7 @@ describe("feature module exports", () => {
       "backup",
       "bulkActions",
       "export",
+      "printing",
       "templates",
       "workflows",
       "undo",
@@ -205,6 +210,10 @@ describe("feature module exports", () => {
 
   it("exports the workspace JSON export service implementation", () => {
     expect(ExportService).toBeDefined();
+  });
+
+  it("exports the print service implementation", () => {
+    expect(PrintService).toBeDefined();
   });
 
   it("exports the bulk action service implementation", () => {

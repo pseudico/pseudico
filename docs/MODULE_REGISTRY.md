@@ -79,6 +79,7 @@ renderer-only implementation.
 | Calendar | Own month/week/day calendar projections and date interactions. | Calendar entries, local dated work, local imports later | Tasks, timeline, metadata, workspace | Today, dashboard, planning views | V1 |
 | Backup | Own local backup orchestration, restore into a new workspace, and backup integrity checks. | Backup snapshots, manifests, restore summaries, integrity reports | Workspace, files, database services, Electron main/preload IPC | Maintenance, export/import, restore | MVP |
 | Export | Own local export orchestration and portable archive outputs. | JSON exports, Markdown exports, CSV/TSV exports, manifests | Workspace, files, metadata, projects, contacts, tasks, notes | Backup, import later, maintenance | MVP |
+| Printing | Own sanitized local print/PDF rendering for selected items and container/view projections. | Print HTML documents, PDF export summaries, print export activity | Workspace, items, projects, contacts, collections, dashboard, Electron printToPDF | Export, activity, files metadata | V1 |
 
 ## Platform And Future Modules
 
@@ -780,6 +781,31 @@ Integration points:
 - Workspace, projects, contacts, tasks, notes, files, links, and metadata.
 - Backup for archive workflows.
 - Electron main/preload IPC for safe destination handling.
+
+### Printing
+
+Owns:
+
+- Sanitized print-safe HTML for selected items and full local container/view
+  projections.
+- Electron `printToPDF` orchestration through main/preload IPC.
+- Local PDF export activity records.
+
+Does not own:
+
+- Cloud sharing, hosted PDF generation, or renderer filesystem writes.
+- Proprietary layouts or external print services.
+
+Implemented service methods:
+
+- `buildPrintHtml`
+- `recordPrintPdfExport`
+- `printPdf`
+
+Integration points:
+
+- Items, tasks, notes, lists, links, file metadata, projects, contacts,
+  collections, dashboards, export folders, and activity logs.
 
 ## Cross-Cutting Rules
 

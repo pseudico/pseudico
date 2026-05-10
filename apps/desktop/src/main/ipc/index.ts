@@ -22,6 +22,7 @@ import { registerMetadataIpc } from "./registerMetadataIpc";
 import { registerNavigationIpc } from "./registerNavigationIpc";
 import { registerNoteIpc } from "./registerNoteIpc";
 import { registerProjectIpc } from "./registerProjectIpc";
+import { registerPrintIpc } from "./registerPrintIpc";
 import { registerRelationshipIpc } from "./registerRelationshipIpc";
 import { registerReminderIpc } from "./registerReminderIpc";
 import { registerSearchIpc } from "./registerSearchIpc";
@@ -63,6 +64,7 @@ export function registerDesktopIpc(
   registerWorkspaceIpc(services.workspaceService);
   registerBackupIpc(services.workspaceService);
   registerExportIpc(services.workspaceService);
+  registerPrintIpc(services.workspaceService);
   registerImportIpc();
   registerDatabaseIpc(services.workspaceService);
   registerInboxIpc(services.workspaceService);

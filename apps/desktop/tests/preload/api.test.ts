@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(155);
+    expect(channels).toHaveLength(156);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -73,6 +73,7 @@ describe("typed preload API", () => {
       "backup",
       "import",
       "export",
+      "print",
       "diagnostics",
       "navigation"
     ]);
@@ -648,6 +649,37 @@ describe("typed preload API", () => {
         input: {
           workspaceId: "workspace_1",
           format: "tsv"
+        }
+      }
+    ]);
+  });
+
+  it("routes print/PDF calls through their named channel", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.print!.printPdf({
+      workspaceId: "workspace_1",
+      title: "Selected work",
+      itemIds: ["item_1"]
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.print.printPdf,
+        input: {
+          workspaceId: "workspace_1",
+          title: "Selected work",
+          itemIds: ["item_1"]
         }
       }
     ]);

@@ -1,4 +1,4 @@
-import { RefreshCw } from "lucide-react";
+import { Printer, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -41,6 +41,8 @@ export function DashboardPage({
     useState<DashboardViewModelSummary | null>(initialDashboard ?? null);
   const [loading, setLoading] = useState(initialDashboard === undefined);
   const [error, setError] = useState<string | null>(null);
+  const [printBusy, setPrintBusy] = useState(false);
+  const [printMessage, setPrintMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialDashboard !== undefined) {
@@ -127,6 +129,45 @@ export function DashboardPage({
     navigate("/search");
   }
 
+  async function printDashboardPdf(): Promise<void> {
+    const workspaceId = currentWorkspace?.id ?? dashboard?.dashboard.workspaceId;
+    const itemIds = [
+      ...getTaskWidgetItems(widgets, "today"),
+      ...getTaskWidgetItems(widgets, "overdue"),
+      ...getTaskWidgetItems(widgets, "upcoming")
+    ].map((item) => item.itemId);
+    const uniqueItemIds = [...new Set(itemIds)];
+
+    if (workspaceId === undefined || uniqueItemIds.length === 0) {
+      setError("Refresh the dashboard before printing task widgets.");
+      return;
+    }
+
+    setPrintBusy(true);
+    setPrintMessage(null);
+    setError(null);
+
+    const result = await apiClient.print?.printPdf({
+      workspaceId,
+      title: dashboard?.dashboard.name ?? "Dashboard",
+      itemIds: uniqueItemIds
+    });
+
+    setPrintBusy(false);
+
+    if (result === undefined) {
+      setError("Print/PDF export is not available.");
+      return;
+    }
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setPrintMessage(`Dashboard PDF created at ${result.data.relativePath}.`);
+  }
+
   if (currentWorkspace === null && initialDashboard === undefined) {
     return (
       <section className="dashboard-page">
@@ -152,19 +193,33 @@ export function DashboardPage({
             favorite projects, project health, and recent activity.
           </p>
         </div>
-        <button
-          className="secondary-button compact-button"
-          disabled={loading}
-          type="button"
-          onClick={() => void refreshDashboard()}
-        >
-          <RefreshCw size={16} aria-hidden="true" />
-          Refresh
-        </button>
+        <div className="button-row">
+          <button
+            className="secondary-button compact-button"
+            disabled={printBusy || loading}
+            type="button"
+            onClick={() => void printDashboardPdf()}
+          >
+            <Printer size={16} aria-hidden="true" />
+            Print / PDF
+          </button>
+          <button
+            className="secondary-button compact-button"
+            disabled={loading}
+            type="button"
+            onClick={() => void refreshDashboard()}
+          >
+            <RefreshCw size={16} aria-hidden="true" />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {error === null ? null : (
         <p className="form-message form-message-error">{error}</p>
+      )}
+      {printMessage === null ? null : (
+        <p className="form-message">{printMessage}</p>
       )}
 
       <div className="dashboard-widget-grid" aria-busy={loading}>

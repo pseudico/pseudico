@@ -16,6 +16,7 @@ export const ITEM_ACTIONS = [
   "archive",
   "duplicate",
   "reveal",
+  "print",
   "copyLink",
   "inspect",
   "delete"
