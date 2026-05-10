@@ -174,18 +174,35 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
     },
     tabs: {
       list: (containerId) => callApi(() => api.tabs.list(containerId)),
+      listManaged: (containerId) =>
+        callApi(() => api.tabs.listManaged(containerId)),
       listSummaries: (containerId) =>
         callApi(() => api.tabs.listSummaries(containerId)),
+      listTemplates: () => callApi(() => api.tabs.listTemplates()),
       create: (input) => callApi(() => api.tabs.create(input)),
+      createFromTemplate: (input) =>
+        callApi(() => api.tabs.createFromTemplate(input)),
       rename: (input) => callApi(() => api.tabs.rename(input)),
       reorder: (input) => callApi(() => api.tabs.reorder(input)),
+      hide: (tabId) => callApi(() => api.tabs.hide(tabId)),
+      show: (tabId) => callApi(() => api.tabs.show(tabId)),
+      duplicate: (tabId) => callApi(() => api.tabs.duplicate(tabId)),
+      archive: (tabId) => callApi(() => api.tabs.archive(tabId)),
       delete: (tabId) => callApi(() => api.tabs.delete(tabId)),
       listTabs: (containerId) => callApi(() => api.tabs.listTabs(containerId)),
+      listManagedTabs: (containerId) =>
+        callApi(() => api.tabs.listManagedTabs(containerId)),
       listTabSummaries: (containerId) =>
         callApi(() => api.tabs.listTabSummaries(containerId)),
       createTab: (input) => callApi(() => api.tabs.createTab(input)),
+      createTabFromTemplate: (input) =>
+        callApi(() => api.tabs.createTabFromTemplate(input)),
       renameTab: (input) => callApi(() => api.tabs.renameTab(input)),
       reorderTabs: (input) => callApi(() => api.tabs.reorderTabs(input)),
+      hideTab: (tabId) => callApi(() => api.tabs.hideTab(tabId)),
+      showTab: (tabId) => callApi(() => api.tabs.showTab(tabId)),
+      duplicateTab: (tabId) => callApi(() => api.tabs.duplicateTab(tabId)),
+      archiveTab: (tabId) => callApi(() => api.tabs.archiveTab(tabId)),
       deleteTab: (tabId) => callApi(() => api.tabs.deleteTab(tabId))
     },
     relationships: {
@@ -602,18 +619,35 @@ export const desktopApiClient: LocalWorkOsApi = {
   },
   tabs: {
     list: (containerId) => getDesktopApiClient().tabs.list(containerId),
+    listManaged: (containerId) =>
+      getDesktopApiClient().tabs.listManaged(containerId),
     listSummaries: (containerId) =>
       getDesktopApiClient().tabs.listSummaries(containerId),
+    listTemplates: () => getDesktopApiClient().tabs.listTemplates(),
     create: (input) => getDesktopApiClient().tabs.create(input),
+    createFromTemplate: (input) =>
+      getDesktopApiClient().tabs.createFromTemplate(input),
     rename: (input) => getDesktopApiClient().tabs.rename(input),
     reorder: (input) => getDesktopApiClient().tabs.reorder(input),
+    hide: (tabId) => getDesktopApiClient().tabs.hide(tabId),
+    show: (tabId) => getDesktopApiClient().tabs.show(tabId),
+    duplicate: (tabId) => getDesktopApiClient().tabs.duplicate(tabId),
+    archive: (tabId) => getDesktopApiClient().tabs.archive(tabId),
     delete: (tabId) => getDesktopApiClient().tabs.delete(tabId),
     listTabs: (containerId) => getDesktopApiClient().tabs.listTabs(containerId),
+    listManagedTabs: (containerId) =>
+      getDesktopApiClient().tabs.listManagedTabs(containerId),
     listTabSummaries: (containerId) =>
       getDesktopApiClient().tabs.listTabSummaries(containerId),
     createTab: (input) => getDesktopApiClient().tabs.createTab(input),
+    createTabFromTemplate: (input) =>
+      getDesktopApiClient().tabs.createTabFromTemplate(input),
     renameTab: (input) => getDesktopApiClient().tabs.renameTab(input),
     reorderTabs: (input) => getDesktopApiClient().tabs.reorderTabs(input),
+    hideTab: (tabId) => getDesktopApiClient().tabs.hideTab(tabId),
+    showTab: (tabId) => getDesktopApiClient().tabs.showTab(tabId),
+    duplicateTab: (tabId) => getDesktopApiClient().tabs.duplicateTab(tabId),
+    archiveTab: (tabId) => getDesktopApiClient().tabs.archiveTab(tabId),
     deleteTab: (tabId) => getDesktopApiClient().tabs.deleteTab(tabId)
   },
   relationships: {

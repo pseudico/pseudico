@@ -400,16 +400,29 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
     },
     tabs: {
       list: async () => apiOk([]),
+      listManaged: async () => apiOk([]),
       listSummaries: async () => apiOk([]),
+      listTemplates: async () => apiOk([]),
       create: async () => apiOk(null as never),
+      createFromTemplate: async () => apiOk(null as never),
       rename: async () => apiOk(null as never),
       reorder: async () => apiOk([]),
+      hide: async () => apiOk(null as never),
+      show: async () => apiOk(null as never),
+      duplicate: async () => apiOk(null as never),
+      archive: async () => apiOk(null as never),
       delete: async () => apiOk(null as never),
       listTabs: async () => apiOk([]),
+      listManagedTabs: async () => apiOk([]),
       listTabSummaries: async () => apiOk([]),
       createTab: async () => apiOk(null as never),
+      createTabFromTemplate: async () => apiOk(null as never),
       renameTab: async () => apiOk(null as never),
       reorderTabs: async () => apiOk([]),
+      hideTab: async () => apiOk(null as never),
+      showTab: async () => apiOk(null as never),
+      duplicateTab: async () => apiOk(null as never),
+      archiveTab: async () => apiOk(null as never),
       deleteTab: async () => apiOk(null as never)
     },
     relationships: {
@@ -947,4 +960,5 @@ function moduleStatus(module: IpcModuleStatus["module"]): IpcModuleStatus {
     message: `${module} placeholder`
   };
 }
+
 

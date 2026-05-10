@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(165);
+    expect(channels).toHaveLength(172);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -1624,6 +1624,69 @@ describe("typed preload API", () => {
           LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runWorkspaceIntegrityCheck,
         input: {
           workspaceId: "workspace_1"
+        }
+      }
+    ]);
+  });
+
+  it("routes advanced tab calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk([])) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.tabs.listManaged("container_1");
+    await api.tabs.listTemplates();
+    await api.tabs.createFromTemplate({
+      containerId: "container_1",
+      templateId: "tab_template_documents"
+    });
+    await api.tabs.hide("tab_1");
+    await api.tabs.show("tab_1");
+    await api.tabs.duplicate("tab_1");
+    await api.tabs.archive("tab_1");
+    await api.tabs.delete({
+      tabId: "tab_1",
+      itemHandling: "move_to_default",
+      targetTabId: "tab_main"
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tabs.listManagedTabs,
+        input: "container_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabTemplates,
+        input: undefined
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTabFromTemplate,
+        input: {
+          containerId: "container_1",
+          templateId: "tab_template_documents"
+        }
+      },
+      { channel: LOCAL_WORK_OS_IPC_CHANNELS.tabs.hideTab, input: "tab_1" },
+      { channel: LOCAL_WORK_OS_IPC_CHANNELS.tabs.showTab, input: "tab_1" },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tabs.duplicateTab,
+        input: "tab_1"
+      },
+      { channel: LOCAL_WORK_OS_IPC_CHANNELS.tabs.archiveTab, input: "tab_1" },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.tabs.deleteTab,
+        input: {
+          tabId: "tab_1",
+          itemHandling: "move_to_default",
+          targetTabId: "tab_main"
         }
       }
     ]);

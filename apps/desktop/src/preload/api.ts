@@ -1479,6 +1479,7 @@ export type ContainerTabSummary = {
   isDefault: boolean;
   createdAt: string;
   updatedAt: string;
+  hiddenAt: string | null;
   archivedAt: string | null;
   deletedAt: string | null;
 };
@@ -1517,6 +1518,18 @@ export type CreateContainerTabInput = {
   sortOrder?: number;
 };
 
+export type TabTemplateSummary = {
+  id: string;
+  name: string;
+  description: string | null;
+};
+
+export type CreateContainerTabFromTemplateInput = {
+  containerId: string;
+  templateId: string;
+  name?: string;
+};
+
 export type RenameContainerTabInput = {
   tabId: string;
   name: string;
@@ -1526,6 +1539,12 @@ export type RenameContainerTabInput = {
 export type ReorderContainerTabsInput = {
   containerId: string;
   tabIds: string[];
+};
+
+export type DeleteContainerTabInput = {
+  tabId: string;
+  itemHandling?: "reject" | "move_to_default" | "archive_items";
+  targetTabId?: string | null;
 };
 
 export type MoveInboxItemToProjectInput = {
@@ -2457,10 +2476,17 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   },
   tabs: {
     listTabs: "local-work-os:tabs:list-tabs",
+    listManagedTabs: "local-work-os:tabs:list-managed-tabs",
     listTabSummaries: "local-work-os:tabs:list-tab-summaries",
+    listTabTemplates: "local-work-os:tabs:list-tab-templates",
     createTab: "local-work-os:tabs:create-tab",
+    createTabFromTemplate: "local-work-os:tabs:create-tab-from-template",
     renameTab: "local-work-os:tabs:rename-tab",
     reorderTabs: "local-work-os:tabs:reorder-tabs",
+    hideTab: "local-work-os:tabs:hide-tab",
+    showTab: "local-work-os:tabs:show-tab",
+    duplicateTab: "local-work-os:tabs:duplicate-tab",
+    archiveTab: "local-work-os:tabs:archive-tab",
     deleteTab: "local-work-os:tabs:delete-tab"
   },
   relationships: {
@@ -2863,12 +2889,24 @@ export type LocalWorkOsIpcContracts = {
     input: string;
     result: ApiResult<ContainerTabSummary[]>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.listManagedTabs]: {
+    input: string;
+    result: ApiResult<ContainerTabSummary[]>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabSummaries]: {
     input: string;
     result: ApiResult<ContainerTabContentSummary[]>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabTemplates]: {
+    input: undefined;
+    result: ApiResult<TabTemplateSummary[]>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTab]: {
     input: CreateContainerTabInput;
+    result: ApiResult<ContainerTabSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTabFromTemplate]: {
+    input: CreateContainerTabFromTemplateInput;
     result: ApiResult<ContainerTabSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.tabs.renameTab]: {
@@ -2879,8 +2917,24 @@ export type LocalWorkOsIpcContracts = {
     input: ReorderContainerTabsInput;
     result: ApiResult<ContainerTabSummary[]>;
   };
-  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.deleteTab]: {
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.hideTab]: {
     input: string;
+    result: ApiResult<ContainerTabSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.showTab]: {
+    input: string;
+    result: ApiResult<ContainerTabSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.duplicateTab]: {
+    input: string;
+    result: ApiResult<ContainerTabSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.archiveTab]: {
+    input: string;
+    result: ApiResult<ContainerTabSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.deleteTab]: {
+    input: string | DeleteContainerTabInput;
     result: ApiResult<ContainerTabSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.relationships.linkContactToProject]: {
@@ -3492,11 +3546,18 @@ export type LocalWorkOsApi = {
   };
   tabs: {
     list: (containerId: string) => Promise<ApiResult<ContainerTabSummary[]>>;
+    listManaged: (
+      containerId: string
+    ) => Promise<ApiResult<ContainerTabSummary[]>>;
     listSummaries: (
       containerId: string
     ) => Promise<ApiResult<ContainerTabContentSummary[]>>;
+    listTemplates: () => Promise<ApiResult<TabTemplateSummary[]>>;
     create: (
       input: CreateContainerTabInput
+    ) => Promise<ApiResult<ContainerTabSummary>>;
+    createFromTemplate: (
+      input: CreateContainerTabFromTemplateInput
     ) => Promise<ApiResult<ContainerTabSummary>>;
     rename: (
       input: RenameContainerTabInput
@@ -3504,8 +3565,17 @@ export type LocalWorkOsApi = {
     reorder: (
       input: ReorderContainerTabsInput
     ) => Promise<ApiResult<ContainerTabSummary[]>>;
-    delete: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
+    hide: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
+    show: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
+    duplicate: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
+    archive: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
+    delete: (
+      input: string | DeleteContainerTabInput
+    ) => Promise<ApiResult<ContainerTabSummary>>;
     listTabs: (
+      containerId: string
+    ) => Promise<ApiResult<ContainerTabSummary[]>>;
+    listManagedTabs: (
       containerId: string
     ) => Promise<ApiResult<ContainerTabSummary[]>>;
     listTabSummaries: (
@@ -3514,13 +3584,22 @@ export type LocalWorkOsApi = {
     createTab: (
       input: CreateContainerTabInput
     ) => Promise<ApiResult<ContainerTabSummary>>;
+    createTabFromTemplate: (
+      input: CreateContainerTabFromTemplateInput
+    ) => Promise<ApiResult<ContainerTabSummary>>;
     renameTab: (
       input: RenameContainerTabInput
     ) => Promise<ApiResult<ContainerTabSummary>>;
     reorderTabs: (
       input: ReorderContainerTabsInput
     ) => Promise<ApiResult<ContainerTabSummary[]>>;
-    deleteTab: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
+    hideTab: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
+    showTab: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
+    duplicateTab: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
+    archiveTab: (tabId: string) => Promise<ApiResult<ContainerTabSummary>>;
+    deleteTab: (
+      input: string | DeleteContainerTabInput
+    ) => Promise<ApiResult<ContainerTabSummary>>;
   };
   relationships: {
     linkContactToProject: (
@@ -4053,26 +4132,52 @@ export function createLocalWorkOsApi(
     tabs: {
       list: (containerId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabs, containerId),
+      listManaged: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listManagedTabs, containerId),
       listSummaries: (containerId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabSummaries, containerId),
+      listTemplates: () =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabTemplates, undefined),
       create: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTab, input),
+      createFromTemplate: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTabFromTemplate, input),
       rename: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.renameTab, input),
       reorder: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.reorderTabs, input),
+      hide: (tabId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.hideTab, tabId),
+      show: (tabId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.showTab, tabId),
+      duplicate: (tabId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.duplicateTab, tabId),
+      archive: (tabId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.archiveTab, tabId),
       delete: (tabId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.deleteTab, tabId),
       listTabs: (containerId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabs, containerId),
+      listManagedTabs: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listManagedTabs, containerId),
       listTabSummaries: (containerId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabSummaries, containerId),
       createTab: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTab, input),
+      createTabFromTemplate: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTabFromTemplate, input),
       renameTab: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.renameTab, input),
       reorderTabs: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.reorderTabs, input),
+      hideTab: (tabId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.hideTab, tabId),
+      showTab: (tabId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.showTab, tabId),
+      duplicateTab: (tabId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.duplicateTab, tabId),
+      archiveTab: (tabId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.archiveTab, tabId),
       deleteTab: (tabId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.deleteTab, tabId)
     },

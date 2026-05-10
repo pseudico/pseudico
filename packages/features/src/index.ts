@@ -229,7 +229,7 @@ export {
   stringifyWorkflowActions,
   workflowsModuleContract
 } from "./workflows";
-export { TabService, tabsModuleContract } from "./tabs";
+export { TabService, TabTemplateService, tabsModuleContract } from "./tabs";
 export { TimelineService, timelineModuleContract } from "./timeline";
 export {
   DEFAULT_TODAY_BACKLOG_DAYS,
@@ -612,8 +612,14 @@ export type {
 export type {
   CreateTabInput,
   DeleteTabInput,
+  DuplicateTabInput,
+  ListTabsInput,
   RenameTabInput,
   ReorderTabsInput,
+  TabTemplateDefinition,
+  TabVisibilityInput,
+  ArchiveTabInput,
+  CreateTabFromTemplateInput,
   TabServiceIdFactory
 } from "./tabs";
 export type {

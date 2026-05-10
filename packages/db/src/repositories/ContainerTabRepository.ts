@@ -10,6 +10,7 @@ type ContainerTabRow = {
   is_default: number;
   created_at: string;
   updated_at: string;
+  hidden_at: string | null;
   archived_at: string | null;
   deleted_at: string | null;
 };
@@ -24,8 +25,14 @@ export type ContainerTabRecord = {
   isDefault: boolean;
   createdAt: string;
   updatedAt: string;
+  hiddenAt: string | null;
   archivedAt: string | null;
   deletedAt: string | null;
+};
+
+export type ListContainerTabsOptions = {
+  includeHidden?: boolean;
+  includeArchived?: boolean;
 };
 
 export type CreateContainerTabInput = {
@@ -52,6 +59,8 @@ export type UpdateContainerTabPatch = {
   name?: string;
   description?: string | null;
   sortOrder?: number;
+  hiddenAt?: string | null;
+  archivedAt?: string | null;
   timestamp: string;
 };
 
@@ -90,16 +99,29 @@ export class ContainerTabRepository {
     return row === undefined ? null : toContainerTabRecord(row);
   }
 
-  listByContainer(containerId: string): ContainerTabRecord[] {
+  listByContainer(
+    containerId: string,
+    options: ListContainerTabsOptions = {}
+  ): ContainerTabRecord[] {
+    const where = ["container_id = ?", "deleted_at is null"];
+    const values: unknown[] = [containerId];
+
+    if (options.includeHidden !== true) {
+      where.push("hidden_at is null");
+    }
+
+    if (options.includeArchived !== true) {
+      where.push("archived_at is null");
+    }
+
     const rows = this.connection.sqlite
-      .prepare<[string], ContainerTabRow>(
+      .prepare<unknown[], ContainerTabRow>(
         `select *
          from container_tabs
-         where container_id = ?
-           and deleted_at is null
+         where ${where.join(" and ")}
          order by sort_order asc, created_at asc`
       )
-      .all(containerId);
+      .all(...values);
 
     return rows.map(toContainerTabRecord);
   }
@@ -197,6 +219,16 @@ export class ContainerTabRepository {
       values.push(patch.sortOrder);
     }
 
+    if (patch.hiddenAt !== undefined) {
+      assignments.push("hidden_at = ?");
+      values.push(patch.hiddenAt);
+    }
+
+    if (patch.archivedAt !== undefined) {
+      assignments.push("archived_at = ?");
+      values.push(patch.archivedAt);
+    }
+
     if (assignments.length === 0) {
       const current = this.getById(id);
 
@@ -260,11 +292,43 @@ export class ContainerTabRepository {
         `select count(*) as count
          from container_tabs
          where container_id = ?
+           and archived_at is null
            and deleted_at is null`
       )
       .get(containerId);
 
     return row?.count ?? 0;
+  }
+
+  countVisibleByContainer(containerId: string): number {
+    const row = this.connection.sqlite
+      .prepare<[string], { count: number }>(
+        `select count(*) as count
+         from container_tabs
+         where container_id = ?
+           and hidden_at is null
+           and archived_at is null
+           and deleted_at is null`
+      )
+      .get(containerId);
+
+    return row?.count ?? 0;
+  }
+
+  hide(id: string, timestamp: string): ContainerTabRecord {
+    return this.update(id, { hiddenAt: timestamp, timestamp });
+  }
+
+  show(id: string, timestamp: string): ContainerTabRecord {
+    return this.update(id, { hiddenAt: null, timestamp });
+  }
+
+  archive(id: string, timestamp: string): ContainerTabRecord {
+    return this.update(id, {
+      archivedAt: timestamp,
+      hiddenAt: timestamp,
+      timestamp
+    });
   }
 }
 
@@ -279,6 +343,7 @@ function toContainerTabRecord(row: ContainerTabRow): ContainerTabRecord {
     isDefault: row.is_default === 1,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    hiddenAt: row.hidden_at,
     archivedAt: row.archived_at,
     deletedAt: row.deleted_at
   };

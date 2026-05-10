@@ -1,38 +1,54 @@
-import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Plus, Settings2, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { TabManagementDialog } from "@local-work-os/ui";
 import {
   LOCAL_WORK_OS_DRAG_MIME_TYPE,
   encodeDragPayload,
   parseDragPayload
 } from "@local-work-os/core";
-import type { ContainerTabSummary } from "../../preload/api";
+import type { ContainerTabSummary, TabTemplateSummary } from "../../preload/api";
 
 type ContainerTabsPanelProps = {
   activeTabId: string | null;
   busy?: boolean;
   error?: string | null;
+  managedTabs?: readonly ContainerTabSummary[];
   tabs: readonly ContainerTabSummary[];
+  templates?: readonly TabTemplateSummary[];
   onCreateTab: (name: string) => Promise<boolean> | boolean;
+  onCreateTabFromTemplate?: (templateId: string) => Promise<void> | void;
+  onArchiveTab?: (tabId: string) => Promise<void> | void;
   onDeleteTab: (tabId: string) => Promise<void> | void;
+  onDuplicateTab?: (tabId: string) => Promise<void> | void;
+  onHideTab?: (tabId: string) => Promise<void> | void;
   onRenameTab: (tabId: string, name: string) => Promise<boolean> | boolean;
   onReorderTabs: (tabIds: string[]) => Promise<void> | void;
   onSelectTab: (tabId: string) => void;
+  onShowTab?: (tabId: string) => Promise<void> | void;
 };
 
 export function ContainerTabsPanel({
   activeTabId,
   busy = false,
   error = null,
+  managedTabs,
   tabs,
+  templates = [],
+  onArchiveTab,
   onCreateTab,
+  onCreateTabFromTemplate,
   onDeleteTab,
+  onDuplicateTab,
+  onHideTab,
   onRenameTab,
   onReorderTabs,
-  onSelectTab
+  onSelectTab,
+  onShowTab
 }: ContainerTabsPanelProps): React.JSX.Element {
   const [newTabName, setNewTabName] = useState("");
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [managementOpen, setManagementOpen] = useState(false);
 
   async function submitNewTab(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -116,6 +132,15 @@ export function ContainerTabsPanel({
         <div className="panel-heading">
           <h3>Tabs</h3>
         </div>
+        <button
+          className="secondary-button compact-button"
+          disabled={busy}
+          type="button"
+          onClick={() => setManagementOpen((current) => !current)}
+        >
+          <Settings2 size={15} aria-hidden="true" />
+          Manage
+        </button>
         <form className="container-tab-create-form" onSubmit={(event) => void submitNewTab(event)}>
           <label className="sr-only" htmlFor="new-container-tab-name">
             New tab name
@@ -137,6 +162,36 @@ export function ContainerTabsPanel({
       {error === null ? null : (
         <p className="form-message form-message-error">{error}</p>
       )}
+
+      {managementOpen ? (
+        <TabManagementDialog
+          busy={busy}
+          tabs={(managedTabs ?? tabs).map((tab) => ({
+            id: tab.id,
+            name: tab.name,
+            description: tab.description,
+            isDefault: tab.isDefault,
+            hiddenAt: tab.hiddenAt,
+            archivedAt: tab.archivedAt
+          }))}
+          templates={templates}
+          onArchiveTab={(tabId) => {
+            void onArchiveTab?.(tabId);
+          }}
+          onCreateFromTemplate={(templateId) => {
+            void onCreateTabFromTemplate?.(templateId);
+          }}
+          onDuplicateTab={(tabId) => {
+            void onDuplicateTab?.(tabId);
+          }}
+          onHideTab={(tabId) => {
+            void onHideTab?.(tabId);
+          }}
+          onShowTab={(tabId) => {
+            void onShowTab?.(tabId);
+          }}
+        />
+      ) : null}
 
       <div className="container-tabs-list" role="tablist" aria-label="Content tabs">
         {tabs.map((tab, index) => {

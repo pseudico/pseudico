@@ -297,6 +297,7 @@ function toContainerTabSummary(tab: ContainerTabRecord): ContainerTabSummary {
     isDefault: tab.isDefault,
     createdAt: tab.createdAt,
     updatedAt: tab.updatedAt,
+    hiddenAt: tab.hiddenAt,
     archivedAt: tab.archivedAt,
     deletedAt: tab.deletedAt
   };

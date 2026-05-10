@@ -86,7 +86,9 @@ object graph:
   Appearance preferences use an `appearance.settings.v1` app setting payload for
   local theme, density, and font-size choices without adding cloud profile data.
 - `containers` and `container_tabs` store Inbox, project, and contact surfaces
-  plus early tab support.
+  plus tab support. Content tabs now include `hidden_at`, `archived_at`, and
+  `deleted_at` timestamps so local visibility, reversible archive, and soft
+  delete state survive app restarts without affecting item ownership.
 - `contact_fields` stores flexible labelled profile fields for contact
   containers.
 - `items`, `task_details`, `list_details`, `list_items`, `note_details`,

@@ -2,6 +2,7 @@ import {
   ActivityLogRepository,
   ContainerRepository,
   ContainerTabRepository,
+  ItemRepository,
   MigrationService,
   WorkspaceRepository,
   createDatabaseConnection,
@@ -100,6 +101,73 @@ describe("TabService", () => {
       "container_tab_updated",
       "container_tab_created",
       "container_tab_created"
+    ]);
+  });
+
+  it("creates tabs from templates and supports hide, show, duplicate, archive, and item-aware delete rules", async () => {
+    const service = createService();
+    const repository = new ContainerTabRepository(connection);
+
+    const templateTab = await service.createTabFromTemplate({
+      containerId: "project_1",
+      templateId: "tab_template_documents"
+    });
+    const duplicate = await service.duplicateTab({
+      tabId: templateTab.id,
+      name: "Document copy"
+    });
+
+    await service.hideTab({ tabId: templateTab.id });
+    expect(service.listTabs("project_1").map((tab) => tab.id)).toEqual([
+      "tab_main",
+      duplicate.id
+    ]);
+    expect(service.listTabs("project_1", { includeHidden: true }).map((tab) => tab.id)).toEqual([
+      "tab_main",
+      templateTab.id,
+      duplicate.id
+    ]);
+
+    await service.showTab({ tabId: templateTab.id });
+    await service.archiveTab({ tabId: duplicate.id });
+    expect(service.listTabs("project_1").map((tab) => tab.id)).toEqual([
+      "tab_main",
+      templateTab.id
+    ]);
+
+    new ItemRepository(connection).create({
+      id: "item_in_tab",
+      workspaceId: "workspace_1",
+      containerId: "project_1",
+      containerTabId: templateTab.id,
+      type: "note",
+      title: "Template note",
+      timestamp: NOW
+    });
+
+    await expect(service.deleteTab({ tabId: templateTab.id })).rejects.toThrow(
+      "Move or delete tab items before deleting this tab."
+    );
+
+    const deleted = await service.deleteTab({
+      tabId: templateTab.id,
+      itemHandling: "move_to_default"
+    });
+
+    expect(deleted.deletedAt).toBe(NOW);
+    expect(new ItemRepository(connection).getById("item_in_tab")).toMatchObject({
+      containerTabId: "tab_main"
+    });
+    expect(repository.getById(duplicate.id)?.archivedAt).toBe(NOW);
+    expect(
+      new ActivityLogRepository(connection).listRecent("workspace_1", 10).map((event) => event.action)
+    ).toEqual([
+      "container_tab_deleted",
+      "container_tab_archived",
+      "container_tab_shown",
+      "container_tab_hidden",
+      "container_tab_duplicated",
+      "container_tab_template_applied"
     ]);
   });
 

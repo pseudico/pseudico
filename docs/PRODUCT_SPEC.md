@@ -412,6 +412,7 @@ Content tabs should exist in the schema early, even if the first UI only shows a
 | is_default | boolean | Exactly one default per container |
 | created_at | datetime | Required |
 | updated_at | datetime | Required |
+| hidden_at | datetime | Nullable local visibility state |
 | archived_at | datetime | Nullable |
 | deleted_at | datetime | Nullable |
 

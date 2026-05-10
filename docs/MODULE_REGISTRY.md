@@ -348,28 +348,35 @@ Integration points:
 
 Owns:
 
-- Project/contact tab create, rename, reorder, and soft-delete operations.
+- Project/contact tab create, template-create, rename, reorder, duplicate,
+  local hide/show, archive, and soft-delete operations.
 - Active-tab filtering in project/contact content feeds.
 - Activity events for user-visible tab writes.
 
 Does not own:
 
 - Item editor internals.
-- Templates that may later create default tab sets.
+- Item editor internals beyond delete-time item handling.
 - Raw database access from renderer code.
 
 Expected service methods:
 
 - `listTabs`
 - `createTab`
+- `createTabFromTemplate`
 - `renameTab`
 - `reorderTabs`
+- `hideTab`
+- `showTab`
+- `duplicateTab`
+- `archiveTab`
 - `deleteTab`
 
 Integration points:
 
 - Projects and contacts as editable tab containers.
 - Tasks, lists, notes, links, and files through `containerTabId`.
+- Tab templates for built-in local tab scaffolds.
 - Activity log for tab write history.
 
 ### Tasks

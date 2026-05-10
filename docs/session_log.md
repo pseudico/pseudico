@@ -2005,3 +2005,33 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi are unrelated and untouched.
 Next actions: Stage scoped files; commit and push; open ready PR.
+
+## 2026-05-10 17:22:00 +10:00
+Objective: Merged PSE-106 and started next ticket PSE-107.
+Decisions made:
+- PSE-106 PR #101 merged via squash at f8190cf and branch was deleted.
+- PSE-107 was promoted, then moved to In Progress per next-ticket workflow.
+Files changed:
+- docs/session_log.md
+Open questions / risks: New PSE-107 scope may require schema changes for hidden tabs/templates.
+Next actions: Read PSE-107 docs; inspect tab/template services; implement scoped slice.
+
+## 2026-05-10T17:24:48+10:00
+Objective: Plan PSE-107 tab templates, hidden tabs, and rich management.
+Decisions made:
+- Add persisted local hidden_at state plus archive/duplicate/template operations through TabService and IPC.
+- Keep visible tab lists filtered by default; management surfaces can list hidden/archived tabs explicitly.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need preserve item handling on delete without search regressions.
+Next actions: Implement DB/service/UI changes; add tests; run checks.
+
+## 2026-05-10T17:41:59+10:00
+Objective: Implement and verify PSE-107 advanced content tabs.
+Decisions made:
+- Persist hidden_at via migration 10; visible lists exclude hidden/archived tabs by default.
+- Added built-in tab templates, duplicate/archive/hide/show, and delete item handling through services/IPC/UI.
+Files changed:
+- packages/db/src/migrations/0010_tab_visibility.ts; packages/features/src/tabs/TabService.ts; apps/desktop/src/renderer/components/ContainerTabsPanel.tsx; packages/ui/src/components/TabManagementDialog.tsx
+Open questions / risks: Full test/build required sandbox escalation for Vite/esbuild EPERM but passed after rerun.
+Next actions: Commit, push, open PR; update Linear; monitor CI.

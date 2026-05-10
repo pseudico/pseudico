@@ -76,6 +76,7 @@ import type {
   ProjectSummary,
   ProjectHealthSummary,
   RelatedContactSummary,
+  TabTemplateSummary,
   TaskSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
@@ -166,6 +167,8 @@ export function ProjectDetailPage({
   const [projectActivity, setProjectActivity] =
     useState<RecentActivityViewModel[]>(initialActivity);
   const [tabs, setTabs] = useState<ContainerTabSummary[]>(initialTabs);
+  const [managedTabs, setManagedTabs] = useState<ContainerTabSummary[]>(initialTabs);
+  const [tabTemplates, setTabTemplates] = useState<TabTemplateSummary[]>([]);
   const [tabSummaries, setTabSummaries] =
     useState<ContainerTabContentSummary[]>(initialTabSummaries);
   const [activeTabId, setActiveTabId] = useState<string | null>(
@@ -245,7 +248,9 @@ export function ProjectDetailPage({
         categoriesResult,
         activityResult,
         tabsResult,
+        managedTabsResult,
         tabSummariesResult,
+        tabTemplatesResult,
         healthResult,
         tasksResult,
         listsResult,
@@ -263,7 +268,9 @@ export function ProjectDetailPage({
           targetId: activeProjectId
         }),
         apiClient.tabs.list(activeProjectId),
+        apiClient.tabs.listManaged(activeProjectId),
         apiClient.tabs.listSummaries(activeProjectId),
+        apiClient.tabs.listTemplates(),
         apiClient.projects.getHealth(activeProjectId),
         apiClient.tasks.listByContainer(activeProjectId),
         apiClient.lists.listByContainer(activeProjectId),
@@ -311,8 +318,18 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!managedTabsResult.ok) {
+        setItemError(managedTabsResult.error.message);
+        return;
+      }
+
       if (!tabSummariesResult.ok) {
         setItemError(tabSummariesResult.error.message);
+        return;
+      }
+
+      if (!tabTemplatesResult.ok) {
+        setItemError(tabTemplatesResult.error.message);
         return;
       }
 
@@ -361,7 +378,9 @@ export function ProjectDetailPage({
       ));
       setCategories(categoriesResult.data);
       setTabs(tabsResult.data);
+      setManagedTabs(managedTabsResult.data);
       setTabSummaries(tabSummariesResult.data);
+      setTabTemplates(tabTemplatesResult.data);
       setActiveTabId((current) =>
         selectAvailableTabId(tabsResult.data, current)
       );
@@ -555,7 +574,11 @@ export function ProjectDetailPage({
   async function refreshProjectTabs(activeProjectId: string): Promise<void> {
     setTabError(null);
 
-    const result = await apiClient.tabs.list(activeProjectId);
+    const [result, managedResult, templatesResult] = await Promise.all([
+      apiClient.tabs.list(activeProjectId),
+      apiClient.tabs.listManaged(activeProjectId),
+      apiClient.tabs.listTemplates()
+    ]);
 
     if (!result.ok) {
       setTabError(result.error.message);
@@ -563,6 +586,12 @@ export function ProjectDetailPage({
     }
 
     setTabs(result.data);
+    if (managedResult.ok) {
+      setManagedTabs(managedResult.data);
+    }
+    if (templatesResult.ok) {
+      setTabTemplates(templatesResult.data);
+    }
     setActiveTabId((current) => selectAvailableTabId(result.data, current));
   }
 
@@ -664,6 +693,57 @@ export function ProjectDetailPage({
     setTabError(null);
 
     const result = await apiClient.tabs.delete(tabId);
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return;
+    }
+
+    await refreshProjectTabs(project.id);
+    await refreshProjectTabSummaries(project.id);
+    await refreshProjectActivity(project.id);
+  }
+
+  async function createProjectTabFromTemplate(templateId: string): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs.createFromTemplate({
+      containerId: project.id,
+      templateId
+    });
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return;
+    }
+
+    await refreshProjectTabs(project.id);
+    await refreshProjectTabSummaries(project.id);
+    setActiveTabId(result.data.id);
+    await refreshProjectActivity(project.id);
+  }
+
+  async function mutateProjectTab(
+    tabId: string,
+    operation: "hide" | "show" | "duplicate" | "archive"
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs[operation](tabId);
 
     setTabBusy(false);
 
@@ -2225,15 +2305,22 @@ export function ProjectDetailPage({
         activeTabId={activeTabId}
         busy={tabBusy}
         error={tabError}
+        managedTabs={managedTabs}
         tabs={tabs}
+        templates={tabTemplates}
+        onArchiveTab={(tabId) => void mutateProjectTab(tabId, "archive")}
         onCreateTab={createProjectTab}
+        onCreateTabFromTemplate={(templateId) => void createProjectTabFromTemplate(templateId)}
         onDeleteTab={(tabId) => void deleteProjectTab(tabId)}
+        onDuplicateTab={(tabId) => void mutateProjectTab(tabId, "duplicate")}
+        onHideTab={(tabId) => void mutateProjectTab(tabId, "hide")}
         onRenameTab={renameProjectTab}
         onReorderTabs={(tabIds) => void reorderProjectTabs(tabIds)}
         onSelectTab={(tabId) => {
           setActiveTabId(tabId);
           setVisibleItemCount(PROJECT_FEED_PAGE_SIZE);
         }}
+        onShowTab={(tabId) => void mutateProjectTab(tabId, "show")}
       />
 
       <ContainerTabSummaryCards

@@ -42,6 +42,7 @@ import type {
   NoteSummary,
   ProjectSummary,
   RelatedProjectSummary,
+  TabTemplateSummary,
   TaskSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
@@ -111,6 +112,8 @@ export function ContactDetailPage({
   const [activity, setActivity] =
     useState<RecentActivityViewModel[]>(initialActivity);
   const [tabs, setTabs] = useState<ContainerTabSummary[]>(initialTabs);
+  const [managedTabs, setManagedTabs] = useState<ContainerTabSummary[]>(initialTabs);
+  const [tabTemplates, setTabTemplates] = useState<TabTemplateSummary[]>([]);
   const [tabSummaries, setTabSummaries] =
     useState<ContainerTabContentSummary[]>(initialTabSummaries);
   const [activeTabId, setActiveTabId] = useState<string | null>(
@@ -175,7 +178,9 @@ export function ContactDetailPage({
         categoriesResult,
         activityResult,
         tabsResult,
+        managedTabsResult,
         tabSummariesResult,
+        tabTemplatesResult,
         tasksResult,
         notesResult,
         projectsResult,
@@ -189,7 +194,9 @@ export function ContactDetailPage({
           targetId: activeContactId
         }),
         apiClient.tabs.list(activeContactId),
+        apiClient.tabs.listManaged(activeContactId),
         apiClient.tabs.listSummaries(activeContactId),
+        apiClient.tabs.listTemplates(),
         apiClient.tasks.listByContainer(activeContactId),
         apiClient.notes.listByContainer(activeContactId),
         apiClient.projects.list(),
@@ -227,8 +234,18 @@ export function ContactDetailPage({
         return;
       }
 
+      if (!managedTabsResult.ok) {
+        setItemError(managedTabsResult.error.message);
+        return;
+      }
+
       if (!tabSummariesResult.ok) {
         setItemError(tabSummariesResult.error.message);
+        return;
+      }
+
+      if (!tabTemplatesResult.ok) {
+        setItemError(tabTemplatesResult.error.message);
         return;
       }
 
@@ -267,7 +284,9 @@ export function ContactDetailPage({
       ));
       setCategories(categoriesResult.data);
       setTabs(tabsResult.data);
+      setManagedTabs(managedTabsResult.data);
       setTabSummaries(tabSummariesResult.data);
+      setTabTemplates(tabTemplatesResult.data);
       setActiveTabId((current) =>
         selectAvailableTabId(tabsResult.data, current)
       );
@@ -398,7 +417,11 @@ export function ContactDetailPage({
   async function refreshContactTabs(activeContactId: string): Promise<void> {
     setTabError(null);
 
-    const result = await apiClient.tabs.list(activeContactId);
+    const [result, managedResult, templatesResult] = await Promise.all([
+      apiClient.tabs.list(activeContactId),
+      apiClient.tabs.listManaged(activeContactId),
+      apiClient.tabs.listTemplates()
+    ]);
 
     if (!result.ok) {
       setTabError(result.error.message);
@@ -406,6 +429,12 @@ export function ContactDetailPage({
     }
 
     setTabs(result.data);
+    if (managedResult.ok) {
+      setManagedTabs(managedResult.data);
+    }
+    if (templatesResult.ok) {
+      setTabTemplates(templatesResult.data);
+    }
     setActiveTabId((current) => selectAvailableTabId(result.data, current));
   }
 
@@ -507,6 +536,57 @@ export function ContactDetailPage({
     setTabError(null);
 
     const result = await apiClient.tabs.delete(tabId);
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return;
+    }
+
+    await refreshContactTabs(contact.id);
+    await refreshContactTabSummaries(contact.id);
+    await refreshContactActivity(contact.id);
+  }
+
+  async function createContactTabFromTemplate(templateId: string): Promise<void> {
+    if (contact === null) {
+      return;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs.createFromTemplate({
+      containerId: contact.id,
+      templateId
+    });
+
+    setTabBusy(false);
+
+    if (!result.ok) {
+      setTabError(result.error.message);
+      return;
+    }
+
+    await refreshContactTabs(contact.id);
+    await refreshContactTabSummaries(contact.id);
+    setActiveTabId(result.data.id);
+    await refreshContactActivity(contact.id);
+  }
+
+  async function mutateContactTab(
+    tabId: string,
+    operation: "hide" | "show" | "duplicate" | "archive"
+  ): Promise<void> {
+    if (contact === null) {
+      return;
+    }
+
+    setTabBusy(true);
+    setTabError(null);
+
+    const result = await apiClient.tabs[operation](tabId);
 
     setTabBusy(false);
 
@@ -1101,15 +1181,22 @@ export function ContactDetailPage({
         activeTabId={activeTabId}
         busy={tabBusy}
         error={tabError}
+        managedTabs={managedTabs}
         tabs={tabs}
+        templates={tabTemplates}
+        onArchiveTab={(tabId) => void mutateContactTab(tabId, "archive")}
         onCreateTab={createContactTab}
+        onCreateTabFromTemplate={(templateId) => void createContactTabFromTemplate(templateId)}
         onDeleteTab={(tabId) => void deleteContactTab(tabId)}
+        onDuplicateTab={(tabId) => void mutateContactTab(tabId, "duplicate")}
+        onHideTab={(tabId) => void mutateContactTab(tabId, "hide")}
         onRenameTab={renameContactTab}
         onReorderTabs={(tabIds) => void reorderContactTabs(tabIds)}
         onSelectTab={(tabId) => {
           setActiveTabId(tabId);
           setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
         }}
+        onShowTab={(tabId) => void mutateContactTab(tabId, "show")}
       />
 
       <ContainerTabSummaryCards

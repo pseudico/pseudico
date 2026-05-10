@@ -80,7 +80,7 @@ describe("ContainerTabRepository", () => {
     expect(repository.listByContainer("container_project_1")).toHaveLength(1);
   });
 
-  it("updates order and soft-deletes active tabs", () => {
+  it("updates order, visibility, archive state, and soft-deletes active tabs", () => {
     const repository = new ContainerTabRepository(connection);
     const first = repository.create({
       id: "tab_1",
@@ -105,6 +105,9 @@ describe("ContainerTabRepository", () => {
       sortOrder: 2,
       timestamp: "2026-05-01T01:00:00.000Z"
     });
+    const hidden = repository.hide(second.id, "2026-05-01T01:30:00.000Z");
+    const shown = repository.show(second.id, "2026-05-01T01:45:00.000Z");
+    const archived = repository.archive(second.id, "2026-05-01T01:50:00.000Z");
     const deleted = repository.softDelete(second.id, "2026-05-01T02:00:00.000Z");
 
     expect(updated).toMatchObject({
@@ -118,7 +121,18 @@ describe("ContainerTabRepository", () => {
       id: "tab_2",
       deletedAt: "2026-05-01T02:00:00.000Z"
     });
+    expect(hidden.hiddenAt).toBe("2026-05-01T01:30:00.000Z");
+    expect(shown.hiddenAt).toBeNull();
+    expect(archived).toMatchObject({
+      archivedAt: "2026-05-01T01:50:00.000Z",
+      hiddenAt: "2026-05-01T01:50:00.000Z"
+    });
     expect(repository.listByContainer("container_project_1")).toEqual([updated]);
+    expect(repository.listByContainer("container_project_1", {
+      includeArchived: true,
+      includeHidden: true
+    }).map((tab) => tab.id)).toEqual(["tab_1"]);
     expect(repository.countActiveByContainer("container_project_1")).toBe(1);
+    expect(repository.countVisibleByContainer("container_project_1")).toBe(1);
   });
 });
