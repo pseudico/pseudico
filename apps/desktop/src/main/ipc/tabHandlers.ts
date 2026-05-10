@@ -3,12 +3,14 @@ import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
   type ContainerTabRecord,
-  type DatabaseConnection
+  type DatabaseConnection,
+  type TabSummaryRecord
 } from "@local-work-os/db";
 import {
   apiError,
   apiOk,
   type ApiResult,
+  type ContainerTabContentSummary,
   type ContainerTabSummary,
   type CreateContainerTabInput,
   type RenameContainerTabInput,
@@ -24,6 +26,7 @@ type CurrentWorkspaceService = Pick<
 
 type TabIpcHandlers = {
   handleListTabs: (input: unknown) => Promise<ApiResult<ContainerTabSummary[]>>;
+  handleListTabSummaries: (input: unknown) => Promise<ApiResult<ContainerTabContentSummary[]>>;
   handleCreateTab: (input: unknown) => Promise<ApiResult<ContainerTabSummary>>;
   handleRenameTab: (input: unknown) => Promise<ApiResult<ContainerTabSummary>>;
   handleReorderTabs: (input: unknown) => Promise<ApiResult<ContainerTabSummary[]>>;
@@ -41,6 +44,25 @@ export function createTabIpcHandlers(
 
       return await withTabService(workspaceService, async (context) =>
         apiOk(context.tabService.listTabs(input).map(toContainerTabSummary))
+      );
+    },
+
+
+
+    async handleListTabSummaries(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "listTabSummaries requires a containerId string."
+        );
+      }
+
+      return await withTabService(workspaceService, async (context) =>
+        apiOk(
+          context.tabService
+            .listTabSummaries(input, { todayStart: getLocalDayStartIso() })
+            .map(toContainerTabContentSummary)
+        )
       );
     },
 
@@ -146,6 +168,38 @@ function toContainerTabSummary(tab: ContainerTabRecord): ContainerTabSummary {
     archivedAt: tab.archivedAt,
     deletedAt: tab.deletedAt
   };
+}
+
+
+function toContainerTabContentSummary(
+  summary: TabSummaryRecord
+): ContainerTabContentSummary {
+  return {
+    tab: toContainerTabSummary(summary.tab),
+    totalItemCount: summary.totalItemCount,
+    openTaskCount: summary.openTaskCount,
+    completedTaskCount: summary.completedTaskCount,
+    overdueTaskCount: summary.overdueTaskCount,
+    upcomingTaskCount: summary.upcomingTaskCount,
+    noteCount: summary.noteCount,
+    fileCount: summary.fileCount,
+    linkCount: summary.linkCount,
+    listCount: summary.listCount,
+    openTaskPreviews: summary.openTaskPreviews,
+    recentContentPreviews: summary.recentContentPreviews
+  };
+}
+
+function getLocalDayStartIso(date = new Date()): string {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    0,
+    0,
+    0,
+    0
+  ).toISOString();
 }
 
 function isCreateContainerTabInput(

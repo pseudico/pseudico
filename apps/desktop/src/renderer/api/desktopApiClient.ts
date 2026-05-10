@@ -164,11 +164,15 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
     },
     tabs: {
       list: (containerId) => callApi(() => api.tabs.list(containerId)),
+      listSummaries: (containerId) =>
+        callApi(() => api.tabs.listSummaries(containerId)),
       create: (input) => callApi(() => api.tabs.create(input)),
       rename: (input) => callApi(() => api.tabs.rename(input)),
       reorder: (input) => callApi(() => api.tabs.reorder(input)),
       delete: (tabId) => callApi(() => api.tabs.delete(tabId)),
       listTabs: (containerId) => callApi(() => api.tabs.listTabs(containerId)),
+      listTabSummaries: (containerId) =>
+        callApi(() => api.tabs.listTabSummaries(containerId)),
       createTab: (input) => callApi(() => api.tabs.createTab(input)),
       renameTab: (input) => callApi(() => api.tabs.renameTab(input)),
       reorderTabs: (input) => callApi(() => api.tabs.reorderTabs(input)),
@@ -570,11 +574,15 @@ export const desktopApiClient: LocalWorkOsApi = {
   },
   tabs: {
     list: (containerId) => getDesktopApiClient().tabs.list(containerId),
+    listSummaries: (containerId) =>
+      getDesktopApiClient().tabs.listSummaries(containerId),
     create: (input) => getDesktopApiClient().tabs.create(input),
     rename: (input) => getDesktopApiClient().tabs.rename(input),
     reorder: (input) => getDesktopApiClient().tabs.reorder(input),
     delete: (tabId) => getDesktopApiClient().tabs.delete(tabId),
     listTabs: (containerId) => getDesktopApiClient().tabs.listTabs(containerId),
+    listTabSummaries: (containerId) =>
+      getDesktopApiClient().tabs.listTabSummaries(containerId),
     createTab: (input) => getDesktopApiClient().tabs.createTab(input),
     renameTab: (input) => getDesktopApiClient().tabs.renameTab(input),
     reorderTabs: (input) => getDesktopApiClient().tabs.reorderTabs(input),

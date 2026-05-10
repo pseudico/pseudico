@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   CategoryBadge,
   ContactFieldsEditor,
+  ContainerTabSummaryCards,
   ItemFeed,
   NoteCardContent,
   NoteEditor,
@@ -11,6 +12,7 @@ import {
   RelatedProjectsPanel,
   TaskCardContent,
   TaskQuickAdd,
+  type ContainerTabSummaryCardViewModel,
   type ContactFieldDraft,
   type ContactFieldViewModel,
   type ItemActionId,
@@ -25,6 +27,7 @@ import {
 import type {
   ActivitySummary,
   CategorySummary,
+  ContainerTabContentSummary,
   ContainerTabSummary,
   ContactDetailSummary,
   ContactFieldSummary,
@@ -65,6 +68,7 @@ type ContactDetailPageProps = {
   initialItems?: UniversalItemViewModel[];
   initialActivity?: RecentActivityViewModel[];
   initialTabs?: ContainerTabSummary[];
+  initialTabSummaries?: ContainerTabContentSummary[];
   initialAvailableProjects?: ProjectSummary[];
   initialRelatedProjects?: RelatedProjectSummary[];
 };
@@ -79,6 +83,7 @@ export function ContactDetailPage({
   initialItems = emptyContactItems,
   initialActivity = [],
   initialTabs = [],
+  initialTabSummaries = [],
   initialAvailableProjects = [],
   initialRelatedProjects = []
 }: ContactDetailPageProps): React.JSX.Element {
@@ -98,6 +103,8 @@ export function ContactDetailPage({
   const [activity, setActivity] =
     useState<RecentActivityViewModel[]>(initialActivity);
   const [tabs, setTabs] = useState<ContainerTabSummary[]>(initialTabs);
+  const [tabSummaries, setTabSummaries] =
+    useState<ContainerTabContentSummary[]>(initialTabSummaries);
   const [activeTabId, setActiveTabId] = useState<string | null>(
     selectInitialTabId(initialTabs)
   );
@@ -149,6 +156,7 @@ export function ContactDetailPage({
         categoriesResult,
         activityResult,
         tabsResult,
+        tabSummariesResult,
         tasksResult,
         notesResult,
         projectsResult,
@@ -161,6 +169,7 @@ export function ContactDetailPage({
           targetId: activeContactId
         }),
         apiClient.tabs.list(activeContactId),
+        apiClient.tabs.listSummaries(activeContactId),
         apiClient.tasks.listByContainer(activeContactId),
         apiClient.notes.listByContainer(activeContactId),
         apiClient.projects.list(),
@@ -194,6 +203,11 @@ export function ContactDetailPage({
         return;
       }
 
+      if (!tabSummariesResult.ok) {
+        setItemError(tabSummariesResult.error.message);
+        return;
+      }
+
       if (!tasksResult.ok) {
         setItemError(tasksResult.error.message);
         return;
@@ -224,6 +238,7 @@ export function ContactDetailPage({
       ));
       setCategories(categoriesResult.data);
       setTabs(tabsResult.data);
+      setTabSummaries(tabSummariesResult.data);
       setActiveTabId((current) =>
         selectAvailableTabId(tabsResult.data, current)
       );
@@ -279,6 +294,7 @@ export function ContactDetailPage({
     );
 
     setItems(mergedItems);
+    await refreshContactTabSummaries(activeContactId);
     setVisibleItemCount((current) =>
       Math.min(Math.max(current, CONTACT_FEED_PAGE_SIZE), mergedItems.length)
     );
@@ -312,6 +328,17 @@ export function ContactDetailPage({
     setActiveTabId((current) => selectAvailableTabId(result.data, current));
   }
 
+  async function refreshContactTabSummaries(activeContactId: string): Promise<void> {
+    const result = await apiClient.tabs.listSummaries(activeContactId);
+
+    if (!result.ok) {
+      setItemError(result.error.message);
+      return;
+    }
+
+    setTabSummaries(result.data);
+  }
+
   async function createContactTab(name: string): Promise<boolean> {
     if (contact === null) {
       return false;
@@ -333,6 +360,7 @@ export function ContactDetailPage({
     }
 
     await refreshContactTabs(contact.id);
+    await refreshContactTabSummaries(contact.id);
     setActiveTabId(result.data.id);
     await refreshContactActivity(contact.id);
     return true;
@@ -359,6 +387,7 @@ export function ContactDetailPage({
     }
 
     await refreshContactTabs(contact.id);
+    await refreshContactTabSummaries(contact.id);
     await refreshContactActivity(contact.id);
     return true;
   }
@@ -384,6 +413,7 @@ export function ContactDetailPage({
     }
 
     setTabs(result.data);
+    await refreshContactTabSummaries(contact.id);
     await refreshContactActivity(contact.id);
   }
 
@@ -405,6 +435,7 @@ export function ContactDetailPage({
     }
 
     await refreshContactTabs(contact.id);
+    await refreshContactTabSummaries(contact.id);
     await refreshContactActivity(contact.id);
   }
 
@@ -912,6 +943,20 @@ export function ContactDetailPage({
         }}
       />
 
+      <ContainerTabSummaryCards
+        activeTabId={activeTabId}
+        busy={itemsLoading || tabBusy}
+        summaries={tabSummaries.map(toContainerTabSummaryCardViewModel)}
+        onOpenItem={(_itemId, tabId) => {
+          setActiveTabId(tabId);
+          setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
+        }}
+        onSelectTab={(tabId) => {
+          setActiveTabId(tabId);
+          setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
+        }}
+      />
+
       <section className="project-content-section" aria-label="Contact content">
         <div className="panel-heading-actions">
           <div className="panel-heading">
@@ -1011,6 +1056,28 @@ export function ContactDetailPage({
       </section>
     </section>
   );
+}
+
+
+function toContainerTabSummaryCardViewModel(
+  summary: ContainerTabContentSummary
+): ContainerTabSummaryCardViewModel {
+  return {
+    tabId: summary.tab.id,
+    name: summary.tab.name,
+    isDefault: summary.tab.isDefault,
+    totalItemCount: summary.totalItemCount,
+    openTaskCount: summary.openTaskCount,
+    completedTaskCount: summary.completedTaskCount,
+    overdueTaskCount: summary.overdueTaskCount,
+    upcomingTaskCount: summary.upcomingTaskCount,
+    noteCount: summary.noteCount,
+    fileCount: summary.fileCount,
+    linkCount: summary.linkCount,
+    listCount: summary.listCount,
+    openTaskPreviews: summary.openTaskPreviews,
+    recentContentPreviews: summary.recentContentPreviews
+  };
 }
 
 function toContactFieldViewModel(

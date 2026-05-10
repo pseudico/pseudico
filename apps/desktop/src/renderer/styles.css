@@ -4419,3 +4419,135 @@ body,
     grid-template-columns: 1fr;
   }
 }
+
+
+.tab-summary-cards {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.tab-summary-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.85rem;
+}
+
+.tab-summary-card {
+  border: 1px solid #dedbd2;
+  border-radius: 1rem;
+  background: #fffdf7;
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.75rem;
+  box-shadow: 0 10px 30px rgb(38 38 36 / 0.08);
+}
+
+.tab-summary-card.is-active {
+  border-color: #245c55;
+  box-shadow: 0 0 0 1px rgb(36 92 85 / 0.18);
+}
+
+.tab-summary-card-open,
+.tab-summary-preview-button {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+
+.tab-summary-card-open {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.tab-summary-card-open span {
+  display: grid;
+  gap: 0.2rem;
+  font-weight: 700;
+}
+
+.tab-summary-card-open small,
+.tab-summary-preview-button small {
+  color: #6f6a5f;
+  font-weight: 500;
+}
+
+.tab-summary-card-open strong {
+  font-size: 1.5rem;
+}
+
+.tab-summary-counts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.tab-summary-counts div {
+  border-radius: 0.7rem;
+  background: #f6f5f0;
+  padding: 0.45rem;
+}
+
+.tab-summary-counts dt {
+  color: #6f6a5f;
+  font-size: 0.72rem;
+}
+
+.tab-summary-counts dd {
+  margin: 0.15rem 0 0;
+  font-weight: 800;
+}
+
+.tab-summary-counts .is-attention {
+  color: #9f2f2f;
+}
+
+.tab-summary-type-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  color: #6f6a5f;
+  font-size: 0.82rem;
+}
+
+.tab-summary-type-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tab-summary-preview-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.tab-summary-preview-button {
+  border-radius: 0.65rem;
+  padding: 0.45rem;
+  background: #f6f5f0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.tab-summary-preview-button:hover,
+.tab-summary-card-open:hover {
+  color: #245c55;
+}
+
+.tab-summary-preview-button span {
+  color: #6f6a5f;
+  font-size: 0.74rem;
+}
+
+.tab-summary-preview-button strong {
+  font-size: 0.9rem;
+}

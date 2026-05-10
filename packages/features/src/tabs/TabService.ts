@@ -10,10 +10,12 @@ import {
   ContainerRepository,
   ContainerTabRepository,
   ItemRepository,
+  TabSummaryRepository,
   TransactionService,
   type ContainerRecord,
   type ContainerTabRecord,
-  type DatabaseConnection
+  type DatabaseConnection,
+  type TabSummaryRecord
 } from "@local-work-os/db";
 
 export type TabServiceIdFactory = (prefix: string) => string;
@@ -70,6 +72,22 @@ export class TabService {
     this.requireEditableTabContainer(containerId);
 
     return new ContainerTabRepository(this.connection).listByContainer(containerId);
+  }
+
+
+  listTabSummaries(
+    containerId: string,
+    input: { todayStart: string; previewLimit?: number }
+  ): TabSummaryRecord[] {
+    validateNonEmptyString(containerId, "containerId");
+    validateNonEmptyString(input.todayStart, "todayStart");
+    this.requireEditableTabContainer(containerId);
+
+    return new TabSummaryRepository(this.connection).listByContainer({
+      containerId,
+      todayStart: input.todayStart,
+      ...(input.previewLimit === undefined ? {} : { previewLimit: input.previewLimit })
+    });
   }
 
   async createTab(input: CreateTabInput): Promise<ContainerTabRecord> {

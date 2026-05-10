@@ -41,6 +41,7 @@ new work should account for this implemented baseline:
   integrity diagnostics, bounded pagination, app-wide error boundaries/toasts,
   command palette navigation/actions, workspace-scoped recent navigation,
   back/forward route history, top-level app tabs for open project/contact/search/collection views,
+  project/contact content-tab summary cards with bounded item previews,
   workspace-scoped appearance preferences,
   unified context menu action providers for local targets, packaged smoke checks,
   and MVP smoke coverage.

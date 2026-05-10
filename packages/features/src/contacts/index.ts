@@ -22,3 +22,5 @@ export type {
   RelatedProjectSummary,
   UnlinkContactFromProjectInput
 } from "./ContactRelationshipService";
+
+export { ContactSummaryService, type ContactSummaryOverview } from "./ContactSummaryService";

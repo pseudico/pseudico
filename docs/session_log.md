@@ -1714,3 +1714,41 @@ Files changed:
 - apps/desktop/tests/smoke/shortcuts.test.ts
 Open questions / risks: CI still needs GitHub validation after push.
 Next actions: Review diff; commit and push; open ready PR.
+## 2026-05-10T13:56:04+10:00
+Objective: Finish PSE-99 end-to-end and prepare next ticket.
+Decisions made:
+- Squash-merged PR #95 after CI success; deleted merged branch and pulled main to eaa12fa.
+- Moved PSE-99 to Done and promoted only PSE-101 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Manual desktop keyboard QA remains recommended for release review.
+Next actions: Start PSE-101; enhance project/contact cards; keep one Codex Ready issue.
+## 2026-05-10T14:25:34+10:00
+Objective: Reconcile active Local Work OS work.
+Decisions made:
+- Found no Linear issues in PR Open or In Progress.
+- Found PSE-101 as the only Codex Ready issue and no open GitHub PRs.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked files remain unrelated and untouched.
+Next actions: Move PSE-101 to In Progress; pull main; read scope/docs.
+## 2026-05-10T14:40:31+10:00
+Objective: Implement PSE-101 tab preview summaries.
+Decisions made:
+- Added bounded TabSummaryRepository plus TabService IPC/preload exposure.
+- Added project/contact tab preview cards with clickable tab and item previews.
+Files changed:
+- packages/db/src/repositories/TabSummaryRepository.ts
+- packages/ui/src/components/ContainerTabSummaryCards.tsx
+Open questions / risks: Full lint/test/build still pending; UI needs human visual QA.
+Next actions: Run full checks; fix failures; publish PR.
+## 2026-05-10T14:41:55+10:00
+Objective: Verify PSE-101 before PR.
+Decisions made:
+- pnpm lint, pnpm typecheck, pnpm test, and pnpm build passed.
+- Vitest/build required sandbox escalation after Vite/electron-vite spawn EPERM.
+Files changed:
+- apps/desktop/src/renderer/pages/ProjectDetailPage.tsx
+- apps/desktop/src/renderer/pages/ContactDetailPage.tsx
+Open questions / risks: Manual visual QA for summary-card layout remains recommended.
+Next actions: Review diff; commit/push branch; open ready PR.

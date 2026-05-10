@@ -122,6 +122,13 @@ export {
   type MetadataTagFilterOption
 } from "./components/MetadataFilterPanel";
 export { ItemFeed, type ItemFeedProps } from "./components/ItemFeed";
+
+export {
+  ContainerTabSummaryCards,
+  type ContainerTabSummaryCardViewModel,
+  type ContainerTabSummaryCardsProps,
+  type TabSummaryPreviewViewModel
+} from "./components/ContainerTabSummaryCards";
 export {
   LoadMoreList,
   type LoadMoreListProps
