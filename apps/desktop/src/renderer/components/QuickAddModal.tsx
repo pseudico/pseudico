@@ -9,6 +9,8 @@ import {
 import {
   QuickAddForm,
   QuickStartMenu,
+  handleModalFocusKeyDown,
+  useModalFocusManagement,
   type QuickAddTargetOption
 } from "@local-work-os/ui";
 import type {
@@ -26,7 +28,7 @@ import type {
 } from "../../preload/api";
 import { apiError, apiOk } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 export const QUICK_TASK_CREATED_EVENT = "local-work-os:quick-task-created";
 export const QUICK_START_OPEN_EVENT = "local-work-os:open-quick-start";
@@ -138,6 +140,15 @@ export function QuickAddModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const titleId = useId();
+  const descriptionId = useId();
+
+  useModalFocusManagement({
+    containerRef: dialogRef,
+    open
+  });
 
   const actions = useMemo(
     () =>
@@ -243,21 +254,39 @@ export function QuickAddModal({
 
   return (
     <div className="quick-add-backdrop" role="presentation">
-      <dialog className="quick-add-dialog quick-start-dialog" open aria-labelledby="quick-add-title">
+      <dialog
+        aria-describedby={descriptionId}
+        aria-labelledby={titleId}
+        aria-modal="true"
+        className="quick-add-dialog quick-start-dialog"
+        open
+        ref={dialogRef}
+        onKeyDown={(event) => {
+          if (submitting && event.key === "Escape") {
+            return;
+          }
+
+          handleModalFocusKeyDown(event, dialogRef.current, onClose);
+        }}
+      >
         <div className="quick-add-dialog-header">
           <div>
             <p className="top-eyebrow">Quick Start</p>
-            <h2 id="quick-add-title">Create local work</h2>
+            <h2 id={titleId}>Create local work</h2>
           </div>
           <button
             className="secondary-button compact-button"
+            aria-label="Close Quick Start"
             disabled={submitting}
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
           >
             Close
           </button>
         </div>
+
+        <p className="sr-only" id={descriptionId}>Use Tab and Shift+Tab to move through Quick Start fields, Escape to close, and Enter to submit the active form.</p>
 
         {loading ? <p className="muted-text">Loading Quick Start context...</p> : null}
 

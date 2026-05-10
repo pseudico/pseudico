@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight, Clock3, Command, Plus, Search } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { QuickAddContext } from "../components/QuickAddModal";
 import { getQuickAddContext } from "../shortcuts/appShortcuts";
 import { getRouteByPath } from "../routes";
@@ -135,23 +135,47 @@ export function RecentNavigationMenu({
   onNavigateRecent: (target: NavigationRecentTargetSummary) => void;
 }): React.JSX.Element {
   const [open, setOpen] = useState(initialOpen);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+  const menuId = useId();
   const hasRecentTargets = recentTargets.length > 0;
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    function closeOnEscape(event: KeyboardEvent): void {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      event.preventDefault();
+      setOpen(false);
+      buttonRef.current?.focus();
+    }
+
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [open]);
 
   return (
     <div className="recent-navigation-menu">
       <button
         type="button"
         className="icon-button"
+        aria-controls={menuId}
         aria-expanded={open}
         aria-haspopup="menu"
         disabled={disabled}
+        ref={buttonRef}
         onClick={() => setOpen((current) => !current)}
       >
         <Clock3 size={18} aria-hidden="true" />
         <span>Recent</span>
       </button>
       {!open ? null : (
-        <div className="recent-navigation-popover" role="menu">
+        <div className="recent-navigation-popover" id={menuId} ref={popoverRef} role="menu" aria-label="Recently opened">
           <p className="top-eyebrow">Recently opened</p>
           {!hasRecentTargets ? (
             <p className="empty-inline">Open a view, project, contact, or item.</p>

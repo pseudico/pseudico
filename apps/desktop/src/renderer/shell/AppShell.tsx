@@ -74,6 +74,7 @@ export function AppShell(): React.JSX.Element {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">Skip to workspace content</a>
       <Sidebar />
       <div className="app-frame">
         <TopBar
@@ -93,7 +94,7 @@ export function AppShell(): React.JSX.Element {
           onMoveTab={appTabs.moveTab}
           onSelectTab={appTabs.selectTab}
         />
-        <main className="main-content" aria-label="Workspace content">
+        <main className="main-content" id="main-content" tabIndex={-1} aria-label="Workspace content">
           <Outlet />
         </main>
       </div>

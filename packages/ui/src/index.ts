@@ -137,6 +137,15 @@ export {
   type SearchResultCardViewModel
 } from "./components/SearchResultCard";
 export {
+  focusFirstFocusableElement,
+  getFocusableElements,
+  getFocusTrapKeyCommand,
+  handleModalFocusKeyDown,
+  modalFocusableSelector,
+  useModalFocusManagement,
+  type FocusTrapKeyCommand
+} from "./components/focusManagement";
+export {
   CommandPalette,
   getCommandPaletteKey,
   getNextCommandPaletteIndex,

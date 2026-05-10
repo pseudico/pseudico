@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { focusFirstFocusableElement } from "./focusManagement";
 import type {
   ContextMenuActionId,
   ContextMenuTarget,
@@ -32,6 +33,8 @@ export function ContextMenu({
 }: ContextMenuProps): React.JSX.Element {
   const menuId = useId();
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const regionRef = useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
   const groupedActions = useMemo(() => groupContextActions(actions), [actions]);
 
@@ -56,6 +59,18 @@ export function ContextMenu({
     return () => document.removeEventListener("click", closeOnDocumentClick);
   }, [open]);
 
+  useEffect(() => {
+    if (!open || menuRef.current === null) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      if (menuRef.current !== null) {
+        focusFirstFocusableElement(menuRef.current);
+      }
+    });
+  }, [open]);
+
   function execute(actionId: ContextMenuActionId): void {
     setOpen(false);
     onAction?.(actionId, target);
@@ -68,6 +83,70 @@ export function ContextMenu({
     }
   }
 
+  function closeAndRestoreFocus(): void {
+    setOpen(false);
+    (triggerRef.current ?? regionRef.current)?.focus();
+  }
+
+  function moveMenuFocus(direction: "first" | "last" | "next" | "previous"): void {
+    const items = getMenuItems();
+
+    if (items.length === 0) {
+      return;
+    }
+
+    const currentIndex = items.findIndex((item) => item === document.activeElement);
+
+    if (direction === "first") {
+      items[0]?.focus();
+      return;
+    }
+
+    if (direction === "last") {
+      items[items.length - 1]?.focus();
+      return;
+    }
+
+    const nextIndex =
+      direction === "next"
+        ? (Math.max(currentIndex, 0) + 1) % items.length
+        : (currentIndex - 1 + items.length) % items.length;
+    items[nextIndex]?.focus();
+  }
+
+  function getMenuItems(): HTMLButtonElement[] {
+    return Array.from(
+      menuRef.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])") ?? []
+    );
+  }
+
+  function handleMenuKeyDown(event: React.KeyboardEvent<HTMLDivElement>): void {
+    switch (event.key) {
+      case "Escape":
+        event.preventDefault();
+        closeAndRestoreFocus();
+        break;
+      case "ArrowDown":
+        event.preventDefault();
+        moveMenuFocus("next");
+        break;
+      case "ArrowUp":
+        event.preventDefault();
+        moveMenuFocus("previous");
+        break;
+      case "Home":
+        event.preventDefault();
+        moveMenuFocus("first");
+        break;
+      case "End":
+        event.preventDefault();
+        moveMenuFocus("last");
+        break;
+      default:
+        break;
+    }
+  }
+
   const menu = (
     <div
       className="context-menu-popover item-actions-list"
@@ -76,6 +155,7 @@ export function ContextMenu({
       role="menu"
       aria-label={label}
       hidden={!open}
+      onKeyDown={handleMenuKeyDown}
     >
       {groupedActions.map((group, groupIndex) => (
         <div
@@ -113,6 +193,10 @@ export function ContextMenu({
         className="context-menu-region"
         data-context-target-id={target.id}
         data-context-target-type={target.type}
+        aria-controls={menuId}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        ref={regionRef}
         tabIndex={0}
         onContextMenu={(event) => {
           event.preventDefault();
@@ -135,6 +219,7 @@ export function ContextMenu({
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label={label}
+        ref={triggerRef}
         onClick={() => setOpen((current) => !current)}
         onKeyDown={openFromKeyboard}
       >

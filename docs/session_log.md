@@ -1667,3 +1667,50 @@ Files changed:
 - docs/ARCHITECTURE.md
 Open questions / risks: Manual restart visual QA not executed in desktop UI.
 Next actions: Review diff; commit and push; open PR.
+
+## 2026-05-10T13:29:10+10:00
+Objective: Finish PSE-98 end-to-end and promote the next ticket.
+Decisions made:
+- Squash-merged PR #94 after CI passed; moved PSE-98 to Done and promoted only PSE-99 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Manual desktop visual/restart QA remains for future human pass.
+Next actions: Start PSE-99; run keyboard accessibility pass; keep one Codex Ready issue.
+## 2026-05-10T13:37:04+10:00
+Objective: Reconcile active Local Work OS work before PSE-99.
+Decisions made:
+- Found no Linear PR Open/In Progress issues and no open GitHub PRs.
+- Fetched origin/main after sandbox escalation for .git metadata.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing unrelated untracked files remain untouched.
+Next actions: Move PSE-99 to In Progress; read scope/docs; create branch.
+## 2026-05-10T13:37:56+10:00
+Objective: Start PSE-99 keyboard accessibility pass.
+Decisions made:
+- Moved PSE-99 from Codex Ready to In Progress.
+- Created branch codex/PSE-99-keyboard-accessibility-pass from origin/main.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need ticket acceptance criteria and target UI scope.
+Next actions: Read ticket pack/source; inspect keyboard-sensitive UI; implement tests/fixes.
+## 2026-05-10T13:46:58+10:00
+Objective: Implement PSE-99 keyboard accessibility pass.
+Decisions made:
+- Added shared modal focus trap utilities and wired palette, dialogs, Quick Start, and context menus.
+- Added shell skip link, keyboard docs, and accessibility-focused tests.
+Files changed:
+- packages/ui/src/components/focusManagement.ts
+- docs/ACCESSIBILITY.md
+Open questions / risks: Manual desktop keyboard QA still needs human visual pass.
+Next actions: Run full lint/typecheck/test/build; fix failures; publish PR.
+## 2026-05-10T13:48:36+10:00
+Objective: Verify PSE-99 before PR.
+Decisions made:
+- Full lint, typecheck, test, and build passed; test/build needed sandbox escalation for EPERM spawn.
+- Kept changes local-only UI/docs/tests with no schema or data writes.
+Files changed:
+- packages/ui/tests/focusManagement.test.ts
+- apps/desktop/tests/smoke/shortcuts.test.ts
+Open questions / risks: CI still needs GitHub validation after push.
+Next actions: Review diff; commit and push; open ready PR.

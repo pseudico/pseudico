@@ -29,6 +29,24 @@ describe("global app shortcuts", () => {
     ]);
   });
 
+
+  it("supports keyboard-only search navigation from the global search shortcut", () => {
+    const navigations: string[] = [];
+    const shortcut = resolveGlobalAppShortcut({ key: "f", ctrlKey: true });
+
+    expect(shortcut?.id).toBe("navigation.search.focus");
+    expect(
+      runGlobalAppShortcut(shortcut!, {
+        currentPathname: "/today",
+        navigate: (path: string) => navigations.push(path),
+        openCommandPalette: () => undefined,
+        openQuickAdd: () => undefined,
+        workspaceOpen: true
+      })
+    ).toBe(true);
+    expect(navigations).toEqual(["/search"]);
+  });
+
   it("ignores global capture shortcuts while typing in form fields", () => {
     expect(
       resolveGlobalAppShortcut({

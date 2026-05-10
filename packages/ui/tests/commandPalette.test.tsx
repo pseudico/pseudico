@@ -31,6 +31,9 @@ describe("CommandPalette", () => {
     expect(html).toContain("Ctrl+1");
     expect(html).toContain("Quick add");
     expect(html).toContain("Open a local workspace first.");
+    expect(html).toContain("aria-modal=\"true\"");
+    expect(html).toContain("role=\"combobox\"");
+    expect(html).toContain("Use arrow keys to move through commands");
     expect(html).toContain("aria-selected=\"true\"");
     expect(html).toContain("disabled=\"\"");
   });

@@ -1,4 +1,6 @@
 import { AlertTriangle, X } from "lucide-react";
+import { useId, useRef } from "react";
+import { handleModalFocusKeyDown, useModalFocusManagement } from "./focusManagement";
 
 export type ConfirmDialogTone = "normal" | "danger";
 
@@ -26,13 +28,36 @@ export function ConfirmDialog({
   tone = "normal",
   onCancel,
   onConfirm
-}: ConfirmDialogProps): React.JSX.Element {
+}: ConfirmDialogProps): React.JSX.Element | null {
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const cancelButtonRef = useRef<HTMLButtonElement | null>(null);
+  const titleId = useId();
+  const descriptionId = useId();
+
+  useModalFocusManagement({
+    containerRef: dialogRef,
+    initialFocusRef: cancelButtonRef,
+    open
+  });
+
+  if (!open) {
+    return null;
+  }
+
   return (
-    <dialog className="confirm-dialog project-dialog" open={open}>
+    <dialog
+      aria-describedby={descriptionId}
+      aria-labelledby={titleId}
+      aria-modal="true"
+      className="confirm-dialog project-dialog"
+      open
+      ref={dialogRef}
+      onKeyDown={(event) => handleModalFocusKeyDown(event, dialogRef.current, onCancel)}
+    >
       <div className="project-dialog-header">
         <div className="confirm-dialog-title">
           <AlertTriangle size={18} aria-hidden="true" />
-          <h3>{title}</h3>
+          <h3 id={titleId}>{title}</h3>
         </div>
         <button
           aria-label="Close confirmation"
@@ -46,7 +71,7 @@ export function ConfirmDialog({
         </button>
       </div>
 
-      <p className="confirm-dialog-description">{description}</p>
+      <p className="confirm-dialog-description" id={descriptionId}>{description}</p>
 
       {error === null ? null : (
         <p className="form-message form-message-error">{error}</p>
@@ -57,6 +82,7 @@ export function ConfirmDialog({
           className="secondary-button"
           disabled={busy}
           type="button"
+          ref={cancelButtonRef}
           onClick={onCancel}
         >
           {cancelLabel}
