@@ -27,4 +27,8 @@ export function registerLinkIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.links.openExternal,
     (_event, input) => handlers.handleOpenLinkExternally(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.links.openUrlExternal,
+    (_event, input) => handlers.handleOpenUrlExternally(input)
+  );
 }

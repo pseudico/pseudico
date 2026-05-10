@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(172);
+    expect(channels).toHaveLength(173);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -1032,6 +1032,7 @@ describe("typed preload API", () => {
     });
     await api.links.listByContainer("container_1");
     await api.links.openExternal("item_link_1");
+    await api.links.openUrlExternal("https://example.com/inline");
 
     expect(calls).toEqual([
       {
@@ -1057,6 +1058,10 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.links.openExternal,
         input: "item_link_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.links.openUrlExternal,
+        input: "https://example.com/inline"
       }
     ]);
   });

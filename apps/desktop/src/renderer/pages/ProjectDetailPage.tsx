@@ -1215,6 +1215,52 @@ export function ProjectDetailPage({
     }
   }
 
+  async function openProjectInlineExternalLink(url: string): Promise<void> {
+    setLinkError(null);
+
+    const result = await apiClient.links.openUrlExternal(url);
+
+    if (!result.ok) {
+      setLinkError(result.error.message);
+    }
+  }
+
+  async function copyProjectInlineExternalLink(url: string): Promise<void> {
+    try {
+      await globalThis.navigator.clipboard.writeText(url);
+      setLinkError(null);
+    } catch {
+      setLinkError("Unable to copy link to clipboard.");
+    }
+  }
+
+  async function createProjectLinkFromInlineUrl(url: string): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setSavingLink(true);
+    setLinkError(null);
+
+    const result = await apiClient.links.create({
+      workspaceId: project.workspaceId,
+      containerId: project.id,
+      containerTabId: activeTabId,
+      url,
+      title: url
+    });
+
+    if (!result.ok) {
+      setSavingLink(false);
+      setLinkError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    setSavingLink(false);
+  }
+
   async function updateProjectLink(
     item: LinkCardViewModel,
     values: LinkEditorValues
@@ -2082,6 +2128,9 @@ export function ProjectDetailPage({
             error={noteErrorItemId === item.id ? noteError : null}
             item={item}
             wikilinkSuggestions={createProjectWikilinkSuggestions(projects, contacts, items)}
+            onExternalLinkCopy={copyProjectInlineExternalLink}
+            onExternalLinkCreate={createProjectLinkFromInlineUrl}
+            onExternalLinkOpen={openProjectInlineExternalLink}
             onSave={updateProjectNote}
             onWikilinkOpen={openWikilinkTarget}
           />

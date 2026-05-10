@@ -4990,6 +4990,42 @@ body,
   color: #8a4a13;
 }
 
+.note-external-link-token {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0 1px;
+}
+
+.note-external-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.note-external-link:hover,
+.note-external-link:focus-visible {
+  color: #1d4ed8;
+}
+
+.note-external-link-action {
+  appearance: none;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1.2;
+  padding: 1px 6px;
+}
+
 .wikilink-suggestions {
   display: grid;
   gap: 6px;

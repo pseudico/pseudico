@@ -877,6 +877,46 @@ describe("Universal item UI", () => {
     expect(html).toContain("Ambiguous wikilink: Shared");
   });
 
+  it("renders safe external links with open, copy, and save actions", () => {
+    const html = renderToStaticMarkup(
+      <NoteCardContent
+        item={{
+          id: "item_note_1",
+          type: "note",
+          title: "Launch note",
+          content: "Read [Docs](https://docs.example.com/start) and https://example.com/brief."
+        }}
+        onExternalLinkCopy={() => undefined}
+        onExternalLinkCreate={() => undefined}
+        onExternalLinkOpen={() => undefined}
+      />
+    );
+
+    expect(html).toContain("note-external-link");
+    expect(html).toContain("Open external link: https://docs.example.com/start");
+    expect(html).toContain("Open external link: https://example.com/brief");
+    expect(html).toContain("Copy link");
+    expect(html).toContain("Save as link");
+    expect(html).not.toContain("https://docs.example.com/start)");
+  });
+
+  it("does not render unsafe javascript URLs as external links", () => {
+    const html = renderToStaticMarkup(
+      <NoteCardContent
+        item={{
+          id: "item_note_1",
+          type: "note",
+          title: "Launch note",
+          content: "Do not open [bad](javascript:alert(1))."
+        }}
+        onExternalLinkOpen={() => undefined}
+      />
+    );
+
+    expect(html).not.toContain("note-external-link");
+    expect(html).toContain("javascript:alert(1)");
+  });
+
   it("renders the Markdown note editor with save and cancel controls", () => {
     const html = renderToStaticMarkup(
       <NoteEditor
