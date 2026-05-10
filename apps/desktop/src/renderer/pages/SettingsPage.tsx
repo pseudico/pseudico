@@ -3,6 +3,7 @@ import {
   FileJson,
   FileSpreadsheet,
   Keyboard,
+  Palette,
   Plus,
   RefreshCw,
   ShieldCheck,
@@ -28,7 +29,11 @@ import {
 } from "../state/workspaceStore";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { showToast } from "../shell/toastStore";
+import { useAppearanceSettings } from "../theme/ThemeProvider";
 import type {
+  AppearanceDensityPreference,
+  AppearanceFontSizePreference,
+  AppearanceThemePreference,
   BackupSnapshotSummary,
   CategorySummary,
   ImportValidationSummary,
@@ -47,13 +52,26 @@ const shortcutGroups = groupShortcuts(
   createShortcutRegistry(defaultShortcutDescriptors).list()
 );
 
+type AppearanceDraft = {
+  theme: AppearanceThemePreference;
+  density: AppearanceDensityPreference;
+  fontSize: AppearanceFontSizePreference;
+};
+
 export function SettingsPage({
   apiClient = desktopApiClient,
   initialCategories = []
 }: SettingsPageProps): React.JSX.Element {
   const { currentWorkspace } = useWorkspaceStore();
+  const appearance = useAppearanceSettings();
   const [categories, setCategories] =
     useState<CategorySummary[]>(initialCategories);
+  const [appearanceDraft, setAppearanceDraft] = useState<AppearanceDraft>({
+    theme: appearance.settings.theme,
+    density: appearance.settings.density,
+    fontSize: appearance.settings.fontSize
+  });
+  const [appearanceSaving, setAppearanceSaving] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState(defaultCategoryColor);
   const [description, setDescription] = useState("");
@@ -90,6 +108,18 @@ export function SettingsPage({
   useEffect(() => {
     void refreshCurrentWorkspace(apiClient);
   }, [apiClient]);
+
+  useEffect(() => {
+    setAppearanceDraft({
+      theme: appearance.settings.theme,
+      density: appearance.settings.density,
+      fontSize: appearance.settings.fontSize
+    });
+  }, [
+    appearance.settings.density,
+    appearance.settings.fontSize,
+    appearance.settings.theme
+  ]);
 
   useEffect(() => {
     if (currentWorkspace === null) {
@@ -169,6 +199,32 @@ export function SettingsPage({
       title: "Category ready",
       tone: "success"
     });
+  }
+
+  async function saveAppearanceSettings(
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> {
+    event.preventDefault();
+
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before changing appearance settings.");
+      return;
+    }
+
+    setAppearanceSaving(true);
+    setError(null);
+
+    try {
+      await appearance.updateSettings(appearanceDraft);
+      showToast("Appearance preferences saved.", {
+        title: "Appearance updated",
+        tone: "success"
+      });
+    } catch (error) {
+      setUserError(error, "Appearance update failed");
+    } finally {
+      setAppearanceSaving(false);
+    }
   }
 
   async function updateCategory(
@@ -481,6 +537,81 @@ export function SettingsPage({
         </p>
       </div>
       <WorkspaceHealthPanel workspace={currentWorkspace} />
+
+      <section className="backup-management-panel" aria-label="Appearance">
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <h3>Appearance</h3>
+            <p className="muted-text">
+              Choose local-only theme, density, and font size preferences for this workspace.
+            </p>
+          </div>
+          <Palette size={20} aria-hidden="true" />
+        </div>
+        <form className="appearance-settings-form" onSubmit={saveAppearanceSettings}>
+          <label>
+            Theme
+            <select
+              disabled={appearanceSaving || currentWorkspace === null}
+              value={appearanceDraft.theme}
+              onChange={(event) =>
+                setAppearanceDraft((current) => ({
+                  ...current,
+                  theme: event.target.value as AppearanceThemePreference
+                }))
+              }
+            >
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+          <label>
+            Density
+            <select
+              disabled={appearanceSaving || currentWorkspace === null}
+              value={appearanceDraft.density}
+              onChange={(event) =>
+                setAppearanceDraft((current) => ({
+                  ...current,
+                  density: event.target.value as AppearanceDensityPreference
+                }))
+              }
+            >
+              <option value="comfortable">Comfortable</option>
+              <option value="compact">Compact</option>
+            </select>
+          </label>
+          <label>
+            Font size
+            <select
+              disabled={appearanceSaving || currentWorkspace === null}
+              value={appearanceDraft.fontSize}
+              onChange={(event) =>
+                setAppearanceDraft((current) => ({
+                  ...current,
+                  fontSize: event.target.value as AppearanceFontSizePreference
+                }))
+              }
+            >
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </label>
+          <button
+            className="primary-button compact-button"
+            disabled={appearanceSaving || currentWorkspace === null}
+            type="submit"
+          >
+            Save appearance
+          </button>
+        </form>
+        <p className="form-helper">
+          Current: {appearance.settings.theme} theme, {appearance.settings.density} density,
+          {appearance.settings.fontSize} font.
+        </p>
+      </section>
 
       <section className="backup-management-panel" aria-label="Keyboard shortcuts">
         <div className="panel-heading-actions">

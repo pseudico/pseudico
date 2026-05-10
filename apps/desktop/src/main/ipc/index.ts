@@ -1,5 +1,6 @@
 import { DatabaseBootstrapService } from "@local-work-os/db";
 import { app } from "electron";
+import { registerAppearanceIpc } from "./registerAppearanceIpc";
 import { registerCategoryIpc } from "./registerCategoryIpc";
 import { registerActivityIpc } from "./registerActivityIpc";
 import { registerBackupIpc } from "./registerBackupIpc";
@@ -65,6 +66,7 @@ export function registerDesktopIpc(
   registerBackupIpc(services.workspaceService);
   registerExportIpc(services.workspaceService);
   registerPrintIpc(services.workspaceService);
+  registerAppearanceIpc(services.workspaceService);
   registerImportIpc();
   registerDatabaseIpc(services.workspaceService);
   registerInboxIpc(services.workspaceService);

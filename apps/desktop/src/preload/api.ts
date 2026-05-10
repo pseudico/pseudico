@@ -2071,6 +2071,26 @@ export type ClearTrashSummary = {
   searchIndex: TrashSearchIndexSummary;
 };
 
+
+export type AppearanceThemePreference = "system" | "light" | "dark";
+export type AppearanceDensityPreference = "comfortable" | "compact";
+export type AppearanceFontSizePreference = "small" | "medium" | "large";
+
+export type AppearanceSettingsSummary = {
+  workspaceId: string;
+  theme: AppearanceThemePreference;
+  density: AppearanceDensityPreference;
+  fontSize: AppearanceFontSizePreference;
+  updatedAt: string | null;
+};
+
+export type UpdateAppearanceSettingsInput = {
+  workspaceId?: string;
+  theme?: AppearanceThemePreference;
+  density?: AppearanceDensityPreference;
+  fontSize?: AppearanceFontSizePreference;
+};
+
 export const LOCAL_WORK_OS_IPC_CHANNELS = {
   workspace: {
     createWorkspace: "local-work-os:workspace:create-workspace",
@@ -2292,6 +2312,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   },
   print: {
     printPdf: "local-work-os:print:print-pdf"
+  },
+  appearance: {
+    getSettings: "local-work-os:appearance:get-settings",
+    updateSettings: "local-work-os:appearance:update-settings"
   },
   diagnostics: {
     runWorkspaceIntegrityCheck:
@@ -2899,6 +2923,14 @@ export type LocalWorkOsIpcContracts = {
     input: PrintPdfInput;
     result: ApiResult<PrintPdfSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.appearance.getSettings]: {
+    input: string | undefined;
+    result: ApiResult<AppearanceSettingsSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.appearance.updateSettings]: {
+    input: UpdateAppearanceSettingsInput;
+    result: ApiResult<AppearanceSettingsSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runWorkspaceIntegrityCheck]: {
     input: RunWorkspaceIntegrityCheckInput | undefined;
     result: ApiResult<WorkspaceIntegritySummary>;
@@ -3429,6 +3461,12 @@ export type LocalWorkOsApi = {
   };
   print?: {
     printPdf: (input: PrintPdfInput) => Promise<ApiResult<PrintPdfSummary>>;
+  };
+  appearance: {
+    getSettings: (workspaceId?: string) => Promise<ApiResult<AppearanceSettingsSummary>>;
+    updateSettings: (
+      input: UpdateAppearanceSettingsInput
+    ) => Promise<ApiResult<AppearanceSettingsSummary>>;
   };
   diagnostics: {
     runWorkspaceIntegrityCheck: (
@@ -3979,6 +4017,12 @@ export function createLocalWorkOsApi(
     print: {
       printPdf: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.print.printPdf, input)
+    },
+    appearance: {
+      getSettings: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.appearance.getSettings, workspaceId),
+      updateSettings: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.appearance.updateSettings, input)
     },
     diagnostics: {
       runWorkspaceIntegrityCheck: (input) =>

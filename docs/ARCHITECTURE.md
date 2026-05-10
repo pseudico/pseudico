@@ -63,7 +63,8 @@ The current implementation follows the planned split:
   packaged-app smoke mode, SQLite connection/bootstrap, and narrow IPC
   handlers.
 - Preload exposes typed APIs for workspace, project, item, metadata, search,
-  dashboard, backup, export, import validation, file, and package-smoke flows.
+  dashboard, backup, export, import validation, file, appearance settings, and
+  package-smoke flows.
 - The renderer calls those APIs through `desktopApiClient` and renders routed
   React pages for Inbox, projects, project detail, Today, dashboard,
   collections, search, tags/categories, settings, contacts placeholder, and

@@ -4196,3 +4196,207 @@ a {
   background: #edebe3;
   padding: 3px 8px;
 }
+
+/* Appearance preferences */
+:root,
+.appearance-root {
+  --app-bg: #f6f5f0;
+  --app-surface: #fbfaf7;
+  --app-surface-strong: #ffffff;
+  --app-sidebar: #edebe3;
+  --app-border: #dedbd1;
+  --app-border-strong: #d5d0c3;
+  --app-text: #262624;
+  --app-text-muted: #6d6a62;
+  --app-accent: #245c55;
+  --app-accent-strong: #1e4b46;
+  --app-accent-soft: #dce9e6;
+  --app-danger: #a64030;
+  --appearance-font-scale: 1;
+  --appearance-density-scale: 1;
+  color: var(--app-text);
+  background: var(--app-bg);
+  font-size: calc(16px * var(--appearance-font-scale));
+}
+
+:root[data-theme="dark"],
+.appearance-root.theme-dark {
+  --app-bg: #171a18;
+  --app-surface: #20241f;
+  --app-surface-strong: #292e28;
+  --app-sidebar: #1c211d;
+  --app-border: #3a4039;
+  --app-border-strong: #4d554c;
+  --app-text: #f4f1e8;
+  --app-text-muted: #b8b1a4;
+  --app-accent: #77b9aa;
+  --app-accent-strong: #9fd2c7;
+  --app-accent-soft: #243f3a;
+  --app-danger: #f08b78;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"],
+  .appearance-root.theme-system {
+    --app-bg: #171a18;
+    --app-surface: #20241f;
+    --app-surface-strong: #292e28;
+    --app-sidebar: #1c211d;
+    --app-border: #3a4039;
+    --app-border-strong: #4d554c;
+    --app-text: #f4f1e8;
+    --app-text-muted: #b8b1a4;
+    --app-accent: #77b9aa;
+    --app-accent-strong: #9fd2c7;
+    --app-accent-soft: #243f3a;
+    --app-danger: #f08b78;
+  }
+}
+
+:root[data-density="compact"],
+.appearance-root.density-compact {
+  --appearance-density-scale: 0.78;
+}
+
+:root[data-font-size="small"],
+.appearance-root.font-small {
+  --appearance-font-scale: 0.9375;
+}
+
+:root[data-font-size="large"],
+.appearance-root.font-large {
+  --appearance-font-scale: 1.0875;
+}
+
+body,
+.app-shell,
+.main-content {
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+.sidebar {
+  border-color: var(--app-border);
+  background: var(--app-sidebar);
+}
+
+.top-bar,
+.search-control,
+.dashboard-widget,
+.today-task-card,
+.search-result-card,
+.metadata-target-card,
+.project-health-card,
+.universal-item-card,
+.timeline-item-card,
+.quick-start-action-card,
+.backup-management-panel,
+.workspace-card,
+.settings-panel,
+.file-card-content,
+.link-card-content,
+.note-card-content,
+.list-card-content,
+.task-card-content,
+.pipeline-card {
+  border-color: var(--app-border);
+  background: var(--app-surface-strong);
+  color: var(--app-text);
+}
+
+.top-eyebrow,
+.brand-subtitle,
+.nav-section-label,
+.page-heading p,
+.muted-text,
+.form-helper,
+.dashboard-widget > p,
+.dashboard-widget-row-main > span,
+.dashboard-widget-row-meta,
+.search-result-card-meta,
+.today-task-card-meta {
+  color: var(--app-text-muted);
+}
+
+.brand-link,
+.search-control input,
+.page-heading h2,
+.dashboard-widget-header h3,
+.universal-item-card-main h4,
+.search-result-card-title strong {
+  color: var(--app-text);
+}
+
+.brand-mark,
+.primary-button {
+  background: var(--app-accent);
+  color: var(--app-surface-strong);
+}
+
+.primary-button:hover:not(:disabled) {
+  background: var(--app-accent-strong);
+}
+
+.nav-item:hover,
+.nav-item-active,
+.dashboard-widget-row:hover,
+.search-result-card:hover,
+.search-result-card-selected,
+.universal-item-card-selected {
+  background: var(--app-accent-soft);
+  color: var(--app-text);
+}
+
+.appearance-root.density-compact .sidebar {
+  gap: calc(24px * var(--appearance-density-scale));
+  padding: 14px 10px;
+}
+
+.appearance-root.density-compact .top-bar {
+  min-height: 58px;
+  padding: 10px 20px;
+}
+
+.appearance-root.density-compact .main-content,
+.appearance-root.density-compact .settings-layout,
+.appearance-root.density-compact .dashboard-page,
+.appearance-root.density-compact .page-grid {
+  gap: calc(20px * var(--appearance-density-scale));
+}
+
+.appearance-root.density-compact .dashboard-widget,
+.appearance-root.density-compact .backup-management-panel,
+.appearance-root.density-compact .universal-item-card,
+.appearance-root.density-compact .today-task-card,
+.appearance-root.density-compact .search-result-card {
+  padding: calc(18px * var(--appearance-density-scale));
+}
+
+.appearance-settings-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+  gap: 12px;
+}
+
+.appearance-settings-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--app-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.appearance-settings-form select {
+  min-height: 38px;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 8px;
+  background: var(--app-surface-strong);
+  color: var(--app-text);
+}
+
+@media (max-width: 900px) {
+  .appearance-settings-form {
+    grid-template-columns: 1fr;
+  }
+}

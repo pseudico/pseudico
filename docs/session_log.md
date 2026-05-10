@@ -1637,3 +1637,33 @@ Open questions / risks:
 - CI/review still need GitHub validation after push.
 Next actions:
 - Commit, push, open ready PR.
+
+## 2026-05-10T13:09:30+10:00
+Objective: Close PSE-97 and prepare the next Local Work OS ticket.
+Decisions made:
+- Merged PR #93 after local checks and CI passed; promoted PSE-98 as the only Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: None; unrelated untracked files remain untouched.
+Next actions: Pull PSE-98 into In Progress; implement themes/density/font preferences; run full checks.
+
+## 2026-05-10T13:22:30+10:00
+Objective: Implement PSE-98 appearance preferences foundation.
+Decisions made:
+- Used app_settings for local persistence; added AppearanceSettingsService, IPC, ThemeProvider, Settings > Appearance, CSS variables.
+Files changed:
+- packages/features/src/appearance/AppearanceSettingsService.ts
+- apps/desktop/src/renderer/theme/ThemeProvider.tsx
+Open questions / risks: Need full test/build and visual QA remains manual.
+Next actions: Update docs; run full checks; open PR.
+
+## 2026-05-10T13:24:30+10:00
+Objective: Verify PSE-98 before PR.
+Decisions made:
+- Kept PSE-98 scoped to appearance preferences; documented app_settings payload and IPC/API boundaries.
+Files changed:
+- docs/PRODUCT_SPEC.md
+- docs/DATA_MODEL.md
+- docs/ARCHITECTURE.md
+Open questions / risks: Manual restart visual QA not executed in desktop UI.
+Next actions: Review diff; commit and push; open PR.

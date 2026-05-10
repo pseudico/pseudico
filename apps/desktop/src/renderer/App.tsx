@@ -18,6 +18,7 @@ import { TodayPage } from "./pages/TodayPage";
 import { TrashPage } from "./pages/TrashPage";
 import { WelcomePage } from "./pages/WelcomePage";
 import { WorkspaceHomePage } from "./pages/WorkspaceHomePage";
+import { ThemeProvider } from "./theme/ThemeProvider";
 
 export function AppRoutes(): React.JSX.Element {
   return (
@@ -49,9 +50,11 @@ export function AppRoutes(): React.JSX.Element {
 export function App(): React.JSX.Element {
   return (
     <ErrorBoundary>
-      <HashRouter>
-        <AppRoutes />
-      </HashRouter>
+      <ThemeProvider>
+        <HashRouter>
+          <AppRoutes />
+        </HashRouter>
+      </ThemeProvider>
       <ToastHost />
     </ErrorBoundary>
   );

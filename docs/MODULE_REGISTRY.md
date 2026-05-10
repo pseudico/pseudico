@@ -41,6 +41,7 @@ new work should account for this implemented baseline:
   integrity diagnostics, bounded pagination, app-wide error boundaries/toasts,
   command palette navigation/actions, workspace-scoped recent navigation,
   back/forward route history, top-level app tabs for open project/contact/search/collection views,
+  workspace-scoped appearance preferences,
   unified context menu action providers for local targets, packaged smoke checks,
   and MVP smoke coverage.
 
@@ -68,6 +69,7 @@ renderer-only implementation.
 | Context Menus | Own local right-click/keyboard menu target contracts and action filtering for containers, items, list rows, metadata, files, and saved views. | Context menu targets, action descriptors, grouped menu UI | Action registry, items, projects, metadata, files, saved views | Project/contact feeds, metadata browser, saved views, future shortcuts | V1 |
 | Navigation History | Own workspace-scoped recent content persistence and app back/forward route stacks. | Recent navigation targets, route stack entries | App shell, app settings, projects, contacts, items, saved views | Top bar recent menu, fast content restore | V1 |
 | App Tabs | Own top-level open-view tab session state, active tab selection, and tab order. | App tab route targets, active tab id | App shell, app settings, navigation history | Fast switching among open projects, contacts, search, and collections | V1 |
+| Appearance | Own local theme, density, and font-size preferences plus renderer appearance contracts. | Appearance settings payloads, CSS variables, ThemeProvider state | Workspace, app settings, activity log, Electron main/preload IPC | App shell, cards, dashboard, settings | V1 |
 | Metadata | Own tags and categories as local classification systems. | Tags, categories, taggings, category assignments | Workspace, search | Saved views, dashboard, today, all content modules | MVP |
 | Search | Own local searchable projections, query behavior, and reindexing entry points. | Search records, indexed content, search diagnostics | Workspace, content modules, database/search repository | Global search, saved views, dashboard, maintenance | MVP |
 | Saved Views | Own collection and smart-list query definitions. | Saved views, collections, smart-list filters | Workspace, metadata, search, tasks, projects, contacts | Dashboard, Today filters, future reports | V1 |
@@ -310,6 +312,31 @@ Integration points:
 - App shell tab strip for user-facing switching.
 - Navigation history recent targets when tabs are opened.
 - App settings repository for local-only session persistence.
+
+### Appearance
+
+Owns:
+
+- Workspace-scoped light, dark, and system theme preference persistence.
+- Comfortable/compact density and small/medium/large font-size validation.
+- Renderer appearance context, CSS variable tokens, and settings page controls.
+
+Does not own:
+
+- Cloud profile sync, hosted accounts, or cross-device preferences.
+- Per-object custom themes, proprietary visual designs, or external assets.
+- Raw renderer database/filesystem access.
+
+Implemented service methods:
+
+- `getSettings`
+- `updateSettings`
+
+Integration points:
+
+- `app_settings` repository for local persistence.
+- Activity Log for user-visible preference writes.
+- Main/preload IPC, `ThemeProvider`, app shell, cards, dashboard, and Settings.
 
 ### Content Tabs
 

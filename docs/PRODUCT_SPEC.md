@@ -35,6 +35,9 @@ Known limitations for MVP release planning:
 - Reminders now have tables, service operations, IPC, scheduler-facing events,
   and a shared picker foundation; full renderer notification preferences remain
   future work.
+- Appearance preferences now persist local theme, density, and font-size choices
+  through app settings and apply renderer CSS variables to shell, card, and
+  dashboard surfaces.
 - Timeline and calendar services are placeholders for future local dated-work
   projections.
 - Search is local and service-backed, but ranking, diagnostics, and rebuild UX
@@ -1970,6 +1973,10 @@ Because this app is local-only, backup is a first-class feature.
 | Tags | Rename/merge tags |
 | Tasks | Default reminders, auto-archive completed |
 | Today | Launch to Today, backlog window |
+
+The first implemented Appearance slice stores theme (`system`, `light`, `dark`),
+density (`comfortable`, `compact`), and font size (`small`, `medium`, `large`)
+as local workspace app settings and applies them via renderer CSS variables.
 | Files | Attachment copy behaviour, reveal/open options |
 | Search | Include archived/deleted toggles |
 | Backups | Backup frequency, retention |

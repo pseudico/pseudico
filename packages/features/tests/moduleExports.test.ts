@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   backupModuleContract,
+  appearanceModuleContract,
+  AppearanceSettingsService,
   BackupService,
   BulkActionService,
   bulkActionsModuleContract,
@@ -96,6 +98,7 @@ describe("feature module exports", () => {
       "bulkActions",
       "export",
       "printing",
+      "appearance",
       "templates",
       "workflows",
       "undo",
@@ -139,6 +142,7 @@ describe("feature module exports", () => {
       bulkActionsModuleContract.module,
       exportModuleContract.module,
       printingModuleContract.module,
+      appearanceModuleContract.module,
       templatesModuleContract.module,
       workflowsModuleContract.module,
       undoModuleContract.module,
@@ -178,6 +182,7 @@ describe("feature module exports", () => {
       "bulkActions",
       "export",
       "printing",
+      "appearance",
       "templates",
       "workflows",
       "undo",
@@ -214,6 +219,10 @@ describe("feature module exports", () => {
 
   it("exports the print service implementation", () => {
     expect(PrintService).toBeDefined();
+  });
+
+  it("exports the appearance settings service implementation", () => {
+    expect(AppearanceSettingsService).toBeDefined();
   });
 
   it("exports the bulk action service implementation", () => {

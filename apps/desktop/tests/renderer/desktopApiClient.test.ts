@@ -595,6 +595,24 @@ function createMockApi(
       exportProjectMarkdown: async () => apiOk(textExportSummary("project_markdown")),
       exportTasksCsv: async () => apiOk(textExportSummary("tasks_csv"))
     },
+    appearance: {
+      getSettings: async () =>
+        apiOk({
+          workspaceId: "workspace_1",
+          theme: "system",
+          density: "comfortable",
+          fontSize: "medium",
+          updatedAt: null
+        }),
+      updateSettings: async () =>
+        apiOk({
+          workspaceId: "workspace_1",
+          theme: "dark",
+          density: "compact",
+          fontSize: "large",
+          updatedAt: "2026-05-10T03:20:00.000Z"
+        })
+    },
     diagnostics: {
       runWorkspaceIntegrityCheck: async () => apiOk(workspaceIntegritySummary())
     },
@@ -1770,6 +1788,29 @@ describe("desktop API client", () => {
       data: {
         kind: "tasks_csv",
         rowCount: 1
+      }
+    });
+    await expect(client.appearance.getSettings("workspace_1")).resolves.toMatchObject({
+      ok: true,
+      data: {
+        theme: "system",
+        density: "comfortable",
+        fontSize: "medium"
+      }
+    });
+    await expect(
+      client.appearance.updateSettings({
+        workspaceId: "workspace_1",
+        theme: "dark",
+        density: "compact",
+        fontSize: "large"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        theme: "dark",
+        density: "compact",
+        fontSize: "large"
       }
     });
     await expect(client.diagnostics.runWorkspaceIntegrityCheck()).resolves.toMatchObject({
