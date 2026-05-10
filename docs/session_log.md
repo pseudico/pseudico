@@ -2226,3 +2226,24 @@ Decisions made: - Committed 689e41e and opened ready PR #108. - Moved PSE-113 to
 Files changed: docs/session_log.md
 Open questions / risks: CI still in progress; merge pending green checks.
 Next actions: Wait for CI; merge if green; promote next ticket.
+
+2026-05-10 21:32:03 +10:00
+Objective: Merge PSE-113 and advance immediately to PSE-114.
+Decisions made: - Squash-merged PR #108 at 6721461. - Moved PSE-113 to Done. - Promoted PSE-114 then moved it to In Progress.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-114 scope still needs source-ticket review.
+Next actions: Branch for PSE-114; read ticket/docs; implement scoped settings.
+
+2026-05-10 21:47:10 +10:00
+Objective: Implement PSE-114 container preferences scope.
+Decisions made: - Used app_settings keys instead of a migration. - Added service, IPC/preload API, project/contact settings UI, docs, and tests.
+Files changed: packages/features/src/containers/ContainerPreferencesService.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/pages/ContactDetailPage.tsx; docs/DATA_MODEL.md
+Open questions / risks: Manual reopen QA still pending after checks.
+Next actions: Run targeted tests; fix failures; run full checks.
+
+2026-05-10 21:54:46 +10:00
+Objective: Verify PSE-114 locally before PR.
+Decisions made: - Fixed module export expectations and desktop test mocks. - Reran sandbox-blocked Vitest/build with escalation after EPERM.
+Files changed: packages/features/tests/moduleExports.test.ts; apps/desktop/tests/renderer/*.tsx; docs/session_log.md
+Open questions / risks: CI still required after push; manual UI reopen QA documented for PR.
+Next actions: Commit; push branch; open PR.

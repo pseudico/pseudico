@@ -2282,6 +2282,56 @@ a {
   display: none;
 }
 
+.container-preferences-dialog {
+  display: grid;
+  gap: 14px;
+  max-width: 900px;
+  padding: 16px;
+  border: 1px solid #dedbd1;
+  border-radius: 14px;
+  background: #fffdfa;
+  box-shadow: 0 12px 28px rgb(61 56 45 / 8%);
+}
+
+.container-preferences-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.container-preferences-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--app-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.container-preferences-form select {
+  min-height: 38px;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--app-text);
+}
+
+.container-preferences-form .checkbox-row {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  color: var(--app-text);
+}
+
+.project-detail-page.container-preferences-compact,
+.project-detail-page.container-preferences-compact .project-content-section {
+  gap: 12px;
+}
+
+.project-detail-page.container-preferences-compact .project-meta-grid,
+.project-detail-page.container-preferences-compact .project-content-section,
+.project-detail-page.container-preferences-compact .container-preferences-dialog {
+  padding-block: 10px;
+}
+
 .project-dialog-header {
   display: flex;
   align-items: start;
@@ -4587,6 +4637,10 @@ body,
 }
 
 @media (max-width: 900px) {
+  .container-preferences-form {
+    grid-template-columns: 1fr;
+  }
+
   .appearance-settings-form {
     grid-template-columns: 1fr;
   }

@@ -434,6 +434,38 @@ export type ListContainersInput = {
   includeArchived?: boolean;
 };
 
+export type ContainerDefaultView = "feed" | "tab" | "summary";
+export type ContainerGroupingMode = "none" | "type" | "tab" | "status";
+export type ContainerQuickAddType = "task" | "note" | "list" | "link" | "file";
+
+export type ContainerPreferencesSummary = {
+  workspaceId: string;
+  containerId: string;
+  updatedAt: string | null;
+  defaultView: ContainerDefaultView;
+  defaultTabId: string | null;
+  showCompleted: boolean;
+  grouping: ContainerGroupingMode;
+  defaultQuickAddType: ContainerQuickAddType;
+  summaryFirst: boolean;
+  compactMode: boolean;
+};
+
+export type UpdateContainerPreferencesInput = Partial<
+  Pick<
+    ContainerPreferencesSummary,
+    | "defaultView"
+    | "defaultTabId"
+    | "showCompleted"
+    | "grouping"
+    | "defaultQuickAddType"
+    | "summaryFirst"
+    | "compactMode"
+  >
+> & {
+  containerId: string;
+};
+
 export type ContainerMediaRole = "project_banner" | "contact_avatar";
 
 export type ContainerMediaSummary = {
@@ -2691,7 +2723,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     listActivityForTarget: "local-work-os:activity:list-activity-for-target"
   },
   containers: {
-    getStatus: "local-work-os:containers:get-status"
+    getStatus: "local-work-os:containers:get-status",
+    getPreferences: "local-work-os:containers:get-preferences",
+    updatePreferences: "local-work-os:containers:update-preferences"
   },
   items: {
     getStatus: "local-work-os:items:get-status",
@@ -3271,6 +3305,14 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.containers.getStatus]: {
     input: undefined;
     result: ApiResult<IpcModuleStatus>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.containers.getPreferences]: {
+    input: string;
+    result: ApiResult<ContainerPreferencesSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.containers.updatePreferences]: {
+    input: UpdateContainerPreferencesInput;
+    result: ApiResult<ContainerPreferencesSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.items.getStatus]: {
     input: undefined;
@@ -3978,6 +4020,12 @@ export type LocalWorkOsApi = {
   };
   containers: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
+    getPreferences: (
+      containerId: string
+    ) => Promise<ApiResult<ContainerPreferencesSummary>>;
+    updatePreferences: (
+      input: UpdateContainerPreferencesInput
+    ) => Promise<ApiResult<ContainerPreferencesSummary>>;
   };
   items: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
@@ -4613,7 +4661,11 @@ export function createLocalWorkOsApi(
     },
     containers: {
       getStatus: () =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containers.getStatus, undefined)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containers.getStatus, undefined),
+      getPreferences: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containers.getPreferences, containerId),
+      updatePreferences: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containers.updatePreferences, input)
     },
     items: {
       getStatus: () =>

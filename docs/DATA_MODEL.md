@@ -85,6 +85,10 @@ object graph:
   local preference/settings rows.
   Appearance preferences use an `appearance.settings.v1` app setting payload for
   local theme, density, and font-size choices without adding cloud profile data.
+  Project/contact display preferences use per-container
+  `container.preferences.v1:<container_id>` app setting payloads for default
+  view/tab, show-completed behavior, grouping, default quick-add type,
+  summary-first layout, and compact mode.
 - `containers` and `container_tabs` store Inbox, project, and contact surfaces
   plus tab support. Content tabs now include `hidden_at`, `archived_at`, and
   `deleted_at` timestamps so local visibility, reversible archive, and soft

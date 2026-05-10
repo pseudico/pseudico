@@ -542,7 +542,33 @@ function createMockApi(): LocalWorkOsApi {
       listActivityForTarget: async () => apiOk([])
     },
     containers: {
-      getStatus: async () => apiOk(moduleStatus("containers"))
+      getStatus: async () => apiOk(moduleStatus("containers")),
+      getPreferences: async (containerId) =>
+        apiOk({
+          workspaceId: "workspace_1",
+          containerId,
+          updatedAt: null,
+          defaultView: "feed",
+          defaultTabId: null,
+          showCompleted: true,
+          grouping: "none",
+          defaultQuickAddType: "task",
+          summaryFirst: false,
+          compactMode: false
+        }),
+      updatePreferences: async (input) =>
+        apiOk({
+          workspaceId: "workspace_1",
+          containerId: input.containerId,
+          updatedAt: "2026-05-10T10:01:00.000Z",
+          defaultView: input.defaultView ?? "feed",
+          defaultTabId: input.defaultTabId ?? null,
+          showCompleted: input.showCompleted ?? true,
+          grouping: input.grouping ?? "none",
+          defaultQuickAddType: input.defaultQuickAddType ?? "task",
+          summaryFirst: input.summaryFirst ?? false,
+          compactMode: input.compactMode ?? false
+        })
     },
     items: {
       getStatus: async () => apiOk(moduleStatus("items")),
@@ -916,5 +942,3 @@ function dailyPlanItemSummary() {
     updatedAt: "2026-05-01T00:00:00.000Z"
   };
 }
-
-

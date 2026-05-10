@@ -93,7 +93,7 @@ export function registerDesktopIpc(
   registerTimelineIpc(services.workspaceService);
   registerCalendarIpc(services.workspaceService);
   registerDashboardIpc(services.workspaceService);
-  registerContainerIpc();
+  registerContainerIpc(services.workspaceService);
   registerContainerMediaIpc(services.workspaceService);
   registerItemIpc(services.workspaceService);
   registerTrashIpc(services.workspaceService);
