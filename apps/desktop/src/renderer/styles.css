@@ -1514,6 +1514,121 @@ a {
   color: #6d6a62;
 }
 
+.related-items-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--app-border, #e1ddd5);
+  border-radius: 16px;
+  background: var(--app-surface, #fffaf2);
+}
+
+.relationship-link-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+}
+
+.relationship-link-controls label {
+  display: grid;
+  gap: 4px;
+  min-width: 180px;
+  color: var(--app-text-muted, #6d6a62);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.relationship-link-controls select {
+  min-height: 34px;
+  border: 1px solid var(--app-border, #d8d1c5);
+  border-radius: 10px;
+  background: var(--app-surface-raised, #fff);
+  color: var(--app-text, #262624);
+  padding: 0 10px;
+}
+
+.related-summary-list,
+.related-graph-list ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.related-summary-card,
+.related-graph-list li {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--app-border, #e1ddd5);
+  border-radius: 12px;
+  background: var(--app-surface-raised, #fff);
+}
+
+.related-graph-list h5 {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+
+.related-graph-list li > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.related-graph-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.related-graph-node {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  max-width: 220px;
+  padding: 10px 12px;
+  border: 1px solid var(--app-border, #d8d1c5);
+  border-radius: 999px;
+  background: var(--app-surface-raised, #fff);
+  color: var(--app-text, #262624);
+  text-align: left;
+}
+
+.related-graph-node.depth-0 {
+  border-color: #a07c39;
+  background: #fff2cf;
+}
+
+.related-graph-node.depth-2 {
+  opacity: 0.78;
+}
+
+.related-graph-node small {
+  color: var(--app-text-muted, #6d6a62);
+}
+
+.link-button {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  color: var(--app-accent, #765b24);
+  padding: 0;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.danger-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #a33a2b;
+}
+
 .recent-list {
   display: grid;
   gap: 8px;

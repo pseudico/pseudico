@@ -1,8 +1,11 @@
 import {
   ContactRelationshipService,
+  RelationshipGraphService,
   type ActivityEventView,
   type ContactProjectRelationshipResult as FeatureContactProjectRelationshipResult,
   type ContactRecord,
+  type CreateRelationshipInput as FeatureCreateRelationshipInput,
+  type RelationshipGraphView as FeatureRelationshipGraphSummary,
   type ProjectRecord,
   type RelatedContactSummary as FeatureRelatedContactSummary,
   type RelatedProjectSummary as FeatureRelatedProjectSummary
@@ -20,10 +23,14 @@ import {
   type ApiResult,
   type ContactProjectRelationshipResult,
   type ContactSummary,
+  type CreateGenericRelationshipInput,
+  type GetRelationshipGraphInput,
   type LinkContactToProjectInput,
   type ProjectSummary,
   type RelatedContactSummary,
   type RelatedProjectSummary,
+  type RelationshipEndpointInput,
+  type RelationshipGraphSummary,
   type RelationshipSummary,
   type WorkspaceSummary
 } from "../../preload/api";
@@ -35,6 +42,15 @@ type CurrentWorkspaceService = Pick<
 >;
 
 type RelationshipIpcHandlers = {
+  handleGetGraph: (
+    input: unknown
+  ) => Promise<ApiResult<RelationshipGraphSummary>>;
+  handleCreateRelationship: (
+    input: unknown
+  ) => Promise<ApiResult<ContactProjectRelationshipResult>>;
+  handleRemoveRelationship: (
+    input: unknown
+  ) => Promise<ApiResult<ContactProjectRelationshipResult>>;
   handleLinkContactToProject: (
     input: unknown
   ) => Promise<ApiResult<ContactProjectRelationshipResult>>;
@@ -53,6 +69,65 @@ export function createRelationshipIpcHandlers(
   workspaceService: CurrentWorkspaceService
 ): RelationshipIpcHandlers {
   return {
+    async handleGetGraph(input) {
+      if (!isGetRelationshipGraphInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "getGraph requires a root relationship endpoint."
+        );
+      }
+
+      return await withRelationshipService(workspaceService, async (context) =>
+        apiOk(
+          toRelationshipGraphSummary(
+            context.relationshipGraphService.getGraph({
+              workspaceId: context.workspace.id,
+              ...input
+            })
+          )
+        )
+      );
+    },
+
+    async handleCreateRelationship(input) {
+      if (!isCreateGenericRelationshipInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "createRelationship requires source, target, and relationType."
+        );
+      }
+
+      return await withRelationshipService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const result = await context.relationshipGraphService.createRelationship({
+          workspaceId,
+          source: input.source,
+          target: input.target,
+          relationType: input.relationType,
+          label: input.label ?? null
+        } satisfies FeatureCreateRelationshipInput);
+
+        return apiOk(toRelationshipMutationResult(result));
+      });
+    },
+
+    async handleRemoveRelationship(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "removeRelationship requires a relationshipId string."
+        );
+      }
+
+      return await withRelationshipService(workspaceService, async (context) =>
+        apiOk(
+          toRelationshipMutationResult(
+            await context.relationshipGraphService.removeRelationship(input)
+          )
+        )
+      );
+    },
+
     async handleLinkContactToProject(input) {
       if (!isLinkContactToProjectInput(input)) {
         return apiError(
@@ -136,6 +211,7 @@ async function withRelationshipService<T>(
   operation: (context: {
     connection: DatabaseConnection;
     relationshipService: ContactRelationshipService;
+    relationshipGraphService: RelationshipGraphService;
     workspace: WorkspaceSummary;
   }) => Promise<ApiResult<T>>
 ): Promise<ApiResult<T>> {
@@ -154,6 +230,7 @@ async function withRelationshipService<T>(
     return await operation({
       connection,
       relationshipService: new ContactRelationshipService({ connection }),
+      relationshipGraphService: new RelationshipGraphService({ connection }),
       workspace
     });
   } catch (error) {
@@ -186,6 +263,18 @@ function toRelationshipMutationResult(
   return {
     relationship: toRelationshipSummary(result.relationship),
     changed: result.changed
+  };
+}
+
+function toRelationshipGraphSummary(
+  graph: FeatureRelationshipGraphSummary
+): RelationshipGraphSummary {
+  return {
+    root: graph.root,
+    relationTypes: graph.relationTypes,
+    selectedRelationType: graph.selectedRelationType,
+    nodes: graph.nodes,
+    edges: graph.edges
   };
 }
 
@@ -299,6 +388,59 @@ function isLinkContactToProjectInput(
     isOptionalString(input.workspaceId) &&
     isNonEmptyString(input.contactId) &&
     isNonEmptyString(input.projectId)
+  );
+}
+
+function isGetRelationshipGraphInput(
+  input: unknown
+): input is GetRelationshipGraphInput {
+  return (
+    isRecord(input) &&
+    isRelationshipEndpoint(input.root) &&
+    isOptionalRelationshipType(input.relationType) &&
+    (input.maxDepth === undefined || input.maxDepth === 1 || input.maxDepth === 2)
+  );
+}
+
+function isCreateGenericRelationshipInput(
+  input: unknown
+): input is CreateGenericRelationshipInput {
+  return (
+    isRecord(input) &&
+    isOptionalString(input.workspaceId) &&
+    isRelationshipEndpoint(input.source) &&
+    isRelationshipEndpoint(input.target) &&
+    isRelationshipType(input.relationType) &&
+    (input.label === undefined ||
+      input.label === null ||
+      typeof input.label === "string")
+  );
+}
+
+function isRelationshipEndpoint(
+  input: unknown
+): input is RelationshipEndpointInput {
+  return (
+    isRecord(input) &&
+    (input.type === "container" ||
+      input.type === "item" ||
+      input.type === "list_item") &&
+    isNonEmptyString(input.id)
+  );
+}
+
+function isOptionalRelationshipType(value: unknown): boolean {
+  return value === undefined || value === "all" || isRelationshipType(value);
+}
+
+function isRelationshipType(value: unknown): boolean {
+  return (
+    value === "related" ||
+    value === "depends_on" ||
+    value === "blocked_by" ||
+    value === "references" ||
+    value === "belongs_to" ||
+    value === "follow_up_for"
   );
 }
 

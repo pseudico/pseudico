@@ -9,6 +9,18 @@ export function registerRelationshipIpc(
   const handlers = createRelationshipIpcHandlers(workspaceService);
 
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.relationships.getGraph,
+    (_event, input) => handlers.handleGetGraph(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.relationships.createRelationship,
+    (_event, input) => handlers.handleCreateRelationship(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.relationships.removeRelationship,
+    (_event, input) => handlers.handleRemoveRelationship(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.relationships.linkContactToProject,
     (_event, input) => handlers.handleLinkContactToProject(input)
   );

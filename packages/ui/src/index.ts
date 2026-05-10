@@ -357,6 +357,17 @@ export {
   type RelatedItemsPanelProps
 } from "./components/RelatedItemsPanel";
 export {
+  RelatedContentGraphPanel,
+  type RelatedContentEdgeViewModel,
+  type RelatedContentEndpointType,
+  type RelatedContentEndpointViewModel,
+  type RelatedContentGraphPanelProps,
+  type RelatedContentGraphViewModel,
+  type RelatedContentNodeViewModel,
+  type RelatedContentRelationType,
+  type RelatedContentTargetOption
+} from "./components/RelatedContentGraphPanel";
+export {
   RelatedContactsPanel,
   type RelatedActivityViewModel,
   type RelatedContactOption,

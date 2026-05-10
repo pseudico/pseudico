@@ -1636,6 +1636,68 @@ export type RelationshipSummary = {
   deletedAt: string | null;
 };
 
+export type RelationshipType =
+  | "related"
+  | "depends_on"
+  | "blocked_by"
+  | "references"
+  | "belongs_to"
+  | "follow_up_for";
+
+export type RelationshipEndpointInput = {
+  type: RelationshipObjectType;
+  id: string;
+};
+
+export type RelationshipGraphEndpointSummary = RelationshipEndpointInput & {
+  kind: "project" | "contact" | "inbox" | "item" | "list_item" | "missing";
+  title: string;
+  description: string | null;
+  containerId: string | null;
+  containerType: string | null;
+  status: string | null;
+  deleted: boolean;
+};
+
+export type RelationshipGraphNodeSummary = RelationshipGraphEndpointSummary & {
+  depth: 0 | 1 | 2;
+  directRelationshipCount: number;
+  secondDegreeRelationshipCount: number;
+};
+
+export type RelationshipGraphEdgeSummary = {
+  id: string;
+  direction: "incoming" | "outgoing";
+  depth: 1 | 2;
+  relationType: RelationshipType;
+  label: string | null;
+  source: RelationshipGraphEndpointSummary;
+  target: RelationshipGraphEndpointSummary;
+  createdAt: string;
+};
+
+export type RelationshipGraphSummary = {
+  root: RelationshipGraphEndpointSummary;
+  relationTypes: readonly RelationshipType[];
+  selectedRelationType: RelationshipType | "all";
+  nodes: RelationshipGraphNodeSummary[];
+  edges: RelationshipGraphEdgeSummary[];
+};
+
+export type GetRelationshipGraphInput = {
+  root: RelationshipEndpointInput;
+  relationType?: RelationshipType | "all";
+  maxDepth?: 1 | 2;
+};
+
+export type CreateGenericRelationshipInput = {
+  workspaceId?: string;
+  source: RelationshipEndpointInput;
+  target: RelationshipEndpointInput;
+  relationType: RelationshipType;
+  label?: string | null;
+};
+
 export type LinkContactToProjectInput = {
   workspaceId?: string;
   contactId: string;
@@ -2516,6 +2578,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     deleteTab: "local-work-os:tabs:delete-tab"
   },
   relationships: {
+    getGraph:
+      "local-work-os:relationships:get-graph",
+    createRelationship:
+      "local-work-os:relationships:create-relationship",
+    removeRelationship:
+      "local-work-os:relationships:remove-relationship",
     linkContactToProject:
       "local-work-os:relationships:link-contact-to-project",
     unlinkContactFromProject:
@@ -2966,6 +3034,18 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.tabs.deleteTab]: {
     input: string | DeleteContainerTabInput;
     result: ApiResult<ContainerTabSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.relationships.getGraph]: {
+    input: GetRelationshipGraphInput;
+    result: ApiResult<RelationshipGraphSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.relationships.createRelationship]: {
+    input: CreateGenericRelationshipInput;
+    result: ApiResult<ContactProjectRelationshipResult>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.relationships.removeRelationship]: {
+    input: string;
+    result: ApiResult<ContactProjectRelationshipResult>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.relationships.linkContactToProject]: {
     input: LinkContactToProjectInput;
@@ -3633,6 +3713,15 @@ export type LocalWorkOsApi = {
     ) => Promise<ApiResult<ContainerTabSummary>>;
   };
   relationships: {
+    getGraph: (
+      input: GetRelationshipGraphInput
+    ) => Promise<ApiResult<RelationshipGraphSummary>>;
+    createRelationship: (
+      input: CreateGenericRelationshipInput
+    ) => Promise<ApiResult<ContactProjectRelationshipResult>>;
+    removeRelationship: (
+      relationshipId: string
+    ) => Promise<ApiResult<ContactProjectRelationshipResult>>;
     linkContactToProject: (
       input: LinkContactToProjectInput
     ) => Promise<ApiResult<ContactProjectRelationshipResult>>;
@@ -4215,6 +4304,18 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.deleteTab, tabId)
     },
     relationships: {
+      getGraph: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.relationships.getGraph, input),
+      createRelationship: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.relationships.createRelationship,
+          input
+        ),
+      removeRelationship: (relationshipId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.relationships.removeRelationship,
+          relationshipId
+        ),
       linkContactToProject: (input) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.relationships.linkContactToProject,

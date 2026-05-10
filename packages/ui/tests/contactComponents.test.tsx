@@ -4,6 +4,7 @@ import {
   ContactFieldsEditor,
   ContactTimeline,
   FollowUpSummaryCard,
+  RelatedContentGraphPanel,
   RelatedContactsPanel,
   RelatedProjectsPanel,
   validateContactFormValues
@@ -48,6 +49,149 @@ describe("ContactFieldsEditor", () => {
 });
 
 describe("Relationship panels", () => {
+  it("renders related-content graph controls, direct edges, and second-degree edges", () => {
+    const html = renderToStaticMarkup(
+      <RelatedContentGraphPanel
+        availableTargets={[
+          { type: "item", id: "note_1", label: "Note · Discovery notes" }
+        ]}
+        graph={{
+          root: {
+            type: "container",
+            id: "project_1",
+            kind: "project",
+            title: "Launch Plan",
+            description: null,
+            containerId: "project_1",
+            containerType: "project",
+            status: "active",
+            deleted: false
+          },
+          relationTypes: ["related", "references"],
+          selectedRelationType: "all",
+          nodes: [
+            {
+              type: "container",
+              id: "project_1",
+              kind: "project",
+              title: "Launch Plan",
+              description: null,
+              containerId: "project_1",
+              containerType: "project",
+              status: "active",
+              deleted: false,
+              depth: 0,
+              directRelationshipCount: 0,
+              secondDegreeRelationshipCount: 0
+            },
+            {
+              type: "container",
+              id: "contact_1",
+              kind: "contact",
+              title: "Alex Chen",
+              description: null,
+              containerId: "contact_1",
+              containerType: "contact",
+              status: "active",
+              deleted: false,
+              depth: 1,
+              directRelationshipCount: 1,
+              secondDegreeRelationshipCount: 0
+            },
+            {
+              type: "item",
+              id: "note_1",
+              kind: "item",
+              title: "Discovery notes",
+              description: null,
+              containerId: "contact_1",
+              containerType: "contact",
+              status: "active",
+              deleted: false,
+              depth: 2,
+              directRelationshipCount: 0,
+              secondDegreeRelationshipCount: 1
+            }
+          ],
+          edges: [
+            {
+              id: "relationship_1",
+              depth: 1,
+              relationType: "related",
+              label: null,
+              source: {
+                type: "container",
+                id: "project_1",
+                kind: "project",
+                title: "Launch Plan",
+                description: null,
+                containerId: "project_1",
+                containerType: "project",
+                status: "active",
+                deleted: false
+              },
+              target: {
+                type: "container",
+                id: "contact_1",
+                kind: "contact",
+                title: "Alex Chen",
+                description: null,
+                containerId: "contact_1",
+                containerType: "contact",
+                status: "active",
+                deleted: false
+              },
+              createdAt: "2026-05-01T00:00:00.000Z"
+            },
+            {
+              id: "relationship_2",
+              depth: 2,
+              relationType: "references",
+              label: "Discovery",
+              source: {
+                type: "container",
+                id: "contact_1",
+                kind: "contact",
+                title: "Alex Chen",
+                description: null,
+                containerId: "contact_1",
+                containerType: "contact",
+                status: "active",
+                deleted: false
+              },
+              target: {
+                type: "item",
+                id: "note_1",
+                kind: "item",
+                title: "Discovery notes",
+                description: null,
+                containerId: "contact_1",
+                containerType: "contact",
+                status: "active",
+                deleted: false
+              },
+              createdAt: "2026-05-01T00:00:00.000Z"
+            }
+          ]
+        }}
+        relationFilter="all"
+        selectedRelationType="related"
+        selectedTargetKey="item:note_1"
+        onCreateRelationship={() => undefined}
+        onOpenTarget={() => undefined}
+        onRelationFilterChange={() => undefined}
+        onRemoveRelationship={() => undefined}
+        onSelectedRelationTypeChange={() => undefined}
+        onSelectedTargetChange={() => undefined}
+      />
+    );
+
+    expect(html).toContain("Related content");
+    expect(html).toContain("Direct relationships");
+    expect(html).toContain("Second-degree relationships");
+    expect(html).toContain("Discovery notes");
+  });
+
   it("renders related contacts with follow-up and activity summaries", () => {
     const html = renderToStaticMarkup(
       <RelatedContactsPanel
