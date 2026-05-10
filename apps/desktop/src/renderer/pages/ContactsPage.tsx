@@ -32,6 +32,7 @@ export function ContactsPage({
   const [createOpen, setCreateOpen] = useState(false);
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [templateSavingId, setTemplateSavingId] = useState<string | null>(null);
+  const [cloningContactId, setCloningContactId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateSummary | null>(null);
   const [applyingTemplateId, setApplyingTemplateId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -132,6 +133,31 @@ export function ContactsPage({
     }
 
     setTemplates((current) => [result.data, ...current]);
+  }
+
+  async function cloneContact(contact: ContactSummary): Promise<void> {
+    setCloningContactId(contact.id);
+    setError(null);
+
+    if (apiClient.contacts.clone === undefined) {
+      setCloningContactId(null);
+      setError("Contact duplicate is unavailable.");
+      return;
+    }
+
+    const result = await apiClient.contacts.clone({
+      contactId: contact.id
+    });
+
+    setCloningContactId(null);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setContacts((current) => [result.data, ...current]);
+    navigate(`/contacts/${result.data.id}`);
   }
 
   async function createContactFromTemplate(values: { name: string; baseDate: string }): Promise<void> {
@@ -256,7 +282,9 @@ export function ContactsPage({
                 key={contact.id}
                 contact={contact}
                 savingTemplate={templateSavingId === contact.id}
+                cloning={cloningContactId === contact.id}
                 onSaveTemplate={saveContactAsTemplate}
+                onClone={cloneContact}
               />
             ))}
           </div>
@@ -289,11 +317,15 @@ function ContactsEmptyState({
 function ContactListRow({
   contact,
   savingTemplate,
-  onSaveTemplate
+  cloning,
+  onSaveTemplate,
+  onClone
 }: {
   contact: ContactSummary;
   savingTemplate: boolean;
+  cloning: boolean;
   onSaveTemplate: (contact: ContactSummary) => void;
+  onClone: (contact: ContactSummary) => void;
 }): React.JSX.Element {
   return (
     <div className="project-list-row">
@@ -311,6 +343,14 @@ function ContactListRow({
       <span className="project-list-meta">
         {contact.isFavorite ? <Star size={16} aria-label="Pinned" /> : null}
         <span>{contact.status}</span>
+        <button
+          type="button"
+          className="secondary-button compact-button"
+          disabled={cloning}
+          onClick={() => onClone(contact)}
+        >
+          {cloning ? "Duplicating..." : "Duplicate"}
+        </button>
         <button
           type="button"
           className="secondary-button compact-button"

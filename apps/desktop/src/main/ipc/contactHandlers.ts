@@ -1,4 +1,5 @@
 import {
+  ContainerCloneService,
   ContactService,
   ContactTimelineService,
   type ContactRecord
@@ -14,6 +15,7 @@ import {
   apiOk,
   type AddContactFieldInput,
   type ApiResult,
+  type CloneContactInput,
   type ContactDetailSummary,
   type ContactFieldSummary,
   type ContactFieldType,
@@ -38,6 +40,9 @@ type ContactIpcHandlers = {
     input: unknown
   ) => Promise<ApiResult<CreateContactResult>>;
   handleUpdateContact: (
+    input: unknown
+  ) => Promise<ApiResult<ContactSummary>>;
+  handleCloneContact: (
     input: unknown
   ) => Promise<ApiResult<ContactSummary>>;
   handleListContacts: (
@@ -94,6 +99,27 @@ export function createContactIpcHandlers(
           toContactSummary(await context.contactService.updateContact(input))
         )
       );
+    },
+
+    async handleCloneContact(input) {
+      if (!isCloneContactInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "cloneContact requires a contactId string."
+        );
+      }
+
+      return await withContactService(workspaceService, async (context) => {
+        const result = await new ContainerCloneService({
+          connection: context.connection
+        }).cloneContainer({
+          ...input,
+          containerId: input.contactId,
+          fileMode: input.fileMode ?? "metadata_only"
+        });
+
+        return apiOk(toContactSummary(result.container as ContactRecord));
+      });
     },
 
     async handleListContacts(input) {
@@ -304,6 +330,23 @@ function isUpdateContactInput(input: unknown): input is UpdateContactInput {
     isOptionalNumber(input.sortOrder) &&
     (input.status === undefined || isMutableContactStatus(input.status)) &&
     hasContactUpdateField(input)
+  );
+}
+
+function isCloneContactInput(input: unknown): input is CloneContactInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.contactId) &&
+    (input.name === undefined || isNonEmptyString(input.name)) &&
+    isOptionalBoolean(input.includeTabs) &&
+    isOptionalBoolean(input.includeItems) &&
+    isOptionalBoolean(input.includeTags) &&
+    isOptionalBoolean(input.includeRelationships) &&
+    isOptionalBoolean(input.includeContactFields) &&
+    isOptionalBoolean(input.resetCompleted) &&
+    (input.fileMode === undefined ||
+      input.fileMode === "metadata_only" ||
+      input.fileMode === "skip")
   );
 }
 

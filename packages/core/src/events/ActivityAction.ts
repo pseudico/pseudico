@@ -4,6 +4,7 @@ export const ActivityAction = {
   workspacePreferencesUpdated: "workspace_preferences_updated",
   containerCreated: "container_created",
   containerUpdated: "container_updated",
+  containerCloned: "container_cloned",
   containerArchived: "container_archived",
   containerDeleted: "container_deleted",
   containerTabCreated: "container_tab_created",

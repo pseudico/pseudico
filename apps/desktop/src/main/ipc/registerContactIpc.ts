@@ -17,6 +17,10 @@ export function registerContactIpc(
     (_event, input) => handlers.handleUpdateContact(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.contacts.cloneContact,
+    (_event, input) => handlers.handleCloneContact(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.contacts.listContacts,
     (_event, input) => handlers.handleListContacts(input)
   );

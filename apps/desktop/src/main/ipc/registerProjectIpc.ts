@@ -17,6 +17,10 @@ export function registerProjectIpc(
     (_event, input) => handlers.handleUpdateProject(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.projects.cloneProject,
+    (_event, input) => handlers.handleCloneProject(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.projects.archiveProject,
     (_event, input) => handlers.handleArchiveProject(input)
   );

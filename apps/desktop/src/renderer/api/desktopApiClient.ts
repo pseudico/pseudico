@@ -26,6 +26,10 @@ async function callApi<T>(
   }
 }
 
+function unavailable<T>(message: string): Promise<ApiResult<T>> {
+  return Promise.resolve(apiError("IPC_ERROR", message));
+}
+
 export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
   return {
     workspace: {
@@ -129,16 +133,24 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       updateLink: (input) => callApi(() => api.links.updateLink(input))
     },
     projects: {
-      create: (input) => callApi(() => api.projects.create(input)),
-      update: (input) => callApi(() => api.projects.update(input)),
-      archive: (projectId) => callApi(() => api.projects.archive(projectId)),
+        create: (input) => callApi(() => api.projects.create(input)),
+        update: (input) => callApi(() => api.projects.update(input)),
+        clone: (input) =>
+          api.projects.clone === undefined
+            ? unavailable("Project clone API is not available.")
+            : callApi(() => api.projects.clone!(input)),
+        archive: (projectId) => callApi(() => api.projects.archive(projectId)),
       softDelete: (projectId) =>
         callApi(() => api.projects.softDelete(projectId)),
       list: (workspaceId) => callApi(() => api.projects.list(workspaceId)),
       get: (projectId) => callApi(() => api.projects.get(projectId)),
       getHealth: (projectId) => callApi(() => api.projects.getHealth(projectId)),
-      createProject: (input) => callApi(() => api.projects.createProject(input)),
-      updateProject: (input) => callApi(() => api.projects.updateProject(input)),
+        createProject: (input) => callApi(() => api.projects.createProject(input)),
+        updateProject: (input) => callApi(() => api.projects.updateProject(input)),
+        cloneProject: (input) =>
+          api.projects.cloneProject === undefined
+            ? unavailable("Project clone API is not available.")
+            : callApi(() => api.projects.cloneProject!(input)),
       archiveProject: (projectId) =>
         callApi(() => api.projects.archiveProject(projectId)),
       softDeleteProject: (projectId) =>
@@ -150,14 +162,22 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.projects.getProjectHealth(projectId))
     },
     contacts: {
-      create: (input) => callApi(() => api.contacts.create(input)),
-      update: (input) => callApi(() => api.contacts.update(input)),
+        create: (input) => callApi(() => api.contacts.create(input)),
+        update: (input) => callApi(() => api.contacts.update(input)),
+        clone: (input) =>
+          api.contacts.clone === undefined
+            ? unavailable("Contact clone API is not available.")
+            : callApi(() => api.contacts.clone!(input)),
       list: (workspaceId) => callApi(() => api.contacts.list(workspaceId)),
       get: (contactId) => callApi(() => api.contacts.get(contactId)),
       addField: (input) => callApi(() => api.contacts.addField(input)),
       updateField: (input) => callApi(() => api.contacts.updateField(input)),
-      createContact: (input) => callApi(() => api.contacts.createContact(input)),
-      updateContact: (input) => callApi(() => api.contacts.updateContact(input)),
+        createContact: (input) => callApi(() => api.contacts.createContact(input)),
+        updateContact: (input) => callApi(() => api.contacts.updateContact(input)),
+        cloneContact: (input) =>
+          api.contacts.cloneContact === undefined
+            ? unavailable("Contact clone API is not available.")
+            : callApi(() => api.contacts.cloneContact!(input)),
       listContacts: (workspaceId) =>
         callApi(() => api.contacts.listContacts(workspaceId)),
       getContact: (contactId) =>
@@ -576,9 +596,12 @@ export const desktopApiClient: LocalWorkOsApi = {
     updateLink: (input) => getDesktopApiClient().links.updateLink(input)
   },
   projects: {
-    create: (input) => getDesktopApiClient().projects.create(input),
-    update: (input) => getDesktopApiClient().projects.update(input),
-    archive: (projectId) => getDesktopApiClient().projects.archive(projectId),
+      create: (input) => getDesktopApiClient().projects.create(input),
+      update: (input) => getDesktopApiClient().projects.update(input),
+      clone: (input) =>
+        getDesktopApiClient().projects.clone?.(input) ??
+        unavailable("Project clone API is not available."),
+      archive: (projectId) => getDesktopApiClient().projects.archive(projectId),
     softDelete: (projectId) =>
       getDesktopApiClient().projects.softDelete(projectId),
     list: (workspaceId) => getDesktopApiClient().projects.list(workspaceId),
@@ -587,8 +610,11 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().projects.getHealth(projectId),
     createProject: (input) =>
       getDesktopApiClient().projects.createProject(input),
-    updateProject: (input) =>
-      getDesktopApiClient().projects.updateProject(input),
+      updateProject: (input) =>
+        getDesktopApiClient().projects.updateProject(input),
+      cloneProject: (input) =>
+        getDesktopApiClient().projects.cloneProject?.(input) ??
+        unavailable("Project clone API is not available."),
     archiveProject: (projectId) =>
       getDesktopApiClient().projects.archiveProject(projectId),
     softDeleteProject: (projectId) =>
@@ -601,16 +627,22 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().projects.getProjectHealth(projectId)
   },
   contacts: {
-    create: (input) => getDesktopApiClient().contacts.create(input),
-    update: (input) => getDesktopApiClient().contacts.update(input),
+      create: (input) => getDesktopApiClient().contacts.create(input),
+      update: (input) => getDesktopApiClient().contacts.update(input),
+      clone: (input) =>
+        getDesktopApiClient().contacts.clone?.(input) ??
+        unavailable("Contact clone API is not available."),
     list: (workspaceId) => getDesktopApiClient().contacts.list(workspaceId),
     get: (contactId) => getDesktopApiClient().contacts.get(contactId),
     addField: (input) => getDesktopApiClient().contacts.addField(input),
     updateField: (input) => getDesktopApiClient().contacts.updateField(input),
     createContact: (input) =>
       getDesktopApiClient().contacts.createContact(input),
-    updateContact: (input) =>
-      getDesktopApiClient().contacts.updateContact(input),
+      updateContact: (input) =>
+        getDesktopApiClient().contacts.updateContact(input),
+      cloneContact: (input) =>
+        getDesktopApiClient().contacts.cloneContact?.(input) ??
+        unavailable("Contact clone API is not available."),
     listContacts: (workspaceId) =>
       getDesktopApiClient().contacts.listContacts(workspaceId),
     getContact: (contactId) =>
