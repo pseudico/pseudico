@@ -37,6 +37,7 @@ import {
 import type {
   ActivitySummary,
   CategorySummary,
+  ContainerPreferencesSummary,
   ContainerTabContentSummary,
   ContainerTabSummary,
   ContactDetailSummary,
@@ -56,6 +57,10 @@ import type {
   TaskSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
+import {
+  ContainerPreferencesPanel,
+  type ContainerPreferencesDraft
+} from "../components/ContainerPreferencesPanel";
 import { ContainerTabsPanel } from "../components/ContainerTabsPanel";
 import { openQuickStartFromContainer } from "../components/QuickAddModal";
 
@@ -90,6 +95,7 @@ type ContactDetailPageProps = {
   initialAvailableProjects?: ProjectSummary[];
   initialRelatedProjects?: RelatedProjectSummary[];
   initialTimeline?: ContactTimelineSummary | null;
+  initialPreferences?: ContainerPreferencesSummary | null;
 };
 
 const emptyContactItems: UniversalItemViewModel[] = [];
@@ -105,7 +111,8 @@ export function ContactDetailPage({
   initialTabSummaries = [],
   initialAvailableProjects = [],
   initialRelatedProjects = [],
-  initialTimeline = null
+  initialTimeline = null,
+  initialPreferences = null
 }: ContactDetailPageProps): React.JSX.Element {
   const { contactId } = useParams();
   const navigate = useNavigate();
@@ -131,6 +138,11 @@ export function ContactDetailPage({
   const [activeTabId, setActiveTabId] = useState<string | null>(
     selectInitialTabId(initialTabs)
   );
+  const [containerPreferences, setContainerPreferences] =
+    useState<ContainerPreferencesSummary | null>(initialPreferences);
+  const [preferencesOpen, setPreferencesOpen] = useState(false);
+  const [preferencesSaving, setPreferencesSaving] = useState(false);
+  const [preferencesError, setPreferencesError] = useState<string | null>(null);
   const [tabBusy, setTabBusy] = useState(false);
   const [tabError, setTabError] = useState<string | null>(null);
   const [projects, setProjects] =
@@ -204,7 +216,8 @@ export function ContactDetailPage({
         notesResult,
         projectsResult,
         relatedProjectsResult,
-        timelineResult
+        timelineResult,
+        preferencesResult
       ] = await Promise.all([
         apiClient.contacts.get(activeContactId),
         apiClient.categories.list(),
@@ -223,7 +236,8 @@ export function ContactDetailPage({
         apiClient.contacts.getTimeline?.({
           contactId: activeContactId,
           filter: timelineFilter
-        }) ?? Promise.resolve(null)
+        }) ?? Promise.resolve(null),
+        apiClient.containers.getPreferences(activeContactId)
       ]);
 
       if (!active) {
@@ -293,6 +307,11 @@ export function ContactDetailPage({
         return;
       }
 
+      if (!preferencesResult.ok) {
+        setItemError(preferencesResult.error.message);
+        return;
+      }
+
       setContact(contactResult.data?.contact ?? null);
       setFields(contactResult.data?.fields ?? []);
       setProjects(projectsResult.data);
@@ -306,8 +325,14 @@ export function ContactDetailPage({
       setManagedTabs(managedTabsResult.data);
       setTabSummaries(tabSummariesResult.data);
       setTabTemplates(tabTemplatesResult.data);
+      setContainerPreferences(preferencesResult.data);
       setActiveTabId((current) =>
-        selectAvailableTabId(tabsResult.data, current)
+        selectAvailableTabId(
+          tabsResult.data,
+          preferencesResult.data.defaultView === "tab"
+            ? preferencesResult.data.defaultTabId
+            : current
+        )
       );
       setActivity(activityResult.data.map(toRecentActivityViewModel));
       setItems(mergeContactContent(tasksResult.data, notesResult.data, categoriesResult.data));
@@ -354,6 +379,56 @@ export function ContactDetailPage({
       active = false;
     };
   }, [apiClient, contactId]);
+
+  async function saveContainerPreferences(
+    draft: ContainerPreferencesDraft
+  ): Promise<void> {
+    if (contact === null) {
+      return;
+    }
+
+    setPreferencesSaving(true);
+    setPreferencesError(null);
+
+    const result = await apiClient.containers.updatePreferences({
+      containerId: contact.id,
+      ...draft
+    });
+
+    if (!result.ok) {
+      setPreferencesSaving(false);
+      setPreferencesError(result.error.message);
+      return;
+    }
+
+    setContainerPreferences(result.data);
+    if (result.data.defaultView === "tab" && result.data.defaultTabId !== null) {
+      setActiveTabId((current) =>
+        selectAvailableTabId(tabs, result.data.defaultTabId ?? current)
+      );
+    }
+    setPreferencesSaving(false);
+    setPreferencesOpen(false);
+  }
+
+  function openContactDefaultQuickAdd(): void {
+    if (contact === null) {
+      return;
+    }
+
+    if (containerPreferences?.defaultQuickAddType === "note") {
+      setNoteEditorOpen(true);
+      setNoteError(null);
+      setNoteErrorItemId(null);
+      return;
+    }
+
+    openQuickStartFromContainer({
+      containerId: contact.id,
+      containerType: "contact",
+      containerTabId: activeTabId
+    });
+  }
 
   async function refreshContact(activeContactId: string): Promise<void> {
     const result = await apiClient.contacts.get(activeContactId);
@@ -1226,11 +1301,36 @@ export function ContactDetailPage({
     toRelatedProjectViewModel
   );
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null;
-  const tabItems = items.filter((item) =>
-    isItemVisibleForTab(item, activeTab)
+  const tabItems = applyContainerPreferenceOrdering(
+    items
+      .filter((item) => isItemVisibleForTab(item, activeTab))
+      .filter((item) =>
+        containerPreferences?.showCompleted === false
+          ? !isCompletedFeedItem(item)
+          : true
+      ),
+    containerPreferences?.grouping ?? "none"
   );
   const visibleItems = tabItems.slice(0, visibleItemCount);
   const hasMoreItems = visibleItemCount < tabItems.length;
+  const tabSummaryCards = (
+    <ContainerTabSummaryCards
+      activeTabId={activeTabId}
+      busy={itemsLoading || tabBusy}
+      summaries={tabSummaries.map(toContainerTabSummaryCardViewModel)}
+      onOpenItem={(_itemId, tabId) => {
+        setActiveTabId(tabId);
+        setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
+      }}
+      onSelectTab={(tabId) => {
+        setActiveTabId(tabId);
+        setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
+      }}
+    />
+  );
+  const showSummaryFirst =
+    containerPreferences?.summaryFirst === true ||
+    containerPreferences?.defaultView === "summary";
   const relationshipGraphTargets = createRelationshipTargetOptions({
     currentContainerId: contact.id,
     projects,
@@ -1238,7 +1338,13 @@ export function ContactDetailPage({
   });
 
   return (
-    <section className="project-detail-page">
+    <section
+      className={`project-detail-page${
+        containerPreferences?.compactMode === true
+          ? " container-preferences-compact"
+          : ""
+      }`}
+    >
       <Link className="text-link page-action-link" to="/contacts">
         <ArrowLeft size={16} aria-hidden="true" />
         Back to contacts
@@ -1264,16 +1370,38 @@ export function ContactDetailPage({
           <h2>{contact.name}</h2>
           <p>{contact.description ?? "No description added yet."}</p>
         </div>
-        <button
-          className="secondary-button compact-button"
-          disabled={printBusy}
-          type="button"
-          onClick={() => void printContactPdf()}
-        >
-          <Printer size={16} aria-hidden="true" />
-          Print / PDF
-        </button>
+        <div className="button-row">
+          <button
+            className="secondary-button compact-button"
+            disabled={printBusy}
+            type="button"
+            onClick={() => void printContactPdf()}
+          >
+            <Printer size={16} aria-hidden="true" />
+            Print / PDF
+          </button>
+          <button
+            className="secondary-button compact-button"
+            type="button"
+            onClick={() => {
+              setPreferencesOpen(true);
+              setPreferencesError(null);
+            }}
+          >
+            Display settings
+          </button>
+        </div>
       </header>
+
+      <ContainerPreferencesPanel
+        error={preferencesError}
+        open={preferencesOpen}
+        preferences={containerPreferences}
+        saving={preferencesSaving}
+        tabs={tabs}
+        onClose={() => setPreferencesOpen(false)}
+        onSave={(draft) => void saveContainerPreferences(draft)}
+      />
 
       {printMessage === null ? null : (
         <p className="form-message">{printMessage}</p>
@@ -1317,6 +1445,8 @@ export function ContactDetailPage({
         onSelectedProjectChange={setSelectedProjectId}
         onUnlinkProject={(relationshipId) => void unlinkRelatedProject(relationshipId)}
       />
+
+      {showSummaryFirst ? tabSummaryCards : null}
 
       <RelatedContentGraphPanel
         availableTargets={relationshipGraphTargets}
@@ -1388,19 +1518,7 @@ export function ContactDetailPage({
         onShowTab={(tabId) => void mutateContactTab(tabId, "show")}
       />
 
-      <ContainerTabSummaryCards
-        activeTabId={activeTabId}
-        busy={itemsLoading || tabBusy}
-        summaries={tabSummaries.map(toContainerTabSummaryCardViewModel)}
-        onOpenItem={(_itemId, tabId) => {
-          setActiveTabId(tabId);
-          setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
-        }}
-        onSelectTab={(tabId) => {
-          setActiveTabId(tabId);
-          setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
-        }}
-      />
+      {showSummaryFirst ? null : tabSummaryCards}
 
       <section className="project-content-section" aria-label="Contact content">
         <div className="panel-heading-actions">
@@ -1421,15 +1539,9 @@ export function ContactDetailPage({
             className="primary-button compact-button"
             disabled={itemsLoading}
             type="button"
-            onClick={() =>
-              openQuickStartFromContainer({
-                containerId: contact.id,
-                containerType: "contact",
-                containerTabId: activeTabId
-              })
-            }
+            onClick={openContactDefaultQuickAdd}
           >
-            Quick Start
+            Quick Start ({formatQuickAddType(containerPreferences?.defaultQuickAddType)})
           </button>
         </div>
 
@@ -1736,6 +1848,66 @@ function compareFeedItems(
   }
 
   return (left.createdAt ?? "").localeCompare(right.createdAt ?? "");
+}
+
+function applyContainerPreferenceOrdering<T extends UniversalItemViewModel>(
+  items: readonly T[],
+  grouping: ContainerPreferencesSummary["grouping"]
+): T[] {
+  if (grouping === "none") {
+    return [...items];
+  }
+
+  return [...items].sort((left, right) => {
+    const groupDelta = getContainerPreferenceGroup(left, grouping).localeCompare(
+      getContainerPreferenceGroup(right, grouping)
+    );
+
+    return groupDelta === 0 ? compareFeedItems(left, right) : groupDelta;
+  });
+}
+
+function getContainerPreferenceGroup(
+  item: UniversalItemViewModel,
+  grouping: ContainerPreferencesSummary["grouping"]
+): string {
+  switch (grouping) {
+    case "type":
+      return item.type;
+    case "tab":
+      return "containerTabId" in item && typeof item.containerTabId === "string"
+        ? item.containerTabId
+        : "";
+    case "status":
+      return item.status ?? "";
+    default:
+      return "";
+  }
+}
+
+function isCompletedFeedItem(item: UniversalItemViewModel): boolean {
+  if (isTaskCardViewModel(item)) {
+    return item.taskStatus === "done" || item.status === "completed";
+  }
+
+  return item.status === "completed";
+}
+
+function formatQuickAddType(
+  type: ContainerPreferencesSummary["defaultQuickAddType"] | undefined
+): string {
+  switch (type) {
+    case "note":
+      return "Note";
+    case "list":
+      return "List";
+    case "link":
+      return "Link";
+    case "file":
+      return "File";
+    default:
+      return "Task";
+  }
 }
 
 function selectInitialTabId(

@@ -374,7 +374,11 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.activity.listActivityForTarget(input))
     },
     containers: {
-      getStatus: () => callApi(() => api.containers.getStatus())
+      getStatus: () => callApi(() => api.containers.getStatus()),
+      getPreferences: (containerId) =>
+        callApi(() => api.containers.getPreferences(containerId)),
+      updatePreferences: (input) =>
+        callApi(() => api.containers.updatePreferences(input))
     },
     items: {
       getStatus: () => callApi(() => api.items.getStatus()),
@@ -870,7 +874,11 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().activity.listActivityForTarget(input)
   },
   containers: {
-    getStatus: () => getDesktopApiClient().containers.getStatus()
+    getStatus: () => getDesktopApiClient().containers.getStatus(),
+    getPreferences: (containerId) =>
+      getDesktopApiClient().containers.getPreferences(containerId),
+    updatePreferences: (input) =>
+      getDesktopApiClient().containers.updatePreferences(input)
   },
   items: {
     getStatus: () => getDesktopApiClient().items.getStatus(),

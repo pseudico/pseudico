@@ -6,6 +6,7 @@ export const plannedFeatureAreas = [
   "items",
   "projects",
   "contacts",
+  "containerPreferences",
   "containerMedia",
   "tasks",
   "lists",
@@ -95,9 +96,11 @@ export { ContainerMediaService, containerMediaModuleContract } from "./container
 export {
   ContainerCloneService,
   ContainerLifecycleService,
+  ContainerPreferencesService,
   CreateContainerCommand,
   containerCloneModuleContract,
-  containerLifecycleModuleContract
+  containerLifecycleModuleContract,
+  containerPreferencesModuleContract
 } from "./containers";
 export type {
   CloneAttachmentFileInput,
@@ -106,13 +109,19 @@ export type {
   ContainerCloneFileMode,
   ContainerCloneResult,
   ContainerCloneServiceIdFactory,
+  ContainerDefaultView,
+  ContainerGroupingMode,
   ContainerLifecycleAction,
   ContainerLifecycleResult,
   ContainerLifecycleServiceIdFactory,
+  ContainerPreferences,
+  ContainerPreferencesValue,
+  ContainerQuickAddType,
   CreateContainerCommandIdFactory,
   CreateContainerCommandInput,
   CreateContainerCommandResult,
-  TransitionContainerInput
+  TransitionContainerInput,
+  UpdateContainerPreferencesInput
 } from "./containers";
 export {
   DashboardService,
