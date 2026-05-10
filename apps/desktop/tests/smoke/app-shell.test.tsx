@@ -62,6 +62,7 @@ describe("desktop shell routes", () => {
       </MemoryRouter>
     );
 
+    expect(html).toContain("Skip to workspace content");
     expect(html).toContain("Primary navigation");
     expect(html).toContain("Today");
     expect(html).toContain("Quick Start");

@@ -199,6 +199,8 @@ describe("QuickAddModal", () => {
     );
 
     expect(html).toContain("Quick Start");
+    expect(html).toContain("aria-modal=\"true\"");
+    expect(html).toContain("Use Tab and Shift+Tab to move through Quick Start fields");
     expect(html).toContain("Open or create a local workspace");
   });
 });

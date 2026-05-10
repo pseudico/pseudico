@@ -1,4 +1,6 @@
 import type { ActionShortcut } from "@local-work-os/core";
+import { useId, useRef } from "react";
+import { handleModalFocusKeyDown, useModalFocusManagement } from "./focusManagement";
 
 export type CommandPaletteAction = {
   id: string;
@@ -39,6 +41,18 @@ export function CommandPalette({
   placeholder = "Search commands",
   query
 }: CommandPaletteProps): React.JSX.Element | null {
+  const dialogRef = useRef<HTMLElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const titleId = useId();
+  const descriptionId = useId();
+  const listboxId = useId();
+
+  useModalFocusManagement({
+    containerRef: dialogRef,
+    initialFocusRef: searchInputRef,
+    open
+  });
+
   if (!open) {
     return null;
   }
@@ -48,6 +62,11 @@ export function CommandPalette({
   function handleKeyDown(
     event: React.KeyboardEvent<HTMLDivElement | HTMLInputElement>
   ): void {
+    if (event.key === "Tab") {
+      handleModalFocusKeyDown(event, dialogRef.current, onClose);
+      return;
+    }
+
     const command = getCommandPaletteKey(event.key);
 
     if (command === "none") {
@@ -83,16 +102,18 @@ export function CommandPalette({
 
   return (
     <div
+      aria-describedby={descriptionId}
+      aria-labelledby={titleId}
       aria-modal="true"
       className="command-palette-backdrop"
       role="dialog"
       onKeyDown={handleKeyDown}
     >
-      <section className="command-palette-dialog">
+      <section className="command-palette-dialog" ref={dialogRef}>
         <div className="command-palette-header">
           <div>
             <p className="top-eyebrow">Command palette</p>
-            <h2>Run a command</h2>
+            <h2 id={titleId}>Run a command</h2>
           </div>
           <button
             aria-label="Close command palette"
@@ -107,7 +128,16 @@ export function CommandPalette({
         <label className="command-palette-search">
           <span className="sr-only">Command search</span>
           <input
+            aria-controls={listboxId}
+            aria-describedby={descriptionId}
+            aria-expanded="true"
+            aria-label="Search commands"
+            aria-activedescendant={
+              activeId === null ? undefined : `command-palette-${activeId}`
+            }
             autoFocus
+            ref={searchInputRef}
+            role="combobox"
             type="search"
             value={query}
             placeholder={placeholder}
@@ -115,6 +145,8 @@ export function CommandPalette({
             onKeyDown={handleKeyDown}
           />
         </label>
+
+        <p className="sr-only" id={descriptionId}>Use arrow keys to move through commands, Enter to run the highlighted command, Escape to close, and Tab to stay inside the command palette.</p>
 
         {actions.length === 0 ? (
           <p className="command-palette-empty">No matching commands.</p>
@@ -125,6 +157,7 @@ export function CommandPalette({
             }
             aria-label="Command results"
             className="command-palette-list"
+            id={listboxId}
             role="listbox"
           >
             {actions.map((action) => {
