@@ -175,7 +175,12 @@ export {
   resolveNavigationTargetPath
 } from "./navigation";
 export { PipelineService, pipelinesModuleContract } from "./pipelines";
-export { ProjectHealthService, ProjectService, projectsModuleContract } from "./projects";
+export {
+  ProjectBoardService,
+  ProjectHealthService,
+  ProjectService,
+  projectsModuleContract
+} from "./projects";
 export { RecurrenceService, recurrenceModuleContract } from "./recurrence";
 export { RelationshipService, relationshipsModuleContract } from "./relationships";
 export { ReminderService, remindersModuleContract } from "./reminders";
@@ -503,6 +508,13 @@ export type {
 export type {
   CreateProjectInput,
   CreateProjectResult,
+  GetProjectBoardInput,
+  MoveProjectBoardCardInput,
+  ProjectBoardColumn,
+  ProjectBoardColumnKind,
+  ProjectBoardGrouping,
+  ProjectBoardProjectCard,
+  ProjectBoardViewModel,
   ProjectMutableStatus,
   ProjectHealthQueryInput,
   ProjectHealthSummary,

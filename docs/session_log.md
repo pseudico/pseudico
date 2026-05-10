@@ -1856,3 +1856,55 @@ Open questions / risks:
 Next actions:
 - Push amended branch.
 - Check CI and merge only if green.
+
+## 2026-05-10 15:48:20 +10:00
+Objective: Merge PSE-103 and prepare next Codex Ready ticket.
+Decisions made:
+- PR #98 CI passed and was squash-merged into main as 3805cfe.
+- PSE-103 moved to Done; PSE-104 promoted to Codex Ready as next M10 ticket.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Local log entry is uncommitted after merge; unrelated untracked files remain untouched.
+Next actions:
+- Start PSE-104 in the next implementation run.
+## 2026-05-10 15:50:43 +10:00
+Objective: Start end-to-end Local Work OS ticket workflow.
+Decisions made:
+- Reconcile Linear/GitHub before implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Active PR status unknown until reconciliation completes.
+Next actions: Check Linear states; inspect active PR; select one ticket.
+## 2026-05-10 15:53:23 +10:00
+Objective: Continue PSE-104 after erroneous stop.
+Decisions made:
+- Treat PSE-104 as active ticket; proceed on codex/PSE-104-kanban-board.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need inspect ticket scope and app structure before edits.
+Next actions: Read docs; inspect source; implement kanban UI.
+## 2026-05-10 15:59:03 +10:00
+Objective: Implement PSE-104 project kanban board slice.
+Decisions made:
+- Added ProjectBoardService over existing status/category persistence.
+- Added reusable KanbanBoard and wired Projects page drag/drop plus move controls.
+Files changed:
+- packages/features/src/projects/ProjectBoardService.ts
+- packages/ui/src/components/KanbanBoard.tsx
+- apps/desktop/src/renderer/pages/ProjectsPage.tsx
+- apps/desktop/src/renderer/styles.css
+Open questions / risks: Need typecheck/tests to catch API typing and lint issues.
+Next actions: Run targeted tests; fix failures; run full checks.
+## 2026-05-10 16:01:32 +10:00
+Objective: Validate PSE-104 implementation.
+Decisions made:
+- Fixed exactOptionalPropertyTypes issues in ProjectBoardService.
+- Required checks passed after sandbox EPERM reruns with escalation.
+Files changed:
+- packages/features/src/projects/ProjectBoardService.ts
+- packages/features/tests/projectBoardService.test.ts
+- packages/ui/src/components/KanbanBoard.tsx
+- packages/ui/tests/kanbanBoard.test.tsx
+Open questions / risks: Manual drag QA still represented by component/build validation.
+Next actions: Review diff; commit; open PR.
