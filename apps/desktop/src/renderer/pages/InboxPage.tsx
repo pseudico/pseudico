@@ -17,6 +17,7 @@ import {
   type ListCardItemViewModel,
   type ListCardViewModel,
   type MoveTargetContainer,
+  type SnoozePreset,
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel
@@ -469,6 +470,59 @@ export function InboxPage({
     setTaskBusyId(null);
   }
 
+  async function snoozeTask(
+    item: TaskCardViewModel,
+    preset: SnoozePreset
+  ): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
+    }
+
+    setTaskBusyId(item.id);
+    setTaskError(null);
+
+    const result = await apiClient.tasks.snooze({
+      itemId: item.id,
+      preset
+    });
+
+    if (!result.ok) {
+      setTaskBusyId(null);
+      setTaskError(result.error.message);
+      return;
+    }
+
+    await loadInbox(currentWorkspace.id);
+    setTaskBusyId(null);
+  }
+
+  async function rescheduleTask(
+    item: TaskCardViewModel,
+    dueAt: string | null
+  ): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
+    }
+
+    setTaskBusyId(item.id);
+    setTaskError(null);
+
+    const result = await apiClient.tasks.reschedule({
+      itemId: item.id,
+      dueAt,
+      allDay: true
+    });
+
+    if (!result.ok) {
+      setTaskBusyId(null);
+      setTaskError(result.error.message);
+      return;
+    }
+
+    await loadInbox(currentWorkspace.id);
+    setTaskBusyId(null);
+  }
+
   async function updateListItemDateRange(
     item: ListCardViewModel,
     listItem: ListCardItemViewModel,
@@ -598,6 +652,8 @@ export function InboxPage({
           disabled={taskBusyId === item.id}
           item={item}
           onDateRangeChange={updateTaskDateRange}
+          onRescheduleTask={rescheduleTask}
+          onSnoozeTask={snoozeTask}
           onToggleComplete={toggleTaskComplete}
         />
       );

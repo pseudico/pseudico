@@ -11,7 +11,8 @@ import {
   type DashboardActivityWidgetItem,
   type DashboardFavoriteWidgetItem,
   type DashboardTaskWidgetItem,
-  type ProjectHealthViewModel
+  type ProjectHealthViewModel,
+  type SnoozePreset
 } from "@local-work-os/ui";
 import type {
   DashboardActivityWidgetItemSummary,
@@ -41,6 +42,8 @@ export function DashboardPage({
     useState<DashboardViewModelSummary | null>(initialDashboard ?? null);
   const [loading, setLoading] = useState(initialDashboard === undefined);
   const [error, setError] = useState<string | null>(null);
+  const [taskMutationError, setTaskMutationError] = useState<string | null>(null);
+  const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [printBusy, setPrintBusy] = useState(false);
   const [printMessage, setPrintMessage] = useState<string | null>(null);
 
@@ -118,6 +121,51 @@ export function DashboardPage({
 
   function openTask(task: DashboardTaskWidgetItem): void {
     navigate(`/projects/${task.containerId}`);
+  }
+
+  async function snoozeTask(
+    task: DashboardTaskWidgetItem,
+    preset: SnoozePreset
+  ): Promise<void> {
+    setBusyTaskId(task.itemId);
+    setTaskMutationError(null);
+
+    const result = await apiClient.tasks.snooze({
+      itemId: task.itemId,
+      preset
+    });
+
+    setBusyTaskId(null);
+
+    if (!result.ok) {
+      setTaskMutationError(result.error.message);
+      return;
+    }
+
+    await refreshDashboard();
+  }
+
+  async function rescheduleTask(
+    task: DashboardTaskWidgetItem,
+    dueAt: string | null
+  ): Promise<void> {
+    setBusyTaskId(task.itemId);
+    setTaskMutationError(null);
+
+    const result = await apiClient.tasks.reschedule({
+      itemId: task.itemId,
+      dueAt,
+      allDay: true
+    });
+
+    setBusyTaskId(null);
+
+    if (!result.ok) {
+      setTaskMutationError(result.error.message);
+      return;
+    }
+
+    await refreshDashboard();
   }
 
   function openActivityTarget(activity: DashboardActivityWidgetItem): void {
@@ -218,25 +266,34 @@ export function DashboardPage({
       {error === null ? null : (
         <p className="form-message form-message-error">{error}</p>
       )}
+      {taskMutationError === null ? null : (
+        <p className="form-message form-message-error">{taskMutationError}</p>
+      )}
       {printMessage === null ? null : (
         <p className="form-message">{printMessage}</p>
       )}
 
-      <div className="dashboard-widget-grid" aria-busy={loading}>
+      <div className="dashboard-widget-grid" aria-busy={loading || busyTaskId !== null}>
         <TodayWidget
-          loading={loading && dashboard === null}
+          loading={(loading && dashboard === null) || busyTaskId !== null}
           tasks={getTaskWidgetItems(widgets, "today")}
           onOpenTask={openTask}
+          onRescheduleTask={rescheduleTask}
+          onSnoozeTask={snoozeTask}
         />
         <OverdueWidget
-          loading={loading && dashboard === null}
+          loading={(loading && dashboard === null) || busyTaskId !== null}
           tasks={getTaskWidgetItems(widgets, "overdue")}
           onOpenTask={openTask}
+          onRescheduleTask={rescheduleTask}
+          onSnoozeTask={snoozeTask}
         />
         <UpcomingWidget
-          loading={loading && dashboard === null}
+          loading={(loading && dashboard === null) || busyTaskId !== null}
           tasks={getTaskWidgetItems(widgets, "upcoming")}
           onOpenTask={openTask}
+          onRescheduleTask={rescheduleTask}
+          onSnoozeTask={snoozeTask}
         />
         <FavoriteProjectsWidget
           loading={loading && dashboard === null}

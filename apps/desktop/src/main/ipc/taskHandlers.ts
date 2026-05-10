@@ -332,6 +332,7 @@ function isSnoozeTaskInput(input: unknown): input is SnoozeTaskInput {
     isRecord(input) &&
     isNonEmptyString(input.itemId) &&
     (input.preset === undefined ||
+      input.preset === "later_today" ||
       input.preset === "tomorrow" ||
       input.preset === "next_week") &&
     (input.dueAt === undefined || isNonEmptyString(input.dueAt)) &&

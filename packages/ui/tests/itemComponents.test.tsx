@@ -568,8 +568,10 @@ describe("Universal item UI", () => {
     expect(cardHtml).toContain("Call accountant");
     expect(cardHtml).toContain("Ask for the revised statement.");
     expect(cardHtml).toContain("Complete");
+    expect(cardHtml).toContain("Later today");
     expect(cardHtml).toContain("Next week");
     expect(cardHtml).toContain("Custom due date");
+    expect(cardHtml).toContain("Remove due");
     expect(cardHtml).toContain("Open source");
     expect(laneHtml).toContain("Today");
     expect(laneHtml).toContain("Tasks due today.");
@@ -681,6 +683,8 @@ describe("Universal item UI", () => {
     expect(emptyHtml).toContain("Nothing to show");
     expect(todayHtml).toContain("Call accountant");
     expect(todayHtml).toContain("P2");
+    expect(todayHtml).toContain("Later today");
+    expect(todayHtml).toContain("Remove due");
     expect(projectsHtml).toContain("Pinned &amp; Favorites");
     expect(projectsHtml).toContain("Launch Plan");
     expect(activityHtml).toContain("Container Created");

@@ -290,7 +290,7 @@ export function TodayPage({
 
   async function rescheduleTask(
     task: TodayTaskCardViewModel,
-    dueAt: string
+    dueAt: string | null
   ): Promise<void> {
     const workspaceId = resolveWorkspaceId(currentWorkspace?.id, viewModel);
 

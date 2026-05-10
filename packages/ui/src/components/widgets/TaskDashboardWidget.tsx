@@ -3,6 +3,7 @@ import {
   DashboardWidget,
   type DashboardWidgetKind
 } from "../DashboardWidget";
+import { SnoozeMenu, type SnoozePreset } from "../SnoozeMenu";
 
 export type DashboardTaskWidgetItem = {
   itemId: string;
@@ -23,6 +24,14 @@ export type TaskDashboardWidgetProps = {
   emptyTitle?: string;
   emptyDescription?: string;
   onOpenTask?: (task: DashboardTaskWidgetItem) => void;
+  onSnoozeTask?: (
+    task: DashboardTaskWidgetItem,
+    preset: SnoozePreset
+  ) => Promise<void> | void;
+  onRescheduleTask?: (
+    task: DashboardTaskWidgetItem,
+    dueAt: string | null
+  ) => Promise<void> | void;
 };
 
 export function TaskDashboardWidget({
@@ -34,7 +43,9 @@ export function TaskDashboardWidget({
   error = null,
   emptyTitle,
   emptyDescription,
-  onOpenTask
+  onOpenTask,
+  onSnoozeTask,
+  onRescheduleTask
 }: TaskDashboardWidgetProps): React.JSX.Element {
   return (
     <DashboardWidget
@@ -51,29 +62,35 @@ export function TaskDashboardWidget({
         <ol className="dashboard-widget-list">
           {tasks.map((task) => (
             <li key={task.itemId}>
-              <button
-                type="button"
-                className="dashboard-widget-row"
-                onClick={() => onOpenTask?.(task)}
-              >
-                <span className="dashboard-widget-row-main">
-                  <strong>{task.title}</strong>
-                  <span>
-                    <CalendarDays size={14} aria-hidden="true" />
-                    {task.dueAt ?? "No due date"}
-                  </span>
-                </span>
-                <span className="dashboard-widget-row-meta">
-                  {task.priority === null ? null : (
+              <div className="dashboard-widget-row dashboard-widget-task-row">
+                <button
+                  type="button"
+                  className="dashboard-widget-row-open"
+                  onClick={() => onOpenTask?.(task)}
+                >
+                  <span className="dashboard-widget-row-main">
+                    <strong>{task.title}</strong>
                     <span>
-                      <CircleAlert size={14} aria-hidden="true" />
-                      P{task.priority}
+                      <CalendarDays size={14} aria-hidden="true" />
+                      {task.dueAt ?? "No due date"}
                     </span>
-                  )}
-                  <span>{task.taskStatus}</span>
-                  <ArrowRight size={16} aria-hidden="true" />
-                </span>
-              </button>
+                  </span>
+                  <span className="dashboard-widget-row-meta">
+                    {task.priority === null ? null : (
+                      <span>
+                        <CircleAlert size={14} aria-hidden="true" />
+                        P{task.priority}
+                      </span>
+                    )}
+                    <span>{task.taskStatus}</span>
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </span>
+                </button>
+                <SnoozeMenu
+                  onReschedule={(dueAt) => onRescheduleTask?.(task, dueAt)}
+                  onSnoozePreset={(preset) => onSnoozeTask?.(task, preset)}
+                />
+              </div>
             </li>
           ))}
         </ol>

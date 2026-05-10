@@ -15,6 +15,8 @@ import {
   SmartListEditor,
   type CreateCollectionFormValues,
   type GroupedResultGroupViewModel,
+  type GroupedResultViewModel,
+  type SnoozePreset,
   type SmartListEditorMetadataOption,
   type SmartListEditorValues
 } from "@local-work-os/ui";
@@ -70,6 +72,7 @@ export function CollectionsPage({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [printBusy, setPrintBusy] = useState(false);
   const [printMessage, setPrintMessage] = useState<string | null>(null);
   const [taskTitle, setTaskTitle] = useState("");
@@ -327,7 +330,76 @@ export function CollectionsPage({
       return;
     }
 
-    await evaluateSelectedCollection();
+    await refreshSelectedCollection();
+  }
+
+  async function refreshSelectedCollection(): Promise<void> {
+    if (selectedCollectionId === null) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const result = await apiClient.collections.evaluateCollection({
+      collectionId: selectedCollectionId,
+      limit: Math.max(evaluation?.results.length ?? COLLECTION_PAGE_SIZE, COLLECTION_PAGE_SIZE),
+      offset: 0
+    });
+
+    setLoading(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setEvaluation(result.data);
+  }
+
+  async function snoozeTask(
+    result: GroupedResultViewModel,
+    preset: SnoozePreset
+  ): Promise<void> {
+    setBusyTaskId(result.targetId);
+    setError(null);
+
+    const mutation = await apiClient.tasks.snoozeTask({
+      itemId: result.targetId,
+      preset
+    });
+
+    setBusyTaskId(null);
+
+    if (!mutation.ok) {
+      setError(mutation.error.message);
+      return;
+    }
+
+    await refreshSelectedCollection();
+  }
+
+  async function rescheduleTask(
+    result: GroupedResultViewModel,
+    dueAt: string | null
+  ): Promise<void> {
+    setBusyTaskId(result.targetId);
+    setError(null);
+
+    const mutation = await apiClient.tasks.rescheduleTask({
+      itemId: result.targetId,
+      dueAt,
+      allDay: true
+    });
+
+    setBusyTaskId(null);
+
+    if (!mutation.ok) {
+      setError(mutation.error.message);
+      return;
+    }
+
+    await refreshSelectedCollection();
   }
 
   async function createTaskInCollection(
@@ -418,7 +490,7 @@ export function CollectionsPage({
   }
 
   return (
-    <section className="collections-page" aria-busy={loading}>
+    <section className="collections-page" aria-busy={loading || busyTaskId !== null}>
       <div className="page-heading">
         <p className="top-eyebrow">Saved views</p>
         <h2>Collections</h2>
@@ -603,6 +675,12 @@ export function CollectionsPage({
                 groups={groupedResults}
                 onCompleteTask={(itemId) => void completeTask(itemId)}
                 onOpenResult={(path) => navigate(path)}
+                onRescheduleTask={(result, dueAt) =>
+                  void rescheduleTask(result, dueAt)
+                }
+                onSnoozeTask={(result, preset) =>
+                  void snoozeTask(result, preset)
+                }
               />
               {evaluation?.page?.hasMore === true ? (
                 <button

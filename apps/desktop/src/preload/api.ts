@@ -1110,6 +1110,8 @@ export type SearchResultSummary = {
   parentItemId: string | null;
   parentItemTitle: string | null;
   destinationPath: string | null;
+  dueAt?: string | null;
+  taskStatus?: string | null;
 };
 
 export type CollectionKind = "tag" | "keyword" | "custom";
@@ -2160,7 +2162,7 @@ export type UpdateTaskInput = {
 
 export type SnoozeTaskInput = {
   itemId: string;
-  preset?: "tomorrow" | "next_week";
+  preset?: "later_today" | "tomorrow" | "next_week";
   dueAt?: string;
   date?: string | Date;
   actorType?: "local_user" | "system" | "importer";

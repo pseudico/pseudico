@@ -2,6 +2,7 @@ import { CheckCircle2, RotateCcw } from "lucide-react";
 import type { ParsedDateRange } from "@local-work-os/core";
 import type { UniversalItemViewModel } from "./ItemCard";
 import { DateRangeInput } from "./DateRangeInput";
+import { SnoozeMenu, type SnoozePreset } from "./SnoozeMenu";
 
 export type TaskCardViewModel = UniversalItemViewModel & {
   taskStatus?: string | null;
@@ -20,6 +21,14 @@ export type TaskCardContentProps = {
     range: ParsedDateRange
   ) => Promise<void> | void;
   onDueDateChange?: (item: TaskCardViewModel, dueDate: string) => Promise<void> | void;
+  onSnoozeTask?: (
+    item: TaskCardViewModel,
+    preset: SnoozePreset
+  ) => Promise<void> | void;
+  onRescheduleTask?: (
+    item: TaskCardViewModel,
+    dueAt: string | null
+  ) => Promise<void> | void;
   onToggleComplete?: (item: TaskCardViewModel) => Promise<void> | void;
 };
 
@@ -28,6 +37,8 @@ export function TaskCardContent({
   disabled = false,
   onDateRangeChange,
   onDueDateChange,
+  onSnoozeTask,
+  onRescheduleTask,
   onToggleComplete
 }: TaskCardContentProps): React.JSX.Element {
   const completed = item.taskStatus === "done" || item.status === "completed";
@@ -69,6 +80,11 @@ export function TaskCardContent({
 
             void onDueDateChange?.(item, range.dueAt ?? "");
           }}
+        />
+        <SnoozeMenu
+          busy={disabled}
+          onReschedule={(dueAt) => onRescheduleTask?.(item, dueAt)}
+          onSnoozePreset={(preset) => onSnoozeTask?.(item, preset)}
         />
       </div>
     </div>

@@ -79,7 +79,7 @@ export type UpdateTaskInput = {
   containerTabId?: string | null;
 };
 
-export type SnoozeTaskPreset = "tomorrow" | "next_week";
+export type SnoozeTaskPreset = "later_today" | "tomorrow" | "next_week";
 
 export type SnoozeTaskInput = {
   itemId: string;
@@ -333,23 +333,26 @@ export class TaskService {
   async snoozeTask(input: SnoozeTaskInput): Promise<TaskMutationResult> {
     this.validateSnoozeInput(input);
 
-    const dueAt =
+    const snoozeTarget =
       input.dueAt === undefined
-        ? createRelativeLocalDayRange(
-            input.date ?? this.now(),
-            input.preset === "next_week" ? 7 : 1
-          ).startInclusive
-        : normalizeTaskDateTime(input.dueAt, "dueAt");
+        ? resolveSnoozePreset({
+            preset: input.preset ?? "tomorrow",
+            referenceDate: input.date ?? this.now()
+          })
+        : {
+            dueAt: normalizeTaskDateTime(input.dueAt, "dueAt"),
+            allDay: true
+          };
 
-    if (dueAt === undefined || dueAt === null) {
+    if (snoozeTarget.dueAt === undefined || snoozeTarget.dueAt === null) {
       throw new Error("snooze dueAt must resolve to a date.");
     }
 
     return await this.updateTaskSchedule({
       itemId: input.itemId,
       ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
-      dueAt,
-      allDay: true,
+      dueAt: snoozeTarget.dueAt,
+      allDay: snoozeTarget.allDay,
       action: ActivityAction.taskSnoozed,
       summaryVerb: "Snoozed"
     });
@@ -733,10 +736,11 @@ export class TaskService {
 
     if (
       input.preset !== undefined &&
+      input.preset !== "later_today" &&
       input.preset !== "tomorrow" &&
       input.preset !== "next_week"
     ) {
-      throw new Error("preset must be tomorrow or next_week.");
+      throw new Error("preset must be later_today, tomorrow, or next_week.");
     }
 
     if (input.preset === undefined && input.dueAt === undefined) {
@@ -798,4 +802,42 @@ function inferAllDay(
   }
 
   return isTaskDateOnly(startAt) || isTaskDateOnly(dueAt);
+}
+
+function resolveSnoozePreset(input: {
+  preset: SnoozeTaskPreset;
+  referenceDate: LocalDateInput;
+}): { dueAt: string; allDay: boolean } {
+  if (input.preset === "later_today") {
+    const reference = new Date(input.referenceDate);
+
+    if (Number.isNaN(reference.getTime())) {
+      throw new Error("date must be a valid date.");
+    }
+
+    const later = new Date(reference);
+    later.setHours(later.getHours() + 3, later.getMinutes(), 0, 0);
+
+    if (later.toDateString() !== reference.toDateString()) {
+      later.setFullYear(
+        reference.getFullYear(),
+        reference.getMonth(),
+        reference.getDate()
+      );
+      later.setHours(23, 59, 0, 0);
+    }
+
+    return {
+      dueAt: later.toISOString(),
+      allDay: false
+    };
+  }
+
+  return {
+    dueAt: createRelativeLocalDayRange(
+      input.referenceDate,
+      input.preset === "next_week" ? 7 : 1
+    ).startInclusive,
+    allDay: true
+  };
 }

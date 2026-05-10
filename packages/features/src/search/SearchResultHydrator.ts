@@ -49,6 +49,8 @@ export type SearchResult = {
   parentItemId: string | null;
   parentItemTitle: string | null;
   destinationPath: string | null;
+  dueAt: string | null;
+  taskStatus: string | null;
 };
 
 export type HydrateSearchResultsOptions = {
@@ -130,7 +132,9 @@ export class SearchResultHydrator {
       containerTitle: container.name,
       parentItemId: null,
       parentItemTitle: null,
-      destinationPath: getContainerDestinationPath(container)
+      destinationPath: getContainerDestinationPath(container),
+      dueAt: null,
+      taskStatus: null
     };
   }
 
@@ -142,6 +146,7 @@ export class SearchResultHydrator {
     }
 
     const container = this.containerRepository.getById(item.containerId);
+    const metadata = parseMetadata(record.metadataJson);
 
     return {
       id: record.id,
@@ -161,7 +166,9 @@ export class SearchResultHydrator {
       containerTitle: container?.name ?? null,
       parentItemId: null,
       parentItemTitle: null,
-      destinationPath: getItemDestinationPath(item, container)
+      destinationPath: getItemDestinationPath(item, container),
+      dueAt: readNullableString(metadata.dueAt),
+      taskStatus: readNullableString(metadata.taskStatus)
     };
   }
 
@@ -180,6 +187,7 @@ export class SearchResultHydrator {
     const parentItem = this.itemRepository.getById(listItem.listId);
     const container =
       parentItem === null ? null : this.containerRepository.getById(parentItem.containerId);
+    const metadata = parseMetadata(record.metadataJson);
 
     return {
       id: record.id,
@@ -208,7 +216,9 @@ export class SearchResultHydrator {
       parentItemId: parentItem?.id ?? null,
       parentItemTitle: parentItem?.title ?? null,
       destinationPath:
-        parentItem === null ? null : getItemDestinationPath(parentItem, container)
+        parentItem === null ? null : getItemDestinationPath(parentItem, container),
+      dueAt: readNullableString(metadata.dueAt),
+      taskStatus: readNullableString(metadata.status)
     };
   }
 
@@ -249,7 +259,9 @@ export class SearchResultHydrator {
       containerTitle: container?.name ?? null,
       parentItemId: item.id,
       parentItemTitle: item.title,
-      destinationPath: getItemDestinationPath(item, container)
+      destinationPath: getItemDestinationPath(item, container),
+      dueAt: null,
+      taskStatus: null
     };
   }
 }
@@ -319,4 +331,20 @@ function toSearchResultKind(value: string): SearchResultKind {
   }
 
   return "unknown";
+}
+
+function parseMetadata(metadataJson: string): Record<string, unknown> {
+  try {
+    const parsed = JSON.parse(metadataJson);
+
+    return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
+      ? parsed
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function readNullableString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value : null;
 }
