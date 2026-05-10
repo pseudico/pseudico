@@ -147,6 +147,21 @@ export {
 } from "./ProjectTagBrowserRepository";
 
 export {
+  ContactLabelBrowserRepository,
+  type ContactLabelBrowserCategoryRecord,
+  type ContactLabelBrowserContactFieldRecord,
+  type ContactLabelBrowserContactRecord,
+  type ContactLabelBrowserFieldFilter,
+  type ContactLabelBrowserFilterInput,
+  type ContactLabelBrowserStatus,
+  type ContactLabelCategoryFacetRecord,
+  type ContactLabelFieldFacetRecord,
+  type ContactLabelStatusFacetRecord,
+  type ContactLabelTagFacetRecord,
+  type ContactLabelValueFacetRecord
+} from "./ContactLabelBrowserRepository";
+
+export {
   MetadataBrowserRepository,
   type CategoryWithTargetCountRecord,
   type ListMetadataTargetsInput,

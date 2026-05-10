@@ -99,6 +99,11 @@ describe("ContactService", () => {
     });
     expect(result.searchRecord.body).toContain("alex@example.com");
     expect(result.searchRecord.body).toContain("Sydney");
+    expect(JSON.parse(result.searchRecord.metadataJson)).toMatchObject({
+      contactFieldLabels: ["Email", "Office"],
+      contactFieldValues: ["alex@example.com", "Sydney"],
+      contactFieldTypes: ["email", "address"]
+    });
     expect(new ContainerRepository(connection).getById("container_1")).toEqual(
       result.contact
     );

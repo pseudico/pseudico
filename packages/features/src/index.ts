@@ -82,6 +82,8 @@ export {
 } from "./calendar";
 export {
   ContactRelationshipService,
+  ContactLabelBrowserService,
+  contactLabelBrowserModuleContract,
   ContactService,
   ContactSummaryService,
   PROJECT_CONTACT_RELATIONSHIP_LABEL,
@@ -286,6 +288,12 @@ export type {
   ContactFieldInput,
   ContactMutableStatus,
   ContactProjectRelationshipResult,
+  ContactLabelBrowserFieldFilterInput,
+  ContactLabelBrowserFilters,
+  ContactLabelBrowserGroup,
+  ContactLabelBrowserGroupBy,
+  ContactLabelBrowserInput,
+  ContactLabelBrowserViewModel,
   ContactRecord,
   ContactServiceIdFactory,
   CreateContactInput,

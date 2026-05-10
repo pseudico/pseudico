@@ -755,6 +755,116 @@ export type ProjectTagBrowserSummary = {
   totalProjectCount: number;
 };
 
+export type ContactLabelBrowserStatus =
+  | "active"
+  | "waiting"
+  | "completed"
+  | "archived";
+
+export type ContactLabelBrowserGroupBy =
+  | "company"
+  | "role"
+  | "location"
+  | "emailDomain"
+  | "category"
+  | "tag"
+  | "status"
+  | "field";
+
+export type ContactLabelBrowserFieldFilterInput = {
+  label: string;
+  value: string;
+};
+
+export type ContactLabelBrowserInput = {
+  workspaceId?: string;
+  fieldFilters?: ContactLabelBrowserFieldFilterInput[];
+  company?: string | null;
+  role?: string | null;
+  location?: string | null;
+  emailDomain?: string | null;
+  tagSlugs?: string[];
+  categoryId?: string | null;
+  status?: ContactLabelBrowserStatus | null;
+  groupBy?: ContactLabelBrowserGroupBy | null;
+  fieldGroupLabel?: string | null;
+};
+
+export type ContactLabelFieldFacetSummary = {
+  label: string;
+  labelKey: string;
+  value: string;
+  valueKey: string;
+  type: ContactFieldSummary["type"];
+  contactCount: number;
+};
+
+export type ContactLabelValueFacetSummary = {
+  value: string;
+  valueKey: string;
+  contactCount: number;
+};
+
+export type ContactLabelCategoryFacetSummary = CategorySummary & {
+  contactCount: number;
+};
+
+export type ContactLabelTagFacetSummary = Omit<TagCountSummary, "targetCount"> & {
+  contactCount: number;
+};
+
+export type ContactLabelStatusFacetSummary = {
+  status: ContactLabelBrowserStatus;
+  contactCount: number;
+};
+
+export type ContactLabelBrowserContactSummary = ContactSummary & {
+  category: MetadataTargetCategorySummary | null;
+  fields: Array<
+    ContactFieldSummary & {
+      labelKey: string;
+      valueKey: string;
+    }
+  >;
+  tags: ItemTagSummary[];
+};
+
+export type ContactLabelBrowserGroupSummary = {
+  key: string;
+  label: string;
+  contactCount: number;
+  contacts: ContactLabelBrowserContactSummary[];
+};
+
+export type ContactLabelBrowserSummary = {
+  workspaceId: string;
+  generatedAt: string;
+  filters: {
+    fieldFilters: Array<{ labelKey: string; valueKey: string }>;
+    company: string | null;
+    role: string | null;
+    location: string | null;
+    emailDomain: string | null;
+    tagSlugs: string[];
+    categoryId: string | null;
+    status: ContactLabelBrowserStatus | null;
+    groupBy: ContactLabelBrowserGroupBy;
+    fieldGroupLabel: string | null;
+  };
+  selectedTags: Omit<TagCountSummary, "targetCount">[];
+  fieldFacets: ContactLabelFieldFacetSummary[];
+  companyFacets: ContactLabelValueFacetSummary[];
+  roleFacets: ContactLabelValueFacetSummary[];
+  locationFacets: ContactLabelValueFacetSummary[];
+  emailDomainFacets: ContactLabelValueFacetSummary[];
+  tagFacets: ContactLabelTagFacetSummary[];
+  categoryFacets: ContactLabelCategoryFacetSummary[];
+  statusFacets: ContactLabelStatusFacetSummary[];
+  contacts: ContactLabelBrowserContactSummary[];
+  groups: ContactLabelBrowserGroupSummary[];
+  totalContactCount: number;
+};
+
 export type SearchResultKind =
   | "inbox"
   | "project"
@@ -2308,6 +2418,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
       "local-work-os:metadata:list-categories-with-counts",
     listTargetsByMetadata: "local-work-os:metadata:list-targets-by-metadata",
     getProjectTagBrowser: "local-work-os:metadata:get-project-tag-browser",
+    getContactLabelBrowser:
+      "local-work-os:metadata:get-contact-label-browser",
     addTagToTarget: "local-work-os:metadata:add-tag-to-target",
     removeTagFromTarget: "local-work-os:metadata:remove-tag-from-target"
   },
@@ -2753,6 +2865,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.metadata.getProjectTagBrowser]: {
     input: ProjectTagBrowserInput;
     result: ApiResult<ProjectTagBrowserSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.metadata.getContactLabelBrowser]: {
+    input: ContactLabelBrowserInput;
+    result: ApiResult<ContactLabelBrowserSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.metadata.addTagToTarget]: {
     input: AddTagToTargetInput;
@@ -3379,6 +3495,9 @@ export type LocalWorkOsApi = {
     getProjectTagBrowser: (
       input: ProjectTagBrowserInput
     ) => Promise<ApiResult<ProjectTagBrowserSummary>>;
+    getContactLabelBrowser: (
+      input: ContactLabelBrowserInput
+    ) => Promise<ApiResult<ContactLabelBrowserSummary>>;
     addTagToTarget: (
       input: AddTagToTargetInput
     ) => Promise<ApiResult<ItemTagSummary>>;
@@ -3938,6 +4057,8 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTargetsByMetadata, input),
       getProjectTagBrowser: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.getProjectTagBrowser, input),
+      getContactLabelBrowser: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.getContactLabelBrowser, input),
       addTagToTarget: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.addTagToTarget, input),
       removeTagFromTarget: (input) =>

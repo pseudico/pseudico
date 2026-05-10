@@ -492,6 +492,24 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
           projects: [],
           totalProjectCount: 0
         }),
+      getContactLabelBrowser: async () =>
+        apiOk({
+          workspaceId: 'workspace_1',
+          generatedAt: '2026-05-01T00:00:00.000Z',
+          filters: { fieldFilters: [], company: null, role: null, location: null, emailDomain: null, tagSlugs: [], categoryId: null, status: null, groupBy: 'company', fieldGroupLabel: null },
+          selectedTags: [],
+          fieldFacets: [],
+          companyFacets: [],
+          roleFacets: [],
+          locationFacets: [],
+          emailDomainFacets: [],
+          tagFacets: [],
+          categoryFacets: [],
+          statusFacets: [],
+          contacts: [],
+          groups: [],
+          totalContactCount: 0
+        }),
       addTagToTarget: async () =>
         apiOk({ id: "tag_1", name: "Quick", slug: "quick", source: "manual" }),
       removeTagFromTarget: async () =>
@@ -929,3 +947,4 @@ function moduleStatus(module: IpcModuleStatus["module"]): IpcModuleStatus {
     message: `${module} placeholder`
   };
 }
+

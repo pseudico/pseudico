@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(163);
+    expect(channels).toHaveLength(164);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -1144,6 +1144,10 @@ describe("typed preload API", () => {
       tagSlugs: ["finance"],
       categoryId: "category_1"
     });
+    await api.metadata.getContactLabelBrowser({
+      workspaceId: "workspace_1",
+      fieldFilters: [{ label: "Company", value: "Acme" }]
+    });
 
     expect(calls).toEqual([
       {
@@ -1160,6 +1164,13 @@ describe("typed preload API", () => {
           workspaceId: "workspace_1",
           tagSlugs: ["finance"],
           categoryId: "category_1"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.metadata.getContactLabelBrowser,
+        input: {
+          workspaceId: "workspace_1",
+          fieldFilters: [{ label: "Company", value: "Acme" }]
         }
       }
     ]);

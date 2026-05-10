@@ -184,6 +184,8 @@ Owns:
 
 - Contact/client container operations.
 - Contact profile context and interaction-history projections.
+- Contact custom-label browsing by flexible fields, company, role, location,
+  email domain, tags, categories, and status.
 - Relationships between contacts, projects, and work items.
 
 Does not own:
@@ -199,6 +201,7 @@ Expected service methods later:
 - `listContactItems`
 - `linkContactToProject`
 - `getContactSummary`
+- `getContactLabelBrowser`
 
 Integration points:
 
