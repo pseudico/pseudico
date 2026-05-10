@@ -179,6 +179,10 @@ export {
   type GroupedResultsListProps
 } from "./components/GroupedResultsList";
 export {
+  DateRangeInput,
+  type DateRangeInputProps
+} from "./components/DateRangeInput";
+export {
   TaskCardContent,
   type TaskCardContentProps,
   type TaskCardViewModel

@@ -8,6 +8,7 @@ import {
   ConfirmDialog,
   ContextMenu,
   DashboardWidget,
+  DateRangeInput,
   EmptyState,
   ErrorState,
   FavoriteProjectsWidget,
@@ -63,6 +64,21 @@ describe("Universal item UI", () => {
     expect(html).toContain("Ask for the revised statement.");
     expect(html).toContain("Finance");
     expect(html).toContain("Today");
+  });
+
+  it("renders one date-range input for task/list date edits", () => {
+    const html = renderToStaticMarkup(
+      <DateRangeInput
+        allDay={false}
+        dueAt={new Date(2026, 4, 3, 17, 0, 0, 0).toISOString()}
+        startAt={new Date(2026, 4, 1, 9, 0, 0, 0).toISOString()}
+        onChange={() => undefined}
+      />
+    );
+
+    expect(html).toContain("Date");
+    expect(html).toContain("09:00");
+    expect(html).toContain("17:00");
   });
 
   it("renders tag badges on item cards", () => {

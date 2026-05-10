@@ -147,6 +147,13 @@ export {
   slugifyTagName
 } from "./services/tagParser";
 export type { ParsedInlineTag } from "./services/tagParser";
+export {
+  formatDateRangeInputValue,
+  formatDateRangeLabel,
+  getLocalTimeZone,
+  parseDateRangeInput
+} from "./services/dateRangeParser";
+export type { DateRangeParserOptions, ParsedDateRange } from "./services/dateRangeParser";
 export { createLocalId } from "./ids";
 export {
   createIsoTimestamp,

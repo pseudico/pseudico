@@ -185,6 +185,36 @@ describe("TaskService", () => {
     ).toEqual(["task_created", "task_snoozed", "task_rescheduled"]);
   });
 
+  it("updates a task from a single date range input and preserves timed metadata", async () => {
+    const service = createService();
+    const created = await service.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Schedule workshop"
+    });
+
+    const updated = await service.updateTaskDateRange({
+      itemId: created.item.id,
+      dateRange: "May 1 9am - May 3 5pm"
+    });
+
+    expect(updated.task).toMatchObject({
+      startAt: new Date(2026, 4, 1, 9, 0, 0, 0).toISOString(),
+      dueAt: new Date(2026, 4, 3, 17, 0, 0, 0).toISOString(),
+      allDay: false
+    });
+    expect(JSON.parse(updated.searchRecord.metadataJson)).toMatchObject({
+      startAt: new Date(2026, 4, 1, 9, 0, 0, 0).toISOString(),
+      dueAt: new Date(2026, 4, 3, 17, 0, 0, 0).toISOString(),
+      allDay: false
+    });
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("item", created.item.id)
+        .map((event) => event.action)
+    ).toEqual(["task_created", "task_updated"]);
+  });
+
   it("syncs inline task tags, preserves manual tags, and projects tags into search", async () => {
     const service = createService();
     const created = await service.createTask({

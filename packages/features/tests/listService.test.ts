@@ -206,6 +206,38 @@ describe("ListService", () => {
     ).toEqual(["list_item_created", "list_item_updated"]);
   });
 
+  it("updates list row dates from a single range input with activity and search alignment", async () => {
+    const service = createService();
+    const list = await service.createList({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Launch checklist"
+    });
+    const created = await service.addListItem({
+      listId: list.item.id,
+      title: "Book venue"
+    });
+
+    const updated = await service.updateListItemDateRange({
+      listItemId: created.listItem.id,
+      dateRange: "May 1 9am - May 3 5pm"
+    });
+
+    expect(updated.listItem).toMatchObject({
+      startAt: new Date(2026, 4, 1, 9, 0, 0, 0).toISOString(),
+      dueAt: new Date(2026, 4, 3, 17, 0, 0, 0).toISOString()
+    });
+    expect(JSON.parse(updated.searchRecord.metadataJson)).toMatchObject({
+      startAt: new Date(2026, 4, 1, 9, 0, 0, 0).toISOString(),
+      dueAt: new Date(2026, 4, 3, 17, 0, 0, 0).toISOString()
+    });
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("list_item", created.listItem.id)
+        .map((event) => event.action)
+    ).toEqual(["list_item_created", "list_item_updated"]);
+  });
+
   it("reorders rows and updates indentation metadata", async () => {
     const service = createService();
     const list = await service.createList({

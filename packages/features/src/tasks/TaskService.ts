@@ -4,6 +4,7 @@ import {
   createIsoTimestamp,
   createLocalId,
   createRelativeLocalDayRange,
+  parseDateRangeInput,
   isTaskStatus,
   taskStatusToItemStatus,
   type ActivityActorType,
@@ -85,6 +86,12 @@ export type SnoozeTaskInput = {
   preset?: SnoozeTaskPreset;
   dueAt?: string;
   date?: LocalDateInput;
+  actorType?: ActivityActorType;
+};
+
+export type UpdateTaskDateRangeInput = {
+  itemId: string;
+  dateRange: string;
   actorType?: ActivityActorType;
 };
 
@@ -305,6 +312,24 @@ export class TaskService {
     });
   }
 
+  async updateTaskDateRange(
+    input: UpdateTaskDateRangeInput
+  ): Promise<TaskMutationResult> {
+    validateNonEmptyString(input.itemId, "itemId");
+
+    const parsed = parseDateRangeInput(input.dateRange, {
+      referenceDate: this.now()
+    });
+
+    return await this.updateTask({
+      itemId: input.itemId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      startAt: parsed.startAt,
+      dueAt: parsed.dueAt,
+      allDay: parsed.allDay,
+      timezone: parsed.timezone
+    });
+  }
   async snoozeTask(input: SnoozeTaskInput): Promise<TaskMutationResult> {
     this.validateSnoozeInput(input);
 

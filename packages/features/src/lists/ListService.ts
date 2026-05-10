@@ -3,6 +3,7 @@ import {
   ActivityAction,
   createIsoTimestamp,
   createLocalId,
+  parseDateRangeInput,
   isListDisplayMode,
   isListItemStatus,
   isListProgressMode,
@@ -81,6 +82,12 @@ export type UpdateListItemInput = {
   listItemParentId?: string | null;
   startAt?: string | null;
   dueAt?: string | null;
+};
+
+export type UpdateListItemDateRangeInput = {
+  listItemId: string;
+  dateRange: string;
+  actorType?: ActivityActorType;
 };
 
 export type ReorderListItemsInput = {
@@ -226,6 +233,23 @@ export class ListService {
       const searchRecord = this.upsertListItemSearchRecord(listItem, timestamp);
 
       return { listItem, searchRecord };
+    });
+  }
+
+  async updateListItemDateRange(
+    input: UpdateListItemDateRangeInput
+  ): Promise<ListItemMutationResult> {
+    validateNonEmptyString(input.listItemId, "listItemId");
+
+    const parsed = parseDateRangeInput(input.dateRange, {
+      referenceDate: this.now()
+    });
+
+    return await this.updateListItem({
+      listItemId: input.listItemId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      startAt: parsed.startAt,
+      dueAt: parsed.dueAt
     });
   }
 
