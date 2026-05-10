@@ -145,9 +145,11 @@ export { LinkService, linksModuleContract } from "./links";
 export { ListService, listsModuleContract, parseBulkListItems } from "./lists";
 export {
   CategoryService,
+  ProjectTagBrowserService,
   categoriesModuleContract,
   MetadataBrowserService,
   metadataBrowserModuleContract,
+  projectTagBrowserModuleContract,
   TagService,
   tagsModuleContract
 } from "./metadata";
@@ -451,6 +453,11 @@ export type {
   PipelineStageView,
   PipelineViewModel
 } from "./pipelines";
+export type {
+  ProjectTagBrowserFilters,
+  ProjectTagBrowserInput,
+  ProjectTagBrowserViewModel
+} from "./metadata";
 export type {
   AddTagToTargetInput,
   AssignCategoryToContainerInput,

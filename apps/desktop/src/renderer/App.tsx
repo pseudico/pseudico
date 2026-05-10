@@ -9,6 +9,7 @@ import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { InboxPage } from "./pages/InboxPage";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
+import { ProjectTagBrowserPage } from "./pages/ProjectTagBrowserPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { SearchPage } from "./pages/SearchPage";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -31,6 +32,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/inbox" element={<InboxPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+        <Route path="/project-tags" element={<ProjectTagBrowserPage />} />
         <Route path="/contacts" element={<ContactsPage />} />
         <Route path="/contacts/:contactId" element={<ContactDetailPage />} />
         <Route path="/collections" element={<CollectionsPage />} />

@@ -26,3 +26,13 @@ export type {
   TagServiceIdFactory,
   TaggingTargetInput
 } from "./TagService";
+
+export {
+  ProjectTagBrowserService,
+  projectTagBrowserModuleContract
+} from "./ProjectTagBrowserService";
+export type {
+  ProjectTagBrowserFilters,
+  ProjectTagBrowserInput,
+  ProjectTagBrowserViewModel
+} from "./ProjectTagBrowserService";

@@ -387,6 +387,18 @@ function createMockApi(
           }
         ]),
       listTargetsByMetadata: async () => apiOk([metadataTargetSummary()]),
+      getProjectTagBrowser: async () =>
+        apiOk({
+          workspaceId: "workspace_1",
+          generatedAt: "2026-05-01T00:00:00.000Z",
+          filters: { tagSlugs: [], categoryId: null, status: null },
+          selectedTags: [],
+          tagFacets: [],
+          categoryFacets: [],
+          statusFacets: [],
+          projects: [],
+          totalProjectCount: 0
+        }),
       addTagToTarget: async () =>
         apiOk({ id: "tag_1", name: "Finance", slug: "finance", source: "manual" }),
       removeTagFromTarget: async () =>

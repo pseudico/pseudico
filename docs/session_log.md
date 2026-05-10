@@ -1801,3 +1801,58 @@ Open questions / risks:
 Next actions:
 - Complete final lint/typecheck pass.
 - Commit, push, and open PR.
+
+## 2026-05-10 15:21:14 +10:00
+Objective: Merge PSE-102 and prepare next ticket.
+Decisions made:
+- PR #97 CI passed and was squash-merged into main.
+- PSE-102 moved to Done; merged branch deleted locally/remotely.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need choose exactly one next logical issue for Codex Ready.
+Next actions:
+- Promote the next M10 dependency-order issue.
+- Report merged PR and checks.
+
+## 2026-05-10 15:24:11 +10:00
+Objective: Start PSE-103 hierarchical project tag browser after reconciliation.
+Decisions made:
+- No PR Open or In Progress issues found; PSE-103 was sole Codex Ready issue.
+- Moved PSE-103 to In Progress for scoped implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need confirm existing tag/project model and avoid renderer DB/filesystem violations.
+Next actions:
+- Read linked docs and ticket source.
+- Create branch and inspect relevant source files.
+
+## 2026-05-10 15:39:45 +10:00
+Objective: Verify PSE-103 hierarchical project tag browser implementation.
+Decisions made:
+- Added project-only tag facet repository/service with multi-tag, category, and status narrowing.
+- Used URL query params for saved browser state instead of schema/app-settings changes.
+Files changed:
+- packages/db/src/repositories/ProjectTagBrowserRepository.ts
+- packages/features/src/metadata/ProjectTagBrowserService.ts
+- apps/desktop/src/renderer/pages/ProjectTagBrowserPage.tsx
+Open questions / risks:
+- Manual desktop QA still needed for live click-through visuals.
+Next actions:
+- Commit, push, open PR, and check CI.
+
+## 2026-05-10 15:43:35 +10:00
+Objective: Open PR #98 for PSE-103 and perform self-review adjustment.
+Decisions made:
+- PR #98 opened ready-for-review and PSE-103 moved to PR Open with link.
+- Status facets now include archived counts while default results remain unarchived.
+Files changed:
+- packages/db/src/repositories/ProjectTagBrowserRepository.ts
+- apps/desktop/src/renderer/pages/ProjectTagBrowserPage.tsx
+- docs/session_log.md
+Open questions / risks:
+- Awaiting CI; manual interactive QA not performed.
+Next actions:
+- Push amended branch.
+- Check CI and merge only if green.
