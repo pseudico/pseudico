@@ -311,6 +311,48 @@ export class ContainerRepository {
     return archived;
   }
 
+  complete(id: string, timestamp: string): ContainerRecord {
+    this.connection.sqlite
+      .prepare(
+        `update containers
+         set status = 'completed',
+             archived_at = null,
+             updated_at = ?
+         where id = ?
+           and deleted_at is null`
+      )
+      .run(timestamp, id);
+
+    const completed = this.getById(id);
+
+    if (completed === null) {
+      throw new Error(`Container row was not found: ${id}.`);
+    }
+
+    return completed;
+  }
+
+  restore(id: string, timestamp: string): ContainerRecord {
+    this.connection.sqlite
+      .prepare(
+        `update containers
+         set status = 'active',
+             archived_at = null,
+             updated_at = ?
+         where id = ?
+           and deleted_at is null`
+      )
+      .run(timestamp, id);
+
+    const restored = this.getById(id);
+
+    if (restored === null) {
+      throw new Error(`Container row was not found: ${id}.`);
+    }
+
+    return restored;
+  }
+
   softDelete(id: string, timestamp: string): ContainerRecord {
     this.connection.sqlite
       .prepare(

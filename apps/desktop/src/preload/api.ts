@@ -419,6 +419,20 @@ export type ContactSummary = {
   deletedAt: string | null;
 };
 
+export type ProjectLifecycleInput = {
+  projectId: string;
+  confirmOpenTasks?: boolean;
+};
+
+export type ContactLifecycleInput = {
+  contactId: string;
+  confirmOpenTasks?: boolean;
+};
+
+export type ListContainersInput = {
+  workspaceId?: string;
+  includeArchived?: boolean;
+};
 
 export type ContainerMediaRole = "project_banner" | "contact_avatar";
 
@@ -2569,6 +2583,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     updateProject: "local-work-os:projects:update-project",
     cloneProject: "local-work-os:projects:clone-project",
     archiveProject: "local-work-os:projects:archive-project",
+    completeProject: "local-work-os:projects:complete-project",
+    restoreProject: "local-work-os:projects:restore-project",
     softDeleteProject: "local-work-os:projects:soft-delete-project",
     listProjects: "local-work-os:projects:list-projects",
     getProject: "local-work-os:projects:get-project",
@@ -2578,6 +2594,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     createContact: "local-work-os:contacts:create-contact",
     updateContact: "local-work-os:contacts:update-contact",
     cloneContact: "local-work-os:contacts:clone-contact",
+    archiveContact: "local-work-os:contacts:archive-contact",
+    completeContact: "local-work-os:contacts:complete-contact",
+    restoreContact: "local-work-os:contacts:restore-contact",
     listContacts: "local-work-os:contacts:list-contacts",
     getContact: "local-work-os:contacts:get-contact",
     addField: "local-work-os:contacts:add-field",
@@ -2962,7 +2981,15 @@ export type LocalWorkOsIpcContracts = {
     result: ApiResult<ProjectSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.archiveProject]: {
-    input: string;
+    input: string | ProjectLifecycleInput;
+    result: ApiResult<ProjectSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.projects.completeProject]: {
+    input: string | ProjectLifecycleInput;
+    result: ApiResult<ProjectSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.projects.restoreProject]: {
+    input: string | ProjectLifecycleInput;
     result: ApiResult<ProjectSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.softDeleteProject]: {
@@ -2970,7 +2997,7 @@ export type LocalWorkOsIpcContracts = {
     result: ApiResult<ProjectSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.listProjects]: {
-    input: string | undefined;
+    input: string | ListContainersInput | undefined;
     result: ApiResult<ProjectSummary[]>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.getProject]: {
@@ -2993,8 +3020,20 @@ export type LocalWorkOsIpcContracts = {
     input: CloneContactInput;
     result: ApiResult<ContactSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.contacts.archiveContact]: {
+    input: string | ContactLifecycleInput;
+    result: ApiResult<ContactSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.contacts.completeContact]: {
+    input: string | ContactLifecycleInput;
+    result: ApiResult<ContactSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.contacts.restoreContact]: {
+    input: string | ContactLifecycleInput;
+    result: ApiResult<ContactSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.contacts.listContacts]: {
-    input: string | undefined;
+    input: string | ListContainersInput | undefined;
     result: ApiResult<ContactSummary[]>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.contacts.getContact]: {
@@ -3630,10 +3669,18 @@ export type LocalWorkOsApi = {
     clone?: (
       input: CloneProjectInput
     ) => Promise<ApiResult<ProjectSummary>>;
-    archive: (projectId: string) => Promise<ApiResult<ProjectSummary>>;
+    archive: (
+      input: string | ProjectLifecycleInput
+    ) => Promise<ApiResult<ProjectSummary>>;
+    complete?: (
+      input: string | ProjectLifecycleInput
+    ) => Promise<ApiResult<ProjectSummary>>;
+    restore?: (
+      input: string | ProjectLifecycleInput
+    ) => Promise<ApiResult<ProjectSummary>>;
     softDelete: (projectId: string) => Promise<ApiResult<ProjectSummary>>;
     list: (
-      workspaceId?: string
+      input?: string | ListContainersInput
     ) => Promise<ApiResult<ProjectSummary[]>>;
     get: (projectId: string) => Promise<ApiResult<ProjectSummary | null>>;
     getHealth: (projectId: string) => Promise<ApiResult<ProjectHealthSummary>>;
@@ -3646,10 +3693,18 @@ export type LocalWorkOsApi = {
     cloneProject?: (
       input: CloneProjectInput
     ) => Promise<ApiResult<ProjectSummary>>;
-    archiveProject: (projectId: string) => Promise<ApiResult<ProjectSummary>>;
+    archiveProject: (
+      input: string | ProjectLifecycleInput
+    ) => Promise<ApiResult<ProjectSummary>>;
+    completeProject?: (
+      input: string | ProjectLifecycleInput
+    ) => Promise<ApiResult<ProjectSummary>>;
+    restoreProject?: (
+      input: string | ProjectLifecycleInput
+    ) => Promise<ApiResult<ProjectSummary>>;
     softDeleteProject: (projectId: string) => Promise<ApiResult<ProjectSummary>>;
     listProjects: (
-      workspaceId?: string
+      input?: string | ListContainersInput
     ) => Promise<ApiResult<ProjectSummary[]>>;
     getProject: (projectId: string) => Promise<ApiResult<ProjectSummary | null>>;
     getProjectHealth: (
@@ -3666,8 +3721,17 @@ export type LocalWorkOsApi = {
     clone?: (
       input: CloneContactInput
     ) => Promise<ApiResult<ContactSummary>>;
+    archive?: (
+      input: string | ContactLifecycleInput
+    ) => Promise<ApiResult<ContactSummary>>;
+    complete?: (
+      input: string | ContactLifecycleInput
+    ) => Promise<ApiResult<ContactSummary>>;
+    restore?: (
+      input: string | ContactLifecycleInput
+    ) => Promise<ApiResult<ContactSummary>>;
     list: (
-      workspaceId?: string
+      input?: string | ListContainersInput
     ) => Promise<ApiResult<ContactSummary[]>>;
     get: (
       contactId: string
@@ -3687,8 +3751,17 @@ export type LocalWorkOsApi = {
     cloneContact?: (
       input: CloneContactInput
     ) => Promise<ApiResult<ContactSummary>>;
+    archiveContact?: (
+      input: string | ContactLifecycleInput
+    ) => Promise<ApiResult<ContactSummary>>;
+    completeContact?: (
+      input: string | ContactLifecycleInput
+    ) => Promise<ApiResult<ContactSummary>>;
+    restoreContact?: (
+      input: string | ContactLifecycleInput
+    ) => Promise<ApiResult<ContactSummary>>;
     listContacts: (
-      workspaceId?: string
+      input?: string | ListContainersInput
     ) => Promise<ApiResult<ContactSummary[]>>;
     getContact: (
       contactId: string
@@ -4242,6 +4315,10 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.cloneProject, input),
       archive: (projectId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.archiveProject, projectId),
+      complete: (projectId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.completeProject, projectId),
+      restore: (projectId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.restoreProject, projectId),
       softDelete: (projectId) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.projects.softDeleteProject,
@@ -4261,6 +4338,10 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.cloneProject, input),
       archiveProject: (projectId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.archiveProject, projectId),
+      completeProject: (projectId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.completeProject, projectId),
+      restoreProject: (projectId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.projects.restoreProject, projectId),
       softDeleteProject: (projectId) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.projects.softDeleteProject,
@@ -4280,6 +4361,12 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateContact, input),
       clone: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.cloneContact, input),
+      archive: (contactId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.archiveContact, contactId),
+      complete: (contactId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.completeContact, contactId),
+      restore: (contactId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.restoreContact, contactId),
       list: (workspaceId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.listContacts, workspaceId),
       get: (contactId) =>
@@ -4294,6 +4381,12 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateContact, input),
       cloneContact: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.cloneContact, input),
+      archiveContact: (contactId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.archiveContact, contactId),
+      completeContact: (contactId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.completeContact, contactId),
+      restoreContact: (contactId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.restoreContact, contactId),
       listContacts: (workspaceId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.listContacts, workspaceId),
       getContact: (contactId) =>

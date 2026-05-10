@@ -132,8 +132,9 @@ export class SearchService {
       targetTypes: ["container", "item", "list_item", "attachment"]
     };
 
-    if (input.includeDeleted !== undefined) {
-      searchWorkspaceInput.includeDeleted = input.includeDeleted;
+    if (input.includeDeleted !== undefined || input.includeArchived === true) {
+      searchWorkspaceInput.includeDeleted =
+        input.includeDeleted === true || input.includeArchived === true;
     }
 
     const resultLimit = input.limit ?? 25;

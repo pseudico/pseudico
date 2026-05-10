@@ -10,7 +10,7 @@ import {
 } from "@local-work-os/db";
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ProjectService } from "../src";
+import { ProjectService, TaskService } from "../src";
 
 let cleanup: (() => Promise<void>) | undefined;
 let connection: DatabaseConnection;
@@ -160,6 +160,72 @@ describe("ProjectService", () => {
     ]);
   });
 
+  it("guards open tasks before project archive/complete and restores archived projects", async () => {
+    const service = createService();
+    const created = await service.createProject({
+      workspaceId: "workspace_1",
+      name: "Launch Plan",
+      description: "Supplier checklist"
+    });
+    await createTaskService().createTask({
+      workspaceId: "workspace_1",
+      containerId: created.project.id,
+      title: "Call supplier"
+    });
+
+    await expect(service.archiveProject(created.project.id)).rejects.toThrow(
+      "has 1 open task"
+    );
+
+    const archived = await service.archiveProject({
+      projectId: created.project.id,
+      confirmOpenTasks: true
+    });
+
+    expect(archived).toMatchObject({
+      status: "archived",
+      archivedAt: "2026-05-01T00:00:00.000Z"
+    });
+    expect(service.listProjects("workspace_1")).toEqual([]);
+    expect(service.listProjects({
+      workspaceId: "workspace_1",
+      includeArchived: true
+    })).toEqual([archived]);
+    expect(new SearchIndexRepository(connection).search(
+      "workspace_1",
+      "Launch"
+    )).toEqual([]);
+    expect(new SearchIndexRepository(connection).search(
+      "workspace_1",
+      "Launch",
+      { includeDeleted: true }
+    )).toHaveLength(1);
+
+    const restored = await service.restoreProject(created.project.id);
+    expect(restored).toMatchObject({
+      status: "active",
+      archivedAt: null
+    });
+
+    const completed = await service.completeProject({
+      projectId: created.project.id,
+      confirmOpenTasks: true
+    });
+    expect(completed).toMatchObject({
+      status: "completed",
+      archivedAt: null
+    });
+    expect(new ActivityLogRepository(connection).listForTarget(
+      "container",
+      created.project.id
+    )).toMatchObject([
+      { action: "container_created" },
+      { action: "container_archived" },
+      { action: "container_restored" },
+      { action: "container_completed" }
+    ]);
+  });
+
   it("generates workspace-unique project slugs", async () => {
     const service = createService();
 
@@ -179,6 +245,17 @@ describe("ProjectService", () => {
 
 function createService(): ProjectService {
   return new ProjectService({
+    connection,
+    idFactory: (prefix) => {
+      idCounter += 1;
+      return `${prefix}_${idCounter}`;
+    },
+    now: () => new Date("2026-05-01T00:00:00.000Z")
+  });
+}
+
+function createTaskService(): TaskService {
+  return new TaskService({
     connection,
     idFactory: (prefix) => {
       idCounter += 1;

@@ -19,6 +19,8 @@ import {
   type CloneProjectInput,
   type CreateProjectInput,
   type CreateProjectResult,
+  type ListContainersInput,
+  type ProjectLifecycleInput,
   type ProjectHealthSummary,
   type ProjectSummary,
   type UpdateProjectInput,
@@ -42,6 +44,8 @@ type ProjectIpcHandlers = {
     input: unknown
   ) => Promise<ApiResult<ProjectSummary>>;
   handleArchiveProject: (input: unknown) => Promise<ApiResult<ProjectSummary>>;
+  handleCompleteProject: (input: unknown) => Promise<ApiResult<ProjectSummary>>;
+  handleRestoreProject: (input: unknown) => Promise<ApiResult<ProjectSummary>>;
   handleSoftDeleteProject: (
     input: unknown
   ) => Promise<ApiResult<ProjectSummary>>;
@@ -116,16 +120,46 @@ export function createProjectIpcHandlers(
     },
 
     async handleArchiveProject(input) {
-      if (!isNonEmptyString(input)) {
+      if (!isProjectLifecycleInput(input)) {
         return apiError(
           "INVALID_INPUT",
-          "archiveProject requires a projectId string."
+          "archiveProject requires a projectId string or lifecycle input."
         );
       }
 
       return await withProjectService(workspaceService, async (context) =>
         apiOk(
           toProjectSummary(await context.projectService.archiveProject(input))
+        )
+      );
+    },
+
+    async handleCompleteProject(input) {
+      if (!isProjectLifecycleInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "completeProject requires a projectId string or lifecycle input."
+        );
+      }
+
+      return await withProjectService(workspaceService, async (context) =>
+        apiOk(
+          toProjectSummary(await context.projectService.completeProject(input))
+        )
+      );
+    },
+
+    async handleRestoreProject(input) {
+      if (!isProjectLifecycleInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "restoreProject requires a projectId string or lifecycle input."
+        );
+      }
+
+      return await withProjectService(workspaceService, async (context) =>
+        apiOk(
+          toProjectSummary(await context.projectService.restoreProject(input))
         )
       );
     },
@@ -146,18 +180,26 @@ export function createProjectIpcHandlers(
     },
 
     async handleListProjects(input) {
-      if (input !== undefined && !isNonEmptyString(input)) {
+      if (!isOptionalListContainersInput(input)) {
         return apiError(
           "INVALID_INPUT",
-          "listProjects requires an optional workspaceId string."
+          "listProjects requires an optional workspaceId string or list input."
         );
       }
 
       return await withProjectService(workspaceService, async (context) => {
-        const workspaceId = resolveWorkspaceId(input, context.workspace);
+        const listInput = normalizeListContainersInput(input);
+        const workspaceId = resolveWorkspaceId(listInput.workspaceId, context.workspace);
 
         return apiOk(
-          context.projectService.listProjects(workspaceId).map(toProjectSummary)
+          context.projectService
+            .listProjects({
+              workspaceId,
+              ...(listInput.includeArchived === undefined
+                ? {}
+                : { includeArchived: listInput.includeArchived })
+            })
+            .map(toProjectSummary)
         );
       });
     },
@@ -327,6 +369,37 @@ function isCloneProjectInput(input: unknown): input is CloneProjectInput {
       input.fileMode === "metadata_only" ||
       input.fileMode === "skip")
   );
+}
+
+function isProjectLifecycleInput(
+  input: unknown
+): input is string | ProjectLifecycleInput {
+  return (
+    isNonEmptyString(input) ||
+    (isRecord(input) &&
+      isNonEmptyString(input.projectId) &&
+      isOptionalBoolean(input.confirmOpenTasks))
+  );
+}
+
+function isOptionalListContainersInput(
+  input: unknown
+): input is string | ListContainersInput | undefined {
+  return (
+    input === undefined ||
+    isNonEmptyString(input) ||
+    (isRecord(input) &&
+      isOptionalString(input.workspaceId) &&
+      isOptionalBoolean(input.includeArchived))
+  );
+}
+
+function normalizeListContainersInput(
+  input: string | ListContainersInput | undefined
+): ListContainersInput {
+  return typeof input === "string"
+    ? { workspaceId: input }
+    : input ?? {};
 }
 
 function hasUpdateField(input: Record<string, unknown>): boolean {

@@ -21,6 +21,18 @@ export function registerContactIpc(
     (_event, input) => handlers.handleCloneContact(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.contacts.archiveContact,
+    (_event, input) => handlers.handleArchiveContact(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.contacts.completeContact,
+    (_event, input) => handlers.handleCompleteContact(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.contacts.restoreContact,
+    (_event, input) => handlers.handleRestoreContact(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.contacts.listContacts,
     (_event, input) => handlers.handleListContacts(input)
   );

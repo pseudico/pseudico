@@ -27,7 +27,7 @@ Expected container capabilities:
 
 - Stable local identity.
 - Title, description, status, and metadata.
-- Soft delete and archive behavior.
+- Soft delete plus reversible archive/restore and completion lifecycle behavior.
 - Relationships to other containers and items.
 - Searchable text projection.
 - Activity log coverage for data-changing operations.
@@ -143,7 +143,9 @@ MVP object graph:
 Search remains a local projection table behind `SearchIndexService`,
 `SearchService`, and feature-level orchestrators. It indexes source records
 that are user-searchable and excludes derived export/search artifacts from the
-portable workspace export.
+portable workspace export. Archived project/contact containers are projected as
+hidden from default search results while remaining available to explicit
+archived searches and restore flows.
 
 The contact foundation now stores contact containers plus flexible profile
 fields behind repository and service APIs. The reminder foundation now stores

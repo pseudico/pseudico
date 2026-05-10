@@ -43,3 +43,14 @@ export type UpdateProjectInput = {
   sortOrder?: number;
   status?: ProjectMutableStatus;
 };
+
+export type ProjectLifecycleInput = {
+  projectId: string;
+  actorType?: ActivityActorType;
+  confirmOpenTasks?: boolean;
+};
+
+export type ListProjectsInput = {
+  workspaceId: string;
+  includeArchived?: boolean;
+};

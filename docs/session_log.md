@@ -2170,3 +2170,17 @@ Files changed:
 - packages/features/src/containers/ContainerCloneService.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/ProjectsPage.tsx
 Open questions / risks: Metadata-only file duplicates create unique placeholder paths; physical copy requires adapter.
 Next actions: Commit/push branch; open PR; move Linear to PR Open.
+
+## 2026-05-10T20:36:58.0156215+10:00
+Objective: Merge PSE-111 and promote the next M10 ticket.
+Decisions made: - Squash-merged PR #106 after local checks and CI passed. - Promoted PSE-112 as the next dependency-order M10 issue.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-112 scope still needs implementation review.
+Next actions: Move PSE-112 to In Progress; implement; verify and open PR.
+
+## 2026-05-10T20:57:06.8488814+10:00
+Objective: Implement PSE-112 container lifecycle workflow.
+Decisions made: - Added generic project/contact archive, complete, restore service. - Archived containers are hidden from default lists/search and available via archived filters.
+Files changed: packages/core/src/events/ActivityAction.ts; packages/db/src/repositories/ContainerRepository.ts; packages/db/src/services/SearchIndexService.ts; packages/features/src/containers/ContainerLifecycleService.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/main/ipc/projectHandlers.ts; apps/desktop/src/main/ipc/contactHandlers.ts; apps/desktop/src/renderer/pages/ProjectsPage.tsx; apps/desktop/src/renderer/pages/ContactsPage.tsx
+Open questions / risks: Full Electron E2E remains represented by service/preload/renderer coverage in current test stack.
+Next actions: Run full checks; commit; open PR.

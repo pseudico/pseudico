@@ -6,6 +6,8 @@ export const ActivityAction = {
   containerUpdated: "container_updated",
   containerCloned: "container_cloned",
   containerArchived: "container_archived",
+  containerCompleted: "container_completed",
+  containerRestored: "container_restored",
   containerDeleted: "container_deleted",
   containerTabCreated: "container_tab_created",
   containerTabUpdated: "container_tab_updated",

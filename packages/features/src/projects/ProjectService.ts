@@ -18,9 +18,12 @@ import {
 import type {
   CreateProjectInput,
   CreateProjectResult,
+  ListProjectsInput,
+  ProjectLifecycleInput,
   ProjectRecord,
   UpdateProjectInput
 } from "./ProjectCommands";
+import { ContainerLifecycleService } from "../containers/ContainerLifecycleService";
 
 // Owns project container application operations.
 // Does not own raw DB access or item type internals.
@@ -210,44 +213,47 @@ export class ProjectService {
   }
 
   async archiveProject(
-    projectId: string,
+    input: ProjectLifecycleInput | string,
     actorType: ActivityActorType = "local_user"
   ): Promise<ProjectRecord> {
-    validateNonEmptyString(projectId, "projectId");
+    const lifecycleInput = normalizeProjectLifecycleInput(input, actorType);
 
-    return await this.transactionService.runInTransaction(() => {
-      const timestamp = createIsoTimestamp(this.now());
-      const containerRepository = new ContainerRepository(this.connection);
-      const activityLogService = new ActivityLogService({
-        connection: this.connection,
-        idFactory: this.idFactory
-      });
-      const searchIndexService = new SearchIndexService({
-        connection: this.connection,
-        idFactory: this.idFactory,
-        now: this.now
-      });
-      const before = this.requireProject(projectId);
-      const project = asProjectRecord(
-        containerRepository.archive(projectId, timestamp)
-      );
+    const result = await this.createLifecycleService().archiveContainer(compactLifecycleInput({
+      containerId: lifecycleInput.projectId,
+      actorType: lifecycleInput.actorType,
+      confirmOpenTasks: lifecycleInput.confirmOpenTasks
+    }));
 
-      activityLogService.logEvent({
-        workspaceId: project.workspaceId,
-        actorType,
-        action: ActivityAction.containerArchived,
-        targetType: "container",
-        targetId: project.id,
-        summary: `Archived project "${project.name}".`,
-        beforeJson: JSON.stringify(before),
-        afterJson: JSON.stringify(project),
-        timestamp
-      });
+    return asProjectRecord(result.container);
+  }
 
-      searchIndexService.upsertContainer(project, { timestamp });
+  async completeProject(
+    input: ProjectLifecycleInput | string,
+    actorType: ActivityActorType = "local_user"
+  ): Promise<ProjectRecord> {
+    const lifecycleInput = normalizeProjectLifecycleInput(input, actorType);
 
-      return project;
-    });
+    const result = await this.createLifecycleService().completeContainer(compactLifecycleInput({
+      containerId: lifecycleInput.projectId,
+      actorType: lifecycleInput.actorType,
+      confirmOpenTasks: lifecycleInput.confirmOpenTasks
+    }));
+
+    return asProjectRecord(result.container);
+  }
+
+  async restoreProject(
+    input: ProjectLifecycleInput | string,
+    actorType: ActivityActorType = "local_user"
+  ): Promise<ProjectRecord> {
+    const lifecycleInput = normalizeProjectLifecycleInput(input, actorType);
+
+    const result = await this.createLifecycleService().restoreContainer(compactLifecycleInput({
+      containerId: lifecycleInput.projectId,
+      actorType: lifecycleInput.actorType
+    }));
+
+    return asProjectRecord(result.container);
   }
 
   async softDeleteProject(
@@ -291,11 +297,18 @@ export class ProjectService {
     });
   }
 
-  listProjects(workspaceId: string): ProjectRecord[] {
-    validateNonEmptyString(workspaceId, "workspaceId");
+  listProjects(input: ListProjectsInput | string): ProjectRecord[] {
+    const normalizedInput =
+      typeof input === "string" ? { workspaceId: input } : input;
+    validateNonEmptyString(normalizedInput.workspaceId, "workspaceId");
 
     return new ContainerRepository(this.connection)
-      .listByWorkspace(workspaceId, { type: "project" })
+      .listByWorkspace(normalizedInput.workspaceId, {
+        type: "project",
+        ...(normalizedInput.includeArchived === undefined
+          ? {}
+          : { includeArchived: normalizedInput.includeArchived })
+      })
       .map(asProjectRecord);
   }
 
@@ -323,6 +336,14 @@ export class ProjectService {
     }
 
     return project;
+  }
+
+  private createLifecycleService(): ContainerLifecycleService {
+    return new ContainerLifecycleService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    });
   }
 
   private createUniqueSlug(
@@ -411,6 +432,36 @@ function asProjectRecord(container: ContainerRecord): ProjectRecord {
   }
 
   return container as ProjectRecord;
+}
+
+function normalizeProjectLifecycleInput(
+  input: ProjectLifecycleInput | string,
+  actorType: ActivityActorType
+): ProjectLifecycleInput {
+  return typeof input === "string"
+    ? { projectId: input, actorType }
+    : {
+        ...input,
+        actorType: input.actorType ?? actorType
+      };
+}
+
+function compactLifecycleInput(input: {
+  containerId: string;
+  actorType?: ActivityActorType | undefined;
+  confirmOpenTasks?: boolean | undefined;
+}): {
+  containerId: string;
+  actorType?: ActivityActorType;
+  confirmOpenTasks?: boolean;
+} {
+  return {
+    containerId: input.containerId,
+    ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+    ...(input.confirmOpenTasks === undefined
+      ? {}
+      : { confirmOpenTasks: input.confirmOpenTasks })
+  };
 }
 
 function validateNonEmptyString(value: string, fieldName: string): void {

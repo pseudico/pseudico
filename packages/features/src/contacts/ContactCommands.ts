@@ -57,6 +57,17 @@ export type UpdateContactInput = {
   status?: ContactMutableStatus;
 };
 
+export type ContactLifecycleInput = {
+  contactId: string;
+  actorType?: ActivityActorType;
+  confirmOpenTasks?: boolean;
+};
+
+export type ListContactsInput = {
+  workspaceId: string;
+  includeArchived?: boolean;
+};
+
 export type AddContactFieldInput = ContactFieldInput & {
   contactId: string;
   actorType?: ActivityActorType;

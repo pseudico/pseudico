@@ -25,6 +25,8 @@ import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
 
 type ProjectBoardGrouping = "status" | "category";
+type ContainerVisibilityFilter = "active" | "archived";
+type ProjectLifecycleAction = "archive" | "complete" | "restore";
 
 type ProjectsPageProps = {
   apiClient?: LocalWorkOsApi;
@@ -44,8 +46,14 @@ export function ProjectsPage({
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [categories, setCategories] = useState<CategorySummary[]>([]);
   const [boardGrouping, setBoardGrouping] = useState<ProjectBoardGrouping>("status");
+  const [visibilityFilter, setVisibilityFilter] = useState<ContainerVisibilityFilter>("active");
   const [movingProjectId, setMovingProjectId] = useState<string | null>(null);
   const [cloningProjectId, setCloningProjectId] = useState<string | null>(null);
+  const [transitioningProjectId, setTransitioningProjectId] = useState<string | null>(null);
+  const [pendingLifecycle, setPendingLifecycle] = useState<{
+    project: ProjectSummary;
+    action: ProjectLifecycleAction;
+  } | null>(null);
   const [templateSavingId, setTemplateSavingId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateSummary | null>(null);
   const [applyingTemplateId, setApplyingTemplateId] = useState<string | null>(null);
@@ -63,7 +71,11 @@ export function ProjectsPage({
       setLoading(true);
       setError(null);
 
-      const result = await apiClient.projects.list(workspaceId);
+      const result = await apiClient.projects.list(
+        visibilityFilter === "archived"
+          ? { workspaceId, includeArchived: true }
+          : workspaceId
+      );
 
       if (!active) {
         return;
@@ -76,7 +88,7 @@ export function ProjectsPage({
         return;
       }
 
-      setProjects(result.data);
+      setProjects(filterProjectsByVisibility(result.data, visibilityFilter));
       if (apiClient.templates !== undefined) {
         const templateResult = await apiClient.templates.listTemplates({
           workspaceId,
@@ -100,7 +112,7 @@ export function ProjectsPage({
     return () => {
       active = false;
     };
-  }, [apiClient, currentWorkspace]);
+  }, [apiClient, currentWorkspace, visibilityFilter]);
 
   async function createProject(values: ProjectFormValues): Promise<void> {
     if (currentWorkspace === null) {
@@ -231,6 +243,11 @@ export function ProjectsPage({
       return;
     }
 
+    if (boardGrouping === "status" && targetColumnId === "completed") {
+      setPendingLifecycle({ project, action: "complete" });
+      return;
+    }
+
     setMovingProjectId(projectId);
     setError(null);
 
@@ -255,6 +272,53 @@ export function ProjectsPage({
 
     setProjects((current) =>
       current.map((entry) => (entry.id === result.data.id ? result.data : entry))
+    );
+  }
+
+  async function confirmProjectLifecycle(): Promise<void> {
+    if (pendingLifecycle === null) {
+      return;
+    }
+
+    const { project, action } = pendingLifecycle;
+    setTransitioningProjectId(project.id);
+    setError(null);
+
+    if (action === "complete" && apiClient.projects.complete === undefined) {
+      setTransitioningProjectId(null);
+      setError("Project complete is unavailable.");
+      return;
+    }
+
+    if (action === "restore" && apiClient.projects.restore === undefined) {
+      setTransitioningProjectId(null);
+      setError("Project restore is unavailable.");
+      return;
+    }
+
+    const result =
+      action === "archive"
+        ? await apiClient.projects.archive({
+            projectId: project.id,
+            confirmOpenTasks: true
+          })
+        : action === "complete"
+          ? await apiClient.projects.complete!({
+              projectId: project.id,
+              confirmOpenTasks: true
+            })
+          : await apiClient.projects.restore!({ projectId: project.id });
+
+    setTransitioningProjectId(null);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setPendingLifecycle(null);
+    setProjects((current) =>
+      applyProjectLifecycleResult(current, result.data, action, visibilityFilter)
     );
   }
 
@@ -318,6 +382,15 @@ export function ProjectsPage({
         onSubmit={createProjectFromTemplate}
       />
 
+      <LifecycleDialog
+        action={pendingLifecycle?.action ?? null}
+        containerName={pendingLifecycle?.project.name ?? ""}
+        containerType="project"
+        submitting={transitioningProjectId !== null}
+        onClose={() => setPendingLifecycle(null)}
+        onConfirm={confirmProjectLifecycle}
+      />
+
       <TemplateLibrary
         kind="project"
         templates={templates.map(toTemplateLibraryItem)}
@@ -342,25 +415,39 @@ export function ProjectsPage({
             <option value="category">Category</option>
           </select>
         </label>
+        <label>
+          View
+          <select
+            value={visibilityFilter}
+            onChange={(event) =>
+              setVisibilityFilter(event.currentTarget.value as ContainerVisibilityFilter)
+            }
+          >
+            <option value="active">Active projects</option>
+            <option value="archived">Archived projects</option>
+          </select>
+        </label>
       </div>
 
-      <div className="project-list-panel project-board-panel" aria-busy={loading}>
-        {renderLoadableState({
-          loading,
-          loadingLabel: "Loading projects..."
-        }) ??
-        (projects.length === 0 ? (
-          <ProjectsEmptyState onCreate={() => setCreateOpen(true)} />
-        ) : (
-          <KanbanBoard
-            ariaLabel="Project phase/status board"
-            columns={toProjectKanbanColumns(projects, categories, boardGrouping)}
-            movingCardId={movingProjectId}
-            onMoveCard={(card, column) => moveProjectOnBoard(card.id, column.id)}
-            onOpenCard={(card) => navigate(`/projects/${card.id}`)}
-          />
-        ))}
-      </div>
+      {visibilityFilter === "active" ? (
+        <div className="project-list-panel project-board-panel" aria-busy={loading}>
+          {renderLoadableState({
+            loading,
+            loadingLabel: "Loading projects..."
+          }) ??
+          (projects.length === 0 ? (
+            <ProjectsEmptyState onCreate={() => setCreateOpen(true)} />
+          ) : (
+            <KanbanBoard
+              ariaLabel="Project phase/status board"
+              columns={toProjectKanbanColumns(projects, categories, boardGrouping)}
+              movingCardId={movingProjectId}
+              onMoveCard={(card, column) => moveProjectOnBoard(card.id, column.id)}
+              onOpenCard={(card) => navigate(`/projects/${card.id}`)}
+            />
+          ))}
+        </div>
+      ) : null}
 
       <div className="project-list-panel project-list-secondary" aria-label="Project list">
         <div className="project-list">
@@ -370,8 +457,11 @@ export function ProjectsPage({
               project={project}
               savingTemplate={templateSavingId === project.id}
               cloning={cloningProjectId === project.id}
+              transitioning={transitioningProjectId === project.id}
+              visibilityFilter={visibilityFilter}
               onSaveTemplate={saveProjectAsTemplate}
               onClone={cloneProject}
+              onLifecycle={(entry, action) => setPendingLifecycle({ project: entry, action })}
             />
           ))}
         </div>
@@ -404,14 +494,20 @@ function ProjectListRow({
   project,
   savingTemplate,
   cloning,
+  transitioning,
+  visibilityFilter,
   onSaveTemplate,
-  onClone
+  onClone,
+  onLifecycle
 }: {
   project: ProjectSummary;
   savingTemplate: boolean;
   cloning: boolean;
+  transitioning: boolean;
+  visibilityFilter: ContainerVisibilityFilter;
   onSaveTemplate: (project: ProjectSummary) => void;
   onClone: (project: ProjectSummary) => void;
+  onLifecycle: (project: ProjectSummary, action: ProjectLifecycleAction) => void;
 }): React.JSX.Element {
   const target = toProjectContextMenuTarget(project);
   const actions = resolveContextMenuActions({
@@ -442,6 +538,35 @@ function ProjectListRow({
         <span className="project-list-meta">
           {project.isFavorite ? <Star size={16} aria-label="Pinned" /> : null}
           <span>{project.status}</span>
+          {visibilityFilter === "archived" ? (
+            <button
+              type="button"
+              className="secondary-button compact-button"
+              disabled={transitioning}
+              onClick={() => onLifecycle(project, "restore")}
+            >
+              {transitioning ? "Restoring..." : "Restore"}
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="secondary-button compact-button"
+                disabled={transitioning || project.status === "completed"}
+                onClick={() => onLifecycle(project, "complete")}
+              >
+                {transitioning ? "Updating..." : "Complete"}
+              </button>
+              <button
+                type="button"
+                className="secondary-button compact-button"
+                disabled={transitioning}
+                onClick={() => onLifecycle(project, "archive")}
+              >
+                {transitioning ? "Archiving..." : "Archive"}
+              </button>
+            </>
+          )}
           <button
             type="button"
             className="secondary-button compact-button"
@@ -462,6 +587,101 @@ function ProjectListRow({
       </div>
     </ContextMenu>
   );
+}
+
+function LifecycleDialog({
+  action,
+  containerName,
+  containerType,
+  submitting,
+  onClose,
+  onConfirm
+}: {
+  action: ProjectLifecycleAction | null;
+  containerName: string;
+  containerType: "project";
+  submitting: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}): React.JSX.Element | null {
+  if (action === null) {
+    return null;
+  }
+
+  const title =
+    action === "archive"
+      ? `Archive ${containerType}`
+      : action === "complete"
+        ? `Complete ${containerType}`
+        : `Restore ${containerType}`;
+  const confirmLabel =
+    action === "archive" ? "Archive" : action === "complete" ? "Complete" : "Restore";
+
+  return (
+    <dialog className="project-dialog" open>
+      <div className="project-dialog-header">
+        <div>
+          <p className="top-eyebrow">Container lifecycle</p>
+          <h3>{title}</h3>
+        </div>
+        <button
+          type="button"
+          className="secondary-button compact-button"
+          onClick={onClose}
+          disabled={submitting}
+        >
+          Close
+        </button>
+      </div>
+      <p>
+        {confirmLabel} "{containerName}"? Open tasks, if present, stay attached to
+        this {containerType} so history remains restorable.
+      </p>
+      <div className="form-actions">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={onClose}
+          disabled={submitting}
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={onConfirm}
+          disabled={submitting}
+        >
+          {submitting ? `${confirmLabel}...` : confirmLabel}
+        </button>
+      </div>
+    </dialog>
+  );
+}
+
+function filterProjectsByVisibility(
+  projects: ProjectSummary[],
+  visibilityFilter: ContainerVisibilityFilter
+): ProjectSummary[] {
+  return visibilityFilter === "archived"
+    ? projects.filter((project) => project.archivedAt !== null)
+    : projects.filter((project) => project.archivedAt === null);
+}
+
+function applyProjectLifecycleResult(
+  projects: ProjectSummary[],
+  updated: ProjectSummary,
+  action: ProjectLifecycleAction,
+  visibilityFilter: ContainerVisibilityFilter
+): ProjectSummary[] {
+  if (
+    (action === "archive" && visibilityFilter === "active") ||
+    (action === "restore" && visibilityFilter === "archived")
+  ) {
+    return projects.filter((project) => project.id !== updated.id);
+  }
+
+  return projects.map((project) => (project.id === updated.id ? updated : project));
 }
 
 function toProjectContextMenuTarget(project: ProjectSummary): ContextMenuTarget {

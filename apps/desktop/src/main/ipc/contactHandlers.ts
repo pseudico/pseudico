@@ -16,6 +16,7 @@ import {
   type AddContactFieldInput,
   type ApiResult,
   type CloneContactInput,
+  type ContactLifecycleInput,
   type ContactDetailSummary,
   type ContactFieldSummary,
   type ContactFieldType,
@@ -24,6 +25,7 @@ import {
   type ContactTimelineSummary,
   type CreateContactInput,
   type CreateContactResult,
+  type ListContainersInput,
   type UpdateContactFieldInput,
   type UpdateContactInput,
   type WorkspaceSummary
@@ -45,6 +47,9 @@ type ContactIpcHandlers = {
   handleCloneContact: (
     input: unknown
   ) => Promise<ApiResult<ContactSummary>>;
+  handleArchiveContact: (input: unknown) => Promise<ApiResult<ContactSummary>>;
+  handleCompleteContact: (input: unknown) => Promise<ApiResult<ContactSummary>>;
+  handleRestoreContact: (input: unknown) => Promise<ApiResult<ContactSummary>>;
   handleListContacts: (
     input: unknown
   ) => Promise<ApiResult<ContactSummary[]>>;
@@ -122,19 +127,66 @@ export function createContactIpcHandlers(
       });
     },
 
-    async handleListContacts(input) {
-      if (input !== undefined && !isNonEmptyString(input)) {
+    async handleArchiveContact(input) {
+      if (!isContactLifecycleInput(input)) {
         return apiError(
           "INVALID_INPUT",
-          "listContacts requires an optional workspaceId string."
+          "archiveContact requires a contactId string or lifecycle input."
+        );
+      }
+
+      return await withContactService(workspaceService, async (context) =>
+        apiOk(toContactSummary(await context.contactService.archiveContact(input)))
+      );
+    },
+
+    async handleCompleteContact(input) {
+      if (!isContactLifecycleInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "completeContact requires a contactId string or lifecycle input."
+        );
+      }
+
+      return await withContactService(workspaceService, async (context) =>
+        apiOk(toContactSummary(await context.contactService.completeContact(input)))
+      );
+    },
+
+    async handleRestoreContact(input) {
+      if (!isContactLifecycleInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "restoreContact requires a contactId string or lifecycle input."
+        );
+      }
+
+      return await withContactService(workspaceService, async (context) =>
+        apiOk(toContactSummary(await context.contactService.restoreContact(input)))
+      );
+    },
+
+    async handleListContacts(input) {
+      if (!isOptionalListContainersInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "listContacts requires an optional workspaceId string or list input."
         );
       }
 
       return await withContactService(workspaceService, async (context) => {
-        const workspaceId = resolveWorkspaceId(input, context.workspace);
+        const listInput = normalizeListContainersInput(input);
+        const workspaceId = resolveWorkspaceId(listInput.workspaceId, context.workspace);
 
         return apiOk(
-          context.contactService.listContacts(workspaceId).map(toContactSummary)
+          context.contactService
+            .listContacts({
+              workspaceId,
+              ...(listInput.includeArchived === undefined
+                ? {}
+                : { includeArchived: listInput.includeArchived })
+            })
+            .map(toContactSummary)
         );
       });
     },
@@ -348,6 +400,37 @@ function isCloneContactInput(input: unknown): input is CloneContactInput {
       input.fileMode === "metadata_only" ||
       input.fileMode === "skip")
   );
+}
+
+function isContactLifecycleInput(
+  input: unknown
+): input is string | ContactLifecycleInput {
+  return (
+    isNonEmptyString(input) ||
+    (isRecord(input) &&
+      isNonEmptyString(input.contactId) &&
+      isOptionalBoolean(input.confirmOpenTasks))
+  );
+}
+
+function isOptionalListContainersInput(
+  input: unknown
+): input is string | ListContainersInput | undefined {
+  return (
+    input === undefined ||
+    isNonEmptyString(input) ||
+    (isRecord(input) &&
+      isOptionalString(input.workspaceId) &&
+      isOptionalBoolean(input.includeArchived))
+  );
+}
+
+function normalizeListContainersInput(
+  input: string | ListContainersInput | undefined
+): ListContainersInput {
+  return typeof input === "string"
+    ? { workspaceId: input }
+    : input ?? {};
 }
 
 function isAddContactFieldInput(input: unknown): input is AddContactFieldInput {

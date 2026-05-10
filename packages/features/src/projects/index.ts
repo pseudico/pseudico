@@ -20,6 +20,8 @@ export type {
 export type {
   CreateProjectInput,
   CreateProjectResult,
+  ListProjectsInput,
+  ProjectLifecycleInput,
   ProjectMutableStatus,
   ProjectRecord,
   ProjectStatus,

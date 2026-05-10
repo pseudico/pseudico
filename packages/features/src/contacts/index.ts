@@ -10,12 +10,14 @@ export {
 export type { ContactServiceIdFactory } from "./ContactService";
 export type {
   AddContactFieldInput,
+  ContactLifecycleInput,
   ContactFieldInput,
   ContactMutableStatus,
   ContactRecord,
   CreateContactInput,
   CreateContactResult,
   DeleteContactFieldInput,
+  ListContactsInput,
   UpdateContactFieldInput,
   UpdateContactInput
 } from "./ContactCommands";

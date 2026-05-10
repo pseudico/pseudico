@@ -20,6 +20,9 @@ type ContactsPageProps = {
   initialContacts?: ContactSummary[];
 };
 
+type ContainerVisibilityFilter = "active" | "archived";
+type ContactLifecycleAction = "archive" | "complete" | "restore";
+
 export function ContactsPage({
   apiClient = desktopApiClient,
   initialContacts = []
@@ -33,6 +36,12 @@ export function ContactsPage({
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [templateSavingId, setTemplateSavingId] = useState<string | null>(null);
   const [cloningContactId, setCloningContactId] = useState<string | null>(null);
+  const [transitioningContactId, setTransitioningContactId] = useState<string | null>(null);
+  const [visibilityFilter, setVisibilityFilter] = useState<ContainerVisibilityFilter>("active");
+  const [pendingLifecycle, setPendingLifecycle] = useState<{
+    contact: ContactSummary;
+    action: ContactLifecycleAction;
+  } | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateSummary | null>(null);
   const [applyingTemplateId, setApplyingTemplateId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +58,11 @@ export function ContactsPage({
       setLoading(true);
       setError(null);
 
-      const result = await apiClient.contacts.list(workspaceId);
+      const result = await apiClient.contacts.list(
+        visibilityFilter === "archived"
+          ? { workspaceId, includeArchived: true }
+          : workspaceId
+      );
 
       if (!active) {
         return;
@@ -62,7 +75,7 @@ export function ContactsPage({
         return;
       }
 
-      setContacts(result.data);
+      setContacts(filterContactsByVisibility(result.data, visibilityFilter));
       if (apiClient.templates !== undefined) {
         const templateResult = await apiClient.templates.listTemplates({
           workspaceId,
@@ -80,7 +93,7 @@ export function ContactsPage({
     return () => {
       active = false;
     };
-  }, [apiClient, currentWorkspace]);
+  }, [apiClient, currentWorkspace, visibilityFilter]);
 
   async function createContact(values: ContactFormValues): Promise<void> {
     if (currentWorkspace === null) {
@@ -196,6 +209,59 @@ export function ContactsPage({
     }
   }
 
+  async function confirmContactLifecycle(): Promise<void> {
+    if (pendingLifecycle === null) {
+      return;
+    }
+
+    const { contact, action } = pendingLifecycle;
+    setTransitioningContactId(contact.id);
+    setError(null);
+
+    if (action === "archive" && apiClient.contacts.archive === undefined) {
+      setTransitioningContactId(null);
+      setError("Contact archive is unavailable.");
+      return;
+    }
+
+    if (action === "complete" && apiClient.contacts.complete === undefined) {
+      setTransitioningContactId(null);
+      setError("Contact complete is unavailable.");
+      return;
+    }
+
+    if (action === "restore" && apiClient.contacts.restore === undefined) {
+      setTransitioningContactId(null);
+      setError("Contact restore is unavailable.");
+      return;
+    }
+
+    const result =
+      action === "archive"
+        ? await apiClient.contacts.archive!({
+            contactId: contact.id,
+            confirmOpenTasks: true
+          })
+        : action === "complete"
+          ? await apiClient.contacts.complete!({
+              contactId: contact.id,
+              confirmOpenTasks: true
+            })
+          : await apiClient.contacts.restore!({ contactId: contact.id });
+
+    setTransitioningContactId(null);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setPendingLifecycle(null);
+    setContacts((current) =>
+      applyContactLifecycleResult(current, result.data, action, visibilityFilter)
+    );
+  }
+
   if (currentWorkspace === null) {
     return (
       <section className="projects-page">
@@ -259,6 +325,14 @@ export function ContactsPage({
         onSubmit={createContactFromTemplate}
       />
 
+      <LifecycleDialog
+        action={pendingLifecycle?.action ?? null}
+        containerName={pendingLifecycle?.contact.name ?? ""}
+        submitting={transitioningContactId !== null}
+        onClose={() => setPendingLifecycle(null)}
+        onConfirm={confirmContactLifecycle}
+      />
+
       <TemplateLibrary
         kind="contact"
         templates={templates.map(toTemplateLibraryItem)}
@@ -267,6 +341,25 @@ export function ContactsPage({
           setSelectedTemplate(templates.find((entry) => entry.id === template.id) ?? null)
         }
       />
+
+      <div className="project-board-toolbar" aria-label="Contact list controls">
+        <div>
+          <strong>Contact lifecycle</strong>
+          <p>Archive completed relationships without losing local history.</p>
+        </div>
+        <label>
+          View
+          <select
+            value={visibilityFilter}
+            onChange={(event) =>
+              setVisibilityFilter(event.currentTarget.value as ContainerVisibilityFilter)
+            }
+          >
+            <option value="active">Active contacts</option>
+            <option value="archived">Archived contacts</option>
+          </select>
+        </label>
+      </div>
 
       <div className="project-list-panel" aria-busy={loading}>
         {renderLoadableState({
@@ -283,8 +376,11 @@ export function ContactsPage({
                 contact={contact}
                 savingTemplate={templateSavingId === contact.id}
                 cloning={cloningContactId === contact.id}
+                transitioning={transitioningContactId === contact.id}
+                visibilityFilter={visibilityFilter}
                 onSaveTemplate={saveContactAsTemplate}
                 onClone={cloneContact}
+                onLifecycle={(entry, action) => setPendingLifecycle({ contact: entry, action })}
               />
             ))}
           </div>
@@ -318,14 +414,20 @@ function ContactListRow({
   contact,
   savingTemplate,
   cloning,
+  transitioning,
+  visibilityFilter,
   onSaveTemplate,
-  onClone
+  onClone,
+  onLifecycle
 }: {
   contact: ContactSummary;
   savingTemplate: boolean;
   cloning: boolean;
+  transitioning: boolean;
+  visibilityFilter: ContainerVisibilityFilter;
   onSaveTemplate: (contact: ContactSummary) => void;
   onClone: (contact: ContactSummary) => void;
+  onLifecycle: (contact: ContactSummary, action: ContactLifecycleAction) => void;
 }): React.JSX.Element {
   return (
     <div className="project-list-row">
@@ -343,6 +445,35 @@ function ContactListRow({
       <span className="project-list-meta">
         {contact.isFavorite ? <Star size={16} aria-label="Pinned" /> : null}
         <span>{contact.status}</span>
+        {visibilityFilter === "archived" ? (
+          <button
+            type="button"
+            className="secondary-button compact-button"
+            disabled={transitioning}
+            onClick={() => onLifecycle(contact, "restore")}
+          >
+            {transitioning ? "Restoring..." : "Restore"}
+          </button>
+        ) : (
+          <>
+            <button
+              type="button"
+              className="secondary-button compact-button"
+              disabled={transitioning || contact.status === "completed"}
+              onClick={() => onLifecycle(contact, "complete")}
+            >
+              {transitioning ? "Updating..." : "Complete"}
+            </button>
+            <button
+              type="button"
+              className="secondary-button compact-button"
+              disabled={transitioning}
+              onClick={() => onLifecycle(contact, "archive")}
+            >
+              {transitioning ? "Archiving..." : "Archive"}
+            </button>
+          </>
+        )}
         <button
           type="button"
           className="secondary-button compact-button"
@@ -362,6 +493,99 @@ function ContactListRow({
       </span>
     </div>
   );
+}
+
+function LifecycleDialog({
+  action,
+  containerName,
+  submitting,
+  onClose,
+  onConfirm
+}: {
+  action: ContactLifecycleAction | null;
+  containerName: string;
+  submitting: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}): React.JSX.Element | null {
+  if (action === null) {
+    return null;
+  }
+
+  const title =
+    action === "archive"
+      ? "Archive contact"
+      : action === "complete"
+        ? "Complete contact"
+        : "Restore contact";
+  const confirmLabel =
+    action === "archive" ? "Archive" : action === "complete" ? "Complete" : "Restore";
+
+  return (
+    <dialog className="project-dialog" open>
+      <div className="project-dialog-header">
+        <div>
+          <p className="top-eyebrow">Container lifecycle</p>
+          <h3>{title}</h3>
+        </div>
+        <button
+          type="button"
+          className="secondary-button compact-button"
+          onClick={onClose}
+          disabled={submitting}
+        >
+          Close
+        </button>
+      </div>
+      <p>
+        {confirmLabel} "{containerName}"? Open tasks, if present, stay attached to
+        this contact so history remains restorable.
+      </p>
+      <div className="form-actions">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={onClose}
+          disabled={submitting}
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={onConfirm}
+          disabled={submitting}
+        >
+          {submitting ? `${confirmLabel}...` : confirmLabel}
+        </button>
+      </div>
+    </dialog>
+  );
+}
+
+function filterContactsByVisibility(
+  contacts: ContactSummary[],
+  visibilityFilter: ContainerVisibilityFilter
+): ContactSummary[] {
+  return visibilityFilter === "archived"
+    ? contacts.filter((contact) => contact.archivedAt !== null)
+    : contacts.filter((contact) => contact.archivedAt === null);
+}
+
+function applyContactLifecycleResult(
+  contacts: ContactSummary[],
+  updated: ContactSummary,
+  action: ContactLifecycleAction,
+  visibilityFilter: ContainerVisibilityFilter
+): ContactSummary[] {
+  if (
+    (action === "archive" && visibilityFilter === "active") ||
+    (action === "restore" && visibilityFilter === "archived")
+  ) {
+    return contacts.filter((contact) => contact.id !== updated.id);
+  }
+
+  return contacts.map((contact) => (contact.id === updated.id ? updated : contact));
 }
 
 function toTemplateLibraryItem(template: TemplateSummary): TemplateLibraryItem {

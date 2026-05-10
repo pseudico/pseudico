@@ -129,7 +129,7 @@ export class SearchIndexService {
         ...tagProjection.metadata,
         ...input.metadata
       }),
-      isDeleted: container.deletedAt !== null,
+      isDeleted: container.deletedAt !== null || container.archivedAt !== null,
       timestamp: input.timestamp ?? createIsoTimestamp(this.now())
     });
   }
@@ -426,7 +426,10 @@ export class SearchIndexService {
     const deletedFlagMismatches: SearchIndexDeletedFlagMismatch[] = [];
 
     for (const container of containers) {
-      expected.set(createHealthKey("container", container.id), container.deletedAt !== null);
+      expected.set(
+        createHealthKey("container", container.id),
+        container.deletedAt !== null || container.archivedAt !== null
+      );
     }
 
     for (const item of items) {
