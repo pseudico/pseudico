@@ -82,6 +82,7 @@ export {
 export {
   ContactRelationshipService,
   ContactService,
+  ContactSummaryService,
   PROJECT_CONTACT_RELATIONSHIP_LABEL,
   contactsModuleContract
 } from "./contacts";

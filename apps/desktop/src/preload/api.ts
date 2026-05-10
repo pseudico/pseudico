@@ -1227,6 +1227,33 @@ export type ContainerTabSummary = {
   deletedAt: string | null;
 };
 
+export type TabSummaryItemPreview = {
+  itemId: string;
+  type: string;
+  title: string;
+  status: string;
+  preview: string | null;
+  dueAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  kind: "open_task" | "recent_content";
+};
+
+export type ContainerTabContentSummary = {
+  tab: ContainerTabSummary;
+  totalItemCount: number;
+  openTaskCount: number;
+  completedTaskCount: number;
+  overdueTaskCount: number;
+  upcomingTaskCount: number;
+  noteCount: number;
+  fileCount: number;
+  linkCount: number;
+  listCount: number;
+  openTaskPreviews: TabSummaryItemPreview[];
+  recentContentPreviews: TabSummaryItemPreview[];
+};
+
 export type CreateContainerTabInput = {
   containerId: string;
   name: string;
@@ -2173,6 +2200,7 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   },
   tabs: {
     listTabs: "local-work-os:tabs:list-tabs",
+    listTabSummaries: "local-work-os:tabs:list-tab-summaries",
     createTab: "local-work-os:tabs:create-tab",
     renameTab: "local-work-os:tabs:rename-tab",
     reorderTabs: "local-work-os:tabs:reorder-tabs",
@@ -2565,6 +2593,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabs]: {
     input: string;
     result: ApiResult<ContainerTabSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabSummaries]: {
+    input: string;
+    result: ApiResult<ContainerTabContentSummary[]>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTab]: {
     input: CreateContainerTabInput;
@@ -3168,6 +3200,9 @@ export type LocalWorkOsApi = {
   };
   tabs: {
     list: (containerId: string) => Promise<ApiResult<ContainerTabSummary[]>>;
+    listSummaries: (
+      containerId: string
+    ) => Promise<ApiResult<ContainerTabContentSummary[]>>;
     create: (
       input: CreateContainerTabInput
     ) => Promise<ApiResult<ContainerTabSummary>>;
@@ -3181,6 +3216,9 @@ export type LocalWorkOsApi = {
     listTabs: (
       containerId: string
     ) => Promise<ApiResult<ContainerTabSummary[]>>;
+    listTabSummaries: (
+      containerId: string
+    ) => Promise<ApiResult<ContainerTabContentSummary[]>>;
     createTab: (
       input: CreateContainerTabInput
     ) => Promise<ApiResult<ContainerTabSummary>>;
@@ -3710,6 +3748,8 @@ export function createLocalWorkOsApi(
     tabs: {
       list: (containerId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabs, containerId),
+      listSummaries: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabSummaries, containerId),
       create: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTab, input),
       rename: (input) =>
@@ -3720,6 +3760,8 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.deleteTab, tabId),
       listTabs: (containerId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabs, containerId),
+      listTabSummaries: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabSummaries, containerId),
       createTab: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTab, input),
       renameTab: (input) =>

@@ -6,10 +6,12 @@ import {
 import {
   ContainerRepository,
   ItemRepository,
+  TabSummaryRepository,
   TaskRepository,
   type ContainerRecord,
   type DatabaseConnection,
-  type TaskWithItemRecord
+  type TaskWithItemRecord,
+  type TabSummaryRecord
 } from "@local-work-os/db";
 import { ActivityService, type ActivityEventView } from "../activity";
 import type { ProjectRecord } from "./ProjectCommands";
@@ -70,6 +72,21 @@ export class ProjectHealthService {
     const project = this.requireProject(projectId);
 
     return this.buildSummary(project, input);
+  }
+
+
+  listProjectTabSummaries(
+    projectId: string,
+    input: { previewLimit?: number } = {}
+  ): TabSummaryRecord[] {
+    validateNonEmptyString(projectId, "projectId");
+    this.requireProject(projectId);
+
+    return new TabSummaryRepository(this.connection).listByContainer({
+      containerId: projectId,
+      todayStart: createLocalDayRange(this.now()).startInclusive,
+      ...(input.previewLimit === undefined ? {} : { previewLimit: input.previewLimit })
+    });
   }
 
   listProjectHealthSummaries(

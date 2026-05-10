@@ -206,6 +206,15 @@ export {
   type WorkflowTriggerType
 } from "./WorkflowRepository";
 
+
+export {
+  TabSummaryRepository,
+  type ListTabSummariesInput,
+  type TabSummaryItemPreviewRecord,
+  type TabSummaryPreviewKind,
+  type TabSummaryRecord
+} from "./TabSummaryRepository";
+
 export {
   TrashRepository,
   type ClearTrashCounts,

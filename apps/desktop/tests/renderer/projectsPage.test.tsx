@@ -442,11 +442,13 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
     },
     tabs: {
       list: async () => apiOk([]),
+      listSummaries: async () => apiOk([]),
       create: async () => apiOk(null as never),
       rename: async () => apiOk(null as never),
       reorder: async () => apiOk([]),
       delete: async () => apiOk(null as never),
       listTabs: async () => apiOk([]),
+      listTabSummaries: async () => apiOk([]),
       createTab: async () => apiOk(null as never),
       renameTab: async () => apiOk(null as never),
       reorderTabs: async () => apiOk([]),

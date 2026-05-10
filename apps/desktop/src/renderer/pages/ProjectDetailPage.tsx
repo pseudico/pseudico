@@ -15,6 +15,7 @@ import { moveIdBeforeTarget } from "@local-work-os/core";
 import {
   CategoryBadge,
   CategoryPicker,
+  ContainerTabSummaryCards,
   ConfirmDialog,
   CreateListForm,
   FileCardContent,
@@ -31,6 +32,7 @@ import {
   RelatedContactsPanel,
   TaskCardContent,
   TaskQuickAdd,
+  type ContainerTabSummaryCardViewModel,
   type CreateListFormValues,
   type FileCardViewModel,
   type FileMetadataEditorValues,
@@ -59,6 +61,7 @@ import type {
   ActivitySummary,
   AttachmentVersionSummary,
   CategorySummary,
+  ContainerTabContentSummary,
   ContainerTabSummary,
   ContactSummary,
   FileItemSummary,
@@ -124,6 +127,7 @@ type ProjectDetailPageProps = {
   initialItems?: UniversalItemViewModel[];
   initialActivity?: RecentActivityViewModel[];
   initialTabs?: ContainerTabSummary[];
+  initialTabSummaries?: ContainerTabContentSummary[];
   initialProjectHealth?: ProjectHealthViewModel | null;
   initialAvailableContacts?: ContactSummary[];
   initialRelatedContacts?: RelatedContactSummary[];
@@ -139,6 +143,7 @@ export function ProjectDetailPage({
   initialItems = emptyProjectItems,
   initialActivity = [],
   initialTabs = [],
+  initialTabSummaries = [],
   initialProjectHealth = null,
   initialAvailableContacts = [],
   initialRelatedContacts = []
@@ -159,6 +164,8 @@ export function ProjectDetailPage({
   const [projectActivity, setProjectActivity] =
     useState<RecentActivityViewModel[]>(initialActivity);
   const [tabs, setTabs] = useState<ContainerTabSummary[]>(initialTabs);
+  const [tabSummaries, setTabSummaries] =
+    useState<ContainerTabContentSummary[]>(initialTabSummaries);
   const [activeTabId, setActiveTabId] = useState<string | null>(
     selectInitialTabId(initialTabs)
   );
@@ -233,6 +240,7 @@ export function ProjectDetailPage({
         categoriesResult,
         activityResult,
         tabsResult,
+        tabSummariesResult,
         healthResult,
         tasksResult,
         listsResult,
@@ -250,6 +258,7 @@ export function ProjectDetailPage({
           targetId: activeProjectId
         }),
         apiClient.tabs.list(activeProjectId),
+        apiClient.tabs.listSummaries(activeProjectId),
         apiClient.projects.getHealth(activeProjectId),
         apiClient.tasks.listByContainer(activeProjectId),
         apiClient.lists.listByContainer(activeProjectId),
@@ -294,6 +303,11 @@ export function ProjectDetailPage({
 
       if (!tabsResult.ok) {
         setItemError(tabsResult.error.message);
+        return;
+      }
+
+      if (!tabSummariesResult.ok) {
+        setItemError(tabSummariesResult.error.message);
         return;
       }
 
@@ -342,6 +356,7 @@ export function ProjectDetailPage({
       ));
       setCategories(categoriesResult.data);
       setTabs(tabsResult.data);
+      setTabSummaries(tabSummariesResult.data);
       setActiveTabId((current) =>
         selectAvailableTabId(tabsResult.data, current)
       );
@@ -441,6 +456,7 @@ export function ProjectDetailPage({
     );
 
     setItems(mergedItems);
+    await refreshProjectTabSummaries(activeProjectId);
     setVisibleItemCount((current) =>
       Math.min(Math.max(current, PROJECT_FEED_PAGE_SIZE), mergedItems.length)
     );
@@ -521,6 +537,17 @@ export function ProjectDetailPage({
     setActiveTabId((current) => selectAvailableTabId(result.data, current));
   }
 
+  async function refreshProjectTabSummaries(activeProjectId: string): Promise<void> {
+    const result = await apiClient.tabs.listSummaries(activeProjectId);
+
+    if (!result.ok) {
+      setItemError(result.error.message);
+      return;
+    }
+
+    setTabSummaries(result.data);
+  }
+
   async function createProjectTab(name: string): Promise<boolean> {
     if (project === null) {
       return false;
@@ -542,6 +569,7 @@ export function ProjectDetailPage({
     }
 
     await refreshProjectTabs(project.id);
+    await refreshProjectTabSummaries(project.id);
     setActiveTabId(result.data.id);
     await refreshProjectActivity(project.id);
     return true;
@@ -568,6 +596,7 @@ export function ProjectDetailPage({
     }
 
     await refreshProjectTabs(project.id);
+    await refreshProjectTabSummaries(project.id);
     await refreshProjectActivity(project.id);
     return true;
   }
@@ -593,6 +622,7 @@ export function ProjectDetailPage({
     }
 
     setTabs(result.data);
+    await refreshProjectTabSummaries(project.id);
     await refreshProjectActivity(project.id);
   }
 
@@ -614,6 +644,7 @@ export function ProjectDetailPage({
     }
 
     await refreshProjectTabs(project.id);
+    await refreshProjectTabSummaries(project.id);
     await refreshProjectActivity(project.id);
   }
 
@@ -2120,6 +2151,21 @@ export function ProjectDetailPage({
         }}
       />
 
+      <ContainerTabSummaryCards
+        activeTabId={activeTabId}
+        busy={itemsLoading || tabBusy}
+        summaries={tabSummaries.map(toContainerTabSummaryCardViewModel)}
+        onOpenItem={(itemId, tabId) => {
+          setActiveTabId(tabId);
+          setVisibleItemCount(PROJECT_FEED_PAGE_SIZE);
+          void openInspector(itemId);
+        }}
+        onSelectTab={(tabId) => {
+          setActiveTabId(tabId);
+          setVisibleItemCount(PROJECT_FEED_PAGE_SIZE);
+        }}
+      />
+
       {projectHealth === null ? null : (
         <ProjectHealthCard health={projectHealth} />
       )}
@@ -2355,6 +2401,28 @@ export function ProjectDetailPage({
       )}
     </section>
   );
+}
+
+
+function toContainerTabSummaryCardViewModel(
+  summary: ContainerTabContentSummary
+): ContainerTabSummaryCardViewModel {
+  return {
+    tabId: summary.tab.id,
+    name: summary.tab.name,
+    isDefault: summary.tab.isDefault,
+    totalItemCount: summary.totalItemCount,
+    openTaskCount: summary.openTaskCount,
+    completedTaskCount: summary.completedTaskCount,
+    overdueTaskCount: summary.overdueTaskCount,
+    upcomingTaskCount: summary.upcomingTaskCount,
+    noteCount: summary.noteCount,
+    fileCount: summary.fileCount,
+    linkCount: summary.linkCount,
+    listCount: summary.listCount,
+    openTaskPreviews: summary.openTaskPreviews,
+    recentContentPreviews: summary.recentContentPreviews
+  };
 }
 
 function toProjectTaskViewModel(

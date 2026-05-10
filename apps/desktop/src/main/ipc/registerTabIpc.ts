@@ -13,6 +13,10 @@ export function registerTabIpc(
     (_event, input) => handlers.handleListTabs(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabSummaries,
+    (_event, input) => handlers.handleListTabSummaries(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.tabs.createTab,
     (_event, input) => handlers.handleCreateTab(input)
   );
