@@ -9,6 +9,14 @@ export {
   validateContainerTemplateJson,
   validateTemplateJson
 } from "./TemplateService";
+export {
+  LWO_TEMPLATE_FILE_EXTENSION,
+  LWO_TEMPLATE_FILE_TYPE,
+  LWO_TEMPLATE_FILE_VERSION,
+  TemplateExportService,
+  TemplateImportValidator,
+  deriveCapabilities
+} from "./TemplateFileFormat";
 export type {
   ContainerTemplateCreationResult,
   CreateContainerFromTemplateInput,
@@ -32,3 +40,19 @@ export type {
   TemplateServiceIdFactory,
   TemplateTagRef
 } from "./TemplateService";
+export type {
+  BuildTemplateFileInput,
+  ExportTemplateFileInput,
+  TemplateExportFileSystemAdapter,
+  TemplateExportServiceIdFactory,
+  TemplateFileCapabilities,
+  TemplateFileCategoryRef,
+  TemplateFileExportResult,
+  TemplateFileV1,
+  TemplateImportValidationCounts,
+  TemplateImportValidationIssue,
+  TemplateImportValidationSeverity,
+  TemplateImportValidationSummary,
+  TemplateImportValidatorFileSystemAdapter,
+  WriteTemplateFileInput
+} from "./TemplateFileFormat";

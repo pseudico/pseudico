@@ -1363,10 +1363,15 @@ export class ContainerTemplateService {
 
 export const templatesModuleContract = {
   module: "templates",
-  purpose: "Define reusable local list structures before broader template types.",
-  owns: ["template definitions", "list template save/apply behavior"],
-  doesNotOwn: ["cloud template sharing", "workflow execution", "project templates"],
-  integrationPoints: ["lists", "metadata", "search", "activity"],
+  purpose: "Define reusable local list, project, and contact template structures.",
+  owns: [
+    "template definitions",
+    "list template save/apply behavior",
+    "container template save/apply behavior",
+    "portable template file validation"
+  ],
+  doesNotOwn: ["cloud template sharing", "workflow execution", "binary attachment export"],
+  integrationPoints: ["lists", "projects", "contacts", "metadata", "search", "activity", "export", "import"],
   priority: "V2"
 } as const satisfies FeatureModuleContract;
 

@@ -1,0 +1,245 @@
+{
+  "fileType": "local-work-os.template",
+  "fileVersion": 1,
+  "exportedAt": "2026-05-02T01:02:03.000Z",
+  "source": {
+    "app": "Local Work OS",
+    "workspaceId": "workspace_fixture",
+    "templateId": "template_fixture",
+    "sourceType": "project",
+    "sourceId": "container_fixture"
+  },
+  "metadata": {
+    "name": "Fixture onboarding project",
+    "description": "Portable fixture for v1 template file validation.",
+    "kind": "project",
+    "templateJsonVersion": 1,
+    "recommendedExtension": ".lwo-template"
+  },
+  "capabilities": {
+    "tabs": true,
+    "tasks": true,
+    "notes": true,
+    "lists": true,
+    "links": true,
+    "filePlaceholders": true,
+    "tags": true,
+    "categories": true,
+    "relativeDates": true,
+    "contactFields": false
+  },
+  "references": {
+    "tags": [
+      {
+        "tagId": "tag_launch",
+        "name": "Launch",
+        "slug": "launch",
+        "source": "manual"
+      }
+    ],
+    "categories": [
+      {
+        "categoryId": "category_client",
+        "name": "Client Work",
+        "slug": "client-work",
+        "color": "#14b8a6",
+        "description": "Reusable client-facing work."
+      }
+    ]
+  },
+  "template": {
+    "version": 1,
+    "kind": "project",
+    "createdFrom": {
+      "sourceType": "project",
+      "sourceId": "container_fixture"
+    },
+    "baseDate": "2026-05-01",
+    "container": {
+      "type": "project",
+      "name": "Client onboarding",
+      "description": "Repeatable onboarding plan.",
+      "status": "active",
+      "categoryId": "category_client",
+      "color": "#14b8a6",
+      "isFavorite": false,
+      "tags": [
+        {
+          "tagId": "tag_launch",
+          "name": "Launch",
+          "slug": "launch",
+          "source": "manual"
+        }
+      ],
+      "contactFields": [],
+      "tabs": [
+        {
+          "stableId": "tab_main",
+          "name": "Main",
+          "description": null,
+          "sortOrder": 0,
+          "isDefault": true
+        },
+        {
+          "stableId": "tab_docs",
+          "name": "Docs",
+          "description": "Reference material",
+          "sortOrder": 1,
+          "isDefault": false
+        }
+      ],
+      "items": [
+        {
+          "stableId": "item_task",
+          "tabStableId": "tab_main",
+          "type": "task",
+          "title": "Schedule kickoff",
+          "body": null,
+          "categoryId": "category_client",
+          "status": "open",
+          "sortOrder": 1024,
+          "pinned": false,
+          "startAt": null,
+          "dueAt": null,
+          "completedAt": null,
+          "startOffsetDays": null,
+          "dueOffsetDays": 2,
+          "completedOffsetDays": null,
+          "tags": [
+            {
+              "tagId": "tag_launch",
+              "name": "Launch",
+              "slug": "launch",
+              "source": "manual"
+            }
+          ],
+          "task": {
+            "taskStatus": "open",
+            "priority": 2,
+            "allDay": true,
+            "timezone": null
+          }
+        },
+        {
+          "stableId": "item_note",
+          "tabStableId": "tab_docs",
+          "type": "note",
+          "title": "Welcome note",
+          "body": null,
+          "categoryId": null,
+          "status": "open",
+          "sortOrder": 2048,
+          "pinned": false,
+          "startAt": null,
+          "dueAt": null,
+          "completedAt": null,
+          "startOffsetDays": null,
+          "dueOffsetDays": null,
+          "completedOffsetDays": null,
+          "tags": [],
+          "note": {
+            "content": "Introduce the team and outline the onboarding flow.",
+            "format": "markdown"
+          }
+        },
+        {
+          "stableId": "item_list",
+          "tabStableId": "tab_main",
+          "type": "list",
+          "title": "Checklist",
+          "body": null,
+          "categoryId": null,
+          "status": "open",
+          "sortOrder": 3072,
+          "pinned": false,
+          "startAt": null,
+          "dueAt": null,
+          "completedAt": null,
+          "startOffsetDays": null,
+          "dueOffsetDays": null,
+          "completedOffsetDays": null,
+          "tags": [],
+          "list": {
+            "displayMode": "checklist",
+            "showCompleted": true,
+            "progressMode": "count",
+            "items": [
+              {
+                "stableId": "list_item_contract",
+                "parentStableId": null,
+                "title": "Send contract",
+                "body": null,
+                "status": "open",
+                "depth": 0,
+                "sortOrder": 1024,
+                "startAt": null,
+                "dueAt": null,
+                "completedAt": null,
+                "startOffsetDays": null,
+                "dueOffsetDays": 1,
+                "completedOffsetDays": null,
+                "tags": []
+              }
+            ]
+          }
+        },
+        {
+          "stableId": "item_link",
+          "tabStableId": "tab_docs",
+          "type": "link",
+          "title": "Internal kickoff guide",
+          "body": null,
+          "categoryId": null,
+          "status": "open",
+          "sortOrder": 4096,
+          "pinned": false,
+          "startAt": null,
+          "dueAt": null,
+          "completedAt": null,
+          "startOffsetDays": null,
+          "dueOffsetDays": null,
+          "completedOffsetDays": null,
+          "tags": [],
+          "link": {
+            "url": "https://example.com/local-guide",
+            "title": "Internal kickoff guide",
+            "description": "Placeholder local reference URL."
+          }
+        },
+        {
+          "stableId": "item_file",
+          "tabStableId": "tab_docs",
+          "type": "file",
+          "title": "welcome.pdf",
+          "body": "Attach the real welcome PDF after instantiation.",
+          "categoryId": null,
+          "status": "open",
+          "sortOrder": 5120,
+          "pinned": false,
+          "startAt": null,
+          "dueAt": null,
+          "completedAt": null,
+          "startOffsetDays": null,
+          "dueOffsetDays": null,
+          "completedOffsetDays": null,
+          "tags": [],
+          "filePlaceholder": {
+            "originalName": "welcome.pdf",
+            "description": "Attach the real welcome PDF after instantiation.",
+            "attachments": [
+              {
+                "originalName": "welcome.pdf",
+                "storedName": "welcome.pdf",
+                "mimeType": "application/pdf",
+                "sizeBytes": 128,
+                "checksum": "fixture-checksum",
+                "description": "Original source file placeholder.",
+                "storagePath": "attachments/2026/05/file_fixture/welcome.pdf"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
