@@ -6,6 +6,7 @@ import { containerTemplatesSql } from "./0005_container_templates";
 import { recurrenceSql } from "./0006_recurrence";
 import { attachmentVersionsSql } from "./0007_attachment_versions";
 import { workflowsSql } from "./0008_workflows";
+import { containerMediaSql } from "./0009_container_media";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -56,5 +57,11 @@ export const migrations: MigrationDefinition[] = [
     name: "workflows",
     sql: workflowsSql,
     checksum: "pse-81-workflows-v1"
+  },
+  {
+    version: 9,
+    name: "container_media",
+    sql: containerMediaSql,
+    checksum: "pse-102-container-media-v1"
   }
 ];

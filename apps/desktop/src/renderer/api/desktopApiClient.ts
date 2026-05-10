@@ -332,6 +332,11 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.dragDrop!.attachFilesToItem(input)),
       getDroppedFilePaths: (files) => api.dragDrop!.getDroppedFilePaths(files)
     },
+    containerMedia: {
+      chooseAndSet: (input) => callApi(() => api.containerMedia!.chooseAndSet(input)),
+      getActive: (input) => callApi(() => api.containerMedia!.getActive(input)),
+      remove: (input) => callApi(() => api.containerMedia!.remove(input))
+    },
     files: {
       getStatus: () => callApi(() => api.files.getStatus()),
       attachFileToContainer: (input) =>
@@ -743,6 +748,11 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().dragDrop!.attachFilesToItem(input),
     getDroppedFilePaths: (files) =>
       getDesktopApiClient().dragDrop!.getDroppedFilePaths(files)
+  },
+  containerMedia: {
+    chooseAndSet: (input) => getDesktopApiClient().containerMedia!.chooseAndSet(input),
+    getActive: (input) => getDesktopApiClient().containerMedia!.getActive(input),
+    remove: (input) => getDesktopApiClient().containerMedia!.remove(input)
   },
   files: {
     getStatus: () => getDesktopApiClient().files.getStatus(),

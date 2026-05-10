@@ -5,6 +5,7 @@ export { attachmentVersions } from "./attachmentVersions";
 export { categories } from "./categories";
 export { contactFields } from "./contactFields";
 export { containerTabs } from "./containerTabs";
+export { containerMedia } from "./containerMedia";
 export { containers } from "./containers";
 export { dailyPlanItems } from "./dailyPlanItems";
 export { dailyPlans } from "./dailyPlans";
@@ -27,4 +28,4 @@ export { templates } from "./templates";
 export { workflowDefinitions, workflowRuns } from "./workflows";
 export { workspaces } from "./workspaces";
 
-export const schemaVersion = 8;
+export const schemaVersion = 9;

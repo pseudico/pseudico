@@ -103,6 +103,8 @@ export type {
   AttachmentVersionRecord,
   AttachmentStorageLayout
 } from "./entities/Attachment";
+export { CONTAINER_MEDIA_ROLES, isContainerMediaRole } from "./entities/ContainerMedia";
+export type { ContainerMediaRecord, ContainerMediaRole } from "./entities/ContainerMedia";
 export { isSupportedLinkProtocol } from "./entities/Link";
 export type { LinkProtocol, LinkRecord } from "./entities/Link";
 export {

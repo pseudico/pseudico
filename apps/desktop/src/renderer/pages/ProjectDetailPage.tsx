@@ -17,6 +17,7 @@ import {
   CategoryPicker,
   ContainerTabSummaryCards,
   ConfirmDialog,
+  ContainerMediaPreview,
   CreateListForm,
   FileCardContent,
   ItemInspectorPanel,
@@ -65,6 +66,7 @@ import type {
   ContainerTabSummary,
   ContactSummary,
   FileItemSummary,
+  ContainerMediaSummary,
   ItemSummary,
   LinkSummary,
   ListItemSummary,
@@ -173,6 +175,9 @@ export function ProjectDetailPage({
   const [tabError, setTabError] = useState<string | null>(null);
   const [projectHealth, setProjectHealth] =
     useState<ProjectHealthViewModel | null>(initialProjectHealth);
+  const [projectMedia, setProjectMedia] = useState<ContainerMediaSummary | null>(null);
+  const [projectMediaBusy, setProjectMediaBusy] = useState(false);
+  const [projectMediaError, setProjectMediaError] = useState<string | null>(null);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [contacts, setContacts] =
     useState<ContactSummary[]>(initialAvailableContacts);
@@ -381,6 +386,30 @@ export function ProjectDetailPage({
     }
 
     void loadProject();
+
+    return () => {
+      active = false;
+    };
+  }, [apiClient, projectId]);
+
+  useEffect(() => {
+    if (projectId === undefined || apiClient.containerMedia === undefined) {
+      return;
+    }
+
+    let active = true;
+    void apiClient.containerMedia
+      .getActive({ containerId: projectId, role: "project_banner" })
+      .then((result) => {
+        if (!active) {
+          return;
+        }
+        if (result.ok) {
+          setProjectMedia(result.data);
+        } else {
+          setProjectMediaError(result.error.message);
+        }
+      });
 
     return () => {
       active = false;
@@ -1996,6 +2025,53 @@ export function ProjectDetailPage({
     );
   }
 
+  async function setProjectBanner(): Promise<void> {
+    if (project === null || apiClient.containerMedia === undefined) {
+      return;
+    }
+
+    setProjectMediaBusy(true);
+    setProjectMediaError(null);
+    const result = await apiClient.containerMedia.chooseAndSet({
+      containerId: project.id,
+      role: "project_banner",
+      altText: `${project.name} banner`
+    });
+    setProjectMediaBusy(false);
+
+    if (!result.ok) {
+      setProjectMediaError(result.error.message);
+      return;
+    }
+
+    if (result.data !== null) {
+      setProjectMedia(result.data);
+      await refreshProjectActivity(project.id);
+    }
+  }
+
+  async function removeProjectBanner(): Promise<void> {
+    if (project === null || apiClient.containerMedia === undefined) {
+      return;
+    }
+
+    setProjectMediaBusy(true);
+    setProjectMediaError(null);
+    const result = await apiClient.containerMedia.remove({
+      containerId: project.id,
+      role: "project_banner"
+    });
+    setProjectMediaBusy(false);
+
+    if (!result.ok) {
+      setProjectMediaError(result.error.message);
+      return;
+    }
+
+    setProjectMedia(null);
+    await refreshProjectActivity(project.id);
+  }
+
   if (loading) {
     return <p className="muted-text">Loading project...</p>;
   }
@@ -2064,6 +2140,15 @@ export function ProjectDetailPage({
       </Link>
 
       <header className="project-detail-header">
+        <ContainerMediaPreview
+          busy={projectMediaBusy}
+          error={projectMediaError}
+          media={projectMedia}
+          title={project.name}
+          variant="banner"
+          onRemove={() => void removeProjectBanner()}
+          onSet={() => void setProjectBanner()}
+        />
         <span
           className="project-detail-color"
           style={{ backgroundColor: project.color ?? "#245c55" }}

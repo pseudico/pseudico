@@ -24,6 +24,7 @@ const requiredTables = [
   "attachment_versions",
   "workflow_definitions",
   "workflow_runs",
+  "container_media",
   "tags",
   "taggings",
   "categories",
@@ -77,7 +78,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version eight", () => {
+  it("runs on an empty database and records schema version nine", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -121,14 +122,19 @@ describe("schema migrations", () => {
           version: 8,
           name: "workflows",
           checksum: "pse-81-workflows-v1"
+        },
+        {
+          version: 9,
+          name: "container_media",
+          checksum: "pse-102-container-media-v1"
         }
       ],
-      currentVersion: 8
+      currentVersion: 9
     });
-    expect(service.getCurrentSchemaVersion()).toBe(8);
+    expect(service.getCurrentSchemaVersion()).toBe(9);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 8
+      currentVersion: 9
     });
   });
 

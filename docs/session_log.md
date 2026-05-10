@@ -1752,3 +1752,52 @@ Files changed:
 - apps/desktop/src/renderer/pages/ContactDetailPage.tsx
 Open questions / risks: Manual visual QA for summary-card layout remains recommended.
 Next actions: Review diff; commit/push branch; open ready PR.
+## 2026-05-10T14:48:29+10:00
+Objective: Finish PSE-101 and prepare next ticket.
+Decisions made:
+- Squash-merged PR #96 at 89c31bb after GitHub CI passed and no reviews/comments were open.
+- Moved PSE-101 to Done and promoted only PSE-102 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-102 not started in this run; unrelated local files remain untouched.
+Next actions: Start PSE-102; read ticket/docs; keep one Codex Ready issue.
+
+## 2026-05-10 14:56:51 +10:00
+Objective: Reconcile active Linear/GitHub work and run next ticket end-to-end.
+Decisions made:
+- Started with Linear/GitHub reconciliation per user workflow.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Existing active PR/issue state unknown until connector checks complete.
+Next actions:
+- Inspect PR Open/In Progress/Codex Ready issues.
+- Merge or implement according to active state.
+
+## 2026-05-10 14:58:11 +10:00
+Objective: Start PSE-102 implementation after reconciliation.
+Decisions made:
+- No PR Open or In Progress issues found; PSE-102 moved to In Progress.
+- Created branch PSE-102-container-media after slash branch creation was blocked by refs layout/permissions.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need fit media support into existing schema/services without scope creep.
+Next actions:
+- Inspect existing attachment/container APIs.
+- Add focused service/repository/UI tests.
+
+## 2026-05-10 15:15:12 +10:00
+Objective: Verify PSE-102 container media implementation.
+Decisions made:
+- Added attachment-backed container_media schema/service/IPC/UI rather than renderer filesystem access.
+- Thumbnails are generated in Electron main and previews are returned as data URLs.
+Files changed:
+- packages/core/src/entities/ContainerMedia.ts
+- packages/db/src/repositories/ContainerMediaRepository.ts
+- packages/features/src/containerMedia/ContainerMediaService.ts
+Open questions / risks:
+- Full UI manual image-pick QA still requires running desktop interactively.
+Next actions:
+- Complete final lint/typecheck pass.
+- Commit, push, and open PR.
