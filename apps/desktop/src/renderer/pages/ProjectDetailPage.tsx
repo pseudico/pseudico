@@ -62,6 +62,7 @@ import {
   type RelatedContentTargetOption,
   type RelatedContactViewModel,
   type TagBadgeViewModel,
+  type SnoozePreset,
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel,
@@ -1583,6 +1584,61 @@ export function ProjectDetailPage({
     setTaskBusyId(null);
   }
 
+  async function snoozeTask(
+    item: TaskCardViewModel,
+    preset: SnoozePreset
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setTaskBusyId(item.id);
+    setTaskError(null);
+
+    const result = await apiClient.tasks.snooze({
+      itemId: item.id,
+      preset
+    });
+
+    if (!result.ok) {
+      setTaskBusyId(null);
+      setTaskError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectHealth(project.id);
+    setTaskBusyId(null);
+  }
+
+  async function rescheduleTask(
+    item: TaskCardViewModel,
+    dueAt: string | null
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setTaskBusyId(item.id);
+    setTaskError(null);
+
+    const result = await apiClient.tasks.reschedule({
+      itemId: item.id,
+      dueAt,
+      allDay: true
+    });
+
+    if (!result.ok) {
+      setTaskBusyId(null);
+      setTaskError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectHealth(project.id);
+    setTaskBusyId(null);
+  }
+
   async function updateListItemDateRange(
     item: ListCardViewModel,
     listItem: ListCardItemViewModel,
@@ -2353,6 +2409,8 @@ export function ProjectDetailPage({
             disabled={taskBusyId === item.id}
             item={item}
             onDateRangeChange={updateTaskDateRange}
+            onRescheduleTask={rescheduleTask}
+            onSnoozeTask={snoozeTask}
             onToggleComplete={toggleTaskComplete}
           />
         </>

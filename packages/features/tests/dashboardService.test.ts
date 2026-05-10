@@ -170,6 +170,32 @@ describe("DashboardService", () => {
     });
   });
 
+  it("refreshes Today and dashboard projections after quick reschedule", async () => {
+    const taskService = createTaskService();
+    const overdue = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Recover overdue",
+      dueAt: new Date(2026, 4, 14, 8).toISOString()
+    });
+
+    expect(createDashboardService().getOverdueWidgetData({
+      workspaceId: "workspace_1"
+    }).items.map((item) => item.title)).toEqual(["Recover overdue"]);
+
+    await taskService.snoozeTask({
+      itemId: overdue.item.id,
+      preset: "tomorrow"
+    });
+
+    expect(createDashboardService().getOverdueWidgetData({
+      workspaceId: "workspace_1"
+    }).items).toEqual([]);
+    expect(createDashboardService().getUpcomingWidgetData({
+      workspaceId: "workspace_1"
+    }).items.map((item) => item.title)).toEqual(["Recover overdue"]);
+  });
+
   it("returns favourite projects for the favorites widget", async () => {
     await createProjectService().createProject({
       workspaceId: "workspace_1",

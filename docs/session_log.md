@@ -2342,3 +2342,50 @@ Files changed:
 - docs/MODULE_REGISTRY.md
 Open questions / risks: CI and review remain after PR opens.
 Next actions: Stage/commit; push branch; open ready PR.
+## 2026-05-11 06:21:23 +10:00
+Objective: Merge PSE-116 and promote next ticket.
+Decisions made:
+- Squash-merged PR #111 at 54ca936 after CI passed.
+- Moved PSE-116 to Done and promoted PSE-117 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Working tree has unrelated untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi.
+Next actions: Start PSE-117 next; reconcile before coding; keep one Codex Ready issue.
+## 2026-05-11 06:37:30 +10:00
+Objective: Reconcile active Local Work OS work before PSE-117.
+Decisions made:
+- No open GitHub PRs or Linear PR Open/In Progress issues were found.
+- Exactly one Codex Ready issue exists: PSE-117.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Working tree still has prior session_log edits plus unrelated untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi.
+Next actions: Pull main; move PSE-117 to In Progress; read linked docs and implement.
+## 2026-05-11 06:38:25 +10:00
+Objective: Start implementation for PSE-117.
+Decisions made:
+- Moved PSE-117 to In Progress.
+- Created branch codex/pse-117-quick-snooze-reschedule from main.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need confirm ticket acceptance criteria from source ticket docs.
+Next actions: Read PSE-117 docs/source; inspect task date flows; add focused tests.
+## 2026-05-11 06:48:07 +10:00
+Objective: Implement PSE-117 quick snooze/reschedule surfaces.
+Decisions made:
+- Extended task snooze presets with later-today and remove-due reschedule support.
+- Reused SnoozeMenu on task cards, Today, search, collections, and dashboard widgets.
+Files changed:
+- packages/features/src/tasks/TaskService.ts
+- packages/ui/src/components/SnoozeMenu.tsx
+- apps/desktop/src/renderer/pages/TodayPage.tsx
+Open questions / risks: Need typecheck/test passes and CI after PR.
+Next actions: Run targeted tests; fix type/lint issues; update Linear/GitHub.
+## 2026-05-11 06:52:14 +10:00
+Objective: Verify PSE-117 locally before PR.
+Decisions made:
+- pnpm lint, pnpm typecheck, pnpm test, and pnpm build pass.
+- Retried Vitest/build commands with escalation after sandbox EPERM on process spawn.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI and review remain after PR opens.
+Next actions: Stage/commit; push branch; open ready PR.

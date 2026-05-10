@@ -34,7 +34,7 @@ export type TodayLaneProps = {
   ) => Promise<void> | void;
   onRescheduleTask?: (
     task: TodayTaskCardViewModel,
-    dueAt: string
+    dueAt: string | null
   ) => Promise<void> | void;
 };
 

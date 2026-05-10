@@ -128,7 +128,9 @@ function toSearchResultSummary(result: SearchResult): SearchResultSummary {
     containerTitle: result.containerTitle,
     parentItemId: result.parentItemId,
     parentItemTitle: result.parentItemTitle,
-    destinationPath: result.destinationPath
+    destinationPath: result.destinationPath,
+    dueAt: result.dueAt,
+    taskStatus: result.taskStatus
   };
 }
 

@@ -161,6 +161,17 @@ describe("TaskService", () => {
       dueAt: new Date(2026, 4, 3).toISOString()
     });
 
+    const laterToday = await service.snoozeTask({
+      itemId: created.item.id,
+      preset: "later_today",
+      date: new Date(2026, 4, 2, 22, 30, 0, 0)
+    });
+
+    expect(laterToday.task).toMatchObject({
+      dueAt: new Date(2026, 4, 2, 23, 59, 0, 0).toISOString(),
+      allDay: false
+    });
+
     const rescheduled = await service.rescheduleTask({
       itemId: created.item.id,
       dueAt: "2026-05-09T15:30:00.000Z",
@@ -171,6 +182,13 @@ describe("TaskService", () => {
       dueAt: "2026-05-09T15:30:00.000Z",
       allDay: false
     });
+
+    const removedDue = await service.rescheduleTask({
+      itemId: created.item.id,
+      dueAt: null
+    });
+
+    expect(removedDue.task.dueAt).toBeNull();
     expect(new SearchIndexRepository(connection).getByTarget({
       workspaceId: "workspace_1",
       targetType: "item",
@@ -182,7 +200,13 @@ describe("TaskService", () => {
       new ActivityLogRepository(connection)
         .listForTarget("item", created.item.id)
         .map((event) => event.action)
-    ).toEqual(["task_created", "task_snoozed", "task_rescheduled"]);
+    ).toEqual([
+      "task_created",
+      "task_snoozed",
+      "task_snoozed",
+      "task_rescheduled",
+      "task_rescheduled"
+    ]);
   });
 
   it("updates a task from a single date range input and preserves timed metadata", async () => {

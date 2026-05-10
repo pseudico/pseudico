@@ -33,6 +33,9 @@ new work should account for this implemented baseline:
 - Task and list-row date editing now uses a shared single date-range input that
   can persist due-only dates or start/due ranges while preserving all-day versus
   timed metadata.
+- Task quick snooze/reschedule actions now share a local menu across task cards,
+  Today, search, collections, and dashboard task widgets, including later-today,
+  tomorrow, next-week, custom date, and remove-due flows.
 - Future or placeholder-heavy flows: Timeline, Calendar, portable/broader Templates,
   broader import execution beyond workspace JSON restore,
   custom dashboard editing, advanced saved-view builder UX, and browser capture.

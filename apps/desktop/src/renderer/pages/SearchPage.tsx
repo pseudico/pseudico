@@ -7,7 +7,8 @@ import {
   LoadMoreList,
   SearchResultCard,
   renderLoadableState,
-  type SearchResultCardViewModel
+  type SearchResultCardViewModel,
+  type SnoozePreset
 } from "@local-work-os/ui";
 import type {
   LocalWorkOsApi,
@@ -55,6 +56,7 @@ export function SearchPage({
     initialResults.length >= SEARCH_PAGE_SIZE
   );
   const [loading, setLoading] = useState(false);
+  const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const activeQuery = initialQuery ?? queryFromRoute;
   const visibleResults = useMemo(
@@ -144,6 +146,90 @@ export function SearchPage({
     }
 
     setSearchParams(params);
+  }
+
+  async function reloadSearchResults(): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
+    }
+
+    const trimmedQuery = activeQuery.trim();
+
+    if (trimmedQuery.length === 0) {
+      setResults([]);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const input: SearchWorkspaceInput = {
+      workspaceId: currentWorkspace.id,
+      query: trimmedQuery,
+      limit: Math.max(results.length, SEARCH_PAGE_SIZE),
+      offset: 0
+    };
+
+    if (selectedKinds.length > 0) {
+      input.kinds = selectedKinds;
+    }
+
+    const result = await apiClient.search.searchWorkspace(input);
+
+    setLoading(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setResults(result.data);
+    setHasMoreResults(result.data.length === input.limit);
+  }
+
+  async function snoozeTask(
+    result: SearchResultCardViewModel,
+    preset: SnoozePreset
+  ): Promise<void> {
+    setBusyTaskId(result.targetId);
+    setError(null);
+
+    const mutation = await apiClient.tasks.snooze({
+      itemId: result.targetId,
+      preset
+    });
+
+    setBusyTaskId(null);
+
+    if (!mutation.ok) {
+      setError(mutation.error.message);
+      return;
+    }
+
+    await reloadSearchResults();
+  }
+
+  async function rescheduleTask(
+    result: SearchResultCardViewModel,
+    dueAt: string | null
+  ): Promise<void> {
+    setBusyTaskId(result.targetId);
+    setError(null);
+
+    const mutation = await apiClient.tasks.reschedule({
+      itemId: result.targetId,
+      dueAt,
+      allDay: true
+    });
+
+    setBusyTaskId(null);
+
+    if (!mutation.ok) {
+      setError(mutation.error.message);
+      return;
+    }
+
+    await reloadSearchResults();
   }
 
   async function loadMoreResults(): Promise<void> {
@@ -300,9 +386,17 @@ export function SearchPage({
               getKey={(result) => result.id}
               hasMore={hasMoreResults}
               items={visibleResults}
-              loading={loading}
+              loading={loading || busyTaskId !== null}
               renderItem={(result) => (
-                <SearchResultCard result={result} onOpen={openResult} />
+                <SearchResultCard
+                  result={{
+                    ...result,
+                    disabled: result.disabled === true || busyTaskId === result.targetId
+                  }}
+                  onOpen={openResult}
+                  onRescheduleTask={rescheduleTask}
+                  onSnoozeTask={snoozeTask}
+                />
               )}
               onLoadMore={() => void loadMoreResults()}
             />
@@ -330,6 +424,8 @@ function toSearchResultCardViewModel(
 ): SearchResultCardViewModel {
   return {
     id: result.id,
+    targetId: result.targetId,
+    targetType: result.targetType,
     kind: result.kind,
     title: result.title,
     body: result.body,
@@ -348,6 +444,8 @@ function toSearchResultCardViewModel(
     })),
     contextLabel: buildContextLabel(result),
     updatedLabel: result.updatedAt.slice(0, 10),
+    dueAt: result.dueAt ?? null,
+    taskStatus: result.taskStatus ?? null,
     disabled: result.destinationPath === null
   };
 }

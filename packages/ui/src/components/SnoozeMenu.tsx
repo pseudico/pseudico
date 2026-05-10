@@ -1,23 +1,36 @@
-import { CalendarClock, CalendarPlus } from "lucide-react";
+import { CalendarClock, CalendarMinus, CalendarPlus, Clock3 } from "lucide-react";
 import { useState } from "react";
 
-export type SnoozePreset = "tomorrow" | "next_week";
+export type SnoozePreset = "later_today" | "tomorrow" | "next_week";
 
 export type SnoozeMenuProps = {
   busy?: boolean;
   onSnoozePreset?: (preset: SnoozePreset) => Promise<void> | void;
-  onReschedule?: (dueAt: string) => Promise<void> | void;
+  onReschedule?: (dueAt: string | null) => Promise<void> | void;
+  showRemoveDue?: boolean;
 };
 
 export function SnoozeMenu({
   busy = false,
   onSnoozePreset,
-  onReschedule
+  onReschedule,
+  showRemoveDue = true
 }: SnoozeMenuProps): React.JSX.Element {
   const [customDate, setCustomDate] = useState("");
 
   return (
     <div className="snooze-menu">
+      <button
+        className="secondary-button compact-button"
+        disabled={busy}
+        type="button"
+        onClick={() => {
+          void onSnoozePreset?.("later_today");
+        }}
+      >
+        <Clock3 size={16} aria-hidden="true" />
+        Later today
+      </button>
       <button
         className="secondary-button compact-button"
         disabled={busy}
@@ -59,6 +72,19 @@ export function SnoozeMenu({
           Apply
         </button>
       </label>
+      {showRemoveDue ? (
+        <button
+          className="secondary-button compact-button"
+          disabled={busy}
+          type="button"
+          onClick={() => {
+            void onReschedule?.(null);
+          }}
+        >
+          <CalendarMinus size={16} aria-hidden="true" />
+          Remove due
+        </button>
+      ) : null}
     </div>
   );
 }

@@ -232,6 +232,34 @@ describe("TodayService", () => {
     });
   });
 
+  it("reflects quick snooze/reschedule changes in Today lanes", async () => {
+    const taskService = createTaskService();
+    const overdue = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Overdue recovery",
+      dueAt: new Date(2026, 4, 14, 10).toISOString()
+    });
+
+    expect(createTodayService().getTodayViewModel({
+      workspaceId: "workspace_1"
+    }).overdueBacklog.map((task) => task.title)).toEqual(["Overdue recovery"]);
+
+    await taskService.rescheduleTask({
+      itemId: overdue.item.id,
+      dueAt: new Date(2026, 4, 16, 10).toISOString()
+    });
+
+    const viewModel = createTodayService().getTodayViewModel({
+      workspaceId: "workspace_1"
+    });
+
+    expect(viewModel.overdueBacklog).toEqual([]);
+    expect(viewModel.tomorrowPreview.map((task) => task.title)).toEqual([
+      "Overdue recovery"
+    ]);
+  });
+
   it("plans, reorders, unplans, and logs daily planning activity", async () => {
     const taskService = createTaskService();
     const dailyPlanService = createDailyPlanService();

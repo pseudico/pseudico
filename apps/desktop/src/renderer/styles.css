@@ -3699,6 +3699,25 @@ a {
   border-color: #245c55;
 }
 
+.dashboard-widget-row-open {
+  display: contents;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.dashboard-widget-task-row {
+  grid-template-columns: minmax(0, 1fr);
+  cursor: default;
+}
+
+.dashboard-widget-task-row .snooze-menu {
+  margin-top: 4px;
+}
+
 .dashboard-widget-row-main {
   display: grid;
   min-width: 0;

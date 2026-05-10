@@ -1,6 +1,7 @@
 import { ArrowUpRight, Check, Circle } from "lucide-react";
 import { TagBadge } from "./TagBadge";
 import { getItemTypeLabel, ItemTypeIcon } from "./ItemTypeIcon";
+import { SnoozeMenu, type SnoozePreset } from "./SnoozeMenu";
 
 export type GroupedResultViewModel = {
   targetType: "container" | "item";
@@ -26,6 +27,14 @@ export type GroupedResultsListProps = {
   selectedResultIds?: readonly string[];
   onCompleteTask?: (itemId: string) => void;
   onOpenResult?: (path: string) => void;
+  onSnoozeTask?: (
+    result: GroupedResultViewModel,
+    preset: SnoozePreset
+  ) => Promise<void> | void;
+  onRescheduleTask?: (
+    result: GroupedResultViewModel,
+    dueAt: string | null
+  ) => Promise<void> | void;
   onSelectionChange?: (resultId: string, selected: boolean) => void;
 };
 
@@ -34,6 +43,8 @@ export function GroupedResultsList({
   selectedResultIds = [],
   onCompleteTask,
   onOpenResult,
+  onSnoozeTask,
+  onRescheduleTask,
   onSelectionChange
 }: GroupedResultsListProps): React.JSX.Element {
   if (groups.length === 0 || groups.every((group) => group.results.length === 0)) {
@@ -125,6 +136,12 @@ export function GroupedResultsList({
                         <Circle size={17} aria-hidden="true" />
                       )}
                     </button>
+                  ) : null}
+                  {result.kind === "task" ? (
+                    <SnoozeMenu
+                      onReschedule={(dueAt) => onRescheduleTask?.(result, dueAt)}
+                      onSnoozePreset={(preset) => onSnoozeTask?.(result, preset)}
+                    />
                   ) : null}
                   <button
                     type="button"

@@ -1,10 +1,13 @@
 import { ArrowUpRight } from "lucide-react";
 import { CategoryBadge, type CategoryBadgeViewModel } from "./CategoryBadge";
 import { getItemTypeLabel, ItemTypeIcon } from "./ItemTypeIcon";
+import { SnoozeMenu, type SnoozePreset } from "./SnoozeMenu";
 import { TagBadge, type TagBadgeViewModel } from "./TagBadge";
 
 export type SearchResultCardViewModel = {
   id: string;
+  targetId: string;
+  targetType?: "container" | "item" | "list_item" | "attachment";
   kind: string;
   title: string;
   body?: string | null;
@@ -13,6 +16,8 @@ export type SearchResultCardViewModel = {
   tags?: readonly TagBadgeViewModel[];
   contextLabel?: string | null;
   updatedLabel?: string | null;
+  dueAt?: string | null;
+  taskStatus?: string | null;
   disabled?: boolean;
 };
 
@@ -20,6 +25,14 @@ export type SearchResultCardProps = {
   result: SearchResultCardViewModel;
   selected?: boolean;
   onOpen?: (resultId: string) => void;
+  onSnoozeTask?: (
+    result: SearchResultCardViewModel,
+    preset: SnoozePreset
+  ) => Promise<void> | void;
+  onRescheduleTask?: (
+    result: SearchResultCardViewModel,
+    dueAt: string | null
+  ) => Promise<void> | void;
   onSelectionChange?: (resultId: string, selected: boolean) => void;
 };
 
@@ -27,6 +40,8 @@ export function SearchResultCard({
   result,
   selected = false,
   onOpen,
+  onSnoozeTask,
+  onRescheduleTask,
   onSelectionChange
 }: SearchResultCardProps): React.JSX.Element {
   const typeLabel = formatKindLabel(result.kind);
@@ -90,6 +105,13 @@ export function SearchResultCard({
       >
         <ArrowUpRight size={17} aria-hidden="true" />
       </button>
+      {result.kind === "task" && result.targetType === "item" ? (
+        <SnoozeMenu
+          busy={result.disabled === true}
+          onReschedule={(dueAt) => onRescheduleTask?.(result, dueAt)}
+          onSnoozePreset={(preset) => onSnoozeTask?.(result, preset)}
+        />
+      ) : null}
     </div>
   );
 }
