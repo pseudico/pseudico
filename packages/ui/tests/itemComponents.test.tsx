@@ -837,14 +837,55 @@ describe("Universal item UI", () => {
     expect(html).toContain("Edit note");
   });
 
+  it("renders resolved, broken, and ambiguous wikilinks in Markdown note previews", () => {
+    const html = renderToStaticMarkup(
+      <NoteCardContent
+        item={{
+          id: "item_note_1",
+          type: "note",
+          title: "Launch note",
+          content: "Discuss [[Client A]], [[Missing]], and [[Shared]].",
+          wikilinks: [
+            {
+              title: "Client A",
+              status: "resolved",
+              target: {
+                type: "container",
+                id: "container_contact_1",
+                kind: "contact",
+                title: "Client A"
+              }
+            },
+            { title: "Missing", status: "broken", target: null },
+            {
+              title: "Shared",
+              status: "ambiguous",
+              target: null,
+              candidates: []
+            }
+          ]
+        }}
+        onWikilinkOpen={() => undefined}
+      />
+    );
+
+    expect(html).toContain("note-wikilink-resolved");
+    expect(html).toContain("Open contact: Client A");
+    expect(html).toContain("note-wikilink-broken");
+    expect(html).toContain("Broken wikilink: Missing");
+    expect(html).toContain("note-wikilink-ambiguous");
+    expect(html).toContain("Ambiguous wikilink: Shared");
+  });
+
   it("renders the Markdown note editor with save and cancel controls", () => {
     const html = renderToStaticMarkup(
       <NoteEditor
         contextLabel="Launch Plan"
         initialValues={{
           title: "Launch note",
-          content: "# Decision"
+          content: "# Decision\n[[Cli"
         }}
+        wikilinkSuggestions={[{ id: "container_contact_1", title: "Client A", kind: "contact" }]}
         onCancel={() => undefined}
         onSubmit={() => true}
       />
@@ -854,6 +895,9 @@ describe("Universal item UI", () => {
     expect(html).toContain("Markdown");
     expect(html).toContain("Launch note");
     expect(html).toContain("# Decision");
+    expect(html).toContain("Wikilink suggestions");
+    expect(html).toContain("Client A");
+    expect(html).toContain("contact");
     expect(html).toContain("Save note");
     expect(html).toContain("Cancel");
   });

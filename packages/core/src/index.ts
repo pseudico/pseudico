@@ -130,6 +130,12 @@ export {
 } from "./entities/Inspector";
 export type { InspectorTarget, InspectorTargetType } from "./entities/Inspector";
 export {
+  normalizeWikilinkTitle,
+  parseUniqueWikilinkTitles,
+  parseWikilinks
+} from "./services/wikilinkParser";
+export type { ParsedWikilink } from "./services/wikilinkParser";
+export {
   normalizeTagName,
   parseInlineTagSlugs,
   parseInlineTags,

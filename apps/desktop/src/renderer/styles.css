@@ -4963,3 +4963,68 @@ body,
   font-size: 12px;
   font-weight: 700;
 }
+
+.note-wikilink {
+  border-radius: 999px;
+  padding: 1px 6px;
+  font: inherit;
+  font-weight: 700;
+}
+
+.note-wikilink-resolved {
+  border: 1px solid #9ac2b7;
+  background: #e6f4ef;
+  color: #245c55;
+  cursor: pointer;
+}
+
+.note-wikilink-broken,
+.note-wikilink-ambiguous {
+  border: 1px dashed #c8b27c;
+  background: #fff7df;
+  color: #7a5a08;
+}
+
+.note-wikilink-ambiguous {
+  border-color: #c98952;
+  color: #8a4a13;
+}
+
+.wikilink-suggestions {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #dedbd1;
+  border-radius: 8px;
+  background: #fbfaf6;
+}
+
+.wikilink-suggestions > span {
+  color: #6d6a62;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.wikilink-suggestions > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wikilink-suggestion-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d5d0c3;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #262624;
+  cursor: pointer;
+  padding: 5px 9px;
+}
+
+.wikilink-suggestion-button small {
+  color: #6d6a62;
+  text-transform: capitalize;
+}

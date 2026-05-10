@@ -49,13 +49,16 @@ import {
   type MoveTargetContainer,
   type NoteCardViewModel,
   type NoteEditorValues,
+  type NoteWikilinkSuggestion,
   type ProjectHealthViewModel,
   type RecentActivityViewModel,
   type RelatedContactViewModel,
   type TagBadgeViewModel,
   type TaskCardViewModel,
   type TaskQuickAddValues,
-  type UniversalItemViewModel
+  type UniversalItemViewModel,
+  type WikilinkTargetViewModel,
+  type WikilinkViewModel
 } from "@local-work-os/ui";
 import type { InspectorTarget } from "@local-work-os/core";
 import type {
@@ -101,6 +104,7 @@ type ProjectNoteViewModel = NoteCardViewModel & {
   categoryId?: string | null;
   containerTabId?: string | null;
   format: NoteSummary["format"];
+  wikilinks: readonly WikilinkViewModel[];
 };
 type ProjectLinkViewModel = LinkCardViewModel & {
   categoryId?: string | null;
@@ -2004,6 +2008,26 @@ export function ProjectDetailPage({
     await refreshProjectContent(project.id);
   }
 
+
+  function openWikilinkTarget(target: WikilinkTargetViewModel): void {
+    if (target.kind === "project" && target.id.trim().length > 0) {
+      navigate(`/projects/${encodeURIComponent(target.id)}`);
+      return;
+    }
+
+    if (target.kind === "contact" && target.id.trim().length > 0) {
+      navigate(`/contacts/${encodeURIComponent(target.id)}`);
+      return;
+    }
+
+    if (target.kind === "item" && target.containerId !== undefined) {
+      const itemRoute = target.containerType === "contact" ? "contacts" : "projects";
+      navigate(
+        `/${itemRoute}/${encodeURIComponent(target.containerId)}?item=${encodeURIComponent(target.id)}`
+      );
+    }
+  }
+
   function renderItemContent(item: UniversalItemViewModel): React.ReactNode {
     const categoryPicker = (
       <CategoryPicker
@@ -2057,7 +2081,9 @@ export function ProjectDetailPage({
             disabled={noteBusyId === item.id}
             error={noteErrorItemId === item.id ? noteError : null}
             item={item}
+            wikilinkSuggestions={createProjectWikilinkSuggestions(projects, contacts, items)}
             onSave={updateProjectNote}
+            onWikilinkOpen={openWikilinkTarget}
           />
         </>
       );
@@ -2419,6 +2445,7 @@ export function ProjectDetailPage({
               setNoteError(null);
               setNoteErrorItemId(null);
             }}
+            wikilinkSuggestions={createProjectWikilinkSuggestions(projects, contacts, items)}
             onSubmit={createProjectNote}
           />
         ) : (
@@ -2674,7 +2701,8 @@ function toProjectNoteViewModel(
     tags: note.tags ?? [],
     content: note.content,
     preview: note.preview,
-    format: note.format
+    format: note.format,
+    wikilinks: note.wikilinks ?? []
   };
 }
 
@@ -2783,6 +2811,31 @@ function mergeProjectContent(
     ...links.map((link) => toProjectLinkViewModel(link, categories)),
     ...files.map((file) => toProjectFileViewModel(file, categories))
   ].sort(compareFeedItems);
+}
+
+
+function createProjectWikilinkSuggestions(
+  projects: readonly ProjectSummary[],
+  contacts: readonly ContactSummary[],
+  items: readonly ProjectFeedViewModel[]
+): NoteWikilinkSuggestion[] {
+  return [
+    ...projects.map((project) => ({
+      id: project.id,
+      title: project.name,
+      kind: "project" as const
+    })),
+    ...contacts.map((contact) => ({
+      id: contact.id,
+      title: contact.name,
+      kind: "contact" as const
+    })),
+    ...items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      kind: "item" as const
+    }))
+  ];
 }
 
 function toMoveTarget(project: ProjectSummary): MoveTargetContainer {

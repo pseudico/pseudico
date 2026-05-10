@@ -29,7 +29,8 @@ export {
 export {
   NoteEditor,
   type NoteEditorProps,
-  type NoteEditorValues
+  type NoteEditorValues,
+  type NoteWikilinkSuggestion
 } from "./forms/NoteEditor";
 export {
   LinkEditor,
@@ -271,7 +272,9 @@ export {
 export {
   NoteCardContent,
   type NoteCardContentProps,
-  type NoteCardViewModel
+  type NoteCardViewModel,
+  type WikilinkTargetViewModel,
+  type WikilinkViewModel
 } from "./components/NoteCardContent";
 export {
   FileCardContent,

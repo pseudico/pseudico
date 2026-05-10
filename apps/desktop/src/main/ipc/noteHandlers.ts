@@ -1,4 +1,9 @@
-import { NoteService, TagService } from "@local-work-os/features";
+import {
+  NoteService,
+  TagService,
+  type WikilinkResolution,
+  type WikilinkResolvedTarget
+} from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -15,6 +20,8 @@ import {
   type NoteFormat,
   type NoteSummary,
   type UpdateNoteInput,
+  type WikilinkSummary,
+  type WikilinkTargetSummary,
   type WorkspaceSummary
 } from "../../preload/api";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
@@ -51,7 +58,11 @@ export function createNoteIpcHandlers(
           workspaceId
         });
 
-        return apiOk(toNoteSummary(result, hydrateSingleItemTags(context, result.item.id)));
+        return apiOk(toNoteSummary(
+          result,
+          hydrateSingleItemTags(context, result.item.id),
+          result.wikilinks
+        ));
       });
     },
 
@@ -65,7 +76,11 @@ export function createNoteIpcHandlers(
 
       return await withNoteService(workspaceService, async (context) => {
         const result = await context.noteService.updateNote(input);
-        return apiOk(toNoteSummary(result, hydrateSingleItemTags(context, result.item.id)));
+        return apiOk(toNoteSummary(
+          result,
+          hydrateSingleItemTags(context, result.item.id),
+          result.wikilinks
+        ));
       });
     },
 
@@ -85,7 +100,11 @@ export function createNoteIpcHandlers(
         });
 
         return apiOk(
-          notes.map((note) => toNoteSummary(note, tagsByItemId[note.item.id] ?? []))
+          notes.map((note) => toNoteSummary(
+            note,
+            tagsByItemId[note.item.id] ?? [],
+            context.noteService.resolveWikilinksForNote(note)
+          ))
         );
       });
     }
@@ -158,7 +177,8 @@ function hydrateSingleItemTags(
 
 function toNoteSummary(
   noteWithItem: NoteWithItemRecord,
-  tags: readonly TaggedTargetRecord[] = []
+  tags: readonly TaggedTargetRecord[] = [],
+  wikilinks: readonly WikilinkResolution[] = []
 ): NoteSummary {
   const { item, note } = noteWithItem;
 
@@ -188,7 +208,31 @@ function toNoteSummary(
     content: note.content,
     preview: note.preview,
     noteCreatedAt: note.createdAt,
-    noteUpdatedAt: note.updatedAt
+    noteUpdatedAt: note.updatedAt,
+    wikilinks: wikilinks.map(toWikilinkSummary)
+  };
+}
+
+
+function toWikilinkSummary(link: WikilinkResolution): WikilinkSummary {
+  return {
+    title: link.title,
+    status: link.status,
+    target: link.target === null ? null : toWikilinkTargetSummary(link.target),
+    candidates: link.candidates.map(toWikilinkTargetSummary)
+  };
+}
+
+function toWikilinkTargetSummary(
+  target: WikilinkResolvedTarget
+): WikilinkTargetSummary {
+  return {
+    type: target.type,
+    id: target.id,
+    kind: target.kind,
+    title: target.title,
+    ...(target.containerId === undefined ? {} : { containerId: target.containerId }),
+    ...(target.containerType === undefined ? {} : { containerType: target.containerType })
   };
 }
 

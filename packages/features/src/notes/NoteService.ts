@@ -27,6 +27,7 @@ import {
   generateNotePreview
 } from "./NotePreview";
 import { TagService } from "../metadata/TagService";
+import { WikilinkService, type WikilinkResolution } from "../wikilinks/WikilinkService";
 
 // Owns Markdown note application operations.
 // Does not own rich text editor internals or attachment storage.
@@ -59,6 +60,7 @@ export type UpdateNoteInput = {
 export type NoteMutationResult = NoteWithItemRecord & {
   searchRecord: SearchIndexRecord;
   inlineTags: string[];
+  wikilinks: WikilinkResolution[];
 };
 
 export class NoteService {
@@ -136,12 +138,18 @@ export class NoteService {
         note,
         ...(input.actorType === undefined ? {} : { actorType: input.actorType })
       });
+      const wikilinks = this.syncWikilinksForNote({
+        item,
+        note,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
 
       return {
         item,
         note,
         searchRecord: inlineTags.searchRecord,
-        inlineTags: inlineTags.inlineTagSlugs
+        inlineTags: inlineTags.inlineTagSlugs,
+        wikilinks
       };
     });
   }
@@ -207,12 +215,18 @@ export class NoteService {
         note,
         ...(input.actorType === undefined ? {} : { actorType: input.actorType })
       });
+      const wikilinks = this.syncWikilinksForNote({
+        item,
+        note,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
 
       return {
         item,
         note,
         searchRecord: inlineTags.searchRecord,
-        inlineTags: inlineTags.inlineTagSlugs
+        inlineTags: inlineTags.inlineTagSlugs,
+        wikilinks
       };
     });
   }
@@ -249,7 +263,8 @@ export class NoteService {
         item,
         note,
         searchRecord,
-        inlineTags: this.getInlineTagSlugs(item)
+        inlineTags: this.getInlineTagSlugs(item),
+        wikilinks: this.resolveWikilinksForNote({ item, note })
       };
     });
   }
@@ -262,6 +277,18 @@ export class NoteService {
 
   generateNotePreview(content: string): string | null {
     return generateNotePreview(content);
+  }
+
+  resolveWikilinksForNote(noteWithItem: NoteWithItemRecord): WikilinkResolution[] {
+    return new WikilinkService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).resolveContent({
+      workspaceId: noteWithItem.item.workspaceId,
+      sourceItemId: noteWithItem.item.id,
+      content: noteWithItem.note.content
+    });
   }
 
   private requireNote(itemId: string): NoteWithItemRecord {
@@ -321,6 +348,23 @@ export class NoteService {
       content: input.note.content,
       ...(input.actorType === undefined ? {} : { actorType: input.actorType })
     });
+  }
+
+  private syncWikilinksForNote(input: {
+    item: ItemRecord;
+    note: NoteDetailsRecord;
+    actorType?: ActivityActorType;
+  }): WikilinkResolution[] {
+    return new WikilinkService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).syncRelationshipsForItemInCurrentTransaction({
+      workspaceId: input.item.workspaceId,
+      sourceItemId: input.item.id,
+      content: input.note.content,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    }).resolutions;
   }
 
   private getInlineTagSlugs(item: ItemRecord): string[] {

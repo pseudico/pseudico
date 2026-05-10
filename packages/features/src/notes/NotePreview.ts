@@ -41,6 +41,7 @@ function stripMarkdown(content: string): string {
     .replace(/`([^`]+)`/g, "$1")
     .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/\[\[([^\]\r\n]+)\]\]/g, "$1")
     .replace(/^#{1,6}\s+/gm, "")
     .replace(/^[\s>]*[-*+]\s+\[[ xX]\]\s+/gm, "")
     .replace(/^[\s>]*[-*+]\s+/gm, "")

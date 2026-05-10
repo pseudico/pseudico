@@ -1,6 +1,6 @@
 import { ArrowLeft, Contact, Printer, RefreshCw, StickyNote, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   CategoryBadge,
   ContactTimeline,
@@ -21,11 +21,14 @@ import {
   type ItemActionId,
   type NoteCardViewModel,
   type NoteEditorValues,
+  type NoteWikilinkSuggestion,
   type RecentActivityViewModel,
   type RelatedProjectViewModel,
   type TaskCardViewModel,
   type TaskQuickAddValues,
-  type UniversalItemViewModel
+  type UniversalItemViewModel,
+  type WikilinkTargetViewModel,
+  type WikilinkViewModel
 } from "@local-work-os/ui";
 import type {
   ActivitySummary,
@@ -62,6 +65,7 @@ type ContactNoteViewModel = NoteCardViewModel & {
   categoryId?: string | null;
   containerTabId?: string | null;
   format: NoteSummary["format"];
+  wikilinks: readonly WikilinkViewModel[];
 };
 type ContactFeedViewModel =
   | ContactTaskViewModel
@@ -97,6 +101,7 @@ export function ContactDetailPage({
   initialTimeline = null
 }: ContactDetailPageProps): React.JSX.Element {
   const { contactId } = useParams();
+  const navigate = useNavigate();
   const [contact, setContact] = useState<ContactSummary | null>(
     initialContactDetail?.contact ?? null
   );
@@ -873,6 +878,26 @@ export function ContactDetailPage({
     setTaskBusyId(null);
   }
 
+
+  function openWikilinkTarget(target: WikilinkTargetViewModel): void {
+    if (target.kind === "project" && target.id.trim().length > 0) {
+      navigate(`/projects/${encodeURIComponent(target.id)}`);
+      return;
+    }
+
+    if (target.kind === "contact" && target.id.trim().length > 0) {
+      navigate(`/contacts/${encodeURIComponent(target.id)}`);
+      return;
+    }
+
+    if (target.kind === "item" && target.containerId !== undefined) {
+      const itemRoute = target.containerType === "contact" ? "contacts" : "projects";
+      navigate(
+        `/${itemRoute}/${encodeURIComponent(target.containerId)}?item=${encodeURIComponent(target.id)}`
+      );
+    }
+  }
+
   function renderItemContent(item: ContactFeedViewModel): React.JSX.Element {
     if (isTaskCardViewModel(item)) {
       return (
@@ -891,7 +916,9 @@ export function ContactDetailPage({
           disabled={noteBusyId === item.id}
           error={noteErrorItemId === item.id ? noteError : null}
           item={item}
+          wikilinkSuggestions={createContactWikilinkSuggestions(contact, projects, items)}
           onSave={updateContactNote}
+          onWikilinkOpen={openWikilinkTarget}
         />
       );
     }
@@ -1263,6 +1290,7 @@ export function ContactDetailPage({
               setNoteError(null);
               setNoteErrorItemId(null);
             }}
+            wikilinkSuggestions={createContactWikilinkSuggestions(contact, projects, items)}
             onSubmit={createContactNote}
           />
         ) : (
@@ -1400,8 +1428,32 @@ function toContactNoteViewModel(
     tags: note.tags ?? [],
     content: note.content,
     preview: note.preview,
-    format: note.format
+    format: note.format,
+    wikilinks: note.wikilinks ?? []
   };
+}
+
+
+function createContactWikilinkSuggestions(
+  contact: ContactSummary | null,
+  projects: readonly ProjectSummary[],
+  items: readonly ContactFeedViewModel[]
+): NoteWikilinkSuggestion[] {
+  return [
+    ...(contact === null
+      ? []
+      : [{ id: contact.id, title: contact.name, kind: "contact" as const }]),
+    ...projects.map((project) => ({
+      id: project.id,
+      title: project.name,
+      kind: "project" as const
+    })),
+    ...items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      kind: "item" as const
+    }))
+  ];
 }
 
 function mergeContactContent(

@@ -1604,6 +1604,25 @@ export type ActivitySummary = {
 
 export type RelationshipObjectType = "container" | "item" | "list_item";
 
+export type WikilinkTargetKind = "project" | "contact" | "item";
+export type WikilinkResolutionStatus = "resolved" | "broken" | "ambiguous";
+
+export type WikilinkTargetSummary = {
+  type: RelationshipObjectType;
+  id: string;
+  kind: WikilinkTargetKind;
+  title: string;
+  containerId?: string;
+  containerType?: string;
+};
+
+export type WikilinkSummary = {
+  title: string;
+  status: WikilinkResolutionStatus;
+  target: WikilinkTargetSummary | null;
+  candidates: WikilinkTargetSummary[];
+};
+
 export type RelationshipSummary = {
   id: string;
   workspaceId: string;
@@ -2158,6 +2177,7 @@ export type NoteSummary = ItemSummary & {
   preview: string | null;
   noteCreatedAt: string;
   noteUpdatedAt: string;
+  wikilinks?: WikilinkSummary[];
 };
 
 export type CreateNoteInput = {
