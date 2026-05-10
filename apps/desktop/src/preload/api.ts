@@ -705,6 +705,56 @@ export type MetadataTargetSummary = {
   deletedAt: string | null;
 };
 
+export type ProjectTagBrowserStatus = "active" | "waiting" | "completed" | "archived";
+
+export type ProjectTagBrowserInput = {
+  workspaceId?: string;
+  tagSlugs?: string[];
+  categoryId?: string | null;
+  status?: ProjectTagBrowserStatus | null;
+};
+
+export type ProjectTagFacetSummary = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  projectCount: number;
+};
+
+export type ProjectCategoryFacetSummary = CategorySummary & {
+  projectCount: number;
+};
+
+export type ProjectStatusFacetSummary = {
+  status: ProjectTagBrowserStatus;
+  projectCount: number;
+};
+
+export type ProjectTagBrowserProjectSummary = ProjectSummary & {
+  category: MetadataTargetCategorySummary | null;
+  tags: ItemTagSummary[];
+};
+
+export type ProjectTagBrowserSummary = {
+  workspaceId: string;
+  generatedAt: string;
+  filters: {
+    tagSlugs: string[];
+    categoryId: string | null;
+    status: ProjectTagBrowserStatus | null;
+  };
+  selectedTags: Omit<TagCountSummary, "targetCount">[];
+  tagFacets: ProjectTagFacetSummary[];
+  categoryFacets: ProjectCategoryFacetSummary[];
+  statusFacets: ProjectStatusFacetSummary[];
+  projects: ProjectTagBrowserProjectSummary[];
+  totalProjectCount: number;
+};
+
 export type SearchResultKind =
   | "inbox"
   | "project"
@@ -2257,6 +2307,7 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     listCategoriesWithCounts:
       "local-work-os:metadata:list-categories-with-counts",
     listTargetsByMetadata: "local-work-os:metadata:list-targets-by-metadata",
+    getProjectTagBrowser: "local-work-os:metadata:get-project-tag-browser",
     addTagToTarget: "local-work-os:metadata:add-tag-to-target",
     removeTagFromTarget: "local-work-os:metadata:remove-tag-from-target"
   },
@@ -2698,6 +2749,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTargetsByMetadata]: {
     input: ListTargetsByMetadataInput;
     result: ApiResult<MetadataTargetSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.metadata.getProjectTagBrowser]: {
+    input: ProjectTagBrowserInput;
+    result: ApiResult<ProjectTagBrowserSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.metadata.addTagToTarget]: {
     input: AddTagToTargetInput;
@@ -3321,6 +3376,9 @@ export type LocalWorkOsApi = {
     listTargetsByMetadata: (
       input: ListTargetsByMetadataInput
     ) => Promise<ApiResult<MetadataTargetSummary[]>>;
+    getProjectTagBrowser: (
+      input: ProjectTagBrowserInput
+    ) => Promise<ApiResult<ProjectTagBrowserSummary>>;
     addTagToTarget: (
       input: AddTagToTargetInput
     ) => Promise<ApiResult<ItemTagSummary>>;
@@ -3878,6 +3936,8 @@ export function createLocalWorkOsApi(
         ),
       listTargetsByMetadata: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.listTargetsByMetadata, input),
+      getProjectTagBrowser: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.getProjectTagBrowser, input),
       addTagToTarget: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.metadata.addTagToTarget, input),
       removeTagFromTarget: (input) =>

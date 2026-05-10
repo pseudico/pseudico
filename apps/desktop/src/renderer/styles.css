@@ -4597,3 +4597,32 @@ body,
   gap: 0.5rem;
   flex-wrap: wrap;
 }
+
+
+.project-browser-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: #6d6a62;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.project-browser-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.project-browser-result {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid #ece8dc;
+}
+
+.project-browser-result:last-child {
+  border-bottom: 0;
+}

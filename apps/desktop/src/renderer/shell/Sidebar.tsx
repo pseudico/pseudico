@@ -25,6 +25,7 @@ const routeIcons: Partial<Record<AppRouteId, LucideIcon>> = {
   today: CalendarDays,
   inbox: Inbox,
   projects: FolderKanban,
+  projectTags: Tags,
   contacts: Contact,
   collections: Workflow,
   tagsCategories: Tags,

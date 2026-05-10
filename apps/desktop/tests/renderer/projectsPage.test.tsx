@@ -27,6 +27,7 @@ import {
   type WorkspaceSummary
 } from "../../src/preload/api";
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
+import { ProjectTagBrowserPage } from "../../src/renderer/pages/ProjectTagBrowserPage";
 import { ProjectsPage } from "../../src/renderer/pages/ProjectsPage";
 import { CollectionsPage } from "../../src/renderer/pages/CollectionsPage";
 import { SearchPage } from "../../src/renderer/pages/SearchPage";
@@ -528,6 +529,7 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
           }
         ]),
       listTargetsByMetadata: async () => apiOk([metadataTarget]),
+      getProjectTagBrowser: async () => apiOk(projectTagBrowserSummary()),
       addTagToTarget: async () =>
         apiOk({ id: "tag_1", name: "Launch", slug: "launch", source: "manual" }),
       removeTagFromTarget: async () =>
@@ -1042,6 +1044,89 @@ function activitySummary(): ActivitySummary {
   };
 }
 
+
+function projectTagBrowserSummary() {
+  return {
+    workspaceId: "workspace_1",
+    generatedAt: "2026-05-01T00:00:00.000Z",
+    filters: {
+      tagSlugs: ["client", "urgent"],
+      categoryId: "category_1",
+      status: "active" as const
+    },
+    selectedTags: [
+      {
+        id: "tag_client",
+        workspaceId: "workspace_1",
+        name: "Client",
+        slug: "client",
+        createdAt: "2026-05-01T00:00:00.000Z",
+        updatedAt: "2026-05-01T00:00:00.000Z",
+        deletedAt: null
+      },
+      {
+        id: "tag_urgent",
+        workspaceId: "workspace_1",
+        name: "Urgent",
+        slug: "urgent",
+        createdAt: "2026-05-01T00:00:00.000Z",
+        updatedAt: "2026-05-01T00:00:00.000Z",
+        deletedAt: null
+      }
+    ],
+    tagFacets: [
+      {
+        id: "tag_client",
+        workspaceId: "workspace_1",
+        name: "Client",
+        slug: "client",
+        createdAt: "2026-05-01T00:00:00.000Z",
+        updatedAt: "2026-05-01T00:00:00.000Z",
+        deletedAt: null,
+        projectCount: 2
+      },
+      {
+        id: "tag_urgent",
+        workspaceId: "workspace_1",
+        name: "Urgent",
+        slug: "urgent",
+        createdAt: "2026-05-01T00:00:00.000Z",
+        updatedAt: "2026-05-01T00:00:00.000Z",
+        deletedAt: null,
+        projectCount: 1
+      }
+    ],
+    categoryFacets: [
+      {
+        ...category,
+        projectCount: 1
+      }
+    ],
+    statusFacets: [
+      {
+        status: "active" as const,
+        projectCount: 1
+      }
+    ],
+    projects: [
+      {
+        ...project,
+        category: {
+          id: "category_1",
+          name: "Finance",
+          slug: "finance",
+          color: "#2c6b8f"
+        },
+        tags: [
+          { id: "tag_client", name: "Client", slug: "client", source: "manual" as const },
+          { id: "tag_urgent", name: "Urgent", slug: "urgent", source: "manual" as const }
+        ]
+      }
+    ],
+    totalProjectCount: 1
+  };
+}
+
 describe("Projects renderer pages", () => {
   afterEach(() => {
     workspaceStore.reset();
@@ -1142,6 +1227,26 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Finance");
     expect(html).toContain("Book launch venue");
     expect(html).toContain("Items");
+  });
+
+  it("renders the project tag browser with drill-down filters and projects", () => {
+    workspaceStore.setCurrentWorkspace(workspace);
+
+    const html = renderToString(
+      <MemoryRouter initialEntries={["/project-tags?tags=client,urgent&categoryId=category_1&status=active"]}>
+        <ProjectTagBrowserPage
+          apiClient={createMockApi([project])}
+          initialViewModel={projectTagBrowserSummary()}
+        />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Project Tag Browser");
+    expect(html).toContain("@client");
+    expect(html).toContain("@urgent");
+    expect(html).toContain("Matching projects");
+    expect(html).toContain("Launch Plan");
+    expect(html).toContain("data-tag-source=\"manual\"");
   });
 
   it("renders global search results with type filters and source context", () => {

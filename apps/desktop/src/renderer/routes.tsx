@@ -4,6 +4,7 @@ export type AppRouteId =
   | "today"
   | "inbox"
   | "projects"
+  | "projectTags"
   | "contacts"
   | "collections"
   | "tagsCategories"
@@ -62,6 +63,14 @@ export const appRoutes = [
     label: "Projects",
     title: "Projects",
     summary: "Project containers and mixed work feeds will appear here.",
+    nav: true
+  },
+  {
+    id: "projectTags",
+    path: "/project-tags",
+    label: "Project Tags",
+    title: "Project Tag Browser",
+    summary: "Facet and drill-down browser for tagged project containers.",
     nav: true
   },
   {

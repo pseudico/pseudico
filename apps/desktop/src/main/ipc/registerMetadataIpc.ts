@@ -21,6 +21,10 @@ export function registerMetadataIpc(
     (_event, input) => handlers.handleListTargetsByMetadata(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.metadata.getProjectTagBrowser,
+    (_event, input) => handlers.handleGetProjectTagBrowser(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.metadata.addTagToTarget,
     (_event, input) => handlers.handleAddTagToTarget(input)
   );

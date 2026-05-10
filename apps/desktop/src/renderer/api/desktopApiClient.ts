@@ -215,6 +215,8 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.metadata.listCategoriesWithCounts(workspaceId)),
       listTargetsByMetadata: (input) =>
         callApi(() => api.metadata.listTargetsByMetadata(input)),
+      getProjectTagBrowser: (input) =>
+        callApi(() => api.metadata.getProjectTagBrowser(input)),
       addTagToTarget: (input) =>
         callApi(() => api.metadata.addTagToTarget(input)),
       removeTagFromTarget: (input) =>
@@ -630,6 +632,8 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().metadata.listCategoriesWithCounts(workspaceId),
     listTargetsByMetadata: (input) =>
       getDesktopApiClient().metadata.listTargetsByMetadata(input),
+    getProjectTagBrowser: (input) =>
+      getDesktopApiClient().metadata.getProjectTagBrowser(input),
     addTagToTarget: (input) =>
       getDesktopApiClient().metadata.addTagToTarget(input),
     removeTagFromTarget: (input) =>

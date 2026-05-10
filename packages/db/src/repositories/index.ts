@@ -135,6 +135,17 @@ export {
   type ListTaggingsForTargetInput,
   type TagRecord
 } from "./TagRepository";
+
+export {
+  ProjectTagBrowserRepository,
+  type ProjectCategoryFacetRecord,
+  type ProjectStatusFacetRecord,
+  type ProjectTagBrowserFilterInput,
+  type ProjectTagBrowserProjectRecord,
+  type ProjectTagBrowserStatus,
+  type ProjectTagFacetRecord
+} from "./ProjectTagBrowserRepository";
+
 export {
   MetadataBrowserRepository,
   type CategoryWithTargetCountRecord,

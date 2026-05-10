@@ -1,4 +1,4 @@
-import { MetadataBrowserService, TagService } from "@local-work-os/features";
+import { MetadataBrowserService, ProjectTagBrowserService, TagService } from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -16,6 +16,8 @@ import {
   type ItemTagSummary,
   type ListTargetsByMetadataInput,
   type MetadataTargetSummary,
+  type ProjectTagBrowserInput,
+  type ProjectTagBrowserSummary,
   type RemoveTagFromTargetInput,
   type TagCountSummary,
   type WorkspaceSummary
@@ -37,6 +39,9 @@ type MetadataIpcHandlers = {
   handleListTargetsByMetadata: (
     input: unknown
   ) => Promise<ApiResult<MetadataTargetSummary[]>>;
+  handleGetProjectTagBrowser: (
+    input: unknown
+  ) => Promise<ApiResult<ProjectTagBrowserSummary>>;
   handleAddTagToTarget: (input: unknown) => Promise<ApiResult<ItemTagSummary>>;
   handleRemoveTagFromTarget: (
     input: unknown
@@ -104,6 +109,23 @@ export function createMetadataIpcHandlers(
       });
     },
 
+    async handleGetProjectTagBrowser(input) {
+      if (!isProjectTagBrowserInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "getProjectTagBrowser requires optional workspaceId, tagSlugs, categoryId, and status fields."
+        );
+      }
+
+      return await withMetadataBrowserService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+
+        return apiOk(toProjectTagBrowserSummary(
+          context.projectTagBrowserService.getViewModel({ ...input, workspaceId })
+        ));
+      });
+    },
+
     async handleAddTagToTarget(input) {
       if (!isAddTagToTargetInput(input)) {
         return apiError(
@@ -149,6 +171,7 @@ async function withMetadataBrowserService<T>(
   operation: (context: {
     connection: DatabaseConnection;
     metadataBrowserService: MetadataBrowserService;
+    projectTagBrowserService: ProjectTagBrowserService;
     tagService: TagService;
     workspace: WorkspaceSummary;
   }) => Promise<ApiResult<T>>
@@ -168,6 +191,7 @@ async function withMetadataBrowserService<T>(
     return await operation({
       connection,
       metadataBrowserService: new MetadataBrowserService({ connection }),
+      projectTagBrowserService: new ProjectTagBrowserService({ connection }),
       tagService: new TagService({ connection }),
       workspace
     });
@@ -267,6 +291,69 @@ function toItemTagSummary(tag: MetadataTargetRecord["tags"][number]): ItemTagSum
   };
 }
 
+
+function toProjectTagBrowserSummary(
+  viewModel: ReturnType<ProjectTagBrowserService["getViewModel"]>
+): ProjectTagBrowserSummary {
+  return {
+    workspaceId: viewModel.workspaceId,
+    generatedAt: viewModel.generatedAt,
+    filters: viewModel.filters,
+    selectedTags: viewModel.selectedTags.map((tag) => ({
+      id: tag.id,
+      workspaceId: tag.workspaceId,
+      name: tag.name,
+      slug: tag.slug,
+      createdAt: tag.createdAt,
+      updatedAt: tag.updatedAt,
+      deletedAt: tag.deletedAt
+    })),
+    tagFacets: viewModel.tagFacets.map((tag) => ({
+      id: tag.id,
+      workspaceId: tag.workspaceId,
+      name: tag.name,
+      slug: tag.slug,
+      createdAt: tag.createdAt,
+      updatedAt: tag.updatedAt,
+      deletedAt: tag.deletedAt,
+      projectCount: tag.projectCount
+    })),
+    categoryFacets: viewModel.categoryFacets.map((category) => ({
+      id: category.id,
+      workspaceId: category.workspaceId,
+      name: category.name,
+      slug: category.slug,
+      color: category.color,
+      description: category.description,
+      createdAt: category.createdAt,
+      updatedAt: category.updatedAt,
+      deletedAt: category.deletedAt,
+      projectCount: category.projectCount
+    })),
+    statusFacets: viewModel.statusFacets,
+    projects: viewModel.projects.map((project) => ({
+      id: project.id,
+      workspaceId: project.workspaceId,
+      type: "project",
+      name: project.name,
+      slug: project.slug,
+      description: project.description,
+      status: project.status as ProjectTagBrowserSummary["projects"][number]["status"],
+      categoryId: project.categoryId,
+      color: project.color,
+      isFavorite: project.isFavorite,
+      sortOrder: project.sortOrder,
+      createdAt: project.createdAt,
+      updatedAt: project.updatedAt,
+      archivedAt: project.archivedAt,
+      deletedAt: project.deletedAt,
+      category: project.category,
+      tags: project.tags.map(toItemTagSummary)
+    })),
+    totalProjectCount: viewModel.totalProjectCount
+  };
+}
+
 function isListTargetsByMetadataInput(
   input: unknown
 ): input is ListTargetsByMetadataInput {
@@ -278,6 +365,22 @@ function isListTargetsByMetadataInput(
     isOptionalNullableString(input.categorySlug) &&
     isOptionalBoolean(input.includeArchived) &&
     isOptionalBoolean(input.includeDeleted)
+  );
+}
+
+
+function isProjectTagBrowserInput(input: unknown): input is ProjectTagBrowserInput {
+  return (
+    isRecord(input) &&
+    isOptionalString(input.workspaceId) &&
+    isOptionalStringArray(input.tagSlugs) &&
+    isOptionalNullableString(input.categoryId) &&
+    (input.status === undefined ||
+      input.status === null ||
+      input.status === "active" ||
+      input.status === "waiting" ||
+      input.status === "completed" ||
+      input.status === "archived")
   );
 }
 
