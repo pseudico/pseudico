@@ -1,4 +1,5 @@
 import {
+  ContainerCloneService,
   ProjectHealthService,
   ProjectService,
   type ActivityEventView,
@@ -15,6 +16,7 @@ import {
   apiOk,
   type ApiResult,
   type ActivitySummary,
+  type CloneProjectInput,
   type CreateProjectInput,
   type CreateProjectResult,
   type ProjectHealthSummary,
@@ -34,6 +36,9 @@ type ProjectIpcHandlers = {
     input: unknown
   ) => Promise<ApiResult<CreateProjectResult>>;
   handleUpdateProject: (
+    input: unknown
+  ) => Promise<ApiResult<ProjectSummary>>;
+  handleCloneProject: (
     input: unknown
   ) => Promise<ApiResult<ProjectSummary>>;
   handleArchiveProject: (input: unknown) => Promise<ApiResult<ProjectSummary>>;
@@ -87,6 +92,27 @@ export function createProjectIpcHandlers(
           toProjectSummary(await context.projectService.updateProject(input))
         )
       );
+    },
+
+    async handleCloneProject(input) {
+      if (!isCloneProjectInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "cloneProject requires a projectId string."
+        );
+      }
+
+      return await withProjectService(workspaceService, async (context) => {
+        const result = await new ContainerCloneService({
+          connection: context.connection
+        }).cloneContainer({
+          ...input,
+          containerId: input.projectId,
+          fileMode: input.fileMode ?? "metadata_only"
+        });
+
+        return apiOk(toProjectSummary(result.container as ProjectRecord));
+      });
     },
 
     async handleArchiveProject(input) {
@@ -287,6 +313,22 @@ function isUpdateProjectInput(input: unknown): input is UpdateProjectInput {
   );
 }
 
+function isCloneProjectInput(input: unknown): input is CloneProjectInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.projectId) &&
+    (input.name === undefined || isNonEmptyString(input.name)) &&
+    isOptionalBoolean(input.includeTabs) &&
+    isOptionalBoolean(input.includeItems) &&
+    isOptionalBoolean(input.includeTags) &&
+    isOptionalBoolean(input.includeRelationships) &&
+    isOptionalBoolean(input.resetCompleted) &&
+    (input.fileMode === undefined ||
+      input.fileMode === "metadata_only" ||
+      input.fileMode === "skip")
+  );
+}
+
 function hasUpdateField(input: Record<string, unknown>): boolean {
   return [
     "categoryId",
@@ -310,6 +352,10 @@ function isNonEmptyString(value: unknown): value is string {
 
 function isOptionalString(value: unknown): boolean {
   return value === undefined || isNonEmptyString(value);
+}
+
+function isOptionalBoolean(value: unknown): boolean {
+  return value === undefined || typeof value === "boolean";
 }
 
 function isMutableProjectStatus(value: unknown): boolean {

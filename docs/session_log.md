@@ -2140,3 +2140,33 @@ Open questions / risks:
 Next actions:
 - Inspect PR CI and review state.
 - Merge only if clean and green.
+
+## 2026-05-10 20:07:27 +10:00
+Objective: Complete PSE-110 merge and prepare next ticket.
+Decisions made:
+- PR #105 passed CI and was squash-merged at f492ece.
+- PSE-110 moved to Done; PSE-111 promoted as the sole next Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- New session log entry is local after merge.
+Next actions:
+- Start PSE-111 in a future run.
+- Leave unrelated untracked files untouched.
+## 2026-05-10 20:10:33 +10:00
+Objective: Reconcile active Linear/GitHub work and start the next Local Work OS ticket.
+Decisions made:
+- No Linear PR Open or In Progress issues found; one Codex Ready issue is available.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need inspect issue source ticket and repo state before implementation.
+Next actions: Move PSE-111 to In Progress; read docs/source; create scoped branch.
+## 2026-05-10 20:29:08 +10:00
+Objective: Implement PSE-111 container clone/duplicate and verify locally.
+Decisions made:
+- Added ContainerCloneService with transaction, id remapping, metadata-only file clone default, relationships/tags/search/activity.
+- Exposed duplicate actions through project/contact IPC and renderer list rows.
+Files changed:
+- packages/features/src/containers/ContainerCloneService.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/ProjectsPage.tsx
+Open questions / risks: Metadata-only file duplicates create unique placeholder paths; physical copy requires adapter.
+Next actions: Commit/push branch; open PR; move Linear to PR Open.

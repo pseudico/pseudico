@@ -92,8 +92,18 @@ export {
   contactsModuleContract
 } from "./contacts";
 export { ContainerMediaService, containerMediaModuleContract } from "./containerMedia";
-export { CreateContainerCommand } from "./containers";
+export {
+  ContainerCloneService,
+  CreateContainerCommand,
+  containerCloneModuleContract
+} from "./containers";
 export type {
+  CloneAttachmentFileInput,
+  ClonedAttachmentFile,
+  CloneContainerInput,
+  ContainerCloneFileMode,
+  ContainerCloneResult,
+  ContainerCloneServiceIdFactory,
   CreateContainerCommandIdFactory,
   CreateContainerCommandInput,
   CreateContainerCommandResult

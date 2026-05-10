@@ -45,6 +45,7 @@ export function ProjectsPage({
   const [categories, setCategories] = useState<CategorySummary[]>([]);
   const [boardGrouping, setBoardGrouping] = useState<ProjectBoardGrouping>("status");
   const [movingProjectId, setMovingProjectId] = useState<string | null>(null);
+  const [cloningProjectId, setCloningProjectId] = useState<string | null>(null);
   const [templateSavingId, setTemplateSavingId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateSummary | null>(null);
   const [applyingTemplateId, setApplyingTemplateId] = useState<string | null>(null);
@@ -152,6 +153,31 @@ export function ProjectsPage({
     }
 
     setTemplates((current) => [result.data, ...current]);
+  }
+
+  async function cloneProject(project: ProjectSummary): Promise<void> {
+    setCloningProjectId(project.id);
+    setError(null);
+
+    if (apiClient.projects.clone === undefined) {
+      setCloningProjectId(null);
+      setError("Project duplicate is unavailable.");
+      return;
+    }
+
+    const result = await apiClient.projects.clone({
+      projectId: project.id
+    });
+
+    setCloningProjectId(null);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setProjects((current) => [result.data, ...current]);
+    navigate(`/projects/${result.data.id}`);
   }
 
   async function createProjectFromTemplate(values: { name: string; baseDate: string }): Promise<void> {
@@ -343,7 +369,9 @@ export function ProjectsPage({
               key={project.id}
               project={project}
               savingTemplate={templateSavingId === project.id}
+              cloning={cloningProjectId === project.id}
               onSaveTemplate={saveProjectAsTemplate}
+              onClone={cloneProject}
             />
           ))}
         </div>
@@ -375,11 +403,15 @@ function ProjectsEmptyState({
 function ProjectListRow({
   project,
   savingTemplate,
-  onSaveTemplate
+  cloning,
+  onSaveTemplate,
+  onClone
 }: {
   project: ProjectSummary;
   savingTemplate: boolean;
+  cloning: boolean;
   onSaveTemplate: (project: ProjectSummary) => void;
+  onClone: (project: ProjectSummary) => void;
 }): React.JSX.Element {
   const target = toProjectContextMenuTarget(project);
   const actions = resolveContextMenuActions({
@@ -410,6 +442,14 @@ function ProjectListRow({
         <span className="project-list-meta">
           {project.isFavorite ? <Star size={16} aria-label="Pinned" /> : null}
           <span>{project.status}</span>
+          <button
+            type="button"
+            className="secondary-button compact-button"
+            disabled={cloning}
+            onClick={() => onClone(project)}
+          >
+            {cloning ? "Duplicating..." : "Duplicate"}
+          </button>
           <button
             type="button"
             className="secondary-button compact-button"
