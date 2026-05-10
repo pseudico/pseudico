@@ -324,6 +324,18 @@ export {
   type RecentActivityViewModel
 } from "./components/RecentActivityList";
 export {
+  FollowUpSummaryCard,
+  type FollowUpSummaryCardProps,
+  type FollowUpSummaryViewModel,
+  type FollowUpTaskViewModel
+} from "./components/FollowUpSummaryCard";
+export {
+  ContactTimeline,
+  type ContactTimelineEntryViewModel,
+  type ContactTimelineFilterValue,
+  type ContactTimelineProps
+} from "./components/ContactTimeline";
+export {
   ProjectHealthCard,
   type ProjectHealthCardProps,
   type ProjectHealthTaskViewModel,

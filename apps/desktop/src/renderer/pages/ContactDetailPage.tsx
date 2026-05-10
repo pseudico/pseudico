@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   CategoryBadge,
+  ContactTimeline,
   ContactFieldsEditor,
   ContainerMediaPreview,
   ContainerTabSummaryCards,
+  FollowUpSummaryCard,
   ItemFeed,
   NoteCardContent,
   NoteEditor,
@@ -33,6 +35,8 @@ import type {
   ContactDetailSummary,
   ContactFieldSummary,
   ContactSummary,
+  ContactTimelineFilter,
+  ContactTimelineSummary,
   ContainerMediaSummary,
   LocalWorkOsApi,
   NoteSummary,
@@ -73,6 +77,7 @@ type ContactDetailPageProps = {
   initialTabSummaries?: ContainerTabContentSummary[];
   initialAvailableProjects?: ProjectSummary[];
   initialRelatedProjects?: RelatedProjectSummary[];
+  initialTimeline?: ContactTimelineSummary | null;
 };
 
 const emptyContactItems: UniversalItemViewModel[] = [];
@@ -87,7 +92,8 @@ export function ContactDetailPage({
   initialTabs = [],
   initialTabSummaries = [],
   initialAvailableProjects = [],
-  initialRelatedProjects = []
+  initialRelatedProjects = [],
+  initialTimeline = null
 }: ContactDetailPageProps): React.JSX.Element {
   const { contactId } = useParams();
   const [contact, setContact] = useState<ContactSummary | null>(
@@ -120,6 +126,14 @@ export function ContactDetailPage({
   const [relatedProjects, setRelatedProjects] = useState<RelatedProjectSummary[]>(
     initialRelatedProjects
   );
+  const [timeline, setTimeline] = useState<ContactTimelineSummary | null>(
+    initialTimeline
+  );
+  const [timelineFilter, setTimelineFilter] = useState<ContactTimelineFilter>(
+    initialTimeline?.filter ?? "all"
+  );
+  const [timelineLoading, setTimelineLoading] = useState(false);
+  const [timelineError, setTimelineError] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [relationshipBusy, setRelationshipBusy] = useState(false);
   const [relationshipError, setRelationshipError] = useState<string | null>(null);
@@ -165,7 +179,8 @@ export function ContactDetailPage({
         tasksResult,
         notesResult,
         projectsResult,
-        relatedProjectsResult
+        relatedProjectsResult,
+        timelineResult
       ] = await Promise.all([
         apiClient.contacts.get(activeContactId),
         apiClient.categories.list(),
@@ -178,7 +193,11 @@ export function ContactDetailPage({
         apiClient.tasks.listByContainer(activeContactId),
         apiClient.notes.listByContainer(activeContactId),
         apiClient.projects.list(),
-        apiClient.relationships.listProjectsForContact(activeContactId)
+        apiClient.relationships.listProjectsForContact(activeContactId),
+        apiClient.contacts.getTimeline?.({
+          contactId: activeContactId,
+          filter: timelineFilter
+        }) ?? Promise.resolve(null)
       ]);
 
       if (!active) {
@@ -233,6 +252,11 @@ export function ContactDetailPage({
         return;
       }
 
+      if (timelineResult !== null && !timelineResult.ok) {
+        setTimelineError(timelineResult.error.message);
+        return;
+      }
+
       setContact(contactResult.data?.contact ?? null);
       setFields(contactResult.data?.fields ?? []);
       setProjects(projectsResult.data);
@@ -249,6 +273,7 @@ export function ContactDetailPage({
       );
       setActivity(activityResult.data.map(toRecentActivityViewModel));
       setItems(mergeContactContent(tasksResult.data, notesResult.data, categoriesResult.data));
+      setTimeline(timelineResult?.data ?? null);
       setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
     }
 
@@ -341,6 +366,33 @@ export function ContactDetailPage({
     }
 
     setActivity(result.data.map(toRecentActivityViewModel));
+  }
+
+  async function refreshContactTimeline(
+    activeContactId: string,
+    filter: ContactTimelineFilter = timelineFilter
+  ): Promise<void> {
+    setTimelineLoading(true);
+    setTimelineError(null);
+
+    const result = await apiClient.contacts.getTimeline?.({
+      contactId: activeContactId,
+      filter
+    }) ?? null;
+
+    setTimelineLoading(false);
+
+    if (result === null) {
+      setTimelineError("Contact timeline API is not available.");
+      return;
+    }
+
+    if (!result.ok) {
+      setTimelineError(result.error.message);
+      return;
+    }
+
+    setTimeline(result.data);
   }
 
   async function refreshContactTabs(activeContactId: string): Promise<void> {
@@ -511,6 +563,7 @@ export function ContactDetailPage({
 
     await refreshRelatedProjects(contact.id);
     await refreshContactActivity(contact.id);
+    await refreshContactTimeline(contact.id);
     setRelationshipBusy(false);
   }
 
@@ -534,6 +587,7 @@ export function ContactDetailPage({
 
     await refreshRelatedProjects(contact.id);
     await refreshContactActivity(contact.id);
+    await refreshContactTimeline(contact.id);
     setRelationshipBusy(false);
   }
 
@@ -559,6 +613,7 @@ export function ContactDetailPage({
 
     await refreshContact(contact.id);
     await refreshContactActivity(contact.id);
+    await refreshContactTimeline(contact.id);
     return true;
   }
 
@@ -587,6 +642,7 @@ export function ContactDetailPage({
 
     await refreshContact(contact.id);
     await refreshContactActivity(contact.id);
+    await refreshContactTimeline(contact.id);
     return true;
   }
 
@@ -616,6 +672,7 @@ export function ContactDetailPage({
 
     await refreshContactContent(contact.id);
     await refreshContactActivity(contact.id);
+    await refreshContactTimeline(contact.id);
     setSavingTask(false);
     return true;
   }
@@ -647,6 +704,7 @@ export function ContactDetailPage({
 
     await refreshContactContent(contact.id);
     await refreshContactActivity(contact.id);
+    await refreshContactTimeline(contact.id);
     setSavingNote(false);
     setNoteEditorOpen(false);
     return true;
@@ -678,6 +736,7 @@ export function ContactDetailPage({
     }
 
     await refreshContactContent(contact.id);
+    await refreshContactTimeline(contact.id);
     setNoteBusyId(null);
     setNoteErrorItemId(null);
     return true;
@@ -703,6 +762,7 @@ export function ContactDetailPage({
     }
 
     await refreshContactContent(contact.id);
+    await refreshContactTimeline(contact.id);
     setTaskBusyId(null);
   }
 
@@ -729,6 +789,7 @@ export function ContactDetailPage({
     }
 
     await refreshContactContent(contact.id);
+    await refreshContactTimeline(contact.id);
     setTaskBusyId(null);
   }
 
@@ -1006,6 +1067,29 @@ export function ContactDetailPage({
         onLinkProject={() => void linkSelectedProject()}
         onSelectedProjectChange={setSelectedProjectId}
         onUnlinkProject={(relationshipId) => void unlinkRelatedProject(relationshipId)}
+      />
+
+      <FollowUpSummaryCard
+        summary={
+          timeline?.followUpSummary ?? {
+            generatedAt: "",
+            nextDueTask: null,
+            openFollowUpCount: 0,
+            openFollowUps: [],
+            overdueTaskCount: 0
+          }
+        }
+      />
+
+      <ContactTimeline
+        entries={timeline?.entries ?? []}
+        error={timelineError}
+        filter={timelineFilter}
+        loading={timelineLoading}
+        onFilterChange={(filter) => {
+          setTimelineFilter(filter);
+          void refreshContactTimeline(contact.id, filter);
+        }}
       />
 
       <RecentActivityList

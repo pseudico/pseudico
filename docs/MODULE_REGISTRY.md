@@ -19,6 +19,8 @@ new work should account for this implemented baseline:
   Tasks, Lists, Notes, Files, Links, Metadata, Search, Saved Views/Collections,
   Today, Dashboard, Templates (list and project/contact container templates), Backup, Export, Import
   validation, Activity Log, Database, and diagnostics.
+- Contact pages now include a local interaction timeline and follow-up summary
+  that combine contact content, relationships, and activity log projections.
 - The Lists/Pipelines slice now supports switching a list between checklist and
   pipeline display modes, projecting top-level rows as stages and child rows as
   movable cards.

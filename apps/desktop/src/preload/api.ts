@@ -465,6 +465,74 @@ export type ContactDetailSummary = {
   fields: ContactFieldSummary[];
 };
 
+export type ContactTimelineFilter =
+  | "all"
+  | "activity"
+  | "content"
+  | "follow_up"
+  | "relationship";
+
+export type ContactFollowUpTaskSummary = {
+  itemId: string;
+  title: string;
+  status: string;
+  dueAt: string | null;
+  priority: number | null;
+  overdue: boolean;
+};
+
+export type ContactFollowUpSummary = {
+  generatedAt: string;
+  openFollowUpCount: number;
+  overdueTaskCount: number;
+  nextDueTask: ContactFollowUpTaskSummary | null;
+  openFollowUps: ContactFollowUpTaskSummary[];
+};
+
+export type ContactTimelineEntrySummary = {
+  id: string;
+  kind:
+    | "activity"
+    | "task"
+    | "note"
+    | "file"
+    | "link"
+    | "list"
+    | "relationship"
+    | "item";
+  sourceType: "activity" | "item" | "relationship";
+  title: string;
+  description: string | null;
+  occurredAt: string;
+  targetType: string;
+  targetId: string;
+  itemType: string | null;
+  status: string | null;
+  dueAt: string | null;
+  overdue: boolean;
+  activityAction: string | null;
+  actorLabel: string | null;
+  relationshipLabel: string | null;
+  relatedTargetName: string | null;
+};
+
+export type ContactTimelineInput = {
+  contactId: string;
+  filter?: ContactTimelineFilter;
+  itemTypes?: string[];
+  includeCompleted?: boolean;
+  limit?: number;
+};
+
+export type ContactTimelineSummary = {
+  contact: ContactSummary;
+  generatedAt: string;
+  filter: ContactTimelineFilter;
+  itemTypes: string[];
+  followUpSummary: ContactFollowUpSummary;
+  entries: ContactTimelineEntrySummary[];
+};
+
 export type ProjectHealthTaskSummary = {
   itemId: string;
   title: string;
@@ -2384,7 +2452,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     listContacts: "local-work-os:contacts:list-contacts",
     getContact: "local-work-os:contacts:get-contact",
     addField: "local-work-os:contacts:add-field",
-    updateField: "local-work-os:contacts:update-field"
+    updateField: "local-work-os:contacts:update-field",
+    getTimeline: "local-work-os:contacts:get-timeline"
   },
   tabs: {
     listTabs: "local-work-os:tabs:list-tabs",
@@ -2785,6 +2854,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateField]: {
     input: UpdateContactFieldInput;
     result: ApiResult<ContactFieldSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.contacts.getTimeline]: {
+    input: ContactTimelineInput;
+    result: ApiResult<ContactTimelineSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.tabs.listTabs]: {
     input: string;
@@ -3413,6 +3486,9 @@ export type LocalWorkOsApi = {
     getContact: (
       contactId: string
     ) => Promise<ApiResult<ContactDetailSummary | null>>;
+    getTimeline?: (
+      input: ContactTimelineInput
+    ) => Promise<ApiResult<ContactTimelineSummary>>;
   };
   tabs: {
     list: (containerId: string) => Promise<ApiResult<ContainerTabSummary[]>>;
@@ -3970,7 +4046,9 @@ export function createLocalWorkOsApi(
       listContacts: (workspaceId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.listContacts, workspaceId),
       getContact: (contactId) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.getContact, contactId)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.getContact, contactId),
+      getTimeline: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.contacts.getTimeline, input)
     },
     tabs: {
       list: (containerId) =>

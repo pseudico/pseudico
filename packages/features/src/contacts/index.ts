@@ -36,3 +36,13 @@ export type {
 } from "./ContactRelationshipService";
 
 export { ContactSummaryService, type ContactSummaryOverview } from "./ContactSummaryService";
+export { ContactTimelineService } from "./ContactTimelineService";
+export type {
+  ContactFollowUpSummary,
+  ContactFollowUpTaskSummary,
+  ContactTimelineEntry,
+  ContactTimelineEntryKind,
+  ContactTimelineFilter,
+  ContactTimelineInput,
+  ContactTimelineViewModel
+} from "./ContactTimelineService";

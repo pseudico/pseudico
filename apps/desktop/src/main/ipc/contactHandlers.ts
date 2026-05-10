@@ -1,5 +1,6 @@
 import {
   ContactService,
+  ContactTimelineService,
   type ContactRecord
 } from "@local-work-os/features";
 import {
@@ -17,6 +18,8 @@ import {
   type ContactFieldSummary,
   type ContactFieldType,
   type ContactSummary,
+  type ContactTimelineInput,
+  type ContactTimelineSummary,
   type CreateContactInput,
   type CreateContactResult,
   type UpdateContactFieldInput,
@@ -49,6 +52,9 @@ type ContactIpcHandlers = {
   handleUpdateField: (
     input: unknown
   ) => Promise<ApiResult<ContactFieldSummary>>;
+  handleGetTimeline: (
+    input: unknown
+  ) => Promise<ApiResult<ContactTimelineSummary>>;
 };
 
 export function createContactIpcHandlers(
@@ -161,6 +167,26 @@ export function createContactIpcHandlers(
           )
         )
       );
+    },
+
+    async handleGetTimeline(input) {
+      if (!isContactTimelineInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "getTimeline requires a contactId and optional timeline filters."
+        );
+      }
+
+      return await withContactService(workspaceService, async (context) => {
+        const timeline = new ContactTimelineService({
+          connection: context.connection
+        }).getTimeline(input);
+
+        return apiOk({
+          ...timeline,
+          contact: toContactSummary(timeline.contact)
+        });
+      });
     }
   };
 }
@@ -305,6 +331,19 @@ function isUpdateContactFieldInput(
   );
 }
 
+function isContactTimelineInput(input: unknown): input is ContactTimelineInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.contactId) &&
+    (input.filter === undefined || isContactTimelineFilter(input.filter)) &&
+    (input.itemTypes === undefined ||
+      (Array.isArray(input.itemTypes) &&
+        input.itemTypes.every((itemType) => typeof itemType === "string"))) &&
+    isOptionalBoolean(input.includeCompleted) &&
+    isOptionalNumber(input.limit)
+  );
+}
+
 function isContactFieldInput(input: unknown): boolean {
   return (
     isRecord(input) &&
@@ -312,6 +351,16 @@ function isContactFieldInput(input: unknown): boolean {
     isNonEmptyString(input.value) &&
     (input.type === undefined || isContactFieldTypeValue(input.type)) &&
     isOptionalNumber(input.sortOrder)
+  );
+}
+
+function isContactTimelineFilter(value: unknown): boolean {
+  return (
+    value === "all" ||
+    value === "activity" ||
+    value === "content" ||
+    value === "follow_up" ||
+    value === "relationship"
   );
 }
 

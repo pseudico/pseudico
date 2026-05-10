@@ -4778,3 +4778,131 @@ body,
   align-items: end;
   justify-content: space-between;
 }
+
+.follow-up-summary-card,
+.contact-timeline-panel {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #dedbd1;
+  border-radius: 14px;
+  background: #fffdf7;
+}
+
+.follow-up-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.follow-up-summary-grid div {
+  padding: 12px;
+  border-radius: 10px;
+  background: #f6f5f0;
+}
+
+.follow-up-summary-grid dt {
+  color: #6d6a62;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.follow-up-summary-grid dd {
+  margin: 4px 0 0;
+  font-weight: 800;
+}
+
+.follow-up-list,
+.contact-timeline-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.follow-up-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #ebe7da;
+}
+
+.follow-up-list small,
+.timeline-entry-meta,
+.timeline-entry-due {
+  color: #6d6a62;
+}
+
+.is-overdue .timeline-entry-due,
+.follow-up-list .is-overdue small {
+  color: #9a3b2f;
+  font-weight: 700;
+}
+
+.segmented-controls {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid #dedbd1;
+  border-radius: 999px;
+  background: #f6f5f0;
+}
+
+.segmented-controls button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #514e49;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.segmented-controls button.is-active {
+  background: #245c55;
+  color: #ffffff;
+}
+
+.contact-timeline-list li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.timeline-marker {
+  width: 10px;
+  height: 10px;
+  margin-top: 16px;
+  border: 2px solid #245c55;
+  border-radius: 999px;
+  background: #fffdf7;
+}
+
+.timeline-entry-card {
+  padding: 12px;
+  border: 1px solid #ebe7da;
+  border-radius: 12px;
+  background: #fbfaf7;
+}
+
+.timeline-entry-card h4,
+.timeline-entry-card p {
+  margin: 0;
+}
+
+.timeline-entry-card h4 + p,
+.timeline-entry-card p + p {
+  margin-top: 6px;
+}
+
+.timeline-entry-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
