@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(164);
+    expect(channels).toHaveLength(165);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -203,6 +203,10 @@ describe("typed preload API", () => {
       fieldId: "contact_field_1",
       value: "alex.revised@example.com"
     });
+    await api.contacts.getTimeline?.({
+      contactId: "container_1",
+      filter: "follow_up"
+    });
 
     expect(calls).toEqual([
       {
@@ -230,6 +234,13 @@ describe("typed preload API", () => {
         input: {
           fieldId: "contact_field_1",
           value: "alex.revised@example.com"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.contacts.getTimeline,
+        input: {
+          contactId: "container_1",
+          filter: "follow_up"
         }
       }
     ]);

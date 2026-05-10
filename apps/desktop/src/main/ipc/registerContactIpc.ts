@@ -32,4 +32,8 @@ export function registerContactIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.contacts.updateField,
     (_event, input) => handlers.handleUpdateField(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.contacts.getTimeline,
+    (_event, input) => handlers.handleGetTimeline(input)
+  );
 }

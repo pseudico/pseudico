@@ -160,7 +160,17 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       listContacts: (workspaceId) =>
         callApi(() => api.contacts.listContacts(workspaceId)),
       getContact: (contactId) =>
-        callApi(() => api.contacts.getContact(contactId))
+        callApi(() => api.contacts.getContact(contactId)),
+      getTimeline: (input) =>
+        api.contacts.getTimeline === undefined
+          ? Promise.resolve({
+              ok: false,
+              error: {
+                code: "IPC_ERROR",
+                message: "Contact timeline API is not available."
+              }
+            })
+          : callApi(() => api.contacts.getTimeline!(input))
     },
     tabs: {
       list: (containerId) => callApi(() => api.tabs.list(containerId)),
@@ -579,7 +589,16 @@ export const desktopApiClient: LocalWorkOsApi = {
     listContacts: (workspaceId) =>
       getDesktopApiClient().contacts.listContacts(workspaceId),
     getContact: (contactId) =>
-      getDesktopApiClient().contacts.getContact(contactId)
+      getDesktopApiClient().contacts.getContact(contactId),
+    getTimeline: (input) =>
+      getDesktopApiClient().contacts.getTimeline?.(input) ??
+      Promise.resolve({
+        ok: false,
+        error: {
+          code: "IPC_ERROR",
+          message: "Contact timeline API is not available."
+        }
+      })
   },
   tabs: {
     list: (containerId) => getDesktopApiClient().tabs.list(containerId),

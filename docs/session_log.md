@@ -1947,3 +1947,61 @@ Next actions: Start PSE-105 next; keep only PSE-105 Codex Ready.
 - Files changed: apps/desktop/src/**; packages/db/src/repositories/**; packages/features/src/contacts/**; docs/MODULE_REGISTRY.md; docs/session_log.md
 - Open questions / risks: Need push/PR and CI/review outcome.
 - Next actions: Stage intended files; commit PSE-105; push/open ready PR.
+## 2026-05-10T16:43:47.6842383+10:00
+- Objective: Open PR and move PSE-105 to review lane.
+- Decisions made: Created ready PR #100; moved Linear to PR Open; added verification summary/comment.
+- Files changed: docs/session_log.md
+- Open questions / risks: Awaiting CI/mergeability/review inspection before merge.
+- Next actions: Inspect PR diff/checks; merge if clean; update Linear.
+## 2026-05-10T16:48:18.5846117+10:00
+- Objective: Merge PSE-105 and sync local main.
+- Decisions made: CI passed; no review threads; squash-merged PR #100; pulled main; deleted merged branch.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need select/promote next single Codex Ready issue.
+- Next actions: Move PSE-105 Done; find next Spec Ready issue; promote exactly one.
+## 2026-05-10T16:49:30.5727730+10:00
+- Objective: Finalize Linear handoff after PSE-105 merge.
+- Decisions made: Moved PSE-105 to Done; promoted exactly one next issue, PSE-106, to Codex Ready; left others unchanged.
+- Files changed: docs/session_log.md
+- Open questions / risks: Post-merge session log entries are local-only; unrelated untracked files remain untouched.
+- Next actions: Next run should start PSE-106; reconcile PRs first; keep one Codex Ready issue.
+
+## 2026-05-10 16:59:10 +10:00
+Objective: Reconciled active Linear/GitHub work and selected next ticket.
+Decisions made:
+- No PR Open/In Progress issues or open GitHub PRs found.
+- PSE-106 was the single Codex Ready issue to implement.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing unrelated untracked files remain untouched.
+Next actions: Move PSE-106 to In Progress; read docs/source; implement scoped changes.
+
+## 2026-05-10 17:02:35 +10:00
+Objective: Planned PSE-106 implementation after reading docs and source.
+Decisions made:
+- Add read-only ContactTimelineService; no schema/migration needed.
+- Expose a narrow contacts timeline IPC and render reusable UI cards on contact detail.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Timeline combines item/activity entries and may intentionally show activity separate from content.
+Next actions: Implement service/API/UI; add service and component tests; run checks.
+
+## 2026-05-10 17:14:16 +10:00
+Objective: Implemented and verified PSE-106 contact timeline/follow-up slice.
+Decisions made:
+- Added service-backed read-only timeline IPC; no schema changes.
+- Added reusable FollowUpSummaryCard and ContactTimeline UI with filters.
+Files changed:
+- apps/desktop/src/main/ipc/contactHandlers.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/ContactDetailPage.tsx; packages/features/src/contacts/ContactTimelineService.ts; packages/ui/src/components/ContactTimeline.tsx
+Open questions / risks: Manual mixed-content QA still documented via PR due desktop UI not launched here.
+Next actions: Commit, push, open PR, update Linear to PR Open.
+
+## 2026-05-10 17:15:45 +10:00
+Objective: Completed local validation for PSE-106.
+Decisions made:
+- Sandbox EPERM on Vitest/build was resolved with approved escalated reruns.
+- Full lint, typecheck, test, and build now pass.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi are unrelated and untouched.
+Next actions: Stage scoped files; commit and push; open ready PR.

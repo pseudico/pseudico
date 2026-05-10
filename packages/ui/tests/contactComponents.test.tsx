@@ -2,6 +2,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
   ContactFieldsEditor,
+  ContactTimeline,
+  FollowUpSummaryCard,
   RelatedContactsPanel,
   RelatedProjectsPanel,
   validateContactFormValues
@@ -108,5 +110,57 @@ describe("Relationship panels", () => {
     expect(html).toContain("Launch Plan");
     expect(html).toContain("1 open follow-up");
     expect(html).toContain("Link project");
+  });
+});
+
+describe("Contact timeline UI", () => {
+  it("renders empty timeline and follow-up summary states", () => {
+    const html = renderToStaticMarkup(
+      <>
+        <FollowUpSummaryCard
+          summary={{
+            openFollowUpCount: 0,
+            overdueTaskCount: 0,
+            nextDueTask: null,
+            openFollowUps: []
+          }}
+        />
+        <ContactTimeline entries={[]} filter="activity" />
+      </>
+    );
+
+    expect(html).toContain("Follow-up summary");
+    expect(html).toContain("No open follow-ups for this contact.");
+    expect(html).toContain("Interaction timeline");
+    expect(html).toContain("No timeline entries match this filter yet.");
+    expect(html).toContain("aria-pressed=\"true\"");
+  });
+
+  it("renders filtered timeline entries with overdue due labels", () => {
+    const html = renderToStaticMarkup(
+      <ContactTimeline
+        filter="follow_up"
+        entries={[
+          {
+            id: "item:task_1",
+            kind: "task",
+            sourceType: "item",
+            title: "Follow up with Alex",
+            description: "Confirm contract timing.",
+            occurredAt: "2026-05-09T11:00:00.000Z",
+            status: "open",
+            dueAt: "2026-05-08T00:00:00.000Z",
+            overdue: true,
+            actorLabel: null,
+            relatedTargetName: null
+          }
+        ]}
+      />
+    );
+
+    expect(html).toContain("Follow-ups");
+    expect(html).toContain("Follow up with Alex");
+    expect(html).toContain("Confirm contract timing.");
+    expect(html).toContain("Due 2026-05-08 - overdue");
   });
 });
