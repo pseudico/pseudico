@@ -19,6 +19,7 @@ export const containerTabs = sqliteTable(
     isDefault: integer("is_default").notNull().default(0),
     createdAt: text("created_at").notNull(),
     updatedAt: text("updated_at").notNull(),
+    hiddenAt: text("hidden_at"),
     archivedAt: text("archived_at"),
     deletedAt: text("deleted_at")
   },

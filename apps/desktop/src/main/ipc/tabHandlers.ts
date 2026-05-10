@@ -12,9 +12,12 @@ import {
   type ApiResult,
   type ContainerTabContentSummary,
   type ContainerTabSummary,
+  type CreateContainerTabFromTemplateInput,
   type CreateContainerTabInput,
+  type DeleteContainerTabInput,
   type RenameContainerTabInput,
   type ReorderContainerTabsInput,
+  type TabTemplateSummary,
   type WorkspaceSummary
 } from "../../preload/api";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
@@ -26,10 +29,17 @@ type CurrentWorkspaceService = Pick<
 
 type TabIpcHandlers = {
   handleListTabs: (input: unknown) => Promise<ApiResult<ContainerTabSummary[]>>;
+  handleListManagedTabs: (input: unknown) => Promise<ApiResult<ContainerTabSummary[]>>;
   handleListTabSummaries: (input: unknown) => Promise<ApiResult<ContainerTabContentSummary[]>>;
+  handleListTabTemplates: () => Promise<ApiResult<TabTemplateSummary[]>>;
   handleCreateTab: (input: unknown) => Promise<ApiResult<ContainerTabSummary>>;
+  handleCreateTabFromTemplate: (input: unknown) => Promise<ApiResult<ContainerTabSummary>>;
   handleRenameTab: (input: unknown) => Promise<ApiResult<ContainerTabSummary>>;
   handleReorderTabs: (input: unknown) => Promise<ApiResult<ContainerTabSummary[]>>;
+  handleHideTab: (input: unknown) => Promise<ApiResult<ContainerTabSummary>>;
+  handleShowTab: (input: unknown) => Promise<ApiResult<ContainerTabSummary>>;
+  handleDuplicateTab: (input: unknown) => Promise<ApiResult<ContainerTabSummary>>;
+  handleArchiveTab: (input: unknown) => Promise<ApiResult<ContainerTabSummary>>;
   handleDeleteTab: (input: unknown) => Promise<ApiResult<ContainerTabSummary>>;
 };
 
@@ -44,6 +54,26 @@ export function createTabIpcHandlers(
 
       return await withTabService(workspaceService, async (context) =>
         apiOk(context.tabService.listTabs(input).map(toContainerTabSummary))
+      );
+    },
+
+    async handleListManagedTabs(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError("INVALID_INPUT", "listManagedTabs requires a containerId string.");
+      }
+
+      return await withTabService(workspaceService, async (context) =>
+        apiOk(
+          context.tabService
+            .listTabs(input, { includeHidden: true, includeArchived: true })
+            .map(toContainerTabSummary)
+        )
+      );
+    },
+
+    async handleListTabTemplates() {
+      return await withTabService(workspaceService, async (context) =>
+        apiOk(context.tabService.listTabTemplates())
       );
     },
 
@@ -79,6 +109,19 @@ export function createTabIpcHandlers(
       );
     },
 
+    async handleCreateTabFromTemplate(input) {
+      if (!isCreateContainerTabFromTemplateInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "createTabFromTemplate requires containerId and templateId fields."
+        );
+      }
+
+      return await withTabService(workspaceService, async (context) =>
+        apiOk(toContainerTabSummary(await context.tabService.createTabFromTemplate(input)))
+      );
+    },
+
     async handleRenameTab(input) {
       if (!isRenameContainerTabInput(input)) {
         return apiError(
@@ -107,13 +150,55 @@ export function createTabIpcHandlers(
       );
     },
 
-    async handleDeleteTab(input) {
+    async handleHideTab(input) {
       if (!isNonEmptyString(input)) {
-        return apiError("INVALID_INPUT", "deleteTab requires a tabId string.");
+        return apiError("INVALID_INPUT", "hideTab requires a tabId string.");
       }
 
       return await withTabService(workspaceService, async (context) =>
-        apiOk(toContainerTabSummary(await context.tabService.deleteTab({ tabId: input })))
+        apiOk(toContainerTabSummary(await context.tabService.hideTab({ tabId: input })))
+      );
+    },
+
+    async handleShowTab(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError("INVALID_INPUT", "showTab requires a tabId string.");
+      }
+
+      return await withTabService(workspaceService, async (context) =>
+        apiOk(toContainerTabSummary(await context.tabService.showTab({ tabId: input })))
+      );
+    },
+
+    async handleDuplicateTab(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError("INVALID_INPUT", "duplicateTab requires a tabId string.");
+      }
+
+      return await withTabService(workspaceService, async (context) =>
+        apiOk(toContainerTabSummary(await context.tabService.duplicateTab({ tabId: input })))
+      );
+    },
+
+    async handleArchiveTab(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError("INVALID_INPUT", "archiveTab requires a tabId string.");
+      }
+
+      return await withTabService(workspaceService, async (context) =>
+        apiOk(toContainerTabSummary(await context.tabService.archiveTab({ tabId: input })))
+      );
+    },
+
+    async handleDeleteTab(input) {
+      if (!isDeleteContainerTabInput(input)) {
+        return apiError("INVALID_INPUT", "deleteTab requires a tabId string or delete input.");
+      }
+
+      return await withTabService(workspaceService, async (context) =>
+        apiOk(toContainerTabSummary(await context.tabService.deleteTab(
+          typeof input === "string" ? { tabId: input } : input
+        )))
       );
     }
   };
@@ -165,6 +250,7 @@ function toContainerTabSummary(tab: ContainerTabRecord): ContainerTabSummary {
     isDefault: tab.isDefault,
     createdAt: tab.createdAt,
     updatedAt: tab.updatedAt,
+    hiddenAt: tab.hiddenAt,
     archivedAt: tab.archivedAt,
     deletedAt: tab.deletedAt
   };
@@ -214,6 +300,17 @@ function isCreateContainerTabInput(
   );
 }
 
+function isCreateContainerTabFromTemplateInput(
+  input: unknown
+): input is CreateContainerTabFromTemplateInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.containerId) &&
+    isNonEmptyString(input.templateId) &&
+    isOptionalNullableString(input.name)
+  );
+}
+
 function isRenameContainerTabInput(
   input: unknown
 ): input is RenameContainerTabInput {
@@ -233,6 +330,24 @@ function isReorderContainerTabsInput(
     isNonEmptyString(input.containerId) &&
     Array.isArray(input.tabIds) &&
     input.tabIds.every(isNonEmptyString)
+  );
+}
+
+function isDeleteContainerTabInput(
+  input: unknown
+): input is string | DeleteContainerTabInput {
+  if (isNonEmptyString(input)) {
+    return true;
+  }
+
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.tabId) &&
+    (input.itemHandling === undefined ||
+      input.itemHandling === "reject" ||
+      input.itemHandling === "move_to_default" ||
+      input.itemHandling === "archive_items") &&
+    isOptionalNullableString(input.targetTabId)
   );
 }
 

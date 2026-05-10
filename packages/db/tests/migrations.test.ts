@@ -46,6 +46,7 @@ const requiredTables = [
 const requiredIndexes = [
   "idx_containers_workspace_type",
   "idx_container_tabs_container",
+  "idx_container_tabs_visibility",
   "idx_contact_fields_container_order",
   "idx_recurrence_rules_active_task",
   "idx_recurrence_rules_workspace_next",
@@ -78,7 +79,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version nine", () => {
+  it("runs on an empty database and records schema version ten", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -127,14 +128,19 @@ describe("schema migrations", () => {
           version: 9,
           name: "container_media",
           checksum: "pse-102-container-media-v1"
+        },
+        {
+          version: 10,
+          name: "tab_visibility",
+          checksum: "pse-107-tab-visibility-v1"
         }
       ],
-      currentVersion: 9
+      currentVersion: 10
     });
-    expect(service.getCurrentSchemaVersion()).toBe(9);
+    expect(service.getCurrentSchemaVersion()).toBe(10);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 9
+      currentVersion: 10
     });
   });
 
@@ -224,6 +230,11 @@ describe("schema migrations", () => {
         .prepare("select count(*) as count from activity_log where workspace_id = ?")
         .get("workspace_1")
     ).toMatchObject({ count: 1 });
+    expect(
+      connection!.sqlite
+        .prepare("select hidden_at from container_tabs where id = ?")
+        .get("tab_1")
+    ).toMatchObject({ hidden_at: null });
     expect(
       connection!.sqlite
         .prepare("select count(*) as count from contact_fields where workspace_id = ?")

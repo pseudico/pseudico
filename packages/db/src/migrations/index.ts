@@ -7,6 +7,7 @@ import { recurrenceSql } from "./0006_recurrence";
 import { attachmentVersionsSql } from "./0007_attachment_versions";
 import { workflowsSql } from "./0008_workflows";
 import { containerMediaSql } from "./0009_container_media";
+import { tabVisibilitySql } from "./0010_tab_visibility";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -63,5 +64,11 @@ export const migrations: MigrationDefinition[] = [
     name: "container_media",
     sql: containerMediaSql,
     checksum: "pse-102-container-media-v1"
+  },
+  {
+    version: 10,
+    name: "tab_visibility",
+    sql: tabVisibilitySql,
+    checksum: "pse-107-tab-visibility-v1"
   }
 ];

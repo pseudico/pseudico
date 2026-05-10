@@ -130,6 +130,12 @@ export {
   type TabSummaryPreviewViewModel
 } from "./components/ContainerTabSummaryCards";
 export {
+  TabManagementDialog,
+  type TabManagementDialogProps,
+  type TabManagementTabViewModel,
+  type TabTemplateOption
+} from "./components/TabManagementDialog";
+export {
   LoadMoreList,
   type LoadMoreListProps
 } from "./components/LoadMoreList";
