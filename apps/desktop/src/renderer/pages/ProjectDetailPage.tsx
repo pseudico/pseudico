@@ -11,7 +11,11 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { moveIdBeforeTarget } from "@local-work-os/core";
+import {
+  moveIdBeforeTarget,
+  type InspectorTarget,
+  type ParsedDateRange
+} from "@local-work-os/core";
 import {
   CategoryBadge,
   CategoryPicker,
@@ -64,7 +68,6 @@ import {
   type WikilinkTargetViewModel,
   type WikilinkViewModel
 } from "@local-work-os/ui";
-import type { InspectorTarget } from "@local-work-os/core";
 import type {
   ActivitySummary,
   AttachmentVersionSummary,
@@ -1550,9 +1553,9 @@ export function ProjectDetailPage({
     setTaskBusyId(null);
   }
 
-  async function updateTaskDueDate(
+  async function updateTaskDateRange(
     item: TaskCardViewModel,
-    dueDate: string
+    range: ParsedDateRange
   ): Promise<void> {
     if (project === null) {
       return;
@@ -1563,7 +1566,10 @@ export function ProjectDetailPage({
 
     const result = await apiClient.tasks.update({
       itemId: item.id,
-      dueAt: dueDate.length === 0 ? null : dueDate
+      startAt: range.startAt,
+      dueAt: range.dueAt,
+      allDay: range.allDay,
+      timezone: range.timezone
     });
 
     if (!result.ok) {
@@ -1575,6 +1581,35 @@ export function ProjectDetailPage({
     await refreshProjectContent(project.id);
     await refreshProjectHealth(project.id);
     setTaskBusyId(null);
+  }
+
+  async function updateListItemDateRange(
+    item: ListCardViewModel,
+    listItem: ListCardItemViewModel,
+    range: ParsedDateRange
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result = await apiClient.lists.updateItem({
+      listItemId: listItem.id,
+      startAt: range.startAt,
+      dueAt: range.dueAt
+    });
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectHealth(project.id);
+    setListBusyId(null);
   }
 
   async function addListItem(
@@ -2299,6 +2334,7 @@ export function ProjectDetailPage({
             onAddItem={addListItem}
             onBulkAddItems={bulkAddListItems}
             onAddPipelineCard={addPipelineCard}
+            onListItemDateRangeChange={updateListItemDateRange}
             onMovePipelineCard={movePipelineCard}
             onReorderListItem={reorderProjectListItem}
             onSaveAsTemplate={saveListAsTemplate}
@@ -2316,7 +2352,7 @@ export function ProjectDetailPage({
           <TaskCardContent
             disabled={taskBusyId === item.id}
             item={item}
-            onDueDateChange={updateTaskDueDate}
+            onDateRangeChange={updateTaskDateRange}
             onToggleComplete={toggleTaskComplete}
           />
         </>
@@ -3106,7 +3142,9 @@ function toListCardItemViewModel(
     listItemParentId: listItem.listItemParentId,
     status: listItem.status,
     depth: listItem.depth,
-    sortOrder: listItem.sortOrder
+    sortOrder: listItem.sortOrder,
+    startAt: listItem.startAt,
+    dueAt: listItem.dueAt
   };
 }
 

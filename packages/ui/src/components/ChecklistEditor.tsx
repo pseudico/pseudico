@@ -7,13 +7,17 @@ import {
   parseDragPayload,
   resolveContextMenuActions
 } from "@local-work-os/core";
+import type { ParsedDateRange } from "@local-work-os/core";
 import { ContextMenu } from "./ContextMenu";
+import { DateRangeInput } from "./DateRangeInput";
 
 export type ChecklistEditorItem = {
   id: string;
   title: string;
   status: string;
   depth?: number;
+  startAt?: string | null;
+  dueAt?: string | null;
 };
 
 export type ChecklistEditorProps = {
@@ -30,6 +34,10 @@ export type ChecklistEditorProps = {
     draggedItemId: string,
     targetItemId: string
   ) => Promise<boolean | void> | boolean | void;
+  onDateRangeChange?: (
+    item: ChecklistEditorItem,
+    range: ParsedDateRange
+  ) => Promise<boolean | void> | boolean | void;
   listId?: string;
 };
 
@@ -40,6 +48,7 @@ export function ChecklistEditor({
   error = null,
   onAddItem,
   onBulkAddItems,
+  onDateRangeChange,
   onReorderItem,
   listId,
   onToggleItem
@@ -213,6 +222,15 @@ export function ChecklistEditor({
                     />
                     <span>{item.title}</span>
                   </label>
+                  {onDateRangeChange === undefined ? null : (
+                    <DateRangeInput
+                      disabled={disabled}
+                      dueAt={item.dueAt}
+                      label="Date"
+                      startAt={item.startAt}
+                      onChange={(range) => onDateRangeChange(item, range)}
+                    />
+                  )}
                 </ContextMenu>
               </li>
             );

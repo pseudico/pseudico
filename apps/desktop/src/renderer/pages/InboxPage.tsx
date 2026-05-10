@@ -1,5 +1,6 @@
 import { Inbox, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import type { ParsedDateRange } from "@local-work-os/core";
 import {
   ConfirmDialog,
   CreateListForm,
@@ -439,9 +440,9 @@ export function InboxPage({
     setTaskBusyId(null);
   }
 
-  async function updateTaskDueDate(
+  async function updateTaskDateRange(
     item: TaskCardViewModel,
-    dueDate: string
+    range: ParsedDateRange
   ): Promise<void> {
     if (currentWorkspace === null) {
       return;
@@ -452,7 +453,10 @@ export function InboxPage({
 
     const result = await apiClient.tasks.update({
       itemId: item.id,
-      dueAt: dueDate.length === 0 ? null : dueDate
+      startAt: range.startAt,
+      dueAt: range.dueAt,
+      allDay: range.allDay,
+      timezone: range.timezone
     });
 
     if (!result.ok) {
@@ -463,6 +467,34 @@ export function InboxPage({
 
     await loadInbox(currentWorkspace.id);
     setTaskBusyId(null);
+  }
+
+  async function updateListItemDateRange(
+    item: ListCardViewModel,
+    listItem: ListCardItemViewModel,
+    range: ParsedDateRange
+  ): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result = await apiClient.lists.updateItem({
+      listItemId: listItem.id,
+      startAt: range.startAt,
+      dueAt: range.dueAt
+    });
+
+    if (!result.ok) {
+      setListBusyId(null);
+      setListError(result.error.message);
+      return;
+    }
+
+    await loadInbox(currentWorkspace.id);
+    setListBusyId(null);
   }
 
   async function addListItem(
@@ -554,6 +586,7 @@ export function InboxPage({
           item={item}
           onAddItem={addListItem}
           onBulkAddItems={bulkAddListItems}
+          onListItemDateRangeChange={updateListItemDateRange}
           onToggleItem={toggleListItem}
         />
       );
@@ -564,7 +597,7 @@ export function InboxPage({
         <TaskCardContent
           disabled={taskBusyId === item.id}
           item={item}
-          onDueDateChange={updateTaskDueDate}
+          onDateRangeChange={updateTaskDateRange}
           onToggleComplete={toggleTaskComplete}
         />
       );
@@ -774,7 +807,9 @@ function toListCardItemViewModel(
     body: listItem.body,
     status: listItem.status,
     depth: listItem.depth,
-    sortOrder: listItem.sortOrder
+    sortOrder: listItem.sortOrder,
+    startAt: listItem.startAt,
+    dueAt: listItem.dueAt
   };
 }
 

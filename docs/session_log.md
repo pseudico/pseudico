@@ -2301,3 +2301,44 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI and review still required after PR opens.
 Next actions: Stage/commit; push branch; open ready PR.
+## 2026-05-11 06:00:45 +10:00
+Objective: Merge PSE-115 and prepare next ticket.
+Decisions made:
+- Squash-merged PR #110 at 1fe683fa after CI passed.
+- Moved PSE-115 to Done and promoted PSE-116 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Working tree has untracked unrelated .playwright-mcp/ and gh_2.92.0_windows_amd64.msi.
+Next actions: Start PSE-116 next; keep exactly one Codex Ready issue; reconcile before coding.
+## 2026-05-11 06:03:09 +10:00
+Objective: Start PSE-116 date range and duration ticket.
+Decisions made:
+- Reconciled Linear/GitHub: no PR Open or In Progress, one Codex Ready issue.
+- Moved PSE-116 to In Progress and created branch codex/PSE-116-date-range-duration.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need confirm current schema/services before implementation.
+Next actions: Read ticket/docs; implement scoped changes; run checks.
+## 2026-05-11 06:14:27 +10:00
+Objective: Implement and verify PSE-116 date-range input.
+Decisions made:
+- Added core DateRangeParser, shared DateRangeInput, task/list service date-range updates.
+- Wired project, inbox, and contact task/list date edits through existing IPC services.
+Files changed:
+- apps/desktop/src/renderer/pages/ProjectDetailPage.tsx
+- apps/desktop/src/renderer/pages/InboxPage.tsx
+- apps/desktop/src/renderer/pages/ContactDetailPage.tsx
+- packages/core/src/services/dateRangeParser.ts
+- packages/ui/src/components/DateRangeInput.tsx
+Open questions / risks: Manual desktop QA not run; local checks pass.
+Next actions: Commit/push; open PR; move Linear to PR Open.
+## 2026-05-11 06:15:35 +10:00
+Objective: Final-check PSE-116 before PR.
+Decisions made:
+- pnpm lint, pnpm typecheck, pnpm test, and pnpm build pass.
+- Documented the shared single date-range editor in the module registry.
+Files changed:
+- docs/session_log.md
+- docs/MODULE_REGISTRY.md
+Open questions / risks: CI and review remain after PR opens.
+Next actions: Stage/commit; push branch; open ready PR.

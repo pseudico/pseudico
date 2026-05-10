@@ -30,6 +30,9 @@ new work should account for this implemented baseline:
 - Local recurrence now has database and service foundations for daily and
   weekly/custom-weekday task roll-forward behavior; monthly/yearly RRULEs remain
   future work.
+- Task and list-row date editing now uses a shared single date-range input that
+  can persist due-only dates or start/due ranges while preserving all-day versus
+  timed metadata.
 - Future or placeholder-heavy flows: Timeline, Calendar, portable/broader Templates,
   broader import execution beyond workspace JSON restore,
   custom dashboard editing, advanced saved-view builder UX, and browser capture.

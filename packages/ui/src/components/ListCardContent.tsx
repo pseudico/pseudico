@@ -1,4 +1,5 @@
 import type { UniversalItemViewModel } from "./ItemCard";
+import type { ParsedDateRange } from "@local-work-os/core";
 import {
   ChecklistEditor,
   type ChecklistEditorItem
@@ -35,6 +36,11 @@ export type ListCardContentProps = {
     item: ListCardViewModel,
     listItem: ListCardItemViewModel
   ) => Promise<boolean | void> | boolean | void;
+  onListItemDateRangeChange?: (
+    item: ListCardViewModel,
+    listItem: ListCardItemViewModel,
+    range: ParsedDateRange
+  ) => Promise<boolean | void> | boolean | void;
   onSaveAsTemplate?: (
     item: ListCardViewModel
   ) => Promise<boolean | void> | boolean | void;
@@ -65,6 +71,7 @@ export function ListCardContent({
   error = null,
   onAddItem,
   onBulkAddItems,
+  onListItemDateRangeChange,
   onToggleItem,
   onSaveAsTemplate,
   onToggleDisplayMode,
@@ -139,6 +146,9 @@ export function ListCardContent({
           listId={item.id}
           onAddItem={(title) => onAddItem?.(item, title)}
           onBulkAddItems={(text) => onBulkAddItems?.(item, text)}
+          onDateRangeChange={(listItem, range) =>
+            onListItemDateRangeChange?.(item, listItem, range)
+          }
           onReorderItem={(draggedItemId, targetItemId) =>
             onReorderListItem?.(item, draggedItemId, targetItemId)
           }

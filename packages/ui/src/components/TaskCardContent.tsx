@@ -1,5 +1,7 @@
-import { CalendarDays, CheckCircle2, RotateCcw } from "lucide-react";
+import { CheckCircle2, RotateCcw } from "lucide-react";
+import type { ParsedDateRange } from "@local-work-os/core";
 import type { UniversalItemViewModel } from "./ItemCard";
+import { DateRangeInput } from "./DateRangeInput";
 
 export type TaskCardViewModel = UniversalItemViewModel & {
   taskStatus?: string | null;
@@ -13,6 +15,10 @@ export type TaskCardViewModel = UniversalItemViewModel & {
 export type TaskCardContentProps = {
   item: TaskCardViewModel;
   disabled?: boolean;
+  onDateRangeChange?: (
+    item: TaskCardViewModel,
+    range: ParsedDateRange
+  ) => Promise<void> | void;
   onDueDateChange?: (item: TaskCardViewModel, dueDate: string) => Promise<void> | void;
   onToggleComplete?: (item: TaskCardViewModel) => Promise<void> | void;
 };
@@ -20,11 +26,11 @@ export type TaskCardContentProps = {
 export function TaskCardContent({
   item,
   disabled = false,
+  onDateRangeChange,
   onDueDateChange,
   onToggleComplete
 }: TaskCardContentProps): React.JSX.Element {
   const completed = item.taskStatus === "done" || item.status === "completed";
-  const dueDate = toDateInputValue(item.dueAt);
 
   return (
     <div className="task-card-content" data-task-status={item.taskStatus ?? item.status}>
@@ -49,29 +55,22 @@ export function TaskCardContent({
           {completed ? "Reopen" : "Complete"}
         </button>
 
-        <label className="task-card-due-field">
-          <span>
-            <CalendarDays size={15} aria-hidden="true" />
-            Due
-          </span>
-          <input
-            disabled={disabled}
-            type="date"
-            value={dueDate}
-            onChange={(event) => {
-              void onDueDateChange?.(item, event.currentTarget.value);
-            }}
-          />
-        </label>
+        <DateRangeInput
+          allDay={item.allDay}
+          disabled={disabled}
+          dueAt={item.dueAt}
+          label="Date"
+          startAt={item.startAt}
+          onChange={(range) => {
+            if (onDateRangeChange !== undefined) {
+              void onDateRangeChange(item, range);
+              return;
+            }
+
+            void onDueDateChange?.(item, range.dueAt ?? "");
+          }}
+        />
       </div>
     </div>
   );
-}
-
-function toDateInputValue(value: string | null | undefined): string {
-  if (value === undefined || value === null || value.trim().length === 0) {
-    return "";
-  }
-
-  return value.slice(0, 10);
 }

@@ -1,6 +1,7 @@
 import { ArrowLeft, Contact, Printer, RefreshCw, StickyNote, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import type { ParsedDateRange } from "@local-work-os/core";
 import {
   CategoryBadge,
   ContactTimeline,
@@ -1061,9 +1062,9 @@ export function ContactDetailPage({
     setTaskBusyId(null);
   }
 
-  async function updateTaskDueDate(
+  async function updateTaskDateRange(
     item: TaskCardViewModel,
-    dueDate: string
+    range: ParsedDateRange
   ): Promise<void> {
     if (contact === null) {
       return;
@@ -1074,7 +1075,10 @@ export function ContactDetailPage({
 
     const result = await apiClient.tasks.update({
       itemId: item.id,
-      dueAt: dueDate.length === 0 ? null : dueDate
+      startAt: range.startAt,
+      dueAt: range.dueAt,
+      allDay: range.allDay,
+      timezone: range.timezone
     });
 
     if (!result.ok) {
@@ -1114,7 +1118,7 @@ export function ContactDetailPage({
         <TaskCardContent
           disabled={taskBusyId === item.id}
           item={item}
-          onDueDateChange={updateTaskDueDate}
+          onDateRangeChange={updateTaskDateRange}
           onToggleComplete={toggleTaskComplete}
         />
       );
