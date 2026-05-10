@@ -25,6 +25,14 @@ export function registerProjectIpc(
     (_event, input) => handlers.handleArchiveProject(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.projects.completeProject,
+    (_event, input) => handlers.handleCompleteProject(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.projects.restoreProject,
+    (_event, input) => handlers.handleRestoreProject(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.projects.softDeleteProject,
     (_event, input) => handlers.handleSoftDeleteProject(input)
   );

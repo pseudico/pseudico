@@ -23,14 +23,17 @@ import {
 } from "@local-work-os/db";
 import type {
   AddContactFieldInput,
+  ContactLifecycleInput,
   ContactFieldInput,
   ContactRecord,
   CreateContactInput,
   CreateContactResult,
   DeleteContactFieldInput,
+  ListContactsInput,
   UpdateContactFieldInput,
   UpdateContactInput
 } from "./ContactCommands";
+import { ContainerLifecycleService } from "../containers/ContainerLifecycleService";
 
 // Owns contact/client container application operations.
 // Does not own hosted CRM behavior or project lifecycle internals.
@@ -239,42 +242,47 @@ export class ContactService {
   }
 
   async archiveContact(
-    contactId: string,
+    input: ContactLifecycleInput | string,
     actorType: ActivityActorType = "local_user"
   ): Promise<ContactRecord> {
-    validateNonEmptyString(contactId, "contactId");
+    const lifecycleInput = normalizeContactLifecycleInput(input, actorType);
 
-    return await this.transactionService.runInTransaction(() => {
-      const timestamp = createIsoTimestamp(this.now());
-      const containerRepository = new ContainerRepository(this.connection);
-      const contactFieldRepository = new ContactFieldRepository(this.connection);
-      const activityLogService = this.createActivityLogService();
-      const searchIndexService = this.createSearchIndexService();
-      const before = this.requireContact(contactId);
-      const contact = asContactRecord(
-        containerRepository.archive(contactId, timestamp)
-      );
-      const fields = contactFieldRepository.listForContact({
-        workspaceId: contact.workspaceId,
-        containerId: contact.id
-      });
+    const result = await this.createLifecycleService().archiveContainer(compactLifecycleInput({
+      containerId: lifecycleInput.contactId,
+      actorType: lifecycleInput.actorType,
+      confirmOpenTasks: lifecycleInput.confirmOpenTasks
+    }));
 
-      activityLogService.logEvent({
-        workspaceId: contact.workspaceId,
-        actorType,
-        action: ActivityAction.containerArchived,
-        targetType: "container",
-        targetId: contact.id,
-        summary: `Archived contact "${contact.name}".`,
-        beforeJson: JSON.stringify(before),
-        afterJson: JSON.stringify(contact),
-        timestamp
-      });
+    return asContactRecord(result.container);
+  }
 
-      this.upsertContactSearchRecord(searchIndexService, contact, fields, timestamp);
+  async completeContact(
+    input: ContactLifecycleInput | string,
+    actorType: ActivityActorType = "local_user"
+  ): Promise<ContactRecord> {
+    const lifecycleInput = normalizeContactLifecycleInput(input, actorType);
 
-      return contact;
-    });
+    const result = await this.createLifecycleService().completeContainer(compactLifecycleInput({
+      containerId: lifecycleInput.contactId,
+      actorType: lifecycleInput.actorType,
+      confirmOpenTasks: lifecycleInput.confirmOpenTasks
+    }));
+
+    return asContactRecord(result.container);
+  }
+
+  async restoreContact(
+    input: ContactLifecycleInput | string,
+    actorType: ActivityActorType = "local_user"
+  ): Promise<ContactRecord> {
+    const lifecycleInput = normalizeContactLifecycleInput(input, actorType);
+
+    const result = await this.createLifecycleService().restoreContainer(compactLifecycleInput({
+      containerId: lifecycleInput.contactId,
+      actorType: lifecycleInput.actorType
+    }));
+
+    return asContactRecord(result.container);
   }
 
   async addContactField(
@@ -404,11 +412,18 @@ export class ContactService {
     });
   }
 
-  listContacts(workspaceId: string): ContactRecord[] {
-    validateNonEmptyString(workspaceId, "workspaceId");
+  listContacts(input: ListContactsInput | string): ContactRecord[] {
+    const normalizedInput =
+      typeof input === "string" ? { workspaceId: input } : input;
+    validateNonEmptyString(normalizedInput.workspaceId, "workspaceId");
 
     return new ContainerRepository(this.connection)
-      .listByWorkspace(workspaceId, { type: "contact" })
+      .listByWorkspace(normalizedInput.workspaceId, {
+        type: "contact",
+        ...(normalizedInput.includeArchived === undefined
+          ? {}
+          : { includeArchived: normalizedInput.includeArchived })
+      })
       .map(asContactRecord);
   }
 
@@ -442,6 +457,14 @@ export class ContactService {
 
   private createSearchIndexService(): SearchIndexService {
     return new SearchIndexService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    });
+  }
+
+  private createLifecycleService(): ContainerLifecycleService {
+    return new ContainerLifecycleService({
       connection: this.connection,
       idFactory: this.idFactory,
       now: this.now
@@ -629,6 +652,36 @@ function asContactRecord(container: ContainerRecord): ContactRecord {
   }
 
   return container as ContactRecord;
+}
+
+function normalizeContactLifecycleInput(
+  input: ContactLifecycleInput | string,
+  actorType: ActivityActorType
+): ContactLifecycleInput {
+  return typeof input === "string"
+    ? { contactId: input, actorType }
+    : {
+        ...input,
+        actorType: input.actorType ?? actorType
+      };
+}
+
+function compactLifecycleInput(input: {
+  containerId: string;
+  actorType?: ActivityActorType | undefined;
+  confirmOpenTasks?: boolean | undefined;
+}): {
+  containerId: string;
+  actorType?: ActivityActorType;
+  confirmOpenTasks?: boolean;
+} {
+  return {
+    containerId: input.containerId,
+    ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+    ...(input.confirmOpenTasks === undefined
+      ? {}
+      : { confirmOpenTasks: input.confirmOpenTasks })
+  };
 }
 
 function buildContactSearchBody(

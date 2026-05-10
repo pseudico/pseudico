@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(178);
+    expect(channels).toHaveLength(183);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -154,6 +154,11 @@ describe("typed preload API", () => {
       name: "Launch Plan"
     });
     await api.projects.archiveProject("container_1");
+    await api.projects.completeProject?.({
+      projectId: "container_1",
+      confirmOpenTasks: true
+    });
+    await api.projects.restoreProject?.("container_1");
     await api.projects.getProjectHealth("container_1");
 
     expect(calls).toEqual([
@@ -166,6 +171,17 @@ describe("typed preload API", () => {
       },
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.projects.archiveProject,
+        input: "container_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.projects.completeProject,
+        input: {
+          projectId: "container_1",
+          confirmOpenTasks: true
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.projects.restoreProject,
         input: "container_1"
       },
       {
@@ -192,6 +208,11 @@ describe("typed preload API", () => {
       workspaceId: "workspace_1",
       name: "Alex Chen"
     });
+    await api.contacts.archiveContact?.({
+      contactId: "container_1",
+      confirmOpenTasks: true
+    });
+    await api.contacts.restoreContact?.("container_1");
     await api.contacts.getContact("container_1");
     await api.contacts.addField({
       contactId: "container_1",
@@ -215,6 +236,17 @@ describe("typed preload API", () => {
           workspaceId: "workspace_1",
           name: "Alex Chen"
         }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.contacts.archiveContact,
+        input: {
+          contactId: "container_1",
+          confirmOpenTasks: true
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.contacts.restoreContact,
+        input: "container_1"
       },
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.contacts.getContact,

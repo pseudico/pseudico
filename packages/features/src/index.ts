@@ -94,8 +94,10 @@ export {
 export { ContainerMediaService, containerMediaModuleContract } from "./containerMedia";
 export {
   ContainerCloneService,
+  ContainerLifecycleService,
   CreateContainerCommand,
-  containerCloneModuleContract
+  containerCloneModuleContract,
+  containerLifecycleModuleContract
 } from "./containers";
 export type {
   CloneAttachmentFileInput,
@@ -104,9 +106,13 @@ export type {
   ContainerCloneFileMode,
   ContainerCloneResult,
   ContainerCloneServiceIdFactory,
+  ContainerLifecycleAction,
+  ContainerLifecycleResult,
+  ContainerLifecycleServiceIdFactory,
   CreateContainerCommandIdFactory,
   CreateContainerCommandInput,
-  CreateContainerCommandResult
+  CreateContainerCommandResult,
+  TransitionContainerInput
 } from "./containers";
 export {
   DashboardService,
@@ -302,6 +308,7 @@ export type {
 } from "./calendar";
 export type {
   AddContactFieldInput,
+  ContactLifecycleInput,
   ContactFieldInput,
   ContactMutableStatus,
   ContactProjectRelationshipResult,
@@ -323,6 +330,7 @@ export type {
   CreateContactInput,
   CreateContactResult,
   DeleteContactFieldInput,
+  ListContactsInput,
   LinkContactToProjectInput,
   RelatedContactSummary,
   RelatedProjectSummary,
@@ -541,7 +549,9 @@ export type {
   CreateProjectInput,
   CreateProjectResult,
   GetProjectBoardInput,
+  ListProjectsInput,
   MoveProjectBoardCardInput,
+  ProjectLifecycleInput,
   ProjectBoardColumn,
   ProjectBoardColumnKind,
   ProjectBoardGrouping,

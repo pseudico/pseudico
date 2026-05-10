@@ -14,4 +14,12 @@ export {
   type ContainerCloneResult,
   type ContainerCloneServiceIdFactory
 } from "./ContainerCloneService";
+export {
+  ContainerLifecycleService,
+  containerLifecycleModuleContract,
+  type ContainerLifecycleAction,
+  type ContainerLifecycleResult,
+  type ContainerLifecycleServiceIdFactory,
+  type TransitionContainerInput
+} from "./ContainerLifecycleService";
 

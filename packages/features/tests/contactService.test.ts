@@ -11,7 +11,7 @@ import {
 } from "@local-work-os/db";
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ContactService } from "../src";
+import { ContactService, TaskService } from "../src";
 
 let cleanup: (() => Promise<void>) | undefined;
 let connection: DatabaseConnection;
@@ -223,7 +223,8 @@ describe("ContactService", () => {
       targetId: created.contact.id
     })).toMatchObject({
       title: "Alex Chen Revised",
-      body: "Vendor"
+      body: "Vendor",
+      isDeleted: true
     });
     expect(new ActivityLogRepository(connection).listForTarget(
       "container",
@@ -233,6 +234,59 @@ describe("ContactService", () => {
       { action: "container_updated" },
       { action: "container_archived" }
     ]);
+  });
+
+  it("guards open follow-up tasks before contact archive/complete and restores contacts", async () => {
+    const service = createService();
+    const created = await service.createContact({
+      workspaceId: "workspace_1",
+      name: "Alex Chen",
+      description: "Client"
+    });
+    await createTaskService().createTask({
+      workspaceId: "workspace_1",
+      containerId: created.contact.id,
+      title: "Send follow-up"
+    });
+
+    await expect(service.completeContact(created.contact.id)).rejects.toThrow(
+      "has 1 open task"
+    );
+
+    const completed = await service.completeContact({
+      contactId: created.contact.id,
+      confirmOpenTasks: true
+    });
+
+    expect(completed).toMatchObject({
+      status: "completed",
+      archivedAt: null
+    });
+    expect(service.listContacts("workspace_1")).toEqual([completed]);
+
+    const archived = await service.archiveContact({
+      contactId: created.contact.id,
+      confirmOpenTasks: true
+    });
+    expect(archived).toMatchObject({
+      status: "archived",
+      archivedAt: "2026-05-01T00:00:00.000Z"
+    });
+    expect(service.listContacts("workspace_1")).toEqual([]);
+    expect(service.listContacts({
+      workspaceId: "workspace_1",
+      includeArchived: true
+    })).toEqual([archived]);
+    expect(new SearchIndexRepository(connection).search(
+      "workspace_1",
+      "Alex"
+    )).toEqual([]);
+
+    const restored = await service.restoreContact(created.contact.id);
+    expect(restored).toMatchObject({
+      status: "active",
+      archivedAt: null
+    });
   });
 
   it("generates workspace-unique contact slugs", async () => {
@@ -254,6 +308,17 @@ describe("ContactService", () => {
 
 function createService(): ContactService {
   return new ContactService({
+    connection,
+    idFactory: (prefix) => {
+      idCounter += 1;
+      return `${prefix}_${idCounter}`;
+    },
+    now: () => new Date("2026-05-01T00:00:00.000Z")
+  });
+}
+
+function createTaskService(): TaskService {
+  return new TaskService({
     connection,
     idFactory: (prefix) => {
       idCounter += 1;
