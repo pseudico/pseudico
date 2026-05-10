@@ -844,3 +844,7 @@ Integration points:
 - Filesystem behavior goes through Electron main/preload IPC.
 - React components do not call SQLite directly.
 - User data should be soft-deleted or archived by default.
+
+### Container Media
+
+Owns local visual identity assignments for projects and contacts: project banners and contact avatars/photos. Uses attachment-backed storage, generated thumbnail paths, activity log events for set/remove operations, and Electron IPC for all filesystem access. Does not own cloud media, remote storage, or renderer filesystem access.

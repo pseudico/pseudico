@@ -6,6 +6,7 @@ export const plannedFeatureAreas = [
   "items",
   "projects",
   "contacts",
+  "containerMedia",
   "tasks",
   "lists",
   "notes",
@@ -86,6 +87,7 @@ export {
   PROJECT_CONTACT_RELATIONSHIP_LABEL,
   contactsModuleContract
 } from "./contacts";
+export { ContainerMediaService, containerMediaModuleContract } from "./containerMedia";
 export { CreateContainerCommand } from "./containers";
 export type {
   CreateContainerCommandIdFactory,
@@ -289,6 +291,12 @@ export type {
   UpdateContactFieldInput,
   UpdateContactInput
 } from "./contacts";
+export type {
+  ContainerMediaMutationResult,
+  ContainerMediaServiceIdFactory,
+  RemoveContainerMediaInput,
+  SetContainerMediaInput
+} from "./containerMedia";
 export type {
   DashboardActivityWidgetItem,
   DashboardFavoriteWidgetItem,

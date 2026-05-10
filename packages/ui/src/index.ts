@@ -307,6 +307,12 @@ export {
   type ItemInspectorProps
 } from "./components/ItemInspector";
 export {
+  ContainerMediaPreview,
+  type ContainerMediaPreviewProps,
+  type ContainerMediaVariant,
+  type ContainerMediaViewModel
+} from "./components/ContainerMediaPreview";
+export {
   RecentActivityList,
   type RecentActivityListProps,
   type RecentActivityViewModel

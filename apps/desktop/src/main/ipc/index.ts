@@ -8,6 +8,7 @@ import { registerCalendarIpc } from "./registerCalendarIpc";
 import { registerCollectionIpc } from "./registerCollectionIpc";
 import { registerContactIpc } from "./registerContactIpc";
 import { registerContainerIpc } from "./registerContainerIpc";
+import { registerContainerMediaIpc } from "./registerContainerMediaIpc";
 import { registerDashboardIpc } from "./registerDashboardIpc";
 import { registerDatabaseIpc } from "./registerDatabaseIpc";
 import { registerDiagnosticsIpc } from "./registerDiagnosticsIpc";
@@ -93,6 +94,7 @@ export function registerDesktopIpc(
   registerCalendarIpc(services.workspaceService);
   registerDashboardIpc(services.workspaceService);
   registerContainerIpc();
+  registerContainerMediaIpc(services.workspaceService);
   registerItemIpc(services.workspaceService);
   registerTrashIpc(services.workspaceService);
   registerFileIpc(services.workspaceService);

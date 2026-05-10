@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(159);
+    expect(channels).toHaveLength(162);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -69,6 +69,7 @@ describe("typed preload API", () => {
       "items",
       "trash",
       "dragDrop",
+      "containerMedia",
       "files",
       "backup",
       "import",

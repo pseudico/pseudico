@@ -169,3 +169,7 @@ through the list service boundary; it does not introduce separate board tables.
 This direction is derived from `docs/PRODUCT_SPEC.md`,
 `docs/COVERAGE_MATRIX.md`, and
 `docs/DECISIONS/ADR-0003-universal-container-item-model.md`.
+
+## Container media
+
+Project banners and contact avatars are stored as local attachment-backed container media records. The container_media table keeps one active media assignment per container/role, references an attachment copied under workspace-relative ttachments/, stores optional thumbnail paths, and soft-deletes prior assignments so changes are reversible. Missing-file state is detected by verifying the attachment or thumbnail path inside the active workspace.

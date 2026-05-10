@@ -30,6 +30,10 @@ export {
   type UpsertAppSettingInput
 } from "./AppSettingsRepository";
 export {
+  ContainerMediaRepository,
+  type CreateContainerMediaInput
+} from "./ContainerMediaRepository";
+export {
   ContainerRepository,
   type ContainerRecord,
   type CreateContainerInput,

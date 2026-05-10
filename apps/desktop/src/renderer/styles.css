@@ -4551,3 +4551,49 @@ body,
 .tab-summary-preview-button strong {
   font-size: 0.9rem;
 }
+
+
+.container-media-preview {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 12rem;
+}
+
+.container-media-frame {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border-muted, #d8e2dc);
+  background: linear-gradient(135deg, rgba(36, 92, 85, 0.14), rgba(44, 107, 143, 0.14));
+  color: var(--text-muted, #65736f);
+}
+
+.container-media-preview-banner .container-media-frame {
+  width: min(28rem, 42vw);
+  height: 7.5rem;
+  border-radius: 1rem;
+}
+
+.container-media-preview-avatar .container-media-frame {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 999px;
+}
+
+.container-media-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.container-media-placeholder {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.container-media-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}

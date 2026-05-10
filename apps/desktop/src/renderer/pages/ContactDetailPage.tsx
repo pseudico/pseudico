@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   CategoryBadge,
   ContactFieldsEditor,
+  ContainerMediaPreview,
   ContainerTabSummaryCards,
   ItemFeed,
   NoteCardContent,
@@ -32,6 +33,7 @@ import type {
   ContactDetailSummary,
   ContactFieldSummary,
   ContactSummary,
+  ContainerMediaSummary,
   LocalWorkOsApi,
   NoteSummary,
   ProjectSummary,
@@ -112,6 +114,9 @@ export function ContactDetailPage({
   const [tabError, setTabError] = useState<string | null>(null);
   const [projects, setProjects] =
     useState<ProjectSummary[]>(initialAvailableProjects);
+  const [contactMedia, setContactMedia] = useState<ContainerMediaSummary | null>(null);
+  const [contactMediaBusy, setContactMediaBusy] = useState(false);
+  const [contactMediaError, setContactMediaError] = useState<string | null>(null);
   const [relatedProjects, setRelatedProjects] = useState<RelatedProjectSummary[]>(
     initialRelatedProjects
   );
@@ -248,6 +253,30 @@ export function ContactDetailPage({
     }
 
     void loadContact();
+
+    return () => {
+      active = false;
+    };
+  }, [apiClient, contactId]);
+
+  useEffect(() => {
+    if (contactId === undefined || apiClient.containerMedia === undefined) {
+      return;
+    }
+
+    let active = true;
+    void apiClient.containerMedia
+      .getActive({ containerId: contactId, role: "contact_avatar" })
+      .then((result) => {
+        if (!active) {
+          return;
+        }
+        if (result.ok) {
+          setContactMedia(result.data);
+        } else {
+          setContactMediaError(result.error.message);
+        }
+      });
 
     return () => {
       active = false;
@@ -806,6 +835,53 @@ export function ContactDetailPage({
     setItemError("That context menu action is not available in this view yet.");
   }
 
+  async function setContactAvatar(): Promise<void> {
+    if (contact === null || apiClient.containerMedia === undefined) {
+      return;
+    }
+
+    setContactMediaBusy(true);
+    setContactMediaError(null);
+    const result = await apiClient.containerMedia.chooseAndSet({
+      containerId: contact.id,
+      role: "contact_avatar",
+      altText: `${contact.name} photo`
+    });
+    setContactMediaBusy(false);
+
+    if (!result.ok) {
+      setContactMediaError(result.error.message);
+      return;
+    }
+
+    if (result.data !== null) {
+      setContactMedia(result.data);
+      await refreshContactActivity(contact.id);
+    }
+  }
+
+  async function removeContactAvatar(): Promise<void> {
+    if (contact === null || apiClient.containerMedia === undefined) {
+      return;
+    }
+
+    setContactMediaBusy(true);
+    setContactMediaError(null);
+    const result = await apiClient.containerMedia.remove({
+      containerId: contact.id,
+      role: "contact_avatar"
+    });
+    setContactMediaBusy(false);
+
+    if (!result.ok) {
+      setContactMediaError(result.error.message);
+      return;
+    }
+
+    setContactMedia(null);
+    await refreshContactActivity(contact.id);
+  }
+
   if (loading) {
     return <p className="muted-text">Loading contact...</p>;
   }
@@ -859,6 +935,15 @@ export function ContactDetailPage({
       </Link>
 
       <header className="project-detail-header">
+        <ContainerMediaPreview
+          busy={contactMediaBusy}
+          error={contactMediaError}
+          media={contactMedia}
+          title={contact.name}
+          variant="avatar"
+          onRemove={() => void removeContactAvatar()}
+          onSet={() => void setContactAvatar()}
+        />
         <span
           className="project-detail-color"
           style={{ backgroundColor: contact.color ?? "#2c6b8f" }}

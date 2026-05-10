@@ -73,6 +73,8 @@ export const ActivityAction = {
   fileAttached: "file_attached",
   fileVersionCreated: "file_version_created",
   fileVersionRestored: "file_version_restored",
+  containerMediaSet: "container_media_set",
+  containerMediaRemoved: "container_media_removed",
   systemRowsRepaired: "system_rows_repaired",
   searchIndexRebuilt: "search_index_rebuilt",
   backupCreated: "backup_created",

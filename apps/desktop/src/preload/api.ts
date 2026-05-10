@@ -419,6 +419,34 @@ export type ContactSummary = {
   deletedAt: string | null;
 };
 
+
+export type ContainerMediaRole = "project_banner" | "contact_avatar";
+
+export type ContainerMediaSummary = {
+  id: string;
+  workspaceId: string;
+  containerId: string;
+  attachmentId: string;
+  role: ContainerMediaRole;
+  thumbnailStoragePath: string | null;
+  altText: string | null;
+  originalName: string;
+  mimeType: string | null;
+  storagePath: string;
+  exists: boolean;
+  thumbnailExists: boolean;
+  previewDataUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
+export type ChooseAndSetContainerMediaInput = {
+  containerId: string;
+  role: ContainerMediaRole;
+  altText?: string | null;
+};
+
 export type ContactFieldSummary = {
   id: string;
   workspaceId: string;
@@ -2303,6 +2331,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
       "local-work-os:drag-drop:attach-files-to-container",
     attachFilesToItem: "local-work-os:drag-drop:attach-files-to-item"
   },
+  containerMedia: {
+    chooseAndSet: "local-work-os:container-media:choose-and-set",
+    getActive: "local-work-os:container-media:get-active",
+    remove: "local-work-os:container-media:remove"
+  },
   files: {
     getStatus: "local-work-os:files:get-status",
     attachFileToContainer: "local-work-os:files:attach-file-to-container",
@@ -2858,6 +2891,18 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.attachFilesToItem]: {
     input: AttachDroppedFilesToItemInput;
     result: ApiResult<FileAttachmentResultSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.containerMedia.chooseAndSet]: {
+    input: ChooseAndSetContainerMediaInput;
+    result: ApiResult<ContainerMediaSummary | null>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.containerMedia.getActive]: {
+    input: { containerId: string; role: ContainerMediaRole };
+    result: ApiResult<ContainerMediaSummary | null>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.containerMedia.remove]: {
+    input: { containerId: string; role: ContainerMediaRole };
+    result: ApiResult<ContainerMediaSummary | null>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.files.getStatus]: {
     input: undefined;
@@ -3421,6 +3466,11 @@ export type LocalWorkOsApi = {
       input: AttachDroppedFilesToItemInput
     ) => Promise<ApiResult<FileAttachmentResultSummary[]>>;
     getDroppedFilePaths: (files: readonly File[]) => string[];
+  };
+  containerMedia?: {
+    chooseAndSet: (input: ChooseAndSetContainerMediaInput) => Promise<ApiResult<ContainerMediaSummary | null>>;
+    getActive: (input: { containerId: string; role: ContainerMediaRole }) => Promise<ApiResult<ContainerMediaSummary | null>>;
+    remove: (input: { containerId: string; role: ContainerMediaRole }) => Promise<ApiResult<ContainerMediaSummary | null>>;
   };
   files: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
@@ -3989,6 +4039,14 @@ export function createLocalWorkOsApi(
       attachFilesToItem: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.dragDrop.attachFilesToItem, input),
       getDroppedFilePaths: () => []
+    },
+    containerMedia: {
+      chooseAndSet: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containerMedia.chooseAndSet, input),
+      getActive: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containerMedia.getActive, input),
+      remove: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containerMedia.remove, input)
     },
     files: {
       getStatus: () =>
