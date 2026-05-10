@@ -11,6 +11,7 @@ export type GroupedResultViewModel = {
   containerTitle: string;
   categoryName?: string | null;
   taskStatus?: string | null;
+  taskPriority?: number | null;
   dueAt?: string | null;
   tags: readonly string[];
   destinationPath: string;
@@ -97,6 +98,9 @@ export function GroupedResultsList({
                     )}
                     {result.taskStatus === undefined || result.taskStatus === null ? null : (
                       <span>{result.taskStatus}</span>
+                    )}
+                    {result.taskPriority === undefined || result.taskPriority === null ? null : (
+                      <span>P{result.taskPriority}</span>
                     )}
                     {result.dueAt === undefined || result.dueAt === null ? null : (
                       <span>{result.dueAt.slice(0, 10)}</span>

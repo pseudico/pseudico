@@ -36,6 +36,7 @@ import {
   ReminderPicker,
   renderLoadableState,
   SmartListEditor,
+  TaskCardContent,
   TodayWidget,
   TodayLane,
   TodayTaskCard,
@@ -52,6 +53,7 @@ const taskItem: UniversalItemViewModel = {
   body: "Ask for the revised statement.",
   status: "active",
   categoryLabel: "Finance",
+  categoryColor: "#2c6b8f",
   dueLabel: "Today"
 };
 
@@ -64,6 +66,7 @@ describe("Universal item UI", () => {
     expect(html).toContain("Ask for the revised statement.");
     expect(html).toContain("Finance");
     expect(html).toContain("Today");
+    expect(html).toContain("--item-accent-color:#2c6b8f");
   });
 
   it("renders one date-range input for task/list date edits", () => {
@@ -108,6 +111,28 @@ describe("Universal item UI", () => {
     expect(html).toContain("@Manual");
     expect(html).toContain("data-tag-source=\"inline\"");
     expect(html).toContain("data-tag-source=\"manual\"");
+  });
+
+  it("renders task status, priority, and editable visual state controls", () => {
+    const html = renderToStaticMarkup(
+      <TaskCardContent
+        item={{
+          ...taskItem,
+          taskStatus: "waiting",
+          priority: 1,
+          dueAt: "2026-05-05T00:00:00.000Z"
+        }}
+        onPriorityChange={() => undefined}
+        onStatusChange={() => undefined}
+      />
+    );
+
+    expect(html).toContain("Task details");
+    expect(html).toContain("Waiting");
+    expect(html).toContain("P1");
+    expect(html).toContain("Priority");
+    expect(html).toContain("Status");
+    expect(html).toContain("value=\"waiting\"");
   });
 
   it("renders category badge and picker controls", () => {
@@ -199,6 +224,7 @@ describe("Universal item UI", () => {
     expect(html).toContain("Item type");
     expect(html).toContain("Container type");
     expect(html).toContain("Task status");
+    expect(html).toContain("Task priority");
     expect(html).toContain("Due relative filter");
     expect(html).toContain("Save smart list");
     expect(html).toContain("Preview found 3 results.");

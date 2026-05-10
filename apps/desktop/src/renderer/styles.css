@@ -2666,6 +2666,7 @@ a {
   gap: 12px;
   padding: 14px;
   border: 1px solid #dedbd1;
+  border-left: 5px solid var(--item-accent-color, #dedbd1);
   border-radius: 8px;
   background: #ffffff;
   box-shadow: 0 10px 24px rgba(38, 38, 36, 0.05);
@@ -2946,6 +2947,67 @@ a {
   gap: 10px;
 }
 
+.task-card-content[data-task-status="done"],
+.task-card-content[data-task-status="cancelled"] {
+  opacity: 0.72;
+}
+
+.task-card-content[data-task-status="done"] p,
+.task-card-content[data-task-status="cancelled"] p {
+  text-decoration: line-through;
+}
+
+.task-details-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  color: #6d6a62;
+  font-size: 12px;
+}
+
+.task-details-row span,
+.task-status-pill,
+.task-priority-pill {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  border: 1px solid #e6e0d1;
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: #fbf8ef;
+  color: #514e49;
+  font-weight: 650;
+}
+
+.task-status-pill-open {
+  border-color: #b9d6ce;
+  background: #edf8f4;
+  color: #245c55;
+}
+
+.task-status-pill-waiting,
+.task-priority-pill-2,
+.task-priority-pill-3 {
+  border-color: #e8c98d;
+  background: #fff7df;
+  color: #7a531c;
+}
+
+.task-status-pill-done {
+  border-color: #bdd9b9;
+  background: #eff8ec;
+  color: #2f6f3a;
+}
+
+.task-status-pill-cancelled,
+.task-priority-pill-0,
+.task-priority-pill-1 {
+  border-color: #e0b4a8;
+  background: #fff0ed;
+  color: #8b3f2d;
+}
+
 .list-card-content {
   display: grid;
   gap: 12px;
@@ -3171,6 +3233,25 @@ a {
   flex-wrap: wrap;
   align-items: end;
   gap: 10px;
+}
+
+.task-card-select-field {
+  display: grid;
+  width: min(150px, 100%);
+  gap: 5px;
+  color: #514e49;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.task-card-select-field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid #d5d0c3;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #262624;
 }
 
 .task-card-due-field {

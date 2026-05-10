@@ -13,6 +13,8 @@ export type TaskCardViewModel = UniversalItemViewModel & {
   timezone?: string | null;
 };
 
+export type TaskCardStatus = "open" | "waiting" | "done" | "cancelled";
+
 export type TaskCardContentProps = {
   item: TaskCardViewModel;
   disabled?: boolean;
@@ -29,6 +31,14 @@ export type TaskCardContentProps = {
     item: TaskCardViewModel,
     dueAt: string | null
   ) => Promise<void> | void;
+  onPriorityChange?: (
+    item: TaskCardViewModel,
+    priority: number | null
+  ) => Promise<void> | void;
+  onStatusChange?: (
+    item: TaskCardViewModel,
+    status: TaskCardStatus
+  ) => Promise<void> | void;
   onToggleComplete?: (item: TaskCardViewModel) => Promise<void> | void;
 };
 
@@ -39,15 +49,25 @@ export function TaskCardContent({
   onDueDateChange,
   onSnoozeTask,
   onRescheduleTask,
+  onPriorityChange,
+  onStatusChange,
   onToggleComplete
 }: TaskCardContentProps): React.JSX.Element {
-  const completed = item.taskStatus === "done" || item.status === "completed";
+  const taskStatus = normalizeTaskStatus(item.taskStatus ?? item.status);
+  const completed = taskStatus === "done" || item.status === "completed";
 
   return (
-    <div className="task-card-content" data-task-status={item.taskStatus ?? item.status}>
+    <div className="task-card-content" data-task-status={taskStatus}>
       {item.body === undefined || item.body === null || item.body.length === 0 ? null : (
         <p>{item.body}</p>
       )}
+
+      <TaskDetailsRow
+        dueAt={item.dueAt}
+        priority={item.priority}
+        status={taskStatus}
+        timezone={item.timezone}
+      />
 
       <div className="task-card-controls">
         <button
@@ -86,7 +106,100 @@ export function TaskCardContent({
           onReschedule={(dueAt) => onRescheduleTask?.(item, dueAt)}
           onSnoozePreset={(preset) => onSnoozeTask?.(item, preset)}
         />
+        <label className="task-card-select-field">
+          <span>Priority</span>
+          <select
+            disabled={disabled || onPriorityChange === undefined}
+            value={item.priority ?? ""}
+            onChange={(event) => {
+              const value = event.currentTarget.value;
+              void onPriorityChange?.(
+                item,
+                value.length === 0 ? null : Number(value)
+              );
+            }}
+          >
+            <option value="">None</option>
+            {[0, 1, 2, 3, 4, 5].map((priority) => (
+              <option key={priority} value={priority}>
+                P{priority}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="task-card-select-field">
+          <span>Status</span>
+          <select
+            disabled={disabled || onStatusChange === undefined}
+            value={taskStatus}
+            onChange={(event) => {
+              void onStatusChange?.(
+                item,
+                event.currentTarget.value as TaskCardStatus
+              );
+            }}
+          >
+            <option value="open">Open</option>
+            <option value="waiting">Waiting</option>
+            <option value="done">Done</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </label>
       </div>
     </div>
   );
+}
+
+export function TaskDetailsRow({
+  dueAt,
+  priority,
+  status,
+  timezone
+}: {
+  dueAt?: string | null | undefined;
+  priority?: number | null | undefined;
+  status: TaskCardStatus;
+  timezone?: string | null | undefined;
+}): React.JSX.Element {
+  return (
+    <div className="task-details-row" aria-label="Task details">
+      <span className={`task-status-pill task-status-pill-${status}`}>
+        {formatTaskStatus(status)}
+      </span>
+      <span className={`task-priority-pill task-priority-pill-${priority ?? "none"}`}>
+        {priority === undefined || priority === null ? "No priority" : `P${priority}`}
+      </span>
+      {dueAt === undefined || dueAt === null ? (
+        <span>No due date</span>
+      ) : (
+        <span>Due {dueAt.slice(0, 10)}</span>
+      )}
+      {timezone === undefined || timezone === null ? null : <span>{timezone}</span>}
+    </div>
+  );
+}
+
+function normalizeTaskStatus(status: string | null | undefined): TaskCardStatus {
+  return status === "waiting" ||
+    status === "done" ||
+    status === "cancelled" ||
+    status === "open"
+    ? status
+    : "open";
+}
+
+function formatTaskStatus(status: TaskCardStatus): string {
+  if (status === "done") {
+    return "Done";
+  }
+
+  if (status === "waiting") {
+    return "Waiting";
+  }
+
+  if (status === "cancelled") {
+    return "Cancelled";
+  }
+
+  return "Open";
 }

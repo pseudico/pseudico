@@ -1140,6 +1140,7 @@ export type CollectionResultSummary = {
   categoryId: string | null;
   categoryName: string | null;
   taskStatus: string | null;
+  taskPriority?: number | null;
   dueAt: string | null;
   tags: string[];
   destinationPath: string;
@@ -1434,6 +1435,7 @@ export type SmartListCriteriaInput = {
   categoryIds?: string[];
   categoryMode?: "any" | "is" | "isEmpty" | "isNotEmpty";
   taskStatuses?: string[];
+  taskPriorities?: number[];
   dueFilter?:
     | "any"
     | "overdue"

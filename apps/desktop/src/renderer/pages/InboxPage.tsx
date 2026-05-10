@@ -18,6 +18,7 @@ import {
   type ListCardViewModel,
   type MoveTargetContainer,
   type SnoozePreset,
+  type TaskCardStatus,
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel
@@ -470,6 +471,46 @@ export function InboxPage({
     setTaskBusyId(null);
   }
 
+  async function updateTaskPriority(
+    item: TaskCardViewModel,
+    priority: number | null
+  ): Promise<void> {
+    await updateTaskVisualState(item, { priority });
+  }
+
+  async function updateTaskStatus(
+    item: TaskCardViewModel,
+    status: TaskCardStatus
+  ): Promise<void> {
+    await updateTaskVisualState(item, { status });
+  }
+
+  async function updateTaskVisualState(
+    item: TaskCardViewModel,
+    patch: { priority?: number | null; status?: TaskCardStatus }
+  ): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
+    }
+
+    setTaskBusyId(item.id);
+    setTaskError(null);
+
+    const result = await apiClient.tasks.update({
+      itemId: item.id,
+      ...patch
+    });
+
+    if (!result.ok) {
+      setTaskBusyId(null);
+      setTaskError(result.error.message);
+      return;
+    }
+
+    await loadInbox(currentWorkspace.id);
+    setTaskBusyId(null);
+  }
+
   async function snoozeTask(
     item: TaskCardViewModel,
     preset: SnoozePreset
@@ -652,8 +693,10 @@ export function InboxPage({
           disabled={taskBusyId === item.id}
           item={item}
           onDateRangeChange={updateTaskDateRange}
+          onPriorityChange={updateTaskPriority}
           onRescheduleTask={rescheduleTask}
           onSnoozeTask={snoozeTask}
+          onStatusChange={updateTaskStatus}
           onToggleComplete={toggleTaskComplete}
         />
       );

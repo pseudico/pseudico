@@ -2389,3 +2389,51 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI and review remain after PR opens.
 Next actions: Stage/commit; push branch; open ready PR.
+## 2026-05-11T06:57:48.4826231+10:00
+Objective: Complete PSE-117 and promote next ticket.
+Decisions made:
+- Squash-merged PR #112 at b1859c62 after CI passed.
+- Moved PSE-117 to Done and promoted PSE-118 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi remain unrelated.
+Next actions: Start PSE-118 next; reconcile before coding; keep one Codex Ready issue.
+## 2026-05-11 07:01:48 +10:00
+Objective: Reconcile active Linear/GitHub work and start PSE-118.
+Decisions made:
+- No PR Open or In Progress issues found; selected sole Codex Ready issue PSE-118.
+- Moved PSE-118 to In Progress for implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked files remain unrelated.
+Next actions: Read docs/ticket details; create branch; implement priority/color emphasis.
+## 2026-05-11 07:05:21 +10:00
+Objective: Plan PSE-118 implementation scope.
+Decisions made:
+- Use existing task priority/status persistence; add UI controls/details and saved-view priority filter.
+- Satisfy color scope via category-color inheritance on task/item cards, not a schema color override.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Full branch has unrelated untracked files that remain untouched.
+Next actions: Patch core saved-view query/evaluator; update UI task card/editor; add tests.
+
+## 2026-05-11T07:15:55.4222312+10:00
+Objective: Verify PSE-118 implementation before PR.
+Decisions made: Ran full lint/typecheck/test/build after targeted package tests; kept scope to priority/color/status display and saved-view filtering.
+Files changed: apps/desktop/src, packages/db/src, packages/features/src, packages/ui/src, packages/*/tests, docs/session_log.md
+Open questions / risks: CI still needs GitHub confirmation after PR opens.
+Next actions: commit changes; push branch; open ready PR.
+
+## 2026-05-11T07:16:36.7879921+10:00
+Objective: Commit PSE-118 implementation.
+Decisions made: Created commit d9d7be4 for priority/status UI, category color inheritance, and saved-view priority filters.
+Files changed: docs/session_log.md
+Open questions / risks: Remote PR and CI still pending.
+Next actions: amend log into commit; push branch; open PR.
+
+## 2026-05-11T07:18:25.3134119+10:00
+Objective: Open PSE-118 PR and update Linear.
+Decisions made: Created PR #113 as ready-for-review and moved PSE-118 to PR Open with PR attachment/comment.
+Files changed: docs/session_log.md
+Open questions / risks: GitHub CI and review threads must be checked before merge.
+Next actions: push log update; inspect PR status; merge only if clean and green.

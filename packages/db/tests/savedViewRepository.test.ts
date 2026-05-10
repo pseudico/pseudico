@@ -102,6 +102,7 @@ describe("SavedViewRepository", () => {
       itemId: item.id,
       workspaceId: "workspace_1",
       taskStatus: "waiting",
+      priority: 1,
       dueAt: "2026-05-05T00:00:00.000Z",
       timestamp: TEST_TIMESTAMP
     });
@@ -138,6 +139,7 @@ describe("SavedViewRepository", () => {
           containerTitle: "Launch Plan",
           categorySlug: "work",
           taskStatus: "waiting",
+          taskPriority: 1,
           dueAt: "2026-05-05T00:00:00.000Z",
           tagSlugs: ["phone-call"]
         }),

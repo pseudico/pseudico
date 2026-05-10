@@ -184,6 +184,8 @@ export {
 } from "./components/DateRangeInput";
 export {
   TaskCardContent,
+  TaskDetailsRow,
+  type TaskCardStatus,
   type TaskCardContentProps,
   type TaskCardViewModel
 } from "./components/TaskCardContent";

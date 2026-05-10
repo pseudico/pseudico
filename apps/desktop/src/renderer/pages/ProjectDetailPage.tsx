@@ -63,6 +63,7 @@ import {
   type RelatedContactViewModel,
   type TagBadgeViewModel,
   type SnoozePreset,
+  type TaskCardStatus,
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel,
@@ -1584,6 +1585,47 @@ export function ProjectDetailPage({
     setTaskBusyId(null);
   }
 
+  async function updateTaskPriority(
+    item: TaskCardViewModel,
+    priority: number | null
+  ): Promise<void> {
+    await updateTaskVisualState(item, { priority });
+  }
+
+  async function updateTaskStatus(
+    item: TaskCardViewModel,
+    status: TaskCardStatus
+  ): Promise<void> {
+    await updateTaskVisualState(item, { status });
+  }
+
+  async function updateTaskVisualState(
+    item: TaskCardViewModel,
+    patch: { priority?: number | null; status?: TaskCardStatus }
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setTaskBusyId(item.id);
+    setTaskError(null);
+
+    const result = await apiClient.tasks.update({
+      itemId: item.id,
+      ...patch
+    });
+
+    if (!result.ok) {
+      setTaskBusyId(null);
+      setTaskError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectHealth(project.id);
+    setTaskBusyId(null);
+  }
+
   async function snoozeTask(
     item: TaskCardViewModel,
     preset: SnoozePreset
@@ -2409,8 +2451,10 @@ export function ProjectDetailPage({
             disabled={taskBusyId === item.id}
             item={item}
             onDateRangeChange={updateTaskDateRange}
+            onPriorityChange={updateTaskPriority}
             onRescheduleTask={rescheduleTask}
             onSnoozeTask={snoozeTask}
+            onStatusChange={updateTaskStatus}
             onToggleComplete={toggleTaskComplete}
           />
         </>
@@ -3045,6 +3089,7 @@ function toProjectTaskViewModel(
     categoryId: task.categoryId,
     containerTabId: task.containerTabId,
     categoryLabel: findCategoryName(task.categoryId, categories),
+    categoryColor: findCategoryColor(task.categoryId, categories),
     sortOrder: task.sortOrder,
     createdAt: task.createdAt,
     dueLabel: formatDateLabel(task.dueAt),
@@ -3312,6 +3357,17 @@ function findCategoryName(
   }
 
   return categories.find((category) => category.id === categoryId)?.name ?? categoryId;
+}
+
+function findCategoryColor(
+  categoryId: string | null | undefined,
+  categories: readonly CategorySummary[]
+): string | null {
+  if (categoryId === undefined || categoryId === null) {
+    return null;
+  }
+
+  return categories.find((category) => category.id === categoryId)?.color ?? null;
 }
 
 function findCategoryIdForItem(

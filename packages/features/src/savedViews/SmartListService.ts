@@ -49,6 +49,7 @@ export type SmartListCriteriaForm = {
   categoryIds?: string[];
   categoryMode?: "any" | "is" | "isEmpty" | "isNotEmpty";
   taskStatuses?: TaskStatus[];
+  taskPriorities?: number[];
   dueFilter?: SmartListDueFilter;
   customDueFrom?: string;
   customDueTo?: string;
@@ -235,6 +236,7 @@ export function mapFormToSavedViewQuery(
     criteria.taskStatuses,
     isTaskStatus
   );
+  const taskPriorities = normalizePriorities(criteria.taskPriorities);
 
   if (itemTypes.length > 0) {
     conditions.push({
@@ -277,6 +279,14 @@ export function mapFormToSavedViewQuery(
       field: "taskStatus",
       operator: taskStatuses.length === 1 ? "is" : "in",
       value: toSingleOrMany(taskStatuses)
+    });
+  }
+
+  if (taskPriorities.length > 0) {
+    conditions.push({
+      field: "taskPriority",
+      operator: taskPriorities.length === 1 ? "is" : "in",
+      value: toSingleOrManyNumbers(taskPriorities)
     });
   }
 
@@ -425,6 +435,7 @@ function normalizeCriteria(input: SmartListCriteriaForm): SmartListCriteriaForm 
           ? "is"
           : "any",
     taskStatuses: normalizeAllowedValues(input.taskStatuses, isTaskStatus),
+    taskPriorities: normalizePriorities(input.taskPriorities),
     dueFilter: normalizeDueFilter(input.dueFilter),
     ...(input.customDueFrom === undefined
       ? {}
@@ -463,12 +474,32 @@ function toSingleOrMany<TValue extends string>(values: TValue[]): TValue | TValu
   return values.length === 1 ? first : values;
 }
 
+function toSingleOrManyNumbers(values: number[]): number | number[] {
+  const first = values[0];
+
+  if (first === undefined) {
+    throw new Error("Expected at least one filter value.");
+  }
+
+  return values.length === 1 ? first : values;
+}
+
 function normalizeStrings(values: readonly string[] | undefined): string[] {
   if (!Array.isArray(values)) {
     return [];
   }
 
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function normalizePriorities(values: readonly number[] | undefined): number[] {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+  return [...new Set(values)].filter(
+    (value) => Number.isInteger(value) && value >= 0 && value <= 5
+  );
 }
 
 function isContainerType(value: string): value is SmartListContainerType {
