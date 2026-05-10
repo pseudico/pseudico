@@ -186,7 +186,11 @@ export {
   projectsModuleContract
 } from "./projects";
 export { RecurrenceService, recurrenceModuleContract } from "./recurrence";
-export { RelationshipService, relationshipsModuleContract } from "./relationships";
+export {
+  RelationshipGraphService,
+  RelationshipService,
+  relationshipsModuleContract
+} from "./relationships";
 export { WikilinkService, wikilinksModuleContract } from "./wikilinks";
 export { ReminderService, remindersModuleContract } from "./reminders";
 export {
@@ -553,8 +557,14 @@ export type {
 } from "./recurrence";
 export type {
   CreateRelationshipInput,
+  GetRelationshipGraphInput,
   ListRelationshipsInput,
+  RelatedContentDepth,
   RelationshipEndpoint,
+  RelationshipGraphEdge,
+  RelationshipGraphEndpoint,
+  RelationshipGraphNode,
+  RelationshipGraphView,
   RelationshipMutationResult,
   RelationshipServiceIdFactory,
   RemoveRelationshipInput

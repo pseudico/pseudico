@@ -2074,3 +2074,69 @@ Decisions made: Added parser/main-process URL opener; rendered safe inline open/
 Files changed: packages/core/src/services/linkParser.ts; packages/ui/src/components/NoteCardContent.tsx; apps/desktop/src/main/ipc/linkHandlers.ts
 Open questions / risks: Convert-to-link is exposed where link items are surfaced in the feed.
 Next actions: Commit; open PR; watch CI.
+
+## 2026-05-10 19:38:17 +10:00
+Objective: Start end-to-end Local Work OS ticket run and reconcile active work.
+Decisions made:
+- Use Linear as source of plan and GitHub as proof.
+- Begin with PR Open/In Progress/Codex Ready reconciliation before coding.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Active PR/CI/review state unknown until checked.
+Next actions:
+- Query Linear states and GitHub PRs.
+- Inspect local repo status.
+
+## 2026-05-10 19:40:14 +10:00
+Objective: Reconcile active Linear/GitHub work for next ticket.
+Decisions made:
+- No PR Open or In Progress issues found; no open GitHub PRs found.
+- PSE-110 is the sole Codex Ready issue and was moved to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Untracked local .playwright-mcp/ and gh installer are unrelated and left untouched.
+Next actions:
+- Create PSE-110 branch.
+- Read linked ticket/docs and implement scoped UI.
+
+## 2026-05-10 19:42:53 +10:00
+Objective: Plan PSE-110 related-content graph/list implementation.
+Decisions made:
+- Add RelationshipGraphService for direct/second-degree expansion with cycle-safe traversal.
+- Expose generic graph/create/remove relationship IPC and render project/contact graph panels.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Keep add-target UI simple and scoped to local project/contact/page items.
+Next actions:
+- Implement service/API/UI component.
+- Add service and component tests.
+
+## 2026-05-10 20:01:15 +10:00
+Objective: Implement and verify PSE-110 related-content graph/list view.
+Decisions made:
+- Added cycle-safe direct/second-degree RelationshipGraphService and generic relationship IPC.
+- Added project/contact graph panels with filter, link, remove, and open-target actions.
+Files changed:
+- packages/features/src/relationships/RelationshipGraphService.ts
+- packages/ui/src/components/RelatedContentGraphPanel.tsx
+Open questions / risks:
+- Manual QA still requires a real workspace scenario after PR CI.
+Next actions:
+- Review diff and open ready PR.
+- Update Linear with PR link.
+
+## 2026-05-10 20:03:16 +10:00
+Objective: Open PR and update Linear for PSE-110.
+Decisions made:
+- Opened ready PR #105 against main with full template and local check results.
+- Moved PSE-110 to PR Open and linked the PR in Linear.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- CI/review outcome pending; branch cleanup waits for merge.
+Next actions:
+- Inspect PR CI and review state.
+- Merge only if clean and green.

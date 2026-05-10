@@ -319,6 +319,9 @@ function createMockApi(
       deleteTab: async () => apiOk(null as never)
     },
     relationships: {
+      getGraph: async () => apiOk(null as never),
+      createRelationship: async () => apiOk(null as never),
+      removeRelationship: async () => apiOk(null as never),
       linkContactToProject: async () =>
         apiOk({
           relationship: relationshipSummary(),

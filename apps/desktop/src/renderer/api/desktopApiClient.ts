@@ -207,6 +207,12 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       deleteTab: (tabId) => callApi(() => api.tabs.deleteTab(tabId))
     },
     relationships: {
+      getGraph: (input) =>
+        callApi(() => api.relationships.getGraph(input)),
+      createRelationship: (input) =>
+        callApi(() => api.relationships.createRelationship(input)),
+      removeRelationship: (relationshipId) =>
+        callApi(() => api.relationships.removeRelationship(relationshipId)),
       linkContactToProject: (input) =>
         callApi(() => api.relationships.linkContactToProject(input)),
       unlinkContactFromProject: (relationshipId) =>
@@ -653,6 +659,12 @@ export const desktopApiClient: LocalWorkOsApi = {
     deleteTab: (tabId) => getDesktopApiClient().tabs.deleteTab(tabId)
   },
   relationships: {
+    getGraph: (input) =>
+      getDesktopApiClient().relationships.getGraph(input),
+    createRelationship: (input) =>
+      getDesktopApiClient().relationships.createRelationship(input),
+    removeRelationship: (relationshipId) =>
+      getDesktopApiClient().relationships.removeRelationship(relationshipId),
     linkContactToProject: (input) =>
       getDesktopApiClient().relationships.linkContactToProject(input),
     unlinkContactFromProject: (relationshipId) =>

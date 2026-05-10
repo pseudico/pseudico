@@ -12,6 +12,7 @@ import {
   NoteCardContent,
   NoteEditor,
   RecentActivityList,
+  RelatedContentGraphPanel,
   RelatedProjectsPanel,
   TaskCardContent,
   TaskQuickAdd,
@@ -23,6 +24,9 @@ import {
   type NoteEditorValues,
   type NoteWikilinkSuggestion,
   type RecentActivityViewModel,
+  type RelatedContentEndpointViewModel,
+  type RelatedContentGraphViewModel,
+  type RelatedContentTargetOption,
   type RelatedProjectViewModel,
   type TaskCardViewModel,
   type TaskQuickAddValues,
@@ -45,6 +49,9 @@ import type {
   NoteSummary,
   ProjectSummary,
   RelatedProjectSummary,
+  RelationshipEndpointInput,
+  RelationshipGraphSummary,
+  RelationshipType,
   TabTemplateSummary,
   TaskSummary
 } from "../../preload/api";
@@ -145,6 +152,13 @@ export function ContactDetailPage({
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [relationshipBusy, setRelationshipBusy] = useState(false);
   const [relationshipError, setRelationshipError] = useState<string | null>(null);
+  const [relationshipGraph, setRelationshipGraph] =
+    useState<RelationshipGraphSummary | null>(null);
+  const [relationshipGraphFilter, setRelationshipGraphFilter] =
+    useState<RelationshipType | "all">("all");
+  const [selectedGraphTargetKey, setSelectedGraphTargetKey] = useState("");
+  const [selectedGraphRelationType, setSelectedGraphRelationType] =
+    useState<RelationshipType>("related");
   const [loading, setLoading] = useState(initialContactDetail === undefined);
   const [itemsLoading, setItemsLoading] = useState(false);
   const [savingField, setSavingField] = useState(false);
@@ -307,6 +321,15 @@ export function ContactDetailPage({
       active = false;
     };
   }, [apiClient, contactId]);
+
+  useEffect(() => {
+    if (contactId === undefined) {
+      setRelationshipGraph(null);
+      return;
+    }
+
+    void refreshRelationshipGraph(contactId);
+  }, [apiClient, contactId, relationshipGraphFilter]);
 
   useEffect(() => {
     if (contactId === undefined || apiClient.containerMedia === undefined) {
@@ -649,6 +672,7 @@ export function ContactDetailPage({
     await refreshRelatedProjects(contact.id);
     await refreshContactActivity(contact.id);
     await refreshContactTimeline(contact.id);
+    await refreshRelationshipGraph(contact.id);
     setRelationshipBusy(false);
   }
 
@@ -673,7 +697,99 @@ export function ContactDetailPage({
     await refreshRelatedProjects(contact.id);
     await refreshContactActivity(contact.id);
     await refreshContactTimeline(contact.id);
+    await refreshRelationshipGraph(contact.id);
     setRelationshipBusy(false);
+  }
+
+  async function refreshRelationshipGraph(activeContactId: string): Promise<void> {
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.getGraph({
+      root: { type: "container", id: activeContactId },
+      relationType: relationshipGraphFilter,
+      maxDepth: 2
+    });
+
+    if (!result.ok) {
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    setRelationshipGraph(result.data);
+  }
+
+  async function linkSelectedGraphTarget(): Promise<void> {
+    if (contact === null || selectedGraphTargetKey.length === 0) {
+      return;
+    }
+
+    const target = parseRelationshipTargetKey(selectedGraphTargetKey);
+    if (target === null) {
+      setRelationshipError("Select a valid related content target.");
+      return;
+    }
+
+    setRelationshipBusy(true);
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.createRelationship({
+      workspaceId: contact.workspaceId,
+      source: { type: "container", id: contact.id },
+      target,
+      relationType: selectedGraphRelationType
+    });
+
+    if (!result.ok) {
+      setRelationshipBusy(false);
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    setSelectedGraphTargetKey("");
+    await refreshRelatedProjects(contact.id);
+    await refreshContactActivity(contact.id);
+    await refreshContactTimeline(contact.id);
+    await refreshRelationshipGraph(contact.id);
+    setRelationshipBusy(false);
+  }
+
+  async function removeGraphRelationship(relationshipId: string): Promise<void> {
+    if (contact === null) {
+      return;
+    }
+
+    setRelationshipBusy(true);
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.removeRelationship(relationshipId);
+
+    if (!result.ok) {
+      setRelationshipBusy(false);
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    await refreshRelatedProjects(contact.id);
+    await refreshContactActivity(contact.id);
+    await refreshContactTimeline(contact.id);
+    await refreshRelationshipGraph(contact.id);
+    setRelationshipBusy(false);
+  }
+
+  function openRelationshipTarget(target: RelatedContentEndpointViewModel): void {
+    if (target.kind === "project") {
+      navigate(`/projects/${encodeURIComponent(target.id)}`);
+      return;
+    }
+
+    if (target.kind === "contact") {
+      navigate(`/contacts/${encodeURIComponent(target.id)}`);
+      return;
+    }
+
+    if (target.type === "item" && target.containerId !== null) {
+      navigate(`/contacts/${encodeURIComponent(target.containerId)}`);
+    }
   }
 
   async function addContactField(field: ContactFieldDraft): Promise<boolean> {
@@ -1115,6 +1231,11 @@ export function ContactDetailPage({
   );
   const visibleItems = tabItems.slice(0, visibleItemCount);
   const hasMoreItems = visibleItemCount < tabItems.length;
+  const relationshipGraphTargets = createRelationshipTargetOptions({
+    currentContainerId: contact.id,
+    projects,
+    items
+  });
 
   return (
     <section className="project-detail-page">
@@ -1195,6 +1316,26 @@ export function ContactDetailPage({
         onLinkProject={() => void linkSelectedProject()}
         onSelectedProjectChange={setSelectedProjectId}
         onUnlinkProject={(relationshipId) => void unlinkRelatedProject(relationshipId)}
+      />
+
+      <RelatedContentGraphPanel
+        availableTargets={relationshipGraphTargets}
+        busy={relationshipBusy}
+        error={relationshipError}
+        graph={relationshipGraph as RelatedContentGraphViewModel | null}
+        relationFilter={relationshipGraphFilter}
+        selectedRelationType={selectedGraphRelationType}
+        selectedTargetKey={selectedGraphTargetKey}
+        onCreateRelationship={() => void linkSelectedGraphTarget()}
+        onOpenTarget={openRelationshipTarget}
+        onRelationFilterChange={(relationType) =>
+          setRelationshipGraphFilter(relationType)
+        }
+        onRemoveRelationship={(relationshipId) =>
+          void removeGraphRelationship(relationshipId)
+        }
+        onSelectedRelationTypeChange={setSelectedGraphRelationType}
+        onSelectedTargetChange={setSelectedGraphTargetKey}
       />
 
       <FollowUpSummaryCard
@@ -1542,6 +1683,46 @@ function selectFirstUnlinkedProjectId(
   );
 
   return projects.find((project) => !relatedIds.has(project.id))?.id ?? "";
+}
+
+function createRelationshipTargetOptions(input: {
+  currentContainerId: string;
+  projects: readonly ProjectSummary[];
+  items: readonly ContactFeedViewModel[];
+}): RelatedContentTargetOption[] {
+  return [
+    ...input.projects.map((project) => ({
+      type: "container" as const,
+      id: project.id,
+      label: `Project · ${project.name}`,
+      helperText: project.description
+    })),
+    ...input.items.map((item) => ({
+      type: "item" as const,
+      id: item.id,
+      label: `${item.type} · ${item.title}`,
+      helperText:
+        "description" in item && typeof item.description === "string"
+          ? item.description
+          : null
+    }))
+  ].filter((target) => target.id !== input.currentContainerId);
+}
+
+function parseRelationshipTargetKey(
+  key: string
+): RelationshipEndpointInput | null {
+  const [type, ...idParts] = key.split(":");
+  const id = idParts.join(":");
+
+  if (
+    (type === "container" || type === "item" || type === "list_item") &&
+    id.length > 0
+  ) {
+    return { type, id };
+  }
+
+  return null;
 }
 
 function compareFeedItems(

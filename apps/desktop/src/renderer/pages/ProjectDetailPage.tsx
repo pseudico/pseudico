@@ -30,6 +30,7 @@ import {
   NoteEditor,
   ProjectHealthCard,
   RecentActivityList,
+  RelatedContentGraphPanel,
   RelatedContactsPanel,
   TaskCardContent,
   TaskQuickAdd,
@@ -52,6 +53,9 @@ import {
   type NoteWikilinkSuggestion,
   type ProjectHealthViewModel,
   type RecentActivityViewModel,
+  type RelatedContentEndpointViewModel,
+  type RelatedContentGraphViewModel,
+  type RelatedContentTargetOption,
   type RelatedContactViewModel,
   type TagBadgeViewModel,
   type TaskCardViewModel,
@@ -79,6 +83,9 @@ import type {
   ProjectSummary,
   ProjectHealthSummary,
   RelatedContactSummary,
+  RelationshipEndpointInput,
+  RelationshipGraphSummary,
+  RelationshipType,
   TabTemplateSummary,
   TaskSummary
 } from "../../preload/api";
@@ -194,6 +201,13 @@ export function ProjectDetailPage({
   const [selectedContactId, setSelectedContactId] = useState("");
   const [relationshipBusy, setRelationshipBusy] = useState(false);
   const [relationshipError, setRelationshipError] = useState<string | null>(null);
+  const [relationshipGraph, setRelationshipGraph] =
+    useState<RelationshipGraphSummary | null>(null);
+  const [relationshipGraphFilter, setRelationshipGraphFilter] =
+    useState<RelationshipType | "all">("all");
+  const [selectedGraphTargetKey, setSelectedGraphTargetKey] = useState("");
+  const [selectedGraphRelationType, setSelectedGraphRelationType] =
+    useState<RelationshipType>("related");
   const [loading, setLoading] = useState(initialProject === undefined);
   const [itemsLoading, setItemsLoading] = useState(false);
   const [moving, setMoving] = useState(false);
@@ -438,6 +452,15 @@ export function ProjectDetailPage({
       active = false;
     };
   }, [apiClient, projectId]);
+
+  useEffect(() => {
+    if (projectId === undefined) {
+      setRelationshipGraph(null);
+      return;
+    }
+
+    void refreshRelationshipGraph(projectId);
+  }, [apiClient, projectId, relationshipGraphFilter]);
 
   useEffect(() => {
     if (
@@ -804,6 +827,7 @@ export function ProjectDetailPage({
 
     await refreshRelatedContacts(project.id);
     await refreshProjectActivity(project.id);
+    await refreshRelationshipGraph(project.id);
     setRelationshipBusy(false);
   }
 
@@ -827,7 +851,104 @@ export function ProjectDetailPage({
 
     await refreshRelatedContacts(project.id);
     await refreshProjectActivity(project.id);
+    await refreshRelationshipGraph(project.id);
     setRelationshipBusy(false);
+  }
+
+  async function refreshRelationshipGraph(activeProjectId: string): Promise<void> {
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.getGraph({
+      root: { type: "container", id: activeProjectId },
+      relationType: relationshipGraphFilter,
+      maxDepth: 2
+    });
+
+    if (!result.ok) {
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    setRelationshipGraph(result.data);
+  }
+
+  async function linkSelectedGraphTarget(): Promise<void> {
+    if (project === null || selectedGraphTargetKey.length === 0) {
+      return;
+    }
+
+    const target = parseRelationshipTargetKey(selectedGraphTargetKey);
+    if (target === null) {
+      setRelationshipError("Select a valid related content target.");
+      return;
+    }
+
+    setRelationshipBusy(true);
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.createRelationship({
+      workspaceId: project.workspaceId,
+      source: { type: "container", id: project.id },
+      target,
+      relationType: selectedGraphRelationType
+    });
+
+    if (!result.ok) {
+      setRelationshipBusy(false);
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    setSelectedGraphTargetKey("");
+    await refreshRelatedContacts(project.id);
+    await refreshProjectActivity(project.id);
+    await refreshRelationshipGraph(project.id);
+    setRelationshipBusy(false);
+  }
+
+  async function removeGraphRelationship(relationshipId: string): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setRelationshipBusy(true);
+    setRelationshipError(null);
+
+    const result = await apiClient.relationships.removeRelationship(relationshipId);
+
+    if (!result.ok) {
+      setRelationshipBusy(false);
+      setRelationshipError(result.error.message);
+      return;
+    }
+
+    await refreshRelatedContacts(project.id);
+    await refreshProjectActivity(project.id);
+    await refreshRelationshipGraph(project.id);
+    setRelationshipBusy(false);
+  }
+
+  function openRelationshipTarget(target: RelatedContentEndpointViewModel): void {
+    if (target.kind === "project") {
+      navigate(`/projects/${encodeURIComponent(target.id)}`);
+      return;
+    }
+
+    if (target.kind === "contact") {
+      navigate(`/contacts/${encodeURIComponent(target.id)}`);
+      return;
+    }
+
+    if (target.type === "item" && target.containerId !== null) {
+      if (target.containerType === "contact") {
+        navigate(`/contacts/${encodeURIComponent(target.containerId)}`);
+        return;
+      }
+
+      navigate(
+        `/projects/${encodeURIComponent(target.containerId)}?item=${encodeURIComponent(target.id)}`
+      );
+    }
   }
 
   async function createProjectTask(
@@ -2286,6 +2407,12 @@ export function ProjectDetailPage({
   );
   const visibleItems = tabItems.slice(0, visibleItemCount);
   const hasMoreItems = visibleItemCount < tabItems.length;
+  const relationshipGraphTargets = createRelationshipTargetOptions({
+    currentContainerId: project.id,
+    contacts,
+    projects,
+    items
+  });
 
   return (
     <section className="project-detail-page">
@@ -2369,6 +2496,26 @@ export function ProjectDetailPage({
         onLinkContact={() => void linkSelectedContact()}
         onSelectedContactChange={setSelectedContactId}
         onUnlinkContact={(relationshipId) => void unlinkRelatedContact(relationshipId)}
+      />
+
+      <RelatedContentGraphPanel
+        availableTargets={relationshipGraphTargets}
+        busy={relationshipBusy}
+        error={relationshipError}
+        graph={relationshipGraph as RelatedContentGraphViewModel | null}
+        relationFilter={relationshipGraphFilter}
+        selectedRelationType={selectedGraphRelationType}
+        selectedTargetKey={selectedGraphTargetKey}
+        onCreateRelationship={() => void linkSelectedGraphTarget()}
+        onOpenTarget={openRelationshipTarget}
+        onRelationFilterChange={(relationType) =>
+          setRelationshipGraphFilter(relationType)
+        }
+        onRemoveRelationship={(relationshipId) =>
+          void removeGraphRelationship(relationshipId)
+        }
+        onSelectedRelationTypeChange={setSelectedGraphRelationType}
+        onSelectedTargetChange={setSelectedGraphTargetKey}
       />
 
       <RecentActivityList
@@ -3027,6 +3174,55 @@ function selectFirstUnlinkedContactId(
   );
 
   return contacts.find((contact) => !relatedIds.has(contact.id))?.id ?? "";
+}
+
+function createRelationshipTargetOptions(input: {
+  currentContainerId: string;
+  contacts: readonly ContactSummary[];
+  projects: readonly ProjectSummary[];
+  items: readonly ProjectFeedViewModel[];
+}): RelatedContentTargetOption[] {
+  return [
+    ...input.projects
+      .filter((project) => project.id !== input.currentContainerId)
+      .map((project) => ({
+        type: "container" as const,
+        id: project.id,
+        label: `Project · ${project.name}`,
+        helperText: project.description
+      })),
+    ...input.contacts.map((contact) => ({
+      type: "container" as const,
+      id: contact.id,
+      label: `Contact · ${contact.name}`,
+      helperText: contact.description
+    })),
+    ...input.items.map((item) => ({
+      type: "item" as const,
+      id: item.id,
+      label: `${item.type} · ${item.title}`,
+      helperText:
+        "description" in item && typeof item.description === "string"
+          ? item.description
+          : null
+    }))
+  ];
+}
+
+function parseRelationshipTargetKey(
+  key: string
+): RelationshipEndpointInput | null {
+  const [type, ...idParts] = key.split(":");
+  const id = idParts.join(":");
+
+  if (
+    (type === "container" || type === "item" || type === "list_item") &&
+    id.length > 0
+  ) {
+    return { type, id };
+  }
+
+  return null;
 }
 
 function toProjectHealthViewModel(
