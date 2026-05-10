@@ -827,6 +827,25 @@ export function ContactDetailPage({
     return true;
   }
 
+  async function openContactInlineExternalLink(url: string): Promise<void> {
+    setItemError(null);
+
+    const result = await apiClient.links.openUrlExternal(url);
+
+    if (!result.ok) {
+      setItemError(result.error.message);
+    }
+  }
+
+  async function copyContactInlineExternalLink(url: string): Promise<void> {
+    try {
+      await globalThis.navigator.clipboard.writeText(url);
+      setItemError(null);
+    } catch {
+      setItemError("Unable to copy link to clipboard.");
+    }
+  }
+
   async function toggleTaskComplete(item: TaskCardViewModel): Promise<void> {
     if (contact === null) {
       return;
@@ -917,6 +936,8 @@ export function ContactDetailPage({
           error={noteErrorItemId === item.id ? noteError : null}
           item={item}
           wikilinkSuggestions={createContactWikilinkSuggestions(contact, projects, items)}
+          onExternalLinkCopy={copyContactInlineExternalLink}
+          onExternalLinkOpen={openContactInlineExternalLink}
           onSave={updateContactNote}
           onWikilinkOpen={openWikilinkTarget}
         />

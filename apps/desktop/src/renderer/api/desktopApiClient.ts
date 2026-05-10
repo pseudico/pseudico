@@ -124,6 +124,7 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       listByContainer: (containerId) =>
         callApi(() => api.links.listByContainer(containerId)),
       openExternal: (itemId) => callApi(() => api.links.openExternal(itemId)),
+      openUrlExternal: (url) => callApi(() => api.links.openUrlExternal(url)),
       createLink: (input) => callApi(() => api.links.createLink(input)),
       updateLink: (input) => callApi(() => api.links.updateLink(input))
     },
@@ -564,6 +565,7 @@ export const desktopApiClient: LocalWorkOsApi = {
     listByContainer: (containerId) =>
       getDesktopApiClient().links.listByContainer(containerId),
     openExternal: (itemId) => getDesktopApiClient().links.openExternal(itemId),
+    openUrlExternal: (url) => getDesktopApiClient().links.openUrlExternal(url),
     createLink: (input) => getDesktopApiClient().links.createLink(input),
     updateLink: (input) => getDesktopApiClient().links.updateLink(input)
   },

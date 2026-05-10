@@ -2060,3 +2060,17 @@ Next actions: Commit, push, open PR; update Linear; monitor CI.
 - Files changed: packages/features/tests/moduleExports.test.ts; packages/features/tests/wikilinkService.test.ts; packages/ui/tests/itemComponents.test.tsx; apps/desktop/src/renderer/styles.css
 - Open questions / risks: Need inspect final diff and avoid unrelated generated outputs.
 - Next actions: review git diff; commit/push; open PR.
+
+## 2026-05-10T19:10:24+10:00
+Objective: Close PSE-108 and begin PSE-109 hyperlink safety work.
+Decisions made: Merged PR #103 after green CI; promoted PSE-109 and moved it to In Progress.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-109 scope must avoid broad Markdown rewrite.
+Next actions: Inspect ticket; implement parser/rendering safety; run checks.
+
+## 2026-05-10T19:25:01+10:00
+Objective: Verify PSE-109 hyperlink safety implementation.
+Decisions made: Added parser/main-process URL opener; rendered safe inline open/copy/save actions.
+Files changed: packages/core/src/services/linkParser.ts; packages/ui/src/components/NoteCardContent.tsx; apps/desktop/src/main/ipc/linkHandlers.ts
+Open questions / risks: Convert-to-link is exposed where link items are surfaced in the feed.
+Next actions: Commit; open PR; watch CI.

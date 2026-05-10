@@ -13,6 +13,7 @@ import {
   type CreateLinkInput,
   type ItemTagSummary,
   type LinkSummary,
+  type OpenExternalUrlSummary,
   type OpenLinkSummary,
   type UpdateLinkInput,
   type WorkspaceSummary
@@ -33,6 +34,9 @@ type LinkIpcHandlers = {
   handleOpenLinkExternally: (
     input: unknown
   ) => Promise<ApiResult<OpenLinkSummary>>;
+  handleOpenUrlExternally: (
+    input: unknown
+  ) => Promise<ApiResult<OpenExternalUrlSummary>>;
 };
 
 export type LinkIpcPlatform = {
@@ -124,6 +128,26 @@ export function createLinkIpcHandlers(
         return apiOk({
           itemId: link.item.id,
           url: link.link.url,
+          normalizedUrl
+        });
+      });
+    },
+
+    async handleOpenUrlExternally(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "openUrlExternally requires a URL string."
+        );
+      }
+
+      return await withLinkService(workspaceService, async (context) => {
+        const normalizedUrl = context.linkService.normaliseUrl(input);
+
+        await platform.openExternal(normalizedUrl);
+
+        return apiOk({
+          url: input.trim(),
           normalizedUrl
         });
       });

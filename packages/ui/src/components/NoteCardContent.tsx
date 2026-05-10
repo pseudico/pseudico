@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { parseWikilinks } from "@local-work-os/core";
+import { parseExternalLinks, parseWikilinks, type ExternalLinkToken } from "@local-work-os/core";
 import { Pencil } from "lucide-react";
 import type { UniversalItemViewModel } from "./ItemCard";
 import {
@@ -41,6 +41,9 @@ export type NoteCardContentProps = {
     values: NoteEditorValues
   ) => Promise<boolean | void> | boolean | void;
   onWikilinkOpen?: ((target: WikilinkTargetViewModel) => void) | undefined;
+  onExternalLinkOpen?: ((url: string) => void | Promise<void>) | undefined;
+  onExternalLinkCopy?: ((url: string) => void | Promise<void>) | undefined;
+  onExternalLinkCreate?: ((url: string) => void | Promise<void>) | undefined;
   wikilinkSuggestions?: readonly NoteWikilinkSuggestion[];
 };
 
@@ -50,6 +53,9 @@ export function NoteCardContent({
   error = null,
   onSave,
   onWikilinkOpen,
+  onExternalLinkOpen,
+  onExternalLinkCopy,
+  onExternalLinkCreate,
   wikilinkSuggestions = []
 }: NoteCardContentProps): React.JSX.Element {
   const [editing, setEditing] = useState(false);
@@ -91,6 +97,9 @@ export function NoteCardContent({
         content={item.content}
         wikilinks={item.wikilinks ?? []}
         onWikilinkOpen={onWikilinkOpen}
+        onExternalLinkOpen={onExternalLinkOpen}
+        onExternalLinkCopy={onExternalLinkCopy}
+        onExternalLinkCreate={onExternalLinkCreate}
       />
 
       {onSave === undefined ? null : (
@@ -111,11 +120,17 @@ export function NoteCardContent({
 function MarkdownPreview({
   content,
   wikilinks,
-  onWikilinkOpen
+  onWikilinkOpen,
+  onExternalLinkOpen,
+  onExternalLinkCopy,
+  onExternalLinkCreate
 }: {
   content: string;
   wikilinks: readonly WikilinkViewModel[];
   onWikilinkOpen?: ((target: WikilinkTargetViewModel) => void) | undefined;
+  onExternalLinkOpen?: ((url: string) => void | Promise<void>) | undefined;
+  onExternalLinkCopy?: ((url: string) => void | Promise<void>) | undefined;
+  onExternalLinkCreate?: ((url: string) => void | Promise<void>) | undefined;
 }): React.JSX.Element {
   const lines = content.split(/\r?\n/).filter((line) => line.trim().length > 0);
 
@@ -137,6 +152,9 @@ function MarkdownPreview({
               text={parsed.text}
               wikilinks={wikilinks}
               onWikilinkOpen={onWikilinkOpen}
+              onExternalLinkOpen={onExternalLinkOpen}
+              onExternalLinkCopy={onExternalLinkCopy}
+              onExternalLinkCreate={onExternalLinkCreate}
             />
           </p>
         );
@@ -207,48 +225,85 @@ function parseMarkdownLine(line: string): {
 function InlineWikilinkText({
   text,
   wikilinks,
-  onWikilinkOpen
+  onWikilinkOpen,
+  onExternalLinkOpen,
+  onExternalLinkCopy,
+  onExternalLinkCreate
 }: {
   text: string;
   wikilinks: readonly WikilinkViewModel[];
   onWikilinkOpen?: ((target: WikilinkTargetViewModel) => void) | undefined;
+  onExternalLinkOpen?: ((url: string) => void | Promise<void>) | undefined;
+  onExternalLinkCopy?: ((url: string) => void | Promise<void>) | undefined;
+  onExternalLinkCreate?: ((url: string) => void | Promise<void>) | undefined;
 }): React.JSX.Element {
-  const nodes = renderInlineWikilinks(text, wikilinks, onWikilinkOpen);
+  const nodes = renderInlineContent(text, {
+    wikilinks,
+    onWikilinkOpen,
+    onExternalLinkOpen,
+    onExternalLinkCopy,
+    onExternalLinkCreate
+  });
 
   return <>{nodes}</>;
 }
 
-function renderInlineWikilinks(
+function renderInlineContent(
   text: string,
-  wikilinks: readonly WikilinkViewModel[],
-  onWikilinkOpen?: (target: WikilinkTargetViewModel) => void
+  options: {
+    wikilinks: readonly WikilinkViewModel[];
+    onWikilinkOpen?: ((target: WikilinkTargetViewModel) => void) | undefined;
+    onExternalLinkOpen?: ((url: string) => void | Promise<void>) | undefined;
+    onExternalLinkCopy?: ((url: string) => void | Promise<void>) | undefined;
+    onExternalLinkCreate?: ((url: string) => void | Promise<void>) | undefined;
+  }
 ): ReactNode[] {
-  const parsed = parseWikilinks(text);
+  const parsed = [
+    ...parseWikilinks(text).map((link) => ({ type: "wikilink" as const, start: link.start, end: link.end, link })),
+    ...parseExternalLinks(text).map((link) => ({ type: "external" as const, start: link.start, end: link.end, link }))
+  ].sort((left, right) => left.start - right.start || right.end - left.end);
 
   if (parsed.length === 0) {
     return [text];
   }
 
   const byTitle = new Map(
-    wikilinks.map((link) => [link.title.trim().toLocaleLowerCase(), link])
+    options.wikilinks.map((link) => [link.title.trim().toLocaleLowerCase(), link])
   );
   const nodes: ReactNode[] = [];
   let cursor = 0;
 
-  parsed.forEach((link, index) => {
-    if (link.start > cursor) {
-      nodes.push(text.slice(cursor, link.start));
+  parsed.forEach((token, index) => {
+    if (token.start < cursor) {
+      return;
     }
 
-    const resolved = byTitle.get(link.title.trim().toLocaleLowerCase());
-    nodes.push(
-      <WikilinkToken
-        key={`${link.start}:${link.raw}:${index}`}
-        link={resolved ?? { title: link.title, status: "broken", target: null }}
-        onOpen={onWikilinkOpen}
-      />
-    );
-    cursor = link.end;
+    if (token.start > cursor) {
+      nodes.push(text.slice(cursor, token.start));
+    }
+
+    if (token.type === "wikilink") {
+      const resolved = byTitle.get(token.link.title.trim().toLocaleLowerCase());
+      nodes.push(
+        <WikilinkToken
+          key={`${token.start}:${token.link.raw}:${index}`}
+          link={resolved ?? { title: token.link.title, status: "broken", target: null }}
+          onOpen={options.onWikilinkOpen}
+        />
+      );
+    } else {
+      nodes.push(
+        <ExternalLinkChip
+          key={`${token.start}:${token.link.raw}:${index}`}
+          link={token.link}
+          onCopy={options.onExternalLinkCopy}
+          onCreate={options.onExternalLinkCreate}
+          onOpen={options.onExternalLinkOpen}
+        />
+      );
+    }
+
+    cursor = token.end;
   });
 
   if (cursor < text.length) {
@@ -256,6 +311,57 @@ function renderInlineWikilinks(
   }
 
   return nodes;
+}
+
+function ExternalLinkChip({
+  link,
+  onCopy,
+  onCreate,
+  onOpen
+}: {
+  link: ExternalLinkToken;
+  onCopy?: ((url: string) => void | Promise<void>) | undefined;
+  onCreate?: ((url: string) => void | Promise<void>) | undefined;
+  onOpen?: ((url: string) => void | Promise<void>) | undefined;
+}): React.JSX.Element {
+  return (
+    <span className="note-external-link-token">
+      <button
+        className="note-external-link"
+        type="button"
+        title={`Open external link: ${link.normalizedUrl}`}
+        onClick={() => {
+          void onOpen?.(link.normalizedUrl);
+        }}
+      >
+        {link.label}
+      </button>
+      {onCopy === undefined ? null : (
+        <button
+          className="note-external-link-action"
+          type="button"
+          title={`Copy ${link.normalizedUrl}`}
+          onClick={() => {
+            void onCopy(link.normalizedUrl);
+          }}
+        >
+          Copy link
+        </button>
+      )}
+      {onCreate === undefined ? null : (
+        <button
+          className="note-external-link-action"
+          type="button"
+          title={`Save ${link.normalizedUrl} as a link item`}
+          onClick={() => {
+            void onCreate(link.normalizedUrl);
+          }}
+        >
+          Save as link
+        </button>
+      )}
+    </span>
+  );
 }
 
 function WikilinkToken({
@@ -297,7 +403,6 @@ function WikilinkToken({
 function stripInlineMarkdown(value: string): string {
   return value
     .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/`([^`]+)`/g, "$1")
     .replace(/[*_~]/g, "")
     .trim();

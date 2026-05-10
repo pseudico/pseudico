@@ -136,6 +136,11 @@ export {
 } from "./services/wikilinkParser";
 export type { ParsedWikilink } from "./services/wikilinkParser";
 export {
+  normalizeExternalLinkUrl,
+  parseExternalLinks
+} from "./services/linkParser";
+export type { ExternalLinkKind, ExternalLinkToken } from "./services/linkParser";
+export {
   normalizeTagName,
   parseInlineTagSlugs,
   parseInlineTags,

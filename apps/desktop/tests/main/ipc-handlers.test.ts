@@ -1865,6 +1865,34 @@ describe("Link IPC handlers", () => {
     });
     expect(openedUrls).toEqual(["https://docs.example.com/final"]);
 
+    await expect(
+      handlers.handleOpenUrlExternally("https://Example.com/inline")
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        url: "https://Example.com/inline",
+        normalizedUrl: "https://example.com/inline"
+      }
+    });
+    expect(openedUrls).toEqual([
+      "https://docs.example.com/final",
+      "https://example.com/inline"
+    ]);
+
+    await expect(
+      handlers.handleOpenUrlExternally("javascript:alert(1)")
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "WORKSPACE_ERROR",
+        message: "url must use HTTP or HTTPS."
+      }
+    });
+    expect(openedUrls).toEqual([
+      "https://docs.example.com/final",
+      "https://example.com/inline"
+    ]);
+
     const connection = await createDatabaseConnection({
       databasePath,
       fileMustExist: true
@@ -1883,7 +1911,10 @@ describe("Link IPC handlers", () => {
         message: "url must use HTTP or HTTPS."
       }
     });
-    expect(openedUrls).toEqual(["https://docs.example.com/final"]);
+    expect(openedUrls).toEqual([
+      "https://docs.example.com/final",
+      "https://example.com/inline"
+    ]);
   });
 });
 

@@ -207,6 +207,11 @@ function createMockApi(
           url: "example.com/brief",
           normalizedUrl: "https://example.com/brief"
         }),
+      openUrlExternal: async () =>
+        apiOk({
+          url: "https://example.com/inline",
+          normalizedUrl: "https://example.com/inline"
+        }),
       createLink: async () => apiOk(linkSummary()),
       updateLink: async () => apiOk(linkSummary())
     },

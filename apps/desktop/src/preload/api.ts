@@ -2248,6 +2248,11 @@ export type OpenLinkSummary = {
   normalizedUrl: string;
 };
 
+export type OpenExternalUrlSummary = {
+  url: string;
+  normalizedUrl: string;
+};
+
 export type LocalWorkOsModuleName =
   | "containers"
   | "items"
@@ -2474,7 +2479,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     createLink: "local-work-os:links:create-link",
     updateLink: "local-work-os:links:update-link",
     listByContainer: "local-work-os:links:list-by-container",
-    openExternal: "local-work-os:links:open-external"
+    openExternal: "local-work-os:links:open-external",
+    openUrlExternal: "local-work-os:links:open-url-external"
   },
   projects: {
     createProject: "local-work-os:projects:create-project",
@@ -2848,6 +2854,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.links.openExternal]: {
     input: string;
     result: ApiResult<OpenLinkSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.links.openUrlExternal]: {
+    input: string;
+    result: ApiResult<OpenExternalUrlSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject]: {
     input: CreateProjectInput;
@@ -3496,6 +3506,7 @@ export type LocalWorkOsApi = {
       containerId: string
     ) => Promise<ApiResult<LinkSummary[]>>;
     openExternal: (itemId: string) => Promise<ApiResult<OpenLinkSummary>>;
+    openUrlExternal: (url: string) => Promise<ApiResult<OpenExternalUrlSummary>>;
     createLink: (input: CreateLinkInput) => Promise<ApiResult<LinkSummary>>;
     updateLink: (input: UpdateLinkInput) => Promise<ApiResult<LinkSummary>>;
   };
@@ -4084,6 +4095,8 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.listByContainer, containerId),
       openExternal: (itemId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.openExternal, itemId),
+      openUrlExternal: (url) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.openUrlExternal, url),
       createLink: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.createLink, input),
       updateLink: (input) =>
