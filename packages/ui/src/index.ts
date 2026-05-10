@@ -235,6 +235,12 @@ export {
   type ListCardViewModel
 } from "./components/ListCardContent";
 export {
+  KanbanBoard,
+  type KanbanBoardProps,
+  type KanbanCardViewModel,
+  type KanbanColumnViewModel
+} from "./components/KanbanBoard";
+export {
   PipelineView,
   type PipelineViewProps
 } from "./components/PipelineView";

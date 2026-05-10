@@ -6,6 +6,7 @@ import {
   ContextMenu,
   EmptyState,
   ErrorState,
+  KanbanBoard,
   CreateFromTemplateDialog,
   ProjectForm,
   TemplateLibrary,
@@ -13,9 +14,17 @@ import {
   type TemplateLibraryItem,
   type ProjectFormValues
 } from "@local-work-os/ui";
-import type { LocalWorkOsApi, ProjectSummary, TemplateSummary } from "../../preload/api";
+import type {
+  CategorySummary,
+  LocalWorkOsApi,
+  ProjectMutableStatus,
+  ProjectSummary,
+  TemplateSummary
+} from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
+
+type ProjectBoardGrouping = "status" | "category";
 
 type ProjectsPageProps = {
   apiClient?: LocalWorkOsApi;
@@ -33,6 +42,9 @@ export function ProjectsPage({
   const [creating, setCreating] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
+  const [categories, setCategories] = useState<CategorySummary[]>([]);
+  const [boardGrouping, setBoardGrouping] = useState<ProjectBoardGrouping>("status");
+  const [movingProjectId, setMovingProjectId] = useState<string | null>(null);
   const [templateSavingId, setTemplateSavingId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateSummary | null>(null);
   const [applyingTemplateId, setApplyingTemplateId] = useState<string | null>(null);
@@ -73,6 +85,12 @@ export function ProjectsPage({
         if (active && templateResult.ok) {
           setTemplates(templateResult.data);
         }
+      }
+
+      const categoryResult = await apiClient.categories.list(workspaceId);
+
+      if (active && categoryResult.ok) {
+        setCategories(categoryResult.data);
       }
     }
 
@@ -172,6 +190,48 @@ export function ProjectsPage({
     }
   }
 
+  async function moveProjectOnBoard(projectId: string, targetColumnId: string): Promise<void> {
+    const project = projects.find((entry) => entry.id === projectId);
+
+    if (project === undefined) {
+      return;
+    }
+
+    if (
+      (boardGrouping === "status" && project.status === targetColumnId) ||
+      (boardGrouping === "category" &&
+        (project.categoryId ?? PROJECT_BOARD_UNCATEGORIZED_COLUMN_ID) === targetColumnId)
+    ) {
+      return;
+    }
+
+    setMovingProjectId(projectId);
+    setError(null);
+
+    const result = await apiClient.projects.update({
+      projectId,
+      ...(boardGrouping === "status"
+        ? { status: targetColumnId as ProjectMutableStatus }
+        : {
+            categoryId:
+              targetColumnId === PROJECT_BOARD_UNCATEGORIZED_COLUMN_ID
+                ? null
+                : targetColumnId
+          })
+    });
+
+    setMovingProjectId(null);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setProjects((current) =>
+      current.map((entry) => (entry.id === result.data.id ? result.data : entry))
+    );
+  }
+
   if (currentWorkspace === null) {
     return (
       <section className="projects-page">
@@ -241,7 +301,24 @@ export function ProjectsPage({
         }
       />
 
-      <div className="project-list-panel" aria-busy={loading}>
+      <div className="project-board-toolbar" aria-label="Project board controls">
+        <div>
+          <strong>Project phase board</strong>
+          <p>Drag project cards between local columns or use the move control.</p>
+        </div>
+        <label>
+          Board columns
+          <select
+            value={boardGrouping}
+            onChange={(event) => setBoardGrouping(event.currentTarget.value as ProjectBoardGrouping)}
+          >
+            <option value="status">Status / phase</option>
+            <option value="category">Category</option>
+          </select>
+        </label>
+      </div>
+
+      <div className="project-list-panel project-board-panel" aria-busy={loading}>
         {renderLoadableState({
           loading,
           loadingLabel: "Loading projects..."
@@ -249,17 +326,27 @@ export function ProjectsPage({
         (projects.length === 0 ? (
           <ProjectsEmptyState onCreate={() => setCreateOpen(true)} />
         ) : (
-          <div className="project-list" aria-label="Projects">
-            {projects.map((project) => (
-              <ProjectListRow
-                key={project.id}
-                project={project}
-                savingTemplate={templateSavingId === project.id}
-                onSaveTemplate={saveProjectAsTemplate}
-              />
-            ))}
-          </div>
+          <KanbanBoard
+            ariaLabel="Project phase/status board"
+            columns={toProjectKanbanColumns(projects, categories, boardGrouping)}
+            movingCardId={movingProjectId}
+            onMoveCard={(card, column) => moveProjectOnBoard(card.id, column.id)}
+            onOpenCard={(card) => navigate(`/projects/${card.id}`)}
+          />
         ))}
+      </div>
+
+      <div className="project-list-panel project-list-secondary" aria-label="Project list">
+        <div className="project-list">
+          {projects.map((project) => (
+            <ProjectListRow
+              key={project.id}
+              project={project}
+              savingTemplate={templateSavingId === project.id}
+              onSaveTemplate={saveProjectAsTemplate}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -365,5 +452,76 @@ function toTemplateLibraryItem(template: TemplateSummary): TemplateLibraryItem {
     name: template.name,
     description: template.description,
     updatedAt: template.updatedAt
+  };
+}
+
+const PROJECT_BOARD_UNCATEGORIZED_COLUMN_ID = "uncategorized";
+
+function toProjectKanbanColumns(
+  projects: ProjectSummary[],
+  categories: CategorySummary[],
+  grouping: ProjectBoardGrouping
+) {
+  if (grouping === "category") {
+    return [
+      {
+        id: PROJECT_BOARD_UNCATEGORIZED_COLUMN_ID,
+        title: "Uncategorized",
+        description: "Projects without a category.",
+        cards: projects
+          .filter((project) => project.categoryId === null)
+          .map((project) => toProjectKanbanCard(project, "Uncategorized"))
+      },
+      ...categories.map((category) => ({
+        id: category.id,
+        title: category.name,
+        description: category.description ?? "Projects assigned to this category.",
+        color: category.color,
+        cards: projects
+          .filter((project) => project.categoryId === category.id)
+          .map((project) => toProjectKanbanCard(project, category.name))
+      }))
+    ];
+  }
+
+  return [
+    {
+      id: "active",
+      title: "Active",
+      description: "Projects currently moving forward.",
+      color: "#245c55",
+      cards: projects
+        .filter((project) => project.status === "active")
+        .map((project) => toProjectKanbanCard(project, "active"))
+    },
+    {
+      id: "waiting",
+      title: "Waiting",
+      description: "Projects paused by a blocker or external response.",
+      color: "#ad7c18",
+      cards: projects
+        .filter((project) => project.status === "waiting")
+        .map((project) => toProjectKanbanCard(project, "waiting"))
+    },
+    {
+      id: "completed",
+      title: "Completed",
+      description: "Finished projects kept visible for review.",
+      color: "#4f6f52",
+      cards: projects
+        .filter((project) => project.status === "completed")
+        .map((project) => toProjectKanbanCard(project, "completed"))
+    }
+  ];
+}
+
+function toProjectKanbanCard(project: ProjectSummary, meta: string) {
+  return {
+    id: project.id,
+    title: project.name,
+    description: project.description,
+    color: project.color,
+    meta,
+    pinned: project.isFavorite
   };
 }
