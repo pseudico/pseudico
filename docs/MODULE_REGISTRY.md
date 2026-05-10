@@ -44,6 +44,8 @@ new work should account for this implemented baseline:
   command palette navigation/actions, workspace-scoped recent navigation,
   back/forward route history, top-level app tabs for open project/contact/search/collection views,
   project/contact content-tab summary cards with bounded item previews,
+  automatic project/contact library grouping by local facets with persisted
+  collapsed-group preferences,
   workspace-scoped appearance preferences,
   unified context menu action providers for local targets, packaged smoke checks,
   and MVP smoke coverage.
@@ -62,6 +64,7 @@ renderer-only implementation.
 | Contacts | Own contact/client container behavior and local CRM-style context. | Contact containers, contact fields, interaction context | Workspace, projects, tasks, notes, files, links, metadata | Dashboard, timeline, saved views | V1 |
 | Content Tabs | Own local project/contact content tab mutations and ordering. | Container tabs | Projects, contacts, items, activity log | Project/contact item feeds, templates later | V1 |
 | Container Preferences | Own project/contact display defaults and default quick-add behavior. | Per-container preference payloads in app settings | Projects, contacts, tabs, activity log | Project/contact detail settings panels and feed rendering | V1 |
+| Container Grouping | Own automatic project/contact library grouping by status, category, tag, favourite, stale state, company, and contact labels. | Workspace-level grouping preferences, collapsed groups, grouped project/contact view models | Projects, contacts, metadata, activity log | Project/contact library pages, saved/browse workflows later | V1 |
 | Tasks | Own task-specific application operations and task lifecycle behavior. | Task items, task status, dates, priority, completion | Workspace, projects, contacts, metadata, search | Today, timeline, calendar, dashboard, saved views | MVP |
 | Lists | Own checklist and structured-list application operations. | List items, list rows, checklist progress | Workspace, projects, tasks, metadata, search | Projects, dashboard, future pipeline views | MVP |
 | Notes | Own Markdown note application operations and note search projections. | Note items, Markdown content, previews | Workspace, projects, contacts, metadata, search | Search, saved views, dashboard | MVP |

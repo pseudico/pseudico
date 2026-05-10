@@ -42,6 +42,14 @@ export {
   type CreateSystemInboxInput
 } from "./ContainerRepository";
 export {
+  ContainerGroupingRepository,
+  type ContainerGroupingCategoryRecord,
+  type ContainerGroupingContactFieldRecord,
+  type ContainerGroupingContainerType,
+  type ContainerGroupingInput,
+  type ContainerGroupingTargetRecord
+} from "./ContainerGroupingRepository";
+export {
   ContactFieldRepository,
   type ContactFieldRecord,
   type CreateContactFieldInput,

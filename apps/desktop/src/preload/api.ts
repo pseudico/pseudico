@@ -466,6 +466,93 @@ export type UpdateContainerPreferencesInput = Partial<
   containerId: string;
 };
 
+export type ProjectLibraryGroupingMode =
+  | "none"
+  | "category"
+  | "tag"
+  | "status"
+  | "favorite"
+  | "stale";
+export type ContactLibraryGroupingMode =
+  | "none"
+  | "company"
+  | "label"
+  | "tag"
+  | "category";
+export type ContainerLibraryGroupingMode =
+  | ProjectLibraryGroupingMode
+  | ContactLibraryGroupingMode;
+export type ContainerGroupingScope = "project" | "contact";
+
+export type ContainerGroupingPreferencesSummary = {
+  workspaceId: string;
+  containerType: ContainerGroupingScope;
+  mode: ContainerLibraryGroupingMode;
+  collapsedGroupKeys: string[];
+  updatedAt: string | null;
+};
+
+export type ContainerGroupingTargetSummary = {
+  id: string;
+  workspaceId: string;
+  type: ContainerGroupingScope;
+  name: string;
+  slug: string;
+  description: string | null;
+  status: string;
+  categoryId: string | null;
+  categoryName: string | null;
+  color: string | null;
+  isFavorite: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  archivedAt: string | null;
+  deletedAt: string | null;
+  tags: Array<{ id: string; name: string; slug: string }>;
+};
+
+export type ContainerGroupingFacetSummary = {
+  key: string;
+  label: string;
+  count: number;
+};
+
+export type ContainerGroupingGroupSummary = {
+  key: string;
+  label: string;
+  count: number;
+  collapsed: boolean;
+  targets: ContainerGroupingTargetSummary[];
+};
+
+export type ContainerGroupingViewModelSummary = {
+  workspaceId: string;
+  containerType: ContainerGroupingScope;
+  mode: ContainerLibraryGroupingMode;
+  generatedAt: string;
+  staleAfterDays: number;
+  totalCount: number;
+  facets: ContainerGroupingFacetSummary[];
+  preferences: ContainerGroupingPreferencesSummary;
+  groups: ContainerGroupingGroupSummary[];
+};
+
+export type GetContainerGroupingInput = {
+  workspaceId?: string;
+  containerType: ContainerGroupingScope;
+  mode?: ContainerLibraryGroupingMode;
+  includeArchived?: boolean;
+  staleAfterDays?: number;
+};
+
+export type UpdateContainerGroupingPreferencesInput = {
+  workspaceId?: string;
+  containerType: ContainerGroupingScope;
+  mode?: ContainerLibraryGroupingMode;
+  collapsedGroupKeys?: string[];
+};
+
 export type ContainerMediaRole = "project_banner" | "contact_avatar";
 
 export type ContainerMediaSummary = {
@@ -2725,7 +2812,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   containers: {
     getStatus: "local-work-os:containers:get-status",
     getPreferences: "local-work-os:containers:get-preferences",
-    updatePreferences: "local-work-os:containers:update-preferences"
+    updatePreferences: "local-work-os:containers:update-preferences",
+    getGrouping: "local-work-os:containers:get-grouping",
+    getGroupingPreferences: "local-work-os:containers:get-grouping-preferences",
+    updateGroupingPreferences:
+      "local-work-os:containers:update-grouping-preferences"
   },
   items: {
     getStatus: "local-work-os:items:get-status",
@@ -3313,6 +3404,18 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.containers.updatePreferences]: {
     input: UpdateContainerPreferencesInput;
     result: ApiResult<ContainerPreferencesSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.containers.getGrouping]: {
+    input: GetContainerGroupingInput;
+    result: ApiResult<ContainerGroupingViewModelSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.containers.getGroupingPreferences]: {
+    input: Pick<GetContainerGroupingInput, "workspaceId" | "containerType">;
+    result: ApiResult<ContainerGroupingPreferencesSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.containers.updateGroupingPreferences]: {
+    input: UpdateContainerGroupingPreferencesInput;
+    result: ApiResult<ContainerGroupingPreferencesSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.items.getStatus]: {
     input: undefined;
@@ -4026,6 +4129,15 @@ export type LocalWorkOsApi = {
     updatePreferences: (
       input: UpdateContainerPreferencesInput
     ) => Promise<ApiResult<ContainerPreferencesSummary>>;
+    getGrouping: (
+      input: GetContainerGroupingInput
+    ) => Promise<ApiResult<ContainerGroupingViewModelSummary>>;
+    getGroupingPreferences: (
+      input: Pick<GetContainerGroupingInput, "workspaceId" | "containerType">
+    ) => Promise<ApiResult<ContainerGroupingPreferencesSummary>>;
+    updateGroupingPreferences: (
+      input: UpdateContainerGroupingPreferencesInput
+    ) => Promise<ApiResult<ContainerGroupingPreferencesSummary>>;
   };
   items: {
     getStatus: () => Promise<ApiResult<IpcModuleStatus>>;
@@ -4665,7 +4777,13 @@ export function createLocalWorkOsApi(
       getPreferences: (containerId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.containers.getPreferences, containerId),
       updatePreferences: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containers.updatePreferences, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containers.updatePreferences, input),
+      getGrouping: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containers.getGrouping, input),
+      getGroupingPreferences: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containers.getGroupingPreferences, input),
+      updateGroupingPreferences: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.containers.updateGroupingPreferences, input)
     },
     items: {
       getStatus: () =>

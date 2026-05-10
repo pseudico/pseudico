@@ -39,4 +39,23 @@ export {
   type ContainerQuickAddType,
   type UpdateContainerPreferencesInput
 } from "./ContainerPreferencesService";
-
+export {
+  CONTACT_LIBRARY_GROUPING_MODES,
+  CONTAINER_GROUPING_SETTING_KEY_PREFIX,
+  ContainerGroupingService,
+  PROJECT_LIBRARY_GROUPING_MODES,
+  containerGroupingModuleContract,
+  createContainerGroupingSettingKey,
+  normalizeContainerGroupingPreferencesPayload,
+  type ContactLibraryGroupingMode,
+  type ContainerGroupingFacet,
+  type ContainerGroupingGroup,
+  type ContainerGroupingPreferences,
+  type ContainerGroupingScope,
+  type ContainerGroupingTarget,
+  type ContainerGroupingViewModel,
+  type ContainerLibraryGroupingMode,
+  type GetContainerGroupingInput,
+  type ProjectLibraryGroupingMode,
+  type UpdateContainerGroupingPreferencesInput
+} from "./ContainerGroupingService";

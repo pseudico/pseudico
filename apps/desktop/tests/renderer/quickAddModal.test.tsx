@@ -615,6 +615,40 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
           defaultQuickAddType: input.defaultQuickAddType ?? "task",
           summaryFirst: input.summaryFirst ?? false,
           compactMode: input.compactMode ?? false
+        }),
+      getGrouping: async (input) =>
+        apiOk({
+          workspaceId: input.workspaceId ?? "workspace_1",
+          containerType: input.containerType,
+          mode: input.mode ?? (input.containerType === "project" ? "status" : "company"),
+          generatedAt: "2026-05-10T10:01:00.000Z",
+          staleAfterDays: 30,
+          totalCount: 0,
+          facets: [],
+          preferences: {
+            workspaceId: input.workspaceId ?? "workspace_1",
+            containerType: input.containerType,
+            mode: input.mode ?? (input.containerType === "project" ? "status" : "company"),
+            collapsedGroupKeys: [],
+            updatedAt: null
+          },
+          groups: []
+        }),
+      getGroupingPreferences: async (input) =>
+        apiOk({
+          workspaceId: input.workspaceId ?? "workspace_1",
+          containerType: input.containerType,
+          mode: input.containerType === "project" ? "status" : "company",
+          collapsedGroupKeys: [],
+          updatedAt: null
+        }),
+      updateGroupingPreferences: async (input) =>
+        apiOk({
+          workspaceId: input.workspaceId ?? "workspace_1",
+          containerType: input.containerType,
+          mode: input.mode ?? (input.containerType === "project" ? "status" : "company"),
+          collapsedGroupKeys: input.collapsedGroupKeys ?? [],
+          updatedAt: "2026-05-10T10:01:00.000Z"
         })
     },
     items: {
