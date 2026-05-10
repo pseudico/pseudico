@@ -29,6 +29,7 @@ type SavedViewEvaluationRow = {
   container_type: string;
   container_title: string;
   task_status: string | null;
+  task_priority: number | null;
   due_at: string | null;
   start_at: string | null;
   sort_order: number;
@@ -95,6 +96,7 @@ export type SavedViewEvaluationTargetRecord = {
   containerType: string;
   containerTitle: string;
   taskStatus: string | null;
+  taskPriority: number | null;
   dueAt: string | null;
   startAt: string | null;
   sortOrder: number;
@@ -287,6 +289,7 @@ export class SavedViewRepository {
            c.type as container_type,
            c.name as container_title,
            null as task_status,
+           null as task_priority,
            null as due_at,
            null as start_at,
            c.sort_order,
@@ -325,6 +328,7 @@ export class SavedViewRepository {
            c.type as container_type,
            c.name as container_title,
            td.task_status,
+           td.priority as task_priority,
            td.due_at,
            td.start_at,
            i.sort_order,
@@ -386,6 +390,7 @@ function toEvaluationTargetRecord(
     containerType: row.container_type,
     containerTitle: row.container_title,
     taskStatus: row.task_status,
+    taskPriority: row.task_priority,
     dueAt: row.due_at,
     startAt: row.start_at,
     sortOrder: row.sort_order,

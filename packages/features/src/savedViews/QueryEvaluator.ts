@@ -17,6 +17,7 @@ export type SavedViewResultRef = {
   categoryId: string | null;
   categoryName: string | null;
   taskStatus: string | null;
+  taskPriority: number | null;
   dueAt: string | null;
   tags: string[];
   destinationPath: string;
@@ -137,6 +138,15 @@ export class QueryEvaluator {
       );
     }
 
+    if (condition.field === "taskPriority") {
+      return (
+        target.targetType === "item" &&
+        target.kind === "task" &&
+        target.taskPriority !== null &&
+        matchesNumberSet(target.taskPriority, condition.value)
+      );
+    }
+
     if (condition.field === "dueDate") {
       return matchesDueDateCondition(target.dueAt, condition);
     }
@@ -188,6 +198,12 @@ function normalizeOffset(offset: number | undefined): number {
 
 function matchesSet(actual: string, expected: string | string[]): boolean {
   return normalizeValues(expected).includes(actual);
+}
+
+function matchesNumberSet(actual: number, expected: number | number[]): boolean {
+  const expectedValues = Array.isArray(expected) ? expected : [expected];
+
+  return expectedValues.includes(actual);
 }
 
 function matchesDueDateCondition(
@@ -320,6 +336,7 @@ function toResultRef(target: SavedViewEvaluationTargetRecord): SavedViewResultRe
     categoryId: target.categoryId,
     categoryName: target.categoryName,
     taskStatus: target.taskStatus,
+    taskPriority: target.taskPriority,
     dueAt: target.dueAt,
     tags: target.tagSlugs,
     destinationPath:

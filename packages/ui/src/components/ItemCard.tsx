@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   isItemType,
   resolveContextMenuActions,
@@ -25,6 +25,7 @@ export type UniversalItemViewModel = {
   body?: string | null;
   status?: string | null;
   categoryLabel?: string | null;
+  categoryColor?: string | null;
   sortOrder?: number;
   createdAt?: string;
   dueLabel?: string | null;
@@ -58,6 +59,7 @@ export function UniversalItemCard({
   const knownType = isItemType(item.type);
   const typeLabel = getItemTypeLabel(item.type);
   const metadata = buildItemMetadata(item);
+  const accentStyle = createItemAccentStyle(item.categoryColor);
   const contextTarget = toItemContextMenuTarget(item, disabledActions ?? []);
   const contextActions = resolveContextMenuActions({
     target: contextTarget,
@@ -81,6 +83,7 @@ export function UniversalItemCard({
         className={`universal-item-card${selection?.selected === true ? " universal-item-card-selected" : ""}`}
         data-item-id={item.id}
         data-item-type={knownType ? item.type : "unknown"}
+        {...(accentStyle === undefined ? {} : { style: accentStyle })}
       >
         <header className="universal-item-card-header">
           <div className="universal-item-card-heading">
@@ -134,6 +137,18 @@ export function UniversalItemCard({
       </article>
     </ContextMenu>
   );
+}
+
+function createItemAccentStyle(
+  categoryColor: string | null | undefined
+): CSSProperties | undefined {
+  if (categoryColor === undefined || categoryColor === null || categoryColor.trim() === "") {
+    return undefined;
+  }
+
+  return {
+    "--item-accent-color": categoryColor
+  } as CSSProperties;
 }
 
 function ItemTagBadges({

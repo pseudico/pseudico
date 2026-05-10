@@ -356,6 +356,7 @@ function toCollectionResultSummary(
     categoryId: result.categoryId,
     categoryName: result.categoryName,
     taskStatus: result.taskStatus,
+    taskPriority: result.taskPriority ?? null,
     dueAt: result.dueAt,
     tags: result.tags,
     destinationPath: result.destinationPath
@@ -519,6 +520,7 @@ function toFeatureSmartListCriteria(
     categoryIds: input.categoryIds ?? [],
     ...(input.categoryMode === undefined ? {} : { categoryMode: input.categoryMode }),
     taskStatuses: (input.taskStatuses ?? []).filter(isTaskStatusValue),
+    taskPriorities: (input.taskPriorities ?? []).filter(isTaskPriorityValue),
     ...(input.dueFilter === undefined ? {} : { dueFilter: input.dueFilter }),
     ...(input.customDueFrom === undefined
       ? {}
@@ -543,6 +545,7 @@ function isSmartListCriteriaInput(input: unknown): boolean {
       input.categoryMode === "isEmpty" ||
       input.categoryMode === "isNotEmpty") &&
     isOptionalStringArray(input.taskStatuses) &&
+    isOptionalNumberArray(input.taskPriorities) &&
     (input.dueFilter === undefined ||
       input.dueFilter === "any" ||
       input.dueFilter === "overdue" ||
@@ -589,6 +592,13 @@ function isOptionalStringArray(value: unknown): boolean {
   );
 }
 
+function isOptionalNumberArray(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (Array.isArray(value) && value.every((entry) => typeof entry === "number"))
+  );
+}
+
 function isOptionalPositiveInteger(value: unknown): boolean {
   return (
     value === undefined ||
@@ -619,6 +629,10 @@ function isTaskStatusValue(value: unknown): value is TaskStatus {
     value === "waiting" ||
     value === "cancelled"
   );
+}
+
+function isTaskPriorityValue(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 5;
 }
 
 function isItemTypeValue(

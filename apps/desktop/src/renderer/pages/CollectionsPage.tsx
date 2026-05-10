@@ -760,6 +760,7 @@ function toSmartListCriteria(values: SmartListEditorValues) {
     categoryIds: values.categoryIds,
     categoryMode: values.categoryMode,
     taskStatuses: values.taskStatuses,
+    taskPriorities: values.taskPriorities,
     dueFilter: values.dueFilter,
     customDueFrom: values.customDueFrom,
     customDueTo: values.customDueTo
@@ -831,6 +832,7 @@ function toGroupedResultGroupViewModel(
       containerTitle: result.containerTitle,
       categoryName: result.categoryName,
       taskStatus: result.taskStatus,
+      taskPriority: result.taskPriority ?? null,
       dueAt: result.dueAt,
       tags: result.tags,
       destinationPath: result.destinationPath

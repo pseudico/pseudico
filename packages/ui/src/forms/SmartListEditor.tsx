@@ -47,6 +47,7 @@ export type SmartListEditorValues = {
   categoryIds: string[];
   categoryMode: "any" | "is" | "isEmpty" | "isNotEmpty";
   taskStatuses: SmartListEditorTaskStatus[];
+  taskPriorities: number[];
   dueFilter: SmartListEditorDueFilter;
   customDueFrom: string;
   customDueTo: string;
@@ -90,6 +91,15 @@ const TASK_STATUSES: { value: SmartListEditorTaskStatus; label: string }[] = [
   { value: "cancelled", label: "Cancelled" }
 ];
 
+const TASK_PRIORITIES: { value: number; label: string }[] = [
+  { value: 0, label: "P0" },
+  { value: 1, label: "P1" },
+  { value: 2, label: "P2" },
+  { value: 3, label: "P3" },
+  { value: 4, label: "P4" },
+  { value: 5, label: "P5" }
+];
+
 const DUE_FILTERS: { value: SmartListEditorDueFilter; label: string }[] = [
   { value: "any", label: "Any due date" },
   { value: "overdue", label: "Overdue" },
@@ -124,6 +134,7 @@ export function SmartListEditor({
     categoryIds: [],
     categoryMode: "any",
     taskStatuses: [],
+    taskPriorities: [],
     dueFilter: "any",
     customDueFrom: "",
     customDueTo: ""
@@ -226,6 +237,13 @@ export function SmartListEditor({
         options={TASK_STATUSES}
         values={values.taskStatuses}
         onChange={(taskStatuses) => setValues({ ...values, taskStatuses })}
+      />
+      <NumberCheckboxGroup
+        disabled={disabled}
+        label="Task priority"
+        options={TASK_PRIORITIES}
+        values={values.taskPriorities}
+        onChange={(taskPriorities) => setValues({ ...values, taskPriorities })}
       />
 
       <label className="field-label">
@@ -403,6 +421,41 @@ function CheckboxGroup<TValue extends string>({
   );
 }
 
+function NumberCheckboxGroup({
+  disabled,
+  label,
+  options,
+  values,
+  onChange
+}: {
+  disabled?: boolean;
+  label: string;
+  options: { value: number; label: string }[];
+  values: number[];
+  onChange: (values: number[]) => void;
+}): React.JSX.Element {
+  return (
+    <fieldset className="smart-list-fieldset">
+      <legend>{label}</legend>
+      {options.map((option) => (
+        <Checkbox
+          key={option.value}
+          checked={values.includes(option.value)}
+          {...(disabled === undefined ? {} : { disabled })}
+          label={option.label}
+          onChange={(checked) =>
+            onChange(
+              checked
+                ? [...values, option.value]
+                : values.filter((value) => value !== option.value)
+            )
+          }
+        />
+      ))}
+    </fieldset>
+  );
+}
+
 function MetadataMultiSelect({
   disabled,
   label,
@@ -452,6 +505,7 @@ function countCriteria(values: SmartListEditorValues): number {
         ? values.categoryIds.length
         : 1,
     values.taskStatuses.length,
+    values.taskPriorities.length,
     values.dueFilter === "any" ? 0 : 1
   ].reduce((total, count) => total + count, 0);
 }

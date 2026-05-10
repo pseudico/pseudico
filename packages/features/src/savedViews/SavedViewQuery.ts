@@ -33,6 +33,11 @@ export type SavedViewQueryCondition =
       value: string | string[];
     }
   | {
+      field: "taskPriority";
+      operator: "is" | "in";
+      value: number | number[];
+    }
+  | {
       field: "dueDate";
       operator: "before" | "after" | "on" | "between" | "isEmpty" | "isNotEmpty";
       value?: string | { from: string; to: string };
@@ -94,6 +99,7 @@ const CONDITION_FIELDS = [
   "tag",
   "category",
   "taskStatus",
+  "taskPriority",
   "dueDate",
   "text"
 ] as const;
@@ -264,6 +270,8 @@ function validateCondition(
     validateCategoryCondition(condition, path, errors);
   } else if (condition.field === "taskStatus") {
     validateSetCondition(condition, path, errors, isTaskStatus, "task status");
+  } else if (condition.field === "taskPriority") {
+    validatePriorityCondition(condition, path, errors);
   } else if (condition.field === "dueDate") {
     validateDueDateCondition(condition, path, errors);
   } else {
@@ -272,6 +280,29 @@ function validateCondition(
     }
     if (typeof condition.value !== "string" || condition.value.trim().length === 0) {
       errors.push(`${path}.value must be a non-empty string.`);
+    }
+  }
+}
+
+function validatePriorityCondition(
+  condition: Record<string, unknown>,
+  path: string,
+  errors: string[]
+): void {
+  if (condition.operator !== "is" && condition.operator !== "in") {
+    errors.push(`${path}.operator must be is or in.`);
+  }
+
+  const values = normalizeNumberValues(condition.value);
+
+  if (values.length === 0) {
+    errors.push(`${path}.value must include at least one task priority.`);
+    return;
+  }
+
+  for (const value of values) {
+    if (!Number.isInteger(value) || value < 0 || value > 5) {
+      errors.push(`${path}.value includes unsupported task priority: ${value}.`);
     }
   }
 }
@@ -404,6 +435,18 @@ function normalizeStringValues(value: unknown): string[] {
     .filter((entry): entry is string => typeof entry === "string")
     .map((entry) => entry.trim())
     .filter(Boolean);
+}
+
+function normalizeNumberValues(value: unknown): number[] {
+  if (typeof value === "number") {
+    return [value];
+  }
+
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((entry): entry is number => typeof entry === "number");
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

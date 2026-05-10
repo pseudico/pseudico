@@ -60,6 +60,7 @@ describe("SmartListService", () => {
           tagSlugs: ["finance"],
           categoryIds: ["category_1"],
           taskStatuses: ["waiting"],
+          taskPriorities: [1, 2],
           dueFilter: "next7Days"
         },
         new Date("2026-05-08T12:00:00.000Z")
@@ -74,6 +75,7 @@ describe("SmartListService", () => {
         { field: "tag", operator: "has", value: "finance" },
         { field: "category", operator: "is", value: "category_1" },
         { field: "taskStatus", operator: "is", value: "waiting" },
+        { field: "taskPriority", operator: "in", value: [1, 2] },
         {
           field: "dueDate",
           operator: "between",
@@ -87,14 +89,15 @@ describe("SmartListService", () => {
   });
 
   it("previews and saves smart lists as smart_list saved views with activity and search", async () => {
-    await createTask("Call accountant @finance", "waiting", "2026-05-08T09:00:00.000Z");
-    await createTask("Send supplier recap @ops", "open", "2026-05-20T09:00:00.000Z");
+    await createTask("Call accountant @finance", "waiting", "2026-05-08T09:00:00.000Z", 1);
+    await createTask("Send supplier recap @ops", "open", "2026-05-20T09:00:00.000Z", 4);
     const service = createService();
     const criteria = {
       itemTypes: ["task" as const],
       containerTypes: ["project" as const],
       tagSlugs: ["finance"],
       taskStatuses: ["waiting" as const],
+      taskPriorities: [1],
       dueFilter: "today" as const
     };
     const preview = service.previewSmartList({
@@ -107,6 +110,7 @@ describe("SmartListService", () => {
         kind: "task",
         title: "Call accountant @finance",
         taskStatus: "waiting",
+        taskPriority: 1,
         tags: ["finance"]
       }
     ]);
@@ -191,7 +195,8 @@ function createService(): SmartListService {
 async function createTask(
   title: string,
   taskStatus: "open" | "waiting",
-  dueAt: string
+  dueAt: string,
+  priority: number | null = null
 ): Promise<void> {
   const task = await new TaskService({
     connection,
@@ -204,6 +209,7 @@ async function createTask(
   });
   new TaskRepository(connection).updateDetails(task.item.id, {
     taskStatus,
+    priority,
     dueAt,
     timestamp: dueAt
   });

@@ -32,6 +32,7 @@ const PHONE_CALL_QUERY = {
     { field: "itemType", operator: "is", value: "task" },
     { field: "tag", operator: "has", value: "phone-call" },
     { field: "taskStatus", operator: "is", value: "waiting" },
+    { field: "taskPriority", operator: "is", value: 1 },
     {
       field: "dueDate",
       operator: "between",
@@ -101,6 +102,7 @@ describe("SavedViewService", () => {
         title: "Call supplier",
         containerTitle: "Launch Plan",
         taskStatus: "waiting",
+        taskPriority: 1,
         dueAt: "2026-05-05T00:00:00.000Z",
         tags: ["phone-call"]
       }
@@ -285,6 +287,7 @@ function seedEvaluationData(): void {
     itemId: task.id,
     workspaceId: "workspace_1",
     taskStatus: "waiting",
+    priority: 1,
     dueAt: "2026-05-05T00:00:00.000Z",
     timestamp: "2026-04-30T00:00:00.000Z"
   });
