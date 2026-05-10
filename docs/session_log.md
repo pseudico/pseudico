@@ -1565,3 +1565,75 @@ Open questions / risks:
 - Manual desktop QA still limited to automated build/test in this run.
 Next actions:
 - Commit, push, open ready PR, then inspect CI/reviews.
+
+## 2026-05-10 06:49:38 +10:00
+Objective: Merge PSE-96 and prepare next Codex Ready ticket.
+Decisions made:
+- PR #92 passed CI, was squash-merged as 2effe507, and branch was deleted.
+- Linear PSE-96 moved to Done; PSE-97 promoted as sole Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Local untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi remain untouched.
+Next actions:
+- Next run should start PSE-97 print/PDF selected-content scope.
+
+## 2026-05-10 12:41:06 +10:00
+Objective: Reconcile active Local Work OS ticket state.
+Decisions made:
+- Started with Linear/GitHub reconciliation before implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Active PR/issue state not yet known.
+Next actions:
+- Query Linear states and GitHub PRs.
+
+## 2026-05-10 12:41:33 +10:00
+Objective: Complete reconciliation and select active ticket.
+Decisions made:
+- Found no PSE issues in PR Open or In Progress.
+- Found one Codex Ready issue: PSE-97.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- GitHub open PR list still being checked for mismatch.
+Next actions:
+- Move PSE-97 to In Progress and inspect scope.
+
+## 2026-05-10 12:42:11 +10:00
+Objective: Start PSE-97 implementation track.
+Decisions made:
+- Moved PSE-97 from Codex Ready to In Progress.
+- Pulled origin/main after sandbox escalation for .git metadata.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need detailed acceptance criteria from ticket pack/source file.
+Next actions:
+- Read docs/source files, create branch, implement scoped changes.
+
+## 2026-05-10 12:55:29 +10:00
+Objective: Implement PSE-97 print/PDF foundation.
+Decisions made:
+- Added sanitized print HTML renderer and Electron PDF IPC path.
+- Added Print/PDF actions for item/context menus and project/contact/collection/dashboard views.
+Files changed:
+- packages/features/src/printing/PrintService.ts
+- apps/desktop/src/main/ipc/printHandlers.ts
+Open questions / risks:
+- Full app checks still pending.
+Next actions:
+- Run typecheck/lint/test/build and fix failures.
+
+## 2026-05-10 13:03:25 +10:00
+Objective: Verify PSE-97 before PR.
+Decisions made:
+- Kept print/PDF local-only through main/preload IPC and workspace-relative exports.
+- Treated PDF generation as export activity with no schema change.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- CI/review still need GitHub validation after push.
+Next actions:
+- Commit, push, open ready PR.

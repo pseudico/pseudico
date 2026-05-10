@@ -1,4 +1,4 @@
-import { ArrowLeft, Contact, RefreshCw, StickyNote, Tag } from "lucide-react";
+import { ArrowLeft, Contact, Printer, RefreshCw, StickyNote, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -13,6 +13,7 @@ import {
   TaskQuickAdd,
   type ContactFieldDraft,
   type ContactFieldViewModel,
+  type ItemActionId,
   type NoteCardViewModel,
   type NoteEditorValues,
   type RecentActivityViewModel,
@@ -124,6 +125,8 @@ export function ContactDetailPage({
   const [taskError, setTaskError] = useState<string | null>(null);
   const [noteError, setNoteError] = useState<string | null>(null);
   const [noteErrorItemId, setNoteErrorItemId] = useState<string | null>(null);
+  const [printBusy, setPrintBusy] = useState(false);
+  const [printMessage, setPrintMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (contactId === undefined) {
@@ -695,6 +698,83 @@ export function ContactDetailPage({
     return item.body === undefined || item.body === null ? <></> : <p>{item.body}</p>;
   }
 
+  async function printContactPdf(): Promise<void> {
+    if (contact === null) {
+      return;
+    }
+
+    setPrintBusy(true);
+    setPrintMessage(null);
+    setItemError(null);
+
+    const result = await apiClient.print?.printPdf({
+      containerId: contact.id,
+      title: contact.name,
+      workspaceId: contact.workspaceId
+    });
+
+    setPrintBusy(false);
+
+    if (result === undefined) {
+      setItemError("Print/PDF export is not available.");
+      return;
+    }
+
+    if (!result.ok) {
+      setItemError(result.error.message);
+      return;
+    }
+
+    setPrintMessage(`Contact PDF created at ${result.data.relativePath}.`);
+    await refreshContactActivity(contact.id);
+  }
+
+  async function printContactItemPdf(item: ContactFeedViewModel): Promise<void> {
+    if (contact === null) {
+      return;
+    }
+
+    setPrintBusy(true);
+    setPrintMessage(null);
+    setItemError(null);
+
+    const result = await apiClient.print?.printPdf({
+      itemIds: [item.id],
+      title: item.title,
+      workspaceId: contact.workspaceId
+    });
+
+    setPrintBusy(false);
+
+    if (result === undefined) {
+      setItemError("Print/PDF export is not available.");
+      return;
+    }
+
+    if (!result.ok) {
+      setItemError(result.error.message);
+      return;
+    }
+
+    setPrintMessage(`Item PDF created at ${result.data.relativePath}.`);
+    await refreshContactActivity(contact.id);
+  }
+
+  function handleItemAction(action: ItemActionId, itemId: string): void {
+    const item = items.find((candidate) => candidate.id === itemId);
+
+    if (item === undefined) {
+      return;
+    }
+
+    if (action === "print") {
+      void printContactItemPdf(item);
+      return;
+    }
+
+    setItemError("That context menu action is not available in this view yet.");
+  }
+
   if (loading) {
     return <p className="muted-text">Loading contact...</p>;
   }
@@ -758,7 +838,20 @@ export function ContactDetailPage({
           <h2>{contact.name}</h2>
           <p>{contact.description ?? "No description added yet."}</p>
         </div>
+        <button
+          className="secondary-button compact-button"
+          disabled={printBusy}
+          type="button"
+          onClick={() => void printContactPdf()}
+        >
+          <Printer size={16} aria-hidden="true" />
+          Print / PDF
+        </button>
       </header>
+
+      {printMessage === null ? null : (
+        <p className="form-message">{printMessage}</p>
+      )}
 
       <dl className="project-meta-grid">
         <div>
@@ -899,6 +992,7 @@ export function ContactDetailPage({
           items={visibleItems}
           loading={itemsLoading}
           renderContent={renderItemContent}
+          onAction={handleItemAction}
         />
         {hasMoreItems ? (
           <button

@@ -25,6 +25,7 @@ export const CONTEXT_MENU_ACTION_IDS = [
   "archive",
   "duplicate",
   "reveal",
+  "print",
   "copyLink",
   "inspect",
   "delete"
@@ -130,6 +131,13 @@ export const defaultContextMenuActions: readonly ContextMenuActionDescriptor[] =
     group: "Open",
     targetTypes: ["file"],
     keywords: ["file", "folder", "show"]
+  }),
+  contextAction({
+    id: "print",
+    title: "Print / PDF",
+    group: "Share",
+    targetTypes: ["container", "item", "file", "savedView"],
+    keywords: ["pdf", "export", "print"]
   }),
   contextAction({
     id: "copyLink",

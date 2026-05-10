@@ -1,4 +1,4 @@
-import { CheckCircle2, FolderPlus, RefreshCw } from "lucide-react";
+import { CheckCircle2, FolderPlus, Printer, RefreshCw } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -70,6 +70,8 @@ export function CollectionsPage({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [printBusy, setPrintBusy] = useState(false);
+  const [printMessage, setPrintMessage] = useState<string | null>(null);
   const [taskTitle, setTaskTitle] = useState("");
   const [taskContainerId, setTaskContainerId] = useState(
     initialProjects?.[0]?.id ?? ""
@@ -363,6 +365,46 @@ export function CollectionsPage({
     await evaluateSelectedCollection();
   }
 
+  async function printSelectedCollectionPdf(): Promise<void> {
+    if (currentWorkspace === null || selectedCollection === null) {
+      return;
+    }
+
+    const printableItemIds =
+      evaluation?.results
+        .filter((result) => result.targetType === "item")
+        .map((result) => result.targetId) ?? [];
+
+    if (printableItemIds.length === 0) {
+      setError("Evaluate this collection before printing item results.");
+      return;
+    }
+
+    setPrintBusy(true);
+    setPrintMessage(null);
+    setError(null);
+
+    const result = await apiClient.print?.printPdf({
+      workspaceId: currentWorkspace.id,
+      title: selectedCollection.name,
+      itemIds: printableItemIds
+    });
+
+    setPrintBusy(false);
+
+    if (result === undefined) {
+      setError("Print/PDF export is not available.");
+      return;
+    }
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setPrintMessage(`Collection PDF created at ${result.data.relativePath}.`);
+  }
+
   if (currentWorkspace === null) {
     return (
       <section className="collections-page">
@@ -478,15 +520,30 @@ export function CollectionsPage({
                     <p>{selectedCollection.description}</p>
                   )}
                 </div>
-                <button
-                  type="button"
-                  className="secondary-button"
-                  onClick={() => void evaluateSelectedCollection()}
-                >
-                  <RefreshCw size={16} aria-hidden="true" />
-                  <span>Refresh</span>
-                </button>
+                <div className="button-row">
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={printBusy}
+                    onClick={() => void printSelectedCollectionPdf()}
+                  >
+                    <Printer size={16} aria-hidden="true" />
+                    <span>Print / PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => void evaluateSelectedCollection()}
+                  >
+                    <RefreshCw size={16} aria-hidden="true" />
+                    <span>Refresh</span>
+                  </button>
+                </div>
               </header>
+
+              {printMessage === null ? null : (
+                <p className="form-message">{printMessage}</p>
+              )}
 
               {selectedCollection.kind === "tag" ? (
                 <form

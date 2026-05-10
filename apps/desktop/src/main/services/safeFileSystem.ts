@@ -202,6 +202,16 @@ export async function writeTextFileInsideWorkspace(
   await writeFile(filePath, contents, "utf8");
 }
 
+export async function writeBinaryFileInsideWorkspace(
+  workspaceRootPath: string,
+  workspaceRelativePath: string,
+  contents: Uint8Array
+): Promise<void> {
+  const filePath = resolveInsideWorkspace(workspaceRootPath, workspaceRelativePath);
+  await ensureDirectory(dirname(filePath));
+  await writeFile(filePath, contents);
+}
+
 export async function calculateChecksum(localPath: string): Promise<string> {
   const filePath = normalizeLocalPath(localPath);
   const stats = await stat(filePath);

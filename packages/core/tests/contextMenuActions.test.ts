@@ -22,6 +22,7 @@ describe("context menu action resolution", () => {
 
     expect(actions.map((action) => action.id)).toContain("open");
     expect(actions.map((action) => action.id)).toContain("move");
+    expect(actions.map((action) => action.id)).toContain("print");
     expect(actions.map((action) => action.id)).not.toContain("duplicate");
     expect(actions.map((action) => action.id)).not.toContain("reveal");
   });

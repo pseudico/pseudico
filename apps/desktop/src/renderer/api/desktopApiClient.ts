@@ -380,6 +380,16 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       exportTasksCsv: (input) =>
         callApi(() => api.export.exportTasksCsv(input))
     },
+    print: {
+      printPdf: (input) =>
+        callApi(() => {
+          if (api.print === undefined) {
+            throw new Error("Print/PDF export is not available.");
+          }
+
+          return api.print.printPdf(input);
+        })
+    },
     diagnostics: {
       runWorkspaceIntegrityCheck: (input) =>
         callApi(() => api.diagnostics.runWorkspaceIntegrityCheck(input))
@@ -770,6 +780,9 @@ export const desktopApiClient: LocalWorkOsApi = {
     exportProjectMarkdown: (input) =>
       getDesktopApiClient().export.exportProjectMarkdown(input),
     exportTasksCsv: (input) => getDesktopApiClient().export.exportTasksCsv(input)
+  },
+  print: {
+    printPdf: (input) => getDesktopApiClient().print!.printPdf(input)
   },
   diagnostics: {
     runWorkspaceIntegrityCheck: (input) =>

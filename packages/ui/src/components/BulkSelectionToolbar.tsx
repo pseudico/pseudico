@@ -1,4 +1,4 @@
-import { Archive, CheckCircle2, Download, FolderInput, Tag, Trash2, X } from "lucide-react";
+import { Archive, CheckCircle2, Download, FolderInput, Printer, Tag, Trash2, X } from "lucide-react";
 
 export type BulkSelectionActionId =
   | "move"
@@ -7,7 +7,8 @@ export type BulkSelectionActionId =
   | "archive"
   | "delete"
   | "complete"
-  | "export";
+  | "export"
+  | "print";
 
 export type BulkSelectionToolbarProps = {
   selectedCount: number;
@@ -24,6 +25,7 @@ const BULK_ACTIONS = [
   { id: "complete", label: "Complete", icon: CheckCircle2, danger: false },
   { id: "archive", label: "Archive", icon: Archive, danger: false },
   { id: "export", label: "Export", icon: Download, danger: false },
+  { id: "print", label: "Print / PDF", icon: Printer, danger: false },
   { id: "delete", label: "Delete", icon: Trash2, danger: true }
 ] as const satisfies readonly {
   id: BulkSelectionActionId;

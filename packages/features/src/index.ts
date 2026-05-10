@@ -32,6 +32,7 @@ export const plannedFeatureAreas = [
   "backup",
   "bulkActions",
   "export",
+  "printing",
   "templates",
   "workflows",
   "undo",
@@ -96,6 +97,11 @@ export {
   exportModuleContract,
   WORKSPACE_EXPORT_SCHEMA_VERSION
 } from "./export";
+export {
+  PrintHtmlRenderer,
+  PrintService,
+  printingModuleContract
+} from "./printing";
 export { FileAttachmentService, FileVersionService, filesModuleContract } from "./files";
 export { ImportValidationService, importModuleContract } from "./import";
 export { IntegrityCheckService, diagnosticsModuleContract } from "./diagnostics";
@@ -315,6 +321,16 @@ export type {
   WriteExportFileInput,
   WriteTextExportInput
 } from "./export";
+export type {
+  BuildPrintHtmlInput,
+  PrintableItem,
+  PrintHtmlDocument,
+  PrintHtmlRendererInput,
+  PrintPdfExportResult,
+  PrintServiceIdFactory,
+  PrintSourceType,
+  RecordPrintPdfExportInput
+} from "./printing";
 export type {
   AttachFileToContainerInput,
   AttachFileToItemInput,

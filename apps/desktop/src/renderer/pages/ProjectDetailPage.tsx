@@ -4,6 +4,7 @@ import {
   FolderKanban,
   Link2,
   Paperclip,
+  Printer,
   RefreshCw,
   StickyNote,
   Tag
@@ -861,6 +862,67 @@ export function ProjectDetailPage({
     await refreshProjectActivity(project.id);
   }
 
+  async function printProjectPdf(): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setExportBusy(true);
+    setExportMessage(null);
+    setItemActionError(null);
+
+    const result = await apiClient.print?.printPdf({
+      containerId: project.id,
+      title: project.name,
+      workspaceId: project.workspaceId
+    });
+
+    setExportBusy(false);
+
+    if (result === undefined) {
+      setItemActionError("Print/PDF export is not available.");
+      return;
+    }
+
+    if (!result.ok) {
+      setItemActionError(result.error.message);
+      return;
+    }
+
+    setExportMessage(`Project PDF created at ${result.data.relativePath}.`);
+    await refreshProjectActivity(project.id);
+  }
+
+  async function printItemPdf(item: ProjectFeedViewModel): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setItemActionBusy(true);
+    setItemActionError(null);
+
+    const result = await apiClient.print?.printPdf({
+      itemIds: [item.id],
+      title: item.title,
+      workspaceId: project.workspaceId
+    });
+
+    setItemActionBusy(false);
+
+    if (result === undefined) {
+      setItemActionError("Print/PDF export is not available.");
+      return;
+    }
+
+    if (!result.ok) {
+      setItemActionError(result.error.message);
+      return;
+    }
+
+    setExportMessage(`Item PDF created at ${result.data.relativePath}.`);
+    await refreshProjectActivity(project.id);
+  }
+
   async function openProjectFile(item: FileCardViewModel): Promise<void> {
     if (project === null) {
       return;
@@ -1355,6 +1417,11 @@ export function ProjectDetailPage({
 
     if (action === "copyLink") {
       void copyLocalItemLink(item);
+      return;
+    }
+
+    if (action === "print") {
+      void printItemPdf(item);
       return;
     }
 
@@ -1976,15 +2043,26 @@ export function ProjectDetailPage({
           <h2>{project.name}</h2>
           <p>{project.description ?? "No description added yet."}</p>
         </div>
-        <button
-          className="secondary-button compact-button"
-          disabled={exportBusy}
-          type="button"
-          onClick={() => void exportProjectMarkdown()}
-        >
-          <Download size={16} aria-hidden="true" />
-          Export Markdown
-        </button>
+        <div className="button-row">
+          <button
+            className="secondary-button compact-button"
+            disabled={exportBusy}
+            type="button"
+            onClick={() => void printProjectPdf()}
+          >
+            <Printer size={16} aria-hidden="true" />
+            Print / PDF
+          </button>
+          <button
+            className="secondary-button compact-button"
+            disabled={exportBusy}
+            type="button"
+            onClick={() => void exportProjectMarkdown()}
+          >
+            <Download size={16} aria-hidden="true" />
+            Export Markdown
+          </button>
+        </div>
       </header>
 
       {exportMessage === null ? null : (
