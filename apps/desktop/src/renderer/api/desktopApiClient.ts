@@ -390,6 +390,12 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
           return api.print.printPdf(input);
         })
     },
+    appearance: {
+      getSettings: (workspaceId) =>
+        callApi(() => api.appearance.getSettings(workspaceId)),
+      updateSettings: (input) =>
+        callApi(() => api.appearance.updateSettings(input))
+    },
     diagnostics: {
       runWorkspaceIntegrityCheck: (input) =>
         callApi(() => api.diagnostics.runWorkspaceIntegrityCheck(input))
@@ -783,6 +789,12 @@ export const desktopApiClient: LocalWorkOsApi = {
   },
   print: {
     printPdf: (input) => getDesktopApiClient().print!.printPdf(input)
+  },
+  appearance: {
+    getSettings: (workspaceId) =>
+      getDesktopApiClient().appearance.getSettings(workspaceId),
+    updateSettings: (input) =>
+      getDesktopApiClient().appearance.updateSettings(input)
   },
   diagnostics: {
     runWorkspaceIntegrityCheck: (input) =>

@@ -83,6 +83,8 @@ object graph:
 
 - `workspaces` and `app_settings` store workspace identity, schema version, and
   local preference/settings rows.
+  Appearance preferences use an `appearance.settings.v1` app setting payload for
+  local theme, density, and font-size choices without adding cloud profile data.
 - `containers` and `container_tabs` store Inbox, project, and contact surfaces
   plus early tab support.
 - `contact_fields` stores flexible labelled profile fields for contact

@@ -33,6 +33,7 @@ export const plannedFeatureAreas = [
   "bulkActions",
   "export",
   "printing",
+  "appearance",
   "templates",
   "workflows",
   "undo",
@@ -43,6 +44,16 @@ export const plannedFeatureAreas = [
 ] as const;
 
 export type { FeatureModuleContract, FeatureModulePriority } from "./featureModuleContract";
+export {
+  APPEARANCE_DENSITIES,
+  APPEARANCE_FONT_SIZES,
+  APPEARANCE_SETTINGS_KEY,
+  APPEARANCE_THEMES,
+  AppearanceSettingsService,
+  DEFAULT_APPEARANCE_SETTINGS,
+  appearanceModuleContract,
+  normalizeAppearanceSettingsValue
+} from "./appearance";
 export {
   ActivityService,
   activityModuleContract,
@@ -331,6 +342,14 @@ export type {
   PrintSourceType,
   RecordPrintPdfExportInput
 } from "./printing";
+export type {
+  AppearanceDensityPreference,
+  AppearanceFontSizePreference,
+  AppearanceSettings,
+  AppearanceSettingsValue,
+  AppearanceThemePreference,
+  UpdateAppearanceSettingsInput
+} from "./appearance";
 export type {
   AttachFileToContainerInput,
   AttachFileToItemInput,

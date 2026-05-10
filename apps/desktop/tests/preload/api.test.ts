@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(156);
+    expect(channels).toHaveLength(158);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -74,6 +74,7 @@ describe("typed preload API", () => {
       "import",
       "export",
       "print",
+      "appearance",
       "diagnostics",
       "navigation"
     ]);
@@ -1533,6 +1534,45 @@ describe("typed preload API", () => {
           workspaceId: "workspace_1",
           month: "2026-05",
           includeCompleted: true
+        }
+      }
+    ]);
+  });
+
+
+  it("routes appearance calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk(null)) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.appearance.getSettings("workspace_1");
+    await api.appearance.updateSettings({
+      workspaceId: "workspace_1",
+      theme: "dark",
+      density: "compact",
+      fontSize: "large"
+    });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.appearance.getSettings,
+        input: "workspace_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.appearance.updateSettings,
+        input: {
+          workspaceId: "workspace_1",
+          theme: "dark",
+          density: "compact",
+          fontSize: "large"
         }
       }
     ]);

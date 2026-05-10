@@ -637,6 +637,24 @@ function createMockApi(): LocalWorkOsApi {
       exportProjectMarkdown: async () => apiOk(null as never),
       exportTasksCsv: async () => apiOk(null as never)
     },
+    appearance: {
+      getSettings: async () =>
+        apiOk({
+          workspaceId: "workspace_1",
+          theme: "system",
+          density: "comfortable",
+          fontSize: "medium",
+          updatedAt: null
+        }),
+      updateSettings: async () =>
+        apiOk({
+          workspaceId: "workspace_1",
+          theme: "system",
+          density: "comfortable",
+          fontSize: "medium",
+          updatedAt: "2026-05-10T03:20:00.000Z"
+        })
+    },
     diagnostics: {
       runWorkspaceIntegrityCheck: async () => apiOk(null as never)
     },
