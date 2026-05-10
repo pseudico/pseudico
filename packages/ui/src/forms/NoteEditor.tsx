@@ -6,6 +6,12 @@ export type NoteEditorValues = {
   content: string;
 };
 
+export type NoteWikilinkSuggestion = {
+  id: string;
+  title: string;
+  kind: "project" | "contact" | "item";
+};
+
 export type NoteEditorProps = {
   contextLabel: string;
   disabled?: boolean;
@@ -16,6 +22,7 @@ export type NoteEditorProps = {
     values: NoteEditorValues
   ) => Promise<boolean | void> | boolean | void;
   resetOnSubmit?: boolean;
+  wikilinkSuggestions?: readonly NoteWikilinkSuggestion[];
   submitLabel?: string;
 };
 
@@ -32,11 +39,17 @@ export function NoteEditor({
   onCancel,
   onSubmit,
   resetOnSubmit = false,
-  submitLabel = "Save note"
+  submitLabel = "Save note",
+  wikilinkSuggestions = []
 }: NoteEditorProps): React.JSX.Element {
   const [title, setTitle] = useState(initialValues.title ?? "");
   const [content, setContent] = useState(initialValues.content ?? "");
   const [formError, setFormError] = useState<string | null>(null);
+  const activeWikilink = findActiveWikilinkQuery(content);
+  const matchingWikilinks = getMatchingWikilinkSuggestions(
+    wikilinkSuggestions,
+    activeWikilink?.query ?? ""
+  );
 
   useEffect(() => {
     setTitle(initialValues.title ?? "");
@@ -102,6 +115,30 @@ export function NoteEditor({
         />
       </label>
 
+      {activeWikilink === null || matchingWikilinks.length === 0 ? null : (
+        <div className="wikilink-suggestions" aria-label="Wikilink suggestions">
+          <span>Link to local object</span>
+          <div>
+            {matchingWikilinks.map((suggestion) => (
+              <button
+                className="wikilink-suggestion-button"
+                disabled={disabled}
+                key={`${suggestion.kind}:${suggestion.id}`}
+                type="button"
+                onClick={() =>
+                  setContent((current) =>
+                    applyWikilinkSuggestion(current, activeWikilink, suggestion.title)
+                  )
+                }
+              >
+                {suggestion.title}
+                <small>{suggestion.kind}</small>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="note-editor-actions">
         <button className="primary-button" disabled={disabled} type="submit">
           <Check size={17} aria-hidden="true" />
@@ -127,4 +164,68 @@ export function NoteEditor({
       )}
     </form>
   );
+}
+
+type ActiveWikilinkQuery = {
+  start: number;
+  end: number;
+  query: string;
+};
+
+function findActiveWikilinkQuery(content: string): ActiveWikilinkQuery | null {
+  const openIndex = content.lastIndexOf("[[");
+
+  if (openIndex === -1) {
+    return null;
+  }
+
+  const closeIndex = content.indexOf("]]", openIndex + 2);
+
+  if (closeIndex !== -1) {
+    return null;
+  }
+
+  const query = content.slice(openIndex + 2);
+
+  if (query.includes("\n") || query.includes("[")) {
+    return null;
+  }
+
+  return {
+    start: openIndex,
+    end: content.length,
+    query
+  };
+}
+
+function getMatchingWikilinkSuggestions(
+  suggestions: readonly NoteWikilinkSuggestion[],
+  query: string
+): NoteWikilinkSuggestion[] {
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const seen = new Set<string>();
+
+  return suggestions
+    .filter((suggestion) => {
+      const key = `${suggestion.kind}:${suggestion.id}`;
+
+      if (seen.has(key)) {
+        return false;
+      }
+
+      seen.add(key);
+      return (
+        normalizedQuery.length === 0 ||
+        suggestion.title.toLocaleLowerCase().includes(normalizedQuery)
+      );
+    })
+    .slice(0, 6);
+}
+
+function applyWikilinkSuggestion(
+  content: string,
+  active: ActiveWikilinkQuery,
+  title: string
+): string {
+  return `${content.slice(0, active.start)}[[${title}]]${content.slice(active.end)}`;
 }

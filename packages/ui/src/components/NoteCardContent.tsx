@@ -1,16 +1,35 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import { parseWikilinks } from "@local-work-os/core";
 import { Pencil } from "lucide-react";
 import type { UniversalItemViewModel } from "./ItemCard";
 import {
   NoteEditor,
-  type NoteEditorValues
+  type NoteEditorValues,
+  type NoteWikilinkSuggestion
 } from "../forms/NoteEditor";
+
+export type WikilinkTargetViewModel = {
+  type: "container" | "item" | "list_item";
+  id: string;
+  kind: "project" | "contact" | "item";
+  title: string;
+  containerId?: string;
+  containerType?: string;
+};
+
+export type WikilinkViewModel = {
+  title: string;
+  status: "resolved" | "broken" | "ambiguous";
+  target: WikilinkTargetViewModel | null;
+  candidates?: readonly WikilinkTargetViewModel[];
+};
 
 export type NoteCardViewModel = UniversalItemViewModel & {
   type: "note";
   content: string;
   preview?: string | null;
   format?: "markdown";
+  wikilinks?: readonly WikilinkViewModel[];
 };
 
 export type NoteCardContentProps = {
@@ -21,13 +40,17 @@ export type NoteCardContentProps = {
     item: NoteCardViewModel,
     values: NoteEditorValues
   ) => Promise<boolean | void> | boolean | void;
+  onWikilinkOpen?: ((target: WikilinkTargetViewModel) => void) | undefined;
+  wikilinkSuggestions?: readonly NoteWikilinkSuggestion[];
 };
 
 export function NoteCardContent({
   item,
   disabled = false,
   error = null,
-  onSave
+  onSave,
+  onWikilinkOpen,
+  wikilinkSuggestions = []
 }: NoteCardContentProps): React.JSX.Element {
   const [editing, setEditing] = useState(false);
 
@@ -42,6 +65,7 @@ export function NoteCardContent({
           content: item.content
         }}
         submitLabel="Save changes"
+        wikilinkSuggestions={wikilinkSuggestions}
         onCancel={() => setEditing(false)}
         onSubmit={async (values) => {
           const saved = await onSave?.(item, values);
@@ -63,7 +87,11 @@ export function NoteCardContent({
         <p className="note-card-preview">{item.preview}</p>
       )}
 
-      <MarkdownPreview content={item.content} />
+      <MarkdownPreview
+        content={item.content}
+        wikilinks={item.wikilinks ?? []}
+        onWikilinkOpen={onWikilinkOpen}
+      />
 
       {onSave === undefined ? null : (
         <button
@@ -81,9 +109,13 @@ export function NoteCardContent({
 }
 
 function MarkdownPreview({
-  content
+  content,
+  wikilinks,
+  onWikilinkOpen
 }: {
   content: string;
+  wikilinks: readonly WikilinkViewModel[];
+  onWikilinkOpen?: ((target: WikilinkTargetViewModel) => void) | undefined;
 }): React.JSX.Element {
   const lines = content.split(/\r?\n/).filter((line) => line.trim().length > 0);
 
@@ -101,7 +133,11 @@ function MarkdownPreview({
             {parsed.prefix === null ? null : (
               <span aria-hidden="true">{parsed.prefix}</span>
             )}
-            {parsed.text}
+            <InlineWikilinkText
+              text={parsed.text}
+              wikilinks={wikilinks}
+              onWikilinkOpen={onWikilinkOpen}
+            />
           </p>
         );
       })}
@@ -165,6 +201,97 @@ function parseMarkdownLine(line: string): {
     prefix: null,
     text: stripInlineMarkdown(trimmed)
   };
+}
+
+
+function InlineWikilinkText({
+  text,
+  wikilinks,
+  onWikilinkOpen
+}: {
+  text: string;
+  wikilinks: readonly WikilinkViewModel[];
+  onWikilinkOpen?: ((target: WikilinkTargetViewModel) => void) | undefined;
+}): React.JSX.Element {
+  const nodes = renderInlineWikilinks(text, wikilinks, onWikilinkOpen);
+
+  return <>{nodes}</>;
+}
+
+function renderInlineWikilinks(
+  text: string,
+  wikilinks: readonly WikilinkViewModel[],
+  onWikilinkOpen?: (target: WikilinkTargetViewModel) => void
+): ReactNode[] {
+  const parsed = parseWikilinks(text);
+
+  if (parsed.length === 0) {
+    return [text];
+  }
+
+  const byTitle = new Map(
+    wikilinks.map((link) => [link.title.trim().toLocaleLowerCase(), link])
+  );
+  const nodes: ReactNode[] = [];
+  let cursor = 0;
+
+  parsed.forEach((link, index) => {
+    if (link.start > cursor) {
+      nodes.push(text.slice(cursor, link.start));
+    }
+
+    const resolved = byTitle.get(link.title.trim().toLocaleLowerCase());
+    nodes.push(
+      <WikilinkToken
+        key={`${link.start}:${link.raw}:${index}`}
+        link={resolved ?? { title: link.title, status: "broken", target: null }}
+        onOpen={onWikilinkOpen}
+      />
+    );
+    cursor = link.end;
+  });
+
+  if (cursor < text.length) {
+    nodes.push(text.slice(cursor));
+  }
+
+  return nodes;
+}
+
+function WikilinkToken({
+  link,
+  onOpen
+}: {
+  link: WikilinkViewModel;
+  onOpen?: ((target: WikilinkTargetViewModel) => void) | undefined;
+}): React.JSX.Element {
+  if (link.status === "resolved" && link.target !== null) {
+    const target = link.target;
+
+    return (
+      <button
+        className="note-wikilink note-wikilink-resolved"
+        type="button"
+        title={`Open ${target.kind}: ${target.title}`}
+        onClick={() => onOpen?.(target)}
+      >
+        [[{link.title}]]
+      </button>
+    );
+  }
+
+  const label = link.status === "ambiguous"
+    ? `Ambiguous wikilink: ${link.title}`
+    : `Broken wikilink: ${link.title}`;
+
+  return (
+    <span
+      className={`note-wikilink note-wikilink-${link.status}`}
+      title={label}
+    >
+      [[{link.title}]]
+    </span>
+  );
 }
 
 function stripInlineMarkdown(value: string): string {

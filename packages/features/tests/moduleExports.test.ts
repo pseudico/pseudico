@@ -61,7 +61,9 @@ import {
   undoModuleContract,
   workflowsModuleContract,
   WorkflowService,
-  workspaceModuleContract
+  workspaceModuleContract,
+  WikilinkService,
+  wikilinksModuleContract
 } from "../src";
 
 describe("feature module exports", () => {
@@ -107,7 +109,8 @@ describe("feature module exports", () => {
       "trash",
       "quickStart",
       "activity",
-      "diagnostics"
+      "diagnostics",
+      "wikilinks"
     ]);
   });
 
@@ -150,7 +153,8 @@ describe("feature module exports", () => {
       workflowsModuleContract.module,
       undoModuleContract.module,
       activityModuleContract.module,
-      diagnosticsModuleContract.module
+      diagnosticsModuleContract.module,
+      wikilinksModuleContract.module
     ];
 
     expect(exportedModules).toEqual([
@@ -191,7 +195,8 @@ describe("feature module exports", () => {
       "workflows",
       "undo",
       "activity",
-      "diagnostics"
+      "diagnostics",
+      "wikilinks"
     ]);
   });
 
@@ -267,6 +272,10 @@ describe("feature module exports", () => {
 
   it("exports the navigation history service implementation", () => {
     expect(NavigationHistoryService).toBeDefined();
+  });
+
+  it("exports the wikilink service implementation", () => {
+    expect(WikilinkService).toBeDefined();
   });
 
   it("exports Quick Start action providers", () => {

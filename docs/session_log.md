@@ -2035,3 +2035,28 @@ Files changed:
 - packages/db/src/migrations/0010_tab_visibility.ts; packages/features/src/tabs/TabService.ts; apps/desktop/src/renderer/components/ContainerTabsPanel.tsx; packages/ui/src/components/TabManagementDialog.tsx
 Open questions / risks: Full test/build required sandbox escalation for Vite/esbuild EPERM but passed after rerun.
 Next actions: Commit, push, open PR; update Linear; monitor CI.
+
+- Timestamp: 2026-05-10T18:38:07.6532388+10:00
+- Objective: Reconciled Linear/GitHub and selected PSE-108 for implementation.
+- Decisions made: No active PR/In Progress issue; PSE-108 only Codex Ready; untracked local files left untouched.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need inspect ticket scope and existing link model.
+- Next actions: move issue In Progress; read docs/source; branch and implement.
+- Timestamp: 2026-05-10T18:39:01.1436346+10:00
+- Objective: Planned PSE-108 wikilinks implementation after reading ticket/docs.
+- Decisions made: Reuse relationships schema; add parser/resolver and renderer link states; no schema expansion.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need map note renderer and relationship APIs.
+- Next actions: inspect services/components; implement slice; add tests.
+- Timestamp: 2026-05-10T18:52:09.3259831+10:00
+- Objective: Implemented PSE-108 wikilink parser, resolver, note sync, and UI rendering.
+- Decisions made: Note save creates references relationships for unique links; duplicate titles render ambiguous; no migration.
+- Files changed: packages/core/src/services/wikilinkParser.ts; packages/features/src/wikilinks/WikilinkService.ts; packages/features/src/notes/NoteService.ts; packages/ui/src/components/NoteCardContent.tsx; packages/ui/src/forms/NoteEditor.tsx
+- Open questions / risks: Typecheck may reveal API/mock adjustments.
+- Next actions: run targeted tests; fix failures; run full checks.
+- Timestamp: 2026-05-10T18:58:27.2829384+10:00
+- Objective: Verified PSE-108 locally.
+- Decisions made: Fixed lint regex escapes; made NoteSummary wikilinks optional for test fixtures; reran EPERM-hit commands with escalation.
+- Files changed: packages/features/tests/moduleExports.test.ts; packages/features/tests/wikilinkService.test.ts; packages/ui/tests/itemComponents.test.tsx; apps/desktop/src/renderer/styles.css
+- Open questions / risks: Need inspect final diff and avoid unrelated generated outputs.
+- Next actions: review git diff; commit/push; open PR.

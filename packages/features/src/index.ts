@@ -41,7 +41,8 @@ export const plannedFeatureAreas = [
   "trash",
   "quickStart",
   "activity",
-  "diagnostics"
+  "diagnostics",
+  "wikilinks"
 ] as const;
 
 export type { FeatureModuleContract, FeatureModulePriority } from "./featureModuleContract";
@@ -186,6 +187,7 @@ export {
 } from "./projects";
 export { RecurrenceService, recurrenceModuleContract } from "./recurrence";
 export { RelationshipService, relationshipsModuleContract } from "./relationships";
+export { WikilinkService, wikilinksModuleContract } from "./wikilinks";
 export { ReminderService, remindersModuleContract } from "./reminders";
 export {
   QueryEvaluator,
@@ -557,6 +559,15 @@ export type {
   RelationshipServiceIdFactory,
   RemoveRelationshipInput
 } from "./relationships";
+export type {
+  SyncWikilinksForItemInput,
+  WikilinkResolution,
+  WikilinkResolvedTarget,
+  WikilinkResolutionStatus,
+  WikilinkServiceIdFactory,
+  WikilinkSyncResult,
+  WikilinkTargetKind
+} from "./wikilinks";
 export type {
   ClearTaskReminderInput,
   DismissReminderInput,
