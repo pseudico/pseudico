@@ -2860,3 +2860,74 @@ Open questions / risks:
 - Drag/drop manual QA not launched locally; covered by service/API/UI wiring tests and build.
 Next actions:
 - Commit, push, and open a ready PR.
+## 2026-05-11T13:35:34.1859005+10:00
+- Objective: Complete PSE-124 end-to-end and prepare the next Codex Ready ticket.
+- Decisions made: Merged PR #119 after green local checks and CI; promoted PSE-125 as the only Codex Ready issue.
+- Files changed: docs/session_log.md
+- Open questions / risks: Session log entry is local-only after merge; unrelated untracked files remain untouched.
+- Next actions: Pick up PSE-125; keep other issues out of Codex Ready; verify task/list conversion scope before coding.
+## 2026-05-11 13:51:46 +10:00
+Objective: Start next Local Work OS ticket end-to-end.
+Decisions made:
+- Using Linear as plan and GitHub as proof; beginning reconciliation before new work.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Active PR/CI state unknown until connectors respond.
+Next actions: Reconcile Linear; inspect active PR; select/implement Codex Ready issue.
+## 2026-05-11 13:52:17 +10:00
+Objective: Reconcile active Linear/GitHub work.
+Decisions made:
+- No PR Open or In Progress Linear issues found for PSE Local Work OS project.
+- No open GitHub PRs found in pseudico/pseudico.
+- Selected the sole Codex Ready issue: PSE-125.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need full issue scope and local branch setup with existing unrelated untracked files untouched.
+Next actions: Move PSE-125 to In Progress; read docs/source; implement scoped ticket.
+## 2026-05-11 13:53:49 +10:00
+Objective: Begin PSE-125 implementation.
+Decisions made:
+- Moved PSE-125 from Codex Ready to In Progress.
+- Created branch codex/PSE-125-task-list-conversion from main/origin main at 5dde8c9.
+- Source ticket expands scope to task-to-list, list-item-to-task, and merge conversions.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need map existing task/list repository capabilities before coding.
+Next actions: Inspect services/tests; implement ConversionService; add integration tests.
+## 2026-05-11 14:01:54 +10:00
+Objective: Implement PSE-125 conversion service.
+Decisions made:
+- Added service-layer task/list/list-row conversions without schema changes.
+- Preserves tags, category mapping, dates, relationships, attachments where model supports them.
+- Added context menu conversion actions and mapping docs.
+Files changed:
+- packages/features/src/taskListConversions/TaskListConversionService.ts; packages/core/src/actions/ContextMenuActions.ts; docs/TASK_LIST_CONVERSION_MAPPING.md
+Open questions / risks: Full renderer execution wiring is not added beyond context action descriptors.
+Next actions: Run full checks; fix failures; publish PR.
+## 2026-05-11 14:03:34 +10:00
+Objective: Verify PSE-125 locally.
+Decisions made:
+- Full lint, typecheck, test, and build pass after sandbox EPERM reruns where needed.
+- Targeted core/features tests also passed with new conversion coverage.
+Files changed:
+- packages/features/tests/taskListConversionService.test.ts; packages/ui/src/components/ItemActionsMenu.tsx; docs/session_log.md
+Open questions / risks: Need PR/CI confirmation after push.
+Next actions: Review diff; commit/push; open ready PR and update Linear.
+## 2026-05-11 14:05:08 +10:00
+Objective: Commit and push PSE-125.
+Decisions made:
+- Committed PSE-125 changes as 0ff2775.
+- Pushed branch codex/PSE-125-task-list-conversion to origin.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub CI/review state pending PR creation.
+Next actions: Create ready PR; update Linear PR Open; inspect CI.
+## 2026-05-11 14:06:15 +10:00
+Objective: Open PR for PSE-125.
+Decisions made:
+- Created ready PR #120 against main with PSE-125 title and completed template.
+- Linked PR in Linear and moved PSE-125 to PR Open.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PR mergeability/CI pending on GitHub.
+Next actions: Check PR diff; check CI; merge only if clean and green.

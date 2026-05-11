@@ -11,6 +11,7 @@ export const plannedFeatureAreas = [
   "containerMedia",
   "tasks",
   "lists",
+  "taskListConversions",
   "notes",
   "files",
   "import",
@@ -192,6 +193,10 @@ export {
   listsModuleContract,
   parseBulkListItems
 } from "./lists";
+export {
+  TaskListConversionService,
+  taskListConversionsModuleContract
+} from "./taskListConversions";
 export {
   CategoryService,
   ProjectTagBrowserService,
@@ -534,6 +539,15 @@ export type {
   ReorderListItemsInput,
   UpdateListItemInput
 } from "./lists";
+export type {
+  ConvertListItemToTaskInput,
+  ConvertListItemToTaskResult,
+  ConvertTaskToListInput,
+  ConvertTaskToListResult,
+  MergeTaskIntoListInput,
+  MergeTaskIntoListResult,
+  TaskListConversionServiceIdFactory
+} from "./taskListConversions";
 export type {
   ListDisplayModeMutationResult,
   MovePipelineCardInput,

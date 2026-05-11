@@ -3,6 +3,7 @@ export {
   type CreateAttachmentInput,
   type ListAttachmentsByWorkspaceInput,
   type ListAttachmentsForItemInput,
+  type MoveAttachmentToItemPatch,
   type UpdateAttachmentStorageMetadataPatch
 } from "./AttachmentRepository";
 export type { AttachmentRecord, AttachmentVersionRecord } from "@local-work-os/core";
