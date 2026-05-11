@@ -697,6 +697,136 @@ a {
   gap: 12px;
 }
 
+.markdown-editor {
+  display: grid;
+  gap: 8px;
+}
+
+.markdown-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border: 1px solid #dedbd1;
+  border-radius: 10px;
+  background: #fbfaf6;
+}
+
+.markdown-editor-command-group,
+.markdown-editor-mode-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.markdown-toolbar-button,
+.markdown-mode-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 6px 8px;
+  border: 1px solid #d5d0c3;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #3b3935;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.markdown-toolbar-button:hover:not(:disabled),
+.markdown-mode-button:hover:not(:disabled),
+.markdown-mode-button[aria-pressed="true"] {
+  border-color: #8a6d2f;
+  background: #fff7df;
+  color: #5d4515;
+}
+
+.markdown-toolbar-button:disabled,
+.markdown-mode-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.markdown-editor-surface {
+  display: grid;
+  gap: 10px;
+}
+
+.markdown-editor-surface-split {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.markdown-editor-input {
+  min-width: 0;
+}
+
+.markdown-editor-preview {
+  min-height: 150px;
+  padding: 12px;
+  border: 1px solid #dedbd1;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.markdown-editor-help {
+  margin: 0;
+  color: #6d6a62;
+  font-size: 12px;
+}
+
+.safe-markdown-preview {
+  display: grid;
+  gap: 7px;
+}
+
+.safe-markdown-preview p,
+.safe-markdown-preview blockquote,
+.safe-markdown-preview pre {
+  margin: 0;
+}
+
+.safe-markdown-heading {
+  color: #262624;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.safe-markdown-list-row {
+  display: flex;
+  gap: 8px;
+  color: #514e49;
+}
+
+.safe-markdown-quote {
+  padding-left: 10px;
+  border-left: 3px solid #d8c690;
+  color: #5c5441;
+}
+
+.safe-markdown-code-block {
+  overflow-x: auto;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f0eee7;
+  color: #2f2d29;
+  font-size: 12px;
+}
+
+.safe-markdown-paragraph {
+  color: #514e49;
+}
+
+@media (max-width: 840px) {
+  .markdown-editor-surface-split {
+    grid-template-columns: 1fr;
+  }
+}
+
 .project-content-section > .note-editor {
   padding: 14px;
   border: 1px solid #dedbd1;

@@ -2968,3 +2968,71 @@ Files changed:
 - apps/desktop/tests/preload/api.test.ts; docs/session_log.md
 Open questions / risks: CI still pending until PR is pushed.
 Next actions: Review diff; commit/push branch; open ready PR and update Linear.
+## 2026-05-11T14:36:53+10:00
+Objective: Merge PSE-126 and prepare next Local Work OS ticket.
+Decisions made:
+- Merged PR #121 after green GitHub CI and no review threads.
+- Moved PSE-126 to Done and promoted only PSE-127 to Codex Ready.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-127 scope still needs implementation planning.
+Next actions: Pull PSE-127 into In Progress; read linked docs; implement editor polish.
+
+## 2026-05-11T14:39:39+10:00
+Objective: Reconcile active Local Work OS ticket queue.
+Decisions made:
+- Found no Linear issues in PR Open or In Progress for PSE Local Work OS.
+- Found exactly one Codex Ready issue: PSE-127.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked .playwright-mcp/ and gh installer remain unrelated and untouched.
+Next actions: Pull main; move PSE-127 to In Progress; inspect ticket/docs.
+
+## 2026-05-11T14:55:27+10:00
+Objective: Resume PSE-127 after erroneous stop.
+Decisions made:
+- Continuing on branch codex/pse-127-markdown-editor-polish.
+- Treating PSE-127 as active In Progress ticket.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need inspect source ticket and editor implementation before coding.
+Next actions: Read ticket/docs; identify editor files; implement scoped polish.
+
+## 2026-05-11T14:57:06+10:00
+Objective: Plan PSE-127 Markdown editor work.
+Decisions made:
+- Source ticket is toolbar/preview modes despite Linear source filename typo.
+- Scope limited to UI editor/preview polish; no schema, IPC, service, or persistence changes needed.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need keep existing NoteCardContent safe preview behavior intact.
+Next actions: Add MarkdownEditor component; wire NoteEditor; add UI tests.
+
+## 2026-05-11T14:59:52+10:00
+Objective: Implement PSE-127 Markdown toolbar and preview modes.
+Decisions made:
+- Added reusable MarkdownEditor with formatting toolbar, edit/preview/split modes, safe React preview, and Ctrl/Cmd shortcuts.
+- Wired NoteEditor through MarkdownEditor without changing persistence/services.
+Files changed:
+- packages/ui/src/forms/MarkdownEditor.tsx; packages/ui/src/forms/NoteEditor.tsx; packages/ui/src/index.ts; apps/desktop/src/renderer/styles.css; packages/ui/tests/markdownEditor.test.tsx
+Open questions / risks: Need full lint/typecheck/test/build across workspace.
+Next actions: Run full checks; fix failures; publish PR.
+
+## 2026-05-11T15:01:38+10:00
+Objective: Verify PSE-127 locally.
+Decisions made:
+- pnpm lint and pnpm typecheck pass.
+- pnpm test and pnpm build pass after EPERM sandbox reruns with escalation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need PR/CI validation before merge; unrelated untracked files remain untouched.
+Next actions: Stage scoped files; commit/push; open ready PR and update Linear.
+
+## 2026-05-11T15:03:31+10:00
+Objective: Publish PSE-127 PR.
+Decisions made:
+- Pushed branch codex/pse-127-markdown-editor-polish at 7dea379.
+- Opened ready PR #122 and moved Linear PSE-127 to PR Open with PR link.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI/review still need inspection before merge.
+Next actions: Check PR diff; wait for CI; merge if clean and green.
