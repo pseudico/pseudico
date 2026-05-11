@@ -508,7 +508,9 @@ function createMockApi(
           ...dailyPlanItemSummary(),
           sortOrder: 512
         }),
-      getPlannedTasks: async () => apiOk([plannedTaskSummary()])
+      getPlannedTasks: async () => apiOk([plannedTaskSummary()]),
+      getPreferences: async () => apiOk(todayPreferencesSummary()),
+      updatePreferences: async () => apiOk(todayPreferencesSummary())
     },
     dashboard: {
       getDefault: async () => apiOk(dashboardViewModelSummary())
@@ -1333,6 +1335,25 @@ function todayViewModelSummary(): TodayViewModelSummary {
     generatedAt: "2026-05-04T00:00:00.000Z",
     localDate: "2026-05-04",
     backlogDays: 14,
+    preferences: {
+      maxFocusTasks: 6,
+      planningMode: "standard",
+      backlogDays: 14,
+      showWaiting: false,
+      showDeferred: false,
+      showDailyCompletionSummary: true
+    },
+    focusSummary: {
+      plannedTodayCount: 0,
+      maxFocusTasks: 6,
+      limitExceeded: false,
+      warning: null
+    },
+    completionSummary: {
+      completedTodayCount: 0,
+      plannedTodayCompletedCount: 0,
+      show: true
+    },
     ranges: {
       today: {
         startInclusive: "2026-05-04T00:00:00.000Z",
@@ -1975,3 +1996,16 @@ describe("desktop API client", () => {
 
 
 
+
+function todayPreferencesSummary() {
+  return {
+    workspaceId: "workspace_1",
+    updatedAt: null,
+    maxFocusTasks: 6,
+    planningMode: "standard" as const,
+    backlogDays: 14,
+    showWaiting: false,
+    showDeferred: false,
+    showDailyCompletionSummary: true
+  };
+}

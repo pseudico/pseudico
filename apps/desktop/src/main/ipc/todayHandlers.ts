@@ -1,6 +1,8 @@
 import {
   DailyPlanService,
+  TodayPreferencesService,
   TodayService,
+  type TodayPreferences,
   type TodayViewModel
 } from "@local-work-os/features";
 import {
@@ -22,6 +24,8 @@ import {
   type UnplanTaskInput,
   type TodayViewModelInput,
   type TodayViewModelSummary,
+  type TodayPreferencesSummary,
+  type UpdateTodayPreferencesInput,
   type WorkspaceSummary
 } from "../../preload/api";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
@@ -48,6 +52,12 @@ type TodayIpcHandlers = {
   handleGetPlannedTasks: (
     input: unknown
   ) => Promise<ApiResult<PlannedTaskSummary[]>>;
+  handleGetPreferences: (
+    input: unknown
+  ) => Promise<ApiResult<TodayPreferencesSummary>>;
+  handleUpdatePreferences: (
+    input: unknown
+  ) => Promise<ApiResult<TodayPreferencesSummary>>;
 };
 
 export function createTodayIpcHandlers(
@@ -170,7 +180,42 @@ export function createTodayIpcHandlers(
 
         return apiOk(tasks);
       });
-    }
+    },
+
+    async handleGetPreferences(input) {
+      if (!isOptionalString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "getTodayPreferences accepts an optional workspaceId string."
+        );
+      }
+
+      return await withTodayService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(typeof input === "string" ? input : undefined, context.workspace);
+        const preferences = context.todayPreferencesService.getPreferences(workspaceId);
+
+        return apiOk(toTodayPreferencesSummary(preferences));
+      });
+    },
+
+    async handleUpdatePreferences(input) {
+      if (!isUpdateTodayPreferencesInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "updateTodayPreferences accepts workspaceId plus planning mode, focus limit, backlog, visibility, and summary fields."
+        );
+      }
+
+      return await withTodayService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const preferences = await context.todayPreferencesService.updatePreferences({
+          ...input,
+          workspaceId
+        });
+
+        return apiOk(toTodayPreferencesSummary(preferences));
+      });
+    },
   };
 }
 
@@ -179,6 +224,7 @@ async function withTodayService<T>(
   operation: (context: {
     connection: DatabaseConnection;
     dailyPlanService: DailyPlanService;
+    todayPreferencesService: TodayPreferencesService;
     todayService: TodayService;
     workspace: WorkspaceSummary;
   }) => Promise<ApiResult<T>>
@@ -198,6 +244,7 @@ async function withTodayService<T>(
     return await operation({
       connection,
       dailyPlanService: new DailyPlanService({ connection }),
+      todayPreferencesService: new TodayPreferencesService({ connection }),
       todayService: new TodayService({ connection }),
       workspace
     });
@@ -229,6 +276,12 @@ function toTodayViewModelSummary(
   viewModel: TodayViewModel
 ): TodayViewModelSummary {
   return viewModel;
+}
+
+function toTodayPreferencesSummary(
+  preferences: TodayPreferences
+): TodayPreferencesSummary {
+  return preferences;
 }
 
 function isTodayViewModelInput(
@@ -298,6 +351,31 @@ function isGetPlannedTasksInput(
       isOptionalDateInput(input.date) &&
       (input.lane === undefined || isDailyPlanLane(input.lane)))
   );
+}
+
+
+function isUpdateTodayPreferencesInput(
+  input: unknown
+): input is UpdateTodayPreferencesInput {
+  return (
+    isRecord(input) &&
+    isOptionalString(input.workspaceId) &&
+    (input.maxFocusTasks === undefined || isOptionalFocusLimit(input.maxFocusTasks)) &&
+    (input.planningMode === undefined || isTodayPlanningMode(input.planningMode)) &&
+    (input.backlogDays === undefined || isOptionalBacklogDays(input.backlogDays)) &&
+    (input.showWaiting === undefined || typeof input.showWaiting === "boolean") &&
+    (input.showDeferred === undefined || typeof input.showDeferred === "boolean") &&
+    (input.showDailyCompletionSummary === undefined ||
+      typeof input.showDailyCompletionSummary === "boolean")
+  );
+}
+
+function isTodayPlanningMode(value: unknown): boolean {
+  return value === "standard" || value === "top_six" || value === "ivy_lee";
+}
+
+function isOptionalFocusLimit(value: unknown): boolean {
+  return typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 24;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

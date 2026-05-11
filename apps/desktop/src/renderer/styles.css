@@ -1951,6 +1951,104 @@ a {
   align-items: start;
 }
 
+
+.today-preferences-panel {
+  display: grid;
+  max-width: 1180px;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--app-border, #ded8cb);
+  border-radius: 18px;
+  background: var(--app-surface, #fffaf0);
+  box-shadow: 0 16px 36px rgb(78 66 40 / 8%);
+}
+
+.today-preferences-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.today-preferences-heading h3 {
+  margin: 0 0 6px;
+  color: var(--app-text, #262624);
+  font-size: 22px;
+}
+
+.today-preferences-heading p:last-child {
+  max-width: 70ch;
+  margin: 0;
+  color: var(--app-text-muted, #514e49);
+  line-height: 1.5;
+}
+
+.today-focus-ok,
+.today-focus-warning {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 30px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.today-focus-ok {
+  border: 1px solid #b9d7bf;
+  background: #edf8ef;
+  color: #246236;
+}
+
+.today-focus-warning {
+  border: 1px solid #e0b16a;
+  background: #fff1d6;
+  color: #8a4a09;
+}
+
+.today-preferences-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.today-preferences-controls label,
+.today-preferences-toggles label {
+  display: grid;
+  gap: 6px;
+  color: var(--app-text-muted, #514e49);
+  font-size: 13px;
+}
+
+.today-preferences-controls input,
+.today-preferences-controls select {
+  min-height: 38px;
+  border: 1px solid var(--app-border-strong, #d5d0c4);
+  border-radius: 10px;
+  background: var(--app-surface-strong, #fffdf8);
+  color: var(--app-text, #262624);
+  padding: 8px 10px;
+}
+
+.today-preferences-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+}
+
+.today-preferences-toggles label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.today-completion-summary {
+  margin: 0;
+  color: var(--app-text-muted, #514e49);
+  font-size: 13px;
+}
+
 .daily-planner-editor {
   display: grid;
   max-width: 1180px;
@@ -4158,6 +4256,7 @@ a {
     .search-page-form,
     .dashboard-widget-grid,
     .daily-planner-editor-grid,
+    .today-preferences-controls,
     .today-lane-grid,
     .today-task-card-actions,
     .checklist-inline-add,

@@ -22,16 +22,25 @@ import {
   type TodayTaskView,
   type TodayViewModel
 } from "./TodayViewModel";
+import {
+  DEFAULT_TODAY_PREFERENCES,
+  TodayPreferencesService,
+  type TodayPreferences
+} from "./TodayPreferencesService";
 
 // Owns Today/Tomorrow planning application contracts.
 // Does not own task persistence internals or calendar rendering.
-export const DEFAULT_TODAY_BACKLOG_DAYS = 14;
+export const DEFAULT_TODAY_BACKLOG_DAYS = DEFAULT_TODAY_PREFERENCES.backlogDays;
 export const TODAY_BACKLOG_DAYS_SETTING_KEY = "today_backlog_days";
 
 export type TodayQueryInput = {
   workspaceId: string;
   date?: LocalDateInput;
   backlogDays?: number;
+};
+
+type TodayQueryContext = TodayQueryInput & {
+  preferences?: TodayPreferences;
 };
 
 export class TodayService {
@@ -50,8 +59,9 @@ export class TodayService {
 
     const date = input.date ?? this.now();
     const todayRange = createLocalDayRange(date);
-    const backlogDays = this.resolveBacklogDays(input);
-    const normalizedInput = { ...input, date, backlogDays };
+    const preferences = this.resolvePreferences(input);
+    const backlogDays = input.backlogDays ?? preferences.backlogDays;
+    const normalizedInput = { ...input, date, backlogDays, preferences };
     const overdueBacklogRange = createLocalDayWindowRange({
       date,
       startOffsetDays: -backlogDays,
@@ -64,6 +74,27 @@ export class TodayService {
       generatedAt: createIsoTimestamp(this.now()),
       localDate: todayRange.localDate,
       backlogDays,
+      preferences: {
+        maxFocusTasks: preferences.maxFocusTasks,
+        planningMode: preferences.planningMode,
+        backlogDays: preferences.backlogDays,
+        showWaiting: preferences.showWaiting,
+        showDeferred: preferences.showDeferred,
+        showDailyCompletionSummary: preferences.showDailyCompletionSummary
+      },
+      focusSummary: this.buildFocusSummary({
+        plannedTodayCount: this.countPlannedToday({
+          workspaceId: input.workspaceId,
+          date,
+          dueToday: this.listDueToday(normalizedInput)
+        }),
+        preferences
+      }),
+      completionSummary: this.buildCompletionSummary({
+        workspaceId: input.workspaceId,
+        date,
+        preferences
+      }),
       ranges: {
         today: {
           startInclusive: todayRange.startInclusive,
@@ -81,22 +112,23 @@ export class TodayService {
     };
   }
 
-  listDueToday(input: TodayQueryInput): TodayTaskView[] {
+  listDueToday(input: TodayQueryContext): TodayTaskView[] {
     this.validateInput(input);
 
     const date = input.date ?? this.now();
     const range = createLocalDayRange(date);
-    const automaticTasks = [
+    const automaticTasks = this.applyVisibilityPreferences([
       ...this.listTasks(input.workspaceId, (repository) =>
         repository.listDueBetween(input.workspaceId, range)
       ),
+      ...this.listReviewTasksForRange(input.workspaceId, range, input.preferences),
       ...this.listListItems(input.workspaceId, (repository) =>
         repository.listDatedItemsBetween({
           workspaceId: input.workspaceId,
           range
         })
       )
-    ].sort(compareTodayTasks);
+    ], input.preferences).sort(compareTodayTasks);
 
     return this.listTasksForLane({
       workspaceId: input.workspaceId,
@@ -106,19 +138,20 @@ export class TodayService {
     });
   }
 
-  listOverdueBacklog(input: TodayQueryInput): TodayTaskView[] {
+  listOverdueBacklog(input: TodayQueryContext): TodayTaskView[] {
     this.validateInput(input);
 
     const date = input.date ?? this.now();
     const range = createLocalDayWindowRange({
       date,
-      startOffsetDays: -this.resolveBacklogDays(input),
+      startOffsetDays: -(input.preferences?.backlogDays ?? this.resolvePreferences(input).backlogDays),
       endOffsetDays: 0
     });
-    const automaticTasks = [
+    const automaticTasks = this.applyVisibilityPreferences([
       ...this.listTasks(input.workspaceId, (repository) =>
         repository.listOverdueBetween(input.workspaceId, range)
       ),
+      ...this.listReviewTasksForRange(input.workspaceId, range, input.preferences),
       ...this.listListItems(input.workspaceId, (repository) =>
         repository.listDatedItemsBetween({
           workspaceId: input.workspaceId,
@@ -130,7 +163,7 @@ export class TodayService {
             record.listItem.dueAt < range.endExclusive
         )
       )
-    ].sort(compareTodayTasks);
+    ], input.preferences).sort(compareTodayTasks);
 
     return this.listTasksForLane({
       workspaceId: input.workspaceId,
@@ -140,22 +173,23 @@ export class TodayService {
     });
   }
 
-  listTomorrowPreview(input: TodayQueryInput): TodayTaskView[] {
+  listTomorrowPreview(input: TodayQueryContext): TodayTaskView[] {
     this.validateInput(input);
 
     const date = input.date ?? this.now();
     const range = createRelativeLocalDayRange(date, 1);
-    const automaticTasks = [
+    const automaticTasks = this.applyVisibilityPreferences([
       ...this.listTasks(input.workspaceId, (repository) =>
         repository.listDueBetween(input.workspaceId, range)
       ),
+      ...this.listReviewTasksForRange(input.workspaceId, range, input.preferences),
       ...this.listListItems(input.workspaceId, (repository) =>
         repository.listDatedItemsBetween({
           workspaceId: input.workspaceId,
           range
         })
       )
-    ].sort(compareTodayTasks);
+    ], input.preferences).sort(compareTodayTasks);
 
     return this.listTasksForLane({
       workspaceId: input.workspaceId,
@@ -222,25 +256,145 @@ export class TodayService {
     ];
   }
 
-  private resolveBacklogDays(input: TodayQueryInput): number {
+  private resolvePreferences(input: TodayQueryInput): TodayPreferences {
+    const preferences = new TodayPreferencesService({
+      connection: this.connection,
+      logActivity: false
+    }).getPreferences(input.workspaceId);
+
     if (input.backlogDays !== undefined) {
-      return validateBacklogDays(input.backlogDays);
+      return {
+        ...preferences,
+        backlogDays: validateBacklogDays(input.backlogDays)
+      };
     }
 
+    const legacyBacklogDays = this.resolveLegacyBacklogDays(input);
+
+    return legacyBacklogDays === null
+      ? preferences
+      : { ...preferences, backlogDays: legacyBacklogDays };
+  }
+
+  private resolveLegacyBacklogDays(input: TodayQueryInput): number | null {
     const setting = new AppSettingsRepository(this.connection).findByKey({
       workspaceId: input.workspaceId,
       settingKey: TODAY_BACKLOG_DAYS_SETTING_KEY
     });
 
     if (setting === null) {
-      return DEFAULT_TODAY_BACKLOG_DAYS;
+      return null;
     }
 
     try {
       return validateBacklogDays(JSON.parse(setting.valueJson));
     } catch {
-      return DEFAULT_TODAY_BACKLOG_DAYS;
+      return null;
     }
+  }
+
+  private listReviewTasksForRange(
+    workspaceId: string,
+    range: { startInclusive: string; endExclusive: string },
+    preferences: TodayPreferences | undefined
+  ): TodayTaskView[] {
+    const statuses = [
+      ...(preferences?.showWaiting === true ? ["waiting" as const] : []),
+      ...(preferences?.showDeferred === true ? ["deferred" as const] : [])
+    ];
+
+    if (statuses.length === 0) {
+      return [];
+    }
+
+    return this.listTasks(workspaceId, (repository) =>
+      repository.listReviewTasks(workspaceId, statuses).filter((record) => {
+        const dueAt = record.task.dueAt;
+        return dueAt !== null && dueAt >= range.startInclusive && dueAt < range.endExclusive;
+      })
+    );
+  }
+
+  private applyVisibilityPreferences(
+    tasks: TodayTaskView[],
+    preferences: TodayPreferences | undefined
+  ): TodayTaskView[] {
+    return tasks.filter((task) => {
+      if (task.taskStatus === "waiting") {
+        return preferences?.showWaiting === true;
+      }
+
+      if (task.taskStatus === "deferred") {
+        return preferences?.showDeferred === true;
+      }
+
+      return true;
+    });
+  }
+
+  private countPlannedToday(input: {
+    workspaceId: string;
+    date: LocalDateInput;
+    dueToday: TodayTaskView[];
+  }): number {
+    const plannedIds = new Set(
+      this.listTasksForLane({
+        workspaceId: input.workspaceId,
+        date: input.date,
+        lane: "today",
+        automaticTasks: []
+      }).map((task) => `${task.itemType}:${task.itemId}`)
+    );
+
+    for (const task of input.dueToday) {
+      if (task.plannedLane === "today") {
+        plannedIds.add(`${task.itemType}:${task.itemId}`);
+      }
+    }
+
+    return plannedIds.size;
+  }
+
+  private buildFocusSummary(input: {
+    plannedTodayCount: number;
+    preferences: TodayPreferences;
+  }) {
+    const limitExceeded = input.plannedTodayCount > input.preferences.maxFocusTasks;
+
+    return {
+      plannedTodayCount: input.plannedTodayCount,
+      maxFocusTasks: input.preferences.maxFocusTasks,
+      limitExceeded,
+      warning: limitExceeded
+        ? `Today has ${input.plannedTodayCount} focus tasks, above the ${input.preferences.maxFocusTasks}-task limit.`
+        : null
+    };
+  }
+
+  private buildCompletionSummary(input: {
+    workspaceId: string;
+    date: LocalDateInput;
+    preferences: TodayPreferences;
+  }) {
+    const range = createLocalDayRange(input.date);
+    const completedTasks = [
+      ...new TaskRepository(this.connection).listTimelineBetween({
+        workspaceId: input.workspaceId,
+        range,
+        includeCompleted: true
+      }).filter((record) => record.task.taskStatus === "done"),
+      ...new ListRepository(this.connection).listDatedItemsBetween({
+        workspaceId: input.workspaceId,
+        range,
+        includeCompleted: true
+      }).filter((record) => record.listItem.status === "done")
+    ];
+
+    return {
+      completedTodayCount: completedTasks.length,
+      plannedTodayCompletedCount: completedTasks.length,
+      show: input.preferences.showDailyCompletionSummary
+    };
   }
 
   private validateInput(input: TodayQueryInput): void {

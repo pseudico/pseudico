@@ -26,6 +26,10 @@ describe("Today renderer page", () => {
     expect(html).toContain("Tomorrow");
     expect(html).toContain("Remove");
     expect(html).toContain("Move down");
+    expect(html).toContain("Planning preferences");
+    expect(html).toContain("2/6 focus tasks planned");
+    expect(html).toContain("Completed today:");
+    expect(html).toContain("item<!-- -->.");
   });
 });
 
@@ -35,6 +39,25 @@ function todayViewModel(): TodayViewModelSummary {
     generatedAt: "2026-05-04T08:00:00.000Z",
     localDate: "2026-05-04",
     backlogDays: 14,
+    preferences: {
+      maxFocusTasks: 6,
+      planningMode: "top_six",
+      backlogDays: 14,
+      showWaiting: false,
+      showDeferred: false,
+      showDailyCompletionSummary: true
+    },
+    focusSummary: {
+      plannedTodayCount: 2,
+      maxFocusTasks: 6,
+      limitExceeded: false,
+      warning: null
+    },
+    completionSummary: {
+      completedTodayCount: 1,
+      plannedTodayCompletedCount: 1,
+      show: true
+    },
     ranges: {
       today: {
         startInclusive: "2026-05-04T00:00:00.000Z",

@@ -3418,3 +3418,13 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Awaiting GitHub CI/review status before merge.
 Next actions: Check CI; merge if green; promote next issue.
+
+## 2026-05-11 20:33:30 +10:00
+Objective: Merge PSE-142 and prepare next Codex Ready issue.
+Decisions made:
+- PR #131 passed CI, had no review threads, and was squash-merged as 8484c7d.
+- Deleted merged branch, pulled main, moved PSE-142 to Done, and promoted PSE-143 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked .playwright-mcp/ and gh installer remain unrelated.
+Next actions: Start PSE-143 in the next run.

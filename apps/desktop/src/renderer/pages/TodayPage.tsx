@@ -14,7 +14,9 @@ import type {
   DailyPlanLane,
   LocalWorkOsApi,
   TodayTaskSummary,
-  TodayViewModelSummary
+  TodayViewModelSummary,
+  TodayPreferencesSummary,
+  TodayPlanningModeSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import {
@@ -46,6 +48,7 @@ export function TodayPage({
     useState<QuickAddTargetResolution | null>(null);
   const [plannerLoading, setPlannerLoading] = useState(initialViewModel === undefined);
   const [plannerError, setPlannerError] = useState<string | null>(null);
+  const [preferencesSaving, setPreferencesSaving] = useState(false);
 
   useEffect(() => {
     if (initialViewModel !== undefined) {
@@ -378,6 +381,33 @@ export function TodayPage({
     await reloadToday(workspaceId);
   }
 
+  async function updateTodayPreferences(
+    patch: Partial<Omit<TodayPreferencesSummary, "workspaceId" | "updatedAt">>
+  ): Promise<void> {
+    const workspaceId = resolveWorkspaceId(currentWorkspace?.id, viewModel);
+
+    if (workspaceId === null || viewModel === null) {
+      return;
+    }
+
+    setPreferencesSaving(true);
+    setMutationError(null);
+
+    const result = await apiClient.today.updatePreferences({
+      workspaceId,
+      ...patch
+    });
+
+    setPreferencesSaving(false);
+
+    if (!result.ok) {
+      setMutationError(result.error.message);
+      return;
+    }
+
+    await reloadToday(workspaceId);
+  }
+
   async function createPlannerTask(
     submission: DailyPlannerSubmission
   ): Promise<boolean> {
@@ -487,6 +517,16 @@ export function TodayPage({
         />
       )}
 
+      {viewModel === null ? null : (
+        <TodayPreferencesPanel
+          completionSummary={viewModel.completionSummary}
+          disabled={preferencesSaving}
+          focusSummary={viewModel.focusSummary}
+          preferences={viewModel.preferences}
+          onChange={updateTodayPreferences}
+        />
+      )}
+
       <div className="today-lane-grid">
         <TodayLane
           description="Tasks due on the selected local day."
@@ -542,6 +582,135 @@ export function TodayPage({
           onUnplanTask={unplanTask}
         />
       </div>
+    </section>
+  );
+}
+
+type TodayPreferencesPanelProps = {
+  completionSummary: TodayViewModelSummary["completionSummary"];
+  disabled: boolean;
+  focusSummary: TodayViewModelSummary["focusSummary"];
+  preferences: TodayViewModelSummary["preferences"];
+  onChange: (
+    patch: Partial<Omit<TodayPreferencesSummary, "workspaceId" | "updatedAt">>
+  ) => Promise<void>;
+};
+
+function TodayPreferencesPanel({
+  completionSummary,
+  disabled,
+  focusSummary,
+  preferences,
+  onChange
+}: TodayPreferencesPanelProps): React.JSX.Element {
+  return (
+    <section className="today-preferences-panel" aria-labelledby="today-preferences-title">
+      <div className="today-preferences-heading">
+        <div>
+          <p className="top-eyebrow">Planning preferences</p>
+          <h3 id="today-preferences-title">Focus mode</h3>
+          <p>
+            Tune the calm-planning guardrails for Today. Top Six and Ivy Lee
+            cap the focus limit at six tasks, but warnings can be overridden.
+          </p>
+        </div>
+        <div className={focusSummary.limitExceeded ? "today-focus-warning" : "today-focus-ok"} role="status">
+          {focusSummary.warning ??
+            `${focusSummary.plannedTodayCount}/${focusSummary.maxFocusTasks} focus tasks planned`}
+        </div>
+      </div>
+
+      <div className="today-preferences-controls">
+        <label>
+          <span>Planning mode</span>
+          <select
+            disabled={disabled}
+            value={preferences.planningMode}
+            onChange={(event) => {
+              const planningMode = event.currentTarget.value as TodayPlanningModeSummary;
+              void onChange({
+                planningMode,
+                ...(planningMode === "top_six" || planningMode === "ivy_lee"
+                  ? { maxFocusTasks: Math.min(preferences.maxFocusTasks, 6) }
+                  : {})
+              });
+            }}
+          >
+            <option value="standard">Standard</option>
+            <option value="top_six">Top Six</option>
+            <option value="ivy_lee">Ivy Lee</option>
+          </select>
+        </label>
+        <label>
+          <span>Max focus tasks</span>
+          <input
+            disabled={disabled}
+            max={preferences.planningMode === "standard" ? 24 : 6}
+            min={1}
+            type="number"
+            value={preferences.maxFocusTasks}
+            onChange={(event) =>
+              void onChange({ maxFocusTasks: Number(event.currentTarget.value) })
+            }
+          />
+        </label>
+        <label>
+          <span>Backlog lookback</span>
+          <input
+            disabled={disabled}
+            max={365}
+            min={1}
+            type="number"
+            value={preferences.backlogDays}
+            onChange={(event) =>
+              void onChange({ backlogDays: Number(event.currentTarget.value) })
+            }
+          />
+        </label>
+      </div>
+
+      <div className="today-preferences-toggles">
+        <label>
+          <input
+            checked={preferences.showWaiting}
+            disabled={disabled}
+            type="checkbox"
+            onChange={(event) =>
+              void onChange({ showWaiting: event.currentTarget.checked })
+            }
+          />
+          Show waiting tasks
+        </label>
+        <label>
+          <input
+            checked={preferences.showDeferred}
+            disabled={disabled}
+            type="checkbox"
+            onChange={(event) =>
+              void onChange({ showDeferred: event.currentTarget.checked })
+            }
+          />
+          Show deferred tasks
+        </label>
+        <label>
+          <input
+            checked={preferences.showDailyCompletionSummary}
+            disabled={disabled}
+            type="checkbox"
+            onChange={(event) =>
+              void onChange({ showDailyCompletionSummary: event.currentTarget.checked })
+            }
+          />
+          Daily completion summary
+        </label>
+      </div>
+
+      {completionSummary.show ? (
+        <p className="today-completion-summary">
+          Completed today: {completionSummary.completedTodayCount} item
+          {completionSummary.completedTodayCount === 1 ? "" : "s"}.
+        </p>
+      ) : null}
     </section>
   );
 }
