@@ -3363,3 +3363,14 @@ Files changed:
 Open questions / risks: None from local checks.
 Next actions: Commit; push; open PR; update Linear.
 
+
+## 2026-05-11 19:55:33 +10:00
+Objective: Open PR for PSE-141.
+Decisions made:
+- Created PR #130 as ready for review after lint/typecheck/test/build passed.
+- Moved Linear PSE-141 to PR Open with PR attachment.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Awaiting GitHub CI/review status.
+Next actions: Check CI; merge if green; promote next issue.
+
