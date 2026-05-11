@@ -3133,3 +3133,42 @@ Files changed:
 - packages/features/src/diagnostics/AttachmentIntegrityService.ts; apps/desktop/src/main/ipc/diagnosticsHandlers.ts; apps/desktop/src/renderer/pages/SettingsPage.tsx
 Open questions / risks: Remote CI and PR review pending after push.
 Next actions: Commit/push PSE-130; open PR; move Linear to PR Open.
+
+## 23+10:00
+Objective: Merge PSE-130 and prepare next Codex Ready issue.
+Decisions made:
+- PR #125 passed CI and was squash-merged at 0360c1b; merged branch deleted.
+- Moved PSE-130 to Done and promoted PSE-137 as the only Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final log entry is local-only/uncommitted; unrelated untracked files remain untouched.
+Next actions: Start PSE-137; read M12 timeline ticket; create PSE-137 branch.
+## 2026-05-11 17:33:24 +10:00
+Objective: Reconcile active Linear/GitHub work for next Local Work OS ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found; one Codex Ready issue is active: PSE-137.
+- No open GitHub PRs found for pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-137 scope may require timeline source discovery.
+Next actions: Move PSE-137 to In Progress; read docs/source; implement scoped change.
+## 2026-05-11 17:35:55 +10:00
+Objective: Resume PSE-137 after premature stop.
+Decisions made:
+- Continue on branch codex/PSE-137-list-timeline-calendar-view-switcher.
+- Implement scoped list/timeline/calendar view switcher for saved/project/contact views.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need source discovery for current saved-view/project/contact UI paths.
+Next actions: Inspect source; implement service/UI/tests; run checks.
+## 2026-05-11 17:51:47 +10:00
+Objective: Implement and verify PSE-137 view switcher.
+Decisions made:
+- Added ViewModeService using saved view display JSON and container app settings.
+- Added typed IPC/API and renderer switchers for collections, projects, and contacts.
+Files changed:
+- packages/features/src/viewModes/ViewModeService.ts
+- apps/desktop/src/preload/api.ts
+- apps/desktop/src/renderer/pages/CollectionsPage.tsx
+Open questions / risks: Timeline/calendar projections are read-only dated-result projections.
+Next actions: Commit changes; push/open PR; update Linear.

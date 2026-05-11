@@ -355,6 +355,10 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       previewSmartList: (input) =>
         callApi(() => api.collections.previewSmartList(input))
     },
+    viewModes: {
+      getViewMode: (input) => callApi(() => api.viewModes!.getViewMode(input)),
+      setViewMode: (input) => callApi(() => api.viewModes!.setViewMode(input))
+    },
     today: {
       getViewModel: (input) =>
         callApi(() => api.today.getViewModel(input)),
@@ -872,6 +876,10 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().collections.updateSmartList(input),
     previewSmartList: (input) =>
       getDesktopApiClient().collections.previewSmartList(input)
+  },
+  viewModes: {
+    getViewMode: (input) => getDesktopApiClient().viewModes!.getViewMode(input),
+    setViewMode: (input) => getDesktopApiClient().viewModes!.setViewMode(input)
   },
   today: {
     getViewModel: (input) =>

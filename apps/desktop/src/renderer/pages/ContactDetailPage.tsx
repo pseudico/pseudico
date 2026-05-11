@@ -17,6 +17,7 @@ import {
   RelatedProjectsPanel,
   TaskCardContent,
   TaskQuickAdd,
+  ViewModeSwitcher,
   type ContainerTabSummaryCardViewModel,
   type ContactFieldDraft,
   type ContactFieldViewModel,
@@ -36,6 +37,7 @@ import {
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel,
+  type ViewMode,
   type WikilinkTargetViewModel,
   type WikilinkViewModel
 } from "@local-work-os/ui";
@@ -145,9 +147,62 @@ export function ContactDetailPage({
   );
   const [containerPreferences, setContainerPreferences] =
     useState<ContainerPreferencesSummary | null>(initialPreferences);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewModeSaving, setViewModeSaving] = useState(false);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [preferencesSaving, setPreferencesSaving] = useState(false);
   const [preferencesError, setPreferencesError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (contact === null) {
+      return;
+    }
+
+    let cancelled = false;
+    if (apiClient.viewModes === undefined) {
+      return;
+    }
+
+    void apiClient.viewModes
+      .getViewMode({ contextType: "container", contextId: contact.id })
+      .then((result) => {
+        if (!cancelled && result.ok) {
+          setViewMode(result.data.mode);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [apiClient, contact?.id]);
+
+  async function changeContactViewMode(mode: ViewMode): Promise<void> {
+    if (contact === null || mode === viewMode) {
+      return;
+    }
+
+    setViewModeSaving(true);
+    setItemError(null);
+    if (apiClient.viewModes === undefined) {
+      setViewMode(mode);
+      return;
+    }
+
+    const result = await apiClient.viewModes.setViewMode({
+      contextType: "container",
+      contextId: contact.id,
+      mode
+    });
+    setViewModeSaving(false);
+
+    if (!result.ok) {
+      setItemError(result.error.message);
+      return;
+    }
+
+    setViewMode(result.data.mode);
+  }
+
   const [tabBusy, setTabBusy] = useState(false);
   const [tabError, setTabError] = useState<string | null>(null);
   const [projects, setProjects] =
@@ -1680,6 +1735,11 @@ export function ContactDetailPage({
             <Contact size={17} aria-hidden="true" />
             <h3>Content feed</h3>
           </div>
+          <ViewModeSwitcher
+            disabled={viewModeSaving}
+            value={viewMode}
+            onChange={(mode) => void changeContactViewMode(mode)}
+          />
           <button
             className="secondary-button compact-button"
             disabled={itemsLoading}
@@ -1738,20 +1798,28 @@ export function ContactDetailPage({
           </button>
         )}
 
-        <ItemFeed
-          ariaLabel="Contact content items"
-          emptyDescription="Follow-up tasks and notes created for this contact will appear here with inline controls."
-          emptyTitle={
-            activeTab === null
-              ? "No contact content yet"
-              : `No content in ${activeTab.name} yet`
-          }
-          error={itemError}
-          items={visibleItems}
-          loading={itemsLoading}
-          renderContent={renderItemContent}
-          onAction={handleItemAction}
-        />
+        {viewMode === "list" ? (
+          <ItemFeed
+            ariaLabel="Contact content items"
+            emptyDescription="Follow-up tasks and notes created for this contact will appear here with inline controls."
+            emptyTitle={
+              activeTab === null
+                ? "No contact content yet"
+                : `No content in ${activeTab.name} yet`
+            }
+            error={itemError}
+            items={visibleItems}
+            loading={itemsLoading}
+            renderContent={renderItemContent}
+            onAction={handleItemAction}
+          />
+        ) : (
+          <DatedContactItemProjection
+            items={tabItems}
+            mode={viewMode}
+            title={viewMode === "timeline" ? "Contact timeline" : "Contact calendar"}
+          />
+        )}
         {hasMoreItems ? (
           <button
             className="secondary-button load-more-button"
@@ -2132,4 +2200,50 @@ function formatDateLabel(value: string | null | undefined): string | null {
   }
 
   return value.slice(0, 10);
+}
+
+
+function DatedContactItemProjection({
+  items,
+  mode,
+  title
+}: {
+  items: readonly UniversalItemViewModel[];
+  mode: ViewMode;
+  title: string;
+}): React.JSX.Element {
+  const datedItems = items.filter(
+    (item) => "dueAt" in item && typeof item.dueAt === "string" && item.dueAt.length > 0
+  );
+
+  if (datedItems.length === 0) {
+    return (
+      <div className="view-mode-empty-state">
+        <h3>{title}</h3>
+        <p>Dated follow-up tasks from this same filtered content set will appear in {mode} mode.</p>
+      </div>
+    );
+  }
+
+  return (
+    <section className="grouped-results-list" aria-label={title}>
+      <header className="grouped-results-heading">
+        <h3>{title}</h3>
+        <span>{datedItems.length}</span>
+      </header>
+      <div className="grouped-result-items">
+        {datedItems.map((item) => (
+          <article className="grouped-result-item" key={item.id}>
+            <div className="grouped-result-main">
+              <strong>{item.title}</strong>
+              <div className="grouped-result-meta">
+                <span>{"dueAt" in item ? String(item.dueAt).slice(0, 10) : ""}</span>
+                <span>{item.type}</span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
 }

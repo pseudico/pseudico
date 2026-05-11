@@ -34,6 +34,7 @@ import { registerTemplateIpc } from "./registerTemplateIpc";
 import { registerTimelineIpc } from "./registerTimelineIpc";
 import { registerTodayIpc } from "./registerTodayIpc";
 import { registerTrashIpc } from "./registerTrashIpc";
+import { registerViewModeIpc } from "./registerViewModeIpc";
 import { registerWorkspaceIpc } from "./registerWorkspaceIpc";
 import {
   assertRuntimeDataPathOutsideAppBundle,
@@ -92,6 +93,7 @@ export function registerDesktopIpc(
   registerTodayIpc(services.workspaceService);
   registerTimelineIpc(services.workspaceService);
   registerCalendarIpc(services.workspaceService);
+  registerViewModeIpc(services.workspaceService);
   registerDashboardIpc(services.workspaceService);
   registerContainerIpc(services.workspaceService);
   registerContainerMediaIpc(services.workspaceService);

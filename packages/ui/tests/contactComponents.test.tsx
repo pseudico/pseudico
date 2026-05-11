@@ -7,6 +7,7 @@ import {
   RelatedContentGraphPanel,
   RelatedContactsPanel,
   RelatedProjectsPanel,
+  ViewModeSwitcher,
   validateContactFormValues
 } from "../src";
 
@@ -306,5 +307,18 @@ describe("Contact timeline UI", () => {
     expect(html).toContain("Follow up with Alex");
     expect(html).toContain("Confirm contract timing.");
     expect(html).toContain("Due 2026-05-08 - overdue");
+  });
+});
+
+describe("ViewModeSwitcher", () => {
+  it("renders all modes and marks the active mode", () => {
+    const html = renderToStaticMarkup(
+      <ViewModeSwitcher value="timeline" onChange={() => undefined} />
+    );
+
+    expect(html).toContain("List");
+    expect(html).toContain("Timeline");
+    expect(html).toContain("Calendar");
+    expect(html).toContain('aria-pressed="true"');
   });
 });
