@@ -152,6 +152,46 @@ describe("ListRepository", () => {
     expect(repository.getMaxListItemSortOrder("item_list_1")).toBe(3072);
   });
 
+  it("persists row depth, parent links, and manual sort order changes", () => {
+    createPersistedList();
+    const repository = new ListRepository(connection);
+    const parent = repository.createListItem({
+      id: "list_item_parent",
+      workspaceId: "workspace_1",
+      listId: "item_list_1",
+      title: "Parent row",
+      sortOrder: 1024,
+      timestamp: TEST_TIMESTAMP
+    });
+    const child = repository.createListItem({
+      id: "list_item_child",
+      workspaceId: "workspace_1",
+      listId: "item_list_1",
+      title: "Child row",
+      sortOrder: 2048,
+      timestamp: TEST_TIMESTAMP
+    });
+
+    repository.updateListItem(child.id, {
+      depth: 1,
+      listItemParentId: parent.id,
+      sortOrder: 512,
+      timestamp: TEST_TIMESTAMP_LATER
+    });
+
+    expect(repository.getListItemById(child.id)).toMatchObject({
+      id: child.id,
+      depth: 1,
+      listItemParentId: parent.id,
+      sortOrder: 512,
+      updatedAt: TEST_TIMESTAMP_LATER
+    });
+    expect(repository.listItems("item_list_1").map((item) => item.id)).toEqual([
+      child.id,
+      parent.id
+    ]);
+  });
+
   it("lists dated checklist rows in a bounded range", () => {
     createPersistedList();
     const repository = new ListRepository(connection);

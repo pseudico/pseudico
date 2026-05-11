@@ -820,6 +820,8 @@ describe("Universal item UI", () => {
     expect(html).toContain("1 of 2 complete");
     expect(html).toContain("Confirm launch copy");
     expect(html).toContain("Send update");
+    expect(html).toContain("Ctrl/Cmd+Left");
+    expect(html).toContain("aria-selected");
     expect(html).toContain("Bulk paste");
     expect(html).toContain("Add pasted");
   });

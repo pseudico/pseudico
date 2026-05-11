@@ -2330,6 +2330,12 @@ export type MovePipelineCardInput = {
   sortOrder?: number;
 };
 
+export type MoveListItemInput = {
+  listItemId: string;
+  direction: "up" | "down";
+  actorType?: "local_user" | "system" | "importer";
+};
+
 export type PipelineStageSummary = {
   stage: ListItemSummary;
   cards: ListItemSummary[];
@@ -2684,6 +2690,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     disablePipelineMode: "local-work-os:lists:disable-pipeline-mode",
     getPipelineViewModel: "local-work-os:lists:get-pipeline-view-model",
     movePipelineCard: "local-work-os:lists:move-pipeline-card",
+    indentItem: "local-work-os:lists:indent-item",
+    outdentItem: "local-work-os:lists:outdent-item",
+    moveItem: "local-work-os:lists:move-item",
     bulkAddItems: "local-work-os:lists:bulk-add-items",
     listByContainer: "local-work-os:lists:list-by-container",
     saveAsTemplate: "local-work-os:lists:save-as-template",
@@ -3037,6 +3046,18 @@ export type LocalWorkOsIpcContracts = {
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.lists.movePipelineCard]: {
     input: MovePipelineCardInput;
+    result: ApiResult<ListItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.indentItem]: {
+    input: string;
+    result: ApiResult<ListItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.outdentItem]: {
+    input: string;
+    result: ApiResult<ListItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.moveItem]: {
+    input: MoveListItemInput;
     result: ApiResult<ListItemSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems]: {
@@ -3766,6 +3787,9 @@ export type LocalWorkOsApi = {
     movePipelineCard: (
       input: MovePipelineCardInput
     ) => Promise<ApiResult<ListItemSummary>>;
+    indentItem: (listItemId: string) => Promise<ApiResult<ListItemSummary>>;
+    outdentItem: (listItemId: string) => Promise<ApiResult<ListItemSummary>>;
+    moveItem: (input: MoveListItemInput) => Promise<ApiResult<ListItemSummary>>;
     bulkAddItems: (
       input: BulkAddListItemsInput
     ) => Promise<ApiResult<ListItemSummary[]>>;
@@ -4427,6 +4451,12 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.getPipelineViewModel, listId),
       movePipelineCard: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.movePipelineCard, input),
+      indentItem: (listItemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.indentItem, listItemId),
+      outdentItem: (listItemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.outdentItem, listItemId),
+      moveItem: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.moveItem, input),
       bulkAddItems: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems, input),
       listByContainer: (containerId) =>

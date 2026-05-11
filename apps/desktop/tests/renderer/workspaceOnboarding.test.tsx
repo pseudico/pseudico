@@ -178,6 +178,9 @@ function createMockApi(
       getPipelineViewModel: async () =>
         apiOk({ list: listSummary(), stages: [] }),
       movePipelineCard: async () => apiOk(listItemSummary()),
+      indentItem: async () => apiOk({ ...listItemSummary(), depth: 1 }),
+      outdentItem: async () => apiOk({ ...listItemSummary(), depth: 0 }),
+      moveItem: async () => apiOk(listItemSummary()),
       bulkAddItems: async () => apiOk([listItemSummary()]),
       listByContainer: async () => apiOk([listSummary()]),
       createList: async () => apiOk(listSummary()),

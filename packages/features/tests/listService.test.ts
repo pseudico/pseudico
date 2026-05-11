@@ -295,6 +295,65 @@ describe("ListService", () => {
     ).toContain("list_item_reordered");
   });
 
+  it("indents, outdents, and moves rows with keyboard-oriented service commands", async () => {
+    const service = createService();
+    const list = await service.createList({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Launch checklist"
+    });
+    const first = await service.addListItem({
+      listId: list.item.id,
+      title: "Plan launch"
+    });
+    const second = await service.addListItem({
+      listId: list.item.id,
+      title: "Book venue"
+    });
+    const third = await service.addListItem({
+      listId: list.item.id,
+      title: "Send update"
+    });
+
+    const indented = await service.indentListItem({
+      listItemId: second.listItem.id
+    });
+    const moved = await service.moveListItem({
+      listItemId: second.listItem.id,
+      direction: "down"
+    });
+    const outdented = await service.outdentListItem({
+      listItemId: second.listItem.id
+    });
+
+    expect(indented.listItem).toMatchObject({
+      id: second.listItem.id,
+      depth: 1,
+      listItemParentId: first.listItem.id
+    });
+    expect(moved.listItem.sortOrder).toBe(third.listItem.sortOrder);
+    expect(outdented.listItem).toMatchObject({
+      id: second.listItem.id,
+      depth: 0,
+      listItemParentId: null
+    });
+    expect(service.listItems(list.item.id).map((item) => item.id)).toEqual([
+      first.listItem.id,
+      third.listItem.id,
+      second.listItem.id
+    ]);
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("list_item", second.listItem.id)
+        .map((event) => event.action)
+    ).toEqual([
+      "list_item_created",
+      "list_item_reordered",
+      "list_item_reordered",
+      "list_item_reordered"
+    ]);
+  });
+
   it("bulk creates parsed rows with parent links, activity, and search records", async () => {
     const service = createService();
     const list = await service.createList({

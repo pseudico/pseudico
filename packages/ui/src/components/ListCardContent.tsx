@@ -63,6 +63,19 @@ export type ListCardContentProps = {
     draggedItemId: string,
     targetItemId: string
   ) => Promise<boolean | void> | boolean | void;
+  onIndentListItem?: (
+    item: ListCardViewModel,
+    listItem: ListCardItemViewModel
+  ) => Promise<boolean | void> | boolean | void;
+  onOutdentListItem?: (
+    item: ListCardViewModel,
+    listItem: ListCardItemViewModel
+  ) => Promise<boolean | void> | boolean | void;
+  onMoveListItem?: (
+    item: ListCardViewModel,
+    listItem: ListCardItemViewModel,
+    direction: "up" | "down"
+  ) => Promise<boolean | void> | boolean | void;
 };
 
 export function ListCardContent({
@@ -77,7 +90,10 @@ export function ListCardContent({
   onToggleDisplayMode,
   onAddPipelineCard,
   onMovePipelineCard,
-  onReorderListItem
+  onReorderListItem,
+  onIndentListItem,
+  onMoveListItem,
+  onOutdentListItem
 }: ListCardContentProps): React.JSX.Element {
   const visibleItems =
     item.showCompleted === false
@@ -149,6 +165,11 @@ export function ListCardContent({
           onDateRangeChange={(listItem, range) =>
             onListItemDateRangeChange?.(item, listItem, range)
           }
+          onIndentItem={(listItem) => onIndentListItem?.(item, listItem)}
+          onMoveItem={(listItem, direction) =>
+            onMoveListItem?.(item, listItem, direction)
+          }
+          onOutdentItem={(listItem) => onOutdentListItem?.(item, listItem)}
           onReorderItem={(draggedItemId, targetItemId) =>
             onReorderListItem?.(item, draggedItemId, targetItemId)
           }

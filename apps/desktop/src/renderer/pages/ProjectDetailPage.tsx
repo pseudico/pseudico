@@ -2101,6 +2101,58 @@ export function ProjectDetailPage({
     await refreshProjectActivity(project.id);
   }
 
+  async function indentProjectListItem(
+    list: ListCardViewModel,
+    listItem: ListCardItemViewModel
+  ): Promise<void> {
+    await applyProjectListKeyboardMutation(list, () =>
+      apiClient.lists.indentItem(listItem.id)
+    );
+  }
+
+  async function outdentProjectListItem(
+    list: ListCardViewModel,
+    listItem: ListCardItemViewModel
+  ): Promise<void> {
+    await applyProjectListKeyboardMutation(list, () =>
+      apiClient.lists.outdentItem(listItem.id)
+    );
+  }
+
+  async function moveProjectListItem(
+    list: ListCardViewModel,
+    listItem: ListCardItemViewModel,
+    direction: "up" | "down"
+  ): Promise<void> {
+    await applyProjectListKeyboardMutation(list, () =>
+      apiClient.lists.moveItem({ listItemId: listItem.id, direction })
+    );
+  }
+
+  async function applyProjectListKeyboardMutation(
+    list: ListCardViewModel,
+    operation: () => ReturnType<typeof apiClient.lists.indentItem>
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setListBusyId(list.id);
+    setListError(null);
+
+    const result = await operation();
+
+    setListBusyId(null);
+
+    if (!result.ok) {
+      setListError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+  }
+
   async function attachDroppedProjectFiles(
     event: React.DragEvent<HTMLElement>
   ): Promise<void> {
@@ -2432,8 +2484,11 @@ export function ProjectDetailPage({
             onAddItem={addListItem}
             onBulkAddItems={bulkAddListItems}
             onAddPipelineCard={addPipelineCard}
+            onIndentListItem={indentProjectListItem}
             onListItemDateRangeChange={updateListItemDateRange}
+            onMoveListItem={moveProjectListItem}
             onMovePipelineCard={movePipelineCard}
+            onOutdentListItem={outdentProjectListItem}
             onReorderListItem={reorderProjectListItem}
             onSaveAsTemplate={saveListAsTemplate}
             onToggleDisplayMode={toggleListDisplayMode}

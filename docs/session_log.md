@@ -2613,3 +2613,93 @@ Open questions / risks:
 - Remote push/PR creation still pending.
 Next actions:
 - Review diff, commit scoped files, push, and open PR.
+## 2026-05-11 11:56:37 +10:00
+Objective: Close PSE-121 and prepare next ticket.
+Decisions made:
+- Merged PR #116 at 638bb032384400f8703825a37f563b1ee862e72b and moved PSE-121 to Done.
+- Promoted PSE-122 as the single next Codex Ready issue.
+Files changed: docs/session_log.md
+Open questions / risks: Main has local session log update plus unrelated untracked files.
+Next actions: Start PSE-122 implementation next.
+## 2026-05-11T11:59:17.4186825+10:00
+Objective: Run next Local Work OS ticket end-to-end.
+Decisions made:
+- Begin with Linear/GitHub reconciliation per operating rule.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Active PR/issue state and CI status unknown.
+Next actions:
+- List Linear active states.
+- Inspect GitHub/local repository state.
+## 2026-05-11T12:00:29.4802155+10:00
+Objective: Reconcile active work before implementation.
+Decisions made:
+- No Linear PR Open or In Progress issues found.
+- No open GitHub PRs found; local main is up to date.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- PSE-122 scope and affected modules still need review.
+Next actions:
+- Move PSE-122 to In Progress.
+- Read docs and source.
+- Create issue branch.
+## 2026-05-11T12:09:09.5223583+10:00
+Objective: Implement PSE-122 keyboard-first list editing.
+Decisions made:
+- Added core ListEditor state machine and Ctrl/Cmd arrow shortcuts.
+- Added ListService indent/outdent/move APIs with activity/search preservation.
+Files changed:
+- packages/core/src/lists/ListEditorStateMachine.ts
+- packages/features/src/lists/ListService.ts
+- packages/ui/src/components/ChecklistEditor.tsx
+Open questions / risks:
+- Typecheck may reveal mock API surfaces needing updates.
+Next actions:
+- Run focused tests.
+- Fix compile/test issues.
+- Run full checks.
+## 2026-05-11T12:13:34.8354453+10:00
+Objective: Verify PSE-122 implementation locally.
+Decisions made:
+- Fixed shortcut/mocked API tests after adding list keyboard APIs.
+- Full lint, typecheck, test, and build pass locally.
+Files changed:
+- apps/desktop/src/preload/api.ts
+- apps/desktop/src/main/ipc/listHandlers.ts
+- apps/desktop/src/renderer/pages/ProjectDetailPage.tsx
+Open questions / risks:
+- CI still needs to run on GitHub after PR opens.
+Next actions:
+- Review diff.
+- Commit and push branch.
+- Open ready PR and update Linear.
+## 2026-05-11T12:15:34.8239422+10:00
+Objective: Complete local verification for PSE-122.
+Decisions made:
+- Retained untracked local .playwright-mcp/ and gh installer outside ticket scope.
+- Ready to commit keyboard list editing implementation.
+Files changed:
+- docs/session_log.md
+- docs/ACCESSIBILITY.md
+- packages/core/tests/listEditorStateMachine.test.ts
+Open questions / risks:
+- GitHub CI/review pending after PR.
+Next actions:
+- Stage scoped files.
+- Commit and push.
+- Create PR.
+## 2026-05-11T12:17:42.5972044+10:00
+Objective: Open PR for PSE-122.
+Decisions made:
+- Created ready PR #117 from codex/pse-122-keyboard-list-editing.
+- Moved Linear PSE-122 to PR Open with PR link.
+Files changed:
+- none
+Open questions / risks:
+- GitHub CI/review/mergeability pending.
+Next actions:
+- Inspect PR diff/checks.
+- Merge if clean and green.
+- Promote next issue after merge.
