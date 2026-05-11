@@ -3288,3 +3288,35 @@ Files changed:
 - apps/desktop/src/preload/api.ts
 Open questions / risks: Need PR CI after push.
 Next actions: Commit; push; open PR; move Linear to PR Open.
+
+## 2026-05-11 18:47:14 +10:00
+Objective: Merge PSE-139 and prepare next ticket.
+Decisions made:
+- PR #128 passed CI and was squash-merged at d614a36.
+- PSE-139 moved to Done; PSE-140 promoted to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local session log has post-merge uncommitted entry; unrelated untracked files remain.
+Next actions: Start PSE-140 in next run; keep only one Codex Ready issue.
+
+## 2026-05-11 18:53:14 +10:00
+Objective: Reconcile active Linear/GitHub work before next ticket.
+Decisions made:
+- No Linear PR Open or In Progress issues found for PSE project.
+- No open GitHub PRs found; PSE-140 is the single Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need implement PSE-140 only; unrelated local files may exist.
+Next actions: Move PSE-140 to In Progress; read docs/source; branch and implement.
+
+## 2026-05-11 19:06:23 +10:00
+Objective: Implement PSE-140 week/day calendar and drag rescheduling.
+Decisions made:
+- Added CalendarService week/day projections and calendar reschedule command through task/list services.
+- Added week/day UI with all-day/timed lanes, create context, and drag-drop payloads.
+Files changed:
+- packages/features/src/calendar/CalendarService.ts
+- packages/ui/src/components/CalendarWeekDay.tsx
+- apps/desktop/src/renderer/pages/CalendarPage.tsx
+Open questions / risks: Full workspace checks and PR CI still pending.
+Next actions: Run lint/typecheck/test/build; fix failures; open PR.

@@ -2,9 +2,14 @@ import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  CalendarDayView,
+  CalendarWeekView,
   EmptyState,
   ErrorState,
   MonthCalendar,
+  type CalendarRescheduleDrop,
+  type CalendarScheduleDay,
+  type CalendarScheduleItem,
   type MonthCalendarDay,
   type MonthCalendarItem
 } from "@local-work-os/ui";
@@ -29,7 +34,12 @@ export function CalendarPage({
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspaceStore();
   const defaultMonth = useMemo(() => toMonthInputValue(new Date()), []);
+  const defaultDate = useMemo(() => toDateInputValue(new Date()), []);
   const [month, setMonth] = useState(initialCalendar?.range.month ?? defaultMonth);
+  const [selectedDate, setSelectedDate] = useState(
+    initialCalendar?.days[0]?.date ?? defaultDate
+  );
+  const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
   const [includeCompleted, setIncludeCompleted] = useState(false);
   const [calendar, setCalendar] =
     useState<CalendarMonthViewModelSummary | null>(initialCalendar ?? null);
@@ -109,7 +119,7 @@ export function CalendarPage({
     setCalendar(result.data);
   }
 
-  async function createTaskForDay(date: string): Promise<void> {
+  async function createTaskForDay(date: string, hour?: number): Promise<void> {
     if (currentWorkspace === null) {
       setError("Open a local workspace before creating calendar tasks.");
       return;
@@ -136,7 +146,8 @@ export function CalendarPage({
       workspaceId: currentWorkspace.id,
       containerId: inboxResult.data.id,
       title: title.trim(),
-      dueAt: date
+      dueAt: hour === undefined ? date : toIsoHour(date, hour),
+      ...(hour === undefined ? { allDay: true } : { startAt: toIsoHour(date, hour), allDay: false })
     });
 
     setCreatingTaskDate(null);
@@ -149,7 +160,36 @@ export function CalendarPage({
     await refreshCalendar();
   }
 
-  function openCalendarItem(item: CalendarItemSummary | MonthCalendarItem): void {
+  async function rescheduleCalendarItem(drop: CalendarRescheduleDrop): Promise<void> {
+    const workspaceId = currentWorkspace?.id ?? calendar?.workspaceId;
+
+    if (workspaceId === undefined) {
+      setError("Open a local workspace before rescheduling calendar items.");
+      return;
+    }
+
+    setError(null);
+
+    const result = await apiClient.calendar!.rescheduleItem({
+      workspaceId,
+      itemId: drop.itemId,
+      kind: drop.kind,
+      dueAt: drop.hour === undefined ? drop.date : toIsoHour(drop.date, drop.hour),
+      ...(drop.hour === undefined ? { startAt: null } : { startAt: toIsoHour(drop.date, drop.hour) }),
+      allDay: drop.allDay
+    });
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    await refreshCalendar();
+  }
+
+  function openCalendarItem(
+    item: CalendarItemSummary | MonthCalendarItem | CalendarScheduleItem
+  ): void {
     const fullItem =
       "navigationTarget" in item
         ? item
@@ -219,6 +259,29 @@ export function CalendarPage({
             onChange={(event) => setMonth(event.currentTarget.value)}
           />
         </label>
+        <label>
+          <span>Focus date</span>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(event) => {
+              setSelectedDate(event.currentTarget.value);
+              setMonth(event.currentTarget.value.slice(0, 7));
+            }}
+          />
+        </label>
+        <div className="segmented-control" aria-label="Calendar view">
+          {(["month", "week", "day"] as const).map((mode) => (
+            <button
+              className={viewMode === mode ? "is-active" : ""}
+              key={mode}
+              type="button"
+              onClick={() => setViewMode(mode)}
+            >
+              {mode}
+            </button>
+          ))}
+        </div>
         <button
           className="secondary-button compact-button"
           type="button"
@@ -244,13 +307,38 @@ export function CalendarPage({
         <p className="muted-text">Creating task for {creatingTaskDate}...</p>
       )}
 
-      <MonthCalendar
-        days={(calendar?.days ?? []).map(toMonthCalendarDay)}
-        loading={loading && calendar === null}
-        monthLabel={formatMonthLabel(month)}
-        onCreateTask={(date) => void createTaskForDay(date)}
-        onOpenItem={openCalendarItem}
-      />
+      {viewMode === "month" ? (
+        <MonthCalendar
+          days={(calendar?.days ?? []).map(toMonthCalendarDay)}
+          loading={loading && calendar === null}
+          monthLabel={formatMonthLabel(month)}
+          onCreateTask={(date) => {
+            setSelectedDate(date);
+            void createTaskForDay(date);
+          }}
+          onOpenItem={openCalendarItem}
+        />
+      ) : null}
+      {viewMode === "week" ? (
+        <CalendarWeekView
+          days={getWeekDays(calendar?.days ?? [], selectedDate).map(toRequiredScheduleDay)}
+          loading={loading && calendar === null}
+          onCreateTask={(date, hour) => void createTaskForDay(date, hour)}
+          onOpenItem={openCalendarItem}
+          onRescheduleItem={(drop) => void rescheduleCalendarItem(drop)}
+        />
+      ) : null}
+      {viewMode === "day" ? (
+        <CalendarDayView
+          day={toScheduleDay(
+            (calendar?.days ?? []).find((day) => day.date === selectedDate) ?? null
+          )}
+          loading={loading && calendar === null}
+          onCreateTask={(date, hour) => void createTaskForDay(date, hour)}
+          onOpenItem={openCalendarItem}
+          onRescheduleItem={(drop) => void rescheduleCalendarItem(drop)}
+        />
+      ) : null}
     </section>
   );
 }
@@ -293,11 +381,58 @@ function toMonthCalendarItem(item: CalendarItemSummary): MonthCalendarItem {
   };
 }
 
+function toScheduleDay(day: CalendarDaySummary | null): CalendarScheduleDay | null {
+  if (day === null) {
+    return null;
+  }
+
+  return {
+    date: day.date,
+    dayOfMonth: day.dayOfMonth,
+    weekday: day.weekday,
+    isToday: day.isToday,
+    items: day.items.map(toScheduleItem)
+  };
+}
+
+function toRequiredScheduleDay(day: CalendarDaySummary): CalendarScheduleDay {
+  return {
+    date: day.date,
+    dayOfMonth: day.dayOfMonth,
+    weekday: day.weekday,
+    isToday: day.isToday,
+    items: day.items.map(toScheduleItem)
+  };
+}
+
+function toScheduleItem(item: CalendarItemSummary): CalendarScheduleItem {
+  return {
+    id: item.id,
+    kind: item.kind,
+    title: item.title,
+    containerName: item.containerName,
+    categoryName: item.categoryName,
+    status: item.status,
+    priority: item.priority,
+    startAt: item.startAt,
+    dueAt: item.dueAt,
+    allDay: item.allDay
+  };
+}
+
 function toMonthInputValue(date: Date): string {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
 
   return `${year}-${month}`;
+}
+
+function toDateInputValue(date: Date): string {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function offsetMonth(value: string, delta: number): string {
@@ -319,4 +454,25 @@ function formatMonthLabel(value: string): string {
     month: "long",
     year: "numeric"
   }).format(new Date(`${value}-01T00:00:00.000Z`));
+}
+
+function getWeekDays(
+  days: CalendarDaySummary[],
+  selectedDate: string
+): CalendarDaySummary[] {
+  const focus = new Date(`${selectedDate}T00:00:00.000Z`);
+  focus.setUTCDate(focus.getUTCDate() - focus.getUTCDay());
+  const weekDates = new Set(
+    Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(focus);
+      date.setUTCDate(date.getUTCDate() + index);
+      return date.toISOString().slice(0, 10);
+    })
+  );
+
+  return days.filter((day) => weekDates.has(day.date));
+}
+
+function toIsoHour(date: string, hour: number): string {
+  return `${date}T${String(hour).padStart(2, "0")}:00:00.000Z`;
 }
