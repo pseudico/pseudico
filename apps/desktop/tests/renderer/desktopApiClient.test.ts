@@ -740,7 +740,8 @@ function createMockApi(
         })
     },
     diagnostics: {
-      runWorkspaceIntegrityCheck: async () => apiOk(workspaceIntegritySummary())
+      runWorkspaceIntegrityCheck: async () => apiOk(workspaceIntegritySummary()),
+      repairAttachment: async () => apiOk(null)
     },
     navigation: {
       listRecentTargets: async () => apiOk([]),

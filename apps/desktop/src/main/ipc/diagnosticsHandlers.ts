@@ -4,6 +4,7 @@ import {
   type DatabaseConnection
 } from "@local-work-os/db";
 import {
+  FileAttachmentService,
   IntegrityCheckService,
   type WorkspaceIntegrityReport
 } from "@local-work-os/features";
@@ -11,13 +12,17 @@ import {
   apiError,
   apiOk,
   type ApiResult,
+  type RepairAttachmentInput,
+  type RepairAttachmentSummary,
   type RunWorkspaceIntegrityCheckInput,
   type WorkspaceIntegritySummary,
   type WorkspaceSummary
 } from "../../preload/api";
 import {
+  calculateChecksum,
   localPathExists,
-  resolveInsideWorkspace
+  resolveInsideWorkspace,
+  restoreAttachmentFileFromReplacement
 } from "../services/safeFileSystem";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
 
@@ -30,10 +35,20 @@ type DiagnosticsIpcHandlers = {
   handleRunWorkspaceIntegrityCheck: (
     input: unknown
   ) => Promise<ApiResult<WorkspaceIntegritySummary>>;
+  handleRepairAttachment: (
+    input: unknown
+  ) => Promise<ApiResult<RepairAttachmentSummary | null>>;
+};
+
+export type DiagnosticsIpcPlatform = {
+  chooseReplacementPath: () => Promise<string | null>;
 };
 
 export function createDiagnosticsIpcHandlers(
-  workspaceService: CurrentWorkspaceService
+  workspaceService: CurrentWorkspaceService,
+  platform: DiagnosticsIpcPlatform = {
+    chooseReplacementPath: async () => null
+  }
 ): DiagnosticsIpcHandlers {
   return {
     async handleRunWorkspaceIntegrityCheck(input) {
@@ -54,6 +69,52 @@ export function createDiagnosticsIpcHandlers(
             );
 
           return apiOk(toWorkspaceIntegritySummary(report));
+        }
+      );
+    },
+
+    async handleRepairAttachment(input) {
+      if (!isRepairAttachmentInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "repairAttachment requires an attachmentId string."
+        );
+      }
+
+      const replacementPath = input.replacementPath ?? await platform.chooseReplacementPath();
+
+      if (replacementPath === null) {
+        return apiOk(null);
+      }
+
+      return await withIntegrityCheckService(
+        workspaceService,
+        async ({ connection, workspace }) => {
+          const fileService = new FileAttachmentService({ connection });
+          const attachment = fileService.getAttachmentById(input.attachmentId);
+
+          if (attachment === null) {
+            return apiError("WORKSPACE_ERROR", "Attachment was not found.");
+          }
+
+          const replacementFile = await restoreAttachmentFileFromReplacement({
+            workspaceRootPath: workspace.rootPath,
+            attachmentStoragePath: attachment.storagePath,
+            sourcePath: replacementPath
+          });
+          const result = await fileService.repairAttachmentFile({
+            attachmentId: attachment.id,
+            replacementFile
+          });
+
+          return apiOk({
+            attachmentId: result.attachment.id,
+            itemId: result.attachment.itemId,
+            exists: true,
+            storagePath: result.attachment.storagePath,
+            checksum: result.attachment.checksum,
+            sizeBytes: result.attachment.sizeBytes
+          });
         }
       );
     }
@@ -87,6 +148,10 @@ async function withIntegrityCheckService<T>(
         fileSystem: {
           workspacePathExists: async (workspaceRelativePath) =>
             await localPathExists(
+              resolveInsideWorkspace(workspace.rootPath, workspaceRelativePath)
+            ),
+          workspaceFileChecksum: async (workspaceRelativePath) =>
+            await calculateChecksum(
               resolveInsideWorkspace(workspace.rootPath, workspaceRelativePath)
             )
         }
@@ -123,6 +188,14 @@ function toWorkspaceIntegritySummary(
   return report;
 }
 
+function isRepairAttachmentInput(input: unknown): input is RepairAttachmentInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.attachmentId) &&
+    isOptionalString(input.replacementPath)
+  );
+}
+
 function isRunWorkspaceIntegrityCheckInput(
   input: unknown
 ): input is RunWorkspaceIntegrityCheckInput | undefined {
@@ -138,4 +211,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isOptionalString(value: unknown): boolean {
   return value === undefined || (typeof value === "string" && value.trim().length > 0);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
 }

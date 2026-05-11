@@ -145,6 +145,67 @@ describe("IntegrityCheckService", () => {
     expect(issueCodes).toContain("search_record_missing");
   });
 
+  it("reports duplicate attachment checksums and checksum mismatches", async () => {
+    const project = new ContainerRepository(connection).create({
+      id: "container_project_duplicates",
+      workspaceId: "workspace_1",
+      type: "project",
+      name: "Duplicates",
+      slug: "duplicates",
+      timestamp: TEST_TIMESTAMP
+    });
+    const firstFile = new ItemRepository(connection).create({
+      id: "item_file_duplicate_1",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      type: "file",
+      title: "One.pdf",
+      timestamp: TEST_TIMESTAMP
+    });
+    const secondFile = new ItemRepository(connection).create({
+      id: "item_file_duplicate_2",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      type: "file",
+      title: "Two.pdf",
+      timestamp: TEST_TIMESTAMP
+    });
+
+    for (const [id, itemId, path] of [
+      ["attachment_duplicate_1", firstFile.id, "attachments/2026/05/attachment_duplicate_1/One.pdf"],
+      ["attachment_duplicate_2", secondFile.id, "attachments/2026/05/attachment_duplicate_2/Two.pdf"]
+    ] as const) {
+      new AttachmentRepository(connection).create({
+        id,
+        workspaceId: "workspace_1",
+        itemId,
+        originalName: `${id}.pdf`,
+        storedName: `${id}.pdf`,
+        sizeBytes: 42,
+        checksum: "b".repeat(64),
+        storagePath: path,
+        timestamp: TEST_TIMESTAMP
+      });
+    }
+
+    const report = await createService({
+      existingPaths: new Set([
+        "attachments/2026/05/attachment_duplicate_1/One.pdf",
+        "attachments/2026/05/attachment_duplicate_2/Two.pdf"
+      ]),
+      checksums: new Map([
+        ["attachments/2026/05/attachment_duplicate_1/One.pdf", "c".repeat(64)],
+        ["attachments/2026/05/attachment_duplicate_2/Two.pdf", "b".repeat(64)]
+      ])
+    }).runWorkspaceIntegrityCheck("workspace_1");
+    const issueCodes = report.sections.flatMap((section) =>
+      section.issues.map((issue) => issue.code)
+    );
+
+    expect(issueCodes).toContain("attachment_checksum_duplicate");
+    expect(issueCodes).toContain("attachment_checksum_mismatch");
+  });
+
   it("repairs missing system rows through the seed service and logs the write", () => {
     connection.sqlite
       .prepare("update dashboards set deleted_at = ? where workspace_id = ?")
@@ -187,14 +248,16 @@ function seedWorkspace(): void {
   });
 }
 
-function createService(input: { existingPaths?: Set<string> } = {}) {
+function createService(input: { existingPaths?: Set<string>; checksums?: Map<string, string> } = {}) {
   return new IntegrityCheckService({
     connection,
     idFactory,
     now,
     fileSystem: {
       workspacePathExists: async (workspaceRelativePath) =>
-        input.existingPaths?.has(workspaceRelativePath) ?? true
+        input.existingPaths?.has(workspaceRelativePath) ?? true,
+      workspaceFileChecksum: async (workspaceRelativePath) =>
+        input.checksums?.get(workspaceRelativePath) ?? "a".repeat(64)
     }
   });
 }

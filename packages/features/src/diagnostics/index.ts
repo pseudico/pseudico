@@ -1,3 +1,5 @@
+export { AttachmentIntegrityService } from "./AttachmentIntegrityService";
+export type { DuplicateAttachmentGroup } from "./AttachmentIntegrityService";
 export {
   IntegrityCheckService,
   diagnosticsModuleContract

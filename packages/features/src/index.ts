@@ -176,7 +176,11 @@ export {
 } from "./printing";
 export { FileAttachmentService, FileVersionService, filesModuleContract } from "./files";
 export { ImportValidationService, importModuleContract } from "./import";
-export { IntegrityCheckService, diagnosticsModuleContract } from "./diagnostics";
+export {
+  AttachmentIntegrityService,
+  IntegrityCheckService,
+  diagnosticsModuleContract
+} from "./diagnostics";
 export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
 export { CaptureService, captureModuleContract } from "./capture";
@@ -474,7 +478,8 @@ export type {
   FileAttachmentServiceIdFactory,
   FileVersionMutationResult,
   FileVersionServiceIdFactory,
-  RestoreFileVersionInput
+  RestoreFileVersionInput,
+  RepairAttachmentFileInput
 } from "./files";
 export type {
   ImportValidationCounts,
@@ -484,6 +489,7 @@ export type {
   ImportValidationSummary
 } from "./import";
 export type {
+  DuplicateAttachmentGroup,
   IntegrityCheckIssue,
   IntegrityCheckKind,
   IntegrityCheckSection,

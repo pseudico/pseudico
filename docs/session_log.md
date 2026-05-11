@@ -3103,3 +3103,33 @@ Files changed:
 - packages/db/src/repositories/CommentRepository.ts; packages/features/src/comments/CommentService.ts; packages/ui/src/components/CommentThread.tsx
 Open questions / risks: PR review and remote CI still pending.
 Next actions: Commit/push branch; open ready PR; move Linear to PR Open.
+
+## 2026-05-11T15:59:17+10:00
+Objective: Finalize PSE-129 merge and next-ticket promotion.
+Decisions made:
+- PR #124 squash-merged at fa31c75 and merged branch was deleted remotely/locally.
+- Moved PSE-129 to Done and promoted PSE-130 as the only Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final session log entry is local-only/uncommitted; unrelated untracked files remain untouched.
+Next actions: Start PSE-130 from Codex Ready; inspect duplicate-detection scope; create ticket branch.
+
+## 36+10:00
+Objective: Reconcile active Linear/GitHub state before next ticket.
+Decisions made:
+- Found no PR Open or In Progress issues; PSE-130 is the only Codex Ready issue.
+- Proceeding to pull PSE-130 into In Progress and implement duplicate detection scope.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need inspect ticket details and existing object/search model.
+Next actions: Move PSE-130 to In Progress; read docs/source; create branch.
+
+## 55+10:00
+Objective: Implement PSE-130 duplicate and repair diagnostics.
+Decisions made:
+- Added attachment checksum duplicate/mismatch audit and replacement-file repair flow.
+- Exposed Settings diagnostics repair action through main/preload IPC without renderer filesystem access.
+Files changed:
+- packages/features/src/diagnostics/AttachmentIntegrityService.ts; apps/desktop/src/main/ipc/diagnosticsHandlers.ts; apps/desktop/src/renderer/pages/SettingsPage.tsx
+Open questions / risks: Remote CI and PR review pending after push.
+Next actions: Commit/push PSE-130; open PR; move Linear to PR Open.

@@ -69,6 +69,15 @@ export type UpdateFileMetadataInput = {
   actorType?: ActivityActorType;
 };
 
+export type RepairAttachmentFileInput = {
+  attachmentId: string;
+  replacementFile: {
+    sizeBytes: number;
+    checksum: string;
+  };
+  actorType?: ActivityActorType;
+};
+
 export class FileAttachmentService {
   readonly module = "files";
 
@@ -235,6 +244,71 @@ export class FileAttachmentService {
     validateNonEmptyString(attachmentId, "attachmentId");
 
     return new AttachmentRepository(this.connection).getById(attachmentId);
+  }
+
+  async repairAttachmentFile(input: RepairAttachmentFileInput): Promise<FileAttachmentMutationResult> {
+    validateNonEmptyString(input.attachmentId, "attachmentId");
+    validateNonEmptyString(input.replacementFile.checksum, "checksum");
+
+    if (!Number.isInteger(input.replacementFile.sizeBytes) || input.replacementFile.sizeBytes < 0) {
+      throw new Error("sizeBytes must be a non-negative integer.");
+    }
+
+    return await this.transactionService.runInTransaction(() => {
+      const timestamp = createIsoTimestamp(this.now());
+      const attachmentRepository = new AttachmentRepository(this.connection);
+      const itemRepository = new ItemRepository(this.connection);
+      const beforeAttachment = attachmentRepository.getById(input.attachmentId);
+
+      if (beforeAttachment === null) {
+        throw new Error(`Attachment was not found: ${input.attachmentId}.`);
+      }
+
+      const item = itemRepository.getById(beforeAttachment.itemId);
+
+      if (item === null) {
+        throw new Error(`File item was not found: ${beforeAttachment.itemId}.`);
+      }
+
+      const attachment = attachmentRepository.updateStorageMetadata(beforeAttachment.id, {
+        checksum: input.replacementFile.checksum,
+        sizeBytes: input.replacementFile.sizeBytes,
+        timestamp
+      });
+
+      new ActivityLogService({
+        connection: this.connection,
+        idFactory: this.idFactory
+      }).logEvent({
+        workspaceId: attachment.workspaceId,
+        actorType: input.actorType ?? "local_user",
+        action: ActivityAction.attachmentRepaired,
+        targetType: "attachment",
+        targetId: attachment.id,
+        summary: `Repaired missing attachment file "${attachment.originalName}".`,
+        beforeJson: JSON.stringify(beforeAttachment),
+        afterJson: JSON.stringify(attachment),
+        timestamp
+      });
+
+      const itemSearchRecord = this.upsertItemSearchRecord({
+        item,
+        attachment,
+        timestamp
+      });
+      const attachmentSearchRecord = this.upsertAttachmentSearchRecord({
+        attachment,
+        item,
+        timestamp
+      });
+
+      return {
+        item,
+        attachment,
+        itemSearchRecord,
+        attachmentSearchRecord
+      };
+    });
   }
 
   async updateMetadata(

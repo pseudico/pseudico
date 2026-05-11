@@ -90,6 +90,7 @@ export const ActivityAction = {
   savedViewUpdated: "saved_view_updated",
   savedViewDeleted: "saved_view_deleted",
   fileAttached: "file_attached",
+  attachmentRepaired: "attachment_repaired",
   fileVersionCreated: "file_version_created",
   fileVersionRestored: "file_version_restored",
   containerMediaSet: "container_media_set",

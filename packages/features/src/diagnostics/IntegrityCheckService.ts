@@ -1,4 +1,5 @@
 import type { FeatureModuleContract } from "../featureModuleContract";
+import { AttachmentIntegrityService } from "./AttachmentIntegrityService";
 import {
   ActivityAction,
   createIsoTimestamp,
@@ -40,6 +41,7 @@ export type IntegrityCheckKind =
   | "taggings"
   | "relationships"
   | "attachments"
+  | "attachment_duplicates"
   | "search_index";
 
 export type IntegrityCheckIssue = {
@@ -74,6 +76,7 @@ export type WorkspaceIntegrityReport = {
 
 export type IntegrityFileSystemAdapter = {
   workspacePathExists: (workspaceRelativePath: string) => Promise<boolean>;
+  workspaceFileChecksum?: (workspaceRelativePath: string) => Promise<string>;
 };
 
 export type RepairSystemRowsResult = {
@@ -122,6 +125,7 @@ export class IntegrityCheckService {
       this.checkTaggings(workspaceId),
       this.checkRelationships(workspaceId),
       await this.checkAttachmentFiles(workspaceId),
+      this.checkAttachmentDuplicates(workspaceId),
       this.checkSearchIndexConsistency(workspaceId)
     ];
     const issueCount = sections.reduce(
@@ -231,12 +235,70 @@ export class IntegrityCheckService {
           })
         );
       }
+
+      if (exists && this.fileSystem.workspaceFileChecksum !== undefined && attachment.checksum !== null) {
+        const actualChecksum = await this.fileSystem.workspaceFileChecksum(attachment.storagePath);
+
+        if (actualChecksum.toLowerCase() !== attachment.checksum.toLowerCase()) {
+          issues.push(
+            createIssue({
+              code: "attachment_checksum_mismatch",
+              message: `Attachment file checksum does not match stored metadata at ${attachment.storagePath}.`,
+              targetType: "attachment",
+              targetId: attachment.id,
+              relatedType: "checksum",
+              relatedId: attachment.checksum
+            })
+          );
+        }
+      }
     }
 
     return createSection({
       kind: "attachments",
       title: "Attachment files",
       checkedCount: attachments.length,
+      issues
+    });
+  }
+
+
+  checkAttachmentDuplicates(workspaceId: string): IntegrityCheckSection {
+    validateNonEmptyString(workspaceId, "workspaceId");
+
+    const attachments = new AttachmentRepository(this.connection).listByWorkspace({
+      workspaceId
+    });
+    const duplicateGroups = new AttachmentIntegrityService({
+      connection: this.connection
+    }).listDuplicateChecksumGroups(workspaceId);
+    const issues: IntegrityCheckIssue[] = [];
+
+    for (const { checksum, attachments: groupedAttachments } of duplicateGroups) {
+
+      const attachmentIds = groupedAttachments.map((attachment) => attachment.id);
+
+      for (const attachment of groupedAttachments) {
+        issues.push(
+          createIssue({
+            severity: "warning",
+            code: "attachment_checksum_duplicate",
+            message: `Attachment ${attachment.id} shares checksum ${checksum} with ${attachmentIds.filter((id) => id !== attachment.id).join(", ")}.`,
+            targetType: "attachment",
+            targetId: attachment.id,
+            relatedType: "checksum",
+            relatedId: checksum
+          })
+        );
+      }
+    }
+
+    return createSection({
+      kind: "attachment_duplicates",
+      title: "Attachment duplicates",
+      checkedCount: attachments.filter(
+        (attachment) => (attachment.checksum?.trim().length ?? 0) > 0
+      ).length,
       issues
     });
   }

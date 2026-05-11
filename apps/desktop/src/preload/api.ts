@@ -304,6 +304,20 @@ export type RunWorkspaceIntegrityCheckInput = {
   workspaceId?: string;
 };
 
+export type RepairAttachmentInput = {
+  attachmentId: string;
+  replacementPath?: string;
+};
+
+export type RepairAttachmentSummary = {
+  attachmentId: string;
+  itemId: string;
+  exists: boolean;
+  storagePath: string;
+  checksum: string | null;
+  sizeBytes: number;
+};
+
 export type IntegrityCheckIssueSummary = {
   severity: "error" | "warning";
   code: string;
@@ -321,6 +335,7 @@ export type IntegrityCheckSectionSummary = {
     | "taggings"
     | "relationships"
     | "attachments"
+    | "attachment_duplicates"
     | "search_index";
   title: string;
   status: "healthy" | "degraded";
@@ -2980,7 +2995,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   },
   diagnostics: {
     runWorkspaceIntegrityCheck:
-      "local-work-os:diagnostics:run-workspace-integrity-check"
+      "local-work-os:diagnostics:run-workspace-integrity-check",
+    repairAttachment:
+      "local-work-os:diagnostics:repair-attachment"
   },
   navigation: {
     listRecentTargets: "local-work-os:navigation:list-recent-targets",
@@ -3744,6 +3761,10 @@ export type LocalWorkOsIpcContracts = {
     input: RunWorkspaceIntegrityCheckInput | undefined;
     result: ApiResult<WorkspaceIntegritySummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairAttachment]: {
+    input: RepairAttachmentInput;
+    result: ApiResult<RepairAttachmentSummary | null>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.navigation.listRecentTargets]: {
     input: string | undefined;
     result: ApiResult<NavigationRecentTargetSummary[]>;
@@ -4412,6 +4433,9 @@ export type LocalWorkOsApi = {
     runWorkspaceIntegrityCheck: (
       input?: RunWorkspaceIntegrityCheckInput
     ) => Promise<ApiResult<WorkspaceIntegritySummary>>;
+    repairAttachment: (
+      input: RepairAttachmentInput
+    ) => Promise<ApiResult<RepairAttachmentSummary | null>>;
   };
   navigation: {
     listRecentTargets: (
@@ -5079,7 +5103,9 @@ export function createLocalWorkOsApi(
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runWorkspaceIntegrityCheck,
           input
-        )
+        ),
+      repairAttachment: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairAttachment, input)
     },
     navigation: {
       listRecentTargets: (workspaceId) =>
