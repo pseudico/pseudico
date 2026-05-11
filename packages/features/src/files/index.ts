@@ -4,7 +4,8 @@ export type {
   AttachFileToItemInput,
   CopiedAttachmentFileInput,
   FileAttachmentMutationResult,
-  FileAttachmentServiceIdFactory
+  FileAttachmentServiceIdFactory,
+  RepairAttachmentFileInput
 } from "./FileAttachmentService";
 export { FileVersionService } from "./FileVersionService";
 export type {

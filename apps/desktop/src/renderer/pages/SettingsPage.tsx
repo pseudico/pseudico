@@ -91,6 +91,7 @@ export function SettingsPage({
   const [restoreSummary, setRestoreSummary] =
     useState<RestoreWorkspaceSummary | null>(null);
   const [diagnosticsBusy, setDiagnosticsBusy] = useState(false);
+  const [repairingAttachmentId, setRepairingAttachmentId] = useState<string | null>(null);
   const [diagnosticsReport, setDiagnosticsReport] =
     useState<WorkspaceIntegritySummary | null>(null);
   const [importSummary, setImportSummary] =
@@ -365,6 +366,34 @@ export function SettingsPage({
         tone: result.data.status === "healthy" ? "success" : "error"
       }
     );
+  }
+
+  async function repairMissingAttachment(attachmentId: string): Promise<void> {
+    setRepairingAttachmentId(attachmentId);
+    setError(null);
+
+    const result = await apiClient.diagnostics.repairAttachment({ attachmentId });
+
+    setRepairingAttachmentId(null);
+
+    if (!result.ok) {
+      setUserError(result.error, "Attachment repair failed");
+      return;
+    }
+
+    if (result.data === null) {
+      showToast("No replacement file selected.", {
+        title: "Repair cancelled",
+        tone: "info"
+      });
+      return;
+    }
+
+    showToast("Attachment file repaired locally.", {
+      title: "Attachment repaired",
+      tone: "success"
+    });
+    await runWorkspaceDiagnostics();
   }
 
   async function exportWorkspaceJson(): Promise<void> {
@@ -665,7 +694,11 @@ export function SettingsPage({
             title="No diagnostics run"
           />
         ) : (
-          <DiagnosticsSummaryPanel report={diagnosticsReport} />
+          <DiagnosticsSummaryPanel
+            repairBusyAttachmentId={repairingAttachmentId}
+            report={diagnosticsReport}
+            onRepairAttachment={repairMissingAttachment}
+          />
         )}
       </section>
       <section className="backup-management-panel" aria-label="Backups">
@@ -904,9 +937,13 @@ export function SettingsPage({
 }
 
 function DiagnosticsSummaryPanel({
-  report
+  repairBusyAttachmentId,
+  report,
+  onRepairAttachment
 }: {
+  repairBusyAttachmentId: string | null;
   report: WorkspaceIntegritySummary;
+  onRepairAttachment: (attachmentId: string) => Promise<void>;
 }): React.JSX.Element {
   return (
     <div className="backup-list" aria-label="Diagnostics summary">
@@ -939,8 +976,8 @@ function DiagnosticsSummaryPanel({
             <span>{section.checkedCount} checked</span>
             <span>{section.status}</span>
           </div>
-          {section.issues.slice(0, 3).map((issue) => (
-            <p
+          {section.issues.slice(0, 5).map((issue) => (
+            <div
               className={
                 issue.severity === "error"
                   ? "form-message form-message-error"
@@ -948,8 +985,18 @@ function DiagnosticsSummaryPanel({
               }
               key={`${section.kind}:${issue.code}:${issue.targetId}:${issue.relatedId}`}
             >
-              {issue.message}
-            </p>
+              <span>{issue.message}</span>
+              {issue.code === "attachment_file_missing" ? (
+                <button
+                  className="secondary-button compact-button"
+                  disabled={repairBusyAttachmentId === issue.targetId}
+                  type="button"
+                  onClick={() => void onRepairAttachment(issue.targetId)}
+                >
+                  {repairBusyAttachmentId === issue.targetId ? "Repairing..." : "Locate replacement"}
+                </button>
+              ) : null}
+            </div>
           ))}
         </div>
       ))}

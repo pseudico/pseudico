@@ -369,6 +369,40 @@ export async function restoreAttachmentFileFromVersion(input: {
   };
 }
 
+export async function restoreAttachmentFileFromReplacement(input: {
+  workspaceRootPath: string;
+  attachmentStoragePath: string;
+  sourcePath: string;
+}): Promise<{
+  sizeBytes: number;
+  checksum: string;
+}> {
+  const sourcePath = normalizeLocalPath(input.sourcePath);
+  const sourceStats = await stat(sourcePath);
+
+  if (!sourceStats.isFile()) {
+    throw new WorkspaceFileSystemError(
+      "INVALID_PATH",
+      "Replacement path must point to a file."
+    );
+  }
+
+  const destinationPath = resolveInsideWorkspace(
+    input.workspaceRootPath,
+    input.attachmentStoragePath
+  );
+
+  await ensureDirectory(dirname(destinationPath));
+  await pipeline(createReadStream(sourcePath), createWriteStream(destinationPath));
+
+  const restoredStats = await stat(destinationPath);
+
+  return {
+    sizeBytes: restoredStats.size,
+    checksum: await calculateChecksum(destinationPath)
+  };
+}
+
 function sanitizeStoredFileName(originalName: string, fallbackName: string): string {
   const sanitized = originalName
     .split("")
