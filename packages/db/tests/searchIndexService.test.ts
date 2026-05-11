@@ -379,6 +379,34 @@ describe("SearchIndexService", () => {
       deletedFlagMismatchCount: 0
     });
   });
+
+  it("orders title-weighted matches ahead of newer body-only matches", () => {
+    const project = createContainer("container_rank", "workspace_1", "Ranking Project");
+    const newerBodyMatch = createItem({
+      id: "item_body_match",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      title: "General note",
+      body: "launch appears in this newer note body"
+    });
+    const olderTitleMatch = createItem({
+      id: "item_title_match",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      title: "Launch decision",
+      body: "Older but more relevant"
+    });
+    const service = createService();
+
+    service.upsertItem(newerBodyMatch, { timestamp: TEST_TIMESTAMP_LATER });
+    service.upsertItem(olderTitleMatch, { timestamp: TEST_TIMESTAMP });
+
+    expect(search("launch").map((result) => result.targetId)).toEqual([
+      "item_title_match",
+      "item_body_match"
+    ]);
+  });
+
 });
 
 function createService(): SearchIndexService {

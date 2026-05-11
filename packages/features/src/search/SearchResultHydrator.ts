@@ -30,6 +30,16 @@ export type SearchResultKind =
   | "list_item"
   | "unknown";
 
+export type SearchHighlightSegment = {
+  text: string;
+  match: boolean;
+};
+
+export type SearchResultExcerpt = {
+  text: string;
+  segments: SearchHighlightSegment[];
+};
+
 export type SearchResult = {
   id: string;
   workspaceId: string;
@@ -51,6 +61,9 @@ export type SearchResult = {
   destinationPath: string | null;
   dueAt: string | null;
   taskStatus: string | null;
+  score: number;
+  titleHighlights: SearchHighlightSegment[];
+  excerpt: SearchResultExcerpt | null;
 };
 
 export type HydrateSearchResultsOptions = {
@@ -134,7 +147,10 @@ export class SearchResultHydrator {
       parentItemTitle: null,
       destinationPath: getContainerDestinationPath(container),
       dueAt: null,
-      taskStatus: null
+      taskStatus: null,
+      score: 0,
+      titleHighlights: [],
+      excerpt: null
     };
   }
 
@@ -168,7 +184,10 @@ export class SearchResultHydrator {
       parentItemTitle: null,
       destinationPath: getItemDestinationPath(item, container),
       dueAt: readNullableString(metadata.dueAt),
-      taskStatus: readNullableString(metadata.taskStatus)
+      taskStatus: readNullableString(metadata.taskStatus),
+      score: 0,
+      titleHighlights: [],
+      excerpt: null
     };
   }
 
@@ -218,7 +237,10 @@ export class SearchResultHydrator {
       destinationPath:
         parentItem === null ? null : getItemDestinationPath(parentItem, container),
       dueAt: readNullableString(metadata.dueAt),
-      taskStatus: readNullableString(metadata.status)
+      taskStatus: readNullableString(metadata.status),
+      score: 0,
+      titleHighlights: [],
+      excerpt: null
     };
   }
 
@@ -261,7 +283,10 @@ export class SearchResultHydrator {
       parentItemTitle: item.title,
       destinationPath: getItemDestinationPath(item, container),
       dueAt: null,
-      taskStatus: null
+      taskStatus: null,
+      score: 0,
+      titleHighlights: [],
+      excerpt: null
     };
   }
 }

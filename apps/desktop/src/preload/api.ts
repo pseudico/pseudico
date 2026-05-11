@@ -1134,6 +1134,16 @@ export type SaveSearchInput = {
   description?: string | null;
 };
 
+export type SearchHighlightSegmentSummary = {
+  text: string;
+  match: boolean;
+};
+
+export type SearchResultExcerptSummary = {
+  text: string;
+  segments: SearchHighlightSegmentSummary[];
+};
+
 export type SearchResultSummary = {
   id: string;
   workspaceId: string;
@@ -1155,6 +1165,9 @@ export type SearchResultSummary = {
   destinationPath: string | null;
   dueAt?: string | null;
   taskStatus?: string | null;
+  score?: number;
+  titleHighlights?: SearchHighlightSegmentSummary[];
+  excerpt?: SearchResultExcerptSummary | null;
 };
 
 export type CollectionKind = "tag" | "keyword" | "custom";

@@ -204,7 +204,16 @@ export class SearchIndexRepository {
       "(lower(title) like ? escape '\\' or lower(body) like ? escape '\\' or lower(tags) like ? escape '\\' or lower(coalesce(category, '')) like ? escape '\\')"
     ];
     const pattern = `%${escapeLikePattern(normalizedQuery)}%`;
+    const titlePrefixPattern = `${escapeLikePattern(normalizedQuery)}%`;
     const values: unknown[] = [workspaceId, pattern, pattern, pattern, pattern];
+    const rankValues: unknown[] = [
+      normalizedQuery,
+      titlePrefixPattern,
+      pattern,
+      pattern,
+      pattern,
+      pattern
+    ];
 
     if (options.includeDeleted !== true) {
       where.push("is_deleted = 0");
@@ -220,14 +229,20 @@ export class SearchIndexRepository {
 
     const rows = this.connection.sqlite
       .prepare<unknown[], SearchIndexRow>(
-        `select *
+        `select *,
+           ((case when lower(title) = ? then 120 else 0 end) +
+            (case when lower(title) like ? then 70 else 0 end) +
+            (case when lower(title) like ? then 45 else 0 end) +
+            (case when lower(tags) like ? then 24 else 0 end) +
+            (case when lower(coalesce(category, '')) like ? then 20 else 0 end) +
+            (case when lower(body) like ? then 12 else 0 end)) as search_rank
          from search_index
          where ${where.join(" and ")}
-         order by updated_at desc, title asc
+         order by search_rank desc, updated_at desc, title asc
          limit ?
          offset ?`
       )
-      .all(...values);
+      .all(...rankValues, ...values);
 
     return rows.map(toSearchIndexRecord);
   }

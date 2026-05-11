@@ -59,6 +59,7 @@ export function SearchPage({
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [activeResultIndex, setActiveResultIndex] = useState(0);
   const activeQuery = initialQuery ?? queryFromRoute;
   const parsedQuery = useMemo(
     () => ({ chips: parseStructuredSearchChips(draftQuery) }),
@@ -135,6 +136,7 @@ export function SearchPage({
       }
 
       setResults(result.data);
+      setActiveResultIndex(0);
       setHasMoreResults(result.data.length === SEARCH_PAGE_SIZE);
     }
 
@@ -160,6 +162,7 @@ export function SearchPage({
 
     setSavedMessage(null);
     setSearchParams(params);
+    setActiveResultIndex(0);
   }
 
   async function saveCurrentSearch(): Promise<void> {
@@ -219,6 +222,7 @@ export function SearchPage({
     }
 
     setResults(result.data);
+    setActiveResultIndex(0);
     setHasMoreResults(result.data.length === input.limit);
   }
 
@@ -326,7 +330,24 @@ export function SearchPage({
     const result = results.find((candidate) => candidate.id === resultId);
 
     if (result?.destinationPath !== undefined && result.destinationPath !== null) {
-      navigate(result.destinationPath);
+      navigate(buildHighlightedDestinationPath(result));
+    }
+  }
+
+  function handleResultsKeyDown(event: React.KeyboardEvent<HTMLElement>): void {
+    if (visibleResults.length === 0) {
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveResultIndex((current) => Math.min(current + 1, visibleResults.length - 1));
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveResultIndex((current) => Math.max(current - 1, 0));
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      openResult(visibleResults[Math.min(activeResultIndex, visibleResults.length - 1)]!.id);
     }
   }
 
@@ -425,7 +446,7 @@ export function SearchPage({
           </div>
         </aside>
 
-        <section className="search-results-panel" aria-busy={loading}>
+        <section className="search-results-panel" aria-busy={loading} onKeyDown={handleResultsKeyDown}>
           <div className="metadata-results-heading">
             <div>
               <p className="top-eyebrow">Results</p>
@@ -477,6 +498,7 @@ export function SearchPage({
                     ...result,
                     disabled: result.disabled === true || busyTaskId === result.targetId
                   }}
+                  selected={visibleResults[activeResultIndex]?.id === result.id}
                   onOpen={openResult}
                   onRescheduleTask={rescheduleTask}
                   onSnoozeTask={snoozeTask}
@@ -506,13 +528,13 @@ function SearchEmptyState({
 function toSearchResultCardViewModel(
   result: SearchResultSummary
 ): SearchResultCardViewModel {
-  return {
+  const viewModel: SearchResultCardViewModel = {
     id: result.id,
     targetId: result.targetId,
     targetType: result.targetType,
     kind: result.kind,
     title: result.title,
-    body: result.body,
+    body: result.excerpt?.text ?? result.body,
     status: result.status,
     category:
       result.category === null
@@ -532,6 +554,16 @@ function toSearchResultCardViewModel(
     taskStatus: result.taskStatus ?? null,
     disabled: result.destinationPath === null
   };
+
+  if (result.titleHighlights !== undefined) {
+    viewModel.titleHighlights = result.titleHighlights;
+  }
+
+  if (result.excerpt?.segments !== undefined) {
+    viewModel.excerptSegments = result.excerpt.segments;
+  }
+
+  return viewModel;
 }
 
 function buildContextLabel(result: SearchResultSummary): string | null {
@@ -606,4 +638,24 @@ function getStructuredSearchSuggestions(query: string): Array<{ token: string; d
     .filter((token) => active.length > 0 && token.toLowerCase().startsWith(active))
     .slice(0, 8)
     .map((token) => ({ token, description: "Structured search token" }));
+}
+
+
+function buildHighlightedDestinationPath(result: SearchResultSummary): string {
+  if (result.destinationPath === null) {
+    return "#";
+  }
+
+  const params = new URLSearchParams();
+  if (result.targetType === "item" || result.targetType === "attachment") {
+    const itemId = result.targetType === "attachment" ? result.parentItemId : result.targetId;
+    if (itemId !== null) params.set("item", itemId);
+  } else if (result.targetType === "list_item" && result.parentItemId !== null) {
+    params.set("item", result.parentItemId);
+    params.set("listItem", result.targetId);
+  }
+
+  params.set("highlight", result.targetId);
+  const separator = result.destinationPath.includes("?") ? "&" : "?";
+  return `${result.destinationPath}${separator}${params.toString()}`;
 }

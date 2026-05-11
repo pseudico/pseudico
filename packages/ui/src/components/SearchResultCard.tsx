@@ -4,6 +4,11 @@ import { getItemTypeLabel, ItemTypeIcon } from "./ItemTypeIcon";
 import { SnoozeMenu, type SnoozePreset } from "./SnoozeMenu";
 import { TagBadge, type TagBadgeViewModel } from "./TagBadge";
 
+export type SearchHighlightSegmentViewModel = {
+  text: string;
+  match: boolean;
+};
+
 export type SearchResultCardViewModel = {
   id: string;
   targetId: string;
@@ -11,6 +16,8 @@ export type SearchResultCardViewModel = {
   kind: string;
   title: string;
   body?: string | null;
+  titleHighlights?: readonly SearchHighlightSegmentViewModel[];
+  excerptSegments?: readonly SearchHighlightSegmentViewModel[];
   status?: string | null;
   category?: CategoryBadgeViewModel | null;
   tags?: readonly TagBadgeViewModel[];
@@ -71,10 +78,10 @@ export function SearchResultCard({
             <ItemTypeIcon itemType={result.kind} />
             <span>{typeLabel}</span>
           </span>
-          <strong>{result.title}</strong>
+          <strong>{renderHighlightSegments(result.titleHighlights, result.title)}</strong>
         </span>
-        {result.body === undefined || result.body === null || result.body.length === 0 ? null : (
-          <span className="search-result-card-body">{result.body}</span>
+        {getBodySegments(result).length === 0 ? null : (
+          <span className="search-result-card-body">{renderHighlightSegments(getBodySegments(result), result.body ?? "")}</span>
         )}
         <span className="search-result-card-meta">
           {result.status === undefined || result.status === null ? null : (
@@ -126,4 +133,36 @@ function formatKindLabel(kind: string): string {
   }
 
   return getItemTypeLabel(kind);
+}
+
+
+function getBodySegments(
+  result: SearchResultCardViewModel
+): readonly SearchHighlightSegmentViewModel[] {
+  if (result.excerptSegments !== undefined) {
+    return result.excerptSegments;
+  }
+
+  if (result.body === undefined || result.body === null || result.body.length === 0) {
+    return [];
+  }
+
+  return [{ text: result.body, match: false }];
+}
+
+function renderHighlightSegments(
+  segments: readonly SearchHighlightSegmentViewModel[] | undefined,
+  fallback: string
+): React.ReactNode {
+  const safeSegments = segments === undefined || segments.length === 0
+    ? [{ text: fallback, match: false }]
+    : segments;
+
+  return safeSegments.map((segment, index) => segment.match ? (
+    <mark key={`${index}:${segment.text}`} className="search-highlight">
+      {segment.text}
+    </mark>
+  ) : (
+    <span key={`${index}:${segment.text}`}>{segment.text}</span>
+  ));
 }
