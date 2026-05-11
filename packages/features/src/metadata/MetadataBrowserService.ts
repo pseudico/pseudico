@@ -26,18 +26,22 @@ export class MetadataBrowserService {
     this.repository = new MetadataBrowserRepository(input.connection);
   }
 
-  listTagsWithCounts(workspaceId: string): TagWithTargetCountRecord[] {
+  listTagsWithCounts(
+    workspaceId: string,
+    filters: { includeArchived?: boolean; includeDeleted?: boolean } = {}
+  ): TagWithTargetCountRecord[] {
     validateNonEmptyString(workspaceId, "workspaceId");
 
-    return this.repository.listTagsWithCounts(workspaceId);
+    return this.repository.listTagsWithCounts(workspaceId, filters);
   }
 
   listCategoriesWithCounts(
-    workspaceId: string
+    workspaceId: string,
+    filters: { includeArchived?: boolean; includeDeleted?: boolean } = {}
   ): CategoryWithTargetCountRecord[] {
     validateNonEmptyString(workspaceId, "workspaceId");
 
-    return this.repository.listCategoriesWithCounts(workspaceId);
+    return this.repository.listCategoriesWithCounts(workspaceId, filters);
   }
 
   listTargetsByMetadata(

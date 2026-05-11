@@ -905,10 +905,16 @@ export type TagCountSummary = {
   updatedAt: string;
   deletedAt: string | null;
   targetCount: number;
+  containerCount?: number;
+  itemCount?: number;
+  listItemCount?: number;
 };
 
 export type CategoryCountSummary = CategorySummary & {
   targetCount: number;
+  containerCount?: number;
+  itemCount?: number;
+  listItemCount?: number;
 };
 
 export type MetadataTargetType = "container" | "item" | "list_item";
@@ -1556,6 +1562,15 @@ export type CreateTagCollectionInput = {
 export type CreateKeywordCollectionInput = {
   workspaceId?: string;
   query: string;
+  name?: string;
+  description?: string | null;
+};
+
+export type CreateMetadataCollectionInput = {
+  workspaceId?: string;
+  tagSlugs?: string[];
+  categoryId?: string | null;
+  includeArchived?: boolean;
   name?: string;
   description?: string | null;
 };
@@ -3087,6 +3102,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     createTagCollection: "local-work-os:collections:create-tag-collection",
     createKeywordCollection:
       "local-work-os:collections:create-keyword-collection",
+    createMetadataCollection:
+      "local-work-os:collections:create-metadata-collection",
     evaluateCollection: "local-work-os:collections:evaluate-collection",
     createTaskInCollection:
       "local-work-os:collections:create-task-in-collection",
@@ -3679,6 +3696,10 @@ export type LocalWorkOsIpcContracts = {
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.collections.createKeywordCollection]: {
     input: CreateKeywordCollectionInput;
+    result: ApiResult<CollectionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.collections.createMetadataCollection]: {
+    input: CreateMetadataCollectionInput;
     result: ApiResult<CollectionSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.collections.evaluateCollection]: {
@@ -4485,6 +4506,9 @@ export type LocalWorkOsApi = {
     createKeywordCollection: (
       input: CreateKeywordCollectionInput
     ) => Promise<ApiResult<CollectionSummary>>;
+    createMetadataCollection: (
+      input: CreateMetadataCollectionInput
+    ) => Promise<ApiResult<CollectionSummary>>;
     evaluateCollection: (
       input: string | EvaluateCollectionInput
     ) => Promise<ApiResult<CollectionEvaluationSummary>>;
@@ -5176,6 +5200,11 @@ export function createLocalWorkOsApi(
       createKeywordCollection: (input) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.collections.createKeywordCollection,
+          input
+        ),
+      createMetadataCollection: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.collections.createMetadataCollection,
           input
         ),
       evaluateCollection: (input) =>

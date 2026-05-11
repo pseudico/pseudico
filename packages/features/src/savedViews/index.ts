@@ -5,6 +5,7 @@ export {
 export {
   CollectionService,
   createKeywordCollectionQuery,
+  createMetadataCollectionQuery,
   createTagCollectionQuery,
   toCollectionSummary
 } from "./CollectionService";
@@ -32,6 +33,7 @@ export type {
   CollectionSummary,
   CollectionTaskMutationResult,
   CreateKeywordCollectionInput,
+  CreateMetadataCollectionInput,
   CreateTagCollectionInput,
   CreateTaskInCollectionInput
 } from "./CollectionService";

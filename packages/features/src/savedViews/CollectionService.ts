@@ -67,6 +67,16 @@ export type CreateKeywordCollectionInput = {
   description?: string | null;
 };
 
+export type CreateMetadataCollectionInput = {
+  workspaceId: string;
+  tagSlugs?: readonly string[];
+  categoryId?: string | null;
+  includeArchived?: boolean;
+  actorType?: ActivityActorType;
+  name?: string;
+  description?: string | null;
+};
+
 export type CreateTaskInCollectionInput = Omit<CreateTaskInput, "workspaceId"> & {
   collectionId: string;
   workspaceId?: string;
@@ -110,6 +120,39 @@ export class CollectionService {
       display: {
         collectionKind: "tag",
         tagSlug
+      },
+      isFavorite: true
+    });
+
+    return toCollectionSummary(savedView.savedView);
+  }
+
+  async createMetadataCollection(
+    input: CreateMetadataCollectionInput
+  ): Promise<CollectionSummary> {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+    const tagSlugs = normalizeTagSlugs(input.tagSlugs ?? []);
+    const categoryId = normalizeOptionalString(input.categoryId ?? null, "categoryId");
+
+    if (tagSlugs.length === 0 && categoryId === null && input.includeArchived !== true) {
+      throw new Error("A metadata collection requires at least one tag, category, or archived filter.");
+    }
+
+    const label = formatMetadataCollectionLabel(tagSlugs, categoryId, input.includeArchived === true);
+    const savedView = await this.savedViewService().createSavedView({
+      workspaceId: input.workspaceId,
+      type: "collection",
+      name: input.name ?? label,
+      description: input.description ?? `Metadata filter: ${label}.`,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      query: createMetadataCollectionQuery({
+        tagSlugs,
+        categoryId,
+        includeArchived: input.includeArchived === true
+      }),
+      display: {
+        collectionKind: "custom",
+        metadataFilter: { tagSlugs, categoryId, includeArchived: input.includeArchived === true }
       },
       isFavorite: true
     });
@@ -250,6 +293,37 @@ export function createTagCollectionQuery(tagSlug: string): SavedViewQuery {
   };
 }
 
+export function createMetadataCollectionQuery(input: {
+  tagSlugs?: readonly string[];
+  categoryId?: string | null;
+  includeArchived?: boolean;
+}): SavedViewQuery {
+  const tagSlugs = normalizeTagSlugs(input.tagSlugs ?? []);
+  const categoryId = normalizeOptionalString(input.categoryId ?? null, "categoryId");
+  const conditions: SavedViewQuery["conditions"] = tagSlugs.map((tagSlug) => ({
+    field: "tag",
+    operator: "has",
+    value: tagSlug
+  }));
+
+  if (categoryId !== null) {
+    conditions.push({ field: "category", operator: "is", value: categoryId });
+  }
+
+  return {
+    version: 1,
+    match: "all",
+    targets: ["container", "item"],
+    conditions,
+    groupBy: "targetType",
+    sort: [
+      { field: "type", direction: "asc" },
+      { field: "updatedAt", direction: "desc" }
+    ],
+    includeArchived: input.includeArchived === true
+  };
+}
+
 export function createKeywordCollectionQuery(query: string): SavedViewQuery {
   return {
     version: 1,
@@ -341,6 +415,33 @@ function normalizeTagSlug(input: string): string {
   }
 
   return slug;
+}
+
+function normalizeTagSlugs(values: readonly string[]): string[] {
+  return [...new Set(values.map(normalizeTagSlug))].sort();
+}
+
+function normalizeOptionalString(value: string | null, fieldName: string): string | null {
+  if (value === null) {
+    return null;
+  }
+
+  validateNonEmptyString(value, fieldName);
+  return value;
+}
+
+function formatMetadataCollectionLabel(
+  tagSlugs: readonly string[],
+  categoryId: string | null,
+  includeArchived: boolean
+): string {
+  const parts = [
+    ...tagSlugs.map((slug) => `@${slug}`),
+    ...(categoryId === null ? [] : [`category:${categoryId}`]),
+    ...(includeArchived ? ["with archived"] : [])
+  ];
+
+  return parts.length === 0 ? "Metadata filter" : parts.join(" + ");
 }
 
 function normalizeKeyword(input: string): string {

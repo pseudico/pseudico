@@ -602,6 +602,7 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
         tagSlug: null,
         keyword: "supplier"
       }),
+      createMetadataCollection: async () => apiOk(collectionSummary()),
       evaluateCollection: async () => apiOk(collectionEvaluationSummary()),
       createTaskInCollection: async () =>
         apiOk({
@@ -1509,7 +1510,10 @@ describe("Projects renderer pages", () => {
           initialCategories={[
             {
               ...category,
-              targetCount: 1
+              targetCount: 1,
+              containerCount: 0,
+              itemCount: 1,
+              listItemCount: 0
             }
           ]}
           initialTags={[
@@ -1521,7 +1525,10 @@ describe("Projects renderer pages", () => {
               createdAt: "2026-05-01T00:00:00.000Z",
               updatedAt: "2026-05-01T00:00:00.000Z",
               deletedAt: null,
-              targetCount: 1
+              targetCount: 1,
+              containerCount: 0,
+              itemCount: 1,
+              listItemCount: 0
             }
           ]}
           initialSelectedTagSlugs={["launch"]}
@@ -1536,6 +1543,9 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Finance");
     expect(html).toContain("Book launch venue");
     expect(html).toContain("Items");
+    expect(html).toContain("Save as collection");
+    expect(html).toContain("Include archived matches");
+    expect(html).toContain("Containers:");
   });
 
   it("renders the project tag browser with drill-down filters and projects", () => {

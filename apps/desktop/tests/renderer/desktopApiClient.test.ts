@@ -470,6 +470,7 @@ function createMockApi(
         tagSlug: null,
         keyword: "supplier"
       }),
+      createMetadataCollection: async () => apiOk(collectionSummary()),
       evaluateCollection: async () => apiOk(collectionEvaluationSummary()),
       createTaskInCollection: async () =>
         apiOk({
