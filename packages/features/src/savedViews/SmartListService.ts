@@ -20,9 +20,12 @@ import {
   parseSavedViewQueryJson,
   validateSavedViewQuery,
   type SavedViewQuery,
+  type SavedViewGroupBy,
   type SavedViewQueryCondition,
   type SavedViewQueryMatch,
-  type SavedViewQueryTarget
+  type SavedViewQueryTarget,
+  type SavedViewSortDirection,
+  type SavedViewSortField
 } from "./SavedViewQuery";
 import type { SavedViewEvaluationResult } from "./QueryEvaluator";
 
@@ -45,11 +48,20 @@ export type SmartListCriteriaForm = {
   includeContainers?: boolean;
   itemTypes?: ItemType[];
   containerTypes?: SmartListContainerType[];
+  containerIds?: string[];
   tagSlugs?: string[];
   categoryIds?: string[];
   categoryMode?: "any" | "is" | "isEmpty" | "isNotEmpty";
   taskStatuses?: TaskStatus[];
   taskPriorities?: number[];
+  statuses?: string[];
+  text?: string;
+  attachmentFilter?: "any" | "has" | "none";
+  pinnedFilter?: "any" | "pinned" | "unpinned";
+  archivedFilter?: "active" | "archived" | "any";
+  groupBy?: SavedViewGroupBy;
+  sortField?: SavedViewSortField;
+  sortDirection?: SavedViewSortDirection;
   dueFilter?: SmartListDueFilter;
   customDueFrom?: string;
   customDueTo?: string;
@@ -230,6 +242,7 @@ export function mapFormToSavedViewQuery(
     criteria.containerTypes,
     isContainerType
   );
+  const containerIds = normalizeStrings(criteria.containerIds);
   const tagSlugs = normalizeStrings(criteria.tagSlugs);
   const categoryIds = normalizeStrings(criteria.categoryIds);
   const taskStatuses = normalizeAllowedValues(
@@ -237,6 +250,8 @@ export function mapFormToSavedViewQuery(
     isTaskStatus
   );
   const taskPriorities = normalizePriorities(criteria.taskPriorities);
+  const statuses = normalizeStrings(criteria.statuses);
+  const text = normalizeNullableText(criteria.text);
 
   if (itemTypes.length > 0) {
     conditions.push({
@@ -251,6 +266,14 @@ export function mapFormToSavedViewQuery(
       field: "containerType",
       operator: containerTypes.length === 1 ? "is" : "in",
       value: toSingleOrMany(containerTypes)
+    });
+  }
+
+  if (containerIds.length > 0) {
+    conditions.push({
+      field: "container",
+      operator: containerIds.length === 1 ? "is" : "in",
+      value: toSingleOrMany(containerIds)
     });
   }
 
@@ -271,6 +294,14 @@ export function mapFormToSavedViewQuery(
       field: "category",
       operator: categoryIds.length === 1 ? "is" : "in",
       value: toSingleOrMany(categoryIds)
+    });
+  }
+
+  if (statuses.length > 0) {
+    conditions.push({
+      field: "status",
+      operator: statuses.length === 1 ? "is" : "in",
+      value: toSingleOrMany(statuses)
     });
   }
 
@@ -296,17 +327,41 @@ export function mapFormToSavedViewQuery(
     conditions.push(dueCondition);
   }
 
+  if (text !== null) {
+    conditions.push({ field: "text", operator: "contains", value: text });
+  }
+
+  if (criteria.attachmentFilter === "has" || criteria.attachmentFilter === "none") {
+    conditions.push({ field: "attachment", operator: criteria.attachmentFilter });
+  }
+
+  if (criteria.pinnedFilter === "pinned" || criteria.pinnedFilter === "unpinned") {
+    conditions.push({
+      field: "pinned",
+      operator: "is",
+      value: criteria.pinnedFilter === "pinned"
+    });
+  }
+
+  if (criteria.archivedFilter === "archived") {
+    conditions.push({ field: "archived", operator: "is", value: true });
+  }
+
   const targets = createTargets(criteria);
   const query: SavedViewQuery = {
     version: 1,
     match: criteria.match ?? "all",
     targets,
     conditions,
-    groupBy: "container",
+    groupBy: criteria.groupBy ?? "container",
     sort: [
-      { field: "dueAt", direction: "asc" },
+      {
+        field: criteria.sortField ?? "dueAt",
+        direction: criteria.sortDirection ?? "asc"
+      },
       { field: "updatedAt", direction: "desc" }
-    ]
+    ],
+    includeArchived: criteria.archivedFilter === "archived" || criteria.archivedFilter === "any"
   };
   const validation = validateSavedViewQuery(query);
 
@@ -426,6 +481,7 @@ function normalizeCriteria(input: SmartListCriteriaForm): SmartListCriteriaForm 
     includeContainers: input.includeContainers === true,
     itemTypes: normalizeAllowedValues(input.itemTypes, isItemType),
     containerTypes: normalizeAllowedValues(input.containerTypes, isContainerType),
+    containerIds: normalizeStrings(input.containerIds),
     tagSlugs: normalizeStrings(input.tagSlugs),
     categoryIds: normalizeStrings(input.categoryIds),
     categoryMode:
@@ -436,6 +492,14 @@ function normalizeCriteria(input: SmartListCriteriaForm): SmartListCriteriaForm 
           : "any",
     taskStatuses: normalizeAllowedValues(input.taskStatuses, isTaskStatus),
     taskPriorities: normalizePriorities(input.taskPriorities),
+    statuses: normalizeStrings(input.statuses),
+    ...normalizeTextPatch(input.text),
+    attachmentFilter: normalizeAttachmentFilter(input.attachmentFilter),
+    pinnedFilter: normalizePinnedFilter(input.pinnedFilter),
+    archivedFilter: normalizeArchivedFilter(input.archivedFilter),
+    groupBy: normalizeGroupBy(input.groupBy),
+    sortField: normalizeSortField(input.sortField),
+    sortDirection: input.sortDirection === "desc" ? "desc" : "asc",
     dueFilter: normalizeDueFilter(input.dueFilter),
     ...(input.customDueFrom === undefined
       ? {}
@@ -569,4 +633,59 @@ function validateNonEmptyString(value: string, fieldName: string): void {
   if (value.trim().length === 0) {
     throw new Error(`${fieldName} must be a non-empty string.`);
   }
+}
+
+function normalizeNullableText(value: string | undefined): string | null {
+  if (value === undefined) {
+    return null;
+  }
+
+  const text = value.trim().replace(/\s+/g, " ");
+  return text.length === 0 ? null : text;
+}
+
+function normalizeAttachmentFilter(value: string | undefined): "any" | "has" | "none" {
+  return value === "has" || value === "none" ? value : "any";
+}
+
+function normalizePinnedFilter(
+  value: string | undefined
+): "any" | "pinned" | "unpinned" {
+  return value === "pinned" || value === "unpinned" ? value : "any";
+}
+
+function normalizeArchivedFilter(
+  value: string | undefined
+): "active" | "archived" | "any" {
+  return value === "archived" || value === "any" ? value : "active";
+}
+
+function normalizeGroupBy(value: SavedViewGroupBy | undefined): SavedViewGroupBy {
+  return value === "none" ||
+    value === "targetType" ||
+    value === "type" ||
+    value === "container" ||
+    value === "category" ||
+    value === "status" ||
+    value === "dueDate"
+    ? value
+    : "container";
+}
+
+function normalizeSortField(value: SavedViewSortField | undefined): SavedViewSortField {
+  return value === "title" ||
+    value === "type" ||
+    value === "container" ||
+    value === "category" ||
+    value === "status" ||
+    value === "dueAt" ||
+    value === "createdAt" ||
+    value === "updatedAt"
+    ? value
+    : "dueAt";
+}
+
+function normalizeTextPatch(value: string | undefined): { text: string } | Record<string, never> {
+  const text = normalizeNullableText(value);
+  return text === null ? {} : { text };
 }

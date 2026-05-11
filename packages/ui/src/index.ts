@@ -83,9 +83,11 @@ export {
   SmartListEditor,
   type SmartListEditorContainerType,
   type SmartListEditorDueFilter,
+  type SmartListEditorGroupBy,
   type SmartListEditorItemType,
   type SmartListEditorMetadataOption,
   type SmartListEditorProps,
+  type SmartListEditorSortField,
   type SmartListEditorTaskStatus,
   type SmartListEditorValues
 } from "./forms/SmartListEditor";

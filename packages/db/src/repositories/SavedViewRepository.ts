@@ -38,6 +38,8 @@ type SavedViewEvaluationRow = {
   archived_at: string | null;
   deleted_at: string | null;
   tag_slugs: string | null;
+  pinned: number;
+  attachment_count: number;
 };
 
 export type SavedViewRecord = {
@@ -105,6 +107,8 @@ export type SavedViewEvaluationTargetRecord = {
   archivedAt: string | null;
   deletedAt: string | null;
   tagSlugs: string[];
+  pinned: boolean;
+  hasAttachments: boolean;
 };
 
 export type ListSavedViewsFilter = {
@@ -297,7 +301,9 @@ export class SavedViewRepository {
            c.updated_at,
            c.archived_at,
            c.deleted_at,
-           group_concat(distinct t.slug) as tag_slugs
+           group_concat(distinct t.slug) as tag_slugs,
+           c.is_favorite as pinned,
+           0 as attachment_count
          from containers c
          left join categories cat on cat.id = c.category_id and cat.deleted_at is null
          left join taggings tg
@@ -336,7 +342,9 @@ export class SavedViewRepository {
            i.updated_at,
            i.archived_at,
            i.deleted_at,
-           group_concat(distinct t.slug) as tag_slugs
+           group_concat(distinct t.slug) as tag_slugs,
+           i.pinned,
+           count(distinct a.id) as attachment_count
          from items i
          inner join containers c on c.id = i.container_id
          left join task_details td on td.item_id = i.id
@@ -347,6 +355,10 @@ export class SavedViewRepository {
           and tg.target_id = i.id
           and tg.deleted_at is null
          left join tags t on t.id = tg.tag_id and t.deleted_at is null
+         left join attachments a
+           on a.workspace_id = i.workspace_id
+          and a.item_id = i.id
+          and a.deleted_at is null
          where i.workspace_id = ?
          group by i.id`
       )
@@ -401,6 +413,8 @@ function toEvaluationTargetRecord(
     tagSlugs: (row.tag_slugs ?? "")
       .split(",")
       .map((slug) => slug.trim())
-      .filter(Boolean)
+      .filter(Boolean),
+    pinned: row.pinned === 1,
+    hasAttachments: row.attachment_count > 0
   };
 }

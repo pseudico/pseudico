@@ -20,6 +20,9 @@ export type SavedViewResultRef = {
   taskPriority: number | null;
   dueAt: string | null;
   tags: string[];
+  pinned: boolean;
+  hasAttachments: boolean;
+  archived: boolean;
   destinationPath: string;
 };
 
@@ -133,6 +136,10 @@ export class QueryEvaluator {
       );
     }
 
+    if (condition.field === "status") {
+      return matchesSet(target.status, condition.value);
+    }
+
     if (condition.field === "taskStatus") {
       return (
         target.targetType === "item" &&
@@ -153,6 +160,18 @@ export class QueryEvaluator {
 
     if (condition.field === "dueDate") {
       return matchesDueDateCondition(target.dueAt, condition);
+    }
+
+    if (condition.field === "attachment") {
+      return condition.operator === "has" ? target.hasAttachments : !target.hasAttachments;
+    }
+
+    if (condition.field === "pinned") {
+      return target.pinned === condition.value;
+    }
+
+    if (condition.field === "archived") {
+      return (target.archivedAt !== null) === condition.value;
     }
 
     return includesText(target, condition.value);
@@ -343,6 +362,9 @@ function toResultRef(target: SavedViewEvaluationTargetRecord): SavedViewResultRe
     taskPriority: target.taskPriority,
     dueAt: target.dueAt,
     tags: target.tagSlugs,
+    pinned: target.pinned,
+    hasAttachments: target.hasAttachments,
+    archived: target.archivedAt !== null,
     destinationPath:
       target.targetType === "container"
         ? createContainerPath(target.containerType, target.targetId)

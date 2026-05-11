@@ -1584,11 +1584,20 @@ export type SmartListCriteriaInput = {
   includeContainers?: boolean;
   itemTypes?: string[];
   containerTypes?: string[];
+  containerIds?: string[];
   tagSlugs?: string[];
   categoryIds?: string[];
   categoryMode?: "any" | "is" | "isEmpty" | "isNotEmpty";
   taskStatuses?: string[];
   taskPriorities?: number[];
+  statuses?: string[];
+  text?: string;
+  attachmentFilter?: "any" | "has" | "none";
+  pinnedFilter?: "any" | "pinned" | "unpinned";
+  archivedFilter?: "active" | "archived" | "any";
+  groupBy?: "none" | "targetType" | "type" | "container" | "category" | "status" | "dueDate";
+  sortField?: "title" | "type" | "container" | "category" | "status" | "dueAt" | "createdAt" | "updatedAt";
+  sortDirection?: "asc" | "desc";
   dueFilter?:
     | "any"
     | "overdue"

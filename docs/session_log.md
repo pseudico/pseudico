@@ -3459,3 +3459,24 @@ Decisions made: Added overdue/upcoming/waiting/completion/stale/no-activity/next
 Files changed: packages/features/src/projects/ProjectHealthService.ts; packages/features/src/dashboard/WidgetDataService.ts; packages/ui/src/components/ProjectHealthCard.tsx; packages/ui/src/components/widgets/ProjectHealthWidget.tsx; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/DashboardPage.tsx; apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/styles.css
 Open questions / risks: Project list row badges remain represented through shared health badge UI in project health widgets/cards, not a separate Projects page health API.
 Next actions: Commit and open PR; monitor CI; merge only after clean review/checks.
+
+## 2026-05-12T05:52:40+10:00
+Objective: Finalize PSE-145 merge and prepare next Codex Ready ticket.
+Decisions made: Squash-merged PR #134 as f7f78d6 after CI passed; moved PSE-145 Done; promoted PSE-146 as the single Codex Ready issue.
+Files changed: docs/session_log.md
+Open questions / risks: Local untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi remain unrelated.
+Next actions: Start PSE-146; reconcile active states before coding; keep one Codex Ready issue.
+
+## 2026-05-12T06:05:00+10:00
+Objective: Reconcile active work and start PSE-146 visual criteria builder.
+Decisions made: - No Linear PR Open/In Progress issues or GitHub open PRs; moved PSE-146 to In Progress; source ticket file is visual criteria builder despite Linear title mismatch.
+Files changed: docs/session_log.md
+Open questions / risks: Linear title says CRM board while source ticket describes visual criteria builder.
+Next actions: Implement criteria/schema/evaluator/UI; run checks; open PR.
+
+## 2026-05-12T06:12:00+10:00
+Objective: Implement PSE-146 visual criteria builder.
+Decisions made: - Added criteria for containers/status/text/attachments/pinned/archived; default smart lists remain active-only via evaluator filtering; added group/sort UI and preview persistence.
+Files changed: apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/CollectionsPage.tsx; packages/db/src/repositories/SavedViewRepository.ts; packages/features/src/savedViews/*; packages/ui/src/forms/SmartListEditor.tsx; packages/ui/tests/smartListEditor.test.tsx
+Open questions / risks: Linear title/source mismatch remains; untracked .playwright-mcp and gh MSI left untouched.
+Next actions: Stage/commit/push; open PR; update Linear.
