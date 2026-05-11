@@ -3537,3 +3537,32 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI status must be established before merge; next ticket not promoted while PR Open exists.
 Next actions: Wait for CI/review status; merge when green; then promote next single issue.
+
+## 2026-05-12 06:48:23 +10:00
+Objective: Clarify PSE-147 PR blocker meaning.
+Decisions made:
+- Explained blocker is missing GitHub CI/check status, not a local code/test failure.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PR remains unmerged until CI/review status is established or owner approves no-CI merge.
+Next actions: Inspect repo Actions/branch protection if needed; rerun/enable CI; merge once allowed.
+
+## 2026-05-12 06:49:41 +10:00
+Objective: Explain how to reconcile missing PR CI checks.
+Decisions made:
+- Confirmed repo has .github/workflows/ci.yml configured for pull_request and main pushes.
+- Recommended reconciling by checking Actions/run status, re-running CI if needed, then merging only when green or explicitly approving no-CI merge.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need know whether GitHub Actions is disabled, queued, skipped, or not visible to current tools.
+Next actions: Check PR Actions tab; rerun workflow; merge once green.
+
+## 2026-05-12 06:51:21 +10:00
+Objective: Reconcile PR #136 GitHub CI status.
+Decisions made:
+- Confirmed GitHub Actions CI run 25696371051 completed successfully for PR #136 branch.
+- Earlier missing status was connector/status visibility lag; PR is ready for merge after final pushed log entry CI.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Pushing this log entry will retrigger CI before merge.
+Next actions: Commit/push log; wait for CI; merge when green.
