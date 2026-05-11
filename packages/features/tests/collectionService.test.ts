@@ -1,5 +1,6 @@
 import {
   ActivityLogRepository,
+  CategoryRepository,
   ContainerRepository,
   MigrationService,
   SearchIndexRepository,
@@ -185,7 +186,10 @@ describe("CollectionService", () => {
     });
 
     expect(created).toMatchObject({
-      tagSlug: "finance",
+      inheritedMetadata: {
+        tagSlugs: ["finance"],
+        categoryId: null
+      },
       item: {
         title: "Call accountant"
       },
@@ -224,6 +228,72 @@ describe("CollectionService", () => {
       }
     ]);
   });
+  it("creates notes in metadata collections with inherited tags and category", async () => {
+    new CategoryRepository(connection).create({
+      id: "category_calls",
+      workspaceId: "workspace_1",
+      name: "Calls",
+      slug: "calls",
+      color: "blue",
+      timestamp: "2026-05-03T00:00:00.000Z"
+    });
+    const service = createService();
+    const collection = await service.createMetadataCollection({
+      workspaceId: "workspace_1",
+      tagSlugs: ["phone-call"],
+      categoryId: "category_calls"
+    });
+
+    const created = await service.createNoteInCollection({
+      collectionId: collection.id,
+      containerId: "container_project_1",
+      title: "Call notes",
+      content: "Discussed the renewal timeline."
+    });
+
+    expect(created).toMatchObject({
+      inheritedMetadata: {
+        tagSlugs: ["phone-call"],
+        categoryId: "category_calls"
+      },
+      item: {
+        title: "Call notes",
+        categoryId: "category_calls"
+      },
+      note: {
+        content: "Discussed the renewal timeline."
+      }
+    });
+    expect(
+      new TagRepository(connection)
+        .listTagsForTarget({
+          workspaceId: "workspace_1",
+          targetType: "item",
+          targetId: created.item.id
+        })
+        .map((tag) => ({ slug: tag.slug, source: tag.taggingSource }))
+    ).toEqual([{ slug: "phone-call", source: "manual" }]);
+    expect(
+      new SearchIndexRepository(connection).getByTarget({
+        workspaceId: "workspace_1",
+        targetType: "item",
+        targetId: created.item.id
+      })
+    ).toMatchObject({
+      title: "Call notes",
+      tags: "phone-call"
+    });
+    expect(created.item.categoryId).toBe("category_calls");
+    expect(service.evaluateCollection(collection.id).results).toMatchObject([
+      {
+        targetId: created.item.id,
+        kind: "note",
+        tags: ["phone-call"],
+        categoryId: "category_calls"
+      }
+    ]);
+  });
+
 });
 
 function createService(): CollectionService {

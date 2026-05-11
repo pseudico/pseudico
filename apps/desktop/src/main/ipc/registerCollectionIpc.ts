@@ -33,6 +33,10 @@ export function registerCollectionIpc(
     (_event, input) => handlers.handleCreateTaskInCollection(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.collections.createNoteInCollection,
+    (_event, input) => handlers.handleCreateNoteInCollection(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.collections.listSmartLists,
     (_event, input) => handlers.handleListSmartLists(input)
   );

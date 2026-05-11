@@ -3,6 +3,7 @@ import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
   type DatabaseConnection,
+  type NoteWithItemRecord,
   type TaggedTargetRecord,
   type TaskWithItemRecord
 } from "@local-work-os/db";
@@ -16,11 +17,13 @@ import {
   type CollectionSummary,
   type CreateKeywordCollectionInput,
   type CreateMetadataCollectionInput,
+  type CreateNoteInCollectionInput,
   type CreateSmartListInput,
   type CreateTagCollectionInput,
   type CreateTaskInCollectionInput,
   type EvaluateCollectionInput,
   type ItemTagSummary,
+  type NoteSummary,
   type PreviewSmartListInput,
   type SmartListCriteriaInput,
   type SmartListPreviewSummary,
@@ -60,6 +63,9 @@ type CollectionIpcHandlers = {
   handleCreateTaskInCollection: (
     input: unknown
   ) => Promise<ApiResult<TaskSummary>>;
+  handleCreateNoteInCollection: (
+    input: unknown
+  ) => Promise<ApiResult<NoteSummary>>;
   handleListSmartLists: (
     input: unknown
   ) => Promise<ApiResult<SmartListSummary[]>>;
@@ -199,6 +205,29 @@ export function createCollectionIpcHandlers(
         })[result.item.id] ?? [];
 
         return apiOk(toTaskSummary(result, tags));
+      });
+    },
+
+    async handleCreateNoteInCollection(input) {
+      if (!isCreateNoteInCollectionInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "createNoteInCollection requires collectionId, containerId, title, and content fields."
+        );
+      }
+
+      return await withCollectionService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const result = await context.collectionService.createNoteInCollection({
+          ...input,
+          workspaceId
+        });
+        const tags = context.tagService.hydrateItemTags({
+          workspaceId,
+          itemIds: [result.item.id]
+        })[result.item.id] ?? [];
+
+        return apiOk(toNoteSummary(result, tags));
       });
     },
 
@@ -436,6 +465,43 @@ function toTaskSummary(
   };
 }
 
+function toNoteSummary(
+  noteWithItem: NoteWithItemRecord,
+  tags: readonly TaggedTargetRecord[] = []
+): NoteSummary {
+  const { item, note } = noteWithItem;
+
+  if (item.type !== "note") {
+    throw new Error(`Expected note item but received ${item.type}.`);
+  }
+
+  return {
+    id: item.id,
+    workspaceId: item.workspaceId,
+    containerId: item.containerId,
+    containerTabId: item.containerTabId,
+    type: "note",
+    title: item.title,
+    body: item.body,
+    categoryId: item.categoryId,
+    status: item.status,
+    sortOrder: item.sortOrder,
+    pinned: item.pinned,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    completedAt: item.completedAt,
+    archivedAt: item.archivedAt,
+    deletedAt: item.deletedAt,
+    tags: tags.map(toItemTagSummary),
+    format: note.format,
+    content: note.content,
+    preview: note.preview,
+    noteCreatedAt: note.createdAt,
+    noteUpdatedAt: note.updatedAt,
+    wikilinks: []
+  };
+}
+
 function toItemTagSummary(tag: TaggedTargetRecord): ItemTagSummary {
   return {
     id: tag.id,
@@ -504,6 +570,25 @@ function isCreateTaskInCollectionInput(
     isOptionalBoolean(input.pinned) &&
     isOptionalActorType(input.actorType) &&
     (input.status === undefined || isTaskStatusValue(input.status))
+  );
+}
+
+function isCreateNoteInCollectionInput(
+  input: unknown
+): input is CreateNoteInCollectionInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.collectionId) &&
+    isOptionalString(input.workspaceId) &&
+    isNonEmptyString(input.containerId) &&
+    isNonEmptyString(input.title) &&
+    typeof input.content === "string" &&
+    isOptionalNullableString(input.categoryId) &&
+    isOptionalNullableString(input.containerTabId) &&
+    (input.format === undefined || input.format === "markdown" || input.format === "plain_text") &&
+    isOptionalNumber(input.sortOrder) &&
+    isOptionalBoolean(input.pinned) &&
+    isOptionalActorType(input.actorType)
   );
 }
 

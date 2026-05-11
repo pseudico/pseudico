@@ -350,6 +350,8 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.collections.evaluateCollection(collectionId)),
       createTaskInCollection: (input) =>
         callApi(() => api.collections.createTaskInCollection(input)),
+      createNoteInCollection: (input) =>
+        callApi(() => api.collections.createNoteInCollection(input)),
       listSmartLists: (workspaceId) =>
         callApi(() => api.collections.listSmartLists(workspaceId)),
       createSmartList: (input) =>
@@ -894,6 +896,8 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().collections.evaluateCollection(collectionId),
     createTaskInCollection: (input) =>
       getDesktopApiClient().collections.createTaskInCollection(input),
+    createNoteInCollection: (input) =>
+      getDesktopApiClient().collections.createNoteInCollection(input),
     listSmartLists: (workspaceId) =>
       getDesktopApiClient().collections.listSmartLists(workspaceId),
     createSmartList: (input) =>

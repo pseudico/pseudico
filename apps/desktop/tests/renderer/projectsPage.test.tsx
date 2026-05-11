@@ -616,6 +616,18 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
             }
           ]
         }),
+      createNoteInCollection: async () =>
+        apiOk({
+          ...noteSummary(),
+          tags: [
+            {
+              id: "tag_1",
+              name: "Finance",
+              slug: "finance",
+              source: "manual"
+            }
+          ]
+        }),
       listSmartLists: async () => apiOk([]),
       createSmartList: async () => apiOk(smartListSummary()),
       updateSmartList: async () => apiOk(smartListSummary()),
@@ -1023,7 +1035,8 @@ function collectionSummary(): CollectionSummary {
     keyword: null,
     isFavorite: true,
     createdAt: "2026-05-01T00:00:00.000Z",
-    updatedAt: "2026-05-01T00:00:00.000Z"
+    updatedAt: "2026-05-01T00:00:00.000Z",
+    viewMode: "list"
   };
 }
 
@@ -1625,6 +1638,7 @@ describe("Projects renderer pages", () => {
           initialCollections={[collectionSummary()]}
           initialEvaluation={collectionEvaluationSummary()}
           initialProjects={[project]}
+          initialContacts={[contact]}
         />
       </MemoryRouter>
     );
@@ -1636,7 +1650,7 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Finance follow-ups");
     expect(html).toContain("Launch Plan");
     expect(html).toContain("Book launch venue");
-    expect(html).toContain("Add task");
+    expect(html).toContain("Add <!-- -->task");
     expect(html).toContain("data-tag-source=\"manual\"");
   });
 });
