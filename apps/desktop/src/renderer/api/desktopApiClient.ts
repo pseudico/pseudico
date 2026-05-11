@@ -101,6 +101,8 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.lists.outdentItem(listItemId)),
       moveItem: (input) => callApi(() => api.lists.moveItem(input)),
       bulkAddItems: (input) => callApi(() => api.lists.bulkAddItems(input)),
+      bulkUpdateItems: (input) =>
+        callApi(() => api.lists.bulkUpdateItems(input)),
       listByContainer: (containerId) =>
         callApi(() => api.lists.listByContainer(containerId)),
       createList: (input) => callApi(() => api.lists.createList(input)),
@@ -618,6 +620,8 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().lists.outdentItem(listItemId),
     moveItem: (input) => getDesktopApiClient().lists.moveItem(input),
     bulkAddItems: (input) => getDesktopApiClient().lists.bulkAddItems(input),
+    bulkUpdateItems: (input) =>
+      getDesktopApiClient().lists.bulkUpdateItems(input),
     listByContainer: (containerId) =>
       getDesktopApiClient().lists.listByContainer(containerId),
     createList: (input) => getDesktopApiClient().lists.createList(input),

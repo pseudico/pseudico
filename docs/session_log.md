@@ -2703,3 +2703,85 @@ Next actions:
 - Inspect PR diff/checks.
 - Merge if clean and green.
 - Promote next issue after merge.
+## 2026-05-11T12:24:23.8002550+10:00
+Objective: Close PSE-122 and prepare next ticket.
+Decisions made:
+- Squash-merged PR #117 at f4c089655d053c4206fce8d157bf44e28514e223.
+- Moved PSE-122 to Done and promoted PSE-123 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- PSE-123 not started yet by design after completed PSE-122 run.
+Next actions:
+- Start PSE-123 in next run.
+
+## 2026-05-11 12:34:30 +10:00
+Objective: Reconcile Linear/GitHub state for next Local Work OS ticket.
+Decisions made:
+- No Linear issues found in PR Open or In Progress.
+- Selected current Codex Ready issue PSE-123 for implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Existing untracked local files will remain untouched.
+Next actions:
+- Pull main and move PSE-123 to In Progress.
+- Read ticket/docs and implement scoped changes.
+
+## 2026-05-11 12:35:06 +10:00
+Objective: Start PSE-123 implementation.
+Decisions made:
+- PSE-123 moved from Codex Ready to In Progress.
+- Pulled origin/main with escalation after sandbox blocked .git/FETCH_HEAD.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need acceptance criteria from ticket pack/source ticket.
+Next actions:
+- Create PSE-123 branch.
+- Read docs and relevant source before coding.
+
+## 2026-05-11 12:44:20 +10:00
+Objective: Implement PSE-123 multiline paste/list bulk actions.
+Decisions made:
+- Added BulkListInsertParser alias while preserving existing parser API.
+- Added grouped ListService bulk row update operations and soft-delete support.
+- Added IPC/API and checklist selection toolbar wiring for complete/delete/move/indent/outdent.
+Files changed:
+- packages/core/src/events/ActivityAction.ts
+- packages/db/src/repositories/ListRepository.ts
+- packages/features/src/lists/BulkListParser.ts
+- packages/features/src/lists/ListService.ts
+- apps/desktop/src/preload/api.ts
+Open questions / risks:
+- Full suite may reveal type/lint issues from broad IPC/UI touchpoints.
+Next actions:
+- Run targeted tests/typecheck and fix failures.
+
+## 2026-05-11 12:49:16 +10:00
+Objective: Verify PSE-123 implementation locally.
+Decisions made:
+- Updated IPC channel count and desktop mocks for new bulk list API.
+- Reran Vitest/build with escalation for sandbox EPERM spawn failures.
+Files changed:
+- apps/desktop/tests/preload/api.test.ts
+- apps/desktop/tests/renderer/desktopApiClient.test.ts
+- apps/desktop/tests/renderer/inboxPage.test.tsx
+- packages/features/tests/listService.test.ts
+Open questions / risks:
+- Need PR/CI result after push.
+Next actions:
+- Review diff, commit, push, and open PR.
+
+## 2026-05-11 12:52:05 +10:00
+Objective: Open PR for PSE-123 and hand off to CI.
+Decisions made:
+- Created ready-for-review PR #118 from codex/PSE-123-multiline-paste-capture-parser.
+- Moved PSE-123 to PR Open and linked/commented the PR in Linear.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- GitHub CI is still in progress; no reviews yet.
+Next actions:
+- Poll CI, then merge if clean and green.
+- Promote next single Codex Ready issue after merge.

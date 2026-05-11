@@ -1,8 +1,12 @@
 export { ListService, listsModuleContract } from "./ListService";
-export { parseBulkListItems } from "./BulkListParser";
+export { BulkListInsertParser, parseBulkListItems } from "./BulkListParser";
 export type {
   AddListItemInput,
   BulkCreateListItemsInput,
+  BulkUpdateListItemResult,
+  BulkUpdateListItemsInput,
+  BulkUpdateListItemsOperation,
+  BulkUpdateListItemsResult,
   CreateListInput,
   ListItemMutationResult,
   ListMutationResult,

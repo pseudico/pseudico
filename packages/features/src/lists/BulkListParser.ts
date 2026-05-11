@@ -18,6 +18,10 @@ export function parseBulkListItems(text: string): ParsedBulkListItem[] {
     .filter((item): item is ParsedBulkListItem => item !== null);
 }
 
+export const BulkListInsertParser = {
+  parse: parseBulkListItems
+} as const;
+
 function parseLine(line: string): ParsedBulkListItem | null {
   const leadingWhitespace = line.match(/^[\t ]*/)?.[0] ?? "";
   const depth = Math.floor(countIndentColumns(leadingWhitespace) / 2);

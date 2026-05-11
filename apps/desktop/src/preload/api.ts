@@ -2322,6 +2322,38 @@ export type BulkAddListItemsInput = {
   startSortOrder?: number;
 };
 
+export type BulkUpdateListItemsOperation =
+  | "complete"
+  | "delete"
+  | "move_up"
+  | "move_down"
+  | "indent"
+  | "outdent";
+
+export type BulkUpdateListItemsInput = {
+  listId: string;
+  listItemIds: string[];
+  operation: BulkUpdateListItemsOperation;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type BulkUpdateListItemSummary = {
+  listItemId: string;
+  ok: boolean;
+  listItem?: ListItemSummary;
+  reason?: string;
+};
+
+export type BulkUpdateListItemsSummary = {
+  listId: string;
+  operation: BulkUpdateListItemsOperation;
+  requestedCount: number;
+  changedCount: number;
+  skippedCount: number;
+  items: BulkUpdateListItemSummary[];
+  activityId: string | null;
+};
+
 export type MovePipelineCardInput = {
   listId: string;
   cardId: string;
@@ -2694,6 +2726,7 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     outdentItem: "local-work-os:lists:outdent-item",
     moveItem: "local-work-os:lists:move-item",
     bulkAddItems: "local-work-os:lists:bulk-add-items",
+    bulkUpdateItems: "local-work-os:lists:bulk-update-items",
     listByContainer: "local-work-os:lists:list-by-container",
     saveAsTemplate: "local-work-os:lists:save-as-template",
     createFromTemplate: "local-work-os:lists:create-from-template",
@@ -3063,6 +3096,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems]: {
     input: BulkAddListItemsInput;
     result: ApiResult<ListItemSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkUpdateItems]: {
+    input: BulkUpdateListItemsInput;
+    result: ApiResult<BulkUpdateListItemsSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.lists.listByContainer]: {
     input: string;
@@ -3793,6 +3830,9 @@ export type LocalWorkOsApi = {
     bulkAddItems: (
       input: BulkAddListItemsInput
     ) => Promise<ApiResult<ListItemSummary[]>>;
+    bulkUpdateItems: (
+      input: BulkUpdateListItemsInput
+    ) => Promise<ApiResult<BulkUpdateListItemsSummary>>;
     listByContainer: (
       containerId: string
     ) => Promise<ApiResult<ListSummary[]>>;
@@ -4459,6 +4499,8 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.moveItem, input),
       bulkAddItems: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems, input),
+      bulkUpdateItems: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkUpdateItems, input),
       listByContainer: (containerId) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.listByContainer, containerId),
       createList: (input) =>

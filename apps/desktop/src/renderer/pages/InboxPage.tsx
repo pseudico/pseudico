@@ -10,6 +10,7 @@ import {
   MoveItemDialog,
   TaskCardContent,
   TaskQuickAdd,
+  type ChecklistBulkAction,
   type CreateListFormValues,
   type ItemActionId,
   type ItemInspectorActivity,
@@ -700,6 +701,35 @@ export function InboxPage({
     );
   }
 
+  async function bulkUpdateInboxListItems(
+    item: ListCardViewModel,
+    listItems: readonly ListCardItemViewModel[],
+    action: ChecklistBulkAction
+  ): Promise<boolean> {
+    if (currentWorkspace === null) {
+      return false;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result = await apiClient.lists.bulkUpdateItems({
+      listId: item.id,
+      listItemIds: listItems.map((listItem) => listItem.id),
+      operation: action
+    });
+
+    setListBusyId(null);
+
+    if (!result.ok) {
+      setListError(result.error.message);
+      return false;
+    }
+
+    await loadInbox(currentWorkspace.id);
+    return true;
+  }
+
   async function applyInboxListKeyboardMutation(
     item: ListCardViewModel,
     operation: () => ReturnType<typeof apiClient.lists.indentItem>
@@ -732,6 +762,7 @@ export function InboxPage({
           item={item}
           onAddItem={addListItem}
           onBulkAddItems={bulkAddListItems}
+          onBulkActionListItems={bulkUpdateInboxListItems}
           onIndentListItem={indentInboxListItem}
           onListItemDateRangeChange={updateListItemDateRange}
           onMoveListItem={moveInboxListItem}

@@ -813,6 +813,7 @@ describe("Universal item UI", () => {
         }}
         onAddItem={() => undefined}
         onBulkAddItems={() => undefined}
+        onBulkActionListItems={() => undefined}
         onToggleItem={() => undefined}
       />
     );
@@ -824,6 +825,7 @@ describe("Universal item UI", () => {
     expect(html).toContain("aria-selected");
     expect(html).toContain("Bulk paste");
     expect(html).toContain("Add pasted");
+    expect(html).toContain("Select Send update");
   });
 
   it("renders pipeline content with stages, cards, and mode controls", () => {

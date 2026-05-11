@@ -1,4 +1,8 @@
-import { ListService, ListTemplateService } from "@local-work-os/features";
+import {
+  ListService,
+  ListTemplateService,
+  type BulkUpdateListItemsResult
+} from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -13,6 +17,10 @@ import {
   type AddListItemInput,
   type ApiResult,
   type BulkAddListItemsInput,
+  type BulkUpdateListItemSummary,
+  type BulkUpdateListItemsInput,
+  type BulkUpdateListItemsOperation,
+  type BulkUpdateListItemsSummary,
   type CreateListFromTemplateInput,
   type CreateListInput,
   type ListDisplayMode,
@@ -54,6 +62,9 @@ type ListIpcHandlers = {
   handleBulkAddListItems: (
     input: unknown
   ) => Promise<ApiResult<ListItemSummary[]>>;
+  handleBulkUpdateListItems: (
+    input: unknown
+  ) => Promise<ApiResult<BulkUpdateListItemsSummary>>;
   handleListListsByContainer: (
     input: unknown
   ) => Promise<ApiResult<ListSummary[]>>;
@@ -307,6 +318,23 @@ export function createListIpcHandlers(
       );
     },
 
+    async handleBulkUpdateListItems(input) {
+      if (!isBulkUpdateListItemsInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "bulkUpdateListItems requires listId, listItemIds, and operation fields."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) =>
+        apiOk(
+          toBulkUpdateListItemsSummary(
+            await context.listService.bulkUpdateListItems(input)
+          )
+        )
+      );
+    },
+
     async handleListListsByContainer(input) {
       if (!isNonEmptyString(input)) {
         return apiError(
@@ -500,6 +528,29 @@ function toListItemSummary(listItem: ListItemRecord): ListItemSummary {
   };
 }
 
+function toBulkUpdateListItemsSummary(
+  result: BulkUpdateListItemsResult
+): BulkUpdateListItemsSummary {
+  return {
+    listId: result.listId,
+    operation: result.operation,
+    requestedCount: result.requestedCount,
+    changedCount: result.changedCount,
+    skippedCount: result.skippedCount,
+    activityId: result.activityId,
+    items: result.items.map(
+      (item): BulkUpdateListItemSummary => ({
+        listItemId: item.listItemId,
+        ok: item.ok,
+        ...(item.listItem === undefined
+          ? {}
+          : { listItem: toListItemSummary(item.listItem) }),
+        ...(item.reason === undefined ? {} : { reason: item.reason })
+      })
+    )
+  };
+}
+
 function toPipelineStageSummary(input: {
   stage: ListItemRecord;
   cards: ListItemRecord[];
@@ -588,6 +639,20 @@ function isBulkAddListItemsInput(input: unknown): input is BulkAddListItemsInput
   );
 }
 
+function isBulkUpdateListItemsInput(
+  input: unknown
+): input is BulkUpdateListItemsInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.listId) &&
+    Array.isArray(input.listItemIds) &&
+    input.listItemIds.length > 0 &&
+    input.listItemIds.every(isNonEmptyString) &&
+    isBulkUpdateListItemsOperationValue(input.operation) &&
+    isOptionalActorType(input.actorType)
+  );
+}
+
 function isMovePipelineCardInput(
   input: unknown
 ): input is MovePipelineCardInput {
@@ -598,6 +663,19 @@ function isMovePipelineCardInput(
     isNonEmptyString(input.targetStageId) &&
     isOptionalActorType(input.actorType) &&
     isOptionalNumber(input.sortOrder)
+  );
+}
+
+function isBulkUpdateListItemsOperationValue(
+  value: unknown
+): value is BulkUpdateListItemsOperation {
+  return (
+    value === "complete" ||
+    value === "delete" ||
+    value === "move_up" ||
+    value === "move_down" ||
+    value === "indent" ||
+    value === "outdent"
   );
 }
 
