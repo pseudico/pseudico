@@ -119,6 +119,17 @@ export function CollectionsPage({
       ),
     [tags]
   );
+  const smartListProjectOptions = useMemo(
+    () =>
+      projects.map(
+        (project): SmartListEditorMetadataOption => ({
+          id: project.id,
+          label: project.name,
+          value: project.id
+        })
+      ),
+    [projects]
+  );
   const smartListCategoryOptions = useMemo(
     () =>
       categories.map(
@@ -564,6 +575,7 @@ export function CollectionsPage({
             categoryOptions={smartListCategoryOptions}
             disabled={saving}
             previewCount={smartListPreview?.total ?? null}
+            projectOptions={smartListProjectOptions}
             saving={saving}
             tagOptions={smartListTagOptions}
             validationMessage={smartListMessage}
@@ -834,11 +846,20 @@ function toSmartListCriteria(values: SmartListEditorValues) {
     includeContainers: values.includeContainers,
     itemTypes: values.itemTypes,
     containerTypes: values.containerTypes,
+    containerIds: values.containerIds,
     tagSlugs: values.tagSlugs,
     categoryIds: values.categoryIds,
     categoryMode: values.categoryMode,
     taskStatuses: values.taskStatuses,
     taskPriorities: values.taskPriorities,
+    statuses: values.statuses,
+    text: values.text,
+    attachmentFilter: values.attachmentFilter,
+    pinnedFilter: values.pinnedFilter,
+    archivedFilter: values.archivedFilter,
+    groupBy: values.groupBy,
+    sortField: values.sortField,
+    sortDirection: values.sortDirection,
     dueFilter: values.dueFilter,
     customDueFrom: values.customDueFrom,
     customDueTo: values.customDueTo

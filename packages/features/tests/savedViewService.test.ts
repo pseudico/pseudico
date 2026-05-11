@@ -1,5 +1,6 @@
 import {
   ActivityLogRepository,
+  AttachmentRepository,
   CategoryRepository,
   ContainerRepository,
   ItemRepository,
@@ -31,6 +32,7 @@ const PHONE_CALL_QUERY = {
   conditions: [
     { field: "itemType", operator: "is", value: "task" },
     { field: "tag", operator: "has", value: "phone-call" },
+    { field: "status", operator: "is", value: "active" },
     { field: "taskStatus", operator: "is", value: "waiting" },
     { field: "taskPriority", operator: "is", value: 1 },
     {
@@ -41,7 +43,10 @@ const PHONE_CALL_QUERY = {
         to: "2026-05-31T23:59:59.999Z"
       }
     },
-    { field: "text", operator: "contains", value: "supplier" }
+    { field: "text", operator: "contains", value: "supplier" },
+    { field: "attachment", operator: "has" },
+    { field: "pinned", operator: "is", value: true },
+    { field: "archived", operator: "is", value: false }
   ],
   groupBy: "container",
   sort: [{ field: "dueAt", direction: "asc" }]
@@ -137,6 +142,52 @@ describe("SavedViewService", () => {
       "item_1",
       "item_2",
       "container_1"
+    ]);
+  });
+
+
+
+  it("evaluates attachment, pinned, archived, status, grouping, and sorting criteria", () => {
+    seedEvaluationData();
+
+    const activePinnedWithAttachments = createService().evaluateSavedView({
+      workspaceId: "workspace_1",
+      query: {
+        version: 1,
+        match: "all",
+        targets: ["item"],
+        conditions: [
+          { field: "status", operator: "is", value: "active" },
+          { field: "attachment", operator: "has" },
+          { field: "pinned", operator: "is", value: true },
+          { field: "archived", operator: "is", value: false }
+        ],
+        groupBy: "status",
+        sort: [{ field: "title", direction: "asc" }]
+      }
+    });
+
+    expect(activePinnedWithAttachments.results.map((entry) => entry.targetId)).toEqual([
+      "item_1"
+    ]);
+    expect(activePinnedWithAttachments.groups).toMatchObject([
+      { key: "waiting", label: "waiting", results: [{ targetId: "item_1" }] }
+    ]);
+
+    const archivedOnly = createService().evaluateSavedView({
+      workspaceId: "workspace_1",
+      query: {
+        version: 1,
+        match: "all",
+        includeArchived: true,
+        conditions: [{ field: "archived", operator: "is", value: true }],
+        sort: [{ field: "title", direction: "asc" }]
+      }
+    });
+
+    expect(archivedOnly.results.map((entry) => entry.targetId)).toEqual([
+      "item_3",
+      "container_2"
     ]);
   });
 
@@ -271,7 +322,8 @@ function seedEvaluationData(): void {
     title: "Call supplier",
     body: "Confirm launch room and quote",
     categoryId: category.id,
-    timestamp: "2026-04-30T00:00:00.000Z"
+    timestamp: "2026-04-30T00:00:00.000Z",
+    pinned: true
   });
   const laterTask = itemRepository.create({
     id: "item_2",
@@ -280,6 +332,27 @@ function seedEvaluationData(): void {
     type: "task",
     title: "Email supplier",
     body: "No phone call needed",
+    timestamp: "2026-04-30T00:00:00.000Z"
+  });
+
+  const archivedItem = itemRepository.create({
+    id: "item_3",
+    workspaceId: "workspace_1",
+    containerId: project.id,
+    type: "note",
+    title: "Archived note",
+    timestamp: "2026-04-30T00:00:00.000Z"
+  });
+  itemRepository.archive(archivedItem.id, "2026-05-01T00:00:00.000Z");
+
+  new AttachmentRepository(connection).create({
+    id: "attachment_1",
+    workspaceId: "workspace_1",
+    itemId: task.id,
+    originalName: "quote.pdf",
+    storedName: "original.pdf",
+    sizeBytes: 12,
+    storagePath: "attachments/quote.pdf",
     timestamp: "2026-04-30T00:00:00.000Z"
   });
 

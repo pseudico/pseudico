@@ -19,6 +19,24 @@ export type SmartListEditorTaskStatus =
   | "someday"
   | "deferred"
   | "cancelled";
+export type SmartListEditorGroupBy =
+  | "none"
+  | "targetType"
+  | "type"
+  | "container"
+  | "category"
+  | "status"
+  | "dueDate";
+export type SmartListEditorSortField =
+  | "title"
+  | "type"
+  | "container"
+  | "category"
+  | "status"
+  | "dueAt"
+  | "createdAt"
+  | "updatedAt";
+
 export type SmartListEditorDueFilter =
   | "any"
   | "overdue"
@@ -45,11 +63,20 @@ export type SmartListEditorValues = {
   includeContainers: boolean;
   itemTypes: SmartListEditorItemType[];
   containerTypes: SmartListEditorContainerType[];
+  containerIds: string[];
   tagSlugs: string[];
   categoryIds: string[];
   categoryMode: "any" | "is" | "isEmpty" | "isNotEmpty";
   taskStatuses: SmartListEditorTaskStatus[];
   taskPriorities: number[];
+  statuses: string[];
+  text: string;
+  attachmentFilter: "any" | "has" | "none";
+  pinnedFilter: "any" | "pinned" | "unpinned";
+  archivedFilter: "active" | "archived" | "any";
+  groupBy: SmartListEditorGroupBy;
+  sortField: SmartListEditorSortField;
+  sortDirection: "asc" | "desc";
   dueFilter: SmartListEditorDueFilter;
   customDueFrom: string;
   customDueTo: string;
@@ -59,6 +86,7 @@ export type SmartListEditorProps = {
   categoryOptions?: SmartListEditorMetadataOption[];
   disabled?: boolean;
   previewCount?: number | null;
+  projectOptions?: SmartListEditorMetadataOption[];
   saving?: boolean;
   tagOptions?: SmartListEditorMetadataOption[];
   validationMessage?: string | null;
@@ -104,6 +132,35 @@ const TASK_PRIORITIES: { value: number; label: string }[] = [
   { value: 5, label: "P5" }
 ];
 
+const STATUS_FILTERS: { value: string; label: string }[] = [
+  { value: "active", label: "Active" },
+  { value: "archived", label: "Archived" },
+  { value: "completed", label: "Completed" },
+  { value: "waiting", label: "Waiting" },
+  { value: "done", label: "Done" }
+];
+
+const GROUP_BY_OPTIONS: { value: SmartListEditorGroupBy; label: string }[] = [
+  { value: "container", label: "Container" },
+  { value: "type", label: "Type" },
+  { value: "category", label: "Category" },
+  { value: "status", label: "Status" },
+  { value: "dueDate", label: "Due date" },
+  { value: "targetType", label: "Target" },
+  { value: "none", label: "No grouping" }
+];
+
+const SORT_FIELD_OPTIONS: { value: SmartListEditorSortField; label: string }[] = [
+  { value: "dueAt", label: "Due date" },
+  { value: "updatedAt", label: "Updated" },
+  { value: "createdAt", label: "Created" },
+  { value: "title", label: "Title" },
+  { value: "type", label: "Type" },
+  { value: "container", label: "Container" },
+  { value: "category", label: "Category" },
+  { value: "status", label: "Status" }
+];
+
 const DUE_FILTERS: { value: SmartListEditorDueFilter; label: string }[] = [
   { value: "any", label: "Any due date" },
   { value: "overdue", label: "Overdue" },
@@ -120,6 +177,7 @@ export function SmartListEditor({
   categoryOptions = [],
   disabled = false,
   previewCount = null,
+  projectOptions = [],
   saving = false,
   tagOptions = [],
   validationMessage,
@@ -134,11 +192,20 @@ export function SmartListEditor({
     includeContainers: false,
     itemTypes: [],
     containerTypes: [],
+    containerIds: [],
     tagSlugs: [],
     categoryIds: [],
     categoryMode: "any",
     taskStatuses: [],
     taskPriorities: [],
+    statuses: [],
+    text: "",
+    attachmentFilter: "any",
+    pinnedFilter: "any",
+    archivedFilter: "active",
+    groupBy: "container",
+    sortField: "dueAt",
+    sortDirection: "asc",
     dueFilter: "any",
     customDueFrom: "",
     customDueTo: ""
@@ -235,6 +302,14 @@ export function SmartListEditor({
         values={values.containerTypes}
         onChange={(containerTypes) => setValues({ ...values, containerTypes })}
       />
+      <MetadataMultiSelect
+        disabled={disabled}
+        label="Specific containers"
+        options={projectOptions}
+        values={values.containerIds}
+        onChange={(containerIds) => setValues({ ...values, containerIds })}
+      />
+
       <CheckboxGroup
         disabled={disabled}
         label="Task status"
@@ -242,6 +317,14 @@ export function SmartListEditor({
         values={values.taskStatuses}
         onChange={(taskStatuses) => setValues({ ...values, taskStatuses })}
       />
+      <MetadataMultiSelect
+        disabled={disabled}
+        label="Generic status"
+        options={STATUS_FILTERS.map((status) => ({ id: status.value, value: status.value, label: status.label }))}
+        values={values.statuses}
+        onChange={(statuses) => setValues({ ...values, statuses })}
+      />
+
       <NumberCheckboxGroup
         disabled={disabled}
         label="Task priority"
@@ -297,6 +380,17 @@ export function SmartListEditor({
         </div>
       ) : null}
 
+      <label className="field-label">
+        <span>Text contains</span>
+        <input
+          type="search"
+          value={values.text}
+          disabled={disabled}
+          placeholder="supplier, invoice, @client"
+          onChange={(event) => setValues({ ...values, text: event.target.value })}
+        />
+      </label>
+
       <MetadataMultiSelect
         disabled={disabled}
         label="Tags"
@@ -333,6 +427,117 @@ export function SmartListEditor({
           onChange={(categoryIds) => setValues({ ...values, categoryIds })}
         />
       ) : null}
+
+
+      <div className="smart-list-custom-range">
+        <label className="field-label">
+          <span>Attachments</span>
+          <select
+            value={values.attachmentFilter}
+            disabled={disabled}
+            onChange={(event) =>
+              setValues({
+                ...values,
+                attachmentFilter: event.target.value as SmartListEditorValues["attachmentFilter"]
+              })
+            }
+          >
+            <option value="any">Any attachment state</option>
+            <option value="has">Has attachments</option>
+            <option value="none">No attachments</option>
+          </select>
+        </label>
+        <label className="field-label">
+          <span>Pinned</span>
+          <select
+            value={values.pinnedFilter}
+            disabled={disabled}
+            onChange={(event) =>
+              setValues({
+                ...values,
+                pinnedFilter: event.target.value as SmartListEditorValues["pinnedFilter"]
+              })
+            }
+          >
+            <option value="any">Any pinned state</option>
+            <option value="pinned">Pinned only</option>
+            <option value="unpinned">Unpinned only</option>
+          </select>
+        </label>
+      </div>
+
+      <div className="smart-list-custom-range">
+        <label className="field-label">
+          <span>Archived</span>
+          <select
+            value={values.archivedFilter}
+            disabled={disabled}
+            onChange={(event) =>
+              setValues({
+                ...values,
+                archivedFilter: event.target.value as SmartListEditorValues["archivedFilter"]
+              })
+            }
+          >
+            <option value="active">Active only</option>
+            <option value="archived">Archived only</option>
+            <option value="any">Active and archived</option>
+          </select>
+        </label>
+        <label className="field-label">
+          <span>Group by</span>
+          <select
+            value={values.groupBy}
+            disabled={disabled}
+            onChange={(event) =>
+              setValues({
+                ...values,
+                groupBy: event.target.value as SmartListEditorGroupBy
+              })
+            }
+          >
+            {GROUP_BY_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="smart-list-custom-range">
+        <label className="field-label">
+          <span>Sort field</span>
+          <select
+            value={values.sortField}
+            disabled={disabled}
+            onChange={(event) =>
+              setValues({
+                ...values,
+                sortField: event.target.value as SmartListEditorSortField
+              })
+            }
+          >
+            {SORT_FIELD_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="field-label">
+          <span>Sort direction</span>
+          <select
+            value={values.sortDirection}
+            disabled={disabled}
+            onChange={(event) =>
+              setValues({
+                ...values,
+                sortDirection: event.target.value as "asc" | "desc"
+              })
+            }
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </label>
+      </div>
 
       {validationMessage === null || validationMessage === undefined ? null : (
         <p className="form-message">{validationMessage}</p>
@@ -502,6 +707,7 @@ function countCriteria(values: SmartListEditorValues): number {
   return [
     values.itemTypes.length,
     values.containerTypes.length,
+    values.containerIds.length,
     values.tagSlugs.length,
     values.categoryMode === "any"
       ? 0
@@ -510,6 +716,13 @@ function countCriteria(values: SmartListEditorValues): number {
         : 1,
     values.taskStatuses.length,
     values.taskPriorities.length,
+    values.statuses.length,
+    values.text.trim().length === 0 ? 0 : 1,
+    values.attachmentFilter === "any" ? 0 : 1,
+    values.pinnedFilter === "any" ? 0 : 1,
+    values.archivedFilter === "active" ? 0 : 1,
+    values.groupBy === "container" ? 0 : 1,
+    values.sortField === "dueAt" && values.sortDirection === "asc" ? 0 : 1,
     values.dueFilter === "any" ? 0 : 1
   ].reduce((total, count) => total + count, 0);
 }

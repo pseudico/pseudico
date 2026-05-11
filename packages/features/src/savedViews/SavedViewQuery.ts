@@ -33,6 +33,11 @@ export type SavedViewQueryCondition =
       value?: string | string[];
     }
   | {
+      field: "status";
+      operator: "is" | "in";
+      value: string | string[];
+    }
+  | {
       field: "taskStatus";
       operator: "is" | "in";
       value: string | string[];
@@ -51,6 +56,20 @@ export type SavedViewQueryCondition =
       field: "text";
       operator: "contains";
       value: string;
+    }
+  | {
+      field: "attachment";
+      operator: "has" | "none";
+    }
+  | {
+      field: "pinned";
+      operator: "is";
+      value: boolean;
+    }
+  | {
+      field: "archived";
+      operator: "is";
+      value: boolean;
     };
 
 export type SavedViewGroupBy =
@@ -104,10 +123,14 @@ const CONDITION_FIELDS = [
   "container",
   "tag",
   "category",
+  "status",
   "taskStatus",
   "taskPriority",
   "dueDate",
-  "text"
+  "text",
+  "attachment",
+  "pinned",
+  "archived"
 ] as const;
 const GROUP_BY_VALUES = [
   "none",
@@ -276,12 +299,25 @@ function validateCondition(
     validateStringOrStringArray(condition.value, `${path}.value`, errors);
   } else if (condition.field === "category") {
     validateCategoryCondition(condition, path, errors);
+  } else if (condition.field === "status") {
+    validateSetCondition(condition, path, errors, isNonEmptyString, "status");
   } else if (condition.field === "taskStatus") {
     validateSetCondition(condition, path, errors, isTaskStatus, "task status");
   } else if (condition.field === "taskPriority") {
     validatePriorityCondition(condition, path, errors);
   } else if (condition.field === "dueDate") {
     validateDueDateCondition(condition, path, errors);
+  } else if (condition.field === "attachment") {
+    if (condition.operator !== "has" && condition.operator !== "none") {
+      errors.push(`${path}.operator must be has or none.`);
+    }
+  } else if (condition.field === "pinned" || condition.field === "archived") {
+    if (condition.operator !== "is") {
+      errors.push(`${path}.operator must be is.`);
+    }
+    if (typeof condition.value !== "boolean") {
+      errors.push(`${path}.value must be a boolean.`);
+    }
   } else {
     if (condition.operator !== "contains") {
       errors.push(`${path}.operator must be contains.`);

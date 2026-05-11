@@ -1,4 +1,5 @@
 import {
+  AttachmentRepository,
   CategoryRepository,
   ContainerRepository,
   ItemRepository,
@@ -95,6 +96,18 @@ describe("SavedViewRepository", () => {
       type: "task",
       title: "Call supplier",
       categoryId: category.id,
+      timestamp: TEST_TIMESTAMP,
+      pinned: true
+    });
+
+    new AttachmentRepository(testDb.connection).create({
+      id: "attachment_1",
+      workspaceId: "workspace_1",
+      itemId: item.id,
+      originalName: "quote.pdf",
+      storedName: "original.pdf",
+      sizeBytes: 12,
+      storagePath: "attachments/quote.pdf",
       timestamp: TEST_TIMESTAMP
     });
 
@@ -141,13 +154,17 @@ describe("SavedViewRepository", () => {
           taskStatus: "waiting",
           taskPriority: 1,
           dueAt: "2026-05-05T00:00:00.000Z",
-          tagSlugs: ["phone-call"]
+          tagSlugs: ["phone-call"],
+          pinned: true,
+          hasAttachments: true
         }),
         expect.objectContaining({
           targetType: "container",
           targetId: "container_1",
           kind: "project",
-          categorySlug: "work"
+          categorySlug: "work",
+          pinned: false,
+          hasAttachments: false
         })
       ])
     );
