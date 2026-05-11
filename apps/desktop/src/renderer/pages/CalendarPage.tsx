@@ -161,17 +161,7 @@ export function CalendarPage({
       return;
     }
 
-    if (fullItem.containerType === "contact") {
-      navigate(`/contacts/${fullItem.containerId}`);
-      return;
-    }
-
-    if (fullItem.containerType === "project") {
-      navigate(`/projects/${fullItem.containerId}`);
-      return;
-    }
-
-    navigate("/inbox");
+    navigate(getCalendarItemDestination(fullItem));
   }
 
   function changeMonth(delta: number): void {
@@ -263,6 +253,22 @@ export function CalendarPage({
       />
     </section>
   );
+}
+
+export function getCalendarItemDestination(item: CalendarItemSummary): string {
+  const sourceItemId =
+    item.navigationTarget.sourceItemId ?? item.navigationTarget.targetId;
+  const itemQuery = `?item=${encodeURIComponent(sourceItemId)}`;
+
+  if (item.containerType === "contact") {
+    return `/contacts/${item.containerId}${itemQuery}`;
+  }
+
+  if (item.containerType === "project") {
+    return `/projects/${item.containerId}${itemQuery}`;
+  }
+
+  return "/inbox";
 }
 
 function toMonthCalendarDay(day: CalendarDaySummary): MonthCalendarDay {

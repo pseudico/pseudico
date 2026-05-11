@@ -2,7 +2,10 @@ import { renderToString } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import type { CalendarMonthViewModelSummary } from "../../src/preload/api";
-import { CalendarPage } from "../../src/renderer/pages/CalendarPage";
+import {
+  CalendarPage,
+  getCalendarItemDestination
+} from "../../src/renderer/pages/CalendarPage";
 
 describe("Calendar renderer page", () => {
   it("renders month controls and dated work", () => {
@@ -18,6 +21,14 @@ describe("Calendar renderer page", () => {
     expect(html).toContain("Launch checklist");
     expect(html).toContain("Confirm launch window");
     expect(html).toContain("Launch Plan");
+  });
+
+  it("opens list item calendar entries in the parent list context", () => {
+    const listItem = calendarViewModel().days[0]!.items[1]!;
+
+    expect(getCalendarItemDestination(listItem)).toBe(
+      "/projects/container_project_1?item=item_list_1"
+    );
   });
 });
 

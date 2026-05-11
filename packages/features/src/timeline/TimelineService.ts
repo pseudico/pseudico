@@ -1,11 +1,13 @@
-import { createIsoTimestamp, type TaskStatus } from "@local-work-os/core";
+import { createIsoTimestamp, type ListItemStatus, type TaskStatus } from "@local-work-os/core";
 import {
   CategoryRepository,
   ContainerRepository,
+  ListRepository,
   TaskRepository,
   type CategoryRecord,
   type ContainerRecord,
   type DatabaseConnection,
+  type ListItemWithListRecord,
   type TaskWithItemRecord
 } from "@local-work-os/db";
 import type { FeatureModuleContract } from "../featureModuleContract";
@@ -32,14 +34,18 @@ export type GroupTimelineItemsInput = TimelineItemsInput & {
   groupBy?: TimelineGroupBy;
 };
 
+export type TimelineEntryKind = "task" | "list_item";
+
 export type TimelineTaskNavigationTarget = {
-  targetType: "item";
+  targetType: "item" | "list_item";
   targetId: string;
   containerId: string;
   workspaceId: string;
+  sourceItemId: string | null;
 };
 
 export type TimelineItem = {
+  kind: TimelineEntryKind;
   itemId: string;
   workspaceId: string;
   title: string;
@@ -51,7 +57,7 @@ export type TimelineItem = {
   categoryId: string | null;
   categoryName: string | null;
   categoryColor: string | null;
-  taskStatus: TaskStatus;
+  taskStatus: TaskStatus | ListItemStatus;
   itemStatus: string;
   priority: number | null;
   startAt: string | null;
@@ -109,8 +115,16 @@ export class TimelineService {
       range,
       includeCompleted: input.includeCompleted === true
     });
+    const listItems = new ListRepository(this.connection).listDatedItemsBetween({
+      workspaceId: input.workspaceId,
+      range,
+      includeCompleted: input.includeCompleted === true
+    });
 
-    return this.hydrateTimelineItems(input.workspaceId, tasks);
+    return [
+      ...this.hydrateTaskTimelineItems(input.workspaceId, tasks),
+      ...this.hydrateListItemTimelineItems(input.workspaceId, listItems)
+    ].sort(compareTimelineItems);
   }
 
   groupTimelineItems(input: GroupTimelineItemsInput): TimelineViewModel {
@@ -131,50 +145,15 @@ export class TimelineService {
     };
   }
 
-  private hydrateTimelineItems(
+  private hydrateTaskTimelineItems(
     workspaceId: string,
     tasks: TaskWithItemRecord[]
   ): TimelineItem[] {
-    const containerRepository = new ContainerRepository(this.connection);
-    const categoryRepository = new CategoryRepository(this.connection);
-    const containers = new Map<string, ContainerRecord>();
-    const categories = new Map<string, CategoryRecord | null>();
-
-    const getContainer = (containerId: string): ContainerRecord => {
-      const cached = containers.get(containerId);
-
-      if (cached !== undefined) {
-        return cached;
-      }
-
-      const container = containerRepository.getById(containerId);
-
-      if (container === null || container.workspaceId !== workspaceId) {
-        throw new Error(`Timeline source container was not found: ${containerId}.`);
-      }
-
-      containers.set(containerId, container);
-      return container;
-    };
-
-    const getCategory = (categoryId: string | null): CategoryRecord | null => {
-      if (categoryId === null) {
-        return null;
-      }
-
-      if (categories.has(categoryId)) {
-        return categories.get(categoryId) ?? null;
-      }
-
-      const category = categoryRepository.getById(categoryId);
-      categories.set(categoryId, category);
-
-      return category;
-    };
+    const context = createHydrationContext(this.connection, workspaceId);
 
     return tasks.map((record) => {
-      const container = getContainer(record.item.containerId);
-      const category = getCategory(record.item.categoryId ?? container.categoryId);
+      const container = context.getContainer(record.item.containerId);
+      const category = context.getCategory(record.item.categoryId ?? container.categoryId);
       const timelineStartAt = record.task.startAt ?? record.task.dueAt;
       const timelineEndAt = record.task.dueAt ?? record.task.startAt;
 
@@ -183,6 +162,7 @@ export class TimelineService {
       }
 
       return {
+        kind: "task",
         itemId: record.item.id,
         workspaceId: record.item.workspaceId,
         title: record.item.title,
@@ -208,7 +188,58 @@ export class TimelineService {
           targetType: "item",
           targetId: record.item.id,
           containerId: container.id,
-          workspaceId: record.item.workspaceId
+          workspaceId: record.item.workspaceId,
+          sourceItemId: null
+        }
+      };
+    });
+  }
+
+  private hydrateListItemTimelineItems(
+    workspaceId: string,
+    records: ListItemWithListRecord[]
+  ): TimelineItem[] {
+    const context = createHydrationContext(this.connection, workspaceId);
+
+    return records.map((record) => {
+      const container = context.getContainer(record.list.item.containerId);
+      const category = context.getCategory(record.list.item.categoryId ?? container.categoryId);
+      const timelineStartAt = record.listItem.startAt ?? record.listItem.dueAt;
+      const timelineEndAt = record.listItem.dueAt ?? record.listItem.startAt;
+
+      if (timelineStartAt === null || timelineEndAt === null) {
+        throw new Error(`Timeline list item is missing all dates: ${record.listItem.id}.`);
+      }
+
+      return {
+        kind: "list_item",
+        itemId: record.listItem.id,
+        workspaceId: record.listItem.workspaceId,
+        title: record.listItem.title,
+        body: record.listItem.body,
+        containerId: container.id,
+        containerName: container.name,
+        containerType: container.type,
+        containerColor: container.color,
+        categoryId: category?.id ?? null,
+        categoryName: category?.name ?? null,
+        categoryColor: category?.color ?? null,
+        taskStatus: record.listItem.status,
+        itemStatus: record.list.item.status,
+        priority: null,
+        startAt: record.listItem.startAt,
+        dueAt: record.listItem.dueAt,
+        timelineStartAt,
+        timelineEndAt,
+        allDay: true,
+        completedAt: record.listItem.completedAt,
+        updatedAt: record.listItem.updatedAt,
+        navigationTarget: {
+          targetType: "list_item",
+          targetId: record.listItem.id,
+          containerId: container.id,
+          workspaceId: record.listItem.workspaceId,
+          sourceItemId: record.list.item.id
         }
       };
     });
@@ -265,6 +296,61 @@ function groupItems(
 
 function isCompleted(item: TimelineItem): boolean {
   return item.taskStatus === "done" || item.completedAt !== null;
+}
+
+function createHydrationContext(connection: DatabaseConnection, workspaceId: string): {
+  getCategory: (categoryId: string | null) => CategoryRecord | null;
+  getContainer: (containerId: string) => ContainerRecord;
+} {
+  const containerRepository = new ContainerRepository(connection);
+  const categoryRepository = new CategoryRepository(connection);
+  const containers = new Map<string, ContainerRecord>();
+  const categories = new Map<string, CategoryRecord | null>();
+
+  return {
+    getContainer(containerId) {
+      const cached = containers.get(containerId);
+
+      if (cached !== undefined) {
+        return cached;
+      }
+
+      const container = containerRepository.getById(containerId);
+
+      if (container === null || container.workspaceId !== workspaceId) {
+        throw new Error(`Timeline source container was not found: ${containerId}.`);
+      }
+
+      containers.set(containerId, container);
+      return container;
+    },
+    getCategory(categoryId) {
+      if (categoryId === null) {
+        return null;
+      }
+
+      if (categories.has(categoryId)) {
+        return categories.get(categoryId) ?? null;
+      }
+
+      const category = categoryRepository.getById(categoryId);
+      categories.set(categoryId, category);
+
+      return category;
+    }
+  };
+}
+
+function compareTimelineItems(left: TimelineItem, right: TimelineItem): number {
+  const leftDate = left.timelineStartAt;
+  const rightDate = right.timelineStartAt;
+  const dateDelta = leftDate.localeCompare(rightDate);
+
+  if (dateDelta !== 0) {
+    return dateDelta;
+  }
+
+  return left.title.localeCompare(right.title, undefined, { sensitivity: "base" });
 }
 
 function validateNonEmptyString(value: string, fieldName: string): void {

@@ -120,9 +120,14 @@ export function TodayPage({
 
     const completed =
       task.taskStatus === "done" || task.itemStatus === "completed";
-    const result = completed
-      ? await apiClient.tasks.reopen(task.itemId)
-      : await apiClient.tasks.complete(task.itemId);
+    const result =
+      task.itemType === "list_item"
+        ? completed
+          ? await apiClient.lists.reopenItem(task.itemId)
+          : await apiClient.lists.completeItem(task.itemId)
+        : completed
+          ? await apiClient.tasks.reopen(task.itemId)
+          : await apiClient.tasks.complete(task.itemId);
 
     setBusyTaskId(null);
 
@@ -131,15 +136,7 @@ export function TodayPage({
       return;
     }
 
-    setViewModel((current) =>
-      current === null
-        ? current
-        : updateTaskInViewModel(current, result.data.id, {
-            itemStatus: result.data.status,
-            taskStatus: result.data.taskStatus,
-            updatedAt: result.data.updatedAt
-          })
-    );
+    await reloadToday(resolveWorkspaceId(currentWorkspace?.id, viewModel) ?? result.data.workspaceId);
   }
 
   async function planTask(
@@ -273,10 +270,16 @@ export function TodayPage({
     setBusyTaskId(task.itemId);
     setMutationError(null);
 
-    const result = await apiClient.tasks.snooze({
-      itemId: task.itemId,
-      preset
-    });
+    const result =
+      task.itemType === "list_item"
+        ? await apiClient.lists.updateItem({
+            listItemId: task.itemId,
+            dueAt: resolveSnoozePresetDueAt(preset)
+          })
+        : await apiClient.tasks.snooze({
+            itemId: task.itemId,
+            preset
+          });
 
     setBusyTaskId(null);
 
@@ -301,11 +304,17 @@ export function TodayPage({
     setBusyTaskId(task.itemId);
     setMutationError(null);
 
-    const result = await apiClient.tasks.reschedule({
-      itemId: task.itemId,
-      dueAt,
-      allDay: true
-    });
+    const result =
+      task.itemType === "list_item"
+        ? await apiClient.lists.updateItem({
+            listItemId: task.itemId,
+            dueAt
+          })
+        : await apiClient.tasks.reschedule({
+            itemId: task.itemId,
+            dueAt,
+            allDay: true
+          });
 
     setBusyTaskId(null);
 
@@ -318,7 +327,13 @@ export function TodayPage({
   }
 
   function openTaskSource(task: TodayTaskCardViewModel): void {
-    navigate(`/projects/${task.containerId}`);
+    const sourceItemId =
+      task.itemType === "list_item" && task.sourceItemId !== null && task.sourceItemId !== undefined
+        ? `?item=${encodeURIComponent(task.sourceItemId)}`
+        : task.itemType === "task"
+          ? `?item=${encodeURIComponent(task.itemId)}`
+          : "";
+    navigate(`/projects/${task.containerId}${sourceItemId}`);
   }
 
   if (currentWorkspace === null && initialViewModel === undefined) {
@@ -427,6 +442,8 @@ export function TodayPage({
 function toTodayTaskCard(task: TodayTaskSummary): TodayTaskCardViewModel {
   return {
     itemId: task.itemId,
+    itemType: task.itemType,
+    sourceItemId: task.sourceItemId,
     title: task.title,
     body: task.body,
     taskStatus: task.taskStatus,
@@ -437,7 +454,7 @@ function toTodayTaskCard(task: TodayTaskSummary): TodayTaskCardViewModel {
     plannedLane: task.plannedLane,
     plannedSortOrder: task.plannedSortOrder,
     addedManually: task.addedManually,
-    sourceLabel: "Open source"
+    sourceLabel: task.itemType === "list_item" ? "Open parent list" : "Open source"
   };
 }
 
@@ -495,29 +512,23 @@ function getMovedSortOrder(input: {
   return targetSortOrder + 1024;
 }
 
-function updateTaskInViewModel(
-  viewModel: TodayViewModelSummary,
-  itemId: string,
-  patch: Pick<TodayTaskSummary, "itemStatus" | "taskStatus" | "updatedAt">
-): TodayViewModelSummary {
-  return {
-    ...viewModel,
-    dueToday: viewModel.dueToday.map((task) =>
-      patchTodayTask(task, itemId, patch)
-    ),
-    overdueBacklog: viewModel.overdueBacklog.map((task) =>
-      patchTodayTask(task, itemId, patch)
-    ),
-    tomorrowPreview: viewModel.tomorrowPreview.map((task) =>
-      patchTodayTask(task, itemId, patch)
-    )
-  };
-}
+function resolveSnoozePresetDueAt(preset: SnoozePreset): string {
+  const now = new Date();
 
-function patchTodayTask(
-  task: TodayTaskSummary,
-  itemId: string,
-  patch: Pick<TodayTaskSummary, "itemStatus" | "taskStatus" | "updatedAt">
-): TodayTaskSummary {
-  return task.itemId === itemId ? { ...task, ...patch } : task;
+  if (preset === "later_today") {
+    const later = new Date(now);
+    later.setHours(later.getHours() + 3, later.getMinutes(), 0, 0);
+
+    if (later.toDateString() !== now.toDateString()) {
+      later.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+      later.setHours(23, 59, 0, 0);
+    }
+
+    return later.toISOString();
+  }
+
+  const day = new Date(now);
+  day.setHours(0, 0, 0, 0);
+  day.setDate(day.getDate() + (preset === "next_week" ? 7 : 1));
+  return day.toISOString();
 }

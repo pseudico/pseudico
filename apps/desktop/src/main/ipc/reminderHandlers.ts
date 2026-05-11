@@ -10,11 +10,13 @@ import {
   apiError,
   apiOk,
   type ApiResult,
+  type ClearListItemReminderInput,
   type ClearTaskReminderInput,
   type DismissReminderInput,
   type ReminderEventMutationSummary,
   type ReminderEventSummary,
   type ReminderPolicySummary,
+  type SetListItemReminderInput,
   type SetTaskReminderInput,
   type SnoozeReminderInput,
   type TaskReminderMutationSummary,
@@ -27,6 +29,8 @@ type CurrentWorkspaceService = Pick<WorkspaceFileSystemService, "getCurrentWorks
 type ReminderIpcHandlers = {
   handleSetTaskReminder: (input: unknown) => Promise<ApiResult<TaskReminderMutationSummary>>;
   handleClearTaskReminder: (input: unknown) => Promise<ApiResult<TaskReminderMutationSummary>>;
+  handleSetListItemReminder: (input: unknown) => Promise<ApiResult<TaskReminderMutationSummary>>;
+  handleClearListItemReminder: (input: unknown) => Promise<ApiResult<TaskReminderMutationSummary>>;
   handleDismissReminder: (input: unknown) => Promise<ApiResult<ReminderEventMutationSummary>>;
   handleSnoozeReminder: (input: unknown) => Promise<ApiResult<ReminderEventMutationSummary>>;
 };
@@ -60,6 +64,38 @@ export function createReminderIpcHandlers(
 
       return await withReminderService(workspaceService, async (context) => {
         const result = await context.reminderService.clearTaskReminder(input);
+        return apiOk(toTaskReminderMutationSummary(result));
+      });
+    },
+
+    async handleSetListItemReminder(input) {
+      if (!isSetListItemReminderInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "setListItemReminder requires listItemId and either triggerAt or leadMinutes."
+        );
+      }
+
+      return await withReminderService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const result = await context.reminderService.setListItemReminder({
+          ...input,
+          workspaceId
+        });
+        return apiOk(toTaskReminderMutationSummary(result));
+      });
+    },
+
+    async handleClearListItemReminder(input) {
+      if (!isClearListItemReminderInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "clearListItemReminder requires a listItemId."
+        );
+      }
+
+      return await withReminderService(workspaceService, async (context) => {
+        const result = await context.reminderService.clearListItemReminder(input);
         return apiOk(toTaskReminderMutationSummary(result));
       });
     },
@@ -175,8 +211,33 @@ function isSetTaskReminderInput(input: unknown): input is SetTaskReminderInput {
   );
 }
 
+function isSetListItemReminderInput(
+  input: unknown
+): input is SetListItemReminderInput {
+  return (
+    isRecord(input) &&
+    isOptionalString(input.workspaceId) &&
+    isNonEmptyString(input.listItemId) &&
+    isOptionalActorType(input.actorType) &&
+    (input.triggerAt === undefined || isNonEmptyString(input.triggerAt)) &&
+    (input.leadMinutes === undefined || typeof input.leadMinutes === "number") &&
+    (input.anchor === undefined || input.anchor === "due" || input.anchor === "start") &&
+    ((input.triggerAt === undefined) !== (input.leadMinutes === undefined))
+  );
+}
+
 function isClearTaskReminderInput(input: unknown): input is ClearTaskReminderInput {
   return isRecord(input) && isNonEmptyString(input.taskId) && isOptionalActorType(input.actorType);
+}
+
+function isClearListItemReminderInput(
+  input: unknown
+): input is ClearListItemReminderInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.listItemId) &&
+    isOptionalActorType(input.actorType)
+  );
 }
 
 function isDismissReminderInput(input: unknown): input is DismissReminderInput {

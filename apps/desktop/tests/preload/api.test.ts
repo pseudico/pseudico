@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(193);
+    expect(channels).toHaveLength(195);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -861,6 +861,13 @@ describe("typed preload API", () => {
       leadMinutes: 30
     });
     await api.reminders!.clearTaskReminder({ taskId: "item_1" });
+    await api.reminders!.setListItemReminder({
+      workspaceId: "workspace_1",
+      listItemId: "list_item_1",
+      anchor: "start",
+      leadMinutes: 15
+    });
+    await api.reminders!.clearListItemReminder({ listItemId: "list_item_1" });
     await api.reminders!.dismissReminder({ eventId: "reminder_event_1" });
     await api.reminders!.snoozeReminder({
       eventId: "reminder_event_1",
@@ -879,6 +886,19 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.reminders.clearTaskReminder,
         input: { taskId: "item_1" }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.reminders.setListItemReminder,
+        input: {
+          workspaceId: "workspace_1",
+          listItemId: "list_item_1",
+          anchor: "start",
+          leadMinutes: 15
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.reminders.clearListItemReminder,
+        input: { listItemId: "list_item_1" }
       },
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.reminders.dismissReminder,

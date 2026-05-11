@@ -14,6 +14,7 @@ import {
   DEFAULT_TODAY_BACKLOG_DAYS,
   TODAY_BACKLOG_DAYS_SETTING_KEY,
   DailyPlanService,
+  ListService,
   TaskService,
   TodayService
 } from "../src";
@@ -63,6 +64,11 @@ describe("TodayService", () => {
       timestamp: "2026-05-01T00:00:00.000Z"
     });
     const taskService = createTaskService();
+    const list = await createListService().createList({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Launch list"
+    });
 
     await taskService.createTask({
       workspaceId: "workspace_1",
@@ -81,6 +87,11 @@ describe("TodayService", () => {
       containerId: "container_project_1",
       title: "Due today",
       dueAt: new Date(2026, 4, 15, 23, 30).toISOString()
+    });
+    const listItemToday = await createListService().addListItem({
+      listId: list.item.id,
+      title: "List item due today",
+      dueAt: new Date(2026, 4, 15, 16).toISOString()
     });
     await taskService.createTask({
       workspaceId: "workspace_1",
@@ -167,9 +178,20 @@ describe("TodayService", () => {
         }
       }
     });
-    expect(viewModel.dueToday.map((task) => task.title)).toEqual(["Due today"]);
+    expect(viewModel.dueToday.map((task) => task.title)).toEqual([
+      "List item due today",
+      "Due today"
+    ]);
     expect(viewModel.dueToday[0]).toMatchObject({
+      itemId: listItemToday.listItem.id,
+      itemType: "list_item",
+      sourceItemId: list.item.id,
+      taskStatus: "open",
+      dueAt: new Date(2026, 4, 15, 16).toISOString()
+    });
+    expect(viewModel.dueToday[1]).toMatchObject({
       itemId: dueToday.item.id,
+      itemType: "task",
       taskStatus: "open",
       dueAt: new Date(2026, 4, 15, 23, 30).toISOString()
     });
@@ -519,6 +541,17 @@ function createTodayService(): TodayService {
 
 function createDailyPlanService(): DailyPlanService {
   return new DailyPlanService({
+    connection,
+    idFactory: (prefix) => {
+      idCounter += 1;
+      return `${prefix}_${idCounter}`;
+    },
+    now: () => NOW
+  });
+}
+
+function createListService(): ListService {
+  return new ListService({
     connection,
     idFactory: (prefix) => {
       idCounter += 1;

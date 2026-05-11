@@ -125,17 +125,7 @@ export function TimelinePage({
   }
 
   function openTaskSource(item: TimelineViewItem): void {
-    if (item.containerType === "contact") {
-      navigate(`/contacts/${item.containerId}`);
-      return;
-    }
-
-    if (item.containerType === "project") {
-      navigate(`/projects/${item.containerId}`);
-      return;
-    }
-
-    navigate("/inbox");
+    navigate(getTimelineItemDestination(item));
   }
 
   if (currentWorkspace === null && initialTimeline === undefined) {
@@ -229,6 +219,24 @@ export function TimelinePage({
   );
 }
 
+export function getTimelineItemDestination(item: TimelineViewItem): string {
+  const sourceItemId =
+    item.kind === "list_item" && item.sourceItemId !== null && item.sourceItemId !== undefined
+      ? item.sourceItemId
+      : item.itemId;
+  const itemQuery = `?item=${encodeURIComponent(sourceItemId)}`;
+
+  if (item.containerType === "contact") {
+    return `/contacts/${item.containerId}${itemQuery}`;
+  }
+
+  if (item.containerType === "project") {
+    return `/projects/${item.containerId}${itemQuery}`;
+  }
+
+  return "/inbox";
+}
+
 function createDefaultRange(): { start: string; end: string } {
   const start = new Date();
   const end = new Date(start);
@@ -262,6 +270,8 @@ function toTimelineViewGroup(group: TimelineGroupSummary): TimelineViewGroup {
 function toTimelineViewItem(item: TimelineItemSummary): TimelineViewItem {
   return {
     itemId: item.itemId,
+    kind: item.kind,
+    sourceItemId: item.navigationTarget.sourceItemId,
     title: item.title,
     body: item.body,
     containerId: item.containerId,

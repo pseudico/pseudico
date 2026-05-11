@@ -1165,7 +1165,9 @@ export type CollectionEvaluationSummary = {
 };
 
 export type TodayTaskSummary = {
+  itemType: "task" | "list_item";
   itemId: string;
+  sourceItemId: string | null;
   workspaceId: string;
   containerId: string;
   containerTabId: string | null;
@@ -1288,13 +1290,15 @@ export type TimelineViewModelInput = TimelineRangeInput & {
 };
 
 export type TimelineNavigationTargetSummary = {
-  targetType: "item";
+  targetType: "item" | "list_item";
   targetId: string;
   containerId: string;
   workspaceId: string;
+  sourceItemId: string | null;
 };
 
 export type TimelineItemSummary = {
+  kind: "task" | "list_item";
   itemId: string;
   workspaceId: string;
   title: string;
@@ -2234,6 +2238,20 @@ export type ClearTaskReminderInput = {
   actorType?: "local_user" | "system" | "importer";
 };
 
+export type SetListItemReminderInput = {
+  workspaceId?: string;
+  listItemId: string;
+  actorType?: "local_user" | "system" | "importer";
+  triggerAt?: string;
+  leadMinutes?: number;
+  anchor?: "due" | "start";
+};
+
+export type ClearListItemReminderInput = {
+  listItemId: string;
+  actorType?: "local_user" | "system" | "importer";
+};
+
 export type DismissReminderInput = {
   eventId: string;
   actorType?: "local_user" | "system" | "importer";
@@ -2717,6 +2735,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   reminders: {
     setTaskReminder: "local-work-os:reminders:set-task-reminder",
     clearTaskReminder: "local-work-os:reminders:clear-task-reminder",
+    setListItemReminder: "local-work-os:reminders:set-list-item-reminder",
+    clearListItemReminder: "local-work-os:reminders:clear-list-item-reminder",
     dismissReminder: "local-work-os:reminders:dismiss-reminder",
     snoozeReminder: "local-work-os:reminders:snooze-reminder"
   },
@@ -3044,6 +3064,14 @@ export type LocalWorkOsIpcContracts = {
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.reminders.clearTaskReminder]: {
     input: ClearTaskReminderInput;
+    result: ApiResult<TaskReminderMutationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.reminders.setListItemReminder]: {
+    input: SetListItemReminderInput;
+    result: ApiResult<TaskReminderMutationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.reminders.clearListItemReminder]: {
+    input: ClearListItemReminderInput;
     result: ApiResult<TaskReminderMutationSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.reminders.dismissReminder]: {
@@ -3814,6 +3842,12 @@ export type LocalWorkOsApi = {
     clearTaskReminder: (
       input: ClearTaskReminderInput
     ) => Promise<ApiResult<TaskReminderMutationSummary>>;
+    setListItemReminder: (
+      input: SetListItemReminderInput
+    ) => Promise<ApiResult<TaskReminderMutationSummary>>;
+    clearListItemReminder: (
+      input: ClearListItemReminderInput
+    ) => Promise<ApiResult<TaskReminderMutationSummary>>;
     dismissReminder: (
       input: DismissReminderInput
     ) => Promise<ApiResult<ReminderEventMutationSummary>>;
@@ -4483,6 +4517,10 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.reminders.setTaskReminder, input),
       clearTaskReminder: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.reminders.clearTaskReminder, input),
+      setListItemReminder: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.reminders.setListItemReminder, input),
+      clearListItemReminder: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.reminders.clearListItemReminder, input),
       dismissReminder: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.reminders.dismissReminder, input),
       snoozeReminder: (input) =>

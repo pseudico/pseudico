@@ -1,8 +1,16 @@
-import type { TaskDateRange, TaskStatus } from "@local-work-os/core";
-import type { DailyPlanLane, TaskWithItemRecord } from "@local-work-os/db";
+import type { ListItemStatus, TaskDateRange, TaskStatus } from "@local-work-os/core";
+import type {
+  DailyPlanLane,
+  ListItemWithListRecord,
+  TaskWithItemRecord
+} from "@local-work-os/db";
+
+export type TodayWorkItemType = "task" | "list_item";
 
 export type TodayTaskView = {
+  itemType: TodayWorkItemType;
   itemId: string;
+  sourceItemId: string | null;
   workspaceId: string;
   containerId: string;
   containerTabId: string | null;
@@ -42,7 +50,9 @@ export type TodayViewModel = {
 
 export function toTodayTaskView(record: TaskWithItemRecord): TodayTaskView {
   return {
+    itemType: "task",
     itemId: record.item.id,
+    sourceItemId: null,
     workspaceId: record.item.workspaceId,
     containerId: record.item.containerId,
     containerTabId: record.item.containerTabId,
@@ -64,4 +74,47 @@ export function toTodayTaskView(record: TaskWithItemRecord): TodayTaskView {
     createdAt: record.item.createdAt,
     updatedAt: record.item.updatedAt
   };
+}
+
+export function toTodayListItemView(
+  record: ListItemWithListRecord
+): TodayTaskView {
+  return {
+    itemType: "list_item",
+    itemId: record.listItem.id,
+    sourceItemId: record.list.item.id,
+    workspaceId: record.listItem.workspaceId,
+    containerId: record.list.item.containerId,
+    containerTabId: record.list.item.containerTabId,
+    title: record.listItem.title,
+    body: record.listItem.body,
+    categoryId: record.list.item.categoryId,
+    itemStatus: record.list.item.status,
+    taskStatus: listItemStatusToTaskStatus(record.listItem.status),
+    priority: null,
+    startAt: record.listItem.startAt,
+    dueAt: record.listItem.dueAt,
+    allDay: true,
+    timezone: null,
+    sortOrder: record.listItem.sortOrder,
+    plannedLane: null,
+    plannedSortOrder: null,
+    addedManually: false,
+    pinned: record.list.item.pinned,
+    createdAt: record.listItem.createdAt,
+    updatedAt: record.listItem.updatedAt
+  };
+}
+
+function listItemStatusToTaskStatus(status: ListItemStatus): TaskStatus {
+  switch (status) {
+    case "done":
+      return "done";
+    case "waiting":
+      return "waiting";
+    case "cancelled":
+      return "cancelled";
+    case "open":
+      return "open";
+  }
 }

@@ -2931,3 +2931,40 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: PR mergeability/CI pending on GitHub.
 Next actions: Check PR diff; check CI; merge only if clean and green.
+## 2026-05-11T14:13:30+10:00
+Objective: Reconcile active PSE-125 PR before new work.
+Decisions made:
+- Found PSE-125 in PR Open with PR #120 ready, mergeable, CI green, and no review threads.
+- Confirmed PR scope matches LWO-M11-010 conversion acceptance criteria.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local session log has prior unpushed edits; unrelated untracked files remain untouched.
+Next actions: Squash-merge PR #120; pull main; move Linear to Done and promote next issue.
+## 2026-05-11T14:17:30+10:00
+Objective: Complete PSE-125 merge and promote next ticket.
+Decisions made:
+- Squash-merged PR #120 at 86aba08, deleted merged feature branch, and pulled main.
+- Moved PSE-125 to Done and promoted PSE-126 as the single Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Session log remains local for current run; unrelated untracked files remain untouched.
+Next actions: Pull PSE-126 into In Progress; read ticket/docs; implement scoped reminder support.
+## 2026-05-11T14:32:00+10:00
+Objective: Implement PSE-126 list item date/reminder support.
+Decisions made:
+- Extended Today and Timeline projections to include dated list rows with parent-list navigation context.
+- Added renderer routing helpers so list-row calendar/timeline sources open the parent list item context.
+- Exposed list-item reminder IPC/client methods reusing ReminderService.
+Files changed:
+- packages/features/src/today/TodayService.ts; packages/features/src/timeline/TimelineService.ts; apps/desktop/src/preload/api.ts
+Open questions / risks: Need typecheck/tests to catch API fixture updates and renderer action edge cases.
+Next actions: Run targeted tests; fix type/lint failures; run full checks.
+## 2026-05-11T14:39:30+10:00
+Objective: Verify PSE-126 implementation locally.
+Decisions made:
+- Fixed IPC channel-count test after adding list-item reminder channels.
+- Full lint, typecheck, test, and build pass; tests/build required EPERM reruns with escalation.
+Files changed:
+- apps/desktop/tests/preload/api.test.ts; docs/session_log.md
+Open questions / risks: CI still pending until PR is pushed.
+Next actions: Review diff; commit/push branch; open ready PR and update Linear.

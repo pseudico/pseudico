@@ -2,7 +2,9 @@ import { CalendarDays } from "lucide-react";
 import { EmptyState } from "./EmptyState";
 
 export type TimelineViewItem = {
+  kind?: "task" | "list_item";
   itemId: string;
+  sourceItemId?: string | null;
   title: string;
   body: string | null;
   containerId: string;
