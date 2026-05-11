@@ -4438,6 +4438,33 @@ a {
   gap: 16px;
 }
 
+.timeline-scale {
+  position: relative;
+  min-height: 34px;
+  margin-left: min(24vw, 252px);
+  border-bottom: 1px solid #dedbd1;
+}
+
+.timeline-scale-tick {
+  position: absolute;
+  bottom: 6px;
+  transform: translateX(-50%);
+  color: #6d6a62;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.timeline-scale-tick::before {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  width: 1px;
+  height: 8px;
+  background: #dedbd1;
+  content: "";
+}
+
 .timeline-group {
   display: grid;
   gap: 12px;
@@ -4501,6 +4528,7 @@ a {
 }
 
 .timeline-item-card {
+  position: relative;
   display: grid;
   gap: 4px;
   width: 100%;
@@ -4511,6 +4539,37 @@ a {
   cursor: pointer;
   padding: 12px;
   text-align: left;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.timeline-range-bar,
+.timeline-range-marker {
+  position: relative;
+  z-index: 0;
+  display: block;
+  grid-row: 1;
+  height: 10px;
+  margin-bottom: 4px;
+  margin-left: var(--timeline-range-left, 0%);
+  width: max(10px, var(--timeline-range-width, 8%));
+  background: var(--timeline-range-color, var(--accent));
+  opacity: 0.75;
+}
+
+.timeline-range-bar {
+  border-top-left-radius: var(--timeline-range-radius-left, 999px);
+  border-bottom-left-radius: var(--timeline-range-radius-left, 999px);
+  border-top-right-radius: var(--timeline-range-radius-right, 999px);
+  border-bottom-right-radius: var(--timeline-range-radius-right, 999px);
+}
+
+.timeline-range-marker {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--timeline-range-color, var(--accent));
+  border-radius: 999px;
+  background: #fffaf0;
 }
 
 .timeline-item-card:hover,
@@ -4532,6 +4591,10 @@ a {
 @media (max-width: 760px) {
   .timeline-list-item {
     grid-template-columns: 1fr;
+  }
+
+  .timeline-scale {
+    margin-left: 0;
   }
 
   .month-calendar-weekdays {

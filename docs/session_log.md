@@ -3172,3 +3172,64 @@ Files changed:
 - apps/desktop/src/renderer/pages/CollectionsPage.tsx
 Open questions / risks: Timeline/calendar projections are read-only dated-result projections.
 Next actions: Commit changes; push/open PR; update Linear.
+## 2026-05-11 17:58:34 +10:00
+Objective: Merge PSE-137 and prepare next Codex Ready ticket.
+Decisions made:
+- PR #126 passed CI and was squash-merged to main at 2002e4d.
+- PSE-137 moved to Done; PSE-138 promoted as the only next Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Untracked local files remain unrelated.
+Next actions: Start PSE-138 in a future run; keep exactly one Codex Ready issue.
+## 2026-05-11 17:59:56 +10:00
+Objective: Explain why code changes may not appear in current working tree.
+Decisions made:
+- Clarify PSE-137 code was committed, pushed, PR'd, squash-merged, then main fast-forwarded.
+- Current local diff only shows session log because merged code is now in main history.
+Files changed:
+- docs/session_log.md
+Open questions / risks: User may be viewing current diff rather than merge commit/PR.
+Next actions: Point to PR/merge commit; note uncommitted session log entry.
+
+## 2026-05-11 18:01:48 +10:00
+Objective: Reconcile Linear/GitHub before starting next ticket.
+Decisions made:
+- No PR Open or In Progress issues found for PSE Local Work OS project.
+- PSE-138 is the single Codex Ready issue to start.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked local files appear unrelated.
+Next actions: Move PSE-138 to In Progress; read docs; implement scoped changes.
+
+## 2026-05-11 18:02:27 +10:00
+Objective: Start PSE-138 implementation planning.
+Decisions made:
+- PSE-138 moved to In Progress after reconciliation.
+- Read AGENTS, required docs, ADRs, and source ticket LWO-M12-002.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need map current timeline architecture before editing.
+Next actions: Inspect timeline code; create issue branch; add tests and UI.
+
+## 2026-05-11 18:07:59 +10:00
+Objective: Implement PSE-138 timeline bars and controls.
+Decisions made:
+- Added reusable core timeline scale/range placement utilities.
+- Extended timeline grouping to contact and rendered week/month/quarter zoom bars/markers.
+Files changed:
+- packages/core/src/services/timelineDateScale.ts
+- packages/features/src/timeline/TimelineService.ts
+- packages/ui/src/components/TimelineView.tsx
+- apps/desktop/src/renderer/pages/TimelinePage.tsx
+Open questions / risks: Full checks still need to pass after type fix.
+Next actions: Run lint/typecheck/test/build; fix failures; open PR.
+
+## 2026-05-11 18:09:27 +10:00
+Objective: Validate PSE-138 implementation.
+Decisions made:
+- Full lint, typecheck, test, and build passed.
+- Targeted timeline tests also passed after EPERM sandbox rerun with escalation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need PR/CI confirmation before merge.
+Next actions: Commit; push; open ready PR.

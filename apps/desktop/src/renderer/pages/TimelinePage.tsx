@@ -2,6 +2,10 @@ import { RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  createTimelineZoomRange,
+  type TimelineZoomLevel
+} from "@local-work-os/core";
+import {
   EmptyState,
   ErrorState,
   TimelineView,
@@ -33,6 +37,7 @@ export function TimelinePage({
   const [start, setStart] = useState(defaultRange.start);
   const [end, setEnd] = useState(defaultRange.end);
   const [groupBy, setGroupBy] = useState<TimelineGroupBy>("project");
+  const [zoom, setZoom] = useState<TimelineZoomLevel>("week");
   const [includeCompleted, setIncludeCompleted] = useState(false);
   const [timeline, setTimeline] = useState<TimelineViewModelSummary | null>(
     initialTimeline ?? null
@@ -128,6 +133,16 @@ export function TimelinePage({
     navigate(getTimelineItemDestination(item));
   }
 
+  function applyZoom(nextZoom: TimelineZoomLevel): void {
+    const range = createTimelineZoomRange({
+      anchorDate: start,
+      zoom: nextZoom
+    });
+    setZoom(nextZoom);
+    setStart(toDateInputValue(new Date(range.startInclusive)));
+    setEnd(toDateInputValue(new Date(range.endExclusive)));
+  }
+
   if (currentWorkspace === null && initialTimeline === undefined) {
     return (
       <section className="timeline-page">
@@ -150,8 +165,8 @@ export function TimelinePage({
           <p className="top-eyebrow">Planning</p>
           <h2>Timeline</h2>
           <p>
-            Dated task workload grouped by project or category for the current
-            local workspace.
+            Dated task workload with range bars, zoom controls, and grouping by
+            project, contact, or category for the current local workspace.
           </p>
         </div>
         <button
@@ -183,6 +198,19 @@ export function TimelinePage({
           />
         </label>
         <label>
+          <span>Zoom</span>
+          <select
+            value={zoom}
+            onChange={(event) =>
+              applyZoom(event.currentTarget.value as TimelineZoomLevel)
+            }
+          >
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="quarter">Quarter</option>
+          </select>
+        </label>
+        <label>
           <span>Group by</span>
           <select
             value={groupBy}
@@ -191,6 +219,7 @@ export function TimelinePage({
             }
           >
             <option value="project">Project</option>
+            <option value="contact">Contact</option>
             <option value="category">Category</option>
           </select>
         </label>
@@ -213,7 +242,9 @@ export function TimelinePage({
       <TimelineView
         groups={(timeline?.groups ?? []).map(toTimelineViewGroup)}
         loading={loading && timeline === null}
+        zoom={zoom}
         onOpenTask={openTaskSource}
+        {...(timeline === null ? {} : { range: timeline.range })}
       />
     </section>
   );
@@ -281,6 +312,8 @@ function toTimelineViewItem(item: TimelineItemSummary): TimelineViewItem {
     categoryColor: item.categoryColor,
     taskStatus: item.taskStatus,
     priority: item.priority,
+    startAt: item.startAt,
+    dueAt: item.dueAt,
     timelineStartAt: item.timelineStartAt,
     timelineEndAt: item.timelineEndAt,
     completedAt: item.completedAt

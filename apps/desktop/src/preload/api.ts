@@ -1287,7 +1287,7 @@ export type GetPlannedTasksInput = DailyPlanDateInput & {
   lane?: DailyPlanLane;
 };
 
-export type TimelineGroupBy = "project" | "category";
+export type TimelineGroupBy = "project" | "contact" | "category";
 
 export type TimelineDateRangeSummary = {
   startInclusive: string;

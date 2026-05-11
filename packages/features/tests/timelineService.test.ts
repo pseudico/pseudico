@@ -64,6 +64,15 @@ describe("TimelineService", () => {
       slug: "client-rollout",
       timestamp: TIMESTAMP
     });
+    new ContainerRepository(connection).create({
+      id: "container_contact_1",
+      workspaceId: "workspace_1",
+      type: "contact",
+      name: "Avery Client",
+      slug: "avery-client",
+      categoryId: "category_sales",
+      timestamp: TIMESTAMP
+    });
     idCounter = 0;
   });
 
@@ -207,6 +216,34 @@ describe("TimelineService", () => {
     expect(byCategory.groups.map((group) => group.label)).toEqual([
       "Operations",
       "Sales"
+    ]);
+  });
+
+  it("groups contact-owned timeline tasks separately from project work", async () => {
+    const taskService = createTaskService();
+    await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_contact_1",
+      title: "Client follow-up",
+      dueAt: "2026-05-15T12:00:00.000Z"
+    });
+    await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Project task",
+      dueAt: "2026-05-15T13:00:00.000Z"
+    });
+
+    const byContact = createTimelineService().groupTimelineItems({
+      workspaceId: "workspace_1",
+      start: "2026-05-15",
+      end: "2026-05-16",
+      groupBy: "contact"
+    });
+
+    expect(byContact.groups.map((group) => group.label)).toEqual([
+      "Avery Client",
+      "Non-contact work"
     ]);
   });
 

@@ -17,7 +17,10 @@ describe("Timeline renderer page", () => {
 
     expect(html).toContain("Timeline");
     expect(html).toContain("Group by");
+    expect(html).toContain("Zoom");
+    expect(html).toContain("Contact");
     expect(html).toContain("Show completed");
+    expect(html).toContain("timeline-range-marker");
     expect(html).toContain("Launch Plan");
     expect(html).toContain("Launch checklist");
     expect(html).toContain("Operations");

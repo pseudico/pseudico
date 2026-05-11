@@ -13,7 +13,7 @@ import {
 import type { FeatureModuleContract } from "../featureModuleContract";
 import { createTaskDateRange } from "../tasks/TaskQueries";
 
-export type TimelineGroupBy = "project" | "category";
+export type TimelineGroupBy = "project" | "contact" | "category";
 
 export type TimelineRangeInput = {
   start: string | Date;
@@ -262,21 +262,15 @@ function groupItems(
   const groups = new Map<string, TimelineGroup>();
 
   for (const item of items) {
-    const key =
-      groupBy === "project"
-        ? item.containerId
-        : item.categoryId ?? "uncategorized";
+    const key = getGroupKey(item, groupBy);
     const existing = groups.get(key);
 
     if (existing === undefined) {
       groups.set(key, {
         key,
-        label:
-          groupBy === "project"
-            ? item.containerName
-            : item.categoryName ?? "Uncategorized",
+        label: getGroupLabel(item, groupBy),
         groupBy,
-        color: groupBy === "project" ? item.containerColor : item.categoryColor,
+        color: getGroupColor(item, groupBy),
         itemCount: 1,
         completedCount: isCompleted(item) ? 1 : 0,
         items: [item]
@@ -292,6 +286,38 @@ function groupItems(
   return [...groups.values()].sort((left, right) =>
     left.label.localeCompare(right.label, undefined, { sensitivity: "base" })
   );
+}
+
+function getGroupKey(item: TimelineItem, groupBy: TimelineGroupBy): string {
+  if (groupBy === "category") {
+    return item.categoryId ?? "uncategorized";
+  }
+
+  if (item.containerType === groupBy) {
+    return item.containerId;
+  }
+
+  return groupBy === "project" ? "non-project-work" : "non-contact-work";
+}
+
+function getGroupLabel(item: TimelineItem, groupBy: TimelineGroupBy): string {
+  if (groupBy === "category") {
+    return item.categoryName ?? "Uncategorized";
+  }
+
+  if (item.containerType === groupBy) {
+    return item.containerName;
+  }
+
+  return groupBy === "project" ? "Non-project work" : "Non-contact work";
+}
+
+function getGroupColor(item: TimelineItem, groupBy: TimelineGroupBy): string | null {
+  if (groupBy === "category") {
+    return item.categoryColor;
+  }
+
+  return item.containerType === groupBy ? item.containerColor : null;
 }
 
 function isCompleted(item: TimelineItem): boolean {
