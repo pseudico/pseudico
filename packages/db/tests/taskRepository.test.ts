@@ -94,6 +94,18 @@ describe("TaskRepository", () => {
       taskStatus: "waiting"
     });
     createTaskProjection({
+      itemId: "item_due_today_someday",
+      title: "Someday today",
+      dueAt: "2026-05-02T09:15:00.000Z",
+      taskStatus: "someday"
+    });
+    createTaskProjection({
+      itemId: "item_overdue_deferred",
+      title: "Deferred overdue",
+      dueAt: "2026-05-01T10:00:00.000Z",
+      taskStatus: "deferred"
+    });
+    createTaskProjection({
       itemId: "item_overdue",
       title: "Overdue",
       dueAt: "2026-05-01T09:00:00.000Z",
@@ -152,8 +164,7 @@ describe("TaskRepository", () => {
       startInclusive: "2026-05-02T00:00:00.000Z",
       endExclusive: "2026-05-03T00:00:00.000Z"
     }).map((task) => task.item.id)).toEqual([
-      "item_due_today_open",
-      "item_due_today_waiting"
+      "item_due_today_open"
     ]);
     expect(repository.listOverdue(
       "workspace_1",
@@ -167,6 +178,46 @@ describe("TaskRepository", () => {
       startInclusive: "2026-05-03T00:00:00.000Z",
       endExclusive: "2026-05-10T00:00:00.000Z"
     }).map((task) => task.item.id)).toEqual(["item_upcoming"]);
+  });
+
+  it("lists waiting, someday, and deferred tasks for review", () => {
+    const repository = new TaskRepository(connection);
+    createTaskProjection({
+      itemId: "item_open",
+      title: "Open task",
+      dueAt: "2026-05-02T08:00:00.000Z",
+      taskStatus: "open"
+    });
+    createTaskProjection({
+      itemId: "item_someday",
+      title: "Someday task",
+      dueAt: "2026-05-05T08:00:00.000Z",
+      taskStatus: "someday"
+    });
+    createTaskProjection({
+      itemId: "item_deferred",
+      title: "Deferred task",
+      dueAt: "2026-05-04T08:00:00.000Z",
+      taskStatus: "deferred"
+    });
+    createTaskProjection({
+      itemId: "item_waiting",
+      title: "Waiting task",
+      dueAt: "2026-05-03T08:00:00.000Z",
+      taskStatus: "waiting"
+    });
+
+    expect(repository.listReviewTasks("workspace_1").map((task) => ({
+      id: task.item.id,
+      status: task.task.taskStatus
+    }))).toEqual([
+      { id: "item_deferred", status: "deferred" },
+      { id: "item_waiting", status: "waiting" },
+      { id: "item_someday", status: "someday" }
+    ]);
+    expect(repository.listReviewTasks("workspace_1", ["someday"]).map(
+      (task) => task.item.id
+    )).toEqual(["item_someday"]);
   });
 
   it("lists timeline tasks overlapping a date range with optional completed tasks", () => {
@@ -232,7 +283,7 @@ function createTaskProjection(input: {
   title: string;
   dueAt: string;
   startAt?: string | null;
-  taskStatus: "open" | "done" | "waiting" | "cancelled";
+  taskStatus: "open" | "done" | "waiting" | "someday" | "deferred" | "cancelled";
 }) {
   const item = createTaskItem(input.itemId, input.title);
   const task = new TaskRepository(connection).createDetails({

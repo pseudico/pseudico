@@ -7,6 +7,7 @@ import {
   DEFAULT_APP_SETTINGS,
   DEFAULT_DASHBOARD_WIDGET_TYPES,
   MigrationService,
+  SavedViewRepository,
   resolveWorkspaceDatabasePath,
   WorkspaceSeedService,
   type DatabaseConnection
@@ -86,6 +87,26 @@ describe("WorkspaceSeedService", () => {
     expect(result.defaultDashboardWidgets.map((widget) => widget.record.type)).toEqual(
       [...DEFAULT_DASHBOARD_WIDGET_TYPES]
     );
+    expect(result.defaultSavedViews).toHaveLength(1);
+    expect(result.defaultSavedViews[0]).toMatchObject({
+      created: true,
+      record: {
+        type: "smart_list",
+        name: "Someday / Waiting Review",
+        isFavorite: true
+      }
+    });
+    expect(JSON.parse(result.defaultSavedViews[0]!.record.queryJson)).toMatchObject({
+      conditions: [
+        { field: "itemType", operator: "is", value: "task" },
+        {
+          field: "taskStatus",
+          operator: "in",
+          value: ["waiting", "someday", "deferred"]
+        }
+      ],
+      groupBy: "status"
+    });
     expect(result.defaultSettings.map((setting) => setting.record.settingKey)).toEqual(
       DEFAULT_APP_SETTINGS.map((setting) => setting.key)
     );
@@ -123,6 +144,7 @@ describe("WorkspaceSeedService", () => {
     expect(secondRun.defaultDashboardWidgets.every((widget) => widget.created)).toBe(
       false
     );
+    expect(secondRun.defaultSavedViews.every((view) => view.created)).toBe(false);
     expect(secondRun.defaultSettings.every((setting) => setting.created)).toBe(
       false
     );
@@ -134,6 +156,12 @@ describe("WorkspaceSeedService", () => {
     expect(countRows("dashboard_widgets")).toBe(
       DEFAULT_DASHBOARD_WIDGET_TYPES.length
     );
+    expect(countRows("saved_views")).toBe(1);
+    expect(
+      new SavedViewRepository(connection!).listByWorkspace("workspace_1", {
+        type: "smart_list"
+      }).map((view) => view.name)
+    ).toEqual(["Someday / Waiting Review"]);
     expect(countRows("app_settings")).toBe(DEFAULT_APP_SETTINGS.length);
     expect(countRows("activity_log")).toBe(1);
   });

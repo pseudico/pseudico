@@ -86,7 +86,7 @@ create table items (
 create table task_details (
   item_id text primary key references items(id) on delete cascade,
   workspace_id text not null references workspaces(id) on delete cascade,
-  task_status text not null default 'open' check (task_status in ('open', 'done', 'waiting', 'cancelled')),
+  task_status text not null default 'open' check (task_status in ('open', 'done', 'waiting', 'someday', 'deferred', 'cancelled')),
   priority integer check (priority is null or (priority >= 0 and priority <= 5)),
   start_at text,
   due_at text,

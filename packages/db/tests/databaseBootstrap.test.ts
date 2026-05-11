@@ -43,9 +43,9 @@ describe("DatabaseBootstrapService", () => {
     expect(result).toMatchObject({
       databasePath,
       workspaceId: "workspace_1",
-      schemaVersion: 11,
+      schemaVersion: 12,
       migrations: {
-        currentVersion: 11
+        currentVersion: 12
       },
       seed: {
         workspace: {
@@ -62,7 +62,7 @@ describe("DatabaseBootstrapService", () => {
         }
       }
     });
-    expect(result.migrations.appliedMigrations).toHaveLength(11);
+    expect(result.migrations.appliedMigrations).toHaveLength(12);
 
     connection = await createDatabaseConnection({
       databasePath,
@@ -72,7 +72,7 @@ describe("DatabaseBootstrapService", () => {
     expect(readOne("workspaces")).toMatchObject({
       id: "workspace_1",
       name: "Personal Work",
-      schema_version: 11
+      schema_version: 12
     });
     expect(readOne("containers")).toMatchObject({
       workspace_id: "workspace_1",
@@ -90,6 +90,7 @@ describe("DatabaseBootstrapService", () => {
     expect(countRows("dashboard_widgets")).toBe(
       DEFAULT_DASHBOARD_WIDGET_TYPES.length
     );
+    expect(countRows("saved_views")).toBe(1);
     expect(countRows("app_settings")).toBe(DEFAULT_APP_SETTINGS.length);
     expect(readOne("activity_log")).toMatchObject({
       workspace_id: "workspace_1",
@@ -140,6 +141,7 @@ describe("DatabaseBootstrapService", () => {
     expect(countRows("dashboard_widgets")).toBe(
       DEFAULT_DASHBOARD_WIDGET_TYPES.length
     );
+    expect(countRows("saved_views")).toBe(1);
     expect(countRows("app_settings")).toBe(DEFAULT_APP_SETTINGS.length);
     expect(countRows("activity_log")).toBe(1);
   });

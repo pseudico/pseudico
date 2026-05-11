@@ -395,6 +395,8 @@ function isTaskStatusValue(value: unknown): value is TaskStatus {
     value === "open" ||
     value === "done" ||
     value === "waiting" ||
+    value === "someday" ||
+    value === "deferred" ||
     value === "cancelled"
   );
 }

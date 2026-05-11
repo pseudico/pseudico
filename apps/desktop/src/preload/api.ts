@@ -2107,7 +2107,7 @@ export type UndoApplySummary = {
 };
 
 
-export type TaskStatus = "open" | "done" | "waiting" | "cancelled";
+export type TaskStatus = "open" | "done" | "waiting" | "someday" | "deferred" | "cancelled";
 export type ListItemStatus = "open" | "done" | "waiting" | "cancelled";
 export type ListDisplayMode = "checklist" | "pipeline";
 export type ListProgressMode = "count" | "manual" | "none";

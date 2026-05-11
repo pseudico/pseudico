@@ -444,7 +444,7 @@ Universal table for all content objects.
 | Field | Type | Notes |
 |---|---|---|
 | item_id | text | PK/FK to items |
-| task_status | text | `open`, `done`, `waiting`, `cancelled` |
+| task_status | text | `open`, `done`, `waiting`, `someday`, `deferred`, `cancelled` |
 | priority | integer | Optional 0–5 |
 | start_at | datetime | Nullable |
 | due_at | datetime | Nullable |
@@ -1060,17 +1060,13 @@ Quick Add Task
 ```text
 open
 waiting
+someday
+deferred
 done
 cancelled
 ```
 
-Optional later:
-
-```text
-someday
-blocked
-deferred
-```
+Waiting, Someday, and Deferred tasks are review states and are hidden from Today/overdue automatic lanes by default. Blocked remains a later workflow extension.
 
 ### 12.4 Date parsing
 

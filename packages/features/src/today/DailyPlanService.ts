@@ -384,9 +384,12 @@ export class DailyPlanService {
       task.item.completedAt !== null ||
       task.task.completedAt !== null ||
       task.task.taskStatus === "done" ||
-      task.task.taskStatus === "cancelled"
+      task.task.taskStatus === "cancelled" ||
+      task.task.taskStatus === "waiting" ||
+      task.task.taskStatus === "someday" ||
+      task.task.taskStatus === "deferred"
     ) {
-      throw new Error("Only open or waiting tasks can be planned.");
+      throw new Error("Only open tasks can be planned.");
     }
 
     return task;

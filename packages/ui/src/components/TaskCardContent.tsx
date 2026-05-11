@@ -13,7 +13,7 @@ export type TaskCardViewModel = UniversalItemViewModel & {
   timezone?: string | null;
 };
 
-export type TaskCardStatus = "open" | "waiting" | "done" | "cancelled";
+export type TaskCardStatus = "open" | "waiting" | "someday" | "deferred" | "done" | "cancelled";
 
 export type TaskCardContentProps = {
   item: TaskCardViewModel;
@@ -141,6 +141,8 @@ export function TaskCardContent({
           >
             <option value="open">Open</option>
             <option value="waiting">Waiting</option>
+            <option value="someday">Someday</option>
+            <option value="deferred">Deferred</option>
             <option value="done">Done</option>
             <option value="cancelled">Cancelled</option>
           </select>
@@ -182,6 +184,8 @@ export function TaskDetailsRow({
 function normalizeTaskStatus(status: string | null | undefined): TaskCardStatus {
   return status === "waiting" ||
     status === "done" ||
+    status === "someday" ||
+    status === "deferred" ||
     status === "cancelled" ||
     status === "open"
     ? status
@@ -195,6 +199,14 @@ function formatTaskStatus(status: TaskCardStatus): string {
 
   if (status === "waiting") {
     return "Waiting";
+  }
+
+  if (status === "someday") {
+    return "Someday";
+  }
+
+  if (status === "deferred") {
+    return "Deferred";
   }
 
   if (status === "cancelled") {

@@ -1,6 +1,6 @@
 import type { ItemStatus } from "./Item";
 
-export const TASK_STATUSES = ["open", "done", "waiting", "cancelled"] as const;
+export const TASK_STATUSES = ["open", "done", "waiting", "someday", "deferred", "cancelled"] as const;
 
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
@@ -18,7 +18,7 @@ export function taskStatusToItemStatus(status: TaskStatus): ItemStatus {
     return "completed";
   }
 
-  if (status === "waiting") {
+  if (status === "waiting" || status === "someday" || status === "deferred") {
     return "waiting";
   }
 

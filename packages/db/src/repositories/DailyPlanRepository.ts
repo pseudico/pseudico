@@ -450,7 +450,7 @@ export class DailyPlanRepository {
            and i.deleted_at is null
            and i.completed_at is null
            and td.completed_at is null
-           and td.task_status in ('open', 'waiting')
+           and td.task_status = 'open'
            ${laneSql}
          order by dpi.lane asc, dpi.sort_order asc, dpi.created_at asc`
       )

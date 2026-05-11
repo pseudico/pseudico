@@ -144,7 +144,7 @@ export class TabSummaryRepository {
              when i.type = 'task'
               and i.completed_at is null
               and td.completed_at is null
-              and td.task_status in ('open', 'waiting') then 1
+              and td.task_status = 'open' then 1
              else 0
            end) as open_task_count,
            sum(case
@@ -156,7 +156,7 @@ export class TabSummaryRepository {
              when i.type = 'task'
               and i.completed_at is null
               and td.completed_at is null
-              and td.task_status in ('open', 'waiting')
+              and td.task_status = 'open'
               and td.due_at is not null
               and td.due_at < ? then 1
              else 0
@@ -165,7 +165,7 @@ export class TabSummaryRepository {
              when i.type = 'task'
               and i.completed_at is null
               and td.completed_at is null
-              and td.task_status in ('open', 'waiting')
+              and td.task_status = 'open'
               and td.due_at is not null
               and td.due_at >= ? then 1
              else 0
@@ -226,7 +226,7 @@ export class TabSummaryRepository {
              and i.deleted_at is null
              and i.completed_at is null
              and td.completed_at is null
-             and td.task_status in ('open', 'waiting')
+             and td.task_status = 'open'
          )
          select tab_id, item_id, type, title, status, preview, due_at, created_at, updated_at
          from ranked

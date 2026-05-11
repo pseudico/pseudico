@@ -10,7 +10,7 @@ import {
 } from "@local-work-os/db";
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { TagService, TaskService } from "../src";
+import { SearchService, TagService, TaskService } from "../src";
 
 let cleanup: (() => Promise<void>) | undefined;
 let connection: DatabaseConnection;
@@ -385,6 +385,67 @@ describe("TaskService", () => {
       start: "2026-05-03T00:00:00.000Z",
       end: "2026-05-10T00:00:00.000Z"
     }).map((task) => task.item.title)).toEqual(["Upcoming"]);
+  });
+
+  it("supports someday/deferred review states, search inclusion, and activation", async () => {
+    const service = createService();
+    const waiting = await service.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Waiting for supplier",
+      status: "waiting",
+      dueAt: "2026-05-02T12:00:00.000Z"
+    });
+    const someday = await service.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Someday idea",
+      status: "someday"
+    });
+    const deferred = await service.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Deferred follow-up",
+      status: "deferred",
+      dueAt: "2026-05-01T12:00:00.000Z"
+    });
+
+    expect(service.listReviewTasks({
+      workspaceId: "workspace_1"
+    }).map((task) => task.item.id)).toEqual([
+      deferred.item.id,
+      waiting.item.id,
+      someday.item.id
+    ]);
+    expect(service.listDueToday(
+      "workspace_1",
+      "2026-05-02"
+    ).map((task) => task.item.id)).toEqual([]);
+    expect(service.listOverdue(
+      "workspace_1",
+      "2026-05-02"
+    ).map((task) => task.item.id)).toEqual([]);
+    expect(new SearchService({ connection }).search({
+      workspaceId: "workspace_1",
+      query: "Someday"
+    }).map((result) => ({
+      title: result.title,
+      taskStatus: result.taskStatus
+    }))).toEqual([{ title: "Someday idea", taskStatus: "someday" }]);
+
+    const activated = await service.activateTask({
+      itemId: deferred.item.id,
+      dueAt: "2026-05-03T09:00:00.000Z"
+    });
+
+    expect(activated.item.status).toBe("active");
+    expect(activated.task).toMatchObject({
+      taskStatus: "open",
+      dueAt: "2026-05-03T09:00:00.000Z"
+    });
+    expect(service.listReviewTasks({
+      workspaceId: "workspace_1"
+    }).map((task) => task.item.id)).toEqual([waiting.item.id, someday.item.id]);
   });
 
   it("lists task feed details by container including completed tasks", async () => {
