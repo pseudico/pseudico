@@ -3374,3 +3374,47 @@ Files changed:
 Open questions / risks: Awaiting GitHub CI/review status.
 Next actions: Check CI; merge if green; promote next issue.
 
+
+## 2026-05-11 20:01:23 +10:00
+Objective: Merge PSE-141 and prepare next Codex Ready issue.
+Decisions made:
+- PR #130 merged cleanly after green CI; branch deleted and main fast-forwarded to merge commit 1815886.
+- PSE-141 moved to Done; PSE-142 promoted as the sole Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked .playwright-mcp/ and gh installer remain unrelated.
+Next actions: Start PSE-142 in a new run.
+
+
+## 2026-05-11 20:07:00 +10:00
+Objective: Start PSE-142 implementation.
+Decisions made:
+- Reconciled no PR Open/In Progress issues; moved PSE-142 to In Progress.
+- Created branch codex/PSE-142-keyboard-planner after sandbox git ref denial required escalation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Linear title differs from source file; implementing linked daily planner scope.
+Next actions: Inspect Today/QuickAdd code; implement keyboard planner; run checks.
+
+## 2026-05-11 20:20:44 +10:00
+Objective: Implement PSE-142 keyboard daily planner.
+Decisions made:
+- Added reusable DailyPlannerEditor with Today/Tomorrow draft lanes and keyboard command helper.
+- Wired Today page to create local tasks through QuickAdd/task API then plan them through Today IPC.
+Files changed:
+- packages/ui/src/components/DailyPlannerEditor.tsx
+- apps/desktop/src/renderer/pages/TodayPage.tsx
+- apps/desktop/src/renderer/styles.css
+- docs/ACCESSIBILITY.md
+Open questions / risks: Full repo checks and PR/CI still pending.
+Next actions: Run lint/typecheck/test/build; open PR; update Linear.
+
+## 2026-05-11 20:28:49 +10:00
+Objective: Open PR for PSE-142.
+Decisions made:
+- Local checks passed: pnpm lint, pnpm typecheck, pnpm test, pnpm build.
+- Created ready PR #131 and moved PSE-142 to PR Open with PR attachment.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Awaiting GitHub CI/review status before merge.
+Next actions: Check CI; merge if green; promote next issue.
