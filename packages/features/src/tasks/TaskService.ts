@@ -24,6 +24,7 @@ import {
   type ItemRecord,
   type SearchIndexRecord,
   type TaskRecord,
+  type TaskReviewStatus,
   type TaskWithItemRecord,
   type UpdateItemPatch,
   type UpdateTaskDetailsPatch
@@ -103,6 +104,14 @@ export type RescheduleTaskInput = {
   itemId: string;
   dueAt: string | null;
   actorType?: ActivityActorType;
+  startAt?: string | null;
+  allDay?: boolean;
+};
+
+export type ActivateTaskInput = {
+  itemId: string;
+  actorType?: ActivityActorType;
+  dueAt?: string | null;
   startAt?: string | null;
   allDay?: boolean;
 };
@@ -390,6 +399,74 @@ export class TaskService {
     });
   }
 
+  async activateTask(input: ActivateTaskInput): Promise<TaskMutationResult> {
+    validateNonEmptyString(input.itemId, "itemId");
+
+    return await this.transactionService.runInTransaction(async () => {
+      const timestamp = createIsoTimestamp(this.now());
+      const before = this.requireTask(input.itemId);
+
+      if (
+        before.item.archivedAt !== null ||
+        before.item.deletedAt !== null ||
+        before.item.completedAt !== null ||
+        before.task.completedAt !== null ||
+        before.task.taskStatus === "done" ||
+        before.task.taskStatus === "cancelled"
+      ) {
+        throw new Error("Only active review or open tasks can be activated.");
+      }
+
+      const startAt =
+        input.startAt === undefined
+          ? before.task.startAt
+          : normalizeTaskDateTime(input.startAt, "startAt") ?? null;
+      const dueAt =
+        input.dueAt === undefined
+          ? before.task.dueAt
+          : normalizeTaskDateTime(input.dueAt, "dueAt") ?? null;
+      assertTaskDateOrder(startAt, dueAt);
+
+      const item = new ItemRepository(this.connection).update(input.itemId, {
+        status: "active",
+        completedAt: null,
+        timestamp
+      });
+      const task = new TaskRepository(this.connection).updateDetails(input.itemId, {
+        taskStatus: "open",
+        completedAt: null,
+        startAt,
+        dueAt,
+        allDay:
+          input.allDay ??
+          inferAllDay(
+            input.startAt === undefined ? before.task.startAt : input.startAt,
+            input.dueAt === undefined ? before.task.dueAt : input.dueAt
+          ),
+        timestamp
+      });
+
+      this.logTaskEvent({
+        item,
+        task,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+        action: ActivityAction.taskUpdated,
+        summary: `Activated task "${item.title}".`,
+        before,
+        timestamp
+      });
+
+      await this.rescheduleReminderForTaskDateChange({
+        itemId: item.id,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
+
+      const searchRecord = this.upsertSearchRecord(item, task, timestamp);
+
+      return { item, task, searchRecord, inlineTags: this.getInlineTagSlugs(item) };
+    });
+  }
+
   async completeTask(
     itemId: string,
     actorType: ActivityActorType = "local_user"
@@ -510,6 +587,18 @@ export class TaskService {
     return new TaskRepository(this.connection).listByContainer(containerId);
   }
 
+  listReviewTasks(input: {
+    workspaceId: string;
+    statuses?: TaskReviewStatus[];
+  }): TaskWithItemRecord[] {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+
+    return new TaskRepository(this.connection).listReviewTasks(
+      input.workspaceId,
+      input.statuses
+    );
+  }
+
   private requireTask(itemId: string): TaskWithItemRecord {
     const task = new TaskRepository(this.connection).getByItemId(itemId);
 
@@ -531,7 +620,7 @@ export class TaskService {
       task.task.taskStatus === "done" ||
       task.task.taskStatus === "cancelled"
     ) {
-      throw new Error("Only active open or waiting tasks can be rescheduled.");
+      throw new Error("Only active open, waiting, someday, or deferred tasks can be rescheduled.");
     }
 
     return task;
@@ -766,7 +855,7 @@ export class TaskService {
     validateNonEmptyString(input.title, "title");
 
     if (input.status !== undefined && !isTaskStatus(input.status)) {
-      throw new Error("status must be open, done, waiting, or cancelled.");
+      throw new Error("status must be open, done, waiting, someday, deferred, or cancelled.");
     }
 
     validatePriority(input.priority);
@@ -780,7 +869,7 @@ export class TaskService {
     }
 
     if (input.status !== undefined && !isTaskStatus(input.status)) {
-      throw new Error("status must be open, done, waiting, or cancelled.");
+      throw new Error("status must be open, done, waiting, someday, deferred, or cancelled.");
     }
 
     validatePriority(input.priority);

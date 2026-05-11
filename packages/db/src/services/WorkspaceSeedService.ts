@@ -5,6 +5,7 @@ import {
   ContainerRepository,
   ContainerTabRepository,
   DashboardRepository,
+  SavedViewRepository,
   WorkspaceRepository,
   type ActivityLogRecord,
   type AppSettingRecord,
@@ -12,6 +13,7 @@ import {
   type ContainerTabRecord,
   type DashboardRecord,
   type DashboardWidgetRecord,
+  type SavedViewRecord,
   type WorkspaceRecord
 } from "../repositories";
 
@@ -74,6 +76,7 @@ export type WorkspaceSeedResult = {
   systemInboxDefaultTab: SeedRowStatus<ContainerTabRecord>;
   defaultDashboard: SeedRowStatus<DashboardRecord>;
   defaultDashboardWidgets: Array<SeedRowStatus<DashboardWidgetRecord>>;
+  defaultSavedViews: Array<SeedRowStatus<SavedViewRecord>>;
   defaultSettings: Array<SeedRowStatus<AppSettingRecord>>;
   workspaceCreatedActivity: SeedRowStatus<ActivityLogRecord>;
 };
@@ -87,6 +90,7 @@ export class WorkspaceSeedService {
   private readonly dashboardRepository: DashboardRepository;
   private readonly idFactory: IdFactory;
   private readonly now: () => Date;
+  private readonly savedViewRepository: SavedViewRepository;
   private readonly workspaceRepository: WorkspaceRepository;
 
   constructor(input: {
@@ -102,6 +106,7 @@ export class WorkspaceSeedService {
     this.containerRepository = new ContainerRepository(input.connection);
     this.containerTabRepository = new ContainerTabRepository(input.connection);
     this.dashboardRepository = new DashboardRepository(input.connection);
+    this.savedViewRepository = new SavedViewRepository(input.connection);
     this.workspaceRepository = new WorkspaceRepository(input.connection);
   }
 
@@ -125,6 +130,10 @@ export class WorkspaceSeedService {
           defaultDashboard.record.id,
           timestamp
         );
+        const defaultSavedViews = this.ensureDefaultSavedViews(
+          workspace.record.id,
+          timestamp
+        );
         const defaultSettings = this.ensureDefaultSettings(
           workspace.record.id,
           timestamp
@@ -140,6 +149,7 @@ export class WorkspaceSeedService {
           systemInboxDefaultTab,
           defaultDashboard,
           defaultDashboardWidgets,
+          defaultSavedViews,
           defaultSettings,
           workspaceCreatedActivity
         };
@@ -310,6 +320,63 @@ export class WorkspaceSeedService {
         created: true
       };
     });
+  }
+
+  private ensureDefaultSavedViews(
+    workspaceId: string,
+    timestamp: string
+  ): Array<SeedRowStatus<SavedViewRecord>> {
+    const existing = this.savedViewRepository
+      .listByWorkspace(workspaceId, { type: "smart_list" })
+      .find((view) => view.name === "Someday / Waiting Review");
+
+    if (existing !== undefined) {
+      return [
+        {
+          record: existing,
+          created: false
+        }
+      ];
+    }
+
+    return [
+      {
+        record: this.savedViewRepository.create({
+          id: this.idFactory("saved_view"),
+          workspaceId,
+          type: "smart_list",
+          name: "Someday / Waiting Review",
+          description:
+            "Review waiting, someday, and deferred tasks that stay out of Today by default.",
+          queryJson: JSON.stringify({
+            version: 1,
+            match: "all",
+            targets: ["item"],
+            conditions: [
+              { field: "itemType", operator: "is", value: "task" },
+              {
+                field: "taskStatus",
+                operator: "in",
+                value: ["waiting", "someday", "deferred"]
+              }
+            ],
+            groupBy: "status",
+            sort: [
+              { field: "dueAt", direction: "asc" },
+              { field: "updatedAt", direction: "desc" }
+            ]
+          }),
+          displayJson: JSON.stringify({
+            kind: "task_review",
+            emptyState:
+              "No waiting, someday, or deferred tasks need review right now."
+          }),
+          isFavorite: true,
+          timestamp
+        }),
+        created: true
+      }
+    ];
   }
 
   private ensureWorkspaceCreatedActivity(

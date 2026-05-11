@@ -33,7 +33,7 @@ export const taskDetails = sqliteTable(
     index("idx_task_details_status").on(table.workspaceId, table.taskStatus),
     check(
       "ck_task_details_status",
-      sql`${table.taskStatus} in ('open', 'done', 'waiting', 'cancelled')`
+      sql`${table.taskStatus} in ('open', 'done', 'waiting', 'someday', 'deferred', 'cancelled')`
     ),
     check(
       "ck_task_details_priority",

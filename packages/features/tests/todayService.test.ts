@@ -88,6 +88,27 @@ describe("TodayService", () => {
       title: "Tomorrow",
       dueAt: new Date(2026, 4, 16, 8).toISOString()
     });
+    await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Waiting today",
+      status: "waiting",
+      dueAt: new Date(2026, 4, 15, 14).toISOString()
+    });
+    await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Someday today",
+      status: "someday",
+      dueAt: new Date(2026, 4, 15, 15).toISOString()
+    });
+    await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Deferred overdue",
+      status: "deferred",
+      dueAt: new Date(2026, 4, 14, 12).toISOString()
+    });
     const completedToday = await taskService.createTask({
       workspaceId: "workspace_1",
       containerId: "container_project_1",
@@ -157,6 +178,56 @@ describe("TodayService", () => {
     ]);
     expect(viewModel.tomorrowPreview.map((task) => task.title)).toEqual([
       "Tomorrow"
+    ]);
+  });
+
+  it("keeps waiting, someday, and deferred tasks out of Today planning lanes by default", async () => {
+    const taskService = createTaskService();
+    const dailyPlanService = createDailyPlanService();
+    const waiting = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Waiting review",
+      status: "waiting",
+      dueAt: new Date(2026, 4, 15, 10).toISOString()
+    });
+    const someday = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Someday review",
+      status: "someday",
+      dueAt: new Date(2026, 4, 14, 10).toISOString()
+    });
+    const deferred = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Deferred review",
+      status: "deferred",
+      dueAt: new Date(2026, 4, 16, 10).toISOString()
+    });
+
+    const viewModel = createTodayService().getTodayViewModel({
+      workspaceId: "workspace_1"
+    });
+
+    expect([
+      ...viewModel.dueToday,
+      ...viewModel.overdueBacklog,
+      ...viewModel.tomorrowPreview
+    ].map((task) => task.title)).toEqual([]);
+    await expect(
+      dailyPlanService.planTask({
+        workspaceId: "workspace_1",
+        itemId: waiting.item.id,
+        lane: "today"
+      })
+    ).rejects.toThrow("Only open tasks can be planned.");
+    expect(taskService.listReviewTasks({
+      workspaceId: "workspace_1"
+    }).map((task) => task.item.id)).toEqual([
+      deferred.item.id,
+      waiting.item.id,
+      someday.item.id
     ]);
   });
 

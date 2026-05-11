@@ -222,6 +222,7 @@ export {
   TaskRepository,
   type CreateTaskDetailsInput,
   type TaskRecord,
+  type TaskReviewStatus,
   type TaskWithItemRecord,
   type UpdateTaskDetailsPatch
 } from "./TaskRepository";

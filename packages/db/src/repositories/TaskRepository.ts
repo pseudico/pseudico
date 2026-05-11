@@ -71,6 +71,11 @@ export type TaskWithItemRecord = {
   task: TaskRecord;
 };
 
+export type TaskReviewStatus = Extract<
+  TaskStatus,
+  "waiting" | "someday" | "deferred"
+>;
+
 export type CreateTaskDetailsInput = {
   itemId: string;
   workspaceId: string;
@@ -385,6 +390,41 @@ export class TaskRepository {
     return rows.map(toTaskWithItemRecord);
   }
 
+  listReviewTasks(
+    workspaceId: string,
+    statuses: TaskReviewStatus[] = ["waiting", "someday", "deferred"]
+  ): TaskWithItemRecord[] {
+    if (statuses.length === 0) {
+      return [];
+    }
+
+    const placeholders = statuses.map(() => "?").join(", ");
+    const rows = this.connection.sqlite
+      .prepare<unknown[], TaskWithItemRow>(
+        `${TASK_WITH_ITEM_SELECT}
+         where td.workspace_id = ?
+           and i.type = 'task'
+           and i.archived_at is null
+           and i.deleted_at is null
+           and i.completed_at is null
+           and td.completed_at is null
+           and td.task_status in (${placeholders})
+         order by
+           case td.task_status
+             when 'deferred' then 1
+             when 'waiting' then 2
+             when 'someday' then 3
+             else 4
+           end,
+           coalesce(td.due_at, td.updated_at) asc,
+           i.sort_order asc,
+           i.created_at asc`
+      )
+      .all(workspaceId, ...statuses);
+
+    return rows.map(toTaskWithItemRecord);
+  }
+
   private listActiveDatedTasks(input: {
     workspaceId: string;
     whereSql: string;
@@ -399,7 +439,7 @@ export class TaskRepository {
            and i.deleted_at is null
            and i.completed_at is null
            and td.due_at is not null
-           and td.task_status in ('open', 'waiting')
+           and td.task_status = 'open'
            and ${input.whereSql}
          order by td.due_at asc, i.sort_order asc, i.created_at asc`
       )

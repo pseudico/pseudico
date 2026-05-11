@@ -16,6 +16,8 @@ export type SmartListEditorTaskStatus =
   | "open"
   | "done"
   | "waiting"
+  | "someday"
+  | "deferred"
   | "cancelled";
 export type SmartListEditorDueFilter =
   | "any"
@@ -87,6 +89,8 @@ const CONTAINER_TYPES: {
 const TASK_STATUSES: { value: SmartListEditorTaskStatus; label: string }[] = [
   { value: "open", label: "Open" },
   { value: "waiting", label: "Waiting" },
+  { value: "someday", label: "Someday" },
+  { value: "deferred", label: "Deferred" },
   { value: "done", label: "Done" },
   { value: "cancelled", label: "Cancelled" }
 ];

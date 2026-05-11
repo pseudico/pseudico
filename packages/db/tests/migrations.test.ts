@@ -80,7 +80,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version eleven", () => {
+  it("runs on an empty database and records schema version twelve", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -139,14 +139,19 @@ describe("schema migrations", () => {
           version: 11,
           name: "reminder_targets",
           checksum: "pse-120-reminder-targets-v1"
+        },
+        {
+          version: 12,
+          name: "review_task_statuses",
+          checksum: "pse-121-review-task-statuses-v1"
         }
       ],
-      currentVersion: 11
+      currentVersion: 12
     });
-    expect(service.getCurrentSchemaVersion()).toBe(11);
+    expect(service.getCurrentSchemaVersion()).toBe(12);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 11
+      currentVersion: 12
     });
   });
 

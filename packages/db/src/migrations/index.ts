@@ -9,6 +9,7 @@ import { workflowsSql } from "./0008_workflows";
 import { containerMediaSql } from "./0009_container_media";
 import { tabVisibilitySql } from "./0010_tab_visibility";
 import { reminderTargetsSql } from "./0011_reminder_targets";
+import { reviewTaskStatusesSql } from "./0012_review_task_statuses";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -77,5 +78,11 @@ export const migrations: MigrationDefinition[] = [
     name: "reminder_targets",
     sql: reminderTargetsSql,
     checksum: "pse-120-reminder-targets-v1"
+  },
+  {
+    version: 12,
+    name: "review_task_statuses",
+    sql: reviewTaskStatusesSql,
+    checksum: "pse-121-review-task-statuses-v1"
   }
 ];

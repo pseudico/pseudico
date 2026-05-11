@@ -190,7 +190,7 @@ describe("database IPC handlers", () => {
       ok: true,
       data: {
         connected: true,
-          schemaVersion: 11,
+          schemaVersion: 12,
         workspaceExists: true,
         inboxExists: true,
         defaultDashboardExists: true,
@@ -241,7 +241,7 @@ describe("navigation IPC handlers", () => {
         name: "Personal",
         rootPath: tempRoot!,
         openedAt: "2026-05-09T04:00:00.000Z",
-        schemaVersion: 11
+        schemaVersion: 12
       })
     });
 
@@ -1110,7 +1110,10 @@ describe("Collection IPC handlers", () => {
     });
     await expect(handlers.handleListSmartLists(undefined)).resolves.toMatchObject({
       ok: true,
-      data: [{ name: "Completed dated tasks" }]
+      data: expect.arrayContaining([
+        expect.objectContaining({ name: "Someday / Waiting Review" }),
+        expect.objectContaining({ name: "Completed dated tasks" })
+      ])
     });
   });
 });

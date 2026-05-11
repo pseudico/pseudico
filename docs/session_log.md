@@ -2543,3 +2543,73 @@ Files changed:
 - docs/DATA_MODEL.md
 Open questions / risks: CI and PR review still pending after push.
 Next actions: Stage/commit; push branch; open ready PR.
+
+### 2026-05-11 10:48:52 +10:00
+Objective: Complete PSE-120 and prepare next ticket.
+Decisions made:
+- PR #115 passed CI and was squash-merged into main at 090fe9e.
+- Deleted merged feature branch locally/remotely and pulled main.
+- Moved PSE-120 to Done and promoted PSE-121 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final log entry is local after merge; unrelated untracked files remain untouched.
+Next actions: Start PSE-121 in a future run; keep only one Codex Ready issue active.
+
+## 2026-05-11 10:53:32 +10:00
+Objective: Run next Local Work OS ticket end-to-end.
+Decisions made:
+- Started Linear/GitHub reconciliation before implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Active PR/issue state not yet reconciled.
+Next actions:
+- Query Linear active states and inspect repo/GitHub state.
+
+## 2026-05-11 10:54:21 +10:00
+Objective: Reconcile active work and start selected ticket.
+Decisions made:
+- No active PR Open or In Progress issues found.
+- Moved PSE-121 from Codex Ready to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- GitHub CLI auth/proxy failed; connector available for PR metadata.
+Next actions:
+- Pull main, branch for PSE-121, and inspect ticket scope.
+
+## 2026-05-11 11:36:21 +10:00
+Objective: Scope PSE-121 implementation.
+Decisions made:
+- Created branch codex/PSE-121-someday-deferred-waiting-task-states.
+- Using individual LWO-M11-006 review-mode ticket as source of truth.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Aggregate doc numbering differs from imported ticket title.
+Next actions:
+- Inspect task/today/saved-view/search services and implement scoped states.
+
+## 2026-05-11 11:45:35 +10:00
+Objective: Implement PSE-121 task review states.
+Decisions made:
+- Added waiting/someday/deferred review status support and seeded review smart list.
+- Excluded review states from Today/overdue automatic planning.
+Files changed:
+- apps/desktop/src/main/ipc/collectionHandlers.ts; apps/desktop/src/main/ipc/taskHandlers.ts; apps/desktop/src/preload/api.ts; packages/core/src/entities/Task.ts; packages/db/src/**; packages/features/src/**; packages/ui/src/**; docs/PRODUCT_SPEC.md; docs/session_log.md
+Open questions / risks:
+- Full lint/typecheck/build still pending.
+Next actions:
+- Run full required checks and fix failures.
+
+## 2026-05-11 11:49:18 +10:00
+Objective: Verify PSE-121 implementation.
+Decisions made:
+- Required checks pass after updating schema-version expectations.
+- Kept unrelated untracked files out of scope.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Remote push/PR creation still pending.
+Next actions:
+- Review diff, commit scoped files, push, and open PR.
