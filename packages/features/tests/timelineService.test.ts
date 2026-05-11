@@ -2,6 +2,7 @@ import {
   CategoryRepository,
   ContainerRepository,
   MigrationService,
+  TagRepository,
   WorkspaceRepository,
   createDatabaseConnection,
   type DatabaseConnection
@@ -62,6 +63,13 @@ describe("TimelineService", () => {
       type: "project",
       name: "Client Rollout",
       slug: "client-rollout",
+      timestamp: TIMESTAMP
+    });
+    new TagRepository(connection).create({
+      id: "tag_client",
+      workspaceId: "workspace_1",
+      name: "client",
+      slug: "client",
       timestamp: TIMESTAMP
     });
     new ContainerRepository(connection).create({
@@ -245,6 +253,106 @@ describe("TimelineService", () => {
       "Avery Client",
       "Non-contact work"
     ]);
+  });
+
+  it("filters timeline items by tags, category, container, status, and summarizes workload", async () => {
+    const taskService = createTaskService();
+    const launch = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Client launch task",
+      dueAt: "2026-05-15T12:00:00.000Z",
+      categoryId: "category_ops"
+    });
+    await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_2",
+      title: "Unmatched task",
+      dueAt: "2026-05-15T13:00:00.000Z",
+      categoryId: "category_sales"
+    });
+    const done = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Done client task",
+      dueAt: "2026-05-15T14:00:00.000Z",
+      categoryId: "category_ops"
+    });
+    await taskService.completeTask(done.item.id);
+    new TagRepository(connection).createTagging({
+      id: "tagging_client",
+      workspaceId: "workspace_1",
+      tagId: "tag_client",
+      targetType: "item",
+      targetId: launch.item.id,
+      source: "manual",
+      timestamp: TIMESTAMP
+    });
+
+    const view = createTimelineService().groupTimelineItems({
+      workspaceId: "workspace_1",
+      start: "2026-05-15",
+      end: "2026-05-16",
+      includeCompleted: true,
+      filters: {
+        tagSlugs: ["client"],
+        categoryIds: ["category_ops"],
+        projectIds: ["container_project_1"],
+        statuses: ["open"],
+        hideCompleted: true
+      }
+    });
+
+    expect(view.totalCount).toBe(1);
+    expect(view.filters).toMatchObject({
+      tagSlugs: ["client"],
+      categoryIds: ["category_ops"],
+      projectIds: ["container_project_1"],
+      hideCompleted: true
+    });
+    expect(view.workload).toMatchObject({
+      itemCount: 1,
+      activeCount: 1,
+      completedCount: 0,
+      density: [{ date: "2026-05-15", itemCount: 1, completedCount: 0 }]
+    });
+    expect(view.groups[0].items[0]).toMatchObject({
+      title: "Client launch task",
+      tags: [{ slug: "client" }]
+    });
+  });
+
+  it("saves timeline filters as smart-list saved views", async () => {
+    const result = await createTimelineService().saveTimelineFilterAsView({
+      workspaceId: "workspace_1",
+      name: "Client timeline",
+      start: "2026-05-15",
+      end: "2026-05-16",
+      groupBy: "category",
+      filters: {
+        tagSlugs: ["client"],
+        categoryIds: ["category_ops"],
+        projectIds: ["container_project_1"],
+        hideCompleted: true
+      }
+    });
+
+    expect(result.savedView).toMatchObject({
+      name: "Client timeline",
+      type: "smart_list"
+    });
+    expect(JSON.parse(result.savedView.queryJson)).toMatchObject({
+      conditions: expect.arrayContaining([
+        { field: "tag", operator: "hasAny", value: ["client"] },
+        { field: "category", operator: "in", value: ["category_ops"] },
+        { field: "container", operator: "in", value: ["container_project_1"] }
+      ]),
+      groupBy: "category"
+    });
+    expect(JSON.parse(result.savedView.displayJson)).toMatchObject({
+      source: "timeline",
+      filters: { hideCompleted: true }
+    });
   });
 
   it("rejects invalid ranges and workspace ids", () => {

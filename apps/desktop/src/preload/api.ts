@@ -1299,10 +1299,26 @@ export type TimelineRangeInput = {
   end: string | Date;
 };
 
+export type TimelineStatusFilter = TaskStatus | ListItemStatus | "done";
+
+export type TimelineFilterInput = {
+  tagSlugs?: string[];
+  categoryIds?: string[];
+  projectIds?: string[];
+  contactIds?: string[];
+  statuses?: TimelineStatusFilter[];
+  hideCompleted?: boolean;
+};
+
 export type TimelineViewModelInput = TimelineRangeInput & {
   workspaceId?: string;
   includeCompleted?: boolean;
   groupBy?: TimelineGroupBy;
+  filters?: TimelineFilterInput;
+};
+
+export type SaveTimelineFilterInput = TimelineViewModelInput & {
+  name: string;
 };
 
 export type TimelineNavigationTargetSummary = {
@@ -1336,7 +1352,21 @@ export type TimelineItemSummary = {
   allDay: boolean;
   completedAt: string | null;
   updatedAt: string;
+  tags: { id: string; name: string; slug: string }[];
   navigationTarget: TimelineNavigationTargetSummary;
+};
+
+export type TimelineWorkloadBucketSummary = {
+  date: string;
+  itemCount: number;
+  completedCount: number;
+};
+
+export type TimelineWorkloadSummary = {
+  itemCount: number;
+  activeCount: number;
+  completedCount: number;
+  density: TimelineWorkloadBucketSummary[];
 };
 
 export type TimelineGroupSummary = {
@@ -1346,6 +1376,7 @@ export type TimelineGroupSummary = {
   color: string | null;
   itemCount: number;
   completedCount: number;
+  workload: TimelineWorkloadSummary;
   items: TimelineItemSummary[];
 };
 
@@ -1356,6 +1387,8 @@ export type TimelineViewModelSummary = {
   includeCompleted: boolean;
   groupBy: TimelineGroupBy;
   totalCount: number;
+  workload: TimelineWorkloadSummary;
+  filters: Required<TimelineFilterInput>;
   groups: TimelineGroupSummary[];
 };
 
@@ -2914,7 +2947,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     getPlannedTasks: "local-work-os:today:get-planned-tasks"
   },
   timeline: {
-    getViewModel: "local-work-os:timeline:get-view-model"
+    getViewModel: "local-work-os:timeline:get-view-model",
+    saveFilterAsView: "local-work-os:timeline:save-filter-as-view"
   },
   calendar: {
     getMonth: "local-work-os:calendar:get-month"
@@ -3531,6 +3565,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.timeline.getViewModel]: {
     input: TimelineViewModelInput;
     result: ApiResult<TimelineViewModelSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.timeline.saveFilterAsView]: {
+    input: SaveTimelineFilterInput;
+    result: ApiResult<{ savedViewId: string; name: string }>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.calendar.getMonth]: {
     input: CalendarMonthInput;
@@ -4274,6 +4312,9 @@ export type LocalWorkOsApi = {
     getViewModel: (
       input: TimelineViewModelInput
     ) => Promise<ApiResult<TimelineViewModelSummary>>;
+    saveFilterAsView: (
+      input: SaveTimelineFilterInput
+    ) => Promise<ApiResult<{ savedViewId: string; name: string }>>;
   };
   calendar?: {
     getMonth: (
@@ -4952,7 +4993,9 @@ export function createLocalWorkOsApi(
     },
     timeline: {
       getViewModel: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.timeline.getViewModel, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.timeline.getViewModel, input),
+      saveFilterAsView: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.timeline.saveFilterAsView, input)
     },
     calendar: {
       getMonth: (input) =>

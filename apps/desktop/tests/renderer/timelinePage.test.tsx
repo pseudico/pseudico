@@ -20,6 +20,9 @@ describe("Timeline renderer page", () => {
     expect(html).toContain("Zoom");
     expect(html).toContain("Contact");
     expect(html).toContain("Show completed");
+    expect(html).toContain("Tags");
+    expect(html).toContain("Save filter as view");
+    expect(html).toContain("scheduled");
     expect(html).toContain("timeline-range-marker");
     expect(html).toContain("Launch Plan");
     expect(html).toContain("Launch checklist");
@@ -61,6 +64,20 @@ function timelineViewModel(): TimelineViewModelSummary {
     includeCompleted: false,
     groupBy: "project",
     totalCount: 1,
+    workload: {
+      itemCount: 1,
+      activeCount: 1,
+      completedCount: 0,
+      density: [{ date: "2026-05-15", itemCount: 1, completedCount: 0 }]
+    },
+    filters: {
+      tagSlugs: [],
+      categoryIds: [],
+      projectIds: [],
+      contactIds: [],
+      statuses: [],
+      hideCompleted: false
+    },
     groups: [
       {
         key: "container_project_1",
@@ -69,6 +86,12 @@ function timelineViewModel(): TimelineViewModelSummary {
         color: "#245c55",
         itemCount: 1,
         completedCount: 0,
+        workload: {
+          itemCount: 1,
+          activeCount: 1,
+          completedCount: 0,
+          density: [{ date: "2026-05-15", itemCount: 1, completedCount: 0 }]
+        },
         items: [
           {
             kind: "task",
@@ -93,6 +116,7 @@ function timelineViewModel(): TimelineViewModelSummary {
             allDay: true,
             completedAt: null,
             updatedAt: "2026-05-01T00:00:00.000Z",
+            tags: [{ id: "tag_client", name: "client", slug: "client" }],
             navigationTarget: {
               targetType: "item",
               targetId: "item_1",

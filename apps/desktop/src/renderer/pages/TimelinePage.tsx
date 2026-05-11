@@ -8,12 +8,16 @@ import {
 import {
   EmptyState,
   ErrorState,
+  TimelineFilterPanel,
   TimelineView,
+  type TimelineFilterPanelValues,
   type TimelineViewGroup,
   type TimelineViewItem
 } from "@local-work-os/ui";
 import type {
   LocalWorkOsApi,
+  TimelineFilterInput,
+  TimelineStatusFilter,
   TimelineGroupBy,
   TimelineGroupSummary,
   TimelineItemSummary,
@@ -39,6 +43,9 @@ export function TimelinePage({
   const [groupBy, setGroupBy] = useState<TimelineGroupBy>("project");
   const [zoom, setZoom] = useState<TimelineZoomLevel>("week");
   const [includeCompleted, setIncludeCompleted] = useState(false);
+  const [filters, setFilters] = useState<TimelineFilterPanelValues>(defaultFilterValues);
+  const [savingFilter, setSavingFilter] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [timeline, setTimeline] = useState<TimelineViewModelSummary | null>(
     initialTimeline ?? null
   );
@@ -69,7 +76,8 @@ export function TimelinePage({
         start,
         end,
         groupBy,
-        includeCompleted
+        includeCompleted,
+        filters: toTimelineFilterInput(filters)
       });
 
       if (!active) {
@@ -97,6 +105,7 @@ export function TimelinePage({
     end,
     groupBy,
     includeCompleted,
+    filters,
     initialTimeline,
     start
   ]);
@@ -116,7 +125,8 @@ export function TimelinePage({
       start,
       end,
       groupBy,
-      includeCompleted
+      includeCompleted,
+      filters: toTimelineFilterInput(filters)
     });
 
     setLoading(false);
@@ -127,6 +137,37 @@ export function TimelinePage({
     }
 
     setTimeline(result.data);
+  }
+
+  async function saveFilterAsView(): Promise<void> {
+    const workspaceId = currentWorkspace?.id ?? timeline?.workspaceId;
+
+    if (workspaceId === undefined || apiClient.timeline?.saveFilterAsView === undefined) {
+      return;
+    }
+
+    setSavingFilter(true);
+    setSaveMessage(null);
+    setError(null);
+
+    const result = await apiClient.timeline.saveFilterAsView({
+      workspaceId,
+      name: filters.savedViewName,
+      start,
+      end,
+      groupBy,
+      includeCompleted,
+      filters: toTimelineFilterInput(filters)
+    });
+
+    setSavingFilter(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setSaveMessage(`Saved view "${result.data.name}".`);
   }
 
   function openTaskSource(item: TimelineViewItem): void {
@@ -235,6 +276,17 @@ export function TimelinePage({
         </label>
       </div>
 
+      <TimelineFilterPanel
+        saving={savingFilter}
+        values={filters}
+        onChange={setFilters}
+        onSaveView={() => void saveFilterAsView()}
+      />
+
+      {saveMessage === null ? null : (
+        <p className="timeline-save-message">{saveMessage}</p>
+      )}
+
       {error === null ? null : (
         <ErrorState error={error} title="Timeline error" />
       )}
@@ -244,7 +296,7 @@ export function TimelinePage({
         loading={loading && timeline === null}
         zoom={zoom}
         onOpenTask={openTaskSource}
-        {...(timeline === null ? {} : { range: timeline.range })}
+        {...(timeline === null ? {} : { range: timeline.range, workload: timeline.workload })}
       />
     </section>
   );
@@ -294,6 +346,7 @@ function toTimelineViewGroup(group: TimelineGroupSummary): TimelineViewGroup {
     color: group.color,
     itemCount: group.itemCount,
     completedCount: group.completedCount,
+    workload: group.workload,
     items: group.items.map(toTimelineViewItem)
   };
 }
@@ -316,6 +369,35 @@ function toTimelineViewItem(item: TimelineItemSummary): TimelineViewItem {
     dueAt: item.dueAt,
     timelineStartAt: item.timelineStartAt,
     timelineEndAt: item.timelineEndAt,
-    completedAt: item.completedAt
+    completedAt: item.completedAt,
+    tags: item.tags
   };
+}
+
+const defaultFilterValues: TimelineFilterPanelValues = {
+  tagSlugs: "",
+  categoryIds: "",
+  projectIds: "",
+  contactIds: "",
+  statuses: [],
+  hideCompleted: false,
+  savedViewName: ""
+};
+
+function toTimelineFilterInput(values: TimelineFilterPanelValues): TimelineFilterInput {
+  return {
+    tagSlugs: splitFilterValues(values.tagSlugs),
+    categoryIds: splitFilterValues(values.categoryIds),
+    projectIds: splitFilterValues(values.projectIds),
+    contactIds: splitFilterValues(values.contactIds),
+    statuses: values.statuses as TimelineStatusFilter[],
+    hideCompleted: values.hideCompleted
+  };
+}
+
+function splitFilterValues(value: string): string[] {
+  return value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
 }

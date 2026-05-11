@@ -231,6 +231,11 @@ export {
   type TodayLaneProps
 } from "./components/TodayLane";
 export {
+  TimelineFilterPanel,
+  type TimelineFilterPanelProps,
+  type TimelineFilterPanelValues
+} from "./components/TimelineFilterPanel";
+export {
   TimelineView,
   type TimelineViewGroup,
   type TimelineViewItem,
