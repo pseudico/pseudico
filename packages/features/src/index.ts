@@ -845,11 +845,17 @@ export type {
 export type {
   GroupTimelineItemsInput,
   TimelineDateRange,
+  SaveTimelineFilterInput,
+  TimelineFilterInput,
   TimelineGroup,
   TimelineGroupBy,
   TimelineItem,
+  TimelineItemTag,
   TimelineItemsInput,
   TimelineRangeInput,
+  TimelineStatusFilter,
+  TimelineWorkloadBucket,
+  TimelineWorkloadSummary,
   TimelineTaskNavigationTarget,
   TimelineViewModel
 } from "./timeline";

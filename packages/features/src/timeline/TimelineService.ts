@@ -3,6 +3,7 @@ import {
   CategoryRepository,
   ContainerRepository,
   ListRepository,
+  TagRepository,
   TaskRepository,
   type CategoryRecord,
   type ContainerRecord,
@@ -12,6 +13,8 @@ import {
 } from "@local-work-os/db";
 import type { FeatureModuleContract } from "../featureModuleContract";
 import { createTaskDateRange } from "../tasks/TaskQueries";
+import { SavedViewService, type SavedViewMutationResult } from "../savedViews/SavedViewService";
+import type { SavedViewQuery } from "../savedViews/SavedViewQuery";
 
 export type TimelineGroupBy = "project" | "contact" | "category";
 
@@ -25,9 +28,21 @@ export type TimelineDateRange = {
   endExclusive: string;
 };
 
+export type TimelineStatusFilter = TaskStatus | ListItemStatus | "done";
+
+export type TimelineFilterInput = {
+  tagSlugs?: string[];
+  categoryIds?: string[];
+  projectIds?: string[];
+  contactIds?: string[];
+  statuses?: TimelineStatusFilter[];
+  hideCompleted?: boolean;
+};
+
 export type TimelineItemsInput = TimelineRangeInput & {
   workspaceId: string;
   includeCompleted?: boolean;
+  filters?: TimelineFilterInput;
 };
 
 export type GroupTimelineItemsInput = TimelineItemsInput & {
@@ -67,7 +82,31 @@ export type TimelineItem = {
   allDay: boolean;
   completedAt: string | null;
   updatedAt: string;
+  tags: TimelineItemTag[];
   navigationTarget: TimelineTaskNavigationTarget;
+};
+
+export type TimelineItemTag = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+export type TimelineWorkloadBucket = {
+  date: string;
+  itemCount: number;
+  completedCount: number;
+};
+
+export type TimelineWorkloadSummary = {
+  itemCount: number;
+  activeCount: number;
+  completedCount: number;
+  density: TimelineWorkloadBucket[];
+};
+
+export type SaveTimelineFilterInput = GroupTimelineItemsInput & {
+  name: string;
 };
 
 export type TimelineGroup = {
@@ -77,6 +116,7 @@ export type TimelineGroup = {
   color: string | null;
   itemCount: number;
   completedCount: number;
+  workload: TimelineWorkloadSummary;
   items: TimelineItem[];
 };
 
@@ -87,6 +127,8 @@ export type TimelineViewModel = {
   includeCompleted: boolean;
   groupBy: TimelineGroupBy;
   totalCount: number;
+  workload: TimelineWorkloadSummary;
+  filters: Required<TimelineFilterInput>;
   groups: TimelineGroup[];
 };
 
@@ -121,10 +163,10 @@ export class TimelineService {
       includeCompleted: input.includeCompleted === true
     });
 
-    return [
+    return applyTimelineFilters([
       ...this.hydrateTaskTimelineItems(input.workspaceId, tasks),
       ...this.hydrateListItemTimelineItems(input.workspaceId, listItems)
-    ].sort(compareTimelineItems);
+    ], input.filters).sort(compareTimelineItems);
   }
 
   groupTimelineItems(input: GroupTimelineItemsInput): TimelineViewModel {
@@ -141,8 +183,37 @@ export class TimelineService {
       includeCompleted: input.includeCompleted === true,
       groupBy,
       totalCount: items.length,
+      workload: summarizeWorkload(items),
+      filters: normalizeTimelineFilters(input.filters),
       groups
     };
+  }
+
+  async saveTimelineFilterAsView(
+    input: SaveTimelineFilterInput
+  ): Promise<SavedViewMutationResult> {
+    validateNonEmptyString(input.name, "name");
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+    const range = this.setTimelineRange(input);
+
+    return await new SavedViewService({
+      connection: this.connection,
+      now: this.now
+    }).createSavedView({
+      workspaceId: input.workspaceId,
+      type: "smart_list",
+      name: input.name,
+      description: "Saved timeline filter.",
+      query: buildTimelineSavedViewQuery(input),
+      display: {
+        source: "timeline",
+        start: range.startInclusive,
+        end: range.endExclusive,
+        groupBy: input.groupBy ?? "project",
+        includeCompleted: input.includeCompleted === true,
+        filters: normalizeTimelineFilters(input.filters)
+      }
+    });
   }
 
   private hydrateTaskTimelineItems(
@@ -184,6 +255,7 @@ export class TimelineService {
         allDay: record.task.allDay,
         completedAt: record.task.completedAt ?? record.item.completedAt,
         updatedAt: record.item.updatedAt,
+        tags: context.getTags("item", record.item.id),
         navigationTarget: {
           targetType: "item",
           targetId: record.item.id,
@@ -234,6 +306,7 @@ export class TimelineService {
         allDay: true,
         completedAt: record.listItem.completedAt,
         updatedAt: record.listItem.updatedAt,
+        tags: context.getTags("list_item", record.listItem.id),
         navigationTarget: {
           targetType: "list_item",
           targetId: record.listItem.id,
@@ -273,6 +346,7 @@ function groupItems(
         color: getGroupColor(item, groupBy),
         itemCount: 1,
         completedCount: isCompleted(item) ? 1 : 0,
+        workload: summarizeWorkload([item]),
         items: [item]
       });
       continue;
@@ -281,6 +355,7 @@ function groupItems(
     existing.items.push(item);
     existing.itemCount += 1;
     existing.completedCount += isCompleted(item) ? 1 : 0;
+    existing.workload = summarizeWorkload(existing.items);
   }
 
   return [...groups.values()].sort((left, right) =>
@@ -327,11 +402,14 @@ function isCompleted(item: TimelineItem): boolean {
 function createHydrationContext(connection: DatabaseConnection, workspaceId: string): {
   getCategory: (categoryId: string | null) => CategoryRecord | null;
   getContainer: (containerId: string) => ContainerRecord;
+  getTags: (targetType: "item" | "list_item", targetId: string) => TimelineItemTag[];
 } {
   const containerRepository = new ContainerRepository(connection);
   const categoryRepository = new CategoryRepository(connection);
   const containers = new Map<string, ContainerRecord>();
   const categories = new Map<string, CategoryRecord | null>();
+  const tagRepository = new TagRepository(connection);
+  const tags = new Map<string, TimelineItemTag[]>();
 
   return {
     getContainer(containerId) {
@@ -350,6 +428,20 @@ function createHydrationContext(connection: DatabaseConnection, workspaceId: str
       containers.set(containerId, container);
       return container;
     },
+    getTags(targetType, targetId) {
+      const cacheKey = `${targetType}:${targetId}`;
+      const cached = tags.get(cacheKey);
+
+      if (cached !== undefined) {
+        return cached;
+      }
+
+      const targetTags = tagRepository
+        .listTagsForTarget({ workspaceId, targetType, targetId })
+        .map((tag) => ({ id: tag.id, name: tag.name, slug: tag.slug }));
+      tags.set(cacheKey, targetTags);
+      return targetTags;
+    },
     getCategory(categoryId) {
       if (categoryId === null) {
         return null;
@@ -365,6 +457,120 @@ function createHydrationContext(connection: DatabaseConnection, workspaceId: str
       return category;
     }
   };
+}
+
+function applyTimelineFilters(
+  items: TimelineItem[],
+  filters: TimelineFilterInput | undefined
+): TimelineItem[] {
+  const normalized = normalizeTimelineFilters(filters);
+
+  return items.filter((item) => {
+    if (normalized.hideCompleted === true && isCompleted(item)) {
+      return false;
+    }
+
+    if (normalized.tagSlugs.length > 0) {
+      const itemTagSlugs = item.tags.map((tag) => tag.slug.toLowerCase());
+      if (!normalized.tagSlugs.some((slug) => itemTagSlugs.includes(slug.toLowerCase()))) {
+        return false;
+      }
+    }
+
+    if (normalized.categoryIds.length > 0 &&
+      (item.categoryId === null || !normalized.categoryIds.includes(item.categoryId))) {
+      return false;
+    }
+
+    if (normalized.projectIds.length > 0 &&
+      (item.containerType !== "project" || !normalized.projectIds.includes(item.containerId))) {
+      return false;
+    }
+
+    if (normalized.contactIds.length > 0 &&
+      (item.containerType !== "contact" || !normalized.contactIds.includes(item.containerId))) {
+      return false;
+    }
+
+    if (normalized.statuses.length > 0 && !normalized.statuses.includes(item.taskStatus)) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+function normalizeTimelineFilters(
+  filters: TimelineFilterInput | undefined
+): Required<TimelineFilterInput> {
+  return {
+    tagSlugs: normalizeStringArray(filters?.tagSlugs),
+    categoryIds: normalizeStringArray(filters?.categoryIds),
+    projectIds: normalizeStringArray(filters?.projectIds),
+    contactIds: normalizeStringArray(filters?.contactIds),
+    statuses: normalizeStringArray(filters?.statuses) as TimelineStatusFilter[],
+    hideCompleted: filters?.hideCompleted === true
+  };
+}
+
+function summarizeWorkload(items: TimelineItem[]): TimelineWorkloadSummary {
+  const buckets = new Map<string, TimelineWorkloadBucket>();
+
+  for (const item of items) {
+    const date = item.timelineStartAt.slice(0, 10);
+    const bucket = buckets.get(date) ?? { date, itemCount: 0, completedCount: 0 };
+    bucket.itemCount += 1;
+    bucket.completedCount += isCompleted(item) ? 1 : 0;
+    buckets.set(date, bucket);
+  }
+
+  const completedCount = items.filter(isCompleted).length;
+
+  return {
+    itemCount: items.length,
+    activeCount: items.length - completedCount,
+    completedCount,
+    density: [...buckets.values()].sort((left, right) => left.date.localeCompare(right.date))
+  };
+}
+
+function buildTimelineSavedViewQuery(input: SaveTimelineFilterInput): SavedViewQuery {
+  const range = createTaskDateRange(input);
+  const filters = normalizeTimelineFilters(input.filters);
+  const conditions: SavedViewQuery["conditions"] = [
+    { field: "itemType", operator: "is", value: "task" },
+    { field: "dueDate", operator: "between", value: { from: range.startInclusive, to: range.endExclusive } }
+  ];
+
+  if (filters.tagSlugs.length > 0) {
+    conditions.push({ field: "tag", operator: "hasAny", value: filters.tagSlugs });
+  }
+  if (filters.categoryIds.length > 0) {
+    conditions.push({ field: "category", operator: "in", value: filters.categoryIds });
+  }
+  if (filters.statuses.length > 0) {
+    conditions.push({ field: "taskStatus", operator: "in", value: filters.statuses });
+  }
+  if (filters.projectIds.length > 0 || filters.contactIds.length > 0) {
+    conditions.push({
+      field: "container",
+      operator: "in",
+      value: [...filters.projectIds, ...filters.contactIds]
+    });
+  }
+
+  return {
+    version: 1,
+    match: "all",
+    targets: ["item"],
+    conditions,
+    groupBy: input.groupBy === "category" ? "category" : "container",
+    sort: [{ field: "dueAt", direction: "asc" }]
+  };
+}
+
+function normalizeStringArray(values: readonly string[] | undefined): string[] {
+  return Array.from(new Set((values ?? []).map((value) => value.trim()).filter(Boolean)));
 }
 
 function compareTimelineItems(left: TimelineItem, right: TimelineItem): number {

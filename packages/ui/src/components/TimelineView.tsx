@@ -26,6 +26,20 @@ export type TimelineViewItem = {
   timelineStartAt: string;
   timelineEndAt: string;
   completedAt: string | null;
+  tags?: { id: string; name: string; slug: string }[];
+};
+
+export type TimelineWorkloadBucket = {
+  date: string;
+  itemCount: number;
+  completedCount: number;
+};
+
+export type TimelineWorkloadSummary = {
+  itemCount: number;
+  activeCount: number;
+  completedCount: number;
+  density: TimelineWorkloadBucket[];
 };
 
 export type TimelineViewGroup = {
@@ -34,6 +48,7 @@ export type TimelineViewGroup = {
   color: string | null;
   itemCount: number;
   completedCount: number;
+  workload?: TimelineWorkloadSummary;
   items: TimelineViewItem[];
 };
 
@@ -42,6 +57,7 @@ export type TimelineViewProps = {
   range?: TimelineScaleRange;
   zoom?: TimelineZoomLevel;
   loading?: boolean;
+  workload?: TimelineWorkloadSummary;
   emptyTitle?: string;
   emptyDescription?: string;
   onOpenTask?: (item: TimelineViewItem) => void;
@@ -52,6 +68,7 @@ export function TimelineView({
   range,
   zoom = "week",
   loading = false,
+  workload,
   emptyTitle = "No timeline work",
   emptyDescription = "Dated tasks in the selected range will appear here.",
   onOpenTask
@@ -79,6 +96,7 @@ export function TimelineView({
 
   return (
     <div className="timeline-view">
+      {workload === undefined ? null : <TimelineWorkloadSummaryView workload={workload} />}
       {scale === null ? null : <TimelineScaleHeader scale={scale} />}
       {groups.map((group) => (
         <section className="timeline-group" key={group.key}>
@@ -138,6 +156,31 @@ export function TimelineView({
         </section>
       ))}
     </div>
+  );
+}
+
+function TimelineWorkloadSummaryView({
+  workload
+}: {
+  workload: TimelineWorkloadSummary;
+}): React.JSX.Element {
+  return (
+    <section className="timeline-workload-summary" aria-label="Timeline workload summary">
+      <strong>{workload.itemCount} scheduled</strong>
+      <span>{workload.activeCount} active</span>
+      <span>{workload.completedCount} completed</span>
+      <div className="timeline-density" aria-label="Workload density">
+        {workload.density.length === 0 ? (
+          <span>No dated workload</span>
+        ) : (
+          workload.density.map((bucket) => (
+            <span className="timeline-density-day" key={bucket.date}>
+              {bucket.date}: {bucket.itemCount}
+            </span>
+          ))
+        )}
+      </div>
+    </section>
   );
 }
 

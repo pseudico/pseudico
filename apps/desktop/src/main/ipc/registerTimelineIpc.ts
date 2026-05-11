@@ -12,4 +12,8 @@ export function registerTimelineIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.timeline.getViewModel,
     (_event, input) => handlers.handleGetTimelineViewModel(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.timeline.saveFilterAsView,
+    (_event, input) => handlers.handleSaveTimelineFilterAsView(input)
+  );
 }

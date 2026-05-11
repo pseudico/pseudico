@@ -104,6 +104,10 @@ export class QueryEvaluator {
       return matchesSet(target.containerType, condition.value);
     }
 
+    if (condition.field === "container") {
+      return matchesSet(target.containerId, condition.value);
+    }
+
     if (condition.field === "tag") {
       const expected = normalizeValues(condition.value);
 

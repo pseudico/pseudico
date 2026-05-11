@@ -3233,3 +3233,58 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Need PR/CI confirmation before merge.
 Next actions: Commit; push; open ready PR.
+
+## 2026-05-11 18:10:42 +10:00
+Objective: Publish PSE-138 PR.
+Decisions made:
+- Committed b92fce2 and pushed codex/PSE-138-timeline-range-bars.
+- Opened ready PR #127 and moved Linear issue to PR Open.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI/review status pending.
+Next actions: Check CI; review diff; merge if green.
+
+## 2026-05-11 18:14:59 +10:00
+Objective: Merge PSE-138 and prepare next ticket.
+Decisions made:
+- PR #127 passed CI and was squash-merged at be05721.
+- PSE-138 moved to Done; PSE-139 promoted to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local session log has post-merge uncommitted entry; unrelated untracked files remain.
+Next actions: Start PSE-139 in next run; keep only one Codex Ready issue.
+
+## 2026-05-11 18:21:06 +10:00
+Objective: Reconcile active Linear/GitHub work before next ticket.
+Decisions made:
+- No open GitHub PRs found for pseudico/pseudico.
+- Linear has no PR Open or In Progress issues; PSE-139 is the only Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing uncommitted session log and unrelated untracked files remain.
+Next actions: Move PSE-139 to In Progress; read docs/source; implement scoped changes.
+
+## 2026-05-11 18:22:06 +10:00
+Objective: Start PSE-139 implementation branch.
+Decisions made:
+- Moved PSE-139 to In Progress.
+- Pulled main and created branch codex/PSE-139-timeline-grouping-filtering.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need source ticket acceptance criteria from repo docs.
+Next actions: Read linked ticket/docs; inspect timeline code; implement controls.
+
+## 2026-05-11 18:39:21 +10:00
+Objective: Implement and validate PSE-139 timeline filters.
+Decisions made:
+- Added timeline tag/category/project/contact/status filters, hide-completed filtering, workload density summaries, and save-filter-as-view IPC.
+- Extended saved-view queries with container matching and added service/UI/renderer tests.
+Files changed:
+- packages/features/src/timeline/TimelineService.ts
+- packages/features/src/savedViews/SavedViewQuery.ts
+- packages/features/src/savedViews/QueryEvaluator.ts
+- packages/ui/src/components/TimelineFilterPanel.tsx
+- packages/ui/src/components/TimelineView.tsx
+- apps/desktop/src/preload/api.ts
+Open questions / risks: Need PR CI after push.
+Next actions: Commit; push; open PR; move Linear to PR Open.

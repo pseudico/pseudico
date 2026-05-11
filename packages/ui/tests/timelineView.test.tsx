@@ -11,6 +11,7 @@ describe("TimelineView", () => {
           startInclusive: "2026-05-15T00:00:00.000Z",
           endExclusive: "2026-05-22T00:00:00.000Z"
         }}
+        workload={{ itemCount: 2, activeCount: 2, completedCount: 0, density: [{ date: "2026-05-16", itemCount: 1, completedCount: 0 }] }}
         zoom="week"
       />
     );
@@ -18,6 +19,8 @@ describe("TimelineView", () => {
     expect(html).toContain("timeline-scale");
     expect(html).toContain("timeline-range-bar");
     expect(html).toContain("timeline-range-marker");
+    expect(html).toContain("2 scheduled");
+    expect(html).toContain("2026-05-16");
     expect(html).toContain("Spanning rollout");
     expect(html).toContain("Due marker");
   });

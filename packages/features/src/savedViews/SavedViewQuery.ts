@@ -18,6 +18,11 @@ export type SavedViewQueryCondition =
       value: string | string[];
     }
   | {
+      field: "container";
+      operator: "is" | "in";
+      value: string | string[];
+    }
+  | {
       field: "tag";
       operator: "has" | "hasAny";
       value: string | string[];
@@ -96,6 +101,7 @@ const CONTAINER_TYPES = ["inbox", "project", "contact"] as const;
 const CONDITION_FIELDS = [
   "itemType",
   "containerType",
+  "container",
   "tag",
   "category",
   "taskStatus",
@@ -261,6 +267,8 @@ function validateCondition(
       (value) => isOneOf(value, CONTAINER_TYPES),
       "container type"
     );
+  } else if (condition.field === "container") {
+    validateSetCondition(condition, path, errors, isNonEmptyString, "container id");
   } else if (condition.field === "tag") {
     if (condition.operator !== "has" && condition.operator !== "hasAny") {
       errors.push(`${path}.operator must be has or hasAny.`);
@@ -447,6 +455,10 @@ function normalizeNumberValues(value: unknown): number[] {
   }
 
   return value.filter((entry): entry is number => typeof entry === "number");
+}
+
+function isNonEmptyString(value: string): boolean {
+  return value.trim().length > 0;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

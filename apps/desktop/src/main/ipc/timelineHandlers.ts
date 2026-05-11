@@ -8,6 +8,8 @@ import {
   apiError,
   apiOk,
   type ApiResult,
+  type SaveTimelineFilterInput,
+  type TimelineFilterInput,
   type TimelineViewModelInput,
   type TimelineViewModelSummary,
   type WorkspaceSummary
@@ -23,6 +25,9 @@ type TimelineIpcHandlers = {
   handleGetTimelineViewModel: (
     input: unknown
   ) => Promise<ApiResult<TimelineViewModelSummary>>;
+  handleSaveTimelineFilterAsView: (
+    input: unknown
+  ) => Promise<ApiResult<{ savedViewId: string; name: string }>>;
 };
 
 export function createTimelineIpcHandlers(
@@ -33,7 +38,7 @@ export function createTimelineIpcHandlers(
       if (!isTimelineViewModelInput(input)) {
         return apiError(
           "INVALID_INPUT",
-          "getTimelineViewModel requires start/end dates and optional workspaceId, includeCompleted, and groupBy fields."
+          "getTimelineViewModel requires start/end dates and optional workspaceId, includeCompleted, groupBy, and filters fields."
         );
       }
 
@@ -48,6 +53,31 @@ export function createTimelineIpcHandlers(
         });
 
         return apiOk(toTimelineViewModelSummary(viewModel));
+      });
+    },
+
+    async handleSaveTimelineFilterAsView(input) {
+      if (!isSaveTimelineFilterInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "saveTimelineFilterAsView requires a name, start/end dates, and optional timeline filters."
+        );
+      }
+
+      return await withTimelineService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(
+          input.workspaceId,
+          context.workspace
+        );
+        const result = await context.timelineService.saveTimelineFilterAsView({
+          ...input,
+          workspaceId
+        });
+
+        return apiOk({
+          savedViewId: result.savedView.id,
+          name: result.savedView.name
+        });
       });
     }
   };
@@ -117,10 +147,46 @@ function isTimelineViewModelInput(
     isDateInput(input.start) &&
     isDateInput(input.end) &&
     isOptionalBoolean(input.includeCompleted) &&
+    isOptionalTimelineFilter(input.filters) &&
     (input.groupBy === undefined ||
       input.groupBy === "project" ||
       input.groupBy === "contact" ||
       input.groupBy === "category")
+  );
+}
+
+function isSaveTimelineFilterInput(
+  input: unknown
+): input is SaveTimelineFilterInput {
+  return (
+    isRecord(input) &&
+    typeof input.name === "string" &&
+    input.name.trim().length > 0 &&
+    isTimelineViewModelInput(input)
+  );
+}
+
+function isOptionalTimelineFilter(value: unknown): value is TimelineFilterInput | undefined {
+  if (value === undefined) {
+    return true;
+  }
+
+  return (
+    isRecord(value) &&
+    isOptionalStringArray(value.tagSlugs) &&
+    isOptionalStringArray(value.categoryIds) &&
+    isOptionalStringArray(value.projectIds) &&
+    isOptionalStringArray(value.contactIds) &&
+    isOptionalStringArray(value.statuses) &&
+    isOptionalBoolean(value.hideCompleted)
+  );
+}
+
+function isOptionalStringArray(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (Array.isArray(value) &&
+      value.every((entry) => typeof entry === "string" && entry.trim().length > 0))
   );
 }
 

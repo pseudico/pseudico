@@ -126,6 +126,7 @@ describe("SavedViewService", () => {
         match: "any",
         conditions: [
           { field: "containerType", operator: "is", value: "project" },
+          { field: "container", operator: "is", value: "container_1" },
           { field: "category", operator: "is", value: "work" }
         ],
         sort: [{ field: "title", direction: "asc" }]
