@@ -98,6 +98,11 @@ export {
 } from "./forms/WorkflowEditor";
 
 export {
+  CommentThread,
+  type CommentThreadComment,
+  type CommentThreadProps
+} from "./components/CommentThread";
+export {
   ItemActionsMenu,
   ITEM_ACTIONS,
   type ItemActionHandler,

@@ -190,7 +190,7 @@ describe("database IPC handlers", () => {
       ok: true,
       data: {
         connected: true,
-          schemaVersion: 12,
+          schemaVersion: 13,
         workspaceExists: true,
         inboxExists: true,
         defaultDashboardExists: true,
@@ -241,7 +241,7 @@ describe("navigation IPC handlers", () => {
         name: "Personal",
         rootPath: tempRoot!,
         openedAt: "2026-05-09T04:00:00.000Z",
-        schemaVersion: 12
+        schemaVersion: 13
       })
     });
 
@@ -2394,3 +2394,4 @@ describe("Dashboard IPC handlers", () => {
     });
   });
 });
+

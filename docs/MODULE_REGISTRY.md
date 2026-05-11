@@ -871,3 +871,8 @@ Integration points:
 ### Container Media
 
 Owns local visual identity assignments for projects and contacts: project banners and contact avatars/photos. Uses attachment-backed storage, generated thumbnail paths, activity log events for set/remove operations, and Electron IPC for all filesystem access. Does not own cloud media, remote storage, or renderer filesystem access.
+
+### Comments
+
+Owns local comments and annotations for containers, items, and list rows. Comment writes go through repository/service layers, create activity events, soft-delete removed comments, and refresh the target search projection. Does not own cloud/team comments or remote sharing.
+

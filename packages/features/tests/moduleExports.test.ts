@@ -78,6 +78,7 @@ describe("feature module exports", () => {
       "items",
       "projects",
       "contacts",
+      "comments",
       "containerGrouping",
       "containerPreferences",
       "containerMedia",

@@ -35,6 +35,15 @@ export {
   type CreateContainerMediaInput
 } from "./ContainerMediaRepository";
 export {
+  CommentRepository,
+  type CommentRecord,
+  type CommentTargetType,
+  type CreateCommentInput,
+  type ListCommentsForTargetInput,
+  type UpdateCommentPatch
+} from "./CommentRepository";
+
+export {
   ContainerRepository,
   type ContainerRecord,
   type CreateContainerInput,
@@ -263,3 +272,4 @@ export {
   type TrashEntryRecord,
   type TrashTargetType
 } from "./TrashRepository";
+

@@ -9,6 +9,7 @@ export type ActivityTargetType =
   | "contact_field"
   | "item"
   | "list_item"
+  | "comment"
   | "tag"
   | "category"
   | "relationship"
