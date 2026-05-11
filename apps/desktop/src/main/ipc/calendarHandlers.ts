@@ -1,4 +1,10 @@
-import { CalendarService, type CalendarMonthViewModel } from "@local-work-os/features";
+import { readFile, stat } from "node:fs/promises";
+import { basename, extname } from "node:path";
+import {
+  CalendarFeedService,
+  CalendarService,
+  type CalendarMonthViewModel
+} from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -12,8 +18,11 @@ import {
   type CalendarMonthViewModelSummary,
   type CalendarRescheduleItemInput,
   type CalendarRescheduleItemSummary,
+  type ImportIcsFileInput,
+  type ImportIcsSummary,
   type WorkspaceSummary
 } from "../../preload/api";
+import { normalizeLocalPath } from "../services/safeFileSystem";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
 
 type CurrentWorkspaceService = Pick<
@@ -28,6 +37,9 @@ type CalendarIpcHandlers = {
   handleRescheduleCalendarItem: (
     input: unknown
   ) => Promise<ApiResult<CalendarRescheduleItemSummary>>;
+  handleImportIcsFile: (
+    input: unknown
+  ) => Promise<ApiResult<ImportIcsSummary>>;
 };
 
 export function createCalendarIpcHandlers(
@@ -75,6 +87,47 @@ export function createCalendarIpcHandlers(
         });
 
         return apiOk(result);
+      });
+    },
+
+    async handleImportIcsFile(input) {
+      if (!isImportIcsFileInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "importIcsFile requires a filePath and optional workspaceId/sourceName fields."
+        );
+      }
+
+      return await withCalendarService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const filePath = normalizeLocalPath(input.filePath);
+
+        if (extname(filePath).toLowerCase() !== ".ics") {
+          return apiError("INVALID_INPUT", "Calendar import requires a .ics file.");
+        }
+
+        const fileStats = await stat(filePath);
+
+        if (!fileStats.isFile()) {
+          return apiError("INVALID_INPUT", "Calendar import path must be a file.");
+        }
+
+        const result = await new CalendarFeedService({
+          connection: context.connection
+        }).importIcs({
+          workspaceId,
+          sourceName: input.sourceName ?? basename(filePath),
+          sourcePath: filePath,
+          sourceType: "file",
+          icsText: await readFile(filePath, "utf8")
+        });
+
+        return apiOk({
+          sourceId: result.source.id,
+          sourceName: result.source.name,
+          importedEventCount: result.importedEventCount,
+          skippedEventCount: result.skippedEventCount
+        });
       });
     }
   };
@@ -155,6 +208,15 @@ function isCalendarRescheduleItemInput(
     isNonEmptyString(input.itemId) &&
     (input.kind === "task" || input.kind === "list_item") &&
     isOptionalBoolean(input.allDay)
+  );
+}
+
+function isImportIcsFileInput(input: unknown): input is ImportIcsFileInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.filePath) &&
+    isOptionalString(input.workspaceId) &&
+    isOptionalString(input.sourceName)
   );
 }
 

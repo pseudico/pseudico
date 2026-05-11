@@ -41,7 +41,9 @@ const requiredTables = [
   "daily_plans",
   "daily_plan_items",
   "activity_log",
-  "search_index"
+  "search_index",
+  "calendar_sources",
+  "calendar_events"
 ];
 
 const requiredIndexes = [
@@ -63,7 +65,10 @@ const requiredIndexes = [
   "idx_task_details_due",
   "idx_taggings_target",
   "idx_activity_log_workspace_created",
-  "idx_search_index_target"
+  "idx_search_index_target",
+  "idx_calendar_sources_workspace",
+  "idx_calendar_events_workspace_range",
+  "idx_calendar_events_source"
 ];
 
 let tempRoot: string;
@@ -82,7 +87,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version thirteen", () => {
+  it("runs on an empty database and records schema version fourteen", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -151,14 +156,19 @@ describe("schema migrations", () => {
           version: 13,
           name: "comments",
           checksum: "pse-129-comments-v1"
+        },
+        {
+          version: 14,
+          name: "calendar_feeds",
+          checksum: "pse-141-calendar-feeds-v1"
         }
       ],
-      currentVersion: 13
+      currentVersion: 14
     });
-    expect(service.getCurrentSchemaVersion()).toBe(13);
+    expect(service.getCurrentSchemaVersion()).toBe(14);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 13
+      currentVersion: 14
     });
   });
 

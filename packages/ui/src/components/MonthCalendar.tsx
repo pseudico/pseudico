@@ -3,7 +3,7 @@ import { EmptyState } from "./EmptyState";
 
 export type MonthCalendarItem = {
   id: string;
-  kind: "task" | "list_item";
+  kind: "task" | "list_item" | "calendar_event";
   title: string;
   containerName: string;
   categoryName: string | null;

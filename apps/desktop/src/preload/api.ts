@@ -1410,11 +1410,16 @@ export type CalendarNavigationTargetSummary = {
   containerId: string;
   workspaceId: string;
   sourceItemId: string | null;
+} | {
+  targetType: "calendar_event";
+  targetId: string;
+  workspaceId: string;
+  sourceId: string;
 };
 
 export type CalendarItemSummary = {
   id: string;
-  kind: "task" | "list_item";
+  kind: "task" | "list_item" | "calendar_event";
   workspaceId: string;
   title: string;
   body: string | null;
@@ -1425,7 +1430,7 @@ export type CalendarItemSummary = {
   categoryId: string | null;
   categoryName: string | null;
   categoryColor: string | null;
-  status: TaskStatus | ListItemStatus;
+  status: TaskStatus | ListItemStatus | "read_only";
   itemStatus: string | null;
   priority: number | null;
   startAt: string | null;
@@ -1457,7 +1462,7 @@ export type CalendarMonthViewModelSummary = {
 export type CalendarRescheduleItemInput = {
   workspaceId?: string;
   itemId: string;
-  kind: "task" | "list_item";
+  kind: "task" | "list_item" | "calendar_event";
   dueAt: string | null;
   startAt?: string | null;
   allDay?: boolean;
@@ -1465,10 +1470,23 @@ export type CalendarRescheduleItemInput = {
 
 export type CalendarRescheduleItemSummary = {
   itemId: string;
-  kind: "task" | "list_item";
+  kind: "task" | "list_item" | "calendar_event";
   startAt: string | null;
   dueAt: string | null;
   allDay: boolean;
+};
+
+export type ImportIcsFileInput = {
+  workspaceId?: string;
+  filePath: string;
+  sourceName?: string;
+};
+
+export type ImportIcsSummary = {
+  sourceId: string;
+  sourceName: string;
+  importedEventCount: number;
+  skippedEventCount: number;
 };
 
 export type CreateTagCollectionInput = {
@@ -2969,7 +2987,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   },
   calendar: {
     getMonth: "local-work-os:calendar:get-month",
-    rescheduleItem: "local-work-os:calendar:reschedule-item"
+    rescheduleItem: "local-work-os:calendar:reschedule-item",
+    importIcsFile: "local-work-os:calendar:import-ics-file"
   },
   dashboard: {
     getDefault: "local-work-os:dashboard:get-default"
@@ -3595,6 +3614,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.calendar.rescheduleItem]: {
     input: CalendarRescheduleItemInput;
     result: ApiResult<CalendarRescheduleItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.calendar.importIcsFile]: {
+    input: ImportIcsFileInput;
+    result: ApiResult<ImportIcsSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.getDefault]: {
     input: GetDefaultDashboardInput | undefined;
@@ -4345,6 +4368,9 @@ export type LocalWorkOsApi = {
     rescheduleItem: (
       input: CalendarRescheduleItemInput
     ) => Promise<ApiResult<CalendarRescheduleItemSummary>>;
+    importIcsFile: (
+      input: ImportIcsFileInput
+    ) => Promise<ApiResult<ImportIcsSummary>>;
   };
   dashboard: {
     getDefault: (
@@ -5026,7 +5052,9 @@ export function createLocalWorkOsApi(
       getMonth: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.calendar.getMonth, input),
       rescheduleItem: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.calendar.rescheduleItem, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.calendar.rescheduleItem, input),
+      importIcsFile: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.calendar.importIcsFile, input)
     },
     dashboard: {
       getDefault: (input) =>

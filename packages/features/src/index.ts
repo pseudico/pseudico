@@ -94,10 +94,12 @@ export {
 } from "./bulkActions";
 export {
   CalendarService,
+  CalendarFeedService,
   calendarModuleContract,
   createCalendarDayRange,
   createCalendarMonthRange,
-  createCalendarWeekRange
+  createCalendarWeekRange,
+  parseIcsEvents
 } from "./calendar";
 export {
   ContactRelationshipService,
@@ -382,7 +384,10 @@ export type {
   CalendarRange,
   CalendarRescheduleItemInput,
   CalendarRescheduleItemResult,
-  CalendarWeekInput
+  CalendarWeekInput,
+  CalendarFeedEventView,
+  IcsImportInput,
+  IcsImportResult
 } from "./calendar";
 export type {
   AddContactFieldInput,
