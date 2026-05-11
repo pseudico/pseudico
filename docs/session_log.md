@@ -3679,3 +3679,49 @@ Files changed:
 - packages/features/src/savedViews/CollectionService.ts
 Open questions / risks: CI and review still need GitHub validation.
 Next actions: Commit; push; open ready PR.
+## 2026-05-12T08:33:06.8809633+10:00
+Objective: Finish PSE-149 merge and next-ticket prep.
+Decisions made:
+- Squash-merged PR #138 at e70670d1 and deleted merged feature branch.
+- Moved PSE-149 to Done and promoted PSE-150 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: This post-merge session-log entry is local-only until next PR.
+Next actions: Start PSE-150 in next run; keep exactly one Codex Ready issue.
+## 2026-05-12T08:57:50.4901018+10:00
+Objective: Reconcile active Local Work OS work and start PSE-150.
+Decisions made:
+- No PR Open or In Progress Linear issues found; PSE-150 is the single Codex Ready issue.
+- Main is aligned with origin/main; existing local session log change will be carried into this ticket branch.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Untracked .playwright-mcp/ and gh installer appear unrelated and will be left untouched.
+Next actions: Move PSE-150 to In Progress; read docs; branch and implement.
+## 2026-05-12T09:04:58.3275134+10:00
+Objective: Implement PSE-150 search ranking/highlight/navigation foundation.
+Decisions made:
+- Added weighted ranking and sanitized highlight/excerpt segments in search service output.
+- Search UI now renders highlights, exposes keyboard result navigation, and opens with highlight query params.
+Files changed:
+- packages/features/src/search/SearchService.ts
+- packages/features/src/search/SearchResultHydrator.ts
+- apps/desktop/src/preload/api.ts
+- apps/desktop/src/main/ipc/searchHandlers.ts
+- apps/desktop/src/renderer/pages/SearchPage.tsx
+- packages/ui/src/components/SearchResultCard.tsx
+- packages/features/tests/searchService.test.ts
+- packages/ui/tests/searchResultCard.test.tsx
+Open questions / risks: Full Playwright E2E may require existing app harness; local tests continue next.
+Next actions: Run lint/test/build; fix failures; open PR.
+## 2026-05-12T09:10:23.7930972+10:00
+Objective: Verify PSE-150 implementation before PR.
+Decisions made:
+- pnpm lint, typecheck, test, and build pass; test/build required escalation after sandbox EPERM.
+- Added DB, feature, and UI tests for ranking order and safe highlight rendering.
+Files changed:
+- packages/db/src/repositories/SearchIndexRepository.ts
+- packages/db/tests/searchIndexService.test.ts
+- packages/features/tests/searchService.test.ts
+- packages/ui/tests/searchResultCard.test.tsx
+Open questions / risks: CI still needs GitHub validation after push.
+Next actions: Commit; push; open ready PR.

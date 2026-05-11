@@ -25,7 +25,9 @@ import {
   SearchResultHydrator,
   type HydrateSearchResultsOptions,
   type SearchResult,
-  type SearchResultKind
+  type SearchResultKind,
+  type SearchHighlightSegment,
+  type SearchResultExcerpt
 } from "./SearchResultHydrator";
 import { SavedViewService, type SavedViewMutationResult } from "../savedViews";
 import {
@@ -194,7 +196,10 @@ export class SearchService {
     return filterStructuredSearchResults(
       this.searchResultHydrator.hydrateSearchResults(records, hydrateOptions),
       parsed
-    ).slice(resultOffset, resultOffset + resultLimit);
+    )
+      .map((result) => decorateSearchResult(result, parsed.textQuery))
+      .sort(compareDecoratedSearchResults)
+      .slice(resultOffset, resultOffset + resultLimit);
   }
 
   parseStructuredQuery(query: string): StructuredSearchParseResult {
@@ -266,3 +271,169 @@ export const searchModuleContract = {
   integrationPoints: ["database search repository", "all searchable modules", "saved views", "dashboard"],
   priority: "MVP"
 } as const satisfies FeatureModuleContract;
+
+
+type SearchTerm = {
+  normalized: string;
+};
+
+function decorateSearchResult(result: SearchResult, query: string): SearchResult {
+  const terms = tokenizeSearchTerms(query);
+  if (terms.length === 0) {
+    return result;
+  }
+
+  const titleHighlights = buildHighlightSegments(result.title, terms);
+  const excerpt = buildExcerpt(result.body ?? "", terms);
+
+  return {
+    ...result,
+    score: calculateSearchScore(result, terms),
+    titleHighlights,
+    excerpt
+  };
+}
+
+function compareDecoratedSearchResults(left: SearchResult, right: SearchResult): number {
+  if (right.score !== left.score) {
+    return right.score - left.score;
+  }
+
+  return right.updatedAt.localeCompare(left.updatedAt) || left.title.localeCompare(right.title);
+}
+
+function calculateSearchScore(result: SearchResult, terms: readonly SearchTerm[]): number {
+  const title = normalizeSearchText(result.title);
+  const body = normalizeSearchText(result.body ?? "");
+  const tags = normalizeSearchText(result.tags.join(" "));
+  const category = normalizeSearchText(result.category ?? "");
+  let score = 0;
+
+  for (const term of terms) {
+    if (title === term.normalized) score += 120;
+    if (title.startsWith(term.normalized)) score += 70;
+    score += countOccurrences(title, term.normalized) * 45;
+    score += countOccurrences(tags, term.normalized) * 24;
+    score += countOccurrences(category, term.normalized) * 20;
+    score += countOccurrences(body, term.normalized) * 12;
+  }
+
+  if (result.kind === "project" || result.kind === "contact" || result.kind === "inbox") {
+    score += 4;
+  }
+
+  return score;
+}
+
+function buildExcerpt(text: string, terms: readonly SearchTerm[]): SearchResultExcerpt | null {
+  const trimmed = collapseWhitespace(text);
+  if (trimmed.length === 0) {
+    return null;
+  }
+
+  const normalized = normalizeSearchText(trimmed);
+  const firstMatch = terms
+    .map((term) => normalized.indexOf(term.normalized))
+    .filter((index) => index >= 0)
+    .sort((left, right) => left - right)[0];
+
+  const excerptText = firstMatch === undefined
+    ? trimExcerpt(trimmed, 0)
+    : trimExcerpt(trimmed, firstMatch);
+
+  return {
+    text: excerptText,
+    segments: buildHighlightSegments(excerptText, terms)
+  };
+}
+
+function trimExcerpt(text: string, matchIndex: number): string {
+  const maxLength = 180;
+  if (text.length <= maxLength) {
+    return text;
+  }
+
+  const start = Math.max(0, matchIndex - 70);
+  const end = Math.min(text.length, start + maxLength);
+  const prefix = start > 0 ? "..." : "";
+  const suffix = end < text.length ? "..." : "";
+  return `${prefix}${text.slice(start, end).trim()}${suffix}`;
+}
+
+function buildHighlightSegments(text: string, terms: readonly SearchTerm[]): SearchHighlightSegment[] {
+  if (text.length === 0 || terms.length === 0) {
+    return text.length === 0 ? [] : [{ text, match: false }];
+  }
+
+  const ranges: Array<{ start: number; end: number }> = [];
+  const normalizedText = normalizeSearchText(text);
+
+  for (const term of terms) {
+    let index = normalizedText.indexOf(term.normalized);
+    while (index >= 0) {
+      ranges.push({ start: index, end: index + term.normalized.length });
+      index = normalizedText.indexOf(term.normalized, index + term.normalized.length);
+    }
+  }
+
+  if (ranges.length === 0) {
+    return [{ text, match: false }];
+  }
+
+  ranges.sort((left, right) => left.start - right.start || right.end - left.end);
+  const merged: Array<{ start: number; end: number }> = [];
+  for (const range of ranges) {
+    const previous = merged.at(-1);
+    if (previous === undefined || range.start > previous.end) {
+      merged.push({ ...range });
+    } else {
+      previous.end = Math.max(previous.end, range.end);
+    }
+  }
+
+  const segments: SearchHighlightSegment[] = [];
+  let cursor = 0;
+  for (const range of merged) {
+    if (range.start > cursor) {
+      segments.push({ text: text.slice(cursor, range.start), match: false });
+    }
+    segments.push({ text: text.slice(range.start, range.end), match: true });
+    cursor = range.end;
+  }
+  if (cursor < text.length) {
+    segments.push({ text: text.slice(cursor), match: false });
+  }
+  return segments;
+}
+
+function tokenizeSearchTerms(query: string): SearchTerm[] {
+  const seen = new Set<string>();
+  return (query.match(/"[^"]+"|'[^']+'|\S+/g) ?? [])
+    .map((term) => term.replace(/^["']|["']$/g, "").trim())
+    .filter(Boolean)
+    .map((original) => ({ normalized: normalizeSearchText(original) }))
+    .filter((term) => {
+      if (term.normalized.length === 0 || seen.has(term.normalized)) return false;
+      seen.add(term.normalized);
+      return true;
+    });
+}
+
+function normalizeSearchText(value: string): string {
+  return value.toLocaleLowerCase();
+}
+
+function collapseWhitespace(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function countOccurrences(value: string, term: string): number {
+  if (value.length === 0 || term.length === 0) return 0;
+  let count = 0;
+  let index = value.indexOf(term);
+  while (index >= 0) {
+    count += 1;
+    index = value.indexOf(term, index + term.length);
+  }
+  return count;
+}

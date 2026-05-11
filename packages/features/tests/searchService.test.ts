@@ -289,6 +289,62 @@ describe("SearchService", () => {
       }
     ]);
   });
+
+  it("ranks title matches ahead of body-only matches and returns safe highlight excerpts", () => {
+    const project = new ContainerRepository(connection).create({
+      id: "container_rank",
+      workspaceId: "workspace_1",
+      type: "project",
+      name: "Ranking Project",
+      slug: "ranking-project",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const itemRepository = new ItemRepository(connection);
+    const bodyOnly = itemRepository.create({
+      id: "item_body_match",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      type: "note",
+      title: "General note",
+      body: "The launch phrase appears only in the body.",
+      timestamp: "2026-04-30T01:00:00.000Z"
+    });
+    const titleMatch = itemRepository.create({
+      id: "item_title_match",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      type: "note",
+      title: "Launch decision",
+      body: "Body includes <script>alert(1)</script> near launch details.",
+      timestamp: "2026-04-30T00:30:00.000Z"
+    });
+    const service = createService();
+
+    service.upsertItem(bodyOnly);
+    service.upsertItem(titleMatch);
+
+    const results = service.search({
+      workspaceId: "workspace_1",
+      query: "launch",
+      kinds: ["note"]
+    });
+
+    expect(results.map((result) => result.targetId)).toEqual([
+      "item_title_match",
+      "item_body_match"
+    ]);
+    expect(results[0]?.score).toBeGreaterThan(results[1]?.score ?? 0);
+    expect(results[0]?.titleHighlights).toEqual([
+      { text: "Launch", match: true },
+      { text: " decision", match: false }
+    ]);
+    expect(results[0]?.excerpt?.segments).toContainEqual({
+      text: "launch",
+      match: true
+    });
+    expect(results[0]?.excerpt?.text).toContain("<script>alert(1)</script>");
+  });
+
 });
 
 function createService(): SearchService {

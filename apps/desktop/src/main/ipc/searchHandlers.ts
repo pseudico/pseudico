@@ -154,7 +154,10 @@ function toSearchResultSummary(result: SearchResult): SearchResultSummary {
     parentItemTitle: result.parentItemTitle,
     destinationPath: result.destinationPath,
     dueAt: result.dueAt,
-    taskStatus: result.taskStatus
+    taskStatus: result.taskStatus,
+    score: result.score,
+    titleHighlights: result.titleHighlights,
+    excerpt: result.excerpt
   };
 }
 

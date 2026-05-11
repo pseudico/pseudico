@@ -2466,6 +2466,17 @@ a {
   font-size: 13px;
 }
 
+.search-highlight {
+  border-radius: 4px;
+  padding: 0 2px;
+  background: #ffe7a3;
+  color: inherit;
+}
+
+.search-results-panel:focus-within .search-result-card-selected {
+  box-shadow: 0 0 0 2px rgba(36, 92, 85, 0.18);
+}
+
 .metadata-browser-layout {
   display: grid;
   grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
