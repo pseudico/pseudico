@@ -170,6 +170,7 @@ function isSetTaskReminderInput(input: unknown): input is SetTaskReminderInput {
     isOptionalActorType(input.actorType) &&
     (input.triggerAt === undefined || isNonEmptyString(input.triggerAt)) &&
     (input.leadMinutes === undefined || typeof input.leadMinutes === "number") &&
+    (input.anchor === undefined || input.anchor === "due" || input.anchor === "start") &&
     ((input.triggerAt === undefined) !== (input.leadMinutes === undefined))
   );
 }

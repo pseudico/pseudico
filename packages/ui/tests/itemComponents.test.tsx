@@ -614,9 +614,13 @@ describe("Universal item UI", () => {
     );
 
     expect(html).toContain("Reminder");
+    expect(html).toContain("Notifications");
+    expect(html).toContain("Before due date");
+    expect(html).toContain("Local notifications on");
     expect(html).toContain("1 hour before");
     expect(html).toContain("Clear");
     expect(html).toContain("data-reminder-mode=\"relative\"");
+    expect(html).toContain("data-reminder-anchor=\"due\"");
   });
 
   it("renders recurrence picker frequency and weekday controls", () => {

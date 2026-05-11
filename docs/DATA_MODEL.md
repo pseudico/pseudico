@@ -157,9 +157,10 @@ archived searches and restore flows.
 
 The contact foundation now stores contact containers plus flexible profile
 fields behind repository and service APIs. The reminder foundation now stores
-task reminder policies and scheduled reminder events in `reminder_policies` and
-`reminder_events`, with task rows pointing at the active local policy when one
-exists. The recurrence foundation now stores active daily and weekly/custom
+task and list-item reminder policies and scheduled reminder events in
+`reminder_policies` and `reminder_events`, with task rows pointing at the active
+local policy when one exists and workspace defaults stored in `app_settings`.
+The recurrence foundation now stores active daily and weekly/custom
 weekday rules in `recurrence_rules`, with task rows pointing at the active local
 rule when one exists and recurring completion rolling the same task to the next
 occurrence. The template foundation stores list templates and project/contact

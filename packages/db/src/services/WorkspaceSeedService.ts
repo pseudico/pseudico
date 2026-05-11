@@ -36,6 +36,22 @@ export const DEFAULT_APP_SETTINGS = [
   {
     key: "backup_retention",
     value: 10
+  },
+  {
+    key: "reminder_preferences",
+    value: {
+      notificationsEnabled: true,
+      tasks: {
+        enabled: false,
+        anchor: "due",
+        leadMinutes: 1440
+      },
+      listItems: {
+        enabled: false,
+        anchor: "due",
+        leadMinutes: 1440
+      }
+    }
   }
 ] as const;
 

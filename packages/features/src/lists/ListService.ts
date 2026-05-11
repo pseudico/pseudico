@@ -38,6 +38,10 @@ import {
   type PipelineViewModel
 } from "../pipelines";
 import { parseBulkListItems } from "./BulkListParser";
+import {
+  ReminderService,
+  type ReminderCreationInput
+} from "../reminders/ReminderService";
 
 // Owns checklist and structured-list application operations.
 // Does not own project lifecycle or list UI rendering.
@@ -69,6 +73,7 @@ export type AddListItemInput = {
   listItemParentId?: string | null;
   startAt?: string | null;
   dueAt?: string | null;
+  reminder?: ReminderCreationInput;
 };
 
 export type UpdateListItemInput = {
@@ -143,7 +148,7 @@ export class ListService {
   async createList(input: CreateListInput): Promise<ListMutationResult> {
     this.validateCreateListInput(input);
 
-    return await this.transactionService.runInTransaction(() => {
+    return await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const itemRepository = new ItemRepository(this.connection);
       const listRepository = new ListRepository(this.connection);
@@ -202,8 +207,8 @@ export class ListService {
   ): Promise<ListItemMutationResult> {
     this.validateAddListItemInput(input);
 
-    return await this.transactionService.runInTransaction(() =>
-      this.createListItemInCurrentTransaction(input)
+    return await this.transactionService.runInTransaction(async () =>
+      await this.createListItemInCurrentTransaction(input)
     );
   }
 
@@ -212,7 +217,7 @@ export class ListService {
   ): Promise<ListItemMutationResult> {
     this.validateUpdateListItemInput(input);
 
-    return await this.transactionService.runInTransaction(() => {
+    return await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const before = this.requireListItem(input.listItemId);
       const patch = this.buildListItemPatch(input, before, timestamp);
@@ -231,6 +236,17 @@ export class ListService {
       });
 
       const searchRecord = this.upsertListItemSearchRecord(listItem, timestamp);
+      if (input.status === "done") {
+        await this.clearReminderForListItemCompletion({
+          listItemId: listItem.id,
+          ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+        });
+      } else if (input.dueAt !== undefined || input.startAt !== undefined) {
+        await this.rescheduleReminderForListItemDateChange({
+          listItemId: listItem.id,
+          ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+        });
+      }
 
       return { listItem, searchRecord };
     });
@@ -259,7 +275,7 @@ export class ListService {
   ): Promise<ListItemMutationResult> {
     validateNonEmptyString(id, "id");
 
-    return await this.transactionService.runInTransaction(() => {
+    return await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const before = this.requireListItem(id);
       const listItem = new ListRepository(this.connection).updateListItem(id, {
@@ -278,6 +294,7 @@ export class ListService {
       });
 
       const searchRecord = this.upsertListItemSearchRecord(listItem, timestamp);
+      await this.clearReminderForListItemCompletion({ listItemId: listItem.id, actorType });
 
       return { listItem, searchRecord };
     });
@@ -289,7 +306,7 @@ export class ListService {
   ): Promise<ListItemMutationResult> {
     validateNonEmptyString(id, "id");
 
-    return await this.transactionService.runInTransaction(() => {
+    return await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const before = this.requireListItem(id);
       const listItem = new ListRepository(this.connection).updateListItem(id, {
@@ -370,7 +387,7 @@ export class ListService {
     validateNonEmptyString(input.listId, "listId");
     validateNonEmptyString(input.text, "text");
 
-    return await this.transactionService.runInTransaction(() => {
+    return await this.transactionService.runInTransaction(async () => {
       const parsedItems = parseBulkListItems(input.text);
 
       if (parsedItems.length === 0) {
@@ -388,7 +405,7 @@ export class ListService {
         nextSortOrder += 1024;
         const parent = createdByDepth.get(parsed.depth - 1) ?? null;
         const normalizedDepth = parent === null ? 0 : parent.depth + 1;
-        const result = this.createListItemInCurrentTransaction({
+        const result = await this.createListItemInCurrentTransaction({
           listId: input.listId,
           title: parsed.title,
           ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
@@ -467,9 +484,9 @@ export class ListService {
     return new ListRepository(this.connection).listByContainer(containerId);
   }
 
-  private createListItemInCurrentTransaction(
+  private async createListItemInCurrentTransaction(
     input: AddListItemInput
-  ): ListItemMutationResult {
+  ): Promise<ListItemMutationResult> {
     const timestamp = createIsoTimestamp(this.now());
     const list = this.requireList(input.listId);
     const parent =
@@ -507,6 +524,12 @@ export class ListService {
     });
 
     const searchRecord = this.upsertListItemSearchRecord(listItem, timestamp);
+    await this.applyCreationReminder({
+      workspaceId: list.list.workspaceId,
+      listItemId: listItem.id,
+      ...(input.reminder === undefined ? {} : { reminder: input.reminder }),
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
 
     return { listItem, searchRecord };
   }
@@ -686,6 +709,75 @@ export class ListService {
       beforeJson: input.before === null ? null : JSON.stringify(input.before),
       afterJson: JSON.stringify(input.listItem),
       timestamp: input.timestamp
+    });
+  }
+
+  private async rescheduleReminderForListItemDateChange(input: {
+    listItemId: string;
+    actorType?: ActivityActorType;
+  }): Promise<void> {
+    await new ReminderService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).rescheduleReminderForListItemDateChange({
+      listItemId: input.listItemId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+  }
+
+  private async clearReminderForListItemCompletion(input: {
+    listItemId: string;
+    actorType?: ActivityActorType;
+  }): Promise<void> {
+    await new ReminderService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).clearListItemReminder({
+      listItemId: input.listItemId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+  }
+
+  private async applyCreationReminder(input: {
+    workspaceId: string;
+    listItemId: string;
+    reminder?: ReminderCreationInput;
+    actorType?: ActivityActorType;
+  }): Promise<void> {
+    if (input.reminder?.mode === "none") {
+      return;
+    }
+
+    const reminderService = new ReminderService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    });
+
+    if (input.reminder === undefined || input.reminder.mode === "default") {
+      await reminderService.applyDefaultListItemReminder({
+        workspaceId: input.workspaceId,
+        listItemId: input.listItemId,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
+      return;
+    }
+
+    await reminderService.setListItemReminder({
+      workspaceId: input.workspaceId,
+      listItemId: input.listItemId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      ...(input.reminder.mode === "absolute"
+        ? {
+            triggerAt: input.reminder.triggerAt,
+            ...(input.reminder.anchor === undefined ? {} : { anchor: input.reminder.anchor })
+          }
+        : {
+            leadMinutes: input.reminder.leadMinutes,
+            ...(input.reminder.anchor === undefined ? {} : { anchor: input.reminder.anchor })
+          })
     });
   }
 

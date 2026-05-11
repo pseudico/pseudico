@@ -1,5 +1,10 @@
 import { ReminderService } from "@local-work-os/features";
-import { TaskRepository, type DatabaseConnection, type ReminderEventRecord } from "@local-work-os/db";
+import {
+  ListRepository,
+  TaskRepository,
+  type DatabaseConnection,
+  type ReminderEventRecord
+} from "@local-work-os/db";
 import { Notification } from "electron";
 
 export type ReminderNotification = {
@@ -74,12 +79,22 @@ export class NotificationScheduler {
 
   private async fireEvent(eventId: string): Promise<void> {
     const result = await this.createReminderService().markReminderFired(eventId);
-    const task = new TaskRepository(this.connection).getByItemId(result.event.taskItemId);
+    const task = result.event.targetType === "item"
+      ? new TaskRepository(this.connection).getByItemId(result.event.targetId)
+      : null;
+    const listItem = result.event.targetType === "list_item"
+      ? new ListRepository(this.connection).getListItemById(result.event.targetId)
+      : null;
 
     if (task !== null) {
       this.notifier({
         title: "Task reminder",
         body: task.item.title
+      });
+    } else if (listItem !== null) {
+      this.notifier({
+        title: "List item reminder",
+        body: listItem.title
       });
     }
 

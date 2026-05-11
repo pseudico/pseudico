@@ -232,7 +232,11 @@ export {
   relationshipsModuleContract
 } from "./relationships";
 export { WikilinkService, wikilinksModuleContract } from "./wikilinks";
-export { ReminderService, remindersModuleContract } from "./reminders";
+export {
+  REMINDER_PREFERENCES_SETTING_KEY,
+  ReminderService,
+  remindersModuleContract
+} from "./reminders";
 export {
   QueryEvaluator,
   SAVED_VIEW_QUERY_VERSION,
@@ -629,14 +633,25 @@ export type {
   WikilinkTargetKind
 } from "./wikilinks";
 export type {
+  ApplyDefaultListItemReminderInput,
+  ApplyDefaultTaskReminderInput,
+  ClearListItemReminderInput,
   ClearTaskReminderInput,
   DismissReminderInput,
+  ReminderCreationInput,
+  ReminderDefaultPreferences,
   ReminderEventMutationResult,
+  ReminderPreferences,
+  ReminderPreferencesMutationResult,
+  ReminderPreferencesValue,
   ReminderServiceIdFactory,
+  RescheduleListItemReminderInput,
   RescheduleTaskReminderInput,
+  SetListItemReminderInput,
   SetTaskReminderInput,
   SnoozeReminderInput,
-  TaskReminderMutationResult
+  TaskReminderMutationResult,
+  UpdateReminderPreferencesInput
 } from "./reminders";
 export type {
   CreateSavedViewInput,

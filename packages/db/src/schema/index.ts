@@ -28,4 +28,4 @@ export { templates } from "./templates";
 export { workflowDefinitions, workflowRuns } from "./workflows";
 export { workspaces } from "./workspaces";
 
-export const schemaVersion = 9;
+export const schemaVersion = 11;

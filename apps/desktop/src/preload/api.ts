@@ -2181,7 +2181,10 @@ export type RescheduleTaskInput = {
 export type ReminderPolicySummary = {
   id: string;
   workspaceId: string;
+  targetType: "item" | "list_item";
+  targetId: string;
   taskItemId: string;
+  anchor: "due" | "start";
   mode: "absolute" | "relative";
   leadMinutes: number | null;
   triggerAt: string;
@@ -2195,6 +2198,8 @@ export type ReminderEventSummary = {
   id: string;
   workspaceId: string;
   policyId: string;
+  targetType: "item" | "list_item";
+  targetId: string;
   taskItemId: string;
   scheduledForAt: string;
   firedAt: string | null;
@@ -2221,6 +2226,7 @@ export type SetTaskReminderInput = {
   actorType?: "local_user" | "system" | "importer";
   triggerAt?: string;
   leadMinutes?: number;
+  anchor?: "due" | "start";
 };
 
 export type ClearTaskReminderInput = {

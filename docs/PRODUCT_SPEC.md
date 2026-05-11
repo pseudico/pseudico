@@ -32,9 +32,9 @@ Known limitations for MVP release planning:
 - Contacts now have a repository/service foundation for local contact
   containers and flexible profile fields; full renderer workflows remain
   future work.
-- Reminders now have tables, service operations, IPC, scheduler-facing events,
-  and a shared picker foundation; full renderer notification preferences remain
-  future work.
+- Reminders now have task/list-item policy targets, default reminder
+  preferences, local notification enablement, scheduler-facing events, and a
+  shared picker foundation; deeper renderer preferences remain future work.
 - Appearance preferences now persist local theme, density, and font-size choices
   through app settings and apply renderer CSS variables to shell, card, and
   dashboard surfaces.

@@ -11,7 +11,7 @@ import {
 } from "@local-work-os/db";
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ReminderService, TaskService } from "../src";
+import { ListService, ReminderService, TaskService } from "../src";
 
 let cleanup: (() => Promise<void>) | undefined;
 let connection: DatabaseConnection;
@@ -137,6 +137,90 @@ describe("ReminderService", () => {
     ]);
   });
 
+  it("applies default reminders to newly created due tasks and honors no-reminder overrides", async () => {
+    await createReminderService().updatePreferences({
+      workspaceId: "workspace_1",
+      preferences: {
+        tasks: {
+          enabled: true,
+          anchor: "due",
+          leadMinutes: 1440
+        }
+      }
+    });
+
+    const task = await createTaskService().createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Prepare launch",
+      dueAt: "2026-05-03T09:00:00.000Z"
+    });
+    const skipped = await createTaskService().createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "No alert",
+      dueAt: "2026-05-03T09:00:00.000Z",
+      reminder: { mode: "none" }
+    });
+
+    const repository = new ReminderRepository(connection);
+    expect(repository.getActivePolicyForTask(task.item.id)).toMatchObject({
+      anchor: "due",
+      mode: "relative",
+      leadMinutes: 1440,
+      triggerAt: "2026-05-02T09:00:00.000Z"
+    });
+    expect(repository.getActivePolicyForTask(skipped.item.id)).toBeNull();
+  });
+
+  it("sets list item reminder overrides and reschedules them from list item date changes", async () => {
+    const list = await createListService().createList({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Launch checklist"
+    });
+    const item = await createListService().addListItem({
+      listId: list.item.id,
+      title: "Send launch note",
+      startAt: "2026-05-04T09:00:00.000Z",
+      reminder: {
+        mode: "relative",
+        anchor: "start",
+        leadMinutes: 60
+      }
+    });
+
+    await createListService().updateListItem({
+      listItemId: item.listItem.id,
+      startAt: "2026-05-05T10:00:00.000Z"
+    });
+
+    const repository = new ReminderRepository(connection);
+    const policy = repository.getActivePolicyForListItem(item.listItem.id);
+    expect(policy).toMatchObject({
+      targetType: "list_item",
+      targetId: item.listItem.id,
+      anchor: "start",
+      triggerAt: "2026-05-05T09:00:00.000Z"
+    });
+    expect(repository.listEventsForPolicy(policy!.id).map((event) => ({
+      targetType: event.targetType,
+      scheduledForAt: event.scheduledForAt,
+      status: event.status
+    }))).toEqual([
+      {
+        targetType: "list_item",
+        scheduledForAt: "2026-05-05T09:00:00.000Z",
+        status: "scheduled"
+      },
+      {
+        targetType: "list_item",
+        scheduledForAt: "2026-05-04T08:00:00.000Z",
+        status: "cancelled"
+      }
+    ]);
+  });
+
   it("dismisses and snoozes reminder events", async () => {
     const task = await createTask();
     const reminderService = createReminderService();
@@ -182,6 +266,14 @@ function createTaskService(): TaskService {
 
 function createReminderService(): ReminderService {
   return new ReminderService({
+    connection,
+    idFactory,
+    now: () => new Date("2026-05-02T01:02:03.000Z")
+  });
+}
+
+function createListService(): ListService {
+  return new ListService({
     connection,
     idFactory,
     now: () => new Date("2026-05-02T01:02:03.000Z")

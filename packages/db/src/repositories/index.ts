@@ -201,9 +201,11 @@ export {
   type CreateReminderPolicyInput,
   type ReminderEventRecord,
   type ReminderEventStatus,
+  type ReminderPolicyAnchor,
   type ReminderPolicyMode,
   type ReminderPolicyRecord,
   type ReminderPolicyStatus,
+  type ReminderPolicyTargetType,
   type UpdateReminderEventPatch,
   type UpdateReminderPolicyPatch
 } from "./ReminderRepository";
