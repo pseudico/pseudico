@@ -3,6 +3,7 @@ import {
   ActivityAction,
   createIsoTimestamp,
   createLocalId,
+  createSequentialSortOrders,
   parseDateRangeInput,
   isListDisplayMode,
   isListItemStatus,
@@ -111,6 +112,14 @@ export type MoveListItemInput = {
   listItemId: string;
   direction: "up" | "down";
   actorType?: ActivityActorType;
+};
+
+export type MoveListItemToListInput = {
+  listItemId: string;
+  targetListId: string;
+  actorType?: ActivityActorType;
+  beforeListItemId?: string | null;
+  targetListItemParentId?: string | null;
 };
 
 export type IndentListItemInput = {
@@ -527,6 +536,132 @@ export class ListService {
     );
   }
 
+  async moveListItemToList(
+    input: MoveListItemToListInput
+  ): Promise<ListItemMutationResult[]> {
+    this.validateMoveListItemToListInput(input);
+
+    return await this.transactionService.runInTransaction(() => {
+      const timestamp = createIsoTimestamp(this.now());
+      const current = this.requireListItem(input.listItemId);
+      const targetList = this.requireList(input.targetListId);
+
+      if (targetList.list.workspaceId !== current.workspaceId) {
+        throw new Error("targetListId must belong to the same workspace.");
+      }
+
+      if (current.listId === input.targetListId) {
+        throw new Error("targetListId must be different from the source list.");
+      }
+
+      const repository = new ListRepository(this.connection);
+      const sourceItems = this.listItems(current.listId);
+      const movingItems = collectListItemSubtree(sourceItems, current.id);
+      const movingIds = new Set(movingItems.map((item) => item.id));
+      const targetItems = this.listItems(input.targetListId).filter(
+        (item) => !movingIds.has(item.id)
+      );
+      const beforeItem =
+        input.beforeListItemId === undefined || input.beforeListItemId === null
+          ? null
+          : this.requireListItem(input.beforeListItemId);
+
+      if (beforeItem !== null && beforeItem.listId !== input.targetListId) {
+        throw new Error("beforeListItemId must belong to targetListId.");
+      }
+
+      const targetParentId = this.resolveMoveTargetParentId(input, beforeItem);
+      const targetParent =
+        targetParentId === null
+          ? null
+          : this.validateParent(input.targetListId, current.id, targetParentId);
+      const rootDepth =
+        targetParent === null ? beforeItem?.depth ?? 0 : targetParent.depth + 1;
+      const movedItems = movingItems.map((item) => ({
+        ...item,
+        listId: input.targetListId,
+        listItemParentId:
+          item.id === current.id ? targetParentId : item.listItemParentId,
+        depth: rootDepth + Math.max(0, item.depth - current.depth)
+      }));
+      const movedById = new Map(movedItems.map((item) => [item.id, item]));
+      const movingBeforeById = new Map(movingItems.map((item) => [item.id, item]));
+      const insertIndex =
+        beforeItem === null
+          ? targetItems.length
+          : Math.max(
+              0,
+              targetItems.findIndex((item) => item.id === beforeItem.id)
+            );
+      const targetSequence = [
+        ...targetItems.slice(0, insertIndex),
+        ...movedItems,
+        ...targetItems.slice(insertIndex)
+      ];
+      const sourceSequence = sourceItems.filter((item) => !movingIds.has(item.id));
+      const results: ListItemMutationResult[] = [];
+
+      for (const order of createSequentialSortOrders(
+        sourceSequence.map((item) => item.id)
+      )) {
+        const item = sourceSequence.find((candidate) => candidate.id === order.id);
+
+        if (item !== undefined && item.sortOrder !== order.sortOrder) {
+          results.push(
+            this.updateMovedListItem({
+              before: item,
+              patch: { sortOrder: order.sortOrder, timestamp },
+              repository,
+              summary: `Repaired source list ordering for "${item.title}".`,
+              timestamp,
+              ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+            })
+          );
+        }
+      }
+
+      for (const order of createSequentialSortOrders(
+        targetSequence.map((item) => item.id)
+      )) {
+        const item = targetSequence.find((candidate) => candidate.id === order.id);
+
+        if (item === undefined) {
+          continue;
+        }
+
+        const movedItem = movedById.get(item.id) ?? item;
+        const before = movingBeforeById.get(item.id) ?? item;
+        const patch: UpdateListItemPatch = {
+          listId: movedItem.listId,
+          listItemParentId: movedItem.listItemParentId,
+          depth: movedItem.depth,
+          sortOrder: order.sortOrder,
+          timestamp
+        };
+
+        if (!hasListItemMovePatchChanged(before, patch)) {
+          continue;
+        }
+
+        results.push(
+          this.updateMovedListItem({
+            before,
+            patch,
+            repository,
+            summary:
+              item.id === current.id
+                ? `Moved list item "${item.title}" to "${targetList.item.title}".`
+                : `Moved child list item "${item.title}" with its parent.`,
+            timestamp,
+            ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+          })
+        );
+      }
+
+      return sortMoveResults(results, movingItems.map((item) => item.id));
+    });
+  }
+
   async bulkCreateListItems(
     input: BulkCreateListItemsInput
   ): Promise<ListItemMutationResult[]> {
@@ -916,6 +1051,42 @@ export class ListService {
     });
 
     return event.id;
+  }
+
+  private resolveMoveTargetParentId(
+    input: MoveListItemToListInput,
+    beforeItem: ListItemRecord | null
+  ): string | null {
+    if (input.targetListItemParentId !== undefined) {
+      return input.targetListItemParentId;
+    }
+
+    return beforeItem?.listItemParentId ?? null;
+  }
+
+  private updateMovedListItem(input: {
+    before: ListItemRecord;
+    patch: UpdateListItemPatch;
+    repository: ListRepository;
+    summary: string;
+    timestamp: string;
+    actorType?: ActivityActorType;
+  }): ListItemMutationResult {
+    const listItem = input.repository.updateListItem(input.before.id, input.patch);
+
+    this.logListItemEvent({
+      listItem,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      action: ActivityAction.listItemReordered,
+      summary: input.summary,
+      before: input.before,
+      timestamp: input.timestamp
+    });
+
+    return {
+      listItem,
+      searchRecord: this.upsertListItemSearchRecord(listItem, input.timestamp)
+    };
   }
 
   private async createListItemInCurrentTransaction(
@@ -1321,6 +1492,26 @@ export class ListService {
     }
   }
 
+  private validateMoveListItemToListInput(input: MoveListItemToListInput): void {
+    validateNonEmptyString(input.listItemId, "listItemId");
+    validateNonEmptyString(input.targetListId, "targetListId");
+
+    if (input.beforeListItemId !== undefined && input.beforeListItemId !== null) {
+      validateNonEmptyString(input.beforeListItemId, "beforeListItemId");
+    }
+
+    if (
+      input.targetListItemParentId !== undefined &&
+      input.targetListItemParentId !== null
+    ) {
+      validateNonEmptyString(
+        input.targetListItemParentId,
+        "targetListItemParentId"
+      );
+    }
+
+  }
+
   private validateBulkUpdateListItemsInput(input: BulkUpdateListItemsInput): void {
     validateNonEmptyString(input.listId, "listId");
 
@@ -1390,6 +1581,69 @@ function sortResultsByRequestedOrder(
       (order.get(left.listItemId) ?? Number.MAX_SAFE_INTEGER) -
       (order.get(right.listItemId) ?? Number.MAX_SAFE_INTEGER)
   );
+}
+
+function collectListItemSubtree(
+  items: readonly ListItemRecord[],
+  rootId: string
+): ListItemRecord[] {
+  const root = items.find((item) => item.id === rootId);
+
+  if (root === undefined) {
+    throw new Error(`List item was not found in source list: ${rootId}.`);
+  }
+
+  const childrenByParent = new Map<string, ListItemRecord[]>();
+
+  for (const item of items) {
+    if (item.listItemParentId === null) {
+      continue;
+    }
+
+    const children = childrenByParent.get(item.listItemParentId) ?? [];
+    children.push(item);
+    childrenByParent.set(item.listItemParentId, children);
+  }
+
+  const subtree: ListItemRecord[] = [];
+  const visit = (item: ListItemRecord): void => {
+    subtree.push(item);
+
+    for (const child of childrenByParent.get(item.id) ?? []) {
+      visit(child);
+    }
+  };
+
+  visit(root);
+
+  return subtree;
+}
+
+function hasListItemMovePatchChanged(
+  before: ListItemRecord,
+  patch: UpdateListItemPatch
+): boolean {
+  return (
+    (patch.listId !== undefined && patch.listId !== before.listId) ||
+    (patch.listItemParentId !== undefined &&
+      patch.listItemParentId !== before.listItemParentId) ||
+    (patch.depth !== undefined && patch.depth !== before.depth) ||
+    (patch.sortOrder !== undefined && patch.sortOrder !== before.sortOrder)
+  );
+}
+
+function sortMoveResults(
+  results: readonly ListItemMutationResult[],
+  movedIds: readonly string[]
+): ListItemMutationResult[] {
+  const order = new Map(movedIds.map((id, index) => [id, index]));
+
+  return [...results].sort((left, right) => {
+    const leftOrder = order.get(left.listItem.id) ?? Number.MAX_SAFE_INTEGER;
+    const rightOrder = order.get(right.listItem.id) ?? Number.MAX_SAFE_INTEGER;
+
+    return leftOrder - rightOrder;
+  });
 }
 
 function isBulkUpdateListItemsOperation(

@@ -3,7 +3,8 @@ import type { ParsedDateRange } from "@local-work-os/core";
 import {
   ChecklistEditor,
   type ChecklistBulkAction,
-  type ChecklistEditorItem
+  type ChecklistEditorItem,
+  type ChecklistMoveTarget
 } from "./ChecklistEditor";
 import { PipelineView } from "./PipelineView";
 import { SaveAsTemplateAction } from "./SaveAsTemplateAction";
@@ -77,6 +78,13 @@ export type ListCardContentProps = {
     listItem: ListCardItemViewModel,
     direction: "up" | "down"
   ) => Promise<boolean | void> | boolean | void;
+  onMoveListItemToList?: (
+    item: ListCardViewModel,
+    listItemId: string,
+    targetListId: string,
+    beforeListItemId?: string
+  ) => Promise<boolean | void> | boolean | void;
+  moveToListTargets?: readonly ChecklistMoveTarget[];
   onBulkActionListItems?: (
     item: ListCardViewModel,
     listItems: readonly ListCardItemViewModel[],
@@ -99,6 +107,8 @@ export function ListCardContent({
   onReorderListItem,
   onIndentListItem,
   onMoveListItem,
+  onMoveListItemToList,
+  moveToListTargets = [],
   onBulkActionListItems,
   onOutdentListItem
 }: ListCardContentProps): React.JSX.Element {
@@ -179,6 +189,17 @@ export function ListCardContent({
           onMoveItem={(listItem, direction) =>
             onMoveListItem?.(item, listItem, direction)
           }
+          onMoveItemToList={(listItemId, targetListId, beforeListItemId) =>
+            onMoveListItemToList?.(
+              item,
+              listItemId,
+              targetListId,
+              beforeListItemId
+            )
+          }
+          moveToListTargets={moveToListTargets.filter(
+            (targetList) => targetList.id !== item.id
+          )}
           onOutdentItem={(listItem) => onOutdentListItem?.(item, listItem)}
           onReorderItem={(draggedItemId, targetItemId) =>
             onReorderListItem?.(item, draggedItemId, targetItemId)

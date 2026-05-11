@@ -357,6 +357,112 @@ describe("ListService", () => {
     ]);
   });
 
+  it("moves a list row subtree across lists while preserving row metadata and repairing order", async () => {
+    const service = createService();
+    const source = await service.createList({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Source checklist"
+    });
+    const target = await service.createList({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Target checklist"
+    });
+    const sourceFirst = await service.addListItem({
+      listId: source.item.id,
+      title: "Source first"
+    });
+    const parent = await service.addListItem({
+      listId: source.item.id,
+      title: "Move me",
+      body: "Keep this note",
+      status: "waiting",
+      dueAt: "2026-05-04"
+    });
+    const child = await service.addListItem({
+      listId: source.item.id,
+      title: "Move child",
+      listItemParentId: parent.listItem.id
+    });
+    const sourceLast = await service.addListItem({
+      listId: source.item.id,
+      title: "Source last"
+    });
+    const targetFirst = await service.addListItem({
+      listId: target.item.id,
+      title: "Target first"
+    });
+    const targetLast = await service.addListItem({
+      listId: target.item.id,
+      title: "Target last"
+    });
+
+    const moved = await service.moveListItemToList({
+      listItemId: parent.listItem.id,
+      targetListId: target.item.id,
+      beforeListItemId: targetLast.listItem.id
+    });
+
+    expect(moved.map((result) => result.listItem.id)).toEqual([
+      parent.listItem.id,
+      child.listItem.id,
+      sourceLast.listItem.id,
+      targetLast.listItem.id
+    ]);
+    expect(moved[0]?.listItem).toMatchObject({
+      id: parent.listItem.id,
+      listId: target.item.id,
+      listItemParentId: null,
+      title: "Move me",
+      body: "Keep this note",
+      status: "waiting",
+      dueAt: "2026-05-04T00:00:00.000Z",
+      depth: 0
+    });
+    expect(moved[1]?.listItem).toMatchObject({
+      id: child.listItem.id,
+      listId: target.item.id,
+      listItemParentId: parent.listItem.id,
+      depth: 1
+    });
+    expect(service.listItems(source.item.id).map((item) => ({
+      id: item.id,
+      sortOrder: item.sortOrder
+    }))).toEqual([
+      { id: sourceFirst.listItem.id, sortOrder: 1024 },
+      { id: sourceLast.listItem.id, sortOrder: 2048 }
+    ]);
+    expect(service.listItems(target.item.id).map((item) => ({
+      id: item.id,
+      parentId: item.listItemParentId,
+      sortOrder: item.sortOrder
+    }))).toEqual([
+      { id: targetFirst.listItem.id, parentId: null, sortOrder: 1024 },
+      { id: parent.listItem.id, parentId: null, sortOrder: 2048 },
+      { id: child.listItem.id, parentId: parent.listItem.id, sortOrder: 3072 },
+      { id: targetLast.listItem.id, parentId: null, sortOrder: 4096 }
+    ]);
+    expect(
+      JSON.parse(
+        new SearchIndexRepository(connection).getByTarget({
+          workspaceId: "workspace_1",
+          targetType: "list_item",
+          targetId: parent.listItem.id
+        })?.metadataJson ?? "{}"
+      )
+    ).toMatchObject({
+      listId: target.item.id,
+      parentId: null,
+      status: "waiting"
+    });
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("list_item", parent.listItem.id)
+        .map((event) => event.action)
+    ).toEqual(["list_item_created", "list_item_reordered"]);
+  });
+
   it("bulk creates parsed rows with parent links, activity, and search records", async () => {
     const service = createService();
     const list = await service.createList({

@@ -2368,6 +2368,14 @@ export type MoveListItemInput = {
   actorType?: "local_user" | "system" | "importer";
 };
 
+export type MoveListItemToListInput = {
+  listItemId: string;
+  targetListId: string;
+  actorType?: "local_user" | "system" | "importer";
+  beforeListItemId?: string | null;
+  targetListItemParentId?: string | null;
+};
+
 export type PipelineStageSummary = {
   stage: ListItemSummary;
   cards: ListItemSummary[];
@@ -2725,6 +2733,7 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     indentItem: "local-work-os:lists:indent-item",
     outdentItem: "local-work-os:lists:outdent-item",
     moveItem: "local-work-os:lists:move-item",
+    moveItemToList: "local-work-os:lists:move-item-to-list",
     bulkAddItems: "local-work-os:lists:bulk-add-items",
     bulkUpdateItems: "local-work-os:lists:bulk-update-items",
     listByContainer: "local-work-os:lists:list-by-container",
@@ -3092,6 +3101,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.lists.moveItem]: {
     input: MoveListItemInput;
     result: ApiResult<ListItemSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.lists.moveItemToList]: {
+    input: MoveListItemToListInput;
+    result: ApiResult<ListItemSummary[]>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems]: {
     input: BulkAddListItemsInput;
@@ -3827,6 +3840,9 @@ export type LocalWorkOsApi = {
     indentItem: (listItemId: string) => Promise<ApiResult<ListItemSummary>>;
     outdentItem: (listItemId: string) => Promise<ApiResult<ListItemSummary>>;
     moveItem: (input: MoveListItemInput) => Promise<ApiResult<ListItemSummary>>;
+    moveItemToList: (
+      input: MoveListItemToListInput
+    ) => Promise<ApiResult<ListItemSummary[]>>;
     bulkAddItems: (
       input: BulkAddListItemsInput
     ) => Promise<ApiResult<ListItemSummary[]>>;
@@ -4497,6 +4513,8 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.outdentItem, listItemId),
       moveItem: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.moveItem, input),
+      moveItemToList: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.moveItemToList, input),
       bulkAddItems: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems, input),
       bulkUpdateItems: (input) =>
