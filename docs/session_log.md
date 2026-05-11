@@ -3428,3 +3428,20 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Local untracked .playwright-mcp/ and gh installer remain unrelated.
 Next actions: Start PSE-143 in the next run.
+
+## 2026-05-11 21:17:16 +10:00
+Objective: Merge PSE-143 and promote next Codex Ready issue.
+Decisions made:
+- PR #132 passed CI, had no review threads, and was squash-merged as b3ca516.
+- Pulled main, deleted the merged PSE-143 branch, moved PSE-143 Done, and promoted PSE-144.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked .playwright-mcp/ and gh installer remain unrelated.
+Next actions: Start PSE-144; read dashboard docs; plan layout editor scope.
+
+## 2026-05-11T21:45:10+10:00
+Objective: Implement PSE-144 dashboard layout editor end-to-end.
+Decisions made: Added service/repository IPC-backed widget add/update/reorder/remove; added schema v15 for timeline/calendar widget types; kept saved-view widgets FK-bound to local saved views.
+Files changed: apps/desktop/src/renderer/pages/DashboardPage.tsx; apps/desktop/src/preload/api.ts; packages/features/src/dashboard/DashboardService.ts; packages/db/src/repositories/DashboardRepository.ts; packages/db/src/migrations/0015_dashboard_widget_layout_types.ts
+Open questions / risks: Saved-view widget UI currently accepts a saved_view ID rather than browsing saved views.
+Next actions: Open PR; monitor CI; promote next Linear issue after merge.

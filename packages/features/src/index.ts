@@ -157,6 +157,7 @@ export type {
   UpdateContainerPreferencesInput
 } from "./containers";
 export {
+  DASHBOARD_WIDGET_REGISTRY,
   DashboardService,
   WidgetDataService,
   dashboardModuleContract
@@ -433,18 +434,26 @@ export type {
   SetContainerMediaInput
 } from "./containerMedia";
 export type {
+  AddDashboardWidgetInput,
   DashboardActivityWidgetItem,
   DashboardFavoriteWidgetItem,
+  DashboardLayoutWidgetType,
   DashboardNavigationTarget,
   DashboardProjectHealthWidgetItem,
   DashboardProjectWidgetItem,
   DashboardServiceIdFactory,
+  DashboardWidgetDefinition,
+  DashboardWidgetPositionInput,
   DashboardTaskWidgetItem,
   DashboardViewModel,
   DashboardWidgetData,
   DashboardWidgetPage,
   DashboardWidgetViewModel,
   GetDefaultDashboardInput,
+  RemoveDashboardWidgetInput,
+  ReorderDashboardWidgetsInput,
+  UpdateDashboardLayoutInput,
+  UpdateDashboardWidgetInput,
   WidgetDataQueryInput
 } from "./dashboard";
 export type {

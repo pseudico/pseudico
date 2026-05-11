@@ -1,8 +1,20 @@
-export { DashboardService, dashboardModuleContract } from "./DashboardService";
+export {
+  DASHBOARD_WIDGET_REGISTRY,
+  DashboardService,
+  dashboardModuleContract
+} from "./DashboardService";
 export { WidgetDataService } from "./WidgetDataService";
 export type {
+  AddDashboardWidgetInput,
+  DashboardLayoutWidgetType,
   DashboardServiceIdFactory,
-  GetDefaultDashboardInput
+  DashboardWidgetDefinition,
+  DashboardWidgetPositionInput,
+  GetDefaultDashboardInput,
+  RemoveDashboardWidgetInput,
+  ReorderDashboardWidgetsInput,
+  UpdateDashboardLayoutInput,
+  UpdateDashboardWidgetInput
 } from "./DashboardService";
 export type {
   DashboardActivityWidgetItem,

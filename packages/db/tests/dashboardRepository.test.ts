@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { DashboardRepository, type DatabaseConnection } from "../src";
+import { DashboardRepository, SavedViewRepository, type DatabaseConnection } from "../src";
 import {
   createRepositoryTestDatabase,
   seedWorkspace,
@@ -61,5 +61,66 @@ describe("DashboardRepository", () => {
       widget.id
     )).toEqual(["widget_overdue", "widget_today"]);
   });
+
+  it("updates layout, widget configuration, ordering, and soft deletion", () => {
+    const repository = new DashboardRepository(connection);
+    const dashboard = repository.createDefaultDashboard({
+      id: "dashboard_1",
+      workspaceId: "workspace_1",
+      timestamp: TEST_TIMESTAMP
+    });
+    new SavedViewRepository(connection).create({
+      id: "saved_view_1",
+      workspaceId: "workspace_1",
+      type: "dashboard_widget",
+      name: "Phone Calls",
+      queryJson: "{}",
+      timestamp: TEST_TIMESTAMP
+    });
+    const widget = repository.createWidget({
+      id: "widget_saved_view",
+      workspaceId: "workspace_1",
+      dashboardId: dashboard.id,
+      type: "saved_view",
+      title: "Calls",
+      savedViewId: "saved_view_1",
+      sortOrder: 0,
+      configJson: JSON.stringify({ limit: 5 }),
+      positionJson: JSON.stringify({ column: 0, row: 0, width: 1 }),
+      timestamp: TEST_TIMESTAMP
+    });
+
+    const updatedDashboard = repository.updateDashboardLayout({
+      dashboardId: dashboard.id,
+      layoutJson: JSON.stringify({ columns: 3 }),
+      timestamp: "2026-05-02T00:00:00.000Z"
+    });
+    const updatedWidget = repository.updateWidget({
+      widgetId: widget.id,
+      title: "Phone calls",
+      configJson: JSON.stringify({ limit: 8 }),
+      positionJson: JSON.stringify({ column: 1, row: 0, width: 2 }),
+      sortOrder: 2,
+      timestamp: "2026-05-02T00:00:00.000Z"
+    });
+    const deleted = repository.softDeleteWidget({
+      widgetId: widget.id,
+      timestamp: "2026-05-03T00:00:00.000Z"
+    });
+
+    expect(updatedDashboard.layoutJson).toBe(JSON.stringify({ columns: 3 }));
+    expect(updatedWidget).toMatchObject({
+      id: widget.id,
+      title: "Phone calls",
+      savedViewId: "saved_view_1",
+      sortOrder: 2,
+      configJson: JSON.stringify({ limit: 8 }),
+      positionJson: JSON.stringify({ column: 1, row: 0, width: 2 })
+    });
+    expect(deleted.deletedAt).toBe("2026-05-03T00:00:00.000Z");
+    expect(repository.getWidgetById(widget.id)).toBeNull();
+    expect(repository.listWidgetsByDashboard(dashboard.id)).toEqual([]);
+  });
+
 });
 

@@ -87,7 +87,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version fourteen", () => {
+  it("runs on an empty database and records schema version fifteen", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -161,14 +161,19 @@ describe("schema migrations", () => {
           version: 14,
           name: "calendar_feeds",
           checksum: "pse-141-calendar-feeds-v1"
+        },
+        {
+          version: 15,
+          name: "dashboard_widget_layout_types",
+          checksum: "pse-144-dashboard-widget-layout-types-v1"
         }
       ],
-      currentVersion: 14
+      currentVersion: 15
     });
-    expect(service.getCurrentSchemaVersion()).toBe(14);
+    expect(service.getCurrentSchemaVersion()).toBe(15);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 14
+      currentVersion: 15
     });
   });
 

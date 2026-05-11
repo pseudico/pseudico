@@ -59,7 +59,9 @@ export type DashboardWidgetType =
   | "favorites"
   | "recent_activity"
   | "saved_view"
-  | "project_health";
+  | "project_health"
+  | "timeline"
+  | "calendar";
 
 export type CreateDefaultDashboardInput = {
   id: string;
@@ -76,6 +78,23 @@ export type CreateDashboardWidgetInput = {
   sortOrder: number;
   configJson: string;
   positionJson: string;
+  timestamp: string;
+  savedViewId?: string | null;
+};
+
+export type UpdateDashboardLayoutInput = {
+  dashboardId: string;
+  layoutJson: string;
+  timestamp: string;
+};
+
+export type UpdateDashboardWidgetInput = {
+  widgetId: string;
+  title?: string | null;
+  configJson?: string;
+  positionJson?: string;
+  sortOrder?: number;
+  savedViewId?: string | null;
   timestamp: string;
 };
 
@@ -217,12 +236,13 @@ export class DashboardRepository {
           dashboard_id,
           type,
           title,
+          saved_view_id,
           config_json,
           position_json,
           sort_order,
           created_at,
           updated_at
-        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
         input.id,
@@ -230,6 +250,7 @@ export class DashboardRepository {
         input.dashboardId,
         input.type,
         input.title,
+        input.savedViewId ?? null,
         input.configJson,
         input.positionJson,
         input.sortOrder,
@@ -237,16 +258,85 @@ export class DashboardRepository {
         input.timestamp
       );
 
-    const created = this.findWidgetByType({
-      dashboardId: input.dashboardId,
-      type: input.type
-    });
+    const created = this.getWidgetById(input.id);
 
     if (created === null) {
       throw new Error(`Dashboard widget was not created: ${input.type}.`);
     }
 
     return created;
+  }
+
+  updateDashboardLayout(input: UpdateDashboardLayoutInput): DashboardRecord {
+    this.connection.sqlite
+      .prepare(
+        `update dashboards
+         set layout_json = ?, updated_at = ?
+         where id = ? and deleted_at is null`
+      )
+      .run(input.layoutJson, input.timestamp, input.dashboardId);
+
+    const row = this.connection.sqlite
+      .prepare<[string], DashboardRow>(
+        `select * from dashboards where id = ? and deleted_at is null limit 1`
+      )
+      .get(input.dashboardId);
+
+    if (row === undefined) {
+      throw new Error(`Dashboard was not found: ${input.dashboardId}.`);
+    }
+
+    return toDashboardRecord(row);
+  }
+
+  updateWidget(input: UpdateDashboardWidgetInput): DashboardWidgetRecord {
+    const existing = this.getWidgetById(input.widgetId);
+
+    if (existing === null) {
+      throw new Error(`Dashboard widget was not found: ${input.widgetId}.`);
+    }
+
+    this.connection.sqlite
+      .prepare(
+        `update dashboard_widgets
+         set title = ?, saved_view_id = ?, config_json = ?, position_json = ?, sort_order = ?, updated_at = ?
+         where id = ? and deleted_at is null`
+      )
+      .run(
+        input.title === undefined ? existing.title : input.title,
+        input.savedViewId === undefined ? existing.savedViewId : input.savedViewId,
+        input.configJson ?? existing.configJson,
+        input.positionJson ?? existing.positionJson,
+        input.sortOrder ?? existing.sortOrder,
+        input.timestamp,
+        input.widgetId
+      );
+
+    const updated = this.getWidgetById(input.widgetId);
+
+    if (updated === null) {
+      throw new Error(`Dashboard widget was not updated: ${input.widgetId}.`);
+    }
+
+    return updated;
+  }
+
+  softDeleteWidget(input: { widgetId: string; timestamp: string }): DashboardWidgetRecord {
+    const existing = this.getWidgetById(input.widgetId);
+
+    if (existing === null) {
+      throw new Error(`Dashboard widget was not found: ${input.widgetId}.`);
+    }
+
+    this.connection.sqlite
+      .prepare(
+        `update dashboard_widgets
+         set deleted_at = ?, updated_at = ?
+         where id = ? and deleted_at is null`
+      )
+      .run(input.timestamp, input.timestamp, input.widgetId);
+
+    return { ...existing, updatedAt: input.timestamp, deletedAt: input.timestamp };
   }
 }
 
