@@ -12,4 +12,8 @@ export function registerSearchIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.search.searchWorkspace,
     (_event, input) => handlers.handleSearchWorkspace(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.search.saveSearch,
+    (_event, input) => handlers.handleSaveSearch(input)
+  );
 }

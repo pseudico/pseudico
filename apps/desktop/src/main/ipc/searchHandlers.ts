@@ -24,6 +24,9 @@ type SearchIpcHandlers = {
   handleSearchWorkspace: (
     input: unknown
   ) => Promise<ApiResult<SearchResultSummary[]>>;
+  handleSaveSearch: (
+    input: unknown
+  ) => Promise<ApiResult<{ savedViewId: string; name: string }>>;
 };
 
 export function createSearchIpcHandlers(
@@ -55,6 +58,27 @@ export function createSearchIpcHandlers(
         };
 
         return apiOk(context.searchService.search(queryInput).map(toSearchResultSummary));
+      });
+    },
+
+    async handleSaveSearch(input) {
+      if (!isSaveSearchInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "saveSearch requires a workspaceId, query, and optional name/description."
+        );
+      }
+
+      return await withSearchService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const result = await context.searchService.saveStructuredSearch({
+          workspaceId,
+          query: input.query,
+          ...(input.name === undefined ? {} : { name: input.name }),
+          ...(input.description === undefined ? {} : { description: input.description })
+        });
+
+        return apiOk({ savedViewId: result.savedView.id, name: result.savedView.name });
       });
     }
   };
@@ -132,6 +156,16 @@ function toSearchResultSummary(result: SearchResult): SearchResultSummary {
     dueAt: result.dueAt,
     taskStatus: result.taskStatus
   };
+}
+
+function isSaveSearchInput(input: unknown): input is { workspaceId?: string; query: string; name?: string; description?: string | null } {
+  return (
+    isRecord(input) &&
+    isOptionalString(input.workspaceId) &&
+    isNonEmptyString(input.query) &&
+    isOptionalString(input.name) &&
+    (input.description === undefined || input.description === null || typeof input.description === "string")
+  );
 }
 
 function isSearchWorkspaceInput(input: unknown): input is SearchWorkspaceInput {

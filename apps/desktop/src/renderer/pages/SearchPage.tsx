@@ -58,7 +58,20 @@ export function SearchPage({
   const [loading, setLoading] = useState(false);
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const activeQuery = initialQuery ?? queryFromRoute;
+  const parsedQuery = useMemo(
+    () => ({ chips: parseStructuredSearchChips(draftQuery) }),
+    [draftQuery]
+  );
+  const activeParsedQuery = useMemo(
+    () => ({ chips: parseStructuredSearchChips(activeQuery) }),
+    [activeQuery]
+  );
+  const suggestions = useMemo(
+    () => getStructuredSearchSuggestions(draftQuery),
+    [draftQuery]
+  );
   const visibleResults = useMemo(
     () => results.map(toSearchResultCardViewModel),
     [results]
@@ -145,7 +158,29 @@ export function SearchPage({
       params.append("type", kind);
     }
 
+    setSavedMessage(null);
     setSearchParams(params);
+  }
+
+  async function saveCurrentSearch(): Promise<void> {
+    if (currentWorkspace === null || activeQuery.trim().length === 0) {
+      return;
+    }
+
+    setError(null);
+    setSavedMessage(null);
+    const result = await apiClient.search.saveSearch({
+      workspaceId: currentWorkspace.id,
+      query: activeQuery,
+      name: `Search: ${activeQuery.trim().slice(0, 64)}`
+    });
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setSavedMessage(`Saved search "${result.data.name}".`);
   }
 
   async function reloadSearchResults(): Promise<void> {
@@ -283,6 +318,7 @@ export function SearchPage({
     }
 
     setSelectedKinds(next);
+    setSavedMessage(null);
     setSearchParams(params);
   }
 
@@ -331,7 +367,42 @@ export function SearchPage({
         <button type="submit" className="primary-button">
           Search
         </button>
+        <button
+          type="button"
+          className="secondary-button"
+          disabled={activeQuery.trim().length === 0}
+          onClick={() => void saveCurrentSearch()}
+        >
+          Save search
+        </button>
       </form>
+
+      {parsedQuery.chips.length === 0 ? null : (
+        <div className="structured-search-chips" aria-label="Parsed search filters">
+          {parsedQuery.chips.map((chip) => (
+            <span key={`${chip.kind}:${chip.value}`} className="metadata-chip static-chip">
+              {chip.label}: {chip.value}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {suggestions.length === 0 ? null : (
+        <div className="structured-search-suggestions" aria-label="Structured search suggestions">
+          <span>Try</span>
+          {suggestions.map((suggestion) => (
+            <button
+              key={suggestion.token}
+              type="button"
+              className="metadata-chip"
+              title={suggestion.description}
+              onClick={() => setDraftQuery(applySuggestion(draftQuery, suggestion.token))}
+            >
+              {suggestion.token}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="search-layout">
         <aside className="search-filter-panel" aria-label="Search filters">
@@ -364,6 +435,19 @@ export function SearchPage({
           </div>
 
           {error === null ? null : <ErrorState error={error} title="Search error" />}
+          {savedMessage === null ? null : (
+            <p className="form-status-success">{savedMessage}</p>
+          )}
+
+          {activeParsedQuery.chips.length === 0 ? null : (
+            <div className="structured-search-chips compact" aria-label="Active search filters">
+              {activeParsedQuery.chips.map((chip) => (
+                <span key={`${chip.kind}:${chip.value}`} className="metadata-chip static-chip">
+                  {chip.label}: {chip.value}
+                </span>
+              ))}
+            </div>
+          )}
 
           {activeQuery.trim().length === 0 ? (
             <SearchEmptyState
@@ -458,4 +542,68 @@ function buildContextLabel(result: SearchResultSummary): string | null {
   }
 
   return result.containerTitle;
+}
+
+function applySuggestion(query: string, token: string): string {
+  const parts = query.split(/\s+/);
+  if (query.trim().length === 0) {
+    return `${token} `;
+  }
+  parts[parts.length - 1] = token;
+  return `${parts.filter(Boolean).join(" ")} `;
+}
+
+
+type StructuredSearchChip = {
+  kind: string;
+  label: string;
+  value: string;
+};
+
+const structuredSearchSuggestionTokens = [
+  "type:task",
+  "type:note",
+  "type:file",
+  "tag:call",
+  "category:work",
+  "due:<+7d",
+  "status:open",
+  "has:file",
+  "in:project:launch"
+] as const;
+
+function parseStructuredSearchChips(query: string): StructuredSearchChip[] {
+  const chips: StructuredSearchChip[] = [];
+  const text: string[] = [];
+  for (const word of query.match(/"[^"]+"|'[^']+'|\S+/g) ?? []) {
+    const clean = word.replace(/^['"]|['"]$/g, "");
+    const delimiter = clean.indexOf(":");
+    if (delimiter <= 0) {
+      text.push(clean);
+      continue;
+    }
+    const key = clean.slice(0, delimiter).toLowerCase();
+    const value = clean.slice(delimiter + 1);
+    if (key === "type") chips.push({ kind: key, label: "Type", value });
+    else if (key === "tag") chips.push({ kind: key, label: "Tag", value: value.replace(/^@/, "") });
+    else if (key === "category") chips.push({ kind: key, label: "Category", value });
+    else if (key === "due") chips.push({ kind: key, label: "Due", value });
+    else if (key === "status") chips.push({ kind: key, label: "Status", value });
+    else if (key === "has") chips.push({ kind: key, label: "Has", value });
+    else if (key === "in") chips.push({ kind: key, label: "In", value });
+    else text.push(clean);
+  }
+  const textQuery = text.join(" ").trim();
+  if (textQuery.length > 0) {
+    chips.push({ kind: "text", label: "Text", value: textQuery });
+  }
+  return chips;
+}
+
+function getStructuredSearchSuggestions(query: string): Array<{ token: string; description: string }> {
+  const active = query.split(/\s+/).at(-1)?.toLowerCase() ?? "";
+  return structuredSearchSuggestionTokens
+    .filter((token) => active.length > 0 && token.toLowerCase().startsWith(active))
+    .slice(0, 8)
+    .map((token) => ({ token, description: "Structured search token" }));
 }

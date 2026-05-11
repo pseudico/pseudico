@@ -288,7 +288,10 @@ export {
 } from "./savedViews";
 export {
   SearchIndexOrchestrator,
+  SearchQueryParser,
+  STRUCTURED_SEARCH_SUGGESTIONS,
   SearchService,
+  filterStructuredSearchResults,
   searchModuleContract
 } from "./search";
 export { TaskService, tasksModuleContract } from "./tasks";

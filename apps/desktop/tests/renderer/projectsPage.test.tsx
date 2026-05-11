@@ -589,7 +589,8 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
         apiOk({ id: "tag_1", name: "Launch", slug: "launch", source: "manual" })
     },
     search: {
-      searchWorkspace: async () => apiOk([])
+      searchWorkspace: async () => apiOk([]),
+      saveSearch: async () => apiOk({ savedViewId: "saved_search_1", name: "Saved search" })
     },
     collections: {
       listCollections: async () => apiOk([collectionSummary()]),
@@ -1581,10 +1582,10 @@ describe("Projects renderer pages", () => {
     workspaceStore.setCurrentWorkspace(workspace);
 
     const html = renderToString(
-      <MemoryRouter initialEntries={["/search?q=launch"]}>
+      <MemoryRouter initialEntries={["/search?q=type:task tag:finance launch"]}>
         <SearchPage
           apiClient={createMockApi([project])}
-          initialQuery="launch"
+          initialQuery="type:task tag:finance launch"
           initialKinds={["task"]}
           initialResults={[searchResult]}
         />
@@ -1595,6 +1596,9 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Projects");
     expect(html).toContain("Tasks");
     expect(html).toContain("Files");
+    expect(html).toContain("Save search");
+    expect(html).toContain("Type<!-- -->: <!-- -->task");
+    expect(html).toContain("Tag<!-- -->: <!-- -->finance");
     expect(html).toContain("Book launch venue");
     expect(html).toContain("Confirm the room hold before Friday.");
     expect(html).toContain("Launch Plan");

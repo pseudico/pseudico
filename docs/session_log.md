@@ -3480,3 +3480,50 @@ Decisions made: - Added criteria for containers/status/text/attachments/pinned/a
 Files changed: apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/CollectionsPage.tsx; packages/db/src/repositories/SavedViewRepository.ts; packages/features/src/savedViews/*; packages/ui/src/forms/SmartListEditor.tsx; packages/ui/tests/smartListEditor.test.tsx
 Open questions / risks: Linear title/source mismatch remains; untracked .playwright-mcp and gh MSI left untouched.
 Next actions: Stage/commit/push; open PR; update Linear.
+
+## 2026-05-12T06:18:00+10:00
+Objective: Merge PSE-146 and prepare next Codex Ready ticket.
+Decisions made: - PR #135 passed CI and was squash-merged as e686562; deleted merged feature branch; moved PSE-146 Done; promoted PSE-147 as sole Codex Ready.
+Files changed: docs/session_log.md
+Open questions / risks: Final session-log entry is local after the merge; untracked .playwright-mcp/ and gh MSI remain unrelated.
+Next actions: Start PSE-147 in next run; reconcile PR Open/In Progress first; keep exactly one Codex Ready.
+
+## 2026-05-12 06:29:36 +10:00
+Objective: Reconcile Linear/GitHub active work for next Local Work OS ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found; one Codex Ready issue is PSE-147.
+- No open GitHub PRs found for pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked files exist and will be left untouched.
+Next actions: Move PSE-147 to In Progress; read docs; implement scoped changes.
+
+## 2026-05-12 06:30:22 +10:00
+Objective: Start implementation for PSE-147 structured search syntax.
+Decisions made:
+- Moved PSE-147 to In Progress.
+- Created branch codex/PSE-147-structured-search-syntax after sandbox escalation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need confirm exact acceptance criteria from ticket pack.
+Next actions: Read linked docs; identify search modules; implement tests and parser changes.
+
+## 2026-05-12 06:39:13 +10:00
+Objective: Implement PSE-147 structured search syntax and saved searches.
+Decisions made:
+- Added SearchQueryParser with chips, suggestions, saved-view query mapping, and service filtering.
+- Added save-search IPC using SavedViewService activity/search-index write flow.
+Files changed:
+- packages/features/src/search/StructuredSearchQuery.ts; packages/features/src/search/SearchService.ts; apps/desktop/src/renderer/pages/SearchPage.tsx
+Open questions / risks: has:file currently filters to file results; broader item-with-attachment matching may need future expansion.
+Next actions: Run lint/test/build; open PR; update Linear.
+
+## 2026-05-12 06:43:12 +10:00
+Objective: Verify PSE-147 implementation before PR.
+Decisions made:
+- Documented structured search capability in product spec current snapshot.
+- Full lint/typecheck/test/build pass after sandbox escalations for Vitest/electron-vite spawn restrictions.
+Files changed:
+- docs/PRODUCT_SPEC.md; docs/session_log.md
+Open questions / risks: Build warning notes large renderer bundle remains existing concern.
+Next actions: Stage and commit; push branch; create PR.

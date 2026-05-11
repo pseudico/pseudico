@@ -6137,3 +6137,31 @@ body,
   color: var(--text-muted);
   padding: 1rem;
 }
+
+.structured-search-chips,
+.structured-search-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: 920px;
+}
+
+.structured-search-chips.compact {
+  margin-bottom: 8px;
+}
+
+.structured-search-suggestions > span {
+  color: #6d6a62;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.form-status-success {
+  margin: 0;
+  color: #245c55;
+  font-weight: 700;
+}
+
