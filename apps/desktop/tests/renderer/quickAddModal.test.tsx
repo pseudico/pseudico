@@ -188,7 +188,38 @@ describe("QuickAddModal", () => {
         containerId: activeProject.id,
         containerTabId: null,
         title: "Call supplier",
-        dueAt: "2026-05-04"
+        dueAt: "2026-05-04",
+        startAt: null,
+        allDay: true,
+        timezone: null
+      }
+    ]);
+  });
+
+  it("passes parsed natural date fields through quick task creation", async () => {
+    const calls: unknown[] = [];
+    const result = await createQuickTask(createMockApi(calls), {
+      workspaceId: workspace.id,
+      targetContainerId: activeProject.id,
+      title: "Call Sam @phone-call",
+      dueDate: "",
+      dueAt: new Date(2026, 4, 11, 17, 0, 0, 0).toISOString(),
+      startAt: null,
+      allDay: false,
+      timezone: "Australia/Sydney"
+    });
+
+    expect(result.ok).toBe(true);
+    expect(calls).toEqual([
+      {
+        workspaceId: workspace.id,
+        containerId: activeProject.id,
+        containerTabId: null,
+        title: "Call Sam @phone-call",
+        dueAt: new Date(2026, 4, 11, 17, 0, 0, 0).toISOString(),
+        startAt: null,
+        allDay: false,
+        timezone: "Australia/Sydney"
       }
     ]);
   });

@@ -2437,3 +2437,59 @@ Decisions made: Created PR #113 as ready-for-review and moved PSE-118 to PR Open
 Files changed: docs/session_log.md
 Open questions / risks: GitHub CI and review threads must be checked before merge.
 Next actions: push log update; inspect PR status; merge only if clean and green.
+
+## 2026-05-11T07:23:45.0955844+10:00
+Objective: Merge PSE-118 and prepare next Codex Ready ticket.
+Decisions made: CI passed; squash-merged PR #113 at 75ef96b; deleted merged branch; moved PSE-118 Done; promoted PSE-119.
+Files changed: docs/session_log.md
+Open questions / risks: Final session log entry is local-only unless included in a future PR.
+Next actions: Pick up PSE-119; keep other issues in Backlog; maintain one Codex Ready issue.
+
+## 2026-05-11T07:51:18.1207535+10:00
+Objective: Reconcile active Linear/GitHub work and start PSE-119.
+Decisions made: No PR Open or In Progress issues found; selected sole Codex Ready issue PSE-119 for implementation.
+Files changed: docs/session_log.md
+Open questions / risks: Existing untracked local files remain unrelated and untouched.
+Next actions: Move PSE-119 In Progress; read ticket/docs; create issue branch.
+
+## 2026-05-11T07:51:52.8866487+10:00
+Objective: Start implementation branch for PSE-119.
+Decisions made: Moved PSE-119 to In Progress; created branch pse-119-complete-local-nlp-date-parsing after .git lock sandbox escalation.
+Files changed: docs/session_log.md
+Open questions / risks: Ticket source filename differs slightly from Linear import description.
+Next actions: inspect existing date parsing; plan scoped parser/tests; implement.
+
+## 2026-05-11T08:02:18.6017659+10:00
+Objective: Implement PSE-119 local NLP quick-task date parsing.
+Decisions made: Added core NaturalDateParser; QuickAddForm previews parsed chips and submits parsed start/due/all-day fields with removal preference.
+Files changed: packages/core/src, packages/core/tests, packages/ui/src, packages/ui/tests, apps/desktop/src, apps/desktop/tests, docs/session_log.md
+Open questions / risks: Parser intentionally remains local deterministic rules, not third-party NLP.
+Next actions: rerun full checks; fix type/build failures; open PR.
+
+## 2026-05-11T10:04:50.6845775+10:00
+Objective: Diagnose long PSE-119 build run.
+Decisions made: Full test passed; pnpm build reached Electron desktop build then failed with esbuild spawn EPERM, treated as sandbox issue.
+Files changed: docs/session_log.md
+Open questions / risks: Escalated build still required to confirm desktop bundle.
+Next actions: rerun pnpm build escalated; continue PR flow if green.
+
+## 2026-05-11T10:06:07.4501149+10:00
+Objective: Complete PSE-119 verification after sandbox build failure.
+Decisions made: Reran pnpm build escalated; Electron/Vite build passed, confirming prior esbuild spawn EPERM was sandbox-only.
+Files changed: docs/session_log.md
+Open questions / risks: CI still needs GitHub confirmation after PR opens.
+Next actions: review diff; commit; push/open PR.
+
+## 2026-05-11T10:06:58.5203854+10:00
+Objective: Commit PSE-119 implementation.
+Decisions made: Committed natural date parser, QuickAdd preview/submission integration, and parser/UI/desktop tests as 908805e.
+Files changed: docs/session_log.md
+Open questions / risks: Session log update after commit remains local until amended or next commit.
+Next actions: push branch; open ready PR; update Linear.
+
+## 2026-05-11T10:08:35.1315208+10:00
+Objective: Open PSE-119 PR and update Linear.
+Decisions made: Pushed branch and opened ready PR #114; moved PSE-119 to PR Open with PR link/comment.
+Files changed: docs/session_log.md
+Open questions / risks: GitHub CI/review state still needs confirmation before merge.
+Next actions: commit log update; inspect PR diff/status; merge if clean and green.

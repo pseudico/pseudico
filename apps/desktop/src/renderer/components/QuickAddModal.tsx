@@ -47,20 +47,28 @@ export type QuickAddTargetResolution = {
 };
 
 export type CreateQuickTaskInput = {
+  allDay?: boolean;
   dueDate: string;
+  dueAt?: string | null;
+  startAt?: string | null;
   targetContainerId: string;
   targetContainerTabId?: string | null;
   title: string;
+  timezone?: string | null;
   workspaceId: string;
 };
 
 export type QuickStartFormValues =
   | {
       kind: "task";
+      allDay?: boolean;
       dueDate: string;
+      dueAt?: string | null;
+      startAt?: string | null;
       targetContainerId: string;
       targetContainerTabId?: string | null;
       title: string;
+      timezone?: string | null;
       workspaceId: string;
     }
   | {
@@ -387,7 +395,11 @@ export async function createQuickTask(
     targetContainerId: input.targetContainerId,
     targetContainerTabId: input.targetContainerTabId ?? null,
     title: input.title,
-    dueDate: input.dueDate
+    dueDate: input.dueDate,
+    ...(input.dueAt === undefined ? {} : { dueAt: input.dueAt }),
+    ...(input.startAt === undefined ? {} : { startAt: input.startAt }),
+    ...(input.allDay === undefined ? {} : { allDay: input.allDay }),
+    ...(input.timezone === undefined ? {} : { timezone: input.timezone })
   });
 
   if (!result.ok) {
@@ -414,7 +426,10 @@ export async function createQuickStartItem(
         containerId: input.targetContainerId,
         containerTabId: input.targetContainerTabId ?? null,
         title: input.title.trim(),
-        dueAt: input.dueDate.length === 0 ? null : input.dueDate
+        dueAt: input.dueAt ?? (input.dueDate.length === 0 ? null : input.dueDate),
+        startAt: input.startAt ?? null,
+        allDay: input.allDay ?? true,
+        timezone: input.timezone ?? null
       });
     case "note":
       if (input.title.trim().length === 0) {
@@ -546,7 +561,11 @@ function QuickStartActionForm({
             targetContainerId: values.targetContainerId,
             targetContainerTabId: defaultContainerTabId,
             title: values.title,
-            dueDate: values.dueDate
+            dueDate: values.dueDate,
+            ...(values.dueAt === undefined ? {} : { dueAt: values.dueAt }),
+            ...(values.startAt === undefined ? {} : { startAt: values.startAt }),
+            ...(values.allDay === undefined ? {} : { allDay: values.allDay }),
+            ...(values.timezone === undefined ? {} : { timezone: values.timezone })
           });
         }}
         onTargetChange={onTargetChange}

@@ -951,6 +951,42 @@ a {
   color: #6d6a62;
 }
 
+.quick-add-date-preview {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid #d9eadf;
+  border-radius: 10px;
+  background: #f5fbf7;
+}
+
+.quick-add-date-chip {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 4px 9px;
+  border: 1px solid #b9dcc6;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #245c55;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.quick-add-form .inline-checkbox {
+  display: inline-flex;
+}
+
+.quick-add-form .inline-checkbox input {
+  width: auto;
+  min-height: auto;
+  padding: 0;
+}
+
 .task-quick-add .form-message {
   grid-column: 1 / -1;
 }
