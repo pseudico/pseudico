@@ -1579,6 +1579,10 @@ export type CreateTaskInCollectionInput = CreateTaskInput & {
   collectionId: string;
 };
 
+export type CreateNoteInCollectionInput = CreateNoteInput & {
+  collectionId: string;
+};
+
 export type EvaluateCollectionInput = {
   collectionId: string;
   limit?: number;
@@ -3107,6 +3111,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     evaluateCollection: "local-work-os:collections:evaluate-collection",
     createTaskInCollection:
       "local-work-os:collections:create-task-in-collection",
+    createNoteInCollection:
+      "local-work-os:collections:create-note-in-collection",
     listSmartLists: "local-work-os:collections:list-smart-lists",
     createSmartList: "local-work-os:collections:create-smart-list",
     updateSmartList: "local-work-os:collections:update-smart-list",
@@ -3709,6 +3715,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.collections.createTaskInCollection]: {
     input: CreateTaskInCollectionInput;
     result: ApiResult<TaskSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.collections.createNoteInCollection]: {
+    input: CreateNoteInCollectionInput;
+    result: ApiResult<NoteSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.collections.listSmartLists]: {
     input: string | undefined;
@@ -4515,6 +4525,9 @@ export type LocalWorkOsApi = {
     createTaskInCollection: (
       input: CreateTaskInCollectionInput
     ) => Promise<ApiResult<TaskSummary>>;
+    createNoteInCollection: (
+      input: CreateNoteInCollectionInput
+    ) => Promise<ApiResult<NoteSummary>>;
     listSmartLists: (
       workspaceId?: string
     ) => Promise<ApiResult<SmartListSummary[]>>;
@@ -5215,6 +5228,11 @@ export function createLocalWorkOsApi(
       createTaskInCollection: (input) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.collections.createTaskInCollection,
+          input
+        ),
+      createNoteInCollection: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.collections.createNoteInCollection,
           input
         ),
       listSmartLists: (workspaceId) =>

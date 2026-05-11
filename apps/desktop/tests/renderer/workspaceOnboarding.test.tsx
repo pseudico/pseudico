@@ -612,6 +612,7 @@ function createMockApi(
       evaluateCollection: async () =>
         apiOk({ collection: collectionSummary(), total: 0, results: [], groups: [] }),
       createTaskInCollection: async () => apiOk(taskSummary()),
+      createNoteInCollection: async () => apiOk(noteSummary()),
       listSmartLists: async () => apiOk([]),
       createSmartList: async () => apiOk(smartListSummary()),
       updateSmartList: async () => apiOk(smartListSummary()),

@@ -8,16 +8,19 @@ import {
   SavedViewRepository,
   type DatabaseConnection,
   type SavedViewRecord,
+  type NoteWithItemRecord,
   type SearchIndexRecord,
   type TaskWithItemRecord
 } from "@local-work-os/db";
 import { TagService } from "../metadata/TagService";
+import { NoteService, type CreateNoteInput } from "../notes/NoteService";
 import { TaskService, type CreateTaskInput } from "../tasks/TaskService";
 import { SavedViewService, type SavedViewServiceIdFactory } from "./SavedViewService";
 import { isViewMode, type ViewMode } from "../viewModes";
 import {
   parseSavedViewQueryJson,
-  type SavedViewQuery
+  type SavedViewQuery,
+  type SavedViewQueryCondition
 } from "./SavedViewQuery";
 import type {
   SavedViewEvaluationResult,
@@ -82,11 +85,35 @@ export type CreateTaskInCollectionInput = Omit<CreateTaskInput, "workspaceId"> &
   workspaceId?: string;
 };
 
+export type CreateNoteInCollectionInput = Omit<CreateNoteInput, "workspaceId"> & {
+  collectionId: string;
+  workspaceId?: string;
+};
+
+export type CreateCollectionItemInput =
+  | ({ itemType: "task" } & CreateTaskInCollectionInput)
+  | ({ itemType: "note" } & CreateNoteInCollectionInput);
+
+export type CollectionInheritedMetadata = {
+  tagSlugs: string[];
+  categoryId: string | null;
+};
+
 export type CollectionTaskMutationResult = TaskWithItemRecord & {
-  tagSlug: string;
+  inheritedMetadata: CollectionInheritedMetadata;
   searchRecord: SearchIndexRecord;
   inlineTags: string[];
 };
+
+export type CollectionNoteMutationResult = NoteWithItemRecord & {
+  inheritedMetadata: CollectionInheritedMetadata;
+  searchRecord: SearchIndexRecord;
+  inlineTags: string[];
+};
+
+export type CollectionItemMutationResult =
+  | ({ itemType: "task" } & CollectionTaskMutationResult)
+  | ({ itemType: "note" } & CollectionNoteMutationResult);
 
 export class CollectionService {
   readonly module = "savedViews.collections";
@@ -214,20 +241,10 @@ export class CollectionService {
   async createTaskInCollection(
     input: CreateTaskInCollectionInput
   ): Promise<CollectionTaskMutationResult> {
-    validateNonEmptyString(input.collectionId, "collectionId");
-    const collection = this.requireCollection(input.collectionId);
-    const tagSlug = extractSingleTagSlug(parseSavedViewQueryJson(collection.queryJson));
-
-    if (tagSlug === null) {
-      throw new Error("Tasks can only be created directly in tag collections.");
-    }
-
-    if (
-      input.workspaceId !== undefined &&
-      input.workspaceId !== collection.workspaceId
-    ) {
-      throw new Error("Collection task workspaceId must match the collection workspace.");
-    }
+    const collection = this.requireCollectionForInlineItem(input);
+    const inheritedMetadata = extractInheritableMetadata(
+      parseSavedViewQueryJson(collection.queryJson)
+    );
 
     const task = await new TaskService({
       connection: this.connection,
@@ -235,28 +252,68 @@ export class CollectionService {
       now: this.now
     }).createTask({
       ...input,
-      workspaceId: collection.workspaceId
-    });
-    const tagging = await new TagService({
-      connection: this.connection,
-      idFactory: this.idFactory,
-      now: this.now
-    }).addTagToTarget({
       workspaceId: collection.workspaceId,
-      targetType: "item",
-      targetId: task.item.id,
-      name: tagSlug,
-      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
-      source: "manual"
+      categoryId: input.categoryId ?? inheritedMetadata.categoryId
+    });
+    const tagging = await this.applyInheritedTags({
+      workspaceId: collection.workspaceId,
+      itemId: task.item.id,
+      tagSlugs: inheritedMetadata.tagSlugs,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
     });
 
     return {
       item: task.item,
       task: task.task,
       inlineTags: task.inlineTags,
-      tagSlug,
-      searchRecord: tagging.searchRecord
+      inheritedMetadata,
+      searchRecord: tagging?.searchRecord ?? task.searchRecord
     };
+  }
+
+  async createNoteInCollection(
+    input: CreateNoteInCollectionInput
+  ): Promise<CollectionNoteMutationResult> {
+    const collection = this.requireCollectionForInlineItem(input);
+    const inheritedMetadata = extractInheritableMetadata(
+      parseSavedViewQueryJson(collection.queryJson)
+    );
+
+    const note = await new NoteService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).createNote({
+      ...input,
+      workspaceId: collection.workspaceId,
+      categoryId: input.categoryId ?? inheritedMetadata.categoryId
+    });
+    const tagging = await this.applyInheritedTags({
+      workspaceId: collection.workspaceId,
+      itemId: note.item.id,
+      tagSlugs: inheritedMetadata.tagSlugs,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+
+    return {
+      item: note.item,
+      note: note.note,
+      inlineTags: note.inlineTags,
+      inheritedMetadata,
+      searchRecord: tagging?.searchRecord ?? note.searchRecord
+    };
+  }
+
+  async createItemInCollection(
+    input: CreateCollectionItemInput
+  ): Promise<CollectionItemMutationResult> {
+    if (input.itemType === "task") {
+      const result = await this.createTaskInCollection(input);
+      return { ...result, itemType: "task" };
+    }
+
+    const result = await this.createNoteInCollection(input);
+    return { ...result, itemType: "note" };
   }
 
   private requireCollection(collectionId: string): SavedViewRecord {
@@ -268,6 +325,63 @@ export class CollectionService {
     }
 
     return savedView;
+  }
+
+  private requireCollectionForInlineItem(input: {
+    collectionId: string;
+    workspaceId?: string;
+  }): SavedViewRecord {
+    validateNonEmptyString(input.collectionId, "collectionId");
+    const collection = this.requireCollection(input.collectionId);
+
+    if (
+      input.workspaceId !== undefined &&
+      input.workspaceId !== collection.workspaceId
+    ) {
+      throw new Error("Collection item workspaceId must match the collection workspace.");
+    }
+
+    const inheritedMetadata = extractInheritableMetadata(
+      parseSavedViewQueryJson(collection.queryJson)
+    );
+
+    if (
+      inheritedMetadata.tagSlugs.length === 0 &&
+      inheritedMetadata.categoryId === null
+    ) {
+      throw new Error(
+        "Items can only be created directly in tag or metadata collections with inheritable filters."
+      );
+    }
+
+    return collection;
+  }
+
+  private async applyInheritedTags(input: {
+    workspaceId: string;
+    itemId: string;
+    tagSlugs: readonly string[];
+    actorType?: ActivityActorType;
+  }): Promise<{ searchRecord: SearchIndexRecord } | null> {
+    let latest: { searchRecord: SearchIndexRecord } | null = null;
+    const tagService = new TagService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    });
+
+    for (const tagSlug of input.tagSlugs) {
+      latest = await tagService.addTagToTarget({
+        workspaceId: input.workspaceId,
+        targetType: "item",
+        targetId: input.itemId,
+        name: tagSlug,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+        source: "manual"
+      });
+    }
+
+    return latest;
   }
 
   private savedViewService(): SavedViewService {
@@ -377,6 +491,35 @@ export type {
   SavedViewResultGroup,
   SavedViewResultRef
 };
+
+function extractInheritableMetadata(query: SavedViewQuery): CollectionInheritedMetadata {
+  if (query.match !== "all") {
+    return { tagSlugs: [], categoryId: null };
+  }
+
+  const tagSlugs = query.conditions
+    .filter(
+      (condition): condition is SavedViewQueryCondition & { value: string } =>
+        condition.field === "tag" &&
+        condition.operator === "has" &&
+        "value" in condition &&
+        typeof condition.value === "string"
+    )
+    .map((condition) => normalizeTagSlug(condition.value));
+  const categoryConditions = query.conditions.filter(
+    (condition) => condition.field === "category" && condition.operator === "is"
+  );
+  const firstCategoryCondition = categoryConditions[0];
+  const categoryValue =
+    firstCategoryCondition !== undefined && "value" in firstCategoryCondition
+      ? firstCategoryCondition.value
+      : null;
+
+  return {
+    tagSlugs: [...new Set(tagSlugs)].sort(),
+    categoryId: typeof categoryValue === "string" ? categoryValue : null
+  };
+}
 
 function extractSingleTagSlug(query: SavedViewQuery): string | null {
   const tagConditions = query.conditions.filter(

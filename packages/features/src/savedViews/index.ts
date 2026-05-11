@@ -31,9 +31,13 @@ export type {
   CollectionEvaluationResult,
   CollectionKind,
   CollectionSummary,
+  CollectionItemMutationResult,
+  CollectionNoteMutationResult,
   CollectionTaskMutationResult,
+  CreateCollectionItemInput,
   CreateKeywordCollectionInput,
   CreateMetadataCollectionInput,
+  CreateNoteInCollectionInput,
   CreateTagCollectionInput,
   CreateTaskInCollectionInput
 } from "./CollectionService";

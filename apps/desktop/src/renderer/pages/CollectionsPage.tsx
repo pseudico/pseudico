@@ -1,4 +1,4 @@
-import { CheckCircle2, FolderPlus, Printer, RefreshCw } from "lucide-react";
+import { CheckCircle2, FolderPlus, Printer, RefreshCw, StickyNote } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -32,6 +32,7 @@ import type {
   CategoryCountSummary,
   CollectionEvaluationSummary,
   CollectionSummary,
+  ContactSummary,
   LocalWorkOsApi,
   ProjectSummary,
   SmartListPreviewSummary,
@@ -46,6 +47,7 @@ type CollectionsPageProps = {
   initialCollections?: CollectionSummary[];
   initialEvaluation?: CollectionEvaluationSummary | null;
   initialProjects?: ProjectSummary[];
+  initialContacts?: ContactSummary[];
   initialSmartLists?: SmartListSummary[];
 };
 
@@ -56,6 +58,7 @@ export function CollectionsPage({
   initialCollections,
   initialEvaluation = null,
   initialProjects,
+  initialContacts,
   initialSmartLists
 }: CollectionsPageProps): React.JSX.Element {
   const navigate = useNavigate();
@@ -64,6 +67,7 @@ export function CollectionsPage({
     initialCollections ?? []
   );
   const [projects, setProjects] = useState<ProjectSummary[]>(initialProjects ?? []);
+  const [contacts, setContacts] = useState<ContactSummary[]>(initialContacts ?? []);
   const [smartLists, setSmartLists] = useState<SmartListSummary[]>(
     initialSmartLists ?? []
   );
@@ -83,10 +87,12 @@ export function CollectionsPage({
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [printBusy, setPrintBusy] = useState(false);
   const [printMessage, setPrintMessage] = useState<string | null>(null);
-  const [taskTitle, setTaskTitle] = useState("");
+  const [inlineItemType, setInlineItemType] = useState<"task" | "note">("task");
+  const [inlineTitle, setInlineTitle] = useState("");
+  const [noteContent, setNoteContent] = useState("");
   const [viewModeSaving, setViewModeSaving] = useState(false);
   const [taskContainerId, setTaskContainerId] = useState(
-    initialProjects?.[0]?.id ?? ""
+    initialProjects?.[0]?.id ?? initialContacts?.[0]?.id ?? ""
   );
   const selectedCollection = useMemo(
     () =>
@@ -119,6 +125,20 @@ export function CollectionsPage({
       ),
     [tags]
   );
+  const inlineContainerOptions = useMemo(
+    () => [
+      ...projects.map((project) => ({
+        id: project.id,
+        label: `Project - ${project.name}`
+      })),
+      ...contacts.map((contact) => ({
+        id: contact.id,
+        label: `Contact - ${contact.name}`
+      }))
+    ],
+    [contacts, projects]
+  );
+
   const smartListProjectOptions = useMemo(
     () =>
       projects.map(
@@ -154,12 +174,14 @@ export function CollectionsPage({
     const [
       collectionResult,
       projectResult,
+      contactResult,
       smartListResult,
       tagResult,
       categoryResult
     ] = await Promise.all([
       apiClient.collections.listCollections(currentWorkspace.id),
       apiClient.projects.listProjects(currentWorkspace.id),
+      apiClient.contacts.list(currentWorkspace.id),
       apiClient.collections.listSmartLists(currentWorkspace.id),
       apiClient.metadata.listTagsWithCounts(currentWorkspace.id),
       apiClient.metadata.listCategoriesWithCounts(currentWorkspace.id)
@@ -178,8 +200,25 @@ export function CollectionsPage({
       setError(projectResult.error.message);
     } else {
       setProjects(projectResult.data);
-      setTaskContainerId((current) => current || (projectResult.data[0]?.id ?? ""));
     }
+
+    if (!contactResult.ok) {
+      setError(contactResult.error.message);
+    } else {
+      setContacts(contactResult.data);
+    }
+
+    setTaskContainerId((current) => {
+      if (current.length > 0) {
+        return current;
+      }
+
+      if (projectResult.ok && projectResult.data[0] !== undefined) {
+        return projectResult.data[0].id;
+      }
+
+      return contactResult.ok ? contactResult.data[0]?.id ?? "" : "";
+    });
 
     if (!smartListResult.ok) {
       setError(smartListResult.error.message);
@@ -469,7 +508,7 @@ export function CollectionsPage({
     await refreshSelectedCollection();
   }
 
-  async function createTaskInCollection(
+  async function createInlineItemInCollection(
     event: FormEvent<HTMLFormElement>
   ): Promise<void> {
     event.preventDefault();
@@ -478,7 +517,8 @@ export function CollectionsPage({
       currentWorkspace === null ||
       selectedCollection === null ||
       taskContainerId.length === 0 ||
-      taskTitle.trim().length === 0
+      inlineTitle.trim().length === 0 ||
+      (inlineItemType === "note" && noteContent.trim().length === 0)
     ) {
       return;
     }
@@ -486,12 +526,20 @@ export function CollectionsPage({
     setSaving(true);
     setError(null);
 
-    const result = await apiClient.collections.createTaskInCollection({
-      workspaceId: currentWorkspace.id,
-      collectionId: selectedCollection.id,
-      containerId: taskContainerId,
-      title: taskTitle.trim()
-    });
+    const result = inlineItemType === "task"
+      ? await apiClient.collections.createTaskInCollection({
+          workspaceId: currentWorkspace.id,
+          collectionId: selectedCollection.id,
+          containerId: taskContainerId,
+          title: inlineTitle.trim()
+        })
+      : await apiClient.collections.createNoteInCollection({
+          workspaceId: currentWorkspace.id,
+          collectionId: selectedCollection.id,
+          containerId: taskContainerId,
+          title: inlineTitle.trim(),
+          content: noteContent.trim()
+        });
 
     setSaving(false);
 
@@ -500,7 +548,8 @@ export function CollectionsPage({
       return;
     }
 
-    setTaskTitle("");
+    setInlineTitle("");
+    setNoteContent("");
     await evaluateSelectedCollection();
   }
 
@@ -690,47 +739,72 @@ export function CollectionsPage({
                 <p className="form-message">{printMessage}</p>
               )}
 
-              {selectedCollection.kind === "tag" ? (
-                <form
-                  className="collection-task-form"
-                  onSubmit={(event) => void createTaskInCollection(event)}
-                >
-                  <label className="field-label">
-                    <span>Task</span>
-                    <input
-                      type="text"
-                      value={taskTitle}
-                      placeholder="Follow up"
-                      onChange={(event) => setTaskTitle(event.target.value)}
-                    />
-                  </label>
-                  <label className="field-label">
-                    <span>Project</span>
-                    <select
-                      value={taskContainerId}
-                      onChange={(event) => setTaskContainerId(event.target.value)}
-                    >
-                      {projects.map((project) => (
-                        <option key={project.id} value={project.id}>
-                          {project.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <button
-                    type="submit"
-                    className="secondary-button"
-                    disabled={
-                      saving ||
-                      projects.length === 0 ||
-                      taskTitle.trim().length === 0
+              <form
+                className="collection-task-form"
+                onSubmit={(event) => void createInlineItemInCollection(event)}
+              >
+                <label className="field-label">
+                  <span>Type</span>
+                  <select
+                    value={inlineItemType}
+                    onChange={(event) =>
+                      setInlineItemType(event.target.value === "note" ? "note" : "task")
                     }
                   >
+                    <option value="task">Task</option>
+                    <option value="note">Note</option>
+                  </select>
+                </label>
+                <label className="field-label">
+                  <span>{inlineItemType === "task" ? "Task" : "Note title"}</span>
+                  <input
+                    type="text"
+                    value={inlineTitle}
+                    placeholder={inlineItemType === "task" ? "Follow up" : "Meeting note"}
+                    onChange={(event) => setInlineTitle(event.target.value)}
+                  />
+                </label>
+                {inlineItemType === "note" ? (
+                  <label className="field-label">
+                    <span>Note</span>
+                    <textarea
+                      value={noteContent}
+                      placeholder="Write a short note"
+                      onChange={(event) => setNoteContent(event.target.value)}
+                    />
+                  </label>
+                ) : null}
+                <label className="field-label">
+                  <span>Target container</span>
+                  <select
+                    value={taskContainerId}
+                    onChange={(event) => setTaskContainerId(event.target.value)}
+                  >
+                    {inlineContainerOptions.map((container) => (
+                      <option key={container.id} value={container.id}>
+                        {container.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  type="submit"
+                  className="secondary-button"
+                  disabled={
+                    saving ||
+                    inlineContainerOptions.length === 0 ||
+                    inlineTitle.trim().length === 0 ||
+                    (inlineItemType === "note" && noteContent.trim().length === 0)
+                  }
+                >
+                  {inlineItemType === "task" ? (
                     <FolderPlus size={16} aria-hidden="true" />
-                    <span>Add task</span>
-                  </button>
-                </form>
-              ) : null}
+                  ) : (
+                    <StickyNote size={16} aria-hidden="true" />
+                  )}
+                  <span>Add {inlineItemType}</span>
+                </button>
+              </form>
 
               <div className="collection-results-summary">
                 <span>{evaluation?.total ?? 0} result{evaluation?.total === 1 ? "" : "s"}</span>

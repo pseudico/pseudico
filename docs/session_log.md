@@ -3608,3 +3608,74 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI still pending after PR opens.
 Next actions: Commit; push branch; open PR.
+
+## 2026-05-12T07:15:02.7786387+10:00
+Objective: Open PSE-148 PR and hand to GitHub proof stage.
+Decisions made:
+- Created ready PR #137 from codex/PSE-148-metadata-browser.
+- PR body documents scope, limitations, and passing local checks.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI/review status pending after PR creation.
+Next actions: Check CI; merge if clean; promote next issue.
+
+## 2026-05-12T07:17:21.9267784+10:00
+Objective: Complete PSE-148 merge and prepare next ticket.
+Decisions made:
+- Squash-merged PR #137 at 0d5961b9 and deleted remote/local feature branch.
+- Moved PSE-148 to Done and promoted PSE-149 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Session log has local post-merge entries not pushed through PR.
+Next actions: Start PSE-149 in the next run; keep exactly one Codex Ready issue.
+## 2026-05-12T08:12:52.4876465+10:00
+Objective: Reconcile active Local Work OS ticket state.
+Decisions made:
+- Found no PR Open or In Progress Linear issues for PSE project.
+- Selected sole Codex Ready issue PSE-149 for implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked .playwright-mcp/ and gh installer left untouched.
+Next actions: Move PSE-149 to In Progress; read issue/docs; implement.
+## 2026-05-12T08:13:32.7955571+10:00
+Objective: Start PSE-149 implementation branch.
+Decisions made:
+- Moved Linear PSE-149 to In Progress.
+- Pulled main with escalation after FETCH_HEAD permission error.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need locate imported source ticket and relevant module boundaries.
+Next actions: Read PSE-149 docs; inspect contacts/tasks/notes source; plan changes.
+## 2026-05-12T08:24:56.5041398+10:00
+Objective: Implement PSE-149 collection inline task/note creation.
+Decisions made:
+- Followed source ticket scope despite Linear title mismatch; added note and metadata-filter inheritance to collections.
+- Kept writes in CollectionService delegating to TaskService/NoteService plus TagService for activity/search updates.
+Files changed:
+- packages/features/src/savedViews/CollectionService.ts
+- apps/desktop/src/renderer/pages/CollectionsPage.tsx
+- apps/desktop/src/preload/api.ts
+Open questions / risks: Full checks still pending.
+Next actions: Run lint/typecheck/test/build; fix failures; open PR.
+## 2026-05-12T08:26:51.3974719+10:00
+Objective: Verify PSE-149 locally.
+Decisions made:
+- Fixed IPC channel-count test after adding note-in-collection channel.
+- Full test/build required escalation because Vite/esbuild spawn failed with EPERM in sandbox.
+Files changed:
+- apps/desktop/tests/preload/api.test.ts
+- apps/desktop/tests/renderer/projectsPage.test.tsx
+- packages/features/tests/collectionService.test.ts
+Open questions / risks: Need PR/CI validation and review before merge.
+Next actions: Review diff; commit; push and open ready PR.
+## 2026-05-12T08:28:25.3057120+10:00
+Objective: Complete local verification for PSE-149.
+Decisions made:
+- pnpm lint, typecheck, test, and build pass after IPC/test updates.
+- Targeted collection service and renderer tests pass.
+Files changed:
+- apps/desktop/src/main/ipc/collectionHandlers.ts
+- apps/desktop/src/renderer/pages/CollectionsPage.tsx
+- packages/features/src/savedViews/CollectionService.ts
+Open questions / risks: CI and review still need GitHub validation.
+Next actions: Commit; push; open ready PR.

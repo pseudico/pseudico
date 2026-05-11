@@ -484,6 +484,7 @@ function createMockApi(
             }
           ]
         }),
+      createNoteInCollection: async () => apiOk(noteSummary()),
       listSmartLists: async () => apiOk([smartListSummary()]),
       createSmartList: async () => apiOk(smartListSummary()),
       updateSmartList: async () => apiOk({ ...smartListSummary(), name: "Due soon" }),
