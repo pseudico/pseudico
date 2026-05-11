@@ -270,7 +270,10 @@ function toTagCountSummary(tag: TagWithTargetCountRecord): TagCountSummary {
     createdAt: tag.createdAt,
     updatedAt: tag.updatedAt,
     deletedAt: tag.deletedAt,
-    targetCount: tag.targetCount
+    targetCount: tag.targetCount,
+    containerCount: tag.containerCount,
+    itemCount: tag.itemCount,
+    listItemCount: tag.listItemCount
   };
 }
 
@@ -287,7 +290,10 @@ function toCategoryCountSummary(
     createdAt: category.createdAt,
     updatedAt: category.updatedAt,
     deletedAt: category.deletedAt,
-    targetCount: category.targetCount
+    targetCount: category.targetCount,
+    containerCount: category.containerCount,
+    itemCount: category.itemCount,
+    listItemCount: category.listItemCount
   };
 }
 

@@ -1,6 +1,6 @@
 import { FolderKanban, Layers, ListChecks, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   CategoryBadge,
   MetadataFilterPanel,
@@ -35,20 +35,28 @@ export function TagsCategoriesPage({
   initialTargets = []
 }: TagsCategoriesPageProps): React.JSX.Element {
   const { currentWorkspace } = useWorkspaceStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [tags, setTags] = useState<TagCountSummary[]>(initialTags);
   const [categories, setCategories] =
     useState<CategoryCountSummary[]>(initialCategories);
   const [targets, setTargets] =
     useState<MetadataTargetSummary[]>(initialTargets);
+  const initialFilters = parseMetadataBrowserFilters(searchParams, {
+    categoryId: initialSelectedCategoryId,
+    tagSlugs: initialSelectedTagSlugs
+  });
   const [selectedTagSlugs, setSelectedTagSlugs] = useState<string[]>(
-    initialSelectedTagSlugs
+    initialFilters.tagSlugs
   );
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    initialSelectedCategoryId
+    initialFilters.categoryId
   );
+  const [includeArchived, setIncludeArchived] = useState(initialFilters.includeArchived);
   const [loading, setLoading] = useState(false);
   const [resultsLoading, setResultsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [savingCollection, setSavingCollection] = useState(false);
 
   const selectedCategory = useMemo(
     () => categories.find((category) => category.id === selectedCategoryId) ?? null,
@@ -56,7 +64,8 @@ export function TagsCategoriesPage({
   );
   const groupedTargets = useMemo(() => groupTargets(targets), [targets]);
   const hasActiveFilter =
-    selectedTagSlugs.length > 0 || selectedCategoryId !== null;
+    selectedTagSlugs.length > 0 || selectedCategoryId !== null || includeArchived;
+  const targetTypeCounts = useMemo(() => countTargetsByType(targets), [targets]);
 
   async function loadMetadata(workspaceId: string): Promise<void> {
     setLoading(true);
@@ -149,7 +158,8 @@ export function TagsCategoriesPage({
       const result = await apiClient.metadata.listTargetsByMetadata({
         workspaceId,
         tagSlugs,
-        categoryId
+        categoryId,
+        includeArchived
       });
 
       if (!active) {
@@ -171,19 +181,62 @@ export function TagsCategoriesPage({
     return () => {
       active = false;
     };
-  }, [apiClient, currentWorkspace, selectedCategoryId, selectedTagSlugs]);
+  }, [apiClient, currentWorkspace, includeArchived, selectedCategoryId, selectedTagSlugs]);
+
+  function syncFilters(next: {
+    tagSlugs?: string[];
+    categoryId?: string | null;
+    includeArchived?: boolean;
+  }): void {
+    const merged = {
+      tagSlugs: next.tagSlugs ?? selectedTagSlugs,
+      categoryId: next.categoryId === undefined ? selectedCategoryId : next.categoryId,
+      includeArchived: next.includeArchived ?? includeArchived
+    };
+    setSelectedTagSlugs(merged.tagSlugs);
+    setSelectedCategoryId(merged.categoryId);
+    setIncludeArchived(merged.includeArchived);
+    setSearchParams(serializeMetadataBrowserFilters(merged), { replace: true });
+    setSaveMessage(null);
+  }
 
   function toggleTag(tagSlug: string): void {
-    setSelectedTagSlugs((current) =>
-      current.includes(tagSlug)
-        ? current.filter((slug) => slug !== tagSlug)
-        : [...current, tagSlug].sort()
-    );
+    const tagSlugs = selectedTagSlugs.includes(tagSlug)
+      ? selectedTagSlugs.filter((slug) => slug !== tagSlug)
+      : [...selectedTagSlugs, tagSlug].sort();
+
+    syncFilters({ tagSlugs });
+  }
+
+  async function saveMetadataFilter(): Promise<void> {
+    if (currentWorkspace === null || !hasActiveFilter) {
+      return;
+    }
+
+    setSavingCollection(true);
+    setError(null);
+    setSaveMessage(null);
+
+    const result = await apiClient.collections.createMetadataCollection({
+      workspaceId: currentWorkspace.id,
+      tagSlugs: selectedTagSlugs,
+      categoryId: selectedCategoryId,
+      includeArchived,
+      name: formatSelectionTitle(selectedTagSlugs, selectedCategory, includeArchived)
+    });
+
+    setSavingCollection(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setSaveMessage(`Saved collection "${result.data.name}".`);
   }
 
   function clearFilters(): void {
-    setSelectedTagSlugs([]);
-    setSelectedCategoryId(null);
+    syncFilters({ tagSlugs: [], categoryId: null, includeArchived: false });
     setTargets([]);
   }
 
@@ -207,7 +260,7 @@ export function TagsCategoriesPage({
           <h2>Tags & Categories</h2>
           <p>
             Browse local tags and categories across projects, Inbox items, notes,
-            lists, and checklist rows.
+            lists, and checklist rows with drill-down counts by target type.
           </p>
         </div>
         <button
@@ -224,6 +277,18 @@ export function TagsCategoriesPage({
       {error === null ? null : (
         <p className="form-message form-message-error">{error}</p>
       )}
+      {saveMessage === null ? null : (
+        <p className="form-message form-message-success">{saveMessage}</p>
+      )}
+
+      <div className="project-browser-breadcrumbs" aria-label="Active metadata filters">
+        <span>All metadata</span>
+        {selectedCategory === null ? null : <span>/ {selectedCategory.name}</span>}
+        {selectedTagSlugs.map((slug) => (
+          <span key={slug}>/ @{slug}</span>
+        ))}
+        {includeArchived ? <span>/ Archived included</span> : null}
+      </div>
 
       <div className="metadata-browser-layout">
         <MetadataFilterPanel
@@ -233,7 +298,7 @@ export function TagsCategoriesPage({
           selectedTagSlugs={selectedTagSlugs}
           tags={tags.map(toTagOption)}
           onClear={clearFilters}
-          onSelectCategory={setSelectedCategoryId}
+          onSelectCategory={(categoryId) => syncFilters({ categoryId })}
           onToggleTag={toggleTag}
         />
 
@@ -246,17 +311,42 @@ export function TagsCategoriesPage({
             <span>{targets.length} target{targets.length === 1 ? "" : "s"}</span>
           </div>
 
+          <div className="metadata-target-metadata" aria-label="Target type counts">
+            <span>Containers: {targetTypeCounts.container}</span>
+            <span>Items: {targetTypeCounts.item}</span>
+            <span>Checklist rows: {targetTypeCounts.listItem}</span>
+          </div>
+
+          <div className="form-row inline-form-row">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={includeArchived}
+                onChange={(event) => syncFilters({ includeArchived: event.currentTarget.checked })}
+              />
+              Include archived matches
+            </label>
+            <button
+              type="button"
+              className="secondary-button compact-button"
+              disabled={!hasActiveFilter || savingCollection}
+              onClick={() => void saveMetadataFilter()}
+            >
+              Save as collection
+            </button>
+          </div>
+
           {!hasActiveFilter ? (
             <MetadataEmptyState
               title="Select metadata"
-              description="Choose one or more tags, a category, or both."
+              description="Choose one or more tags, a category, or the archive toggle."
             />
           ) : resultsLoading ? (
             <p className="muted-text">Loading matches...</p>
           ) : targets.length === 0 ? (
             <MetadataEmptyState
               title="No matching targets"
-              description="Archived and deleted records are excluded from this browser."
+              description="Try a different tag/category path or toggle archived matches."
             />
           ) : (
             <div className="metadata-result-groups">
@@ -396,13 +486,65 @@ function toCategoryOption(
   };
 }
 
+function countTargetsByType(targets: readonly MetadataTargetSummary[]): {
+  container: number;
+  item: number;
+  listItem: number;
+} {
+  return {
+    container: targets.filter((target) => target.targetType === "container").length,
+    item: targets.filter((target) => target.targetType === "item").length,
+    listItem: targets.filter((target) => target.targetType === "list_item").length
+  };
+}
+
+function parseMetadataBrowserFilters(
+  params: URLSearchParams,
+  fallback: { categoryId: string | null; tagSlugs: string[] }
+): { tagSlugs: string[]; categoryId: string | null; includeArchived: boolean } {
+  const tagsParam = params.get("tags");
+
+  return {
+    tagSlugs:
+      tagsParam === null
+        ? fallback.tagSlugs
+        : [...new Set(tagsParam.split(",").map((tag) => tag.trim()).filter(Boolean))].sort(),
+    categoryId: params.get("categoryId") ?? fallback.categoryId,
+    includeArchived: params.get("archived") === "1"
+  };
+}
+
+function serializeMetadataBrowserFilters(filters: {
+  tagSlugs: readonly string[];
+  categoryId: string | null;
+  includeArchived: boolean;
+}): URLSearchParams {
+  const params = new URLSearchParams();
+
+  if (filters.tagSlugs.length > 0) {
+    params.set("tags", filters.tagSlugs.join(","));
+  }
+
+  if (filters.categoryId !== null) {
+    params.set("categoryId", filters.categoryId);
+  }
+
+  if (filters.includeArchived) {
+    params.set("archived", "1");
+  }
+
+  return params;
+}
+
 function formatSelectionTitle(
   tagSlugs: readonly string[],
-  category: CategoryCountSummary | null
+  category: CategoryCountSummary | null,
+  includeArchived = false
 ): string {
   const parts = [
     ...tagSlugs.map((slug) => `@${slug}`),
-    ...(category === null ? [] : [category.name])
+    ...(category === null ? [] : [category.name]),
+    ...(includeArchived ? ["archived included"] : [])
   ];
 
   return parts.length === 0 ? "No filter selected" : parts.join(" + ");

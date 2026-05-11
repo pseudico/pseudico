@@ -21,6 +21,10 @@ export function registerCollectionIpc(
     (_event, input) => handlers.handleCreateKeywordCollection(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.collections.createMetadataCollection,
+    (_event, input) => handlers.handleCreateMetadataCollection(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.collections.evaluateCollection,
     (_event, input) => handlers.handleEvaluateCollection(input)
   );

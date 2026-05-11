@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(210);
+    expect(channels).toHaveLength(211);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -1319,6 +1319,12 @@ describe("typed preload API", () => {
       workspaceId: "workspace_1",
       query: "supplier"
     });
+    await api.collections.createMetadataCollection({
+      workspaceId: "workspace_1",
+      tagSlugs: ["urgent"],
+      categoryId: "category_1",
+      includeArchived: true
+    });
     await api.collections.evaluateCollection("saved_view_1");
     await api.collections.createTaskInCollection({
       workspaceId: "workspace_1",
@@ -1363,6 +1369,15 @@ describe("typed preload API", () => {
         input: {
           workspaceId: "workspace_1",
           query: "supplier"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.collections.createMetadataCollection,
+        input: {
+          workspaceId: "workspace_1",
+          tagSlugs: ["urgent"],
+          categoryId: "category_1",
+          includeArchived: true
         }
       },
       {

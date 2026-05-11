@@ -344,6 +344,8 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.collections.createTagCollection(input)),
       createKeywordCollection: (input) =>
         callApi(() => api.collections.createKeywordCollection(input)),
+      createMetadataCollection: (input) =>
+        callApi(() => api.collections.createMetadataCollection(input)),
       evaluateCollection: (collectionId) =>
         callApi(() => api.collections.evaluateCollection(collectionId)),
       createTaskInCollection: (input) =>
@@ -886,6 +888,8 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().collections.createTagCollection(input),
     createKeywordCollection: (input) =>
       getDesktopApiClient().collections.createKeywordCollection(input),
+    createMetadataCollection: (input) =>
+      getDesktopApiClient().collections.createMetadataCollection(input),
     evaluateCollection: (collectionId) =>
       getDesktopApiClient().collections.evaluateCollection(collectionId),
     createTaskInCollection: (input) =>

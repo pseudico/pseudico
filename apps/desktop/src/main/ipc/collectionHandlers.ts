@@ -15,6 +15,7 @@ import {
   type CollectionResultSummary,
   type CollectionSummary,
   type CreateKeywordCollectionInput,
+  type CreateMetadataCollectionInput,
   type CreateSmartListInput,
   type CreateTagCollectionInput,
   type CreateTaskInCollectionInput,
@@ -48,6 +49,9 @@ type CollectionIpcHandlers = {
     input: unknown
   ) => Promise<ApiResult<CollectionSummary>>;
   handleCreateKeywordCollection: (
+    input: unknown
+  ) => Promise<ApiResult<CollectionSummary>>;
+  handleCreateMetadataCollection: (
     input: unknown
   ) => Promise<ApiResult<CollectionSummary>>;
   handleEvaluateCollection: (
@@ -121,6 +125,25 @@ export function createCollectionIpcHandlers(
       return await withCollectionService(workspaceService, async (context) => {
         const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
         const collection = await context.collectionService.createKeywordCollection({
+          ...input,
+          workspaceId
+        });
+
+        return apiOk(collection);
+      });
+    },
+
+    async handleCreateMetadataCollection(input) {
+      if (!isCreateMetadataCollectionInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "createMetadataCollection requires optional tagSlugs, categoryId, includeArchived, name, description, and workspaceId fields."
+        );
+      }
+
+      return await withCollectionService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const collection = await context.collectionService.createMetadataCollection({
           ...input,
           workspaceId
         });
@@ -429,6 +452,20 @@ function isCreateTagCollectionInput(
     isRecord(input) &&
     isNonEmptyString(input.tagSlug) &&
     isOptionalString(input.workspaceId) &&
+    isOptionalString(input.name) &&
+    isOptionalNullableString(input.description)
+  );
+}
+
+function isCreateMetadataCollectionInput(
+  input: unknown
+): input is CreateMetadataCollectionInput {
+  return (
+    isRecord(input) &&
+    isOptionalString(input.workspaceId) &&
+    isOptionalStringArray(input.tagSlugs) &&
+    isOptionalNullableString(input.categoryId) &&
+    isOptionalBoolean(input.includeArchived) &&
     isOptionalString(input.name) &&
     isOptionalNullableString(input.description)
   );

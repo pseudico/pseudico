@@ -13,6 +13,9 @@ type MetadataCountRow = {
   updated_at: string;
   deleted_at: string | null;
   target_count: number;
+  container_count: number;
+  item_count: number;
+  list_item_count: number;
 };
 
 type MetadataTargetRow = {
@@ -42,10 +45,16 @@ export type TagWithTargetCountRecord = {
   updatedAt: string;
   deletedAt: string | null;
   targetCount: number;
+  containerCount: number;
+  itemCount: number;
+  listItemCount: number;
 };
 
 export type CategoryWithTargetCountRecord = CategoryRecord & {
   targetCount: number;
+  containerCount: number;
+  itemCount: number;
+  listItemCount: number;
 };
 
 export type MetadataTargetType = "container" | "item" | "list_item";
@@ -105,7 +114,10 @@ export class MetadataBrowserRepository {
            t.created_at,
            t.updated_at,
            t.deleted_at,
-           count(distinct active_targets.target_key) as target_count
+           count(distinct active_targets.target_key) as target_count,
+           count(distinct case when active_targets.target_type = 'container' then active_targets.target_key end) as container_count,
+           count(distinct case when active_targets.target_type = 'item' then active_targets.target_key end) as item_count,
+           count(distinct case when active_targets.target_type = 'list_item' then active_targets.target_key end) as list_item_count
          from tags t
          left join taggings tg on tg.tag_id = t.id
            and tg.workspace_id = t.workspace_id
@@ -140,7 +152,10 @@ export class MetadataBrowserRepository {
            c.created_at,
            c.updated_at,
            c.deleted_at,
-           count(distinct active_categorized_targets.target_key) as target_count
+           count(distinct active_categorized_targets.target_key) as target_count,
+           count(distinct case when active_categorized_targets.target_type = 'container' then active_categorized_targets.target_key end) as container_count,
+           count(distinct case when active_categorized_targets.target_type = 'item' then active_categorized_targets.target_key end) as item_count,
+           0 as list_item_count
          from categories c
          left join active_categorized_targets on
            active_categorized_targets.category_id = c.id
@@ -315,6 +330,7 @@ function createActiveCategorizedTargetsSql(filters: {
   return [
     `select
        category_id,
+       'container' as target_type,
        'container:' || id as target_key
      from containers
      where workspace_id = ?
@@ -322,6 +338,7 @@ function createActiveCategorizedTargetsSql(filters: {
        ${activeTargetFilter(filters)}`,
     `select
        category_id,
+       'item' as target_type,
        'item:' || id as target_key
      from items
      where workspace_id = ?
@@ -411,7 +428,10 @@ function toTagWithTargetCountRecord(
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     deletedAt: row.deleted_at,
-    targetCount: row.target_count
+    targetCount: row.target_count,
+    containerCount: row.container_count,
+    itemCount: row.item_count,
+    listItemCount: row.list_item_count
   };
 }
 
@@ -428,7 +448,10 @@ function toCategoryWithTargetCountRecord(
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     deletedAt: row.deleted_at,
-    targetCount: row.target_count
+    targetCount: row.target_count,
+    containerCount: row.container_count,
+    itemCount: row.item_count,
+    listItemCount: row.list_item_count
   };
 }
 

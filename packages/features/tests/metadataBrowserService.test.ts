@@ -43,7 +43,10 @@ describe("MetadataBrowserService", () => {
     expect(service.listTagsWithCounts("workspace_1")).toMatchObject([
       {
         slug: "finance",
-        targetCount: 2
+        targetCount: 2,
+        containerCount: 1,
+        itemCount: 1,
+        listItemCount: 0
       },
       {
         slug: "office",
@@ -53,7 +56,10 @@ describe("MetadataBrowserService", () => {
     expect(service.listCategoriesWithCounts("workspace_1")).toMatchObject([
       {
         slug: "finance",
-        targetCount: 2
+        targetCount: 2,
+        containerCount: 1,
+        itemCount: 1,
+        listItemCount: 0
       }
     ]);
     expect(
@@ -75,6 +81,23 @@ describe("MetadataBrowserService", () => {
         tagSlugs: []
       })
     ).toEqual([]);
+  });
+
+  it("includes archived targets when requested", () => {
+    const containers = new ContainerRepository(connection);
+    containers.archive("container_tax", "2026-05-02T00:00:00.000Z");
+    const service = new MetadataBrowserService({ connection });
+
+    expect(service.listTagsWithCounts("workspace_1")[0]).toMatchObject({
+      slug: "finance",
+      containerCount: 0,
+      itemCount: 1
+    });
+    expect(service.listTagsWithCounts("workspace_1", { includeArchived: true })[0]).toMatchObject({
+      slug: "finance",
+      containerCount: 1,
+      itemCount: 1
+    });
   });
 
   it("validates tag slugs before querying", () => {

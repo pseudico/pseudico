@@ -3566,3 +3566,45 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Pushing this log entry will retrigger CI before merge.
 Next actions: Commit/push log; wait for CI; merge when green.
+
+## 2026-05-12 06:55:49 +10:00
+Objective: Merge PSE-147 and promote the next ticket.
+Decisions made:
+- CI run 25696590203 passed; PR #136 squash-merged as 946b623 and branch deleted.
+- Moved PSE-147 to Done and promoted PSE-148 as the sole Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked .playwright-mcp/ and gh MSI remain unrelated.
+Next actions: Start PSE-148 on next run; reconcile active work first; keep one Codex Ready.
+
+## 2026-05-12T07:00:48.0621589+10:00
+Objective: Reconcile active Linear/GitHub work and start next ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found; one Codex Ready issue selected (PSE-148).
+- No open GitHub PRs found for pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-148 scope still needs source/doc inspection.
+Next actions: Read docs; create branch; implement PSE-148.
+
+
+## 2026-05-12T07:10:33.7196343+10:00
+Objective: Implement PSE-148 metadata browser drill-down scope.
+Decisions made:
+- Added per-target-type metadata counts and archived filtering support.
+- Added custom metadata collection saving via service/IPC/preload API.
+- Updated Tags & Categories UI with URL breadcrumbs, archive toggle, counts, and save action.
+Files changed:
+- packages/db/src/repositories/MetadataBrowserRepository.ts; packages/features/src/metadata/MetadataBrowserService.ts; packages/features/src/savedViews/CollectionService.ts; apps/desktop/src/renderer/pages/TagsCategoriesPage.tsx; apps/desktop/src/preload/api.ts
+Open questions / risks: Full suite and build still pending.
+Next actions: Run full checks; open PR; update Linear.
+
+## 2026-05-12T07:13:18.9041262+10:00
+Objective: Verify PSE-148 implementation before PR.
+Decisions made:
+- Full lint, typecheck, test, and build now pass; EPERM runs were retried with escalation.
+- Unrelated untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi left untouched.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI still pending after PR opens.
+Next actions: Commit; push branch; open PR.
