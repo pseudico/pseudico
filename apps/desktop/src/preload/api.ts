@@ -1121,6 +1121,13 @@ export type SearchWorkspaceInput = {
   includeDeleted?: boolean;
 };
 
+export type SaveSearchInput = {
+  workspaceId?: string;
+  query: string;
+  name?: string;
+  description?: string | null;
+};
+
 export type SearchResultSummary = {
   id: string;
   workspaceId: string;
@@ -3072,7 +3079,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     removeTagFromTarget: "local-work-os:metadata:remove-tag-from-target"
   },
   search: {
-    searchWorkspace: "local-work-os:search:search-workspace"
+    searchWorkspace: "local-work-os:search:search-workspace",
+    saveSearch: "local-work-os:search:save-search"
   },
   collections: {
     listCollections: "local-work-os:collections:list-collections",
@@ -3656,6 +3664,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.search.searchWorkspace]: {
     input: SearchWorkspaceInput;
     result: ApiResult<SearchResultSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.search.saveSearch]: {
+    input: SaveSearchInput;
+    result: ApiResult<{ savedViewId: string; name: string }>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.collections.listCollections]: {
     input: string | undefined;
@@ -4459,6 +4471,9 @@ export type LocalWorkOsApi = {
     searchWorkspace: (
       input: SearchWorkspaceInput
     ) => Promise<ApiResult<SearchResultSummary[]>>;
+    saveSearch: (
+      input: SaveSearchInput
+    ) => Promise<ApiResult<{ savedViewId: string; name: string }>>;
   };
   collections: {
     listCollections: (
@@ -5143,7 +5158,9 @@ export function createLocalWorkOsApi(
     },
     search: {
       searchWorkspace: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.search.searchWorkspace, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.search.searchWorkspace, input),
+      saveSearch: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.search.saveSearch, input)
     },
     collections: {
       listCollections: (workspaceId) =>

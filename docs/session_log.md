@@ -3480,3 +3480,89 @@ Decisions made: - Added criteria for containers/status/text/attachments/pinned/a
 Files changed: apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/CollectionsPage.tsx; packages/db/src/repositories/SavedViewRepository.ts; packages/features/src/savedViews/*; packages/ui/src/forms/SmartListEditor.tsx; packages/ui/tests/smartListEditor.test.tsx
 Open questions / risks: Linear title/source mismatch remains; untracked .playwright-mcp and gh MSI left untouched.
 Next actions: Stage/commit/push; open PR; update Linear.
+
+## 2026-05-12T06:18:00+10:00
+Objective: Merge PSE-146 and prepare next Codex Ready ticket.
+Decisions made: - PR #135 passed CI and was squash-merged as e686562; deleted merged feature branch; moved PSE-146 Done; promoted PSE-147 as sole Codex Ready.
+Files changed: docs/session_log.md
+Open questions / risks: Final session-log entry is local after the merge; untracked .playwright-mcp/ and gh MSI remain unrelated.
+Next actions: Start PSE-147 in next run; reconcile PR Open/In Progress first; keep exactly one Codex Ready.
+
+## 2026-05-12 06:29:36 +10:00
+Objective: Reconcile Linear/GitHub active work for next Local Work OS ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found; one Codex Ready issue is PSE-147.
+- No open GitHub PRs found for pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked files exist and will be left untouched.
+Next actions: Move PSE-147 to In Progress; read docs; implement scoped changes.
+
+## 2026-05-12 06:30:22 +10:00
+Objective: Start implementation for PSE-147 structured search syntax.
+Decisions made:
+- Moved PSE-147 to In Progress.
+- Created branch codex/PSE-147-structured-search-syntax after sandbox escalation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need confirm exact acceptance criteria from ticket pack.
+Next actions: Read linked docs; identify search modules; implement tests and parser changes.
+
+## 2026-05-12 06:39:13 +10:00
+Objective: Implement PSE-147 structured search syntax and saved searches.
+Decisions made:
+- Added SearchQueryParser with chips, suggestions, saved-view query mapping, and service filtering.
+- Added save-search IPC using SavedViewService activity/search-index write flow.
+Files changed:
+- packages/features/src/search/StructuredSearchQuery.ts; packages/features/src/search/SearchService.ts; apps/desktop/src/renderer/pages/SearchPage.tsx
+Open questions / risks: has:file currently filters to file results; broader item-with-attachment matching may need future expansion.
+Next actions: Run lint/test/build; open PR; update Linear.
+
+## 2026-05-12 06:43:12 +10:00
+Objective: Verify PSE-147 implementation before PR.
+Decisions made:
+- Documented structured search capability in product spec current snapshot.
+- Full lint/typecheck/test/build pass after sandbox escalations for Vitest/electron-vite spawn restrictions.
+Files changed:
+- docs/PRODUCT_SPEC.md; docs/session_log.md
+Open questions / risks: Build warning notes large renderer bundle remains existing concern.
+Next actions: Stage and commit; push branch; create PR.
+
+## 2026-05-12 06:46:53 +10:00
+Objective: Open PR and complete merge readiness check for PSE-147.
+Decisions made:
+- Opened PR #136 and moved PSE-147 to PR Open with PR link.
+- Merge blocked because GitHub reports no CI status contexts despite local checks and no review threads.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI status must be established before merge; next ticket not promoted while PR Open exists.
+Next actions: Wait for CI/review status; merge when green; then promote next single issue.
+
+## 2026-05-12 06:48:23 +10:00
+Objective: Clarify PSE-147 PR blocker meaning.
+Decisions made:
+- Explained blocker is missing GitHub CI/check status, not a local code/test failure.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PR remains unmerged until CI/review status is established or owner approves no-CI merge.
+Next actions: Inspect repo Actions/branch protection if needed; rerun/enable CI; merge once allowed.
+
+## 2026-05-12 06:49:41 +10:00
+Objective: Explain how to reconcile missing PR CI checks.
+Decisions made:
+- Confirmed repo has .github/workflows/ci.yml configured for pull_request and main pushes.
+- Recommended reconciling by checking Actions/run status, re-running CI if needed, then merging only when green or explicitly approving no-CI merge.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need know whether GitHub Actions is disabled, queued, skipped, or not visible to current tools.
+Next actions: Check PR Actions tab; rerun workflow; merge once green.
+
+## 2026-05-12 06:51:21 +10:00
+Objective: Reconcile PR #136 GitHub CI status.
+Decisions made:
+- Confirmed GitHub Actions CI run 25696371051 completed successfully for PR #136 branch.
+- Earlier missing status was connector/status visibility lag; PR is ready for merge after final pushed log entry CI.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Pushing this log entry will retrigger CI before merge.
+Next actions: Commit/push log; wait for CI; merge when green.

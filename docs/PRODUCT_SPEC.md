@@ -40,8 +40,9 @@ Known limitations for MVP release planning:
   dashboard surfaces.
 - Timeline and calendar services are placeholders for future local dated-work
   projections.
-- Search is local and service-backed, but ranking, diagnostics, and rebuild UX
-  are intentionally basic.
+- Search is local and service-backed, with structured query tokens for type, tag,
+  category, due, status, file presence, and project scoping; ranking, diagnostics,
+  and rebuild UX are intentionally basic.
 - Import validation exists for workspace JSON, and valid workspace JSON exports
   can now be restored into a separate new workspace folder where feasible.
 - Backups and exports are manual local actions. Manual backup restore into a new

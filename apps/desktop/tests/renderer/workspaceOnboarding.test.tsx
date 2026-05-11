@@ -596,7 +596,8 @@ function createMockApi(
         apiOk({ id: "tag_1", name: "Setup", slug: "setup", source: "manual" })
     },
     search: {
-      searchWorkspace: async () => apiOk([])
+      searchWorkspace: async () => apiOk([]),
+      saveSearch: async () => apiOk({ savedViewId: "saved_search_1", name: "Saved search" })
     },
     collections: {
       listCollections: async () => apiOk([]),

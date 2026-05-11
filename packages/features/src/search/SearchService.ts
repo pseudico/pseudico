@@ -13,7 +13,8 @@ import {
   type ContainerRecord,
   type ItemRecord,
   type ListItemRecord,
-  type NoteDetailsRecord
+  type NoteDetailsRecord,
+  SearchIndexRepository
 } from "@local-work-os/db";
 import {
   SearchIndexOrchestrator,
@@ -26,6 +27,13 @@ import {
   type SearchResult,
   type SearchResultKind
 } from "./SearchResultHydrator";
+import { SavedViewService, type SavedViewMutationResult } from "../savedViews";
+import {
+  SearchQueryParser,
+  filterStructuredSearchResults,
+  type StructuredSearchParseResult,
+  type StructuredSearchSuggestion
+} from "./StructuredSearchQuery";
 
 export type SearchInput = {
   workspaceId: string;
@@ -37,11 +45,25 @@ export type SearchInput = {
   includeDeleted?: boolean;
 };
 
+export type SaveStructuredSearchInput = {
+  workspaceId: string;
+  query: string;
+  name?: string;
+  description?: string | null;
+};
+
+export type SaveStructuredSearchResult = SavedViewMutationResult & {
+  parsed: StructuredSearchParseResult;
+};
+
 // Owns search-facing application service contracts.
 // Does not own source-of-truth domain records or remote indexing.
 export class SearchService {
   readonly module = "search";
 
+  private readonly connection: DatabaseConnection;
+  private readonly now: () => Date;
+  private readonly idFactory: SearchIndexIdFactory | undefined;
   private readonly searchIndexOrchestrator: SearchIndexOrchestrator;
   private readonly searchIndexService: SearchIndexService;
   private readonly searchResultHydrator: SearchResultHydrator;
@@ -51,6 +73,9 @@ export class SearchService {
     idFactory?: SearchIndexIdFactory;
     now?: () => Date;
   }) {
+    this.connection = input.connection;
+    this.now = input.now ?? (() => new Date());
+    this.idFactory = input.idFactory;
     this.searchIndexService = new SearchIndexService(input);
     this.searchIndexOrchestrator = new SearchIndexOrchestrator(input);
     this.searchResultHydrator = new SearchResultHydrator(input);
@@ -126,9 +151,10 @@ export class SearchService {
   }
 
   search(input: SearchInput): SearchResult[] {
+    const parsed = this.parseStructuredQuery(input.query);
     const searchWorkspaceInput: SearchWorkspaceInput = {
       workspaceId: input.workspaceId,
-      query: input.query,
+      query: parsed.textQuery.length > 0 ? parsed.textQuery : input.query,
       targetTypes: ["container", "item", "list_item", "attachment"]
     };
 
@@ -141,7 +167,11 @@ export class SearchService {
     const resultOffset = normalizeOffset(input.offset);
     searchWorkspaceInput.limit = resultOffset + Math.max(resultLimit * 3, resultLimit);
 
-    const records = this.searchIndexService.searchWorkspace(searchWorkspaceInput);
+    const records = parsed.textQuery.length > 0
+      ? this.searchIndexService.searchWorkspace(searchWorkspaceInput)
+      : new SearchIndexRepository(this.connection).listByWorkspace(input.workspaceId, {
+          targetTypes: ["container", "item", "list_item", "attachment"]
+        }).slice(0, searchWorkspaceInput.limit);
 
     const hydrateOptions: HydrateSearchResultsOptions = {};
 
@@ -153,13 +183,47 @@ export class SearchService {
       hydrateOptions.includeDeleted = input.includeDeleted;
     }
 
-    if (input.kinds !== undefined) {
-      hydrateOptions.kinds = input.kinds;
+    const structuredKinds = parsed.filters.kinds;
+    if (input.kinds !== undefined || structuredKinds !== undefined) {
+      const mergedKinds = mergeKinds(input.kinds, structuredKinds);
+      if (mergedKinds !== undefined) {
+        hydrateOptions.kinds = mergedKinds;
+      }
     }
 
-    return this.searchResultHydrator
-      .hydrateSearchResults(records, hydrateOptions)
-      .slice(resultOffset, resultOffset + resultLimit);
+    return filterStructuredSearchResults(
+      this.searchResultHydrator.hydrateSearchResults(records, hydrateOptions),
+      parsed
+    ).slice(resultOffset, resultOffset + resultLimit);
+  }
+
+  parseStructuredQuery(query: string): StructuredSearchParseResult {
+    return new SearchQueryParser().parse(query, this.now());
+  }
+
+  getStructuredSearchSuggestions(query: string): StructuredSearchSuggestion[] {
+    return new SearchQueryParser().getSuggestions(query);
+  }
+
+  async saveStructuredSearch(
+    input: SaveStructuredSearchInput
+  ): Promise<SaveStructuredSearchResult> {
+    const parsed = this.parseStructuredQuery(input.query);
+    const name = input.name?.trim() || createSavedSearchName(input.query);
+    const service = new SavedViewService({
+      connection: this.connection,
+      now: this.now,
+      ...(this.idFactory === undefined ? {} : { idFactory: this.idFactory })
+    });
+    const result = await service.createSavedView({
+      workspaceId: input.workspaceId,
+      type: "search",
+      name,
+      description: input.description ?? `Saved search for ${input.query.trim()}`,
+      query: parsed.savedViewQuery
+    });
+
+    return { ...result, parsed };
   }
 
   rebuildWorkspaceIndex(workspaceId: string): RebuildWorkspaceIndexResult {
@@ -169,6 +233,21 @@ export class SearchService {
   getSearchIndexHealth(workspaceId: string): SearchIndexHealthReport {
     return this.searchIndexOrchestrator.getSearchIndexHealth(workspaceId);
   }
+}
+
+function mergeKinds(
+  left: readonly SearchResultKind[] | undefined,
+  right: readonly SearchResultKind[] | undefined
+): SearchResultKind[] | undefined {
+  if (left === undefined) return right === undefined ? undefined : [...right];
+  if (right === undefined) return [...left];
+  const rightSet = new Set(right);
+  return left.filter((kind) => rightSet.has(kind));
+}
+
+function createSavedSearchName(query: string): string {
+  const trimmed = query.trim();
+  return trimmed.length === 0 ? "Saved search" : `Search: ${trimmed.slice(0, 80)}`;
 }
 
 function normalizeOffset(offset: number | undefined): number {
