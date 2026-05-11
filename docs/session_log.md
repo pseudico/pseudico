@@ -3527,3 +3527,13 @@ Files changed:
 - docs/PRODUCT_SPEC.md; docs/session_log.md
 Open questions / risks: Build warning notes large renderer bundle remains existing concern.
 Next actions: Stage and commit; push branch; create PR.
+
+## 2026-05-12 06:46:53 +10:00
+Objective: Open PR and complete merge readiness check for PSE-147.
+Decisions made:
+- Opened PR #136 and moved PSE-147 to PR Open with PR link.
+- Merge blocked because GitHub reports no CI status contexts despite local checks and no review threads.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI status must be established before merge; next ticket not promoted while PR Open exists.
+Next actions: Wait for CI/review status; merge when green; then promote next single issue.
