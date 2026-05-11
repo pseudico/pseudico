@@ -2,7 +2,10 @@ import { renderToString } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import type { TimelineViewModelSummary } from "../../src/preload/api";
-import { TimelinePage } from "../../src/renderer/pages/TimelinePage";
+import {
+  TimelinePage,
+  getTimelineItemDestination
+} from "../../src/renderer/pages/TimelinePage";
 
 describe("Timeline renderer page", () => {
   it("renders workload filters and grouped timeline tasks", () => {
@@ -19,6 +22,28 @@ describe("Timeline renderer page", () => {
     expect(html).toContain("Launch checklist");
     expect(html).toContain("Operations");
     expect(html).toContain("P2");
+  });
+
+  it("opens list item timeline entries in the parent list context", () => {
+    expect(
+      getTimelineItemDestination({
+        kind: "list_item",
+        itemId: "list_item_1",
+        sourceItemId: "item_list_1",
+        title: "Confirm launch window",
+        body: null,
+        containerId: "container_project_1",
+        containerName: "Launch Plan",
+        containerType: "project",
+        categoryName: null,
+        categoryColor: null,
+        taskStatus: "open",
+        priority: null,
+        timelineStartAt: "2026-05-15T12:00:00.000Z",
+        timelineEndAt: "2026-05-15T12:00:00.000Z",
+        completedAt: null
+      })
+    ).toBe("/projects/container_project_1?item=item_list_1");
   });
 });
 
@@ -43,6 +68,7 @@ function timelineViewModel(): TimelineViewModelSummary {
         completedCount: 0,
         items: [
           {
+            kind: "task",
             itemId: "item_1",
             workspaceId: "workspace_1",
             title: "Launch checklist",
@@ -68,7 +94,8 @@ function timelineViewModel(): TimelineViewModelSummary {
               targetType: "item",
               targetId: "item_1",
               containerId: "container_project_1",
-              workspaceId: "workspace_1"
+              workspaceId: "workspace_1",
+              sourceItemId: null
             }
           }
         ]

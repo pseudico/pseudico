@@ -1348,7 +1348,9 @@ function todayViewModelSummary(): TodayViewModelSummary {
     },
     dueToday: [
       {
+        itemType: "task",
         itemId: "item_1",
+        sourceItemId: null,
         workspaceId: "workspace_1",
         containerId: "container_1",
         containerTabId: null,

@@ -71,7 +71,9 @@ function todayViewModel(): TodayViewModelSummary {
 
 function todayTask(itemId: string, title: string, dueAt: string) {
   return {
+    itemType: "task" as const,
     itemId,
+    sourceItemId: null,
     workspaceId: "workspace_1",
     containerId: "container_project_1",
     containerTabId: null,

@@ -8,7 +8,7 @@ import {
 } from "@local-work-os/db";
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { TaskService, TimelineService } from "../src";
+import { ListService, TaskService, TimelineService } from "../src";
 
 let cleanup: (() => Promise<void>) | undefined;
 let connection: DatabaseConnection;
@@ -74,6 +74,11 @@ describe("TimelineService", () => {
 
   it("returns dated tasks in range and hides completed tasks by default", async () => {
     const taskService = createTaskService();
+    const list = await createListService().createList({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Launch list"
+    });
     const launch = await taskService.createTask({
       workspaceId: "workspace_1",
       containerId: "container_project_1",
@@ -102,6 +107,12 @@ describe("TimelineService", () => {
       title: "Outside range",
       dueAt: "2026-05-20T12:00:00.000Z"
     });
+    const listItem = await createListService().addListItem({
+      listId: list.item.id,
+      title: "Confirm rollout list row",
+      startAt: "2026-05-15T08:00:00.000Z",
+      dueAt: "2026-05-15T10:00:00.000Z"
+    });
 
     const service = createTimelineService();
     const items = service.getTimelineItems({
@@ -112,10 +123,24 @@ describe("TimelineService", () => {
 
     expect(items.map((item) => item.title)).toEqual([
       "Spanning rollout",
+      "Confirm rollout list row",
       "Launch checklist"
     ]);
     expect(items[1]).toMatchObject({
+      itemId: listItem.listItem.id,
+      kind: "list_item",
+      priority: null,
+      timelineStartAt: "2026-05-15T08:00:00.000Z",
+      timelineEndAt: "2026-05-15T10:00:00.000Z",
+      navigationTarget: {
+        targetType: "list_item",
+        targetId: listItem.listItem.id,
+        sourceItemId: list.item.id
+      }
+    });
+    expect(items[2]).toMatchObject({
       itemId: launch.item.id,
+      kind: "task",
       containerId: "container_project_1",
       containerName: "Launch Plan",
       categoryId: "category_ops",
@@ -127,7 +152,8 @@ describe("TimelineService", () => {
         targetType: "item",
         targetId: launch.item.id,
         containerId: "container_project_1",
-        workspaceId: "workspace_1"
+        workspaceId: "workspace_1",
+        sourceItemId: null
       }
     });
     expect(service.getTimelineItems({
@@ -217,6 +243,17 @@ function createTaskService(): TaskService {
 function createTimelineService(): TimelineService {
   return new TimelineService({
     connection,
+    now: () => NOW
+  });
+}
+
+function createListService(): ListService {
+  return new ListService({
+    connection,
+    idFactory: (prefix) => {
+      idCounter += 1;
+      return `${prefix}_${idCounter}`;
+    },
     now: () => NOW
   });
 }

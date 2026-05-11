@@ -11,7 +11,9 @@ import { ReorderControls } from "./ReorderControls";
 import { SnoozeMenu, type SnoozePreset } from "./SnoozeMenu";
 
 export type TodayTaskCardViewModel = {
+  itemType?: "task" | "list_item";
   itemId: string;
+  sourceItemId?: string | null;
   title: string;
   body?: string | null;
   taskStatus: string;

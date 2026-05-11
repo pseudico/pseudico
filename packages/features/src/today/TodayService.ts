@@ -10,11 +10,14 @@ import {
 import {
   AppSettingsRepository,
   DailyPlanRepository,
+  ListRepository,
   TaskRepository,
   type DatabaseConnection,
+  type ListItemWithListRecord,
   type TaskWithItemRecord
 } from "@local-work-os/db";
 import {
+  toTodayListItemView,
   toTodayTaskView,
   type TodayTaskView,
   type TodayViewModel
@@ -83,9 +86,17 @@ export class TodayService {
 
     const date = input.date ?? this.now();
     const range = createLocalDayRange(date);
-    const automaticTasks = this.listTasks(input.workspaceId, (repository) =>
-      repository.listDueBetween(input.workspaceId, range)
-    );
+    const automaticTasks = [
+      ...this.listTasks(input.workspaceId, (repository) =>
+        repository.listDueBetween(input.workspaceId, range)
+      ),
+      ...this.listListItems(input.workspaceId, (repository) =>
+        repository.listDatedItemsBetween({
+          workspaceId: input.workspaceId,
+          range
+        })
+      )
+    ].sort(compareTodayTasks);
 
     return this.listTasksForLane({
       workspaceId: input.workspaceId,
@@ -104,9 +115,22 @@ export class TodayService {
       startOffsetDays: -this.resolveBacklogDays(input),
       endOffsetDays: 0
     });
-    const automaticTasks = this.listTasks(input.workspaceId, (repository) =>
-      repository.listOverdueBetween(input.workspaceId, range)
-    );
+    const automaticTasks = [
+      ...this.listTasks(input.workspaceId, (repository) =>
+        repository.listOverdueBetween(input.workspaceId, range)
+      ),
+      ...this.listListItems(input.workspaceId, (repository) =>
+        repository.listDatedItemsBetween({
+          workspaceId: input.workspaceId,
+          range
+        }).filter(
+          (record) =>
+            record.listItem.dueAt !== null &&
+            record.listItem.dueAt >= range.startInclusive &&
+            record.listItem.dueAt < range.endExclusive
+        )
+      )
+    ].sort(compareTodayTasks);
 
     return this.listTasksForLane({
       workspaceId: input.workspaceId,
@@ -121,9 +145,17 @@ export class TodayService {
 
     const date = input.date ?? this.now();
     const range = createRelativeLocalDayRange(date, 1);
-    const automaticTasks = this.listTasks(input.workspaceId, (repository) =>
-      repository.listDueBetween(input.workspaceId, range)
-    );
+    const automaticTasks = [
+      ...this.listTasks(input.workspaceId, (repository) =>
+        repository.listDueBetween(input.workspaceId, range)
+      ),
+      ...this.listListItems(input.workspaceId, (repository) =>
+        repository.listDatedItemsBetween({
+          workspaceId: input.workspaceId,
+          range
+        })
+      )
+    ].sort(compareTodayTasks);
 
     return this.listTasksForLane({
       workspaceId: input.workspaceId,
@@ -140,6 +172,15 @@ export class TodayService {
     validateNonEmptyString(workspaceId, "workspaceId");
 
     return query(new TaskRepository(this.connection)).map(toTodayTaskView);
+  }
+
+  private listListItems(
+    workspaceId: string,
+    query: (repository: ListRepository) => ListItemWithListRecord[]
+  ): TodayTaskView[] {
+    validateNonEmptyString(workspaceId, "workspaceId");
+
+    return query(new ListRepository(this.connection)).map(toTodayListItemView);
   }
 
   private listTasksForLane(input: {
@@ -163,7 +204,7 @@ export class TodayService {
       dailyPlanId: plan.id
     });
     const plannedIds = new Set(
-      plannedTasks.map((record) => record.task.item.id)
+      plannedTasks.map((record) => `task:${record.task.item.id}`)
     );
     const laneTasks = plannedTasks
       .filter((record) => record.planItem.lane === input.lane)
@@ -177,7 +218,7 @@ export class TodayService {
 
     return [
       ...laneTasks,
-      ...input.automaticTasks.filter((task) => !plannedIds.has(task.itemId))
+      ...input.automaticTasks.filter((task) => !plannedIds.has(`${task.itemType}:${task.itemId}`))
     ];
   }
 
@@ -237,4 +278,22 @@ function validateBacklogDays(value: unknown): number {
   }
 
   return value;
+}
+
+function compareTodayTasks(left: TodayTaskView, right: TodayTaskView): number {
+  const leftDate = left.dueAt ?? left.startAt ?? "";
+  const rightDate = right.dueAt ?? right.startAt ?? "";
+  const dateDelta = leftDate.localeCompare(rightDate);
+
+  if (dateDelta !== 0) {
+    return dateDelta;
+  }
+
+  const sortDelta = left.sortOrder - right.sortOrder;
+
+  if (sortDelta !== 0) {
+    return sortDelta;
+  }
+
+  return left.title.localeCompare(right.title, undefined, { sensitivity: "base" });
 }
