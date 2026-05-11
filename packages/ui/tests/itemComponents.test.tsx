@@ -4,6 +4,7 @@ import {
   getItemTypeLabel,
   CategoryBadge,
   CategoryPicker,
+  CommentThread,
   BulkSelectionToolbar,
   ConfirmDialog,
   ContextMenu,
@@ -67,6 +68,33 @@ describe("Universal item UI", () => {
     expect(html).toContain("Finance");
     expect(html).toContain("Today");
     expect(html).toContain("--item-accent-color:#2c6b8f");
+  });
+
+  it("renders comment threads with add, edit, and delete affordances", () => {
+    const html = renderToStaticMarkup(
+      <CommentThread
+        comments={[
+          {
+            id: "comment_1",
+            body: "Confirm local-only wording.",
+            authorLabel: "Al",
+            createdAt: "2026-05-02T00:00:00.000Z",
+            editedAt: "2026-05-02T00:05:00.000Z"
+          }
+        ]}
+        onAddComment={() => undefined}
+        onDeleteComment={() => undefined}
+        onUpdateComment={() => undefined}
+      />
+    );
+
+    expect(html).toContain("Comments");
+    expect(html).toContain("1 local annotation");
+    expect(html).toContain("Confirm local-only wording.");
+    expect(html).toContain("Add comment");
+    expect(html).toContain("Edit");
+    expect(html).toContain("Delete");
+    expect(html).toContain("(edited)");
   });
 
   it("renders one date-range input for task/list date edits", () => {

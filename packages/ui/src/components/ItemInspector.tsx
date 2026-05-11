@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ComponentProps } from "react";
 import { X } from "lucide-react";
 import {
   createInspectorTargetKey,
@@ -12,6 +13,7 @@ import {
 } from "./RelatedItemsPanel";
 import { RecentActivityList } from "./RecentActivityList";
 import { TagBadge, type TagBadgeViewModel } from "./TagBadge";
+import { CommentThread } from "./CommentThread";
 
 export type ItemInspectorItem = {
   id: string;
@@ -115,6 +117,22 @@ export type InspectorDateChangeHandler = (
   value: string
 ) => void | Promise<void>;
 
+export type InspectorCommentAddHandler = (
+  target: InspectorTarget,
+  body: string
+) => void | Promise<void>;
+
+export type InspectorCommentUpdateHandler = (
+  target: InspectorTarget,
+  commentId: string,
+  body: string
+) => void | Promise<void>;
+
+export type InspectorCommentDeleteHandler = (
+  target: InspectorTarget,
+  commentId: string
+) => void | Promise<void>;
+
 export type ItemInspectorProps = {
   activity: readonly ItemInspectorActivity[];
   open: boolean;
@@ -132,6 +150,9 @@ export type ItemInspectorProps = {
   onAddTag?: InspectorTagAddHandler | undefined;
   onRemoveTag?: InspectorTagRemoveHandler | undefined;
   onDateChange?: InspectorDateChangeHandler | undefined;
+  onAddComment?: InspectorCommentAddHandler | undefined;
+  onUpdateComment?: InspectorCommentUpdateHandler | undefined;
+  onDeleteComment?: InspectorCommentDeleteHandler | undefined;
 };
 
 export function ItemInspectorPanel({
@@ -146,11 +167,14 @@ export function ItemInspectorPanel({
   open,
   target,
   onAddTag,
+  onAddComment,
   onCategoryChange,
   onClose,
   onDateChange,
+  onDeleteComment,
   onRemoveTag,
-  onTargetChange
+  onTargetChange,
+  onUpdateComment
 }: ItemInspectorProps): React.JSX.Element {
   const resolvedTarget = target ?? (item === undefined ? null : itemToTarget(item));
 
@@ -215,7 +239,14 @@ export function ItemInspectorPanel({
           />
           <InspectorRelationshipsSection relationships={relationships} />
           <InspectorAttachmentsSection attachments={resolvedTarget.attachments} />
-          <InspectorCommentsSection comments={resolvedTarget.comments} />
+          <InspectorCommentsSection
+            busy={busy}
+            comments={resolvedTarget.comments}
+            target={resolvedTarget}
+            onAddComment={onAddComment}
+            onDeleteComment={onDeleteComment}
+            onUpdateComment={onUpdateComment}
+          />
           <RecentActivityList activity={activity} />
         </>
       )}
@@ -515,26 +546,47 @@ function InspectorAttachmentsSection({
 }
 
 function InspectorCommentsSection({
-  comments = []
+  busy,
+  comments = [],
+  target,
+  onAddComment,
+  onDeleteComment,
+  onUpdateComment
 }: {
+  busy: boolean;
   comments?: readonly InspectorCommentViewModel[] | undefined;
+  target: InspectorTargetViewModel;
+  onAddComment?: InspectorCommentAddHandler | undefined;
+  onDeleteComment?: InspectorCommentDeleteHandler | undefined;
+  onUpdateComment?: InspectorCommentUpdateHandler | undefined;
 }): React.JSX.Element {
+  const commentThreadHandlers: Pick<
+    ComponentProps<typeof CommentThread>,
+    "onAddComment" | "onDeleteComment" | "onUpdateComment"
+  > = {};
+
+  if (onAddComment !== undefined) {
+    commentThreadHandlers.onAddComment = (body) =>
+      onAddComment({ id: target.id, type: target.type }, body);
+  }
+
+  if (onDeleteComment !== undefined) {
+    commentThreadHandlers.onDeleteComment = (commentId) =>
+      onDeleteComment({ id: target.id, type: target.type }, commentId);
+  }
+
+  if (onUpdateComment !== undefined) {
+    commentThreadHandlers.onUpdateComment = (commentId, body) =>
+      onUpdateComment({ id: target.id, type: target.type }, commentId, body);
+  }
+
   return (
     <section className="inspector-section" aria-label="Comments">
-      <h4>Comments</h4>
-      {comments.length === 0 ? (
-        <p className="muted-text">No comments recorded yet.</p>
-      ) : (
-        <ul className="inspector-simple-list">
-          {comments.map((comment) => (
-            <li key={comment.id}>
-              <strong>{comment.authorLabel ?? "Local user"}</strong>
-              <span>{comment.body}</span>
-              <time dateTime={comment.createdAt}>{comment.createdAt}</time>
-            </li>
-          ))}
-        </ul>
-      )}
+      <CommentThread
+        busy={busy}
+        comments={comments}
+        {...commentThreadHandlers}
+      />
     </section>
   );
 }

@@ -3084,3 +3084,22 @@ Open questions / risks: CI/review still need inspection before merge.
 Next actions: Check PR diff; wait for CI; merge if clean and green.
 
 
+## 2026-05-11T15:37:51+10:00
+Objective: Merge PSE-128 and prepare next ticket.
+Decisions made:
+- CI passed and PR #123 squash-merged at cac8561b; merged branch was deleted.
+- Moved PSE-128 to Done and promoted PSE-129 as the single Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local post-merge session log entry is uncommitted; unrelated untracked files remain untouched.
+Next actions: Pull PSE-129 into In Progress next run; read comments/annotations ticket/docs; implement scoped PR.
+
+## 2026-05-11T15:54:53+10:00
+Objective: Implement PSE-129 comments/annotations ticket.
+Decisions made:
+- Added local comments table/repository/service with activity events and search projection refresh.
+- Added CommentThread UI and inspector comment add/edit/delete handler seams.
+Files changed:
+- packages/db/src/repositories/CommentRepository.ts; packages/features/src/comments/CommentService.ts; packages/ui/src/components/CommentThread.tsx
+Open questions / risks: PR review and remote CI still pending.
+Next actions: Commit/push branch; open ready PR; move Linear to PR Open.

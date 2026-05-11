@@ -6,6 +6,7 @@ export const plannedFeatureAreas = [
   "items",
   "projects",
   "contacts",
+  "comments",
   "containerGrouping",
   "containerPreferences",
   "containerMedia",
@@ -59,6 +60,18 @@ export {
   appearanceModuleContract,
   normalizeAppearanceSettingsValue
 } from "./appearance";
+export {
+  CommentService,
+  commentsModuleContract,
+  type AddCommentInput,
+  type CommentMutationResult,
+  type CommentServiceIdFactory,
+  type CommentTargetInput,
+  type CommentThreadSummary,
+  type DeleteCommentInput,
+  type UpdateCommentInput
+} from "./comments";
+
 export {
   ActivityService,
   activityModuleContract,
@@ -831,3 +844,4 @@ export type {
   UnplanTaskInput
 } from "./today";
 export type { WorkspaceService } from "./workspace";
+

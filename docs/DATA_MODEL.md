@@ -186,3 +186,8 @@ This direction is derived from `docs/PRODUCT_SPEC.md`,
 ## Container media
 
 Project banners and contact avatars are stored as local attachment-backed container media records. The container_media table keeps one active media assignment per container/role, references an attachment copied under workspace-relative ttachments/, stores optional thumbnail paths, and soft-deletes prior assignments so changes are reversible. Missing-file state is detected by verifying the attachment or thumbnail path inside the active workspace.
+
+### Comments and annotations
+
+Comments are local-only annotations stored in a dedicated comments table. Each comment belongs to one workspace and targets a container, item, or list_item; comments use soft delete, write activity events on create/update/delete, and are folded into the target's local search projection so searching comment text returns the annotated object.
+

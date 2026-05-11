@@ -14,6 +14,7 @@ const requiredTables = [
   "app_settings",
   "containers",
   "container_tabs",
+  "comments",
   "items",
   "task_details",
   "list_details",
@@ -47,6 +48,7 @@ const requiredIndexes = [
   "idx_containers_workspace_type",
   "idx_container_tabs_container",
   "idx_container_tabs_visibility",
+  "idx_comments_target_order",
   "idx_contact_fields_container_order",
   "idx_recurrence_rules_active_task",
   "idx_recurrence_rules_workspace_next",
@@ -80,7 +82,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version twelve", () => {
+  it("runs on an empty database and records schema version thirteen", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -144,14 +146,19 @@ describe("schema migrations", () => {
           version: 12,
           name: "review_task_statuses",
           checksum: "pse-121-review-task-statuses-v1"
+        },
+        {
+          version: 13,
+          name: "comments",
+          checksum: "pse-129-comments-v1"
         }
       ],
-      currentVersion: 12
+      currentVersion: 13
     });
-    expect(service.getCurrentSchemaVersion()).toBe(12);
+    expect(service.getCurrentSchemaVersion()).toBe(13);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 12
+      currentVersion: 13
     });
   });
 
@@ -283,3 +290,4 @@ function listSqliteObjects(type: "index" | "table"): string[] {
       .all(type) as Array<{ name: string }>
   ).map((row) => row.name);
 }
+

@@ -3,6 +3,7 @@ import type { DatabaseConnection } from "../connection/createDatabaseConnection"
 import {
   ContainerRepository,
   type ContainerRecord,
+  CommentRepository,
   ContactFieldRepository,
   AttachmentRepository,
   type AttachmentRecord,
@@ -111,7 +112,12 @@ export class SearchIndexService {
       targetType: "container",
       targetId: container.id,
       title: container.name,
-      body: input.body ?? this.buildContainerSearchBody(container),
+      body: this.withCommentSearchBody(
+        container.workspaceId,
+        "container",
+        container.id,
+        input.body ?? this.buildContainerSearchBody(container)
+      ),
       tags: tagProjection.tags,
       category:
         input.category ??
@@ -151,7 +157,12 @@ export class SearchIndexService {
       targetType: "item",
       targetId: item.id,
       title: item.title,
-      body: item.body ?? "",
+      body: this.withCommentSearchBody(
+        item.workspaceId,
+        "item",
+        item.id,
+        item.body ?? ""
+      ),
       tags: tagProjection.tags,
       category: input.category ?? this.findCategoryName(item.categoryId, item.workspaceId),
       metadataJson: stringifyMetadata({
@@ -189,7 +200,12 @@ export class SearchIndexService {
       targetType: "list_item",
       targetId: listItem.id,
       title: listItem.title,
-      body: listItem.body ?? "",
+      body: this.withCommentSearchBody(
+        listItem.workspaceId,
+        "list_item",
+        listItem.id,
+        listItem.body ?? ""
+      ),
       tags: tagProjection.tags,
       category: input.category ?? null,
       metadataJson: stringifyMetadata({
@@ -229,7 +245,12 @@ export class SearchIndexService {
       targetType: "item",
       targetId: item.id,
       title: item.title,
-      body: buildNoteSearchBody(note),
+      body: this.withCommentSearchBody(
+        item.workspaceId,
+        "item",
+        item.id,
+        buildNoteSearchBody(note)
+      ),
       tags: tagProjection.tags,
       category: input.category ?? this.findCategoryName(item.categoryId, item.workspaceId),
       metadataJson: stringifyMetadata({
@@ -270,7 +291,12 @@ export class SearchIndexService {
       targetType: "item",
       targetId: item.id,
       title: item.title,
-      body: buildLinkSearchBody(link),
+      body: this.withCommentSearchBody(
+        item.workspaceId,
+        "item",
+        item.id,
+        buildLinkSearchBody(link)
+      ),
       tags: tagProjection.tags,
       category: input.category ?? this.findCategoryName(item.categoryId, item.workspaceId),
       metadataJson: stringifyMetadata({
@@ -676,6 +702,22 @@ export class SearchIndexService {
       .map((value) => value.trim())
       .filter(Boolean)
       .join("\n");
+  }
+
+  private withCommentSearchBody(
+    workspaceId: string,
+    targetType: "container" | "item" | "list_item",
+    targetId: string,
+    body: string
+  ): string {
+    const comments = new CommentRepository(this.connection).listForTarget({
+      workspaceId,
+      targetType,
+      targetId
+    });
+    const commentText = comments.map((comment) => comment.body.trim()).filter(Boolean);
+
+    return [body.trim(), ...commentText].filter(Boolean).join("\n");
   }
 }
 
