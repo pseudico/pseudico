@@ -16,7 +16,6 @@ describe("ContainerTabSummaryCards", () => {
             openTaskCount: 2,
             completedTaskCount: 1,
             overdueTaskCount: 1,
-            upcomingTaskCount: 1,
             noteCount: 1,
             fileCount: 1,
             linkCount: 0,

@@ -1,6 +1,6 @@
 import { Activity, AlertTriangle, CalendarClock } from "lucide-react";
 import { DashboardWidget } from "../DashboardWidget";
-import type { ProjectHealthViewModel } from "../ProjectHealthCard";
+import { ProjectHealthBadges, type ProjectHealthViewModel } from "../ProjectHealthCard";
 
 export type ProjectHealthWidgetProps = {
   projects: readonly ProjectHealthViewModel[];
@@ -42,10 +42,11 @@ export function ProjectHealthWidget({
                     <AlertTriangle size={13} aria-hidden="true" />
                     {`${project.overdueTaskCount} overdue`}
                     <Activity size={13} aria-hidden="true" />
-                    {`${project.openTaskCount} open`}
+                    {`${project.openTaskCount} open / ${project.waitingTaskCount} waiting`}
                     <CalendarClock size={13} aria-hidden="true" />
-                    {project.nextDueTask?.dueAt?.slice(0, 10) ?? "No due date"}
+                    {project.nextTask?.dueAt?.slice(0, 10) ?? "No due date"}
                   </span>
+                  <ProjectHealthBadges badges={project.healthBadges} />
                 </span>
               </button>
             </li>

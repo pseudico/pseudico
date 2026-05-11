@@ -79,8 +79,17 @@ function projectHealthSummary(
     openTaskCount: 1,
     completedTaskCount: 0,
     overdueTaskCount: 0,
+    upcomingTaskCount: 0,
+    waitingTaskCount: 0,
+    completionRatio: 0,
+    staleAfterDays: 14,
+    lastActivityAt: "2026-05-04T00:00:00.000Z",
+    isStale: false,
+    hasRecentActivity: true,
     totalTaskCount: 1,
     nextDueTask: null,
+    nextTask: null,
+    healthBadges: [],
     recentActivity: []
   };
 }

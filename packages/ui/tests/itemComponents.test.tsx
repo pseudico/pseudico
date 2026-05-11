@@ -724,6 +724,13 @@ describe("Universal item UI", () => {
             openTaskCount: 3,
             completedTaskCount: 2,
             overdueTaskCount: 1,
+            upcomingTaskCount: 1,
+            waitingTaskCount: 0,
+            completionRatio: 0.4,
+            staleAfterDays: 14,
+            lastActivityAt: "2026-05-04T00:00:00.000Z",
+            isStale: false,
+            hasRecentActivity: true,
             totalTaskCount: 5,
             nextDueTask: {
               itemId: "item_1",
@@ -732,6 +739,14 @@ describe("Universal item UI", () => {
               taskStatus: "open",
               priority: 2
             },
+            nextTask: {
+              itemId: "item_1",
+              title: "Book launch venue",
+              dueAt: "2026-05-04T00:00:00.000Z",
+              taskStatus: "open",
+              priority: 2
+            },
+            healthBadges: [{ kind: "overdue", label: "1 overdue", tone: "risk" }],
             recentActivity: []
           }
         ]}
@@ -763,6 +778,13 @@ describe("Universal item UI", () => {
           openTaskCount: 3,
           completedTaskCount: 2,
           overdueTaskCount: 1,
+          upcomingTaskCount: 1,
+          waitingTaskCount: 0,
+          completionRatio: 0.4,
+          staleAfterDays: 14,
+          lastActivityAt: "2026-05-04T00:00:00.000Z",
+          isStale: false,
+          hasRecentActivity: true,
           totalTaskCount: 5,
           nextDueTask: {
             itemId: "item_1",
@@ -771,6 +793,14 @@ describe("Universal item UI", () => {
             taskStatus: "open",
             priority: 2
           },
+          nextTask: {
+            itemId: "item_1",
+            title: "Book launch venue",
+            dueAt: "2026-05-04T00:00:00.000Z",
+            taskStatus: "open",
+            priority: 2
+          },
+          healthBadges: [{ kind: "overdue", label: "1 overdue", tone: "risk" }],
           recentActivity: [
             {
               id: "activity_1",
