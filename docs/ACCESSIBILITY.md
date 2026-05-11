@@ -52,3 +52,7 @@ Global shortcuts intentionally do not fire while focus is inside inputs, textare
 ## Keyboard-first checklist editing
 
 Checklist rows support keyboard selection and scoped editing shortcuts. Enter submits the inline add-row field, Escape clears dirty add-row text before clearing row selection, Arrow Up/Down moves row focus, and Ctrl/Cmd+Arrow Left/Right/Up/Down outdents, indents, or reorders the focused row through the list service.
+
+## Keyboard-first daily planning
+
+The Today page includes a Rapid day planner panel with separate Today and Tomorrow draft fields. Enter saves the active draft as a local task and plans it into that lane, Arrow Up/Down moves focus between lanes, and Escape clears the active draft before any data is written.

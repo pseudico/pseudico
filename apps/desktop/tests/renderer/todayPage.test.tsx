@@ -18,6 +18,9 @@ describe("Today renderer page", () => {
     expect(html).toContain("Call accountant");
     expect(html).toContain("Review launch copy");
     expect(html).toContain("Send overdue report");
+    expect(html).toContain("Keyboard planner");
+    expect(html).toContain("Today task");
+    expect(html).toContain("Tomorrow task");
     expect(html).toContain("Complete");
     expect(html).toContain("Open source");
     expect(html).toContain("Tomorrow");

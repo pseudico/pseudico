@@ -1951,6 +1951,74 @@ a {
   align-items: start;
 }
 
+.daily-planner-editor {
+  display: grid;
+  max-width: 1180px;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #dedbd1;
+  border-radius: 18px;
+  background: #fffdf7;
+  box-shadow: 0 12px 24px rgb(45 37 27 / 8%);
+}
+
+.daily-planner-editor-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.daily-planner-editor-heading h3 {
+  margin: 0 0 6px;
+  color: #262624;
+  font-size: 22px;
+}
+
+.daily-planner-editor-heading p:last-child {
+  max-width: 70ch;
+  margin: 0;
+  color: #514e49;
+  line-height: 1.5;
+}
+
+.daily-planner-editor-heading > span {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 28px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #f1eee4;
+  color: #514e49;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.daily-planner-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.daily-planner-lane-input {
+  display: grid;
+  gap: 6px;
+  color: #514e49;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.daily-planner-lane-input input {
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #d5d0c4;
+  border-radius: 12px;
+  background: #fff;
+  color: #262624;
+  font: inherit;
+}
+
 .today-lane {
   display: grid;
   min-width: 0;
@@ -4089,6 +4157,7 @@ a {
     .search-layout,
     .search-page-form,
     .dashboard-widget-grid,
+    .daily-planner-editor-grid,
     .today-lane-grid,
     .today-task-card-actions,
     .checklist-inline-add,

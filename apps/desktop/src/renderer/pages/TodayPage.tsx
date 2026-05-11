@@ -2,9 +2,11 @@ import { RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  DailyPlannerEditor,
   EmptyState,
   ErrorState,
   TodayLane,
+  type DailyPlannerSubmission,
   type SnoozePreset,
   type TodayTaskCardViewModel
 } from "@local-work-os/ui";
@@ -15,6 +17,11 @@ import type {
   TodayViewModelSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
+import {
+  createQuickTask,
+  resolveDefaultCaptureContainer,
+  type QuickAddTargetResolution
+} from "../components/QuickAddModal";
 import { useWorkspaceStore } from "../state/workspaceStore";
 
 type TodayPageProps = {
@@ -35,6 +42,10 @@ export function TodayPage({
   const [error, setError] = useState<string | null>(null);
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);
+  const [plannerTarget, setPlannerTarget] =
+    useState<QuickAddTargetResolution | null>(null);
+  const [plannerLoading, setPlannerLoading] = useState(initialViewModel === undefined);
+  const [plannerError, setPlannerError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialViewModel !== undefined) {
@@ -79,6 +90,47 @@ export function TodayPage({
       active = false;
     };
   }, [apiClient, currentWorkspace, initialViewModel]);
+
+  useEffect(() => {
+    if (currentWorkspace === null) {
+      setPlannerTarget(null);
+      setPlannerLoading(false);
+      setPlannerError(null);
+      return;
+    }
+
+    let active = true;
+    const workspaceId = currentWorkspace.id;
+
+    async function loadPlannerTarget(): Promise<void> {
+      setPlannerLoading(true);
+      setPlannerError(null);
+      const result = await resolveDefaultCaptureContainer(
+        workspaceId,
+        undefined,
+        apiClient
+      );
+
+      if (!active) {
+        return;
+      }
+
+      setPlannerLoading(false);
+
+      if (!result.ok) {
+        setPlannerError(result.error.message);
+        return;
+      }
+
+      setPlannerTarget(result.data);
+    }
+
+    void loadPlannerTarget();
+
+    return () => {
+      active = false;
+    };
+  }, [apiClient, currentWorkspace]);
 
   async function refreshToday(): Promise<void> {
     const workspaceId = resolveWorkspaceId(currentWorkspace?.id, viewModel);
@@ -326,6 +378,49 @@ export function TodayPage({
     await reloadToday(workspaceId);
   }
 
+  async function createPlannerTask(
+    submission: DailyPlannerSubmission
+  ): Promise<boolean> {
+    const workspaceId = resolveWorkspaceId(currentWorkspace?.id, viewModel);
+
+    if (workspaceId === null || plannerTarget === null) {
+      setMutationError("Open a workspace before using the keyboard planner.");
+      return false;
+    }
+
+    setMutationError(null);
+    const created = await createQuickTask(apiClient, {
+      workspaceId,
+      targetContainerId: submission.targetContainerId,
+      targetContainerTabId: plannerTarget.defaultContainerTabId,
+      title: submission.title,
+      dueDate: submission.dueDate,
+      ...(submission.dueAt === undefined ? {} : { dueAt: submission.dueAt }),
+      ...(submission.startAt === undefined ? {} : { startAt: submission.startAt }),
+      ...(submission.allDay === undefined ? {} : { allDay: submission.allDay }),
+      ...(submission.timezone === undefined ? {} : { timezone: submission.timezone })
+    });
+
+    if (!created.ok) {
+      setMutationError(created.error.message);
+      return false;
+    }
+
+    const planned = await apiClient.today.planTask({
+      workspaceId,
+      itemId: created.data.id,
+      lane: submission.lane
+    });
+
+    if (!planned.ok) {
+      setMutationError(planned.error.message);
+      return false;
+    }
+
+    await reloadToday(workspaceId);
+    return true;
+  }
+
   function openTaskSource(task: TodayTaskCardViewModel): void {
     const sourceItemId =
       task.itemType === "list_item" && task.sourceItemId !== null && task.sourceItemId !== undefined
@@ -378,6 +473,18 @@ export function TodayPage({
       {error === null ? null : <ErrorState error={error} title="Today error" />}
       {mutationError === null ? null : (
         <ErrorState error={mutationError} title="Task update failed" />
+      )}
+
+      {viewModel === null ? null : (
+        <DailyPlannerEditor
+          disabled={plannerLoading || plannerTarget === null}
+          error={plannerError}
+          targetContainerId={plannerTarget?.defaultContainerId ?? ""}
+          targetContainerName={plannerTarget?.inbox.name ?? "Inbox"}
+          todayDueAt={viewModel.ranges.today.startInclusive}
+          tomorrowDueAt={viewModel.ranges.tomorrow.startInclusive}
+          onSubmit={createPlannerTask}
+        />
       )}
 
       <div className="today-lane-grid">
