@@ -154,6 +154,17 @@ export {
   parseDateRangeInput
 } from "./services/dateRangeParser";
 export type { DateRangeParserOptions, ParsedDateRange } from "./services/dateRangeParser";
+export {
+  NaturalDateParser,
+  createNaturalDateParser,
+  parseQuickTaskNaturalDate
+} from "./services/naturalDateParser";
+export type {
+  NaturalDateParserOptions,
+  NaturalDateParseResult,
+  NaturalDateToken,
+  NaturalDateTokenKind
+} from "./services/naturalDateParser";
 export { createLocalId } from "./ids";
 export {
   createIsoTimestamp,

@@ -16,7 +16,10 @@ export {
   type ContactFormValues
 } from "./forms/ContactForm";
 export {
+  buildQuickAddTaskSubmission,
   QuickAddForm,
+  type BuildQuickAddTaskSubmissionInput,
+  type BuildQuickAddTaskSubmissionResult,
   type QuickAddFormProps,
   type QuickAddFormValues,
   type QuickAddTargetOption
