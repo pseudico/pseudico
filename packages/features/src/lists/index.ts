@@ -13,6 +13,7 @@ export type {
   ListServiceIdFactory,
   IndentListItemInput,
   MoveListItemInput,
+  MoveListItemToListInput,
   ReorderListItemsInput,
   UpdateListItemInput
 } from "./ListService";

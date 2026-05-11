@@ -232,6 +232,7 @@ function createMockApi(): LocalWorkOsApi {
       indentItem: async () => apiOk({ ...listItemSummary(), depth: 1 }),
       outdentItem: async () => apiOk({ ...listItemSummary(), depth: 0 }),
       moveItem: async () => apiOk(listItemSummary()),
+      moveItemToList: async () => apiOk([listItemSummary()]),
       bulkAddItems: async () => apiOk([listItemSummary()]),
       bulkUpdateItems: async () => apiOk({
         listId: 'item_list_1',
@@ -988,3 +989,4 @@ function dailyPlanItemSummary() {
     updatedAt: "2026-05-01T00:00:00.000Z"
   };
 }
+

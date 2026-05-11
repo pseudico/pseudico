@@ -529,6 +529,7 @@ export type {
   ListItemMutationResult,
   ListMutationResult,
   ListServiceIdFactory,
+  MoveListItemToListInput,
   ParsedBulkListItem,
   ReorderListItemsInput,
   UpdateListItemInput

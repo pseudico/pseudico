@@ -243,6 +243,7 @@ export {
   ChecklistEditor,
   type ChecklistBulkAction,
   type ChecklistEditorItem,
+  type ChecklistMoveTarget,
   type ChecklistEditorProps
 } from "./components/ChecklistEditor";
 export {

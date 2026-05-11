@@ -2130,6 +2130,37 @@ export function ProjectDetailPage({
     );
   }
 
+  async function moveProjectListItemToList(
+    list: ListCardViewModel,
+    listItemId: string,
+    targetListId: string,
+    beforeListItemId?: string
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setListBusyId(list.id);
+    setListError(null);
+
+    const result = await apiClient.lists.moveItemToList({
+      listItemId,
+      targetListId,
+      ...(beforeListItemId === undefined ? {} : { beforeListItemId })
+    });
+
+    setListBusyId(null);
+
+    if (!result.ok) {
+      setListError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    return true;
+  }
+
   async function bulkUpdateProjectListItems(
     list: ListCardViewModel,
     listItems: readonly ListCardItemViewModel[],
@@ -2519,9 +2550,13 @@ export function ProjectDetailPage({
             onIndentListItem={indentProjectListItem}
             onListItemDateRangeChange={updateListItemDateRange}
             onMoveListItem={moveProjectListItem}
+            onMoveListItemToList={moveProjectListItemToList}
             onMovePipelineCard={movePipelineCard}
             onOutdentListItem={outdentProjectListItem}
             onReorderListItem={reorderProjectListItem}
+            moveToListTargets={items
+              .filter(isListCardViewModel)
+              .map((listItem) => ({ id: listItem.id, title: listItem.title }))}
             onSaveAsTemplate={saveListAsTemplate}
             onToggleDisplayMode={toggleListDisplayMode}
             onToggleItem={toggleListItem}

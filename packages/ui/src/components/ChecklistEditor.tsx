@@ -33,6 +33,11 @@ export type ChecklistEditorItem = {
   dueAt?: string | null;
 };
 
+export type ChecklistMoveTarget = {
+  id: string;
+  title: string;
+};
+
 export type ChecklistBulkAction =
   | "complete"
   | "delete"
@@ -65,6 +70,12 @@ export type ChecklistEditorProps = {
     item: ChecklistEditorItem,
     direction: "up" | "down"
   ) => Promise<boolean | void> | boolean | void;
+  onMoveItemToList?: (
+    listItemId: string,
+    targetListId: string,
+    beforeListItemId?: string
+  ) => Promise<boolean | void> | boolean | void;
+  moveToListTargets?: readonly ChecklistMoveTarget[];
   onBulkActionItems?: (
     items: readonly ChecklistEditorItem[],
     action: ChecklistBulkAction
@@ -86,6 +97,8 @@ export function ChecklistEditor({
   onDateRangeChange,
   onIndentItem,
   onMoveItem,
+  onMoveItemToList,
+  moveToListTargets = [],
   onOutdentItem,
   onReorderItem,
   onBulkActionItems,
@@ -295,7 +308,33 @@ export function ChecklistEditor({
   }
 
   return (
-    <div className="checklist-editor">
+    <div
+      className="checklist-editor"
+      onDragOver={(event) => {
+        if (listId !== undefined && onMoveItemToList !== undefined) {
+          event.preventDefault();
+        }
+      }}
+      onDrop={(event) => {
+        if (listId === undefined || onMoveItemToList === undefined) {
+          return;
+        }
+
+        const payload = parseDragPayload(
+          event.dataTransfer.getData(LOCAL_WORK_OS_DRAG_MIME_TYPE)
+        );
+
+        if (
+          payload?.type !== "list_item" ||
+          payload.listId === listId
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+        void onMoveItemToList(payload.listItemId, listId);
+      }}
+    >
       {items.length === 0 ? (
         <p className="muted-text">{emptyText}</p>
       ) : (
@@ -427,7 +466,10 @@ export function ChecklistEditor({
                 tabIndex={disabled ? -1 : 0}
                 style={{ paddingInlineStart: `${(item.depth ?? 0) * 18}px` }}
                 onDragOver={(event) => {
-                  if (onReorderItem !== undefined) {
+                  if (
+                    onReorderItem !== undefined ||
+                    onMoveItemToList !== undefined
+                  ) {
                     event.preventDefault();
                   }
                 }}
@@ -448,7 +490,10 @@ export function ChecklistEditor({
                   event.dataTransfer.setData("text/plain", item.id);
                 }}
                 onDrop={(event) => {
-                  if (onReorderItem === undefined) {
+                  if (
+                    onReorderItem === undefined &&
+                    onMoveItemToList === undefined
+                  ) {
                     return;
                   }
 
@@ -459,12 +504,28 @@ export function ChecklistEditor({
                   if (
                     payload?.type !== "list_item" ||
                     payload.listItemId === item.id ||
-                    (listId !== undefined && payload.listId !== listId)
+                    listId === undefined
                   ) {
                     return;
                   }
 
+                  if (payload.listId !== listId) {
+                    if (onMoveItemToList === undefined) {
+                      return;
+                    }
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void onMoveItemToList(payload.listItemId, listId, item.id);
+                    return;
+                  }
+
+                  if (onReorderItem === undefined) {
+                    return;
+                  }
+
                   event.preventDefault();
+                  event.stopPropagation();
                   void onReorderItem(payload.listItemId, item.id);
                 }}
                 onFocus={() =>
@@ -507,6 +568,34 @@ export function ChecklistEditor({
                       startAt={item.startAt}
                       onChange={(range) => onDateRangeChange(item, range)}
                     />
+                  )}
+                  {onMoveItemToList === undefined ||
+                  listId === undefined ||
+                  moveToListTargets.length === 0 ? null : (
+                    <label className="checklist-move-target">
+                      <span className="sr-only">
+                        Move {item.title} to another list
+                      </span>
+                      <select
+                        aria-label={`Move ${item.title} to another list`}
+                        disabled={disabled}
+                        value=""
+                        onChange={(event) => {
+                          const targetListId = event.currentTarget.value;
+
+                          if (targetListId.length > 0) {
+                            void onMoveItemToList(item.id, targetListId);
+                          }
+                        }}
+                      >
+                        <option value="">Move to...</option>
+                        {moveToListTargets.map((targetList) => (
+                          <option key={targetList.id} value={targetList.id}>
+                            {targetList.title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                   )}
                   </ContextMenu>
                 </li>

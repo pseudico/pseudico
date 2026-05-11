@@ -2785,3 +2785,78 @@ Open questions / risks:
 Next actions:
 - Poll CI, then merge if clean and green.
 - Promote next single Codex Ready issue after merge.
+
+## 2026-05-11 12:56:41 +10:00
+Objective: Merge PSE-123 and prepare next Codex Ready issue.
+Decisions made:
+- Squash-merged PR #118 at d2b2345 after CI passed and no review comments were present.
+- Deleted the merged feature branch and fast-forwarded local main.
+- Moved PSE-123 to Done and promoted PSE-124 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Post-merge session log entry is local-only unless included in a future PR.
+Next actions:
+- Start PSE-124 on the next run.
+## 2026-05-11 13:09:42 +10:00
+Objective: Start end-to-end Local Work OS ticket run and reconcile active work.
+Decisions made:
+- Using Linear as plan source and GitHub/local git as proof.
+- Will inspect PR Open, In Progress, and Codex Ready before coding.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Active PR/CI state and next issue scope are unknown.
+Next actions:
+- List Linear statuses/issues and inspect local/git state.
+## 2026-05-11 13:10:38 +10:00
+Objective: Reconcile active work and claim next ticket.
+Decisions made:
+- No PR Open or In Progress issues were present in Linear.
+- Pulled main after sandbox escalation for .git/FETCH_HEAD.
+- Moved PSE-124 from Codex Ready to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- PSE-124 acceptance criteria still need expansion from ticket docs.
+Next actions:
+- Read linked docs and source.
+- Create PSE-124 branch and implement scoped change.
+## 2026-05-11 13:15:19 +10:00
+Objective: Plan PSE-124 implementation.
+Decisions made:
+- Use existing list_items.list_id; no schema migration planned.
+- Implement service/repository/preload/IPC/UI plus service tests.
+- Cross-list drop targets insert before a row or at list end; same-list reorder stays existing.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need preserve subtree parent/depth and search metadata during moves.
+Next actions:
+- Patch list service and IPC/API.
+- Add UI controls and tests.
+## 2026-05-11 13:26:28 +10:00
+Objective: Implement and verify PSE-124.
+Decisions made:
+- Added cross-list list-row subtree moves through repository/service/IPC/preload/UI.
+- Reused list_item_reordered activity for moves and repaired source/target ordering.
+- Added service regression coverage and updated IPC channel count.
+Files changed:
+- packages/db/src/repositories/ListRepository.ts
+- packages/features/src/lists/ListService.ts
+- packages/features/tests/listService.test.ts
+- apps/desktop/src/preload/api.ts
+- apps/desktop/src/main/ipc/listHandlers.ts
+- apps/desktop/src/main/ipc/registerListIpc.ts
+- apps/desktop/src/renderer/api/desktopApiClient.ts
+- apps/desktop/src/renderer/pages/ProjectDetailPage.tsx
+- packages/ui/src/components/ChecklistEditor.tsx
+- packages/ui/src/components/ListCardContent.tsx
+- packages/ui/src/index.ts
+- apps/desktop/tests/preload/api.test.ts
+- apps/desktop/tests/renderer/*.test.tsx
+- docs/session_log.md
+Open questions / risks:
+- Drag/drop manual QA not launched locally; covered by service/API/UI wiring tests and build.
+Next actions:
+- Commit, push, and open a ready PR.

@@ -135,6 +135,7 @@ export type CreateListItemInput = {
 };
 
 export type UpdateListItemPatch = {
+  listId?: string;
   title?: string;
   body?: string | null;
   status?: ListItemStatus;
@@ -524,6 +525,11 @@ export class ListRepository {
   updateListItem(id: string, patch: UpdateListItemPatch): ListItemRecord {
     const assignments: string[] = [];
     const values: unknown[] = [];
+
+    if (patch.listId !== undefined) {
+      assignments.push("list_id = ?");
+      values.push(patch.listId);
+    }
 
     if (patch.title !== undefined) {
       assignments.push("title = ?");

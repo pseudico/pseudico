@@ -57,6 +57,10 @@ export function registerListIpc(
     (_event, input) => handlers.handleMoveListItem(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.lists.moveItemToList,
+    (_event, input) => handlers.handleMoveListItemToList(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems,
     (_event, input) => handlers.handleBulkAddListItems(input)
   );

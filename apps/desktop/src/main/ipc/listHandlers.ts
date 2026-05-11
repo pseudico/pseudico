@@ -29,6 +29,7 @@ import {
   type ListProgressMode,
   type ListSummary,
   type MoveListItemInput,
+  type MoveListItemToListInput,
   type MovePipelineCardInput,
   type PipelineStageSummary,
   type PipelineViewModelSummary,
@@ -59,6 +60,9 @@ type ListIpcHandlers = {
   handleIndentListItem: (input: unknown) => Promise<ApiResult<ListItemSummary>>;
   handleOutdentListItem: (input: unknown) => Promise<ApiResult<ListItemSummary>>;
   handleMoveListItem: (input: unknown) => Promise<ApiResult<ListItemSummary>>;
+  handleMoveListItemToList: (
+    input: unknown
+  ) => Promise<ApiResult<ListItemSummary[]>>;
   handleBulkAddListItems: (
     input: unknown
   ) => Promise<ApiResult<ListItemSummary[]>>;
@@ -296,6 +300,23 @@ export function createListIpcHandlers(
         apiOk(
           toListItemSummary(
             (await context.listService.moveListItem(input)).listItem
+          )
+        )
+      );
+    },
+
+    async handleMoveListItemToList(input) {
+      if (!isMoveListItemToListInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "moveListItemToList requires listItemId and targetListId fields."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) =>
+        apiOk(
+          (await context.listService.moveListItemToList(input)).map((result) =>
+            toListItemSummary(result.listItem)
           )
         )
       );
@@ -684,6 +705,19 @@ function isMoveListItemInput(input: unknown): input is MoveListItemInput {
     isRecord(input) &&
     isNonEmptyString(input.listItemId) &&
     (input.direction === "up" || input.direction === "down") &&
+    isOptionalActorType(input.actorType)
+  );
+}
+
+function isMoveListItemToListInput(
+  input: unknown
+): input is MoveListItemToListInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.listItemId) &&
+    isNonEmptyString(input.targetListId) &&
+    isOptionalNullableString(input.beforeListItemId) &&
+    isOptionalNullableString(input.targetListItemParentId) &&
     isOptionalActorType(input.actorType)
   );
 }
