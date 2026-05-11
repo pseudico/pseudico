@@ -86,6 +86,8 @@ export {
   DashboardRepository,
   type CreateDashboardWidgetInput,
   type CreateDefaultDashboardInput,
+  type UpdateDashboardLayoutInput,
+  type UpdateDashboardWidgetInput,
   type DashboardRecord,
   type DashboardWidgetRecord,
   type DashboardWidgetType

@@ -389,7 +389,15 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.calendar!.importIcsFile(input))
     },
     dashboard: {
-      getDefault: (input) => callApi(() => api.dashboard.getDefault(input))
+      getDefault: (input) => callApi(() => api.dashboard.getDefault(input)),
+      listWidgetDefinitions: () =>
+        callApi(() => api.dashboard.listWidgetDefinitions!()),
+      addWidget: (input) => callApi(() => api.dashboard.addWidget!(input)),
+      updateWidget: (input) => callApi(() => api.dashboard.updateWidget!(input)),
+      removeWidget: (input) => callApi(() => api.dashboard.removeWidget!(input)),
+      reorderWidgets: (input) =>
+        callApi(() => api.dashboard.reorderWidgets!(input)),
+      updateLayout: (input) => callApi(() => api.dashboard.updateLayout!(input))
     },
     activity: {
       listRecent: (input) => callApi(() => api.activity.listRecent(input)),
@@ -922,7 +930,18 @@ export const desktopApiClient: LocalWorkOsApi = {
   },
   dashboard: {
     getDefault: (input) =>
-      getDesktopApiClient().dashboard.getDefault(input)
+      getDesktopApiClient().dashboard.getDefault(input),
+    listWidgetDefinitions: () =>
+      getDesktopApiClient().dashboard.listWidgetDefinitions!(),
+    addWidget: (input) => getDesktopApiClient().dashboard.addWidget!(input),
+    updateWidget: (input) =>
+      getDesktopApiClient().dashboard.updateWidget!(input),
+    removeWidget: (input) =>
+      getDesktopApiClient().dashboard.removeWidget!(input),
+    reorderWidgets: (input) =>
+      getDesktopApiClient().dashboard.reorderWidgets!(input),
+    updateLayout: (input) =>
+      getDesktopApiClient().dashboard.updateLayout!(input)
   },
   activity: {
     listRecent: (input) =>

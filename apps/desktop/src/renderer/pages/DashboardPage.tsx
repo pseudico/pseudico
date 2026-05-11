@@ -1,7 +1,8 @@
-import { Printer, RefreshCw } from "lucide-react";
+import { ArrowDown, ArrowUp, Edit3, Plus, Printer, RefreshCw, Settings, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  DashboardWidget,
   FavoriteProjectsWidget,
   OverdueWidget,
   ProjectHealthWidget,
@@ -21,6 +22,7 @@ import type {
   DashboardTaskWidgetItemSummary,
   DashboardViewModelSummary,
   DashboardWidgetDataSummary,
+  DashboardWidgetDefinitionSummary,
   DashboardWidgetSummary,
   LocalWorkOsApi
 } from "../../preload/api";
@@ -46,6 +48,11 @@ export function DashboardPage({
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [printBusy, setPrintBusy] = useState(false);
   const [printMessage, setPrintMessage] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [widgetDefinitions, setWidgetDefinitions] = useState<DashboardWidgetDefinitionSummary[]>([]);
+  const [selectedWidgetType, setSelectedWidgetType] = useState("today");
+  const [savedViewId, setSavedViewId] = useState("");
+  const [widgetMutationBusy, setWidgetMutationBusy] = useState(false);
 
   useEffect(() => {
     if (initialDashboard !== undefined) {
@@ -88,6 +95,31 @@ export function DashboardPage({
       active = false;
     };
   }, [apiClient, currentWorkspace, initialDashboard]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadWidgetDefinitions(): Promise<void> {
+      const result = await apiClient.dashboard.listWidgetDefinitions?.();
+
+      if (result === undefined) {
+        return;
+      }
+
+      if (!active || !result.ok) {
+        return;
+      }
+
+      setWidgetDefinitions(result.data);
+      setSelectedWidgetType(result.data[0]?.type ?? "today");
+    }
+
+    void loadWidgetDefinitions();
+
+    return () => {
+      active = false;
+    };
+  }, [apiClient]);
 
   async function refreshDashboard(): Promise<void> {
     const workspaceId = currentWorkspace?.id ?? dashboard?.dashboard.workspaceId;
@@ -216,6 +248,139 @@ export function DashboardPage({
     setPrintMessage(`Dashboard PDF created at ${result.data.relativePath}.`);
   }
 
+
+  async function addDashboardWidget(): Promise<void> {
+    const workspaceId = currentWorkspace?.id ?? dashboard?.dashboard.workspaceId;
+    const selectedDefinition = widgetDefinitions.find(
+      (definition) => definition.type === selectedWidgetType
+    );
+
+    if (workspaceId === undefined || dashboard === null || selectedDefinition === undefined) {
+      return;
+    }
+
+    if (selectedDefinition.requiresSavedView && savedViewId.trim().length === 0) {
+      setError("Enter a saved view ID before adding a saved-view widget.");
+      return;
+    }
+
+    setWidgetMutationBusy(true);
+    setError(null);
+
+    const result = await apiClient.dashboard.addWidget?.({
+      workspaceId,
+      dashboardId: dashboard.dashboard.id,
+      type: selectedDefinition.type,
+      savedViewId: selectedDefinition.requiresSavedView ? savedViewId.trim() : null,
+      config: { limit: 10 }
+    });
+
+    setWidgetMutationBusy(false);
+
+    if (result === undefined) {
+      setError("Dashboard layout editing is not available.");
+      return;
+    }
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    await refreshDashboard();
+  }
+
+  async function removeDashboardWidget(widgetId: string): Promise<void> {
+    setWidgetMutationBusy(true);
+    setError(null);
+
+    const result = await apiClient.dashboard.removeWidget?.({ widgetId });
+
+    setWidgetMutationBusy(false);
+
+    if (result === undefined) {
+      setError("Dashboard layout editing is not available.");
+      return;
+    }
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    await refreshDashboard();
+  }
+
+  async function moveDashboardWidget(widgetId: string, direction: -1 | 1): Promise<void> {
+    if (dashboard === null) {
+      return;
+    }
+
+    const currentIds = orderedWidgets.map((widget) => widget.widget.id);
+    const index = currentIds.indexOf(widgetId);
+    const targetIndex = index + direction;
+
+    if (index < 0 || targetIndex < 0 || targetIndex >= currentIds.length) {
+      return;
+    }
+
+    const nextIds = [...currentIds];
+    const currentId = nextIds[index];
+    const targetId = nextIds[targetIndex];
+    if (currentId === undefined || targetId === undefined) {
+      return;
+    }
+    nextIds[index] = targetId;
+    nextIds[targetIndex] = currentId;
+
+    setWidgetMutationBusy(true);
+    setError(null);
+
+    const result = await apiClient.dashboard.reorderWidgets?.({
+      dashboardId: dashboard.dashboard.id,
+      widgetIds: nextIds
+    });
+
+    setWidgetMutationBusy(false);
+
+    if (result === undefined) {
+      setError("Dashboard layout editing is not available.");
+      return;
+    }
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setDashboard(result.data);
+  }
+
+  async function resizeDashboardWidget(widget: DashboardWidgetSummary, width: number): Promise<void> {
+    setWidgetMutationBusy(true);
+    setError(null);
+
+    const position = readWidgetPosition(widget.widget.positionJson);
+    const result = await apiClient.dashboard.updateWidget?.({
+      widgetId: widget.widget.id,
+      position: { ...position, width }
+    });
+
+    setWidgetMutationBusy(false);
+
+    if (result === undefined) {
+      setError("Dashboard layout editing is not available.");
+      return;
+    }
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    await refreshDashboard();
+  }
+
   if (currentWorkspace === null && initialDashboard === undefined) {
     return (
       <section className="dashboard-page">
@@ -229,6 +394,11 @@ export function DashboardPage({
   }
 
   const widgets = dashboard?.widgets ?? [];
+  const orderedWidgets = [...widgets].sort((a, b) =>
+    a.widget.sortOrder === b.widget.sortOrder
+      ? a.widget.createdAt.localeCompare(b.widget.createdAt)
+      : a.widget.sortOrder - b.widget.sortOrder
+  );
 
   return (
     <section className="dashboard-page">
@@ -242,6 +412,15 @@ export function DashboardPage({
           </p>
         </div>
         <div className="button-row">
+          <button
+            className={editMode ? "primary-button compact-button" : "secondary-button compact-button"}
+            disabled={loading || dashboard === null}
+            type="button"
+            onClick={() => setEditMode((value) => !value)}
+          >
+            <Edit3 size={16} aria-hidden="true" />
+            {editMode ? "Done editing" : "Edit layout"}
+          </button>
           <button
             className="secondary-button compact-button"
             disabled={printBusy || loading}
@@ -273,43 +452,37 @@ export function DashboardPage({
         <p className="form-message">{printMessage}</p>
       )}
 
+      {editMode ? (
+        <DashboardEditorPanel
+          busy={widgetMutationBusy}
+          definitions={widgetDefinitions}
+          savedViewId={savedViewId}
+          selectedType={selectedWidgetType}
+          widgets={orderedWidgets}
+          onAddWidget={() => void addDashboardWidget()}
+          onMoveWidget={(widgetId, direction) => void moveDashboardWidget(widgetId, direction)}
+          onRemoveWidget={(widgetId) => void removeDashboardWidget(widgetId)}
+          onResizeWidget={(widget, width) => void resizeDashboardWidget(widget, width)}
+          onSavedViewIdChange={setSavedViewId}
+          onSelectedTypeChange={setSelectedWidgetType}
+        />
+      ) : null}
+
       <div className="dashboard-widget-grid" aria-busy={loading || busyTaskId !== null}>
-        <TodayWidget
-          loading={(loading && dashboard === null) || busyTaskId !== null}
-          tasks={getTaskWidgetItems(widgets, "today")}
-          onOpenTask={openTask}
-          onRescheduleTask={rescheduleTask}
-          onSnoozeTask={snoozeTask}
-        />
-        <OverdueWidget
-          loading={(loading && dashboard === null) || busyTaskId !== null}
-          tasks={getTaskWidgetItems(widgets, "overdue")}
-          onOpenTask={openTask}
-          onRescheduleTask={rescheduleTask}
-          onSnoozeTask={snoozeTask}
-        />
-        <UpcomingWidget
-          loading={(loading && dashboard === null) || busyTaskId !== null}
-          tasks={getTaskWidgetItems(widgets, "upcoming")}
-          onOpenTask={openTask}
-          onRescheduleTask={rescheduleTask}
-          onSnoozeTask={snoozeTask}
-        />
-        <FavoriteProjectsWidget
-          loading={loading && dashboard === null}
-          favorites={getFavoriteWidgetItems(widgets)}
-          onOpenFavorite={openFavorite}
-        />
-        <ProjectHealthWidget
-          loading={loading && dashboard === null}
-          projects={getProjectHealthWidgetItems(widgets)}
-          onOpenProject={openProjectHealth}
-        />
-        <RecentActivityWidget
-          activity={getActivityWidgetItems(widgets)}
-          loading={loading && dashboard === null}
-          onOpenActivityTarget={openActivityTarget}
-        />
+        {orderedWidgets.map((widget) => (
+          <DashboardWidgetRenderer
+            key={widget.widget.id}
+            busyTaskId={busyTaskId}
+            loading={loading && dashboard === null}
+            widget={widget}
+            onOpenActivityTarget={openActivityTarget}
+            onOpenFavorite={openFavorite}
+            onOpenProjectHealth={openProjectHealth}
+            onOpenTask={openTask}
+            onRescheduleTask={rescheduleTask}
+            onSnoozeTask={snoozeTask}
+          />
+        ))}
       </div>
     </section>
   );
@@ -435,4 +608,262 @@ function toDashboardActivityWidgetItem(
     targetType: activity.targetNavigationTarget.targetType,
     targetId: activity.targetNavigationTarget.targetId
   };
+}
+
+
+type DashboardWidgetRendererProps = {
+  widget: DashboardWidgetSummary;
+  loading: boolean;
+  busyTaskId: string | null;
+  onOpenTask: (task: DashboardTaskWidgetItem) => void;
+  onSnoozeTask: (task: DashboardTaskWidgetItem, preset: SnoozePreset) => Promise<void>;
+  onRescheduleTask: (task: DashboardTaskWidgetItem, dueAt: string | null) => Promise<void>;
+  onOpenFavorite: (favorite: DashboardFavoriteWidgetItem) => void;
+  onOpenProjectHealth: (project: ProjectHealthViewModel) => void;
+  onOpenActivityTarget: (activity: DashboardActivityWidgetItem) => void;
+};
+
+function DashboardWidgetRenderer({
+  widget,
+  loading,
+  busyTaskId,
+  onOpenTask,
+  onSnoozeTask,
+  onRescheduleTask,
+  onOpenFavorite,
+  onOpenProjectHealth,
+  onOpenActivityTarget
+}: DashboardWidgetRendererProps): React.JSX.Element {
+  const width = readWidgetPosition(widget.widget.positionJson).width ?? 1;
+  const className = width > 1 ? "dashboard-widget-span-2" : undefined;
+
+  switch (widget.widget.type) {
+    case "today":
+      return (
+        <div className={className}>
+          <TodayWidget
+            loading={loading || busyTaskId !== null}
+            tasks={getTaskWidgetItems([widget], "today")}
+            onOpenTask={onOpenTask}
+            onRescheduleTask={onRescheduleTask}
+            onSnoozeTask={onSnoozeTask}
+          />
+        </div>
+      );
+    case "overdue":
+      return (
+        <div className={className}>
+          <OverdueWidget
+            loading={loading || busyTaskId !== null}
+            tasks={getTaskWidgetItems([widget], "overdue")}
+            onOpenTask={onOpenTask}
+            onRescheduleTask={onRescheduleTask}
+            onSnoozeTask={onSnoozeTask}
+          />
+        </div>
+      );
+    case "upcoming":
+      return (
+        <div className={className}>
+          <UpcomingWidget
+            loading={loading || busyTaskId !== null}
+            tasks={getTaskWidgetItems([widget], "upcoming")}
+            onOpenTask={onOpenTask}
+            onRescheduleTask={onRescheduleTask}
+            onSnoozeTask={onSnoozeTask}
+          />
+        </div>
+      );
+    case "favorites":
+      return (
+        <div className={className}>
+          <FavoriteProjectsWidget
+            loading={loading}
+            favorites={getFavoriteWidgetItems([widget])}
+            onOpenFavorite={onOpenFavorite}
+          />
+        </div>
+      );
+    case "project_health":
+      return (
+        <div className={className}>
+          <ProjectHealthWidget
+            loading={loading}
+            projects={getProjectHealthWidgetItems([widget])}
+            onOpenProject={onOpenProjectHealth}
+          />
+        </div>
+      );
+    case "recent_activity":
+      return (
+        <div className={className}>
+          <RecentActivityWidget
+            activity={getActivityWidgetItems([widget])}
+            loading={loading}
+            onOpenActivityTarget={onOpenActivityTarget}
+          />
+        </div>
+      );
+    default:
+      return (
+        <div className={className}>
+          <DashboardWidget
+            count={0}
+            description={placeholderWidgetDescription(widget)}
+            kind={placeholderWidgetKind(widget.widget.type)}
+            title={widget.widget.title ?? placeholderWidgetTitle(widget.widget.type)}
+            emptyTitle="Widget configured"
+            emptyDescription="This widget type is saved in the local dashboard layout and will show data when its source view is available."
+          />
+        </div>
+      );
+  }
+}
+
+type DashboardEditorPanelProps = {
+  busy: boolean;
+  definitions: DashboardWidgetDefinitionSummary[];
+  selectedType: string;
+  savedViewId: string;
+  widgets: DashboardWidgetSummary[];
+  onAddWidget: () => void;
+  onMoveWidget: (widgetId: string, direction: -1 | 1) => void;
+  onRemoveWidget: (widgetId: string) => void;
+  onResizeWidget: (widget: DashboardWidgetSummary, width: number) => void;
+  onSelectedTypeChange: (type: string) => void;
+  onSavedViewIdChange: (savedViewId: string) => void;
+};
+
+function DashboardEditorPanel({
+  busy,
+  definitions,
+  selectedType,
+  savedViewId,
+  widgets,
+  onAddWidget,
+  onMoveWidget,
+  onRemoveWidget,
+  onResizeWidget,
+  onSelectedTypeChange,
+  onSavedViewIdChange
+}: DashboardEditorPanelProps): React.JSX.Element {
+  const selectedDefinition = definitions.find((definition) => definition.type === selectedType);
+
+  return (
+    <section className="dashboard-editor-panel" aria-label="Dashboard layout editor">
+      <div className="dashboard-editor-add-row">
+        <label>
+          Widget
+          <select
+            value={selectedType}
+            onChange={(event) => onSelectedTypeChange(event.target.value)}
+          >
+            {definitions.map((definition) => (
+              <option key={definition.type} value={definition.type}>
+                {definition.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        {selectedDefinition?.requiresSavedView ? (
+          <label>
+            Saved view ID
+            <input
+              value={savedViewId}
+              placeholder="saved_view_..."
+              onChange={(event) => onSavedViewIdChange(event.target.value)}
+            />
+          </label>
+        ) : null}
+        <button
+          className="primary-button compact-button"
+          disabled={busy || definitions.length === 0}
+          type="button"
+          onClick={onAddWidget}
+        >
+          <Plus size={16} aria-hidden="true" />
+          Add widget
+        </button>
+      </div>
+
+      <ol className="dashboard-editor-list">
+        {widgets.map((widget, index) => {
+          const position = readWidgetPosition(widget.widget.positionJson);
+          const width = position.width ?? 1;
+          return (
+            <li key={widget.widget.id}>
+              <span>
+                <Settings size={14} aria-hidden="true" />
+                {widget.widget.title ?? placeholderWidgetTitle(widget.widget.type)}
+                <small>{widget.widget.type}</small>
+              </span>
+              <div className="button-row">
+                <button className="secondary-button compact-button" disabled={busy || index === 0} type="button" onClick={() => onMoveWidget(widget.widget.id, -1)}>
+                  <ArrowUp size={14} aria-hidden="true" />
+                  Up
+                </button>
+                <button className="secondary-button compact-button" disabled={busy || index === widgets.length - 1} type="button" onClick={() => onMoveWidget(widget.widget.id, 1)}>
+                  <ArrowDown size={14} aria-hidden="true" />
+                  Down
+                </button>
+                <button className="secondary-button compact-button" disabled={busy} type="button" onClick={() => onResizeWidget(widget, width > 1 ? 1 : 2)}>
+                  {width > 1 ? "1 col" : "2 col"}
+                </button>
+                <button className="danger-button compact-button" disabled={busy} type="button" onClick={() => onRemoveWidget(widget.widget.id)}>
+                  <Trash2 size={14} aria-hidden="true" />
+                  Remove
+                </button>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+function readWidgetPosition(positionJson: string): { column: number; row: number; width?: number; height?: number } {
+  try {
+    const value = JSON.parse(positionJson) as unknown;
+    if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+      const record = value as Record<string, unknown>;
+      return {
+        column: Number.isInteger(record.column) ? Number(record.column) : 0,
+        row: Number.isInteger(record.row) ? Number(record.row) : 0,
+        ...(Number.isInteger(record.width) ? { width: Number(record.width) } : {}),
+        ...(Number.isInteger(record.height) ? { height: Number(record.height) } : {})
+      };
+    }
+  } catch {
+    // Fall through to default below.
+  }
+
+  return { column: 0, row: 0, width: 1, height: 1 };
+}
+
+function placeholderWidgetKind(type: string): "saved_view" | "timeline" | "calendar" {
+  if (type === "timeline" || type === "calendar") {
+    return type;
+  }
+  return "saved_view";
+}
+
+function placeholderWidgetTitle(type: string): string {
+  switch (type) {
+    case "saved_view":
+      return "Saved View";
+    case "timeline":
+      return "Timeline";
+    case "calendar":
+      return "Calendar";
+    default:
+      return "Custom Widget";
+  }
+}
+
+function placeholderWidgetDescription(widget: DashboardWidgetSummary): string {
+  if (widget.widget.type === "saved_view" && widget.widget.savedViewId !== null) {
+    return `Saved view widget bound to ${widget.widget.savedViewId}.`;
+  }
+  return placeholderWidgetTitle(widget.widget.type);
 }

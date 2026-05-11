@@ -33,7 +33,7 @@ export const dashboardWidgets = sqliteTable(
     ),
     check(
       "ck_dashboard_widgets_type",
-      sql`${table.type} in ('saved_view', 'today', 'upcoming', 'overdue', 'favorites', 'recent_activity', 'project_health')`
+      sql`${table.type} in ('saved_view', 'today', 'upcoming', 'overdue', 'favorites', 'recent_activity', 'project_health', 'timeline', 'calendar')`
     )
   ]
 );

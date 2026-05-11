@@ -2,6 +2,7 @@ import {
   ActivityLogRepository,
   ContainerRepository,
   MigrationService,
+  SavedViewRepository,
   WorkspaceRepository,
   createDatabaseConnection,
   type DatabaseConnection
@@ -266,6 +267,91 @@ describe("DashboardService", () => {
       ])
     });
   });
+
+  it("adds, configures, resizes, reorders, and removes custom dashboard widgets", async () => {
+    const service = createDashboardService();
+    const defaultDashboard = await service.getDefaultDashboard({
+      workspaceId: "workspace_1"
+    });
+
+    const added = await service.addWidget({
+      workspaceId: "workspace_1",
+      dashboardId: defaultDashboard.dashboard.id,
+      type: "calendar",
+      config: { limit: 4 },
+      position: { column: 0, row: 3, width: 2 }
+    });
+
+    expect(added.widget).toMatchObject({
+      type: "calendar",
+      title: "Calendar",
+      configJson: JSON.stringify({ limit: 4 }),
+      positionJson: JSON.stringify({ column: 0, row: 3, width: 2 })
+    });
+    expect(added.data).toBeNull();
+
+    const updated = await service.updateWidget({
+      widgetId: added.widget.id,
+      title: "Calendar focus",
+      position: { column: 1, row: 0, width: 1 }
+    });
+
+    expect(updated.widget).toMatchObject({
+      title: "Calendar focus",
+      positionJson: JSON.stringify({ column: 1, row: 0, width: 1 })
+    });
+
+    const reordered = await service.reorderWidgets({
+      dashboardId: defaultDashboard.dashboard.id,
+      widgetIds: [
+        added.widget.id,
+        ...defaultDashboard.widgets.map((widget) => widget.widget.id)
+      ]
+    });
+
+    expect(reordered.widgets[0].widget.id).toBe(added.widget.id);
+
+    const removed = await service.removeWidget({ widgetId: added.widget.id });
+    expect(removed.deletedAt).not.toBeNull();
+    expect(new ActivityLogRepository(connection).listRecent("workspace_1", 20)
+      .map((event) => event.action)).toEqual(
+        expect.arrayContaining([
+          "dashboard_widget_created",
+          "dashboard_widget_updated",
+          "dashboard_layout_updated",
+          "dashboard_widget_deleted"
+        ])
+      );
+  });
+
+  it("validates saved-view widget configuration", async () => {
+    await expect(createDashboardService().addWidget({
+      workspaceId: "workspace_1",
+      type: "saved_view"
+    })).rejects.toThrow("saved_view widgets require savedViewId");
+
+    new SavedViewRepository(connection).create({
+      id: "saved_view_phone_calls",
+      workspaceId: "workspace_1",
+      type: "dashboard_widget",
+      name: "Phone Calls",
+      queryJson: "{}",
+      timestamp: "2026-05-01T00:00:00.000Z"
+    });
+
+    await expect(createDashboardService().addWidget({
+      workspaceId: "workspace_1",
+      type: "saved_view",
+      savedViewId: "saved_view_phone_calls"
+    })).resolves.toMatchObject({
+      widget: {
+        type: "saved_view",
+        savedViewId: "saved_view_phone_calls"
+      },
+      data: null
+    });
+  });
+
 });
 
 function createDashboardService(): DashboardService {

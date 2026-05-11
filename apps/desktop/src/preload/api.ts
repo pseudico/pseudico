@@ -2147,8 +2147,67 @@ export type DashboardViewModelSummary = {
   widgets: DashboardWidgetSummary[];
 };
 
+export type DashboardLayoutWidgetType =
+  | "today"
+  | "overdue"
+  | "upcoming"
+  | "favorites"
+  | "recent_activity"
+  | "project_health"
+  | "saved_view"
+  | "timeline"
+  | "calendar";
+
+export type DashboardWidgetDefinitionSummary = {
+  type: DashboardLayoutWidgetType;
+  title: string;
+  description: string;
+  configurable: boolean;
+  requiresSavedView: boolean;
+};
+
+export type DashboardWidgetPositionInput = {
+  column: number;
+  row: number;
+  width?: number;
+  height?: number;
+};
+
 export type GetDefaultDashboardInput = {
   workspaceId?: string;
+};
+
+export type AddDashboardWidgetInput = {
+  workspaceId?: string;
+  dashboardId?: string;
+  type: DashboardLayoutWidgetType;
+  title?: string | null;
+  savedViewId?: string | null;
+  config?: Record<string, unknown>;
+  position?: DashboardWidgetPositionInput;
+};
+
+export type UpdateDashboardWidgetInput = {
+  widgetId: string;
+  title?: string | null;
+  savedViewId?: string | null;
+  config?: Record<string, unknown>;
+  position?: DashboardWidgetPositionInput;
+  sortOrder?: number;
+};
+
+export type RemoveDashboardWidgetInput = {
+  widgetId: string;
+};
+
+export type ReorderDashboardWidgetsInput = {
+  dashboardId: string;
+  widgetIds: string[];
+};
+
+export type UpdateDashboardLayoutInput = {
+  dashboardId: string;
+  layout: Record<string, unknown>;
 };
 
 export type ListRecentActivityInput = {
@@ -3028,7 +3087,13 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     importIcsFile: "local-work-os:calendar:import-ics-file"
   },
   dashboard: {
-    getDefault: "local-work-os:dashboard:get-default"
+    getDefault: "local-work-os:dashboard:get-default",
+    listWidgetDefinitions: "local-work-os:dashboard:list-widget-definitions",
+    addWidget: "local-work-os:dashboard:add-widget",
+    updateWidget: "local-work-os:dashboard:update-widget",
+    removeWidget: "local-work-os:dashboard:remove-widget",
+    reorderWidgets: "local-work-os:dashboard:reorder-widgets",
+    updateLayout: "local-work-os:dashboard:update-layout"
   },
   activity: {
     listRecentActivity: "local-work-os:activity:list-recent-activity",
@@ -3667,6 +3732,30 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.getDefault]: {
     input: GetDefaultDashboardInput | undefined;
     result: ApiResult<DashboardViewModelSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.listWidgetDefinitions]: {
+    input: undefined;
+    result: ApiResult<DashboardWidgetDefinitionSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.addWidget]: {
+    input: AddDashboardWidgetInput;
+    result: ApiResult<DashboardWidgetSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.updateWidget]: {
+    input: UpdateDashboardWidgetInput;
+    result: ApiResult<DashboardWidgetSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.removeWidget]: {
+    input: RemoveDashboardWidgetInput;
+    result: ApiResult<DashboardWidgetRecordSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.reorderWidgets]: {
+    input: ReorderDashboardWidgetsInput;
+    result: ApiResult<DashboardViewModelSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.updateLayout]: {
+    input: UpdateDashboardLayoutInput;
+    result: ApiResult<DashboardRecordSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.activity.listRecentActivity]: {
     input: ListRecentActivityInput | undefined;
@@ -4427,6 +4516,12 @@ export type LocalWorkOsApi = {
     getDefault: (
       input?: GetDefaultDashboardInput
     ) => Promise<ApiResult<DashboardViewModelSummary>>;
+    listWidgetDefinitions?: () => Promise<ApiResult<DashboardWidgetDefinitionSummary[]>>;
+    addWidget?: (input: AddDashboardWidgetInput) => Promise<ApiResult<DashboardWidgetSummary>>;
+    updateWidget?: (input: UpdateDashboardWidgetInput) => Promise<ApiResult<DashboardWidgetSummary>>;
+    removeWidget?: (input: RemoveDashboardWidgetInput) => Promise<ApiResult<DashboardWidgetRecordSummary>>;
+    reorderWidgets?: (input: ReorderDashboardWidgetsInput) => Promise<ApiResult<DashboardViewModelSummary>>;
+    updateLayout?: (input: UpdateDashboardLayoutInput) => Promise<ApiResult<DashboardRecordSummary>>;
   };
   activity: {
     listRecent: (
@@ -5113,7 +5208,19 @@ export function createLocalWorkOsApi(
     },
     dashboard: {
       getDefault: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dashboard.getDefault, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dashboard.getDefault, input),
+      listWidgetDefinitions: () =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dashboard.listWidgetDefinitions, undefined),
+      addWidget: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dashboard.addWidget, input),
+      updateWidget: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dashboard.updateWidget, input),
+      removeWidget: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dashboard.removeWidget, input),
+      reorderWidgets: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dashboard.reorderWidgets, input),
+      updateLayout: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.dashboard.updateLayout, input)
     },
     activity: {
       listRecent: (input) =>
