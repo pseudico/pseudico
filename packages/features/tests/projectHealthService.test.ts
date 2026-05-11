@@ -70,6 +70,13 @@ describe("ProjectHealthService", () => {
       containerId: "container_project_1",
       title: "Done task"
     });
+    await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Waiting task",
+      status: "waiting",
+      dueAt: "2026-05-06"
+    });
     await taskService.completeTask(completed.item.id);
     await createNoteService().createNote({
       workspaceId: "workspace_1",
@@ -83,20 +90,56 @@ describe("ProjectHealthService", () => {
     expect(health).toMatchObject({
       projectId: "container_project_1",
       name: "Launch Plan",
-      openTaskCount: 2,
+      openTaskCount: 3,
       completedTaskCount: 1,
       overdueTaskCount: 1,
-      totalTaskCount: 3,
+      upcomingTaskCount: 2,
+      waitingTaskCount: 1,
+      totalTaskCount: 4,
+      completionRatio: 0.25,
+      isStale: false,
+      hasRecentActivity: true,
       nextDueTask: {
         itemId: nextDue.item.id,
         title: "Next due",
         dueAt: "2026-05-05T00:00:00.000Z"
       }
     });
+    expect(health.nextTask).toMatchObject({
+      title: "Past due",
+      dueAt: "2026-05-03T00:00:00.000Z"
+    });
+    expect(health.healthBadges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "overdue", label: "1 overdue" }),
+        expect.objectContaining({ kind: "waiting", label: "1 waiting" }),
+        expect.objectContaining({ kind: "upcoming", label: "2 upcoming" })
+      ])
+    );
     expect(health.recentActivity[0]).toMatchObject({
       action: "note_created",
       description: "Created note \"Launch note\"."
     });
+  });
+
+  it("flags stale projects with no recent activity using a configurable threshold", async () => {
+    const health = createService().getProjectHealth("container_project_2", {
+      staleAfterDays: 1
+    });
+
+    expect(health).toMatchObject({
+      projectId: "container_project_2",
+      staleAfterDays: 1,
+      isStale: true,
+      hasRecentActivity: false,
+      lastActivityAt: null
+    });
+    expect(health.healthBadges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "stale", label: "Stale" }),
+        expect.objectContaining({ kind: "no_recent_activity" })
+      ])
+    );
   });
 
   it("orders project health summaries by attention and limit", async () => {
@@ -117,6 +160,29 @@ describe("ProjectHealthService", () => {
       projectId: "container_project_1",
       overdueTaskCount: 1
     });
+  });
+
+  it("summarizes many projects within the bounded health limit", async () => {
+    const repository = new ContainerRepository(connection);
+    for (let index = 0; index < 120; index += 1) {
+      repository.create({
+        id: `container_project_many_${index}`,
+        workspaceId: "workspace_1",
+        type: "project",
+        name: `Many Project ${index}`,
+        slug: `many-project-${index}`,
+        timestamp: "2026-05-01T00:00:00.000Z"
+      });
+    }
+
+    const summaries = createService().listProjectHealthSummaries({
+      workspaceId: "workspace_1",
+      limit: 250,
+      staleAfterDays: 30
+    });
+
+    expect(summaries).toHaveLength(100);
+    expect(summaries.every((summary) => summary.healthBadges.length >= 0)).toBe(true);
   });
 });
 

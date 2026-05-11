@@ -3745,8 +3745,17 @@ function toProjectHealthViewModel(
     openTaskCount: health.openTaskCount,
     completedTaskCount: health.completedTaskCount,
     overdueTaskCount: health.overdueTaskCount,
+    upcomingTaskCount: health.upcomingTaskCount,
+    waitingTaskCount: health.waitingTaskCount,
     totalTaskCount: health.totalTaskCount,
+    completionRatio: health.completionRatio,
+    staleAfterDays: health.staleAfterDays,
+    lastActivityAt: health.lastActivityAt,
+    isStale: health.isStale,
+    hasRecentActivity: health.hasRecentActivity,
     nextDueTask: health.nextDueTask,
+    nextTask: health.nextTask,
+    healthBadges: health.healthBadges,
     recentActivity: health.recentActivity.map(toRecentActivityViewModel)
   };
 }

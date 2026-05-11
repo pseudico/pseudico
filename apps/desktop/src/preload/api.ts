@@ -689,6 +689,12 @@ export type ProjectHealthTaskSummary = {
   priority: number | null;
 };
 
+export type ProjectHealthBadgeSummary = {
+  kind: "overdue" | "upcoming" | "waiting" | "stale" | "no_recent_activity" | "complete";
+  label: string;
+  tone: "risk" | "warning" | "info" | "success" | "neutral";
+};
+
 export type ProjectHealthSummary = {
   projectId: string;
   workspaceId: string;
@@ -699,8 +705,17 @@ export type ProjectHealthSummary = {
   openTaskCount: number;
   completedTaskCount: number;
   overdueTaskCount: number;
+  upcomingTaskCount: number;
+  waitingTaskCount: number;
   totalTaskCount: number;
+  completionRatio: number;
+  staleAfterDays: number;
+  lastActivityAt: string | null;
+  isStale: boolean;
+  hasRecentActivity: boolean;
   nextDueTask: ProjectHealthTaskSummary | null;
+  nextTask: ProjectHealthTaskSummary | null;
+  healthBadges: ProjectHealthBadgeSummary[];
   recentActivity: ActivitySummary[];
 };
 

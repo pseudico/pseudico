@@ -674,6 +674,7 @@ export type {
   ProjectBoardProjectCard,
   ProjectBoardViewModel,
   ProjectMutableStatus,
+  ProjectHealthBadge,
   ProjectHealthQueryInput,
   ProjectHealthSummary,
   ProjectHealthTaskSummary,

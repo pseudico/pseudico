@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarClock, CheckCircle2, ListTodo } from "lucide-react";
+import { AlertTriangle, CalendarClock, CheckCircle2, Clock3, ListTodo } from "lucide-react";
 import type { RecentActivityViewModel } from "./RecentActivityList";
 
 export type ProjectHealthTaskViewModel = {
@@ -9,6 +9,12 @@ export type ProjectHealthTaskViewModel = {
   priority: number | null;
 };
 
+export type ProjectHealthBadgeViewModel = {
+  kind: "overdue" | "upcoming" | "waiting" | "stale" | "no_recent_activity" | "complete";
+  label: string;
+  tone: "risk" | "warning" | "info" | "success" | "neutral";
+};
+
 export type ProjectHealthViewModel = {
   projectId: string;
   name: string;
@@ -17,8 +23,17 @@ export type ProjectHealthViewModel = {
   openTaskCount: number;
   completedTaskCount: number;
   overdueTaskCount: number;
+  upcomingTaskCount: number;
+  waitingTaskCount: number;
   totalTaskCount: number;
+  completionRatio: number;
+  staleAfterDays: number;
+  lastActivityAt: string | null;
+  isStale: boolean;
+  hasRecentActivity: boolean;
   nextDueTask: ProjectHealthTaskViewModel | null;
+  nextTask: ProjectHealthTaskViewModel | null;
+  healthBadges: readonly ProjectHealthBadgeViewModel[];
   recentActivity: readonly RecentActivityViewModel[];
 };
 
@@ -49,32 +64,35 @@ export function ProjectHealthCard({
 
       <dl className="project-health-metrics">
         <Metric label="Open" value={health.openTaskCount} tone="normal" />
-        <Metric label="Completed" value={health.completedTaskCount} tone="done" />
+        <Metric label="Completed" value={`${Math.round(health.completionRatio * 100)}%`} tone="done" />
         <Metric label="Overdue" value={health.overdueTaskCount} tone="risk" />
+        <Metric label="Waiting" value={health.waitingTaskCount} tone="warning" />
       </dl>
+
+      <ProjectHealthBadges badges={health.healthBadges} />
 
       <div className="project-health-detail-grid">
         <div>
           <div className="panel-heading">
             <CalendarClock size={16} aria-hidden="true" />
-            <h4>Next due</h4>
+            <h4>Next task</h4>
           </div>
-          {health.nextDueTask === null ? (
-            <p className="muted-text">No upcoming task.</p>
+          {health.nextTask === null ? (
+            <p className="muted-text">No open task.</p>
           ) : (
             <p>
-              <strong>{health.nextDueTask.title}</strong>
-              <span>{formatDateLabel(health.nextDueTask.dueAt)}</span>
+              <strong>{health.nextTask.title}</strong>
+              <span>{formatDateLabel(health.nextTask.dueAt)}</span>
             </p>
           )}
         </div>
         <div>
           <div className="panel-heading">
-            <ListTodo size={16} aria-hidden="true" />
-            <h4>Recent</h4>
+            <Clock3 size={16} aria-hidden="true" />
+            <h4>Activity</h4>
           </div>
           {latestActivity === null ? (
-            <p className="muted-text">No recent activity.</p>
+            <p className="muted-text">No recent activity. Stale threshold: {health.staleAfterDays} days.</p>
           ) : (
             <p>
               <strong>{latestActivity.actionLabel ?? latestActivity.action}</strong>
@@ -103,10 +121,10 @@ function Metric({
   tone
 }: {
   label: string;
-  value: number;
-  tone: "normal" | "done" | "risk";
+  value: number | string;
+  tone: "normal" | "done" | "risk" | "warning";
 }): React.JSX.Element {
-  const Icon = tone === "risk" ? AlertTriangle : tone === "done" ? CheckCircle2 : ListTodo;
+  const Icon = tone === "risk" || tone === "warning" ? AlertTriangle : tone === "done" ? CheckCircle2 : ListTodo;
 
   return (
     <div data-health-tone={tone}>
@@ -116,6 +134,26 @@ function Metric({
       </dt>
       <dd>{value}</dd>
     </div>
+  );
+}
+
+export function ProjectHealthBadges({
+  badges
+}: {
+  badges: readonly ProjectHealthBadgeViewModel[];
+}): React.JSX.Element | null {
+  if (badges.length === 0) {
+    return null;
+  }
+
+  return (
+    <ul className="project-health-badges" aria-label="Project health badges">
+      {badges.map((badge) => (
+        <li key={`${badge.kind}:${badge.label}`} data-health-badge-tone={badge.tone}>
+          {badge.label}
+        </li>
+      ))}
+    </ul>
   );
 }
 

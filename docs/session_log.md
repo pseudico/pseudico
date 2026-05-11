@@ -3445,3 +3445,17 @@ Decisions made: Added service/repository IPC-backed widget add/update/reorder/re
 Files changed: apps/desktop/src/renderer/pages/DashboardPage.tsx; apps/desktop/src/preload/api.ts; packages/features/src/dashboard/DashboardService.ts; packages/db/src/repositories/DashboardRepository.ts; packages/db/src/migrations/0015_dashboard_widget_layout_types.ts
 Open questions / risks: Saved-view widget UI currently accepts a saved_view ID rather than browsing saved views.
 Next actions: Open PR; monitor CI; promote next Linear issue after merge.
+
+## 2026-05-11T21:50:59+10:00
+Objective: Finalize PSE-144 merge and prepare next Codex Ready ticket.
+Decisions made: Squash-merged PR #133; marked PSE-144 Done; promoted PSE-145 as the sole next Codex Ready issue.
+Files changed: docs/session_log.md
+Open questions / risks: Local untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi remain unrelated.
+Next actions: Start PSE-145; reconcile active states before coding; keep one Codex Ready issue.
+
+## 2026-05-12T05:46:25+10:00
+Objective: Implement PSE-145 rich project health widgets and badges.
+Decisions made: Added overdue/upcoming/waiting/completion/stale/no-activity/next-task health snapshots; exposed stale/upcoming widget config inputs; rendered health badges in cards/widgets.
+Files changed: packages/features/src/projects/ProjectHealthService.ts; packages/features/src/dashboard/WidgetDataService.ts; packages/ui/src/components/ProjectHealthCard.tsx; packages/ui/src/components/widgets/ProjectHealthWidget.tsx; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/DashboardPage.tsx; apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/styles.css
+Open questions / risks: Project list row badges remain represented through shared health badge UI in project health widgets/cards, not a separate Projects page health API.
+Next actions: Commit and open PR; monitor CI; merge only after clean review/checks.

@@ -13,6 +13,7 @@ export type {
 } from "./ProjectBoardService";
 export type {
   ListProjectHealthSummariesInput,
+  ProjectHealthBadge,
   ProjectHealthQueryInput,
   ProjectHealthSummary,
   ProjectHealthTaskSummary

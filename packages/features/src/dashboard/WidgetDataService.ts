@@ -123,7 +123,9 @@ export class WidgetDataService {
       .listProjectHealthSummaries({
         workspaceId: normalized.workspaceId,
         limit: normalized.limit + normalized.offset,
-        recentActivityLimit: 1
+        recentActivityLimit: 1,
+        staleAfterDays: normalized.staleAfterDays,
+        upcomingDays: normalized.upcomingDays
       })
       .map(toProjectHealthWidgetItem);
 
@@ -149,7 +151,7 @@ export class WidgetDataService {
   }
 
   private normalizeInput(input: WidgetDataQueryInput): Required<
-    Pick<WidgetDataQueryInput, "workspaceId" | "limit" | "offset" | "date" | "upcomingDays">
+    Pick<WidgetDataQueryInput, "workspaceId" | "limit" | "offset" | "date" | "upcomingDays" | "staleAfterDays">
   > {
     validateNonEmptyString(input.workspaceId, "workspaceId");
 
@@ -158,7 +160,8 @@ export class WidgetDataService {
       limit: normalizeLimit(input.limit),
       offset: normalizeOffset(input.offset),
       date: input.date ?? this.now(),
-      upcomingDays: normalizeUpcomingDays(input.upcomingDays)
+      upcomingDays: normalizeUpcomingDays(input.upcomingDays),
+      staleAfterDays: normalizeStaleAfterDays(input.staleAfterDays)
     };
   }
 }
@@ -231,4 +234,21 @@ function validateNonEmptyString(value: string, fieldName: string): void {
   if (value.trim().length === 0) {
     throw new Error(`${fieldName} must be a non-empty string.`);
   }
+}
+
+function normalizeStaleAfterDays(staleAfterDays: number | undefined): number {
+  if (staleAfterDays === undefined) {
+    return 14;
+  }
+
+  if (
+    !Number.isFinite(staleAfterDays) ||
+    !Number.isInteger(staleAfterDays) ||
+    staleAfterDays < 1 ||
+    staleAfterDays > 3660
+  ) {
+    throw new Error("staleAfterDays must be an integer between 1 and 3660.");
+  }
+
+  return staleAfterDays;
 }

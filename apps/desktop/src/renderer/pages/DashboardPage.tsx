@@ -591,8 +591,17 @@ function toProjectHealthWidgetItem(
     openTaskCount: project.openTaskCount,
     completedTaskCount: project.completedTaskCount,
     overdueTaskCount: project.overdueTaskCount,
+    upcomingTaskCount: project.upcomingTaskCount,
+    waitingTaskCount: project.waitingTaskCount,
     totalTaskCount: project.totalTaskCount,
+    completionRatio: project.completionRatio,
+    staleAfterDays: project.staleAfterDays,
+    lastActivityAt: project.lastActivityAt,
+    isStale: project.isStale,
+    hasRecentActivity: project.hasRecentActivity,
     nextDueTask: project.nextDueTask,
+    nextTask: project.nextTask,
+    healthBadges: project.healthBadges,
     recentActivity: project.recentActivity
   };
 }

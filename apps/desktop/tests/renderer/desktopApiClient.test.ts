@@ -863,6 +863,13 @@ function projectHealthSummary(): ProjectHealthSummary {
     openTaskCount: 1,
     completedTaskCount: 0,
     overdueTaskCount: 0,
+    upcomingTaskCount: 0,
+    waitingTaskCount: 0,
+    completionRatio: 0,
+    staleAfterDays: 14,
+    lastActivityAt: "2026-05-04T00:00:00.000Z",
+    isStale: false,
+    hasRecentActivity: true,
     totalTaskCount: 1,
     nextDueTask: {
       itemId: "item_1",
@@ -871,6 +878,14 @@ function projectHealthSummary(): ProjectHealthSummary {
       taskStatus: "open",
       priority: 2
     },
+    nextTask: {
+      itemId: "item_1",
+      title: "Call accountant",
+      dueAt: "2026-05-04T00:00:00.000Z",
+      taskStatus: "open",
+      priority: 2
+    },
+    healthBadges: [{ kind: "upcoming", label: "1 upcoming", tone: "info" }],
     recentActivity: [activitySummary()]
   };
 }

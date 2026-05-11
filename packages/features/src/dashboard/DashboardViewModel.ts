@@ -104,6 +104,7 @@ export type WidgetDataQueryInput = {
   offset?: number;
   date?: string | Date;
   upcomingDays?: number;
+  staleAfterDays?: number;
 };
 
 export function isDefaultDashboardWidgetType(
