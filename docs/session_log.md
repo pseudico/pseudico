@@ -2486,3 +2486,10 @@ Decisions made: Committed natural date parser, QuickAdd preview/submission integ
 Files changed: docs/session_log.md
 Open questions / risks: Session log update after commit remains local until amended or next commit.
 Next actions: push branch; open ready PR; update Linear.
+
+## 2026-05-11T10:08:35.1315208+10:00
+Objective: Open PSE-119 PR and update Linear.
+Decisions made: Pushed branch and opened ready PR #114; moved PSE-119 to PR Open with PR link/comment.
+Files changed: docs/session_log.md
+Open questions / risks: GitHub CI/review state still needs confirmation before merge.
+Next actions: commit log update; inspect PR diff/status; merge if clean and green.
