@@ -32,4 +32,12 @@ export function registerTodayIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.today.getPlannedTasks,
     (_event, input) => handlers.handleGetPlannedTasks(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.today.getPreferences,
+    (_event, input) => handlers.handleGetPreferences(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.today.updatePreferences,
+    (_event, input) => handlers.handleUpdatePreferences(input)
+  );
 }

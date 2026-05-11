@@ -1240,11 +1240,40 @@ export type TodayDateRangeSummary = {
   endExclusive: string;
 };
 
+export type TodayPlanningModeSummary = "standard" | "top_six" | "ivy_lee";
+
+export type TodayPreferencesSummary = {
+  workspaceId: string;
+  updatedAt: string | null;
+  maxFocusTasks: number;
+  planningMode: TodayPlanningModeSummary;
+  backlogDays: number;
+  showWaiting: boolean;
+  showDeferred: boolean;
+  showDailyCompletionSummary: boolean;
+};
+
+export type TodayFocusSummary = {
+  plannedTodayCount: number;
+  maxFocusTasks: number;
+  limitExceeded: boolean;
+  warning: string | null;
+};
+
+export type TodayCompletionSummary = {
+  completedTodayCount: number;
+  plannedTodayCompletedCount: number;
+  show: boolean;
+};
+
 export type TodayViewModelSummary = {
   workspaceId: string;
   generatedAt: string;
   localDate: string;
   backlogDays: number;
+  preferences: Omit<TodayPreferencesSummary, "workspaceId" | "updatedAt">;
+  focusSummary: TodayFocusSummary;
+  completionSummary: TodayCompletionSummary;
   ranges: {
     today: TodayDateRangeSummary;
     overdueBacklog: TodayDateRangeSummary;
@@ -1259,6 +1288,12 @@ export type TodayViewModelInput = {
   workspaceId?: string;
   date?: string | Date;
   backlogDays?: number;
+};
+
+export type UpdateTodayPreferencesInput = Partial<
+  Omit<TodayPreferencesSummary, "workspaceId" | "updatedAt">
+> & {
+  workspaceId?: string;
 };
 
 export type DailyPlanDateInput = {
@@ -2979,7 +3014,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     planTask: "local-work-os:today:plan-task",
     unplanTask: "local-work-os:today:unplan-task",
     reorderPlannedTask: "local-work-os:today:reorder-planned-task",
-    getPlannedTasks: "local-work-os:today:get-planned-tasks"
+    getPlannedTasks: "local-work-os:today:get-planned-tasks",
+    getPreferences: "local-work-os:today:get-preferences",
+    updatePreferences: "local-work-os:today:update-preferences"
   },
   timeline: {
     getViewModel: "local-work-os:timeline:get-view-model",
@@ -3598,6 +3635,14 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.today.getPlannedTasks]: {
     input: GetPlannedTasksInput | undefined;
     result: ApiResult<PlannedTaskSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.today.getPreferences]: {
+    input: string | undefined;
+    result: ApiResult<TodayPreferencesSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.today.updatePreferences]: {
+    input: UpdateTodayPreferencesInput;
+    result: ApiResult<TodayPreferencesSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.timeline.getViewModel]: {
     input: TimelineViewModelInput;
@@ -4352,6 +4397,12 @@ export type LocalWorkOsApi = {
     getPlannedTasks: (
       input?: GetPlannedTasksInput
     ) => Promise<ApiResult<PlannedTaskSummary[]>>;
+    getPreferences: (
+      workspaceId?: string
+    ) => Promise<ApiResult<TodayPreferencesSummary>>;
+    updatePreferences: (
+      input: UpdateTodayPreferencesInput
+    ) => Promise<ApiResult<TodayPreferencesSummary>>;
   };
   timeline?: {
     getViewModel: (
@@ -5040,7 +5091,11 @@ export function createLocalWorkOsApi(
       reorderPlannedTask: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.reorderPlannedTask, input),
       getPlannedTasks: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.getPlannedTasks, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.getPlannedTasks, input),
+      getPreferences: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.getPreferences, workspaceId),
+      updatePreferences: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.today.updatePreferences, input)
     },
     timeline: {
       getViewModel: (input) =>

@@ -5,8 +5,21 @@ export {
   todayModuleContract
 } from "./TodayService";
 export { DailyPlanService, normalizePlanDate } from "./DailyPlanService";
+export {
+  DEFAULT_TODAY_PREFERENCES,
+  TODAY_PLANNING_MODES,
+  TODAY_PREFERENCES_SETTING_KEY,
+  TodayPreferencesService,
+  normalizeTodayPreferencesValue
+} from "./TodayPreferencesService";
 export { toTodayTaskView } from "./TodayViewModel";
 export type { TodayQueryInput } from "./TodayService";
+export type {
+  TodayPlanningMode,
+  TodayPreferences,
+  TodayPreferencesValue,
+  UpdateTodayPreferencesInput
+} from "./TodayPreferencesService";
 export type {
   DailyPlanDateInput,
   DailyPlanServiceIdFactory,
@@ -17,4 +30,4 @@ export type {
   RolloverTomorrowToTodayInput,
   UnplanTaskInput
 } from "./DailyPlanService";
-export type { TodayTaskView, TodayViewModel } from "./TodayViewModel";
+export type { TodayTaskView, TodayViewModel, TodayPreferencesView, TodayFocusSummary, TodayCompletionSummary } from "./TodayViewModel";

@@ -33,11 +33,38 @@ export type TodayTaskView = {
   updatedAt: string;
 };
 
+export type TodayPlanningMode = "standard" | "top_six" | "ivy_lee";
+
+export type TodayPreferencesView = {
+  maxFocusTasks: number;
+  planningMode: TodayPlanningMode;
+  backlogDays: number;
+  showWaiting: boolean;
+  showDeferred: boolean;
+  showDailyCompletionSummary: boolean;
+};
+
+export type TodayFocusSummary = {
+  plannedTodayCount: number;
+  maxFocusTasks: number;
+  limitExceeded: boolean;
+  warning: string | null;
+};
+
+export type TodayCompletionSummary = {
+  completedTodayCount: number;
+  plannedTodayCompletedCount: number;
+  show: boolean;
+};
+
 export type TodayViewModel = {
   workspaceId: string;
   generatedAt: string;
   localDate: string;
   backlogDays: number;
+  preferences: TodayPreferencesView;
+  focusSummary: TodayFocusSummary;
+  completionSummary: TodayCompletionSummary;
   ranges: {
     today: TaskDateRange;
     overdueBacklog: TaskDateRange;

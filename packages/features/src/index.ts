@@ -330,10 +330,15 @@ export {
 } from "./viewModes";
 export {
   DEFAULT_TODAY_BACKLOG_DAYS,
+  DEFAULT_TODAY_PREFERENCES,
   TODAY_BACKLOG_DAYS_SETTING_KEY,
+  TODAY_PLANNING_MODES,
+  TODAY_PREFERENCES_SETTING_KEY,
   DailyPlanService,
   normalizePlanDate,
+  TodayPreferencesService,
   TodayService,
+  normalizeTodayPreferencesValue,
   todayModuleContract,
   toTodayTaskView
 } from "./today";
@@ -878,9 +883,16 @@ export type {
   PlannedTaskView,
   PlanTaskInput,
   ReorderPlannedTaskInput,
+  TodayCompletionSummary,
+  TodayFocusSummary,
+  TodayPlanningMode,
+  TodayPreferences,
+  TodayPreferencesValue,
+  TodayPreferencesView,
   TodayQueryInput,
   TodayTaskView,
   TodayViewModel,
+  UpdateTodayPreferencesInput,
   UnplanTaskInput
 } from "./today";
 export type { WorkspaceService } from "./workspace";

@@ -369,7 +369,11 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       reorderPlannedTask: (input) =>
         callApi(() => api.today.reorderPlannedTask(input)),
       getPlannedTasks: (input) =>
-        callApi(() => api.today.getPlannedTasks(input))
+        callApi(() => api.today.getPlannedTasks(input)),
+      getPreferences: (workspaceId) =>
+        callApi(() => api.today.getPreferences(workspaceId)),
+      updatePreferences: (input) =>
+        callApi(() => api.today.updatePreferences(input))
     },
     timeline: {
       getViewModel: (input) =>
@@ -897,7 +901,11 @@ export const desktopApiClient: LocalWorkOsApi = {
     reorderPlannedTask: (input) =>
       getDesktopApiClient().today.reorderPlannedTask(input),
     getPlannedTasks: (input) =>
-      getDesktopApiClient().today.getPlannedTasks(input)
+      getDesktopApiClient().today.getPlannedTasks(input),
+    getPreferences: (workspaceId) =>
+      getDesktopApiClient().today.getPreferences(workspaceId),
+    updatePreferences: (input) =>
+      getDesktopApiClient().today.updatePreferences(input)
   },
   timeline: {
     getViewModel: (input) =>
