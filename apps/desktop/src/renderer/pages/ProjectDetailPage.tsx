@@ -38,6 +38,7 @@ import {
   RelatedContactsPanel,
   TaskCardContent,
   TaskQuickAdd,
+  ViewModeSwitcher,
   type ChecklistBulkAction,
   type ContainerTabSummaryCardViewModel,
   type CreateListFormValues,
@@ -70,6 +71,7 @@ import {
   type TaskCardViewModel,
   type TaskQuickAddValues,
   type UniversalItemViewModel,
+  type ViewMode,
   type WikilinkTargetViewModel,
   type WikilinkViewModel
 } from "@local-work-os/ui";
@@ -202,6 +204,8 @@ export function ProjectDetailPage({
   );
   const [containerPreferences, setContainerPreferences] =
     useState<ContainerPreferencesSummary | null>(initialPreferences);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewModeSaving, setViewModeSaving] = useState(false);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [preferencesSaving, setPreferencesSaving] = useState(false);
   const [preferencesError, setPreferencesError] = useState<string | null>(null);
@@ -258,6 +262,57 @@ export function ProjectDetailPage({
   const [movingItem, setMovingItem] = useState<ProjectFeedViewModel | null>(null);
   const [confirmAction, setConfirmAction] =
     useState<PendingConfirmAction | null>(null);
+
+  useEffect(() => {
+    if (project === null) {
+      return;
+    }
+
+    let cancelled = false;
+    if (apiClient.viewModes === undefined) {
+      return;
+    }
+
+    void apiClient.viewModes
+      .getViewMode({ contextType: "container", contextId: project.id })
+      .then((result) => {
+        if (!cancelled && result.ok) {
+          setViewMode(result.data.mode);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [apiClient, project?.id]);
+
+  async function changeProjectViewMode(mode: ViewMode): Promise<void> {
+    if (project === null || mode === viewMode) {
+      return;
+    }
+
+    setViewModeSaving(true);
+    setItemError(null);
+    if (apiClient.viewModes === undefined) {
+      setViewMode(mode);
+      return;
+    }
+
+    const result = await apiClient.viewModes.setViewMode({
+      contextType: "container",
+      contextId: project.id,
+      mode
+    });
+    setViewModeSaving(false);
+
+    if (!result.ok) {
+      setItemError(result.error.message);
+      return;
+    }
+
+    setViewMode(result.data.mode);
+  }
+
   const [itemActionBusy, setItemActionBusy] = useState(false);
   const [inspector, setInspector] = useState<{
     item: ItemInspectorItem;
@@ -3021,6 +3076,11 @@ export function ProjectDetailPage({
             <FolderKanban size={17} aria-hidden="true" />
             <h3>Content feed</h3>
           </div>
+          <ViewModeSwitcher
+            disabled={viewModeSaving}
+            value={viewMode}
+            onChange={(mode) => void changeProjectViewMode(mode)}
+          />
           <button
             className="secondary-button compact-button"
             disabled={itemsLoading}
@@ -3130,23 +3190,31 @@ export function ProjectDetailPage({
           <p className="form-message form-message-error">{linkError}</p>
         )}
 
-        <ItemFeed
-          ariaLabel="Project content items"
-          emptyDescription="Tasks, checklists, notes, and files created for this project will appear here with inline controls."
-          emptyTitle={
-            activeTab === null
-              ? "No project content yet"
-              : `No content in ${activeTab.name} yet`
-          }
-          error={itemError}
-          getDisabledActions={getDisabledActionsForProjectItem}
-          items={visibleItems}
-          loading={itemsLoading}
-          renderContent={renderItemContent}
-          onAction={handleItemAction}
-          onDropFilesOnItem={attachDroppedFilesToItem}
-          onReorderItem={reorderProjectItem}
-        />
+        {viewMode === "list" ? (
+          <ItemFeed
+            ariaLabel="Project content items"
+            emptyDescription="Tasks, checklists, notes, and files created for this project will appear here with inline controls."
+            emptyTitle={
+              activeTab === null
+                ? "No project content yet"
+                : `No content in ${activeTab.name} yet`
+            }
+            error={itemError}
+            getDisabledActions={getDisabledActionsForProjectItem}
+            items={visibleItems}
+            loading={itemsLoading}
+            renderContent={renderItemContent}
+            onAction={handleItemAction}
+            onDropFilesOnItem={attachDroppedFilesToItem}
+            onReorderItem={reorderProjectItem}
+          />
+        ) : (
+          <DatedItemProjection
+            items={tabItems}
+            mode={viewMode}
+            title={viewMode === "timeline" ? "Project timeline" : "Project calendar"}
+          />
+        )}
         {hasMoreItems ? (
           <button
             className="secondary-button load-more-button"
@@ -3847,4 +3915,50 @@ function formatDateLabel(value: string | null | undefined): string | null {
   }
 
   return value.slice(0, 10);
+}
+
+
+function DatedItemProjection({
+  items,
+  mode,
+  title
+}: {
+  items: readonly UniversalItemViewModel[];
+  mode: ViewMode;
+  title: string;
+}): React.JSX.Element {
+  const datedItems = items.filter(
+    (item) => "dueAt" in item && typeof item.dueAt === "string" && item.dueAt.length > 0
+  );
+
+  if (datedItems.length === 0) {
+    return (
+      <div className="view-mode-empty-state">
+        <h3>{title}</h3>
+        <p>Dated tasks from this same filtered content set will appear in {mode} mode.</p>
+      </div>
+    );
+  }
+
+  return (
+    <section className="grouped-results-list" aria-label={title}>
+      <header className="grouped-results-heading">
+        <h3>{title}</h3>
+        <span>{datedItems.length}</span>
+      </header>
+      <div className="grouped-result-items">
+        {datedItems.map((item) => (
+          <article className="grouped-result-item" key={item.id}>
+            <div className="grouped-result-main">
+              <strong>{item.title}</strong>
+              <div className="grouped-result-meta">
+                <span>{"dueAt" in item ? String(item.dueAt).slice(0, 10) : ""}</span>
+                <span>{item.type}</span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
 }

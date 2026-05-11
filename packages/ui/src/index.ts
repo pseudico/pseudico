@@ -154,6 +154,11 @@ export {
   type MetadataTagFilterOption
 } from "./components/MetadataFilterPanel";
 export { ItemFeed, type ItemFeedProps } from "./components/ItemFeed";
+export {
+  ViewModeSwitcher,
+  type ViewMode,
+  type ViewModeSwitcherProps
+} from "./components/ViewModeSwitcher";
 
 export {
   ContainerTabSummaryCards,

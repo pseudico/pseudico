@@ -14,6 +14,7 @@ import {
 import { TagService } from "../metadata/TagService";
 import { TaskService, type CreateTaskInput } from "../tasks/TaskService";
 import { SavedViewService, type SavedViewServiceIdFactory } from "./SavedViewService";
+import { isViewMode, type ViewMode } from "../viewModes";
 import {
   parseSavedViewQueryJson,
   type SavedViewQuery
@@ -37,6 +38,7 @@ export type CollectionSummary = {
   isFavorite: boolean;
   createdAt: string;
   updatedAt: string;
+  viewMode: ViewMode;
 };
 
 export type CollectionEvaluationResult = SavedViewEvaluationResult & {
@@ -291,7 +293,8 @@ export function toCollectionSummary(savedView: SavedViewRecord): CollectionSumma
         : queryKeyword,
     isFavorite: savedView.isFavorite,
     createdAt: savedView.createdAt,
-    updatedAt: savedView.updatedAt
+    updatedAt: savedView.updatedAt,
+    viewMode: isViewMode(display.viewMode) ? display.viewMode : "list"
   };
 }
 

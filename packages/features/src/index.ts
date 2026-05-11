@@ -316,6 +316,15 @@ export {
 export { TabService, TabTemplateService, tabsModuleContract } from "./tabs";
 export { TimelineService, timelineModuleContract } from "./timeline";
 export {
+  CONTAINER_VIEW_MODE_SETTING_KEY_PREFIX,
+  VIEW_MODES,
+  ViewModeService,
+  createContainerViewModeSettingKey,
+  isViewMode,
+  validateViewMode,
+  viewModesModuleContract
+} from "./viewModes";
+export {
   DEFAULT_TODAY_BACKLOG_DAYS,
   TODAY_BACKLOG_DAYS_SETTING_KEY,
   DailyPlanService,
@@ -826,6 +835,13 @@ export type {
   WorkflowRunResult,
   WorkflowServiceIdFactory
 } from "./workflows";
+export type {
+  SetViewModeInput,
+  ViewMode,
+  ViewModeContextType,
+  ViewModePreference,
+  ViewModeServiceOptions
+} from "./viewModes";
 export type {
   GroupTimelineItemsInput,
   TimelineDateRange,

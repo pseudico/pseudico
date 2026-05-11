@@ -12,11 +12,19 @@ import {
   ContextMenu,
   CreateCollectionForm,
   GroupedResultsList,
+  MonthCalendar,
   SmartListEditor,
+  TimelineView,
+  ViewModeSwitcher,
   type CreateCollectionFormValues,
   type GroupedResultGroupViewModel,
   type GroupedResultViewModel,
+  type MonthCalendarDay,
+  type MonthCalendarItem,
   type SnoozePreset,
+  type TimelineViewGroup,
+  type TimelineViewItem,
+  type ViewMode,
   type SmartListEditorMetadataOption,
   type SmartListEditorValues
 } from "@local-work-os/ui";
@@ -76,6 +84,7 @@ export function CollectionsPage({
   const [printBusy, setPrintBusy] = useState(false);
   const [printMessage, setPrintMessage] = useState<string | null>(null);
   const [taskTitle, setTaskTitle] = useState("");
+  const [viewModeSaving, setViewModeSaving] = useState(false);
   const [taskContainerId, setTaskContainerId] = useState(
     initialProjects?.[0]?.id ?? ""
   );
@@ -87,6 +96,15 @@ export function CollectionsPage({
   );
   const groupedResults = useMemo(
     () => evaluation?.groups.map(toGroupedResultGroupViewModel) ?? [],
+    [evaluation]
+  );
+  const selectedViewMode = selectedCollection?.viewMode ?? "list";
+  const timelineGroups = useMemo(
+    () => toCollectionTimelineGroups(evaluation),
+    [evaluation]
+  );
+  const calendarDays = useMemo(
+    () => toCollectionCalendarDays(evaluation),
     [evaluation]
   );
   const smartListTagOptions = useMemo(
@@ -230,6 +248,44 @@ export function CollectionsPage({
   useEffect(() => {
     void evaluateSelectedCollection();
   }, [evaluateSelectedCollection]);
+
+
+  async function changeCollectionViewMode(mode: ViewMode): Promise<void> {
+    if (selectedCollection === null || mode === selectedCollection.viewMode) {
+      return;
+    }
+
+    setViewModeSaving(true);
+    setError(null);
+    if (apiClient.viewModes === undefined) {
+      setCollections((current) =>
+        current.map((collection) =>
+          collection.id === selectedCollection.id ? { ...collection, viewMode: mode } : collection
+        )
+      );
+      return;
+    }
+
+    const result = await apiClient.viewModes.setViewMode({
+      contextType: "saved_view",
+      contextId: selectedCollection.id,
+      mode
+    });
+    setViewModeSaving(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setCollections((current) =>
+      current.map((collection) =>
+        collection.id === selectedCollection.id
+          ? { ...collection, viewMode: result.data.mode, updatedAt: result.data.updatedAt ?? collection.updatedAt }
+          : collection
+      )
+    );
+  }
 
   async function createCollection(values: CreateCollectionFormValues): Promise<void> {
     if (currentWorkspace === null) {
@@ -602,6 +658,11 @@ export function CollectionsPage({
                     <Printer size={16} aria-hidden="true" />
                     <span>Print / PDF</span>
                   </button>
+                  <ViewModeSwitcher
+                    disabled={viewModeSaving}
+                    value={selectedViewMode}
+                    onChange={(mode) => void changeCollectionViewMode(mode)}
+                  />
                   <button
                     type="button"
                     className="secondary-button"
@@ -671,17 +732,34 @@ export function CollectionsPage({
                 )}
               </div>
 
-              <GroupedResultsList
-                groups={groupedResults}
-                onCompleteTask={(itemId) => void completeTask(itemId)}
-                onOpenResult={(path) => navigate(path)}
-                onRescheduleTask={(result, dueAt) =>
-                  void rescheduleTask(result, dueAt)
-                }
-                onSnoozeTask={(result, preset) =>
-                  void snoozeTask(result, preset)
-                }
-              />
+              {selectedViewMode === "timeline" ? (
+                <TimelineView
+                  emptyDescription="Dated collection tasks will appear here. Switch back to list to see undated results."
+                  emptyTitle="No dated timeline results"
+                  groups={timelineGroups}
+                  loading={loading}
+                  onOpenTask={(item) => navigate(`/projects/${item.containerId}`)}
+                />
+              ) : selectedViewMode === "calendar" ? (
+                <MonthCalendar
+                  days={calendarDays}
+                  loading={loading}
+                  monthLabel={formatCalendarMonthLabel(calendarDays)}
+                  onOpenItem={(item) => navigate(item.id)}
+                />
+              ) : (
+                <GroupedResultsList
+                  groups={groupedResults}
+                  onCompleteTask={(itemId) => void completeTask(itemId)}
+                  onOpenResult={(path) => navigate(path)}
+                  onRescheduleTask={(result, dueAt) =>
+                    void rescheduleTask(result, dueAt)
+                  }
+                  onSnoozeTask={(result, preset) =>
+                    void snoozeTask(result, preset)
+                  }
+                />
+              )}
               {evaluation?.page?.hasMore === true ? (
                 <button
                   className="secondary-button load-more-button"
@@ -838,4 +916,112 @@ function toGroupedResultGroupViewModel(
       destinationPath: result.destinationPath
     }))
   };
+}
+
+
+function toCollectionTimelineGroups(
+  evaluation: CollectionEvaluationSummary | null
+): TimelineViewGroup[] {
+  const datedResults = (evaluation?.results ?? [])
+    .filter((result) => result.kind === "task" && result.dueAt !== null)
+    .sort((left, right) => (left.dueAt ?? "").localeCompare(right.dueAt ?? ""));
+  const groups = new Map<string, TimelineViewGroup>();
+
+  for (const result of datedResults) {
+    const date = (result.dueAt ?? "").slice(0, 10);
+    const group = groups.get(date) ?? {
+      key: date,
+      label: formatDateHeading(date),
+      color: null,
+      itemCount: 0,
+      completedCount: 0,
+      items: []
+    };
+    const item: TimelineViewItem = {
+      kind: "task",
+      itemId: result.targetId,
+      title: result.title,
+      body: null,
+      containerId: result.containerId,
+      containerName: result.containerTitle,
+      containerType: result.containerType,
+      categoryName: result.categoryName,
+      categoryColor: null,
+      taskStatus: result.taskStatus ?? "open",
+      priority: result.taskPriority ?? null,
+      timelineStartAt: result.dueAt ?? new Date().toISOString(),
+      timelineEndAt: result.dueAt ?? new Date().toISOString(),
+      completedAt: null
+    };
+
+    group.itemCount += 1;
+    group.completedCount += item.taskStatus === "done" ? 1 : 0;
+    group.items.push(item);
+    groups.set(date, group);
+  }
+
+  return [...groups.values()];
+}
+
+function toCollectionCalendarDays(
+  evaluation: CollectionEvaluationSummary | null
+): MonthCalendarDay[] {
+  const datedResults = (evaluation?.results ?? [])
+    .filter((result) => result.kind === "task" && result.dueAt !== null)
+    .sort((left, right) => (left.dueAt ?? "").localeCompare(right.dueAt ?? ""));
+
+  if (datedResults.length === 0) {
+    return [];
+  }
+
+  const firstDate = new Date((datedResults[0]?.dueAt ?? new Date().toISOString()).slice(0, 10));
+  const year = firstDate.getUTCFullYear();
+  const month = firstDate.getUTCMonth();
+  const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const today = new Date().toISOString().slice(0, 10);
+
+  return Array.from({ length: daysInMonth }, (_, index): MonthCalendarDay => {
+    const day = index + 1;
+    const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const dayDate = new Date(`${date}T00:00:00.000Z`);
+    const items: MonthCalendarItem[] = datedResults
+      .filter((result) => (result.dueAt ?? "").slice(0, 10) === date)
+      .map((result) => ({
+        id: result.destinationPath,
+        kind: "task",
+        title: result.title,
+        containerName: result.containerTitle,
+        categoryName: result.categoryName,
+        status: result.taskStatus ?? "open",
+        priority: result.taskPriority ?? null
+      }));
+
+    return {
+      date,
+      dayOfMonth: day,
+      weekday: dayDate.getUTCDay(),
+      isToday: date === today,
+      items
+    };
+  });
+}
+
+function formatCalendarMonthLabel(days: readonly MonthCalendarDay[]): string {
+  const firstDate = days[0]?.date;
+  if (firstDate === undefined) {
+    return "Collection calendar";
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC"
+  }).format(new Date(`${firstDate}T00:00:00.000Z`));
+}
+
+function formatDateHeading(date: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeZone: "UTC"
+  }).format(new Date(`${date}T00:00:00.000Z`));
 }

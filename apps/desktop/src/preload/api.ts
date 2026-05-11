@@ -1142,6 +1142,7 @@ export type CollectionSummary = {
   isFavorite: boolean;
   createdAt: string;
   updatedAt: string;
+  viewMode?: ViewMode;
 };
 
 export type CollectionResultSummary = {
@@ -1442,6 +1443,21 @@ export type EvaluateCollectionInput = {
   collectionId: string;
   limit?: number;
   offset?: number;
+};
+
+export type ViewMode = "list" | "timeline" | "calendar";
+export type ViewModeContextType = "saved_view" | "container";
+export type ViewModePreferenceSummary = {
+  contextType: ViewModeContextType;
+  contextId: string;
+  workspaceId: string;
+  mode: ViewMode;
+  updatedAt: string | null;
+};
+export type SetViewModeInput = {
+  contextType: ViewModeContextType;
+  contextId: string;
+  mode: ViewMode;
 };
 
 export type SmartListCriteriaInput = {
@@ -2885,6 +2901,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     updateSmartList: "local-work-os:collections:update-smart-list",
     previewSmartList: "local-work-os:collections:preview-smart-list"
   },
+  viewModes: {
+    getViewMode: "local-work-os:view-modes:get",
+    setViewMode: "local-work-os:view-modes:set"
+  },
   today: {
     getViewModel: "local-work-os:today:get-view-model",
     getOrCreateDailyPlan: "local-work-os:today:get-or-create-daily-plan",
@@ -3475,6 +3495,14 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.collections.previewSmartList]: {
     input: PreviewSmartListInput;
     result: ApiResult<SmartListPreviewSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.viewModes.getViewMode]: {
+    input: { contextType: ViewModeContextType; contextId: string };
+    result: ApiResult<ViewModePreferenceSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.viewModes.setViewMode]: {
+    input: SetViewModeInput;
+    result: ApiResult<ViewModePreferenceSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.today.getViewModel]: {
     input: TodayViewModelInput | undefined;
@@ -4220,6 +4248,10 @@ export type LocalWorkOsApi = {
       input: PreviewSmartListInput
     ) => Promise<ApiResult<SmartListPreviewSummary>>;
   };
+  viewModes?: {
+    getViewMode: (input: { contextType: ViewModeContextType; contextId: string }) => Promise<ApiResult<ViewModePreferenceSummary>>;
+    setViewMode: (input: SetViewModeInput) => Promise<ApiResult<ViewModePreferenceSummary>>;
+  };
   today: {
     getViewModel: (
       input?: TodayViewModelInput
@@ -4897,6 +4929,12 @@ export function createLocalWorkOsApi(
           LOCAL_WORK_OS_IPC_CHANNELS.collections.previewSmartList,
           input
         )
+    },
+    viewModes: {
+      getViewMode: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.viewModes.getViewMode, input),
+      setViewMode: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.viewModes.setViewMode, input)
     },
     today: {
       getViewModel: (input) =>
