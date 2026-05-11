@@ -11,6 +11,7 @@ import {
   ActivityLogService,
   ItemRepository,
   NoteRepository,
+  SearchIndexRepository,
   SearchIndexService,
   SortOrderService,
   TagRepository,
@@ -49,6 +50,7 @@ export type CreateNoteInput = {
 export type UpdateNoteInput = {
   itemId: string;
   actorType?: ActivityActorType;
+  expectedNoteUpdatedAt?: string;
   title?: string;
   content?: string;
   categoryId?: string | null;
@@ -160,6 +162,33 @@ export class NoteService {
     return await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const before = this.requireNote(input.itemId);
+
+      if (
+        input.expectedNoteUpdatedAt !== undefined &&
+        before.note.updatedAt !== input.expectedNoteUpdatedAt
+      ) {
+        throw new Error(
+          "Note has changed since editing began. Review the latest note before saving or restore the local draft."
+        );
+      }
+
+      if (!hasNoteChanges(input, before)) {
+        const searchRecord =
+          new SearchIndexRepository(this.connection).getByTarget({
+            workspaceId: before.item.workspaceId,
+            targetType: "item",
+            targetId: before.item.id
+          }) ?? this.upsertSearchRecord(before.item, before.note, before.note.updatedAt);
+
+        return {
+          item: before.item,
+          note: before.note,
+          searchRecord,
+          inlineTags: this.getInlineTagSlugs(before.item),
+          wikilinks: this.resolveWikilinksForNote(before)
+        };
+      }
+
       const itemPatch: UpdateItemPatch = { timestamp };
       const notePatch: UpdateNoteDetailsPatch = { timestamp };
 
@@ -431,6 +460,19 @@ export class NoteService {
       throw new Error("At least one note field must be provided.");
     }
   }
+}
+
+function hasNoteChanges(input: UpdateNoteInput, before: NoteWithItemRecord): boolean {
+  return (
+    (input.title !== undefined && input.title.trim() !== before.item.title) ||
+    (input.content !== undefined && input.content !== before.note.content) ||
+    (input.categoryId !== undefined &&
+      normalizeNullableString(input.categoryId) !== before.item.categoryId) ||
+    (input.containerTabId !== undefined &&
+      input.containerTabId !== before.item.containerTabId) ||
+    (input.pinned !== undefined && input.pinned !== before.item.pinned) ||
+    (input.sortOrder !== undefined && input.sortOrder !== before.item.sortOrder)
+  );
 }
 
 export const notesModuleContract = {

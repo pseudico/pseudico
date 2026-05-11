@@ -151,6 +151,65 @@ describe("NoteService", () => {
     ).toEqual(expect.arrayContaining(["note_created", "note_updated"]));
   });
 
+  it("guards note updates with the expected note version", async () => {
+    const service = createService();
+    const created = await service.createNote({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Draft note",
+      content: "Initial notes"
+    });
+
+    await new NoteService({
+      connection,
+      idFactory: (prefix) => {
+        idCounter += 1;
+        return `${prefix}_${idCounter}`;
+      },
+      now: () => new Date("2026-05-02T01:02:04.000Z")
+    }).updateNote({
+      itemId: created.item.id,
+      title: "Newer note",
+      content: "Saved elsewhere"
+    });
+
+    await expect(
+      service.updateNote({
+        itemId: created.item.id,
+        expectedNoteUpdatedAt: created.note.updatedAt,
+        title: "Stale note",
+        content: "Stale content"
+      })
+    ).rejects.toThrow("Note has changed since editing began");
+  });
+
+  it("skips no-op note updates to avoid activity spam", async () => {
+    const service = createService();
+    const created = await service.createNote({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Draft note",
+      content: "Initial notes"
+    });
+    const activityBefore = new ActivityLogRepository(connection)
+      .listForTarget("item", created.item.id)
+      .map((event) => event.action);
+
+    const saved = await service.updateNote({
+      itemId: created.item.id,
+      expectedNoteUpdatedAt: created.note.updatedAt,
+      title: " Draft note ",
+      content: "Initial notes"
+    });
+
+    expect(saved.note.updatedAt).toBe(created.note.updatedAt);
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("item", created.item.id)
+        .map((event) => event.action)
+    ).toEqual(activityBefore);
+  });
+
   it("syncs persisted note tags while preserving manual taggings", async () => {
     const service = createService();
     const created = await service.createNote({

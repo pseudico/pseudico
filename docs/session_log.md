@@ -3036,3 +3036,51 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI/review still need inspection before merge.
 Next actions: Check PR diff; wait for CI; merge if clean and green.
+
+## 2026-05-11T15:08:02+10:00
+Objective: Merge PSE-127 and prepare next ticket.
+Decisions made:
+- CI passed, PR #122 squash-merged at 05e2b155, and merged branch was deleted.
+- Moved PSE-127 to Done and promoted PSE-128 as the single Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local session log entry is uncommitted; unrelated untracked files remain untouched.
+Next actions: Pull PSE-128 into In Progress next run; read autosave ticket/docs; implement conflict guard.
+## 2026-05-11T15:10:19+10:00
+Objective: Reconcile active Local Work OS workflow before PSE-128.
+Decisions made:
+- Linear has no PR Open or In Progress issues and exactly one Codex Ready issue: PSE-128.
+- Local main is aligned with origin/main; unrelated untracked files left untouched.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing session log edits are uncommitted and must be preserved on the work branch.
+Next actions: Move PSE-128 to In Progress; read docs/source; implement autosave scope.
+## 2026-05-11T15:24:40+10:00
+Objective: Implement PSE-128 autosave/conflict guard core and UI.
+Decisions made:
+- Added expected note-version guard, no-op update suppression, NoteAutosaveService, local draft persistence, recovery prompt, and autosave indicators.
+- Wired project/contact note editors to debounced autosave with draft keys and conflict feedback.
+Files changed:
+- packages/features/src/notes/NoteService.ts; packages/features/src/notes/NoteAutosaveService.ts; packages/ui/src/forms/NoteEditor.tsx; packages/ui/src/components/NoteCardContent.tsx; apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/pages/ContactDetailPage.tsx
+Open questions / risks: Need full lint/typecheck/test/build and CI validation.
+Next actions: Run workspace checks; fix failures; publish PR.
+## 2026-05-11T15:27:11+10:00
+Objective: Verify PSE-128 locally.
+Decisions made:
+- pnpm lint and pnpm typecheck passed.
+- pnpm test and pnpm build passed after EPERM sandbox reruns with escalation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need PR CI/review before merge; unrelated untracked files remain untouched.
+Next actions: Stage scoped files; commit/push; open PR and update Linear.
+## 2026-05-11T15:31:14+10:00
+Objective: Publish PSE-128 PR.
+Decisions made:
+- Pushed branch codex/pse-128-autosave-conflict-guard to PR #123.
+- Opened ready PR #123 and moved Linear PSE-128 to PR Open with PR link/comment.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI/review still need inspection before merge.
+Next actions: Check PR diff; wait for CI; merge if clean and green.
+
+

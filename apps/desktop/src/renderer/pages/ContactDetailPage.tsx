@@ -22,6 +22,8 @@ import {
   type ContactFieldViewModel,
   type ItemActionId,
   type NoteCardViewModel,
+  type NoteEditorSaveMeta,
+  type NoteEditorSaveResult,
   type NoteEditorValues,
   type NoteWikilinkSuggestion,
   type RecentActivityViewModel,
@@ -991,8 +993,9 @@ export function ContactDetailPage({
 
   async function updateContactNote(
     item: NoteCardViewModel,
-    values: NoteEditorValues
-  ): Promise<boolean> {
+    values: NoteEditorValues,
+    meta: NoteEditorSaveMeta
+  ): Promise<NoteEditorSaveResult | boolean> {
     if (contact === null) {
       return false;
     }
@@ -1003,6 +1006,9 @@ export function ContactDetailPage({
 
     const result = await apiClient.notes.update({
       itemId: item.id,
+      ...(meta.expectedVersion === undefined
+        ? {}
+        : { expectedNoteUpdatedAt: meta.expectedVersion }),
       title: values.title,
       content: values.content
     });
@@ -1018,7 +1024,48 @@ export function ContactDetailPage({
     await refreshContactTimeline(contact.id);
     setNoteBusyId(null);
     setNoteErrorItemId(null);
-    return true;
+    return {
+      savedValues: values,
+      savedVersion: result.data.noteUpdatedAt,
+      status: "saved"
+    };
+  }
+
+  async function autosaveContactNote(
+    item: NoteCardViewModel,
+    values: NoteEditorValues,
+    meta: NoteEditorSaveMeta
+  ): Promise<NoteEditorSaveResult | boolean> {
+    if (contact === null) {
+      return false;
+    }
+
+    const result = await apiClient.notes.update({
+      itemId: item.id,
+      ...(meta.expectedVersion === undefined
+        ? {}
+        : { expectedNoteUpdatedAt: meta.expectedVersion }),
+      title: values.title,
+      content: values.content
+    });
+
+    if (!result.ok) {
+      setNoteError(result.error.message);
+      setNoteErrorItemId(item.id);
+      return result.error.message.toLocaleLowerCase().includes("changed since editing")
+        ? { status: "conflict" }
+        : false;
+    }
+
+    await refreshContactContent(contact.id);
+    await refreshContactTimeline(contact.id);
+    setNoteError(null);
+    setNoteErrorItemId(null);
+    return {
+      savedValues: values,
+      savedVersion: result.data.noteUpdatedAt,
+      status: "saved"
+    };
   }
 
   async function openContactInlineExternalLink(url: string): Promise<void> {
@@ -1235,6 +1282,7 @@ export function ContactDetailPage({
           wikilinkSuggestions={createContactWikilinkSuggestions(contact, projects, items)}
           onExternalLinkCopy={copyContactInlineExternalLink}
           onExternalLinkOpen={openContactInlineExternalLink}
+          onAutosave={autosaveContactNote}
           onSave={updateContactNote}
           onWikilinkOpen={openWikilinkTarget}
         />
@@ -1662,6 +1710,7 @@ export function ContactDetailPage({
           <NoteEditor
             contextLabel={contact.name}
             disabled={savingNote || itemsLoading}
+            draftKey={`local-work-os:note-draft:${contact.workspaceId}:${contact.id}:${activeTabId ?? "feed"}:new`}
             error={noteErrorItemId === null ? noteError : null}
             resetOnSubmit
             submitLabel="Add note"
@@ -1810,6 +1859,7 @@ function toContactNoteViewModel(
     content: note.content,
     preview: note.preview,
     format: note.format,
+    noteUpdatedAt: note.noteUpdatedAt,
     wikilinks: note.wikilinks ?? []
   };
 }

@@ -4,6 +4,8 @@ import { Pencil } from "lucide-react";
 import type { UniversalItemViewModel } from "./ItemCard";
 import {
   NoteEditor,
+  type NoteEditorSaveMeta,
+  type NoteEditorSaveResult,
   type NoteEditorValues,
   type NoteWikilinkSuggestion
 } from "../forms/NoteEditor";
@@ -29,6 +31,7 @@ export type NoteCardViewModel = UniversalItemViewModel & {
   content: string;
   preview?: string | null;
   format?: "markdown";
+  noteUpdatedAt?: string;
   wikilinks?: readonly WikilinkViewModel[];
 };
 
@@ -38,8 +41,14 @@ export type NoteCardContentProps = {
   error?: string | null;
   onSave?: (
     item: NoteCardViewModel,
-    values: NoteEditorValues
-  ) => Promise<boolean | void> | boolean | void;
+    values: NoteEditorValues,
+    meta: NoteEditorSaveMeta
+  ) => Promise<NoteEditorSaveResult | boolean | void> | NoteEditorSaveResult | boolean | void;
+  onAutosave?: (
+    item: NoteCardViewModel,
+    values: NoteEditorValues,
+    meta: NoteEditorSaveMeta
+  ) => Promise<NoteEditorSaveResult | boolean | void> | NoteEditorSaveResult | boolean | void;
   onWikilinkOpen?: ((target: WikilinkTargetViewModel) => void) | undefined;
   onExternalLinkOpen?: ((url: string) => void | Promise<void>) | undefined;
   onExternalLinkCopy?: ((url: string) => void | Promise<void>) | undefined;
@@ -52,6 +61,7 @@ export function NoteCardContent({
   disabled = false,
   error = null,
   onSave,
+  onAutosave,
   onWikilinkOpen,
   onExternalLinkOpen,
   onExternalLinkCopy,
@@ -61,6 +71,18 @@ export function NoteCardContent({
   const [editing, setEditing] = useState(false);
 
   if (editing) {
+    const autosaveProps = onAutosave === undefined
+      ? {}
+      : {
+          autosave: {
+            ...(item.noteUpdatedAt === undefined
+              ? {}
+              : { expectedVersion: item.noteUpdatedAt }),
+            onSave: (values: NoteEditorValues, meta: NoteEditorSaveMeta) =>
+              onAutosave(item, values, meta)
+          }
+        };
+
     return (
       <NoteEditor
         contextLabel={item.title}
@@ -70,11 +92,13 @@ export function NoteCardContent({
           title: item.title,
           content: item.content
         }}
+        draftKey={`local-work-os:note-draft:${item.id}`}
         submitLabel="Save changes"
         wikilinkSuggestions={wikilinkSuggestions}
+        {...autosaveProps}
         onCancel={() => setEditing(false)}
-        onSubmit={async (values) => {
-          const saved = await onSave?.(item, values);
+        onSubmit={async (values, meta) => {
+          const saved = await onSave?.(item, values, meta);
 
           if (saved === false) {
             return false;

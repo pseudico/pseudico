@@ -208,6 +208,7 @@ export {
   tagsModuleContract
 } from "./metadata";
 export {
+  NoteAutosaveService,
   NoteService,
   extractInlineNoteTags,
   generateNotePreview,
@@ -599,6 +600,9 @@ export type {
 export type {
   CreateNoteInput,
   GenerateNotePreviewOptions,
+  NoteAutosaveValues,
+  NoteConflictCheckInput,
+  NoteDraftIdentity,
   NoteMutationResult,
   NoteServiceIdFactory,
   UpdateNoteInput

@@ -54,6 +54,8 @@ import {
   type ListCardViewModel,
   type MoveTargetContainer,
   type NoteCardViewModel,
+  type NoteEditorSaveMeta,
+  type NoteEditorSaveResult,
   type NoteEditorValues,
   type NoteWikilinkSuggestion,
   type ProjectHealthViewModel,
@@ -1503,8 +1505,9 @@ export function ProjectDetailPage({
 
   async function updateProjectNote(
     item: NoteCardViewModel,
-    values: NoteEditorValues
-  ): Promise<boolean> {
+    values: NoteEditorValues,
+    meta: NoteEditorSaveMeta
+  ): Promise<NoteEditorSaveResult | boolean> {
     if (project === null) {
       return false;
     }
@@ -1515,6 +1518,9 @@ export function ProjectDetailPage({
 
     const result = await apiClient.notes.update({
       itemId: item.id,
+      ...(meta.expectedVersion === undefined
+        ? {}
+        : { expectedNoteUpdatedAt: meta.expectedVersion }),
       title: values.title,
       content: values.content
     });
@@ -1529,7 +1535,47 @@ export function ProjectDetailPage({
     await refreshProjectContent(project.id);
     setNoteBusyId(null);
     setNoteErrorItemId(null);
-    return true;
+    return {
+      savedValues: values,
+      savedVersion: result.data.noteUpdatedAt,
+      status: "saved"
+    };
+  }
+
+  async function autosaveProjectNote(
+    item: NoteCardViewModel,
+    values: NoteEditorValues,
+    meta: NoteEditorSaveMeta
+  ): Promise<NoteEditorSaveResult | boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    const result = await apiClient.notes.update({
+      itemId: item.id,
+      ...(meta.expectedVersion === undefined
+        ? {}
+        : { expectedNoteUpdatedAt: meta.expectedVersion }),
+      title: values.title,
+      content: values.content
+    });
+
+    if (!result.ok) {
+      setNoteError(result.error.message);
+      setNoteErrorItemId(item.id);
+      return result.error.message.toLocaleLowerCase().includes("changed since editing")
+        ? { status: "conflict" }
+        : false;
+    }
+
+    await refreshProjectContent(project.id);
+    setNoteError(null);
+    setNoteErrorItemId(null);
+    return {
+      savedValues: values,
+      savedVersion: result.data.noteUpdatedAt,
+      status: "saved"
+    };
   }
 
   async function toggleTaskComplete(item: TaskCardViewModel): Promise<void> {
@@ -2595,6 +2641,7 @@ export function ProjectDetailPage({
             onExternalLinkCopy={copyProjectInlineExternalLink}
             onExternalLinkCreate={createProjectLinkFromInlineUrl}
             onExternalLinkOpen={openProjectInlineExternalLink}
+            onAutosave={autosaveProjectNote}
             onSave={updateProjectNote}
             onWikilinkOpen={openWikilinkTarget}
           />
@@ -3011,6 +3058,7 @@ export function ProjectDetailPage({
           <NoteEditor
             contextLabel={project.name}
             disabled={savingNote || itemsLoading}
+            draftKey={`local-work-os:note-draft:${project.workspaceId}:${project.id}:${activeTabId ?? "feed"}:new`}
             error={noteErrorItemId === null ? noteError : null}
             resetOnSubmit
             submitLabel="Add note"
@@ -3277,6 +3325,7 @@ function toProjectNoteViewModel(
     content: note.content,
     preview: note.preview,
     format: note.format,
+    noteUpdatedAt: note.noteUpdatedAt,
     wikilinks: note.wikilinks ?? []
   };
 }

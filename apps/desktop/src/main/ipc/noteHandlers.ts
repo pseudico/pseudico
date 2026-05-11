@@ -267,6 +267,7 @@ function isUpdateNoteInput(input: unknown): input is UpdateNoteInput {
     isNonEmptyString(input.itemId) &&
     (input.title === undefined || isNonEmptyString(input.title)) &&
     (input.content === undefined || typeof input.content === "string") &&
+    isOptionalString(input.expectedNoteUpdatedAt) &&
     isOptionalNullableString(input.categoryId) &&
     isOptionalNullableString(input.containerTabId) &&
     isOptionalNumber(input.sortOrder) &&
