@@ -95,6 +95,11 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.lists.getPipelineViewModel(listId)),
       movePipelineCard: (input) =>
         callApi(() => api.lists.movePipelineCard(input)),
+      indentItem: (listItemId) =>
+        callApi(() => api.lists.indentItem(listItemId)),
+      outdentItem: (listItemId) =>
+        callApi(() => api.lists.outdentItem(listItemId)),
+      moveItem: (input) => callApi(() => api.lists.moveItem(input)),
       bulkAddItems: (input) => callApi(() => api.lists.bulkAddItems(input)),
       listByContainer: (containerId) =>
         callApi(() => api.lists.listByContainer(containerId)),
@@ -607,6 +612,11 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().lists.getPipelineViewModel(listId),
     movePipelineCard: (input) =>
       getDesktopApiClient().lists.movePipelineCard(input),
+    indentItem: (listItemId) =>
+      getDesktopApiClient().lists.indentItem(listItemId),
+    outdentItem: (listItemId) =>
+      getDesktopApiClient().lists.outdentItem(listItemId),
+    moveItem: (input) => getDesktopApiClient().lists.moveItem(input),
     bulkAddItems: (input) => getDesktopApiClient().lists.bulkAddItems(input),
     listByContainer: (containerId) =>
       getDesktopApiClient().lists.listByContainer(containerId),

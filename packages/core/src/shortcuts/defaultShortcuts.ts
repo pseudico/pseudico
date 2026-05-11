@@ -90,7 +90,7 @@ export const defaultShortcutDescriptors: readonly ShortcutDescriptor[] = [
     description: "Move the active checklist row one level deeper.",
     category: "Lists",
     scope: "list-editor",
-    binding: { key: "Tab", label: "Tab" },
+    binding: { key: "ArrowRight", primary: true, label: "Ctrl/Cmd Right" },
     allowInEditable: true
   },
   {
@@ -99,7 +99,7 @@ export const defaultShortcutDescriptors: readonly ShortcutDescriptor[] = [
     description: "Move the active checklist row one level higher.",
     category: "Lists",
     scope: "list-editor",
-    binding: { key: "Tab", shift: true, label: "Shift+Tab" },
+    binding: { key: "ArrowLeft", primary: true, label: "Ctrl/Cmd Left" },
     allowInEditable: true
   },
   {
@@ -108,7 +108,7 @@ export const defaultShortcutDescriptors: readonly ShortcutDescriptor[] = [
     description: "Move the active checklist row earlier in the list.",
     category: "Lists",
     scope: "list-editor",
-    binding: { key: "ArrowUp", alt: true, label: "Alt+Up" },
+    binding: { key: "ArrowUp", primary: true, label: "Ctrl/Cmd Up" },
     allowInEditable: true
   },
   {
@@ -117,7 +117,7 @@ export const defaultShortcutDescriptors: readonly ShortcutDescriptor[] = [
     description: "Move the active checklist row later in the list.",
     category: "Lists",
     scope: "list-editor",
-    binding: { key: "ArrowDown", alt: true, label: "Alt+Down" },
+    binding: { key: "ArrowDown", primary: true, label: "Ctrl/Cmd Down" },
     allowInEditable: true
   }
 ];

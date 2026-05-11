@@ -1,10 +1,13 @@
 import { ClipboardList, Plus } from "lucide-react";
-import type { ClipboardEvent, FormEvent } from "react";
-import { useState } from "react";
+import type { ClipboardEvent, FormEvent, KeyboardEvent } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import {
   LOCAL_WORK_OS_DRAG_MIME_TYPE,
+  createListEditorState,
   encodeDragPayload,
   parseDragPayload,
+  reduceListEditorState,
+  resolveListEditorKeyboardCommand,
   resolveContextMenuActions
 } from "@local-work-os/core";
 import type { ParsedDateRange } from "@local-work-os/core";
@@ -34,6 +37,16 @@ export type ChecklistEditorProps = {
     draggedItemId: string,
     targetItemId: string
   ) => Promise<boolean | void> | boolean | void;
+  onIndentItem?: (
+    item: ChecklistEditorItem
+  ) => Promise<boolean | void> | boolean | void;
+  onOutdentItem?: (
+    item: ChecklistEditorItem
+  ) => Promise<boolean | void> | boolean | void;
+  onMoveItem?: (
+    item: ChecklistEditorItem,
+    direction: "up" | "down"
+  ) => Promise<boolean | void> | boolean | void;
   onDateRangeChange?: (
     item: ChecklistEditorItem,
     range: ParsedDateRange
@@ -49,13 +62,25 @@ export function ChecklistEditor({
   onAddItem,
   onBulkAddItems,
   onDateRangeChange,
+  onIndentItem,
+  onMoveItem,
+  onOutdentItem,
   onReorderItem,
   listId,
   onToggleItem
 }: ChecklistEditorProps): React.JSX.Element {
-  const [title, setTitle] = useState("");
+  const [editorState, dispatchEditorState] = useReducer(
+    reduceListEditorState,
+    createListEditorState()
+  );
   const [bulkText, setBulkText] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
+  const rowRefs = useRef(new Map<string, HTMLLIElement>());
+  const title = editorState.draftTitle;
+
+  useEffect(() => {
+    dispatchEditorState({ type: "itemsChanged", items });
+  }, [items]);
 
   async function handleAddItem(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -74,7 +99,93 @@ export function ChecklistEditor({
       return;
     }
 
-    setTitle("");
+    dispatchEditorState({ type: "submitDraft" });
+  }
+
+  function handleDraftKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
+    const command = resolveListEditorKeyboardCommand(event, {
+      target: "draft",
+      dirty: editorState.dirty,
+      hasSelection: editorState.selectedItemId !== null
+    });
+
+    if (command === "cancelDirtyDraft" || command === "clearSelection") {
+      event.preventDefault();
+      setFormError(null);
+      dispatchEditorState({ type: "escape" });
+    }
+  }
+
+  function handleRowKeyDown(
+    event: KeyboardEvent<HTMLLIElement>,
+    item: ChecklistEditorItem
+  ): void {
+    const command = resolveListEditorKeyboardCommand(event, {
+      target: "row",
+      dirty: editorState.dirty,
+      hasSelection: editorState.selectedItemId !== null
+    });
+
+    if (command === null) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (command === "selectPrevious" || command === "selectNext") {
+      const direction = command === "selectPrevious" ? "previous" : "next";
+      const selectedItemId = moveAndFocusSelection(direction);
+      dispatchEditorState({
+        type: "selectItem",
+        itemId: selectedItemId
+      });
+      return;
+    }
+
+    if (command === "indentSelected" && onIndentItem !== undefined) {
+      void onIndentItem(item);
+      return;
+    }
+
+    if (command === "outdentSelected" && onOutdentItem !== undefined) {
+      void onOutdentItem(item);
+      return;
+    }
+
+    if (command === "moveSelectedUp" && onMoveItem !== undefined) {
+      void onMoveItem(item, "up");
+      return;
+    }
+
+    if (command === "moveSelectedDown" && onMoveItem !== undefined) {
+      void onMoveItem(item, "down");
+      return;
+    }
+
+    if (command === "cancelDirtyDraft" || command === "clearSelection") {
+      dispatchEditorState({ type: "escape" });
+    }
+  }
+
+  function moveAndFocusSelection(direction: "previous" | "next"): string | null {
+    const currentIndex = items.findIndex(
+      (item) => item.id === editorState.selectedItemId
+    );
+    const nextIndex =
+      currentIndex === -1
+        ? direction === "previous"
+          ? items.length - 1
+          : 0
+        : direction === "previous"
+          ? Math.max(0, currentIndex - 1)
+          : Math.min(items.length - 1, currentIndex + 1);
+    const nextItemId = items[nextIndex]?.id ?? null;
+
+    if (nextItemId !== null) {
+      rowRefs.current.get(nextItemId)?.focus();
+    }
+
+    return nextItemId;
   }
 
   async function handleBulkSubmit(
@@ -125,8 +236,13 @@ export function ChecklistEditor({
       {items.length === 0 ? (
         <p className="muted-text">{emptyText}</p>
       ) : (
-        <ul className="checklist-items">
-          {items.map((item) => {
+        <>
+          <p className="muted-text checklist-keyboard-hint">
+            Keyboard: Enter adds a row. Focus a row, then use Ctrl/Cmd+Left or
+            Right to outdent/indent and Ctrl/Cmd+Up or Down to move it.
+          </p>
+          <ul className="checklist-items">
+            {items.map((item) => {
             const completed = item.status === "done";
             const target = {
               id: item.id,
@@ -157,12 +273,23 @@ export function ChecklistEditor({
               danger: action.danger
             }));
 
-            return (
-              <li
+              return (
+                <li
                 className="checklist-item"
                 data-checklist-item-status={item.status}
                 draggable={onReorderItem !== undefined}
                 key={item.id}
+                ref={(element) => {
+                  if (element === null) {
+                    rowRefs.current.delete(item.id);
+                    return;
+                  }
+
+                  rowRefs.current.set(item.id, element);
+                }}
+                aria-label={`Checklist row: ${item.title}`}
+                aria-selected={editorState.selectedItemId === item.id}
+                tabIndex={disabled ? -1 : 0}
                 style={{ paddingInlineStart: `${(item.depth ?? 0) * 18}px` }}
                 onDragOver={(event) => {
                   if (onReorderItem !== undefined) {
@@ -205,8 +332,12 @@ export function ChecklistEditor({
                   event.preventDefault();
                   void onReorderItem(payload.listItemId, item.id);
                 }}
-              >
-                <ContextMenu
+                onFocus={() =>
+                  dispatchEditorState({ type: "selectItem", itemId: item.id })
+                }
+                onKeyDown={(event) => handleRowKeyDown(event, item)}
+                >
+                  <ContextMenu
                   actions={actions}
                   label={`Context menu for ${item.title}`}
                   target={target}
@@ -231,11 +362,12 @@ export function ChecklistEditor({
                       onChange={(range) => onDateRangeChange(item, range)}
                     />
                   )}
-                </ContextMenu>
-              </li>
-            );
-          })}
-        </ul>
+                  </ContextMenu>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
 
       <form
@@ -249,7 +381,13 @@ export function ChecklistEditor({
           disabled={disabled}
           placeholder="Add checklist item"
           value={title}
-          onChange={(event) => setTitle(event.currentTarget.value)}
+          onChange={(event) =>
+            dispatchEditorState({
+              type: "updateDraft",
+              title: event.currentTarget.value
+            })
+          }
+          onKeyDown={handleDraftKeyDown}
           onPaste={(event) => {
             void handleInlinePaste(event);
           }}

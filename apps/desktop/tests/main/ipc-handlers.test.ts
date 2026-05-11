@@ -1610,6 +1610,37 @@ describe("List IPC handlers", () => {
       }
     });
     await expect(
+      handlers.handleIndentListItem(bulkResult.data[0]!.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: bulkResult.data[0]!.id,
+        listItemParentId: createdItem.data.id,
+        depth: 1
+      }
+    });
+    await expect(
+      handlers.handleMoveListItem({
+        listItemId: bulkResult.data[0]!.id,
+        direction: "down"
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: bulkResult.data[0]!.id
+      }
+    });
+    await expect(
+      handlers.handleOutdentListItem(bulkResult.data[0]!.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: bulkResult.data[0]!.id,
+        listItemParentId: null,
+        depth: 0
+      }
+    });
+    await expect(
       handlers.handleDisablePipelineMode(createdList.data.id)
     ).resolves.toMatchObject({
       ok: true,
@@ -1632,10 +1663,10 @@ describe("List IPC handlers", () => {
               title: "Confirm copy"
             },
             {
-              title: "Send update"
+              title: "Confirm brief"
             },
             {
-              title: "Confirm brief"
+              title: "Send update"
             },
             {
               title: "Draft card"

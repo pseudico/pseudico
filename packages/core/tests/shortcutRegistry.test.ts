@@ -44,12 +44,12 @@ describe("ShortcutRegistry", () => {
     ).toBe(APP_SHORTCUT_IDS.save);
     expect(
       registry.match(
-        { key: "Tab", shiftKey: true, target: { tagName: "input" } },
+        { key: "ArrowLeft", ctrlKey: true, target: { tagName: "input" } },
         { scope: "list-editor" }
       )?.id
     ).toBe(APP_SHORTCUT_IDS.listOutdent);
     expect(
-      registry.match({ key: "Tab", shiftKey: true }, { scope: "global" })
+      registry.match({ key: "ArrowLeft", ctrlKey: true }, { scope: "global" })
     ).toBeNull();
   });
 
@@ -58,8 +58,8 @@ describe("ShortcutRegistry", () => {
     expect(normalizeShortcutKey("Esc")).toBe("escape");
     expect(
       matchesShortcutBinding(
-        { key: "ArrowDown", altKey: true },
-        { key: "down", alt: true }
+        { key: "ArrowDown", ctrlKey: true },
+        { key: "down", primary: true }
       )
     ).toBe(true);
   });

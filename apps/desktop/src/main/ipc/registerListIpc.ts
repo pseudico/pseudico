@@ -45,6 +45,18 @@ export function registerListIpc(
     (_event, input) => handlers.handleMovePipelineCard(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.lists.indentItem,
+    (_event, input) => handlers.handleIndentListItem(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.lists.outdentItem,
+    (_event, input) => handlers.handleOutdentListItem(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.lists.moveItem,
+    (_event, input) => handlers.handleMoveListItem(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.lists.bulkAddItems,
     (_event, input) => handlers.handleBulkAddListItems(input)
   );

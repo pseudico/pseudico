@@ -20,6 +20,7 @@ import {
   type ListItemSummary,
   type ListProgressMode,
   type ListSummary,
+  type MoveListItemInput,
   type MovePipelineCardInput,
   type PipelineStageSummary,
   type PipelineViewModelSummary,
@@ -47,6 +48,9 @@ type ListIpcHandlers = {
     input: unknown
   ) => Promise<ApiResult<PipelineViewModelSummary>>;
   handleMovePipelineCard: (input: unknown) => Promise<ApiResult<ListItemSummary>>;
+  handleIndentListItem: (input: unknown) => Promise<ApiResult<ListItemSummary>>;
+  handleOutdentListItem: (input: unknown) => Promise<ApiResult<ListItemSummary>>;
+  handleMoveListItem: (input: unknown) => Promise<ApiResult<ListItemSummary>>;
   handleBulkAddListItems: (
     input: unknown
   ) => Promise<ApiResult<ListItemSummary[]>>;
@@ -228,6 +232,59 @@ export function createListIpcHandlers(
         apiOk(
           toListItemSummary(
             (await context.listService.movePipelineCard(input)).card
+          )
+        )
+      );
+    },
+
+    async handleIndentListItem(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "indentListItem requires a list item id string."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) =>
+        apiOk(
+          toListItemSummary(
+            (await context.listService.indentListItem({ listItemId: input }))
+              .listItem
+          )
+        )
+      );
+    },
+
+    async handleOutdentListItem(input) {
+      if (!isNonEmptyString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "outdentListItem requires a list item id string."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) =>
+        apiOk(
+          toListItemSummary(
+            (await context.listService.outdentListItem({ listItemId: input }))
+              .listItem
+          )
+        )
+      );
+    },
+
+    async handleMoveListItem(input) {
+      if (!isMoveListItemInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "moveListItem requires listItemId and direction fields."
+        );
+      }
+
+      return await withListService(workspaceService, async (context) =>
+        apiOk(
+          toListItemSummary(
+            (await context.listService.moveListItem(input)).listItem
           )
         )
       );
@@ -541,6 +598,15 @@ function isMovePipelineCardInput(
     isNonEmptyString(input.targetStageId) &&
     isOptionalActorType(input.actorType) &&
     isOptionalNumber(input.sortOrder)
+  );
+}
+
+function isMoveListItemInput(input: unknown): input is MoveListItemInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.listItemId) &&
+    (input.direction === "up" || input.direction === "down") &&
+    isOptionalActorType(input.actorType)
   );
 }
 

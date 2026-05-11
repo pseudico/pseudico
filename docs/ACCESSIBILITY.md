@@ -48,3 +48,7 @@ Global shortcuts intentionally do not fire while focus is inside inputs, textare
 5. Use the top-bar search form with only keyboard input to search for the task.
 6. Open a context menu with Shift+F10, move with Arrow keys, and close it with Escape.
 
+
+## Keyboard-first checklist editing
+
+Checklist rows support keyboard selection and scoped editing shortcuts. Enter submits the inline add-row field, Escape clears dirty add-row text before clearing row selection, Arrow Up/Down moves row focus, and Ctrl/Cmd+Arrow Left/Right/Up/Down outdents, indents, or reorders the focused row through the list service.

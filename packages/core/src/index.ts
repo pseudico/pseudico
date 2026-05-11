@@ -82,6 +82,20 @@ export type {
   ListProgressMode
 } from "./entities/List";
 export {
+  createListEditorState,
+  moveListEditorSelection,
+  reduceListEditorState,
+  resolveListEditorKeyboardCommand
+} from "./lists/ListEditorStateMachine";
+export type {
+  ListEditorItemSnapshot,
+  ListEditorKeyboardCommand,
+  ListEditorKeyboardEventLike,
+  ListEditorKeyboardTarget,
+  ListEditorState,
+  ListEditorStateEvent
+} from "./lists/ListEditorStateMachine";
+export {
   RELATIONSHIP_OBJECT_TYPES,
   RELATIONSHIP_TYPES,
   isRelationshipObjectType,

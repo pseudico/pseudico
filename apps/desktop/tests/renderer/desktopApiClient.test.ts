@@ -170,6 +170,9 @@ function createMockApi(
           listItemParentId: "list_item_stage_1",
           depth: 1
         }),
+      indentItem: async () => apiOk({ ...listItemSummary(), depth: 1 }),
+      outdentItem: async () => apiOk({ ...listItemSummary(), depth: 0 }),
+      moveItem: async () => apiOk(listItemSummary()),
       bulkAddItems: async () => apiOk([listItemSummary()]),
       listByContainer: async () => apiOk([listSummary()]),
       createList: async () => apiOk(listSummary()),

@@ -672,6 +672,57 @@ export function InboxPage({
     setListBusyId(null);
   }
 
+  async function indentInboxListItem(
+    item: ListCardViewModel,
+    listItem: ListCardItemViewModel
+  ): Promise<void> {
+    await applyInboxListKeyboardMutation(item, () =>
+      apiClient.lists.indentItem(listItem.id)
+    );
+  }
+
+  async function outdentInboxListItem(
+    item: ListCardViewModel,
+    listItem: ListCardItemViewModel
+  ): Promise<void> {
+    await applyInboxListKeyboardMutation(item, () =>
+      apiClient.lists.outdentItem(listItem.id)
+    );
+  }
+
+  async function moveInboxListItem(
+    item: ListCardViewModel,
+    listItem: ListCardItemViewModel,
+    direction: "up" | "down"
+  ): Promise<void> {
+    await applyInboxListKeyboardMutation(item, () =>
+      apiClient.lists.moveItem({ listItemId: listItem.id, direction })
+    );
+  }
+
+  async function applyInboxListKeyboardMutation(
+    item: ListCardViewModel,
+    operation: () => ReturnType<typeof apiClient.lists.indentItem>
+  ): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
+    }
+
+    setListBusyId(item.id);
+    setListError(null);
+
+    const result = await operation();
+
+    setListBusyId(null);
+
+    if (!result.ok) {
+      setListError(result.error.message);
+      return;
+    }
+
+    await loadInbox(currentWorkspace.id);
+  }
+
   function renderItemContent(item: UniversalItemViewModel): React.ReactNode {
     if (isListCardViewModel(item)) {
       return (
@@ -681,7 +732,10 @@ export function InboxPage({
           item={item}
           onAddItem={addListItem}
           onBulkAddItems={bulkAddListItems}
+          onIndentListItem={indentInboxListItem}
           onListItemDateRangeChange={updateListItemDateRange}
+          onMoveListItem={moveInboxListItem}
+          onOutdentListItem={outdentInboxListItem}
           onToggleItem={toggleListItem}
         />
       );

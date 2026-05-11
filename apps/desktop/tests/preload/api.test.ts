@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(188);
+    expect(channels).toHaveLength(191);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -926,6 +926,12 @@ describe("typed preload API", () => {
       cardId: "list_item_card_1",
       targetStageId: "list_item_stage_1"
     });
+    await api.lists.indentItem("list_item_1");
+    await api.lists.outdentItem("list_item_1");
+    await api.lists.moveItem({
+      listItemId: "list_item_1",
+      direction: "down"
+    });
     await api.lists.bulkAddItems({
       listId: "item_list_1",
       text: "- Confirm copy"
@@ -974,6 +980,21 @@ describe("typed preload API", () => {
           listId: "item_list_1",
           cardId: "list_item_card_1",
           targetStageId: "list_item_stage_1"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.indentItem,
+        input: "list_item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.outdentItem,
+        input: "list_item_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.lists.moveItem,
+        input: {
+          listItemId: "list_item_1",
+          direction: "down"
         }
       },
       {

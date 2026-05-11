@@ -7,6 +7,8 @@ export type {
   ListItemMutationResult,
   ListMutationResult,
   ListServiceIdFactory,
+  IndentListItemInput,
+  MoveListItemInput,
   ReorderListItemsInput,
   UpdateListItemInput
 } from "./ListService";

@@ -17,6 +17,7 @@ import {
   ItemRepository,
   ListRepository,
   SearchIndexService,
+  SearchIndexRepository,
   SortOrderService,
   TransactionService,
   type DatabaseConnection,
@@ -104,6 +105,17 @@ export type ReorderListItemsInput = {
     depth?: number;
     listItemParentId?: string | null;
   }>;
+};
+
+export type MoveListItemInput = {
+  listItemId: string;
+  direction: "up" | "down";
+  actorType?: ActivityActorType;
+};
+
+export type IndentListItemInput = {
+  listItemId: string;
+  actorType?: ActivityActorType;
 };
 
 export type BulkCreateListItemsInput = {
@@ -381,6 +393,107 @@ export class ListService {
     });
   }
 
+  async indentListItem(
+    input: IndentListItemInput
+  ): Promise<ListItemMutationResult> {
+    validateNonEmptyString(input.listItemId, "listItemId");
+
+    const current = this.requireListItem(input.listItemId);
+    const orderedItems = this.listItems(current.listId);
+    const currentIndex = orderedItems.findIndex((item) => item.id === current.id);
+    const previousItem = currentIndex > 0 ? orderedItems[currentIndex - 1] : undefined;
+
+    if (previousItem === undefined) {
+      return this.createUnchangedListItemResult(current);
+    }
+
+    const [result] = await this.reorderListItems({
+      listId: current.listId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      items: [
+        {
+          id: current.id,
+          sortOrder: current.sortOrder,
+          depth: previousItem.depth + 1,
+          listItemParentId: previousItem.id
+        }
+      ]
+    });
+
+    return result ?? this.createUnchangedListItemResult(current);
+  }
+
+  async outdentListItem(
+    input: IndentListItemInput
+  ): Promise<ListItemMutationResult> {
+    validateNonEmptyString(input.listItemId, "listItemId");
+
+    const current = this.requireListItem(input.listItemId);
+
+    if (current.listItemParentId === null || current.depth <= 0) {
+      return this.createUnchangedListItemResult(current);
+    }
+
+    const parent = this.requireListItem(current.listItemParentId);
+    const grandparent =
+      parent.listItemParentId === null ? null : this.requireListItem(parent.listItemParentId);
+    const [result] = await this.reorderListItems({
+      listId: current.listId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      items: [
+        {
+          id: current.id,
+          sortOrder: current.sortOrder,
+          depth: grandparent === null ? 0 : grandparent.depth + 1,
+          listItemParentId: grandparent?.id ?? null
+        }
+      ]
+    });
+
+    return result ?? this.createUnchangedListItemResult(current);
+  }
+
+  async moveListItem(
+    input: MoveListItemInput
+  ): Promise<ListItemMutationResult> {
+    validateNonEmptyString(input.listItemId, "listItemId");
+
+    if (input.direction !== "up" && input.direction !== "down") {
+      throw new Error("direction must be up or down.");
+    }
+
+    const current = this.requireListItem(input.listItemId);
+    const orderedItems = this.listItems(current.listId);
+    const currentIndex = orderedItems.findIndex((item) => item.id === current.id);
+    const targetIndex =
+      input.direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    const target = orderedItems[targetIndex];
+
+    if (currentIndex === -1 || target === undefined) {
+      return this.createUnchangedListItemResult(current);
+    }
+
+    const results = await this.reorderListItems({
+      listId: current.listId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      items: [
+        {
+          id: current.id,
+          sortOrder: target.sortOrder
+        },
+        {
+          id: target.id,
+          sortOrder: current.sortOrder
+        }
+      ]
+    });
+
+    return (
+      results.find((result) => result.listItem.id === current.id) ??
+      this.createUnchangedListItemResult(current)
+    );
+  }
+
   async bulkCreateListItems(
     input: BulkCreateListItemsInput
   ): Promise<ListItemMutationResult[]> {
@@ -582,6 +695,28 @@ export class ListService {
     ).getMaxListItemSortOrder(listId);
 
     return maxSortOrder === null ? 1024 : maxSortOrder + 1024;
+  }
+
+  private createUnchangedListItemResult(
+    listItem: ListItemRecord
+  ): ListItemMutationResult {
+    const searchRecord = new SearchIndexRepository(this.connection).getByTarget({
+      workspaceId: listItem.workspaceId,
+      targetType: "list_item",
+      targetId: listItem.id
+    });
+
+    if (searchRecord !== null) {
+      return { listItem, searchRecord };
+    }
+
+    return {
+      listItem,
+      searchRecord: this.upsertListItemSearchRecord(
+        listItem,
+        createIsoTimestamp(this.now())
+      )
+    };
   }
 
   private buildListItemPatch(
