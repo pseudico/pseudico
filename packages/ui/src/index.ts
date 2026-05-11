@@ -36,6 +36,19 @@ export {
   type NoteWikilinkSuggestion
 } from "./forms/NoteEditor";
 export {
+  applyMarkdownToolbarCommand,
+  getMarkdownEditorKeyCommand,
+  MarkdownEditor,
+  SafeMarkdownPreview,
+  markdownToolbarCommands,
+  type MarkdownEditorKeyCommand,
+  type MarkdownEditorMode,
+  type MarkdownEditorProps,
+  type MarkdownEditorSelection,
+  type MarkdownToolbarCommandId,
+  type MarkdownToolbarCommandResult
+} from "./forms/MarkdownEditor";
+export {
   LinkEditor,
   type LinkEditorProps,
   type LinkEditorValues

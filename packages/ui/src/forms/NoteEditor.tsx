@@ -1,5 +1,6 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Check, FileText, X } from "lucide-react";
+import { MarkdownEditor } from "./MarkdownEditor";
 
 export type NoteEditorValues = {
   title: string;
@@ -42,6 +43,7 @@ export function NoteEditor({
   submitLabel = "Save note",
   wikilinkSuggestions = []
 }: NoteEditorProps): React.JSX.Element {
+  const formRef = useRef<HTMLFormElement | null>(null);
   const [title, setTitle] = useState(initialValues.title ?? "");
   const [content, setContent] = useState(initialValues.content ?? "");
   const [formError, setFormError] = useState<string | null>(null);
@@ -87,6 +89,7 @@ export function NoteEditor({
     <form
       className="note-editor"
       aria-label={`Edit Markdown note for ${contextLabel}`}
+      ref={formRef}
       onSubmit={(event) => {
         void handleSubmit(event);
       }}
@@ -104,16 +107,13 @@ export function NoteEditor({
         </span>
       </label>
 
-      <label>
-        <span>Markdown</span>
-        <textarea
-          disabled={disabled}
-          placeholder="# Meeting notes"
-          rows={8}
-          value={content}
-          onChange={(event) => setContent(event.currentTarget.value)}
-        />
-      </label>
+      <MarkdownEditor
+        disabled={disabled}
+        label="Markdown"
+        value={content}
+        onChange={setContent}
+        onSaveShortcut={() => formRef.current?.requestSubmit()}
+      />
 
       {activeWikilink === null || matchingWikilinks.length === 0 ? null : (
         <div className="wikilink-suggestions" aria-label="Wikilink suggestions">
