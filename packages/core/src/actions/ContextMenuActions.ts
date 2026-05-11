@@ -24,6 +24,9 @@ export const CONTEXT_MENU_ACTION_IDS = [
   "pin",
   "archive",
   "duplicate",
+  "convertToList",
+  "convertToTask",
+  "mergeIntoList",
   "reveal",
   "print",
   "copyLink",
@@ -124,6 +127,31 @@ export const defaultContextMenuActions: readonly ContextMenuActionDescriptor[] =
     group: "Manage",
     targetTypes: ["container", "item", "listItem", "file", "savedView"],
     keywords: ["copy"]
+  }),
+  contextAction({
+    id: "convertToList",
+    title: "Convert task to list",
+    group: "Convert",
+    targetTypes: ["item"],
+    keywords: ["checklist", "task", "list"],
+    disabled: ({ target }) =>
+      target.kind === "task" ? false : "Only task items can be converted to lists."
+  }),
+  contextAction({
+    id: "convertToTask",
+    title: "Convert list item to task",
+    group: "Convert",
+    targetTypes: ["listItem"],
+    keywords: ["task", "break out"]
+  }),
+  contextAction({
+    id: "mergeIntoList",
+    title: "Merge task into list",
+    group: "Convert",
+    targetTypes: ["item"],
+    keywords: ["checklist", "append", "list"],
+    disabled: ({ target }) =>
+      target.kind === "task" ? false : "Only task items can be merged into lists."
   }),
   contextAction({
     id: "reveal",

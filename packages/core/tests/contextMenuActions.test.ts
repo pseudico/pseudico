@@ -23,6 +23,8 @@ describe("context menu action resolution", () => {
     expect(actions.map((action) => action.id)).toContain("open");
     expect(actions.map((action) => action.id)).toContain("move");
     expect(actions.map((action) => action.id)).toContain("print");
+    expect(actions.map((action) => action.id)).toContain("convertToList");
+    expect(actions.map((action) => action.id)).toContain("mergeIntoList");
     expect(actions.map((action) => action.id)).not.toContain("duplicate");
     expect(actions.map((action) => action.id)).not.toContain("reveal");
   });
@@ -45,6 +47,7 @@ describe("context menu action resolution", () => {
 
     expect(resolved.map((action) => action.id)).toContain("open");
     expect(resolved.map((action) => action.id)).toContain("copyLink");
+    expect(resolved.map((action) => action.id)).toContain("convertToList");
     expect(resolved.map((action) => action.id)).not.toContain("reveal");
   });
 
@@ -60,6 +63,19 @@ describe("context menu action resolution", () => {
 
     expect(actions.map((action) => action.id)).toContain("open");
     expect(actions.map((action) => action.id)).toContain("reveal");
+  });
+
+  it("resolves conversion actions only for compatible task and list row targets", () => {
+    expect(
+      resolveContextMenuActions({
+        target: { id: "item_2", type: "item", label: "Note", kind: "note" }
+      }).map((action) => action.id)
+    ).not.toContain("convertToList");
+    expect(
+      resolveContextMenuActions({
+        target: { id: "row_1", type: "listItem", label: "Book venue" }
+      }).map((action) => action.id)
+    ).toContain("convertToTask");
   });
 });
 

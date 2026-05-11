@@ -53,6 +53,8 @@ import {
   searchModuleContract,
   tagsModuleContract,
   TabService,
+  TaskListConversionService,
+  taskListConversionsModuleContract,
   tabsModuleContract,
   tasksModuleContract,
   timelineModuleContract,
@@ -81,6 +83,7 @@ describe("feature module exports", () => {
       "containerMedia",
       "tasks",
       "lists",
+      "taskListConversions",
       "notes",
       "files",
       "import",
@@ -130,6 +133,7 @@ describe("feature module exports", () => {
       containerMediaModuleContract.module,
       tasksModuleContract.module,
       listsModuleContract.module,
+      taskListConversionsModuleContract.module,
       notesModuleContract.module,
       filesModuleContract.module,
       importModuleContract.module,
@@ -174,6 +178,7 @@ describe("feature module exports", () => {
       "containerMedia",
       "tasks",
       "lists",
+      "task-list-conversions",
       "notes",
       "files",
       "import",
@@ -268,6 +273,10 @@ describe("feature module exports", () => {
 
   it("exports the list template service implementation", () => {
     expect(ListTemplateService).toBeDefined();
+  });
+
+  it("exports the task/list conversion service implementation", () => {
+    expect(TaskListConversionService).toBeDefined();
   });
 
   it("exports the workflow service implementation", () => {
