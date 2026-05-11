@@ -1,6 +1,5 @@
 import { sql } from "drizzle-orm";
 import { check, index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
-import { items } from "./items";
 import { workspaces } from "./workspaces";
 
 export const reminderPolicies = sqliteTable(
@@ -10,9 +9,10 @@ export const reminderPolicies = sqliteTable(
     workspaceId: text("workspace_id")
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
-    taskItemId: text("task_item_id")
-      .notNull()
-      .references(() => items.id, { onDelete: "cascade" }),
+    targetType: text("target_type").notNull().default("item"),
+    targetId: text("target_id").notNull(),
+    taskItemId: text("task_item_id").notNull(),
+    anchor: text("anchor").notNull().default("due"),
     mode: text("mode").notNull(),
     leadMinutes: integer("lead_minutes"),
     triggerAt: text("trigger_at").notNull(),
@@ -23,13 +23,16 @@ export const reminderPolicies = sqliteTable(
   },
   (table) => [
     uniqueIndex("idx_reminder_policies_active_task")
-      .on(table.taskItemId)
+      .on(table.targetType, table.targetId)
       .where(sql`${table.deletedAt} is null and ${table.status} = 'active'`),
     index("idx_reminder_policies_workspace_task").on(
       table.workspaceId,
-      table.taskItemId,
+      table.targetType,
+      table.targetId,
       table.deletedAt
     ),
+    check("ck_reminder_policies_target_type", sql`${table.targetType} in ('item', 'list_item')`),
+    check("ck_reminder_policies_anchor", sql`${table.anchor} in ('due', 'start')`),
     check("ck_reminder_policies_mode", sql`${table.mode} in ('absolute', 'relative')`),
     check("ck_reminder_policies_status", sql`${table.status} in ('active', 'cleared')`),
     check(
@@ -49,9 +52,9 @@ export const reminderEvents = sqliteTable(
     policyId: text("policy_id")
       .notNull()
       .references(() => reminderPolicies.id, { onDelete: "cascade" }),
-    taskItemId: text("task_item_id")
-      .notNull()
-      .references(() => items.id, { onDelete: "cascade" }),
+    targetType: text("target_type").notNull().default("item"),
+    targetId: text("target_id").notNull(),
+    taskItemId: text("task_item_id").notNull(),
     scheduledForAt: text("scheduled_for_at").notNull(),
     firedAt: text("fired_at"),
     dismissedAt: text("dismissed_at"),
@@ -72,6 +75,13 @@ export const reminderEvents = sqliteTable(
       table.scheduledForAt,
       table.snoozedUntil
     ),
+    index("idx_reminder_events_target").on(
+      table.workspaceId,
+      table.targetType,
+      table.targetId,
+      table.status
+    ),
+    check("ck_reminder_events_target_type", sql`${table.targetType} in ('item', 'list_item')`),
     check(
       "ck_reminder_events_status",
       sql`${table.status} in ('scheduled', 'fired', 'dismissed', 'snoozed', 'cancelled')`

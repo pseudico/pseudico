@@ -2493,3 +2493,53 @@ Decisions made: Pushed branch and opened ready PR #114; moved PSE-119 to PR Open
 Files changed: docs/session_log.md
 Open questions / risks: GitHub CI/review state still needs confirmation before merge.
 Next actions: commit log update; inspect PR diff/status; merge if clean and green.
+
+## 2026-05-11T10:13:25.7190545+10:00
+Objective: Merge PSE-119 and prepare next Codex Ready ticket.
+Decisions made: CI passed; squash-merged PR #114 at 49882a1; deleted remote/local PSE-119 branch; moved PSE-119 Done; promoted PSE-120.
+Files changed: docs/session_log.md
+Open questions / risks: Final session log entry is local-only unless included in a future PR; unrelated untracked files remain.
+Next actions: Start PSE-120; keep other issues Backlog; maintain one Codex Ready issue.
+
+### 2026-05-11 10:18:17 +10:00
+Objective: Run next Local Work OS ticket end-to-end.
+Decisions made:
+- Reconciled Linear: no PR Open or In Progress issues; PSE-120 is sole Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked files are unrelated and will be left untouched.
+Next actions: Move PSE-120 to In Progress; read docs; implement scoped ticket.
+
+### 2026-05-11 10:19:09 +10:00
+Objective: Start PSE-120 implementation.
+Decisions made:
+- Moved PSE-120 from Codex Ready to In Progress.
+- Pulled main and created branch codex/PSE-120-default-reminders-preferences.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need confirm acceptance criteria from ticket source docs.
+Next actions: Read ticket/docs; inspect reminder/settings code; implement tests.
+
+### 2026-05-11 10:38:21 +10:00
+Objective: Implement PSE-120 reminder defaults and overrides.
+Decisions made:
+- Added reminder target migration for task/list-item policies.
+- Added reminder preferences in app settings and service-level default application.
+- Integrated task/list creation, date-change reschedule, and completion clearing.
+Files changed:
+- packages/db/src/migrations/0011_reminder_targets.ts
+- packages/features/src/reminders/ReminderService.ts
+Open questions / risks: Full suite still running; scheduler UI remains foundational picker-level.
+Next actions: Run pnpm test/build; update docs if needed; open PR.
+
+### 2026-05-11 10:43:43 +10:00
+Objective: Verify PSE-120 implementation.
+Decisions made:
+- Kept full local-only architecture and added migration-backed reminder targets.
+- Updated product/data/module docs for implemented reminder defaults.
+Files changed:
+- docs/session_log.md
+- docs/PRODUCT_SPEC.md
+- docs/DATA_MODEL.md
+Open questions / risks: CI and PR review still pending after push.
+Next actions: Stage/commit; push branch; open ready PR.

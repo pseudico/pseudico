@@ -37,7 +37,10 @@ import {
   type TaskRangeInput
 } from "./TaskQueries";
 import { TagService } from "../metadata/TagService";
-import { ReminderService } from "../reminders/ReminderService";
+import {
+  ReminderService,
+  type ReminderCreationInput
+} from "../reminders/ReminderService";
 import { RecurrenceService } from "../recurrence/RecurrenceService";
 
 // Owns task-specific application operations.
@@ -60,6 +63,7 @@ export type CreateTaskInput = {
   timezone?: string | null;
   sortOrder?: number;
   pinned?: boolean;
+  reminder?: ReminderCreationInput;
 };
 
 export type UpdateTaskInput = {
@@ -193,10 +197,17 @@ export class TaskService {
         item,
         ...(input.actorType === undefined ? {} : { actorType: input.actorType })
       });
+      await this.applyCreationReminder({
+        workspaceId: input.workspaceId,
+        itemId: item.id,
+        ...(input.reminder === undefined ? {} : { reminder: input.reminder }),
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
+      const refreshed = this.requireTask(item.id);
 
       return {
-        item,
-        task,
+        item: refreshed.item,
+        task: refreshed.task,
         searchRecord: inlineTags.searchRecord,
         inlineTags: inlineTags.inlineTagSlugs
       };
@@ -290,7 +301,12 @@ export class TaskService {
         timestamp
       });
 
-      if (input.dueAt !== undefined) {
+      if (input.status === "done") {
+        await this.clearReminderForTaskCompletion({
+          itemId: item.id,
+          ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+        });
+      } else if (input.dueAt !== undefined || input.startAt !== undefined) {
         await this.rescheduleReminderForTaskDateChange({
           itemId: item.id,
           ...(input.actorType === undefined ? {} : { actorType: input.actorType })
@@ -414,6 +430,7 @@ export class TaskService {
       });
 
       const searchRecord = this.upsertSearchRecord(item, task, timestamp);
+      await this.clearReminderForTaskCompletion({ itemId: item.id, actorType });
 
       return { item, task, searchRecord, inlineTags: this.getInlineTagSlugs(item) };
     });
@@ -649,6 +666,61 @@ export class TaskService {
     }).rescheduleReminderForTaskDateChange({
       taskId: input.itemId,
       ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+  }
+
+  private async clearReminderForTaskCompletion(input: {
+    itemId: string;
+    actorType?: ActivityActorType;
+  }): Promise<void> {
+    await new ReminderService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    }).clearTaskReminder({
+      taskId: input.itemId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+  }
+
+  private async applyCreationReminder(input: {
+    workspaceId: string;
+    itemId: string;
+    reminder?: ReminderCreationInput;
+    actorType?: ActivityActorType;
+  }): Promise<void> {
+    if (input.reminder?.mode === "none") {
+      return;
+    }
+
+    const reminderService = new ReminderService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    });
+
+    if (input.reminder === undefined || input.reminder.mode === "default") {
+      await reminderService.applyDefaultTaskReminder({
+        workspaceId: input.workspaceId,
+        taskId: input.itemId,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
+      return;
+    }
+
+    await reminderService.setTaskReminder({
+      workspaceId: input.workspaceId,
+      taskId: input.itemId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      ...(input.reminder.mode === "absolute"
+        ? {
+            triggerAt: input.reminder.triggerAt,
+            ...(input.reminder.anchor === undefined ? {} : { anchor: input.reminder.anchor })
+          }
+        : {
+            leadMinutes: input.reminder.leadMinutes,
+            ...(input.reminder.anchor === undefined ? {} : { anchor: input.reminder.anchor })
+          })
     });
   }
 

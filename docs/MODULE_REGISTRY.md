@@ -42,9 +42,9 @@ new work should account for this implemented baseline:
 - Workflows now have a manual-only service foundation with persisted local
   definitions/runs, preview, and service-backed add-tag, set-category,
   move-item, and create-task actions; scheduling remains future work.
-- Local reminders now have database, service, IPC, scheduler, and shared picker
-  foundations; deeper renderer workflows and notification preference UX remain
-  future work.
+- Local reminders now have task/list-item targets, default preferences,
+  notification enablement, scheduler, IPC, and shared picker foundations;
+  deeper renderer workflows remain future work.
 - Cross-cutting services now include project health, recent activity,
   integrity diagnostics, bounded pagination, app-wide error boundaries/toasts,
   command palette navigation/actions, workspace-scoped recent navigation,
@@ -88,7 +88,7 @@ renderer-only implementation.
 | Saved Views | Own collection and smart-list query definitions. | Saved views, collections, smart-list filters | Workspace, metadata, search, tasks, projects, contacts | Dashboard, Today filters, future reports | V1 |
 | Today | Own daily planning, due/overdue task projections, and rollover planning flows. | Daily plans, planned task references, Today/Tomorrow lanes | Tasks, metadata, saved views, workspace | Dashboard, timeline, calendar | V1 |
 | Dashboard | Own workspace overview widgets, project health summaries, and saved-view widgets. | Dashboard widgets, summary cards, health summaries | Workspace, projects, tasks, search, saved views, today | Workspace home, planning views | V1 |
-| Reminders | Own local task reminder policies, reminder event state, and scheduler-facing projections. | Reminder policies, reminder events | Tasks, activity log, Electron main notifications | Today, dashboard, future calendar | V1 |
+| Reminders | Own local task/list-item reminder policies, default preferences, reminder event state, and scheduler-facing projections. | Reminder policies, reminder events, app-setting defaults | Tasks, lists, activity log, Electron main notifications | Today, dashboard, future calendar | V1 |
 | Recurrence | Own narrow local repeating-task rules and recurring task roll-forward behavior. | Recurrence rules, task recurrence pointers | Tasks, activity log, search, reminders | Today, timeline, calendar | V2 |
 | Timeline | Own timeline projections for dated work and project ranges. | Timeline entries, date ranges, grouped dated work | Tasks, projects, contacts, metadata, saved views | Calendar, dashboard, planning views | V1 |
 | Calendar | Own month/week/day calendar projections and date interactions. | Calendar entries, local dated work, local imports later | Tasks, timeline, metadata, workspace | Today, dashboard, planning views | V1 |
@@ -644,15 +644,16 @@ Integration points:
 
 Owns:
 
-- Local task reminder policy and reminder event persistence.
-- Set, clear, dismiss, snooze, and task-date rescheduling behavior.
+- Local task and list-item reminder policy and reminder event persistence.
+- Workspace default reminder and notification-enabled preferences.
+- Set, clear, dismiss, snooze, and target date rescheduling behavior.
 - Scheduler-facing event projections for Electron main-process notifications.
 
 Does not own:
 
 - Cloud push notifications, mobile notifications, or hosted accounts.
-- General task lifecycle rules outside reminder rescheduling hooks.
-- Full renderer notification preference or recurrence UX.
+- General task/list lifecycle rules outside reminder rescheduling hooks.
+- Full renderer recurrence UX.
 
 Expected service methods:
 
@@ -664,7 +665,7 @@ Expected service methods:
 
 Integration points:
 
-- Tasks for due-date changes and task context.
+- Tasks and list items for start/due-date changes and target context.
 - Activity log for all reminder writes.
 - Electron main for local notifications only.
 

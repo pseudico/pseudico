@@ -52,6 +52,7 @@ const requiredIndexes = [
   "idx_recurrence_rules_workspace_next",
   "idx_reminder_policies_active_task",
   "idx_reminder_events_due",
+  "idx_reminder_events_target",
   "idx_templates_workspace_kind",
   "idx_attachment_versions_attachment",
   "idx_workflow_definitions_workspace_status",
@@ -79,7 +80,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version ten", () => {
+  it("runs on an empty database and records schema version eleven", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -133,14 +134,19 @@ describe("schema migrations", () => {
           version: 10,
           name: "tab_visibility",
           checksum: "pse-107-tab-visibility-v1"
+        },
+        {
+          version: 11,
+          name: "reminder_targets",
+          checksum: "pse-120-reminder-targets-v1"
         }
       ],
-      currentVersion: 10
+      currentVersion: 11
     });
-    expect(service.getCurrentSchemaVersion()).toBe(10);
+    expect(service.getCurrentSchemaVersion()).toBe(11);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 10
+      currentVersion: 11
     });
   });
 

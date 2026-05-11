@@ -1,15 +1,17 @@
 import { Bell, BellOff } from "lucide-react";
 
 export type ReminderPickerValue =
-  | { mode: "relative"; leadMinutes: number }
-  | { mode: "absolute"; triggerAt: string }
+  | { mode: "relative"; leadMinutes: number; anchor?: "due" | "start" }
+  | { mode: "absolute"; triggerAt: string; anchor?: "due" | "start" }
   | null;
 
 export type ReminderPickerProps = {
   value?: ReminderPickerValue;
   disabled?: boolean;
+  notificationsEnabled?: boolean;
   onSetReminder?: (value: Exclude<ReminderPickerValue, null>) => Promise<void> | void;
   onClearReminder?: () => Promise<void> | void;
+  onNotificationsEnabledChange?: (enabled: boolean) => Promise<void> | void;
 };
 
 const RELATIVE_PRESETS = [
@@ -22,13 +24,56 @@ const RELATIVE_PRESETS = [
 export function ReminderPicker({
   value = null,
   disabled = false,
+  notificationsEnabled = true,
   onSetReminder,
-  onClearReminder
+  onClearReminder,
+  onNotificationsEnabledChange
 }: ReminderPickerProps): React.JSX.Element {
   const absoluteValue = value?.mode === "absolute" ? toDateTimeLocalValue(value.triggerAt) : "";
+  const anchor = value?.anchor ?? "due";
 
   return (
-    <div className="reminder-picker" data-reminder-mode={value?.mode ?? "none"}>
+    <div
+      className="reminder-picker"
+      data-notifications-enabled={notificationsEnabled ? "true" : "false"}
+      data-reminder-anchor={anchor}
+      data-reminder-mode={value?.mode ?? "none"}
+    >
+      <label className="reminder-picker-field">
+        <span>Notifications</span>
+        <select
+          disabled={disabled}
+          value={notificationsEnabled ? "enabled" : "disabled"}
+          onChange={(event) => {
+            void onNotificationsEnabledChange?.(event.currentTarget.value === "enabled");
+          }}
+        >
+          <option value="enabled">Local notifications on</option>
+          <option value="disabled">Local notifications off</option>
+        </select>
+      </label>
+
+      <label className="reminder-picker-field">
+        <span>Anchor</span>
+        <select
+          disabled={disabled}
+          value={anchor}
+          onChange={(event) => {
+            const nextAnchor = event.currentTarget.value === "start" ? "start" : "due";
+            if (value?.mode === "relative") {
+              void onSetReminder?.({
+                mode: "relative",
+                leadMinutes: value.leadMinutes,
+                anchor: nextAnchor
+              });
+            }
+          }}
+        >
+          <option value="due">Before due date</option>
+          <option value="start">Before start date</option>
+        </select>
+      </label>
+
       <label className="reminder-picker-field">
         <span>
           <Bell size={15} aria-hidden="true" />
@@ -46,7 +91,8 @@ export function ReminderPicker({
 
             void onSetReminder?.({
               mode: "relative",
-              leadMinutes: Number(selected)
+              leadMinutes: Number(selected),
+              anchor
             });
           }}
         >
@@ -72,7 +118,8 @@ export function ReminderPicker({
 
             void onSetReminder?.({
               mode: "absolute",
-              triggerAt: new Date(event.currentTarget.value).toISOString()
+              triggerAt: new Date(event.currentTarget.value).toISOString(),
+              anchor
             });
           }}
         />
