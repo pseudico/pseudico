@@ -169,6 +169,18 @@ export {
 } from "./services/dateRangeParser";
 export type { DateRangeParserOptions, ParsedDateRange } from "./services/dateRangeParser";
 export {
+  createTimelineDateScale,
+  createTimelineZoomRange,
+  mapTimelineRangeToScale
+} from "./services/timelineDateScale";
+export type {
+  TimelineDateScale,
+  TimelineRangePlacement,
+  TimelineScaleRange,
+  TimelineScaleTick,
+  TimelineZoomLevel
+} from "./services/timelineDateScale";
+export {
   NaturalDateParser,
   createNaturalDateParser,
   parseQuickTaskNaturalDate

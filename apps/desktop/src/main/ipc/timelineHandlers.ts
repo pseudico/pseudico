@@ -119,6 +119,7 @@ function isTimelineViewModelInput(
     isOptionalBoolean(input.includeCompleted) &&
     (input.groupBy === undefined ||
       input.groupBy === "project" ||
+      input.groupBy === "contact" ||
       input.groupBy === "category")
   );
 }
