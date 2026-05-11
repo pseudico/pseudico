@@ -144,6 +144,8 @@ export type UpdateListItemPatch = {
   startAt?: string | null;
   dueAt?: string | null;
   completedAt?: string | null;
+  archivedAt?: string | null;
+  deletedAt?: string | null;
   timestamp: string;
 };
 
@@ -327,13 +329,17 @@ export class ListRepository {
     return updated;
   }
 
-  getListItemById(id: string): ListItemRecord | null {
+  getListItemById(
+    id: string,
+    filters: Pick<ListItemsFilter, "includeDeleted"> = {}
+  ): ListItemRecord | null {
+    const deletedFilter = filters.includeDeleted === true ? "" : "and deleted_at is null";
     const row = this.connection.sqlite
       .prepare<[string], ListItemRow>(
         `select *
          from list_items
          where id = ?
-           and deleted_at is null`
+           ${deletedFilter}`
       )
       .get(id);
 
@@ -564,6 +570,16 @@ export class ListRepository {
       values.push(patch.completedAt);
     }
 
+    if (patch.archivedAt !== undefined) {
+      assignments.push("archived_at = ?");
+      values.push(patch.archivedAt);
+    }
+
+    if (patch.deletedAt !== undefined) {
+      assignments.push("deleted_at = ?");
+      values.push(patch.deletedAt);
+    }
+
     assignments.push("updated_at = ?");
     values.push(patch.timestamp, id);
 
@@ -583,6 +599,26 @@ export class ListRepository {
     }
 
     return updated;
+  }
+
+  softDeleteListItem(id: string, timestamp: string): ListItemRecord {
+    this.connection.sqlite
+      .prepare(
+        `update list_items
+         set deleted_at = ?,
+             updated_at = ?
+         where id = ?
+           and deleted_at is null`
+      )
+      .run(timestamp, timestamp, id);
+
+    const deleted = this.getListItemById(id, { includeDeleted: true });
+
+    if (deleted === null) {
+      throw new Error(`List item row was not found: ${id}.`);
+    }
+
+    return deleted;
   }
 
   getMaxListItemSortOrder(listId: string): number | null {

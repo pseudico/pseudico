@@ -2,6 +2,7 @@ import type { UniversalItemViewModel } from "./ItemCard";
 import type { ParsedDateRange } from "@local-work-os/core";
 import {
   ChecklistEditor,
+  type ChecklistBulkAction,
   type ChecklistEditorItem
 } from "./ChecklistEditor";
 import { PipelineView } from "./PipelineView";
@@ -76,6 +77,11 @@ export type ListCardContentProps = {
     listItem: ListCardItemViewModel,
     direction: "up" | "down"
   ) => Promise<boolean | void> | boolean | void;
+  onBulkActionListItems?: (
+    item: ListCardViewModel,
+    listItems: readonly ListCardItemViewModel[],
+    action: ChecklistBulkAction
+  ) => Promise<boolean | void> | boolean | void;
 };
 
 export function ListCardContent({
@@ -93,6 +99,7 @@ export function ListCardContent({
   onReorderListItem,
   onIndentListItem,
   onMoveListItem,
+  onBulkActionListItems,
   onOutdentListItem
 }: ListCardContentProps): React.JSX.Element {
   const visibleItems =
@@ -162,6 +169,9 @@ export function ListCardContent({
           listId={item.id}
           onAddItem={(title) => onAddItem?.(item, title)}
           onBulkAddItems={(text) => onBulkAddItems?.(item, text)}
+          onBulkActionItems={(listItems, action) =>
+            onBulkActionListItems?.(item, listItems, action)
+          }
           onDateRangeChange={(listItem, range) =>
             onListItemDateRangeChange?.(item, listItem, range)
           }

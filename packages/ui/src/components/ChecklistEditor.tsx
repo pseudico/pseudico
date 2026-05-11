@@ -1,4 +1,14 @@
-import { ClipboardList, Plus } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  CheckCircle2,
+  ClipboardList,
+  Plus,
+  Trash2,
+  X
+} from "lucide-react";
 import type { ClipboardEvent, FormEvent, KeyboardEvent } from "react";
 import { useEffect, useReducer, useRef, useState } from "react";
 import {
@@ -22,6 +32,14 @@ export type ChecklistEditorItem = {
   startAt?: string | null;
   dueAt?: string | null;
 };
+
+export type ChecklistBulkAction =
+  | "complete"
+  | "delete"
+  | "move_up"
+  | "move_down"
+  | "indent"
+  | "outdent";
 
 export type ChecklistEditorProps = {
   items: readonly ChecklistEditorItem[];
@@ -47,6 +65,10 @@ export type ChecklistEditorProps = {
     item: ChecklistEditorItem,
     direction: "up" | "down"
   ) => Promise<boolean | void> | boolean | void;
+  onBulkActionItems?: (
+    items: readonly ChecklistEditorItem[],
+    action: ChecklistBulkAction
+  ) => Promise<boolean | void> | boolean | void;
   onDateRangeChange?: (
     item: ChecklistEditorItem,
     range: ParsedDateRange
@@ -66,6 +88,7 @@ export function ChecklistEditor({
   onMoveItem,
   onOutdentItem,
   onReorderItem,
+  onBulkActionItems,
   listId,
   onToggleItem
 }: ChecklistEditorProps): React.JSX.Element {
@@ -75,11 +98,20 @@ export function ChecklistEditor({
   );
   const [bulkText, setBulkText] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(
+    () => new Set()
+  );
   const rowRefs = useRef(new Map<string, HTMLLIElement>());
   const title = editorState.draftTitle;
 
   useEffect(() => {
     dispatchEditorState({ type: "itemsChanged", items });
+    setSelectedItemIds((current) => {
+      const visibleIds = new Set(items.map((item) => item.id));
+      const next = new Set([...current].filter((itemId) => visibleIds.has(itemId)));
+
+      return next.size === current.size ? current : next;
+    });
   }, [items]);
 
   async function handleAddItem(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -231,6 +263,37 @@ export function ChecklistEditor({
     }
   }
 
+  function toggleBulkSelection(itemId: string, selected: boolean): void {
+    setSelectedItemIds((current) => {
+      const next = new Set(current);
+
+      if (selected) {
+        next.add(itemId);
+      } else {
+        next.delete(itemId);
+      }
+
+      return next;
+    });
+  }
+
+  async function handleBulkAction(action: ChecklistBulkAction): Promise<void> {
+    if (onBulkActionItems === undefined || selectedItemIds.size === 0) {
+      return;
+    }
+
+    const selectedItems = items.filter((item) => selectedItemIds.has(item.id));
+    const submitted = await onBulkActionItems(selectedItems, action);
+
+    if (submitted === false) {
+      return;
+    }
+
+    if (action === "delete") {
+      setSelectedItemIds(new Set());
+    }
+  }
+
   return (
     <div className="checklist-editor">
       {items.length === 0 ? (
@@ -241,6 +304,78 @@ export function ChecklistEditor({
             Keyboard: Enter adds a row. Focus a row, then use Ctrl/Cmd+Left or
             Right to outdent/indent and Ctrl/Cmd+Up or Down to move it.
           </p>
+          {onBulkActionItems === undefined || selectedItemIds.size === 0 ? null : (
+            <div
+              className="checklist-selection-toolbar"
+              role="toolbar"
+              aria-label="Selected checklist actions"
+            >
+              <strong>{selectedItemIds.size} selected</strong>
+              <button
+                className="secondary-button compact-button"
+                disabled={disabled}
+                type="button"
+                onClick={() => void handleBulkAction("complete")}
+              >
+                <CheckCircle2 size={15} aria-hidden="true" />
+                Complete
+              </button>
+              <button
+                className="secondary-button compact-button"
+                disabled={disabled}
+                type="button"
+                onClick={() => void handleBulkAction("move_up")}
+              >
+                <ArrowUp size={15} aria-hidden="true" />
+                Up
+              </button>
+              <button
+                className="secondary-button compact-button"
+                disabled={disabled}
+                type="button"
+                onClick={() => void handleBulkAction("move_down")}
+              >
+                <ArrowDown size={15} aria-hidden="true" />
+                Down
+              </button>
+              <button
+                className="secondary-button compact-button"
+                disabled={disabled}
+                type="button"
+                onClick={() => void handleBulkAction("indent")}
+              >
+                <ArrowRight size={15} aria-hidden="true" />
+                Indent
+              </button>
+              <button
+                className="secondary-button compact-button"
+                disabled={disabled}
+                type="button"
+                onClick={() => void handleBulkAction("outdent")}
+              >
+                <ArrowLeft size={15} aria-hidden="true" />
+                Outdent
+              </button>
+              <button
+                className="danger-button compact-button"
+                disabled={disabled}
+                type="button"
+                onClick={() => void handleBulkAction("delete")}
+              >
+                <Trash2 size={15} aria-hidden="true" />
+                Delete
+              </button>
+              <button
+                className="icon-button"
+                disabled={disabled}
+                type="button"
+                aria-label="Clear checklist selection"
+                onClick={() => setSelectedItemIds(new Set())}
+              >
+                <X size={16} aria-hidden="true" />
+              </button>
+            </div>
+          )}
           <ul className="checklist-items">
             {items.map((item) => {
             const completed = item.status === "done";
@@ -343,6 +478,17 @@ export function ChecklistEditor({
                   target={target}
                 >
                   <label>
+                    {onBulkActionItems === undefined ? null : (
+                      <input
+                        aria-label={`Select ${item.title}`}
+                        checked={selectedItemIds.has(item.id)}
+                        disabled={disabled}
+                        type="checkbox"
+                        onChange={(event) =>
+                          toggleBulkSelection(item.id, event.currentTarget.checked)
+                        }
+                      />
+                    )}
                     <input
                       checked={completed}
                       disabled={disabled}

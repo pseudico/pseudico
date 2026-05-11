@@ -326,6 +326,15 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
       outdentItem: async () => apiOk({ ...listItemSummary(), depth: 0 }),
       moveItem: async () => apiOk(listItemSummary()),
       bulkAddItems: async () => apiOk([listItemSummary()]),
+      bulkUpdateItems: async () => apiOk({
+        listId: 'item_list_1',
+        operation: 'complete',
+        requestedCount: 1,
+        changedCount: 1,
+        skippedCount: 0,
+        items: [],
+        activityId: 'activity_1'
+      }),
       listByContainer: async () => apiOk([listSummary()]),
       createList: async () => apiOk(listSummary()),
       saveAsTemplate: async () =>

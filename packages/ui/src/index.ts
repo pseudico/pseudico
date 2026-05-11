@@ -241,6 +241,7 @@ export {
 } from "./components/RecurrencePicker";
 export {
   ChecklistEditor,
+  type ChecklistBulkAction,
   type ChecklistEditorItem,
   type ChecklistEditorProps
 } from "./components/ChecklistEditor";

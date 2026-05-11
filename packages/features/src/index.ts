@@ -186,7 +186,12 @@ export {
   taskQuickStartActionProvider
 } from "./quickStart";
 export { LinkService, linksModuleContract } from "./links";
-export { ListService, listsModuleContract, parseBulkListItems } from "./lists";
+export {
+  BulkListInsertParser,
+  ListService,
+  listsModuleContract,
+  parseBulkListItems
+} from "./lists";
 export {
   CategoryService,
   ProjectTagBrowserService,
@@ -516,6 +521,10 @@ export type {
 export type {
   AddListItemInput,
   BulkCreateListItemsInput,
+  BulkUpdateListItemResult,
+  BulkUpdateListItemsInput,
+  BulkUpdateListItemsOperation,
+  BulkUpdateListItemsResult,
   CreateListInput,
   ListItemMutationResult,
   ListMutationResult,

@@ -3225,7 +3225,7 @@ a {
 
 .checklist-item label {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
+  grid-template-columns: repeat(2, 20px) minmax(0, 1fr);
   align-items: start;
   gap: 8px;
   color: #262624;
@@ -3238,6 +3238,17 @@ a {
 .checklist-item[data-checklist-item-status="done"] span {
   color: #6d6a62;
   text-decoration: line-through;
+}
+
+.checklist-selection-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid #d9d2c8;
+  border-radius: 10px;
+  background: #fbfaf7;
 }
 
 .checklist-inline-add {

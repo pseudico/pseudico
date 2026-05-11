@@ -9,7 +9,7 @@ import {
 } from "@local-work-os/db";
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ListService, parseBulkListItems } from "../src";
+import { BulkListInsertParser, ListService, parseBulkListItems } from "../src";
 
 let cleanup: (() => Promise<void>) | undefined;
 let connection: DatabaseConnection;
@@ -23,6 +23,9 @@ describe("parseBulkListItems", () => {
       { title: "Book venue", status: "open", depth: 0 },
       { title: "Confirm caterer", status: "done", depth: 1 },
       { title: "Send invites", status: "open", depth: 0 }
+    ]);
+    expect(BulkListInsertParser.parse("\t- Nested")).toEqual([
+      { title: "Nested", status: "open", depth: 1 }
     ]);
   });
 });
@@ -416,6 +419,98 @@ describe("ListService", () => {
           action: "list_item_created",
           targetId: results[2]?.listItem.id
         })
+      ])
+    );
+  });
+
+  it("bulk updates selected list rows with grouped activity and search alignment", async () => {
+    const service = createService();
+    const list = await service.createList({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Launch checklist"
+    });
+    const first = await service.addListItem({
+      listId: list.item.id,
+      title: "Plan launch"
+    });
+    const second = await service.addListItem({
+      listId: list.item.id,
+      title: "Book venue"
+    });
+    const third = await service.addListItem({
+      listId: list.item.id,
+      title: "Send update"
+    });
+
+    const indented = await service.bulkUpdateListItems({
+      listId: list.item.id,
+      listItemIds: [second.listItem.id, third.listItem.id],
+      operation: "indent"
+    });
+    const completed = await service.bulkUpdateListItems({
+      listId: list.item.id,
+      listItemIds: [second.listItem.id, third.listItem.id],
+      operation: "complete"
+    });
+    const moved = await service.bulkUpdateListItems({
+      listId: list.item.id,
+      listItemIds: [second.listItem.id, third.listItem.id],
+      operation: "move_up"
+    });
+    const deleted = await service.bulkUpdateListItems({
+      listId: list.item.id,
+      listItemIds: [third.listItem.id],
+      operation: "delete"
+    });
+
+    expect(indented).toMatchObject({
+      operation: "indent",
+      requestedCount: 2,
+      changedCount: 2,
+      skippedCount: 0
+    });
+    expect(indented.items.map((item) => item.listItem?.listItemParentId)).toEqual([
+      first.listItem.id,
+      second.listItem.id
+    ]);
+    expect(completed).toMatchObject({
+      operation: "complete",
+      changedCount: 2
+    });
+    expect(moved).toMatchObject({
+      operation: "move_up",
+      changedCount: 2,
+      skippedCount: 0
+    });
+    expect(deleted).toMatchObject({
+      operation: "delete",
+      changedCount: 1
+    });
+    expect(service.listItems(list.item.id).map((item) => item.id)).toEqual([
+      second.listItem.id,
+      first.listItem.id
+    ]);
+    expect(
+      new SearchIndexRepository(connection).getByTarget({
+        workspaceId: "workspace_1",
+        targetType: "list_item",
+        targetId: third.listItem.id
+      })
+    ).toMatchObject({
+      targetId: third.listItem.id,
+      isDeleted: true
+    });
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("item", list.item.id, 10)
+        .map((event) => event.action)
+    ).toEqual(
+      expect.arrayContaining([
+        "bulk_list_items_indented",
+        "bulk_list_items_completed",
+        "bulk_list_items_moved",
+        "bulk_list_items_deleted"
       ])
     );
   });

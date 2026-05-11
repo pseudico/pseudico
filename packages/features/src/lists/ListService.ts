@@ -125,6 +125,21 @@ export type BulkCreateListItemsInput = {
   startSortOrder?: number;
 };
 
+export type BulkUpdateListItemsOperation =
+  | "complete"
+  | "delete"
+  | "move_up"
+  | "move_down"
+  | "indent"
+  | "outdent";
+
+export type BulkUpdateListItemsInput = {
+  listId: string;
+  listItemIds: readonly string[];
+  operation: BulkUpdateListItemsOperation;
+  actorType?: ActivityActorType;
+};
+
 export type ListMutationResult = {
   item: ItemRecord;
   list: ListDetailsRecord;
@@ -134,6 +149,24 @@ export type ListMutationResult = {
 export type ListItemMutationResult = {
   listItem: ListItemRecord;
   searchRecord: SearchIndexRecord;
+};
+
+export type BulkUpdateListItemResult = {
+  listItemId: string;
+  ok: boolean;
+  listItem?: ListItemRecord;
+  searchRecord?: SearchIndexRecord;
+  reason?: string;
+};
+
+export type BulkUpdateListItemsResult = {
+  listId: string;
+  operation: BulkUpdateListItemsOperation;
+  requestedCount: number;
+  changedCount: number;
+  skippedCount: number;
+  items: BulkUpdateListItemResult[];
+  activityId: string | null;
 };
 
 export class ListService {
@@ -541,6 +574,131 @@ export class ListService {
     });
   }
 
+  async bulkUpdateListItems(
+    input: BulkUpdateListItemsInput
+  ): Promise<BulkUpdateListItemsResult> {
+    this.validateBulkUpdateListItemsInput(input);
+
+    return await this.transactionService.runInTransaction(async () => {
+      this.requireList(input.listId);
+      const timestamp = createIsoTimestamp(this.now());
+      const uniqueListItemIds = uniqueIds(input.listItemIds);
+      const beforeItems = this.listItems(input.listId, { includeDeleted: false });
+      const selectedIds = new Set(uniqueListItemIds);
+      const repository = new ListRepository(this.connection);
+      const results: BulkUpdateListItemResult[] = [];
+
+      switch (input.operation) {
+        case "complete":
+          for (const listItemId of uniqueListItemIds) {
+            const before = this.requireBulkListItem(input.listId, listItemId);
+
+            if (before.status === "done") {
+              results.push({
+                listItemId,
+                ok: false,
+                listItem: before,
+                reason: "List item is already complete.",
+                searchRecord: this.upsertListItemSearchRecord(before, timestamp)
+              });
+              continue;
+            }
+
+            const listItem = repository.updateListItem(listItemId, {
+              status: "done",
+              completedAt: timestamp,
+              timestamp
+            });
+            results.push(this.toBulkListItemResult(listItem, timestamp));
+            await this.clearReminderForListItemCompletion({
+              listItemId: listItem.id,
+              ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+            });
+          }
+          break;
+        case "delete":
+          for (const listItemId of uniqueListItemIds) {
+            this.requireBulkListItem(input.listId, listItemId);
+            const listItem = repository.softDeleteListItem(listItemId, timestamp);
+            results.push(this.toBulkListItemResult(listItem, timestamp));
+          }
+          break;
+        case "indent":
+          for (const before of beforeItems) {
+            if (!selectedIds.has(before.id)) {
+              continue;
+            }
+
+            const previousItem = beforeItems[beforeItems.indexOf(before) - 1];
+            if (previousItem === undefined) {
+              results.push({
+                listItemId: before.id,
+                ok: false,
+                listItem: before,
+                reason: "First list item cannot be indented.",
+                searchRecord: this.upsertListItemSearchRecord(before, timestamp)
+              });
+              continue;
+            }
+
+            const listItem = repository.updateListItem(before.id, {
+              depth: previousItem.depth + 1,
+              listItemParentId: previousItem.id,
+              timestamp
+            });
+            results.push(this.toBulkListItemResult(listItem, timestamp));
+          }
+          break;
+        case "outdent":
+          for (const before of beforeItems) {
+            if (!selectedIds.has(before.id)) {
+              continue;
+            }
+
+            if (before.listItemParentId === null || before.depth <= 0) {
+              results.push({
+                listItemId: before.id,
+                ok: false,
+                listItem: before,
+                reason: "List item is already at the top indentation level.",
+                searchRecord: this.upsertListItemSearchRecord(before, timestamp)
+              });
+              continue;
+            }
+
+            const parent = this.requireListItem(before.listItemParentId);
+            const grandparent =
+              parent.listItemParentId === null
+                ? null
+                : this.requireListItem(parent.listItemParentId);
+            const listItem = repository.updateListItem(before.id, {
+              depth: grandparent === null ? 0 : grandparent.depth + 1,
+              listItemParentId: grandparent?.id ?? null,
+              timestamp
+            });
+            results.push(this.toBulkListItemResult(listItem, timestamp));
+          }
+          break;
+        case "move_up":
+        case "move_down":
+          results.push(
+            ...this.bulkMoveListItems({
+              listId: input.listId,
+              selectedIds,
+              direction: input.operation === "move_up" ? "up" : "down",
+              timestamp
+            })
+          );
+          break;
+      }
+
+      return this.finishBulkListItemOperation(input, {
+        results,
+        timestamp
+      });
+    });
+  }
+
   async enablePipelineMode(
     listId: string,
     actorType: ActivityActorType = "local_user"
@@ -585,16 +743,179 @@ export class ListService {
     }).movePipelineCard(input);
   }
 
-  listItems(listId: string): ListItemRecord[] {
+  listItems(
+    listId: string,
+    filters: { includeDeleted?: boolean; includeArchived?: boolean } = {}
+  ): ListItemRecord[] {
     validateNonEmptyString(listId, "listId");
 
-    return new ListRepository(this.connection).listItems(listId);
+    return new ListRepository(this.connection).listItems(listId, filters);
   }
 
   listListsByContainer(containerId: string): ListWithItemRecord[] {
     validateNonEmptyString(containerId, "containerId");
 
     return new ListRepository(this.connection).listByContainer(containerId);
+  }
+
+  private bulkMoveListItems(input: {
+    listId: string;
+    selectedIds: Set<string>;
+    direction: "up" | "down";
+    timestamp: string;
+  }): BulkUpdateListItemResult[] {
+    const repository = new ListRepository(this.connection);
+    const orderedItems = this.listItems(input.listId);
+    const targetOrder = [...orderedItems];
+    const indexes =
+      input.direction === "up"
+        ? orderedItems.map((_, index) => index)
+        : orderedItems.map((_, index) => index).reverse();
+
+    for (const index of indexes) {
+      const item = targetOrder[index];
+      const swapIndex = input.direction === "up" ? index - 1 : index + 1;
+      const swapItem = targetOrder[swapIndex];
+
+      if (
+        item === undefined ||
+        swapItem === undefined ||
+        !input.selectedIds.has(item.id) ||
+        input.selectedIds.has(swapItem.id)
+      ) {
+        continue;
+      }
+
+      targetOrder[swapIndex] = item;
+      targetOrder[index] = swapItem;
+    }
+
+    const originalById = new Map(orderedItems.map((item) => [item.id, item]));
+    const sortOrders = orderedItems.map((item) => item.sortOrder);
+    const changedIds = new Set<string>();
+    const results: BulkUpdateListItemResult[] = [];
+
+    targetOrder.forEach((item, index) => {
+      const before = originalById.get(item.id);
+      const nextSortOrder = sortOrders[index] ?? item.sortOrder;
+
+      if (before === undefined || before.sortOrder === nextSortOrder) {
+        return;
+      }
+
+      const listItem = repository.updateListItem(item.id, {
+        sortOrder: nextSortOrder,
+        timestamp: input.timestamp
+      });
+      changedIds.add(item.id);
+
+      if (input.selectedIds.has(item.id)) {
+        results.push(this.toBulkListItemResult(listItem, input.timestamp));
+      }
+    });
+
+    for (const itemId of input.selectedIds) {
+      if (!orderedItems.some((item) => item.id === itemId)) {
+        throw new Error(`List item does not belong to list: ${itemId}.`);
+      }
+
+      if (!changedIds.has(itemId)) {
+        const listItem = this.requireListItem(itemId);
+        results.push({
+          listItemId: itemId,
+          ok: false,
+          listItem,
+          reason:
+            input.direction === "up"
+              ? "List item cannot move above the first row."
+              : "List item cannot move below the last row.",
+          searchRecord: this.upsertListItemSearchRecord(listItem, input.timestamp)
+        });
+      }
+    }
+
+    return sortResultsByRequestedOrder(results, Array.from(input.selectedIds));
+  }
+
+  private toBulkListItemResult(
+    listItem: ListItemRecord,
+    timestamp: string
+  ): BulkUpdateListItemResult {
+    return {
+      listItemId: listItem.id,
+      ok: true,
+      listItem,
+      searchRecord: this.upsertListItemSearchRecord(listItem, timestamp)
+    };
+  }
+
+  private finishBulkListItemOperation(
+    input: BulkUpdateListItemsInput,
+    details: {
+      results: BulkUpdateListItemResult[];
+      timestamp: string;
+    }
+  ): BulkUpdateListItemsResult {
+    const changedCount = countBulkListItemChanges(details.results);
+    const activityId =
+      details.results.length === 0
+        ? null
+        : this.logBulkListItemEvent({
+            listId: input.listId,
+            actorType: input.actorType ?? "local_user",
+            operation: input.operation,
+            summary: summarizeBulkListItemOperation(input.operation, changedCount),
+            results: details.results,
+            timestamp: details.timestamp
+          });
+
+    return {
+      listId: input.listId,
+      operation: input.operation,
+      requestedCount: uniqueIds(input.listItemIds).length,
+      changedCount,
+      skippedCount: details.results.length - changedCount,
+      items: sortResultsByRequestedOrder(details.results, uniqueIds(input.listItemIds)),
+      activityId
+    };
+  }
+
+  private logBulkListItemEvent(input: {
+    listId: string;
+    actorType: ActivityActorType;
+    operation: BulkUpdateListItemsOperation;
+    summary: string;
+    results: BulkUpdateListItemResult[];
+    timestamp: string;
+  }): string {
+    const list = this.requireList(input.listId);
+    const event = new ActivityLogService({
+      connection: this.connection,
+      idFactory: this.idFactory
+    }).logEvent({
+      workspaceId: list.list.workspaceId,
+      actorType: input.actorType,
+      action: actionForBulkListItemOperation(input.operation),
+      targetType: "item",
+      targetId: input.listId,
+      summary: input.summary,
+      beforeJson: null,
+      afterJson: JSON.stringify({
+        operation: input.operation,
+        changedCount: countBulkListItemChanges(input.results),
+        skippedCount:
+          input.results.length - countBulkListItemChanges(input.results),
+        targets: input.results.map((result) => ({
+          listItemId: result.listItemId,
+          ok: result.ok,
+          reason: result.reason ?? null,
+          title: result.listItem?.title ?? null
+        }))
+      }),
+      timestamp: input.timestamp
+    });
+
+    return event.id;
   }
 
   private async createListItemInCurrentTransaction(
@@ -662,6 +983,16 @@ export class ListService {
 
     if (listItem === null) {
       throw new Error(`List item was not found: ${id}.`);
+    }
+
+    return listItem;
+  }
+
+  private requireBulkListItem(listId: string, listItemId: string): ListItemRecord {
+    const listItem = this.requireListItem(listItemId);
+
+    if (listItem.listId !== listId) {
+      throw new Error(`List item does not belong to list: ${listItemId}.`);
     }
 
     return listItem;
@@ -989,6 +1320,22 @@ export class ListService {
       validateDepth(item.depth);
     }
   }
+
+  private validateBulkUpdateListItemsInput(input: BulkUpdateListItemsInput): void {
+    validateNonEmptyString(input.listId, "listId");
+
+    if (uniqueIds(input.listItemIds).length === 0) {
+      throw new Error("listItemIds must include at least one list item.");
+    }
+
+    if (!isBulkUpdateListItemsOperation(input.operation)) {
+      throw new Error("operation must be complete, delete, move_up, move_down, indent, or outdent.");
+    }
+
+    for (const listItemId of uniqueIds(input.listItemIds)) {
+      validateNonEmptyString(listItemId, "listItemId");
+    }
+  }
 }
 
 export const listsModuleContract = {
@@ -1019,6 +1366,82 @@ function validateDepth(value: number | undefined): void {
 
   if (!Number.isInteger(value) || value < 0) {
     throw new Error("depth must be a non-negative integer.");
+  }
+}
+
+function uniqueIds(ids: readonly string[]): string[] {
+  return [...new Set(ids.map((id) => id.trim()).filter(Boolean))];
+}
+
+function countBulkListItemChanges(
+  results: readonly BulkUpdateListItemResult[]
+): number {
+  return results.filter((result) => result.ok).length;
+}
+
+function sortResultsByRequestedOrder(
+  results: readonly BulkUpdateListItemResult[],
+  requestedIds: readonly string[]
+): BulkUpdateListItemResult[] {
+  const order = new Map(requestedIds.map((id, index) => [id, index]));
+
+  return [...results].sort(
+    (left, right) =>
+      (order.get(left.listItemId) ?? Number.MAX_SAFE_INTEGER) -
+      (order.get(right.listItemId) ?? Number.MAX_SAFE_INTEGER)
+  );
+}
+
+function isBulkUpdateListItemsOperation(
+  value: string
+): value is BulkUpdateListItemsOperation {
+  return (
+    value === "complete" ||
+    value === "delete" ||
+    value === "move_up" ||
+    value === "move_down" ||
+    value === "indent" ||
+    value === "outdent"
+  );
+}
+
+function actionForBulkListItemOperation(
+  operation: BulkUpdateListItemsOperation
+): typeof ActivityAction[keyof typeof ActivityAction] {
+  switch (operation) {
+    case "complete":
+      return ActivityAction.bulkListItemsCompleted;
+    case "delete":
+      return ActivityAction.bulkListItemsDeleted;
+    case "move_up":
+    case "move_down":
+      return ActivityAction.bulkListItemsMoved;
+    case "indent":
+      return ActivityAction.bulkListItemsIndented;
+    case "outdent":
+      return ActivityAction.bulkListItemsOutdented;
+  }
+}
+
+function summarizeBulkListItemOperation(
+  operation: BulkUpdateListItemsOperation,
+  changedCount: number
+): string {
+  const suffix = changedCount === 1 ? "list item" : "list items";
+
+  switch (operation) {
+    case "complete":
+      return `Completed ${changedCount} selected ${suffix}.`;
+    case "delete":
+      return `Soft-deleted ${changedCount} selected ${suffix}.`;
+    case "move_up":
+      return `Moved ${changedCount} selected ${suffix} up.`;
+    case "move_down":
+      return `Moved ${changedCount} selected ${suffix} down.`;
+    case "indent":
+      return `Indented ${changedCount} selected ${suffix}.`;
+    case "outdent":
+      return `Outdented ${changedCount} selected ${suffix}.`;
   }
 }
 

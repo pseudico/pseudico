@@ -38,6 +38,7 @@ import {
   RelatedContactsPanel,
   TaskCardContent,
   TaskQuickAdd,
+  type ChecklistBulkAction,
   type ContainerTabSummaryCardViewModel,
   type CreateListFormValues,
   type FileCardViewModel,
@@ -2129,6 +2130,36 @@ export function ProjectDetailPage({
     );
   }
 
+  async function bulkUpdateProjectListItems(
+    list: ListCardViewModel,
+    listItems: readonly ListCardItemViewModel[],
+    action: ChecklistBulkAction
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setListBusyId(list.id);
+    setListError(null);
+
+    const result = await apiClient.lists.bulkUpdateItems({
+      listId: list.id,
+      listItemIds: listItems.map((listItem) => listItem.id),
+      operation: action
+    });
+
+    setListBusyId(null);
+
+    if (!result.ok) {
+      setListError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    return true;
+  }
+
   async function applyProjectListKeyboardMutation(
     list: ListCardViewModel,
     operation: () => ReturnType<typeof apiClient.lists.indentItem>
@@ -2483,6 +2514,7 @@ export function ProjectDetailPage({
             item={item}
             onAddItem={addListItem}
             onBulkAddItems={bulkAddListItems}
+            onBulkActionListItems={bulkUpdateProjectListItems}
             onAddPipelineCard={addPipelineCard}
             onIndentListItem={indentProjectListItem}
             onListItemDateRangeChange={updateListItemDateRange}
