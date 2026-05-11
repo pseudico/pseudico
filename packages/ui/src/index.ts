@@ -31,7 +31,17 @@ export {
 } from "./forms/TaskQuickAdd";
 export {
   NoteEditor,
+  isNoteEditorDirty,
+  parseNoteDraft,
+  serializeNoteDraft,
+  shouldAutosaveNoteEditor,
+  shouldRecoverNoteDraft,
+  type NoteDraftRecord,
+  type NoteDraftStorage,
+  type NoteEditorAutosaveOptions,
   type NoteEditorProps,
+  type NoteEditorSaveMeta,
+  type NoteEditorSaveResult,
   type NoteEditorValues,
   type NoteWikilinkSuggestion
 } from "./forms/NoteEditor";

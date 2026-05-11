@@ -1139,6 +1139,31 @@ a {
   gap: 8px;
 }
 
+.note-draft-recovery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid #d8bf83;
+  border-radius: 8px;
+  background: #fff8df;
+  color: #654d13;
+  font-size: 13px;
+}
+
+.note-autosave-status {
+  margin: 0;
+  color: #6d6a62;
+  font-size: 12px;
+}
+
+.note-autosave-status-error,
+.note-autosave-status-conflict {
+  color: #8b3219;
+  font-weight: 650;
+}
+
 .move-to-container-form {
   display: grid;
   gap: 14px;

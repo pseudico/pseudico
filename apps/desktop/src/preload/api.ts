@@ -2485,6 +2485,7 @@ export type CreateNoteInput = {
 export type UpdateNoteInput = {
   itemId: string;
   actorType?: "local_user" | "system" | "importer";
+  expectedNoteUpdatedAt?: string;
   title?: string;
   content?: string;
   categoryId?: string | null;
