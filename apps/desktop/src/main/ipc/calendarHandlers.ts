@@ -10,6 +10,8 @@ import {
   type ApiResult,
   type CalendarMonthInput,
   type CalendarMonthViewModelSummary,
+  type CalendarRescheduleItemInput,
+  type CalendarRescheduleItemSummary,
   type WorkspaceSummary
 } from "../../preload/api";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
@@ -23,6 +25,9 @@ type CalendarIpcHandlers = {
   handleGetCalendarMonth: (
     input: unknown
   ) => Promise<ApiResult<CalendarMonthViewModelSummary>>;
+  handleRescheduleCalendarItem: (
+    input: unknown
+  ) => Promise<ApiResult<CalendarRescheduleItemSummary>>;
 };
 
 export function createCalendarIpcHandlers(
@@ -48,6 +53,28 @@ export function createCalendarIpcHandlers(
         });
 
         return apiOk(toCalendarMonthSummary(viewModel));
+      });
+    },
+
+    async handleRescheduleCalendarItem(input) {
+      if (!isCalendarRescheduleItemInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "rescheduleCalendarItem requires itemId, kind, dueAt, and optional startAt/allDay fields."
+        );
+      }
+
+      return await withCalendarService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(
+          input.workspaceId,
+          context.workspace
+        );
+        const result = await context.calendarService.rescheduleCalendarItem({
+          ...input,
+          workspaceId
+        });
+
+        return apiOk(result);
       });
     }
   };
@@ -117,12 +144,34 @@ function isCalendarMonthInput(input: unknown): input is CalendarMonthInput {
   );
 }
 
+function isCalendarRescheduleItemInput(
+  input: unknown
+): input is CalendarRescheduleItemInput {
+  return (
+    isRecord(input) &&
+    isOptionalString(input.workspaceId) &&
+    isOptionalNullableString(input.dueAt) &&
+    isOptionalNullableString(input.startAt) &&
+    isNonEmptyString(input.itemId) &&
+    (input.kind === "task" || input.kind === "list_item") &&
+    isOptionalBoolean(input.allDay)
+  );
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function isOptionalString(value: unknown): boolean {
   return value === undefined || (typeof value === "string" && value.trim().length > 0);
+}
+
+function isOptionalNullableString(value: unknown): boolean {
+  return value === undefined || value === null || isNonEmptyString(value);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
 }
 
 function isDateInput(value: unknown): value is string | Date {

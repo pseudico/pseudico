@@ -1454,6 +1454,23 @@ export type CalendarMonthViewModelSummary = {
   days: CalendarDaySummary[];
 };
 
+export type CalendarRescheduleItemInput = {
+  workspaceId?: string;
+  itemId: string;
+  kind: "task" | "list_item";
+  dueAt: string | null;
+  startAt?: string | null;
+  allDay?: boolean;
+};
+
+export type CalendarRescheduleItemSummary = {
+  itemId: string;
+  kind: "task" | "list_item";
+  startAt: string | null;
+  dueAt: string | null;
+  allDay: boolean;
+};
+
 export type CreateTagCollectionInput = {
   workspaceId?: string;
   tagSlug: string;
@@ -2951,7 +2968,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     saveFilterAsView: "local-work-os:timeline:save-filter-as-view"
   },
   calendar: {
-    getMonth: "local-work-os:calendar:get-month"
+    getMonth: "local-work-os:calendar:get-month",
+    rescheduleItem: "local-work-os:calendar:reschedule-item"
   },
   dashboard: {
     getDefault: "local-work-os:dashboard:get-default"
@@ -3573,6 +3591,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.calendar.getMonth]: {
     input: CalendarMonthInput;
     result: ApiResult<CalendarMonthViewModelSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.calendar.rescheduleItem]: {
+    input: CalendarRescheduleItemInput;
+    result: ApiResult<CalendarRescheduleItemSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.dashboard.getDefault]: {
     input: GetDefaultDashboardInput | undefined;
@@ -4320,6 +4342,9 @@ export type LocalWorkOsApi = {
     getMonth: (
       input: CalendarMonthInput
     ) => Promise<ApiResult<CalendarMonthViewModelSummary>>;
+    rescheduleItem: (
+      input: CalendarRescheduleItemInput
+    ) => Promise<ApiResult<CalendarRescheduleItemSummary>>;
   };
   dashboard: {
     getDefault: (
@@ -4999,7 +5024,9 @@ export function createLocalWorkOsApi(
     },
     calendar: {
       getMonth: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.calendar.getMonth, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.calendar.getMonth, input),
+      rescheduleItem: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.calendar.rescheduleItem, input)
     },
     dashboard: {
       getDefault: (input) =>

@@ -8,7 +8,13 @@ import {
 } from "@local-work-os/db";
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { CalendarService, ListService, TaskService, createCalendarMonthRange } from "../src";
+import {
+  CalendarService,
+  ListService,
+  TaskService,
+  createCalendarMonthRange,
+  createCalendarWeekRange
+} from "../src";
 
 let cleanup: (() => Promise<void>) | undefined;
 let connection: DatabaseConnection;
@@ -61,6 +67,14 @@ describe("CalendarService", () => {
       month: "2026-05",
       startInclusive: "2026-05-01T00:00:00.000Z",
       endExclusive: "2026-06-01T00:00:00.000Z"
+    });
+  });
+
+  it("creates a Sunday-start calendar week range", () => {
+    expect(createCalendarWeekRange("2026-05-15")).toMatchObject({
+      month: "2026-05",
+      startInclusive: "2026-05-10T00:00:00.000Z",
+      endExclusive: "2026-05-17T00:00:00.000Z"
     });
   });
 
@@ -153,6 +167,93 @@ describe("CalendarService", () => {
       month: "2026-05",
       includeCompleted: true
     }).totalCount).toBe(1);
+  });
+
+  it("projects all-day and timed work into week and day views", async () => {
+    const taskService = createTaskService();
+    await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "All-day planning",
+      dueAt: "2026-05-12",
+      allDay: true
+    });
+    await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Timed review",
+      startAt: "2026-05-12T10:00:00.000Z",
+      dueAt: "2026-05-12T10:30:00.000Z",
+      allDay: false
+    });
+
+    const week = createCalendarService().getCalendarWeek({
+      workspaceId: "workspace_1",
+      weekOf: "2026-05-12"
+    });
+    const day = createCalendarService().getCalendarDay({
+      workspaceId: "workspace_1",
+      date: "2026-05-12"
+    });
+
+    expect(week.days).toHaveLength(7);
+    expect(week.days.find((candidate) => candidate.date === "2026-05-12")?.items)
+      .toMatchObject([
+        { title: "All-day planning", allDay: true },
+        { title: "Timed review", allDay: false }
+      ]);
+    expect(day.days).toHaveLength(1);
+    expect(day.days[0]?.items.map((item) => item.title)).toEqual([
+      "All-day planning",
+      "Timed review"
+    ]);
+  });
+
+  it("reschedules task and list item calendar entries through write services", async () => {
+    const taskService = createTaskService();
+    const listService = createListService();
+    const task = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Drag task",
+      dueAt: "2026-05-11"
+    });
+    const list = await listService.createList({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Drag list"
+    });
+    const listItem = await listService.addListItem({
+      listId: list.item.id,
+      title: "Drag list row",
+      dueAt: "2026-05-11"
+    });
+
+    const calendarService = createCalendarService();
+    await calendarService.rescheduleCalendarItem({
+      workspaceId: "workspace_1",
+      itemId: task.item.id,
+      kind: "task",
+      dueAt: "2026-05-12T09:00:00.000Z",
+      startAt: "2026-05-12T08:30:00.000Z",
+      allDay: false
+    });
+    await calendarService.rescheduleCalendarItem({
+      workspaceId: "workspace_1",
+      itemId: listItem.listItem.id,
+      kind: "list_item",
+      dueAt: "2026-05-13T00:00:00.000Z"
+    });
+
+    const month = calendarService.getCalendarMonth({
+      workspaceId: "workspace_1",
+      month: "2026-05"
+    });
+
+    expect(month.days.find((day) => day.date === "2026-05-12")?.items[0])
+      .toMatchObject({ title: "Drag task", allDay: false });
+    expect(month.days.find((day) => day.date === "2026-05-13")?.items[0])
+      .toMatchObject({ title: "Drag list row", kind: "list_item" });
   });
 });
 

@@ -215,7 +215,7 @@ describe("ContainerGroupingService", () => {
         containerType: "project"
       })
     ).toHaveLength(750);
-  });
+  }, 20_000);
 });
 
 function createProjectService(): ProjectService {

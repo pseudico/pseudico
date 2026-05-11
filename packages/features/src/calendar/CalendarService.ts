@@ -11,6 +11,8 @@ import {
   type TaskWithItemRecord
 } from "@local-work-os/db";
 import type { FeatureModuleContract } from "../featureModuleContract";
+import { ListService } from "../lists/ListService";
+import { TaskService } from "../tasks/TaskService";
 import { createTaskDateRange } from "../tasks/TaskQueries";
 
 export type CalendarEntryKind = "task" | "list_item";
@@ -21,10 +23,26 @@ export type CalendarMonthInput = {
   includeCompleted?: boolean;
 };
 
+export type CalendarWeekInput = {
+  workspaceId: string;
+  weekOf: string | Date;
+  includeCompleted?: boolean;
+};
+
+export type CalendarDayInput = {
+  workspaceId: string;
+  date: string | Date;
+  includeCompleted?: boolean;
+};
+
 export type CalendarMonthRange = {
   month: string;
   startInclusive: string;
   endExclusive: string;
+};
+
+export type CalendarRange = CalendarMonthRange & {
+  label?: string;
 };
 
 export type CalendarNavigationTarget = {
@@ -71,10 +89,27 @@ export type CalendarDay = {
 export type CalendarMonthViewModel = {
   workspaceId: string;
   generatedAt: string;
-  range: CalendarMonthRange;
+  range: CalendarRange;
   includeCompleted: boolean;
   totalCount: number;
   days: CalendarDay[];
+};
+
+export type CalendarRescheduleItemInput = {
+  workspaceId: string;
+  itemId: string;
+  kind: CalendarEntryKind;
+  dueAt: string | null;
+  startAt?: string | null;
+  allDay?: boolean;
+};
+
+export type CalendarRescheduleItemResult = {
+  itemId: string;
+  kind: CalendarEntryKind;
+  startAt: string | null;
+  dueAt: string | null;
+  allDay: boolean;
 };
 
 // Owns calendar projection application contracts.
@@ -127,6 +162,126 @@ export class CalendarService {
     const date = toUtcDayKey(parseDateInput(input.date, "date"));
 
     return month.days.find((day) => day.date === date)?.items ?? [];
+  }
+
+  getCalendarWeek(input: CalendarWeekInput): CalendarMonthViewModel {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+    const range = createCalendarWeekRange(input.weekOf);
+    const items = this.listCalendarItems({
+      workspaceId: input.workspaceId,
+      range,
+      includeCompleted: input.includeCompleted === true
+    });
+
+    return {
+      workspaceId: input.workspaceId,
+      generatedAt: createIsoTimestamp(this.now()),
+      range,
+      includeCompleted: input.includeCompleted === true,
+      totalCount: items.length,
+      days: buildCalendarDaysForRange({
+        range,
+        now: this.now(),
+        items
+      })
+    };
+  }
+
+  getCalendarDay(input: CalendarDayInput): CalendarMonthViewModel {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+    const range = createCalendarDayRange(input.date);
+    const items = this.listCalendarItems({
+      workspaceId: input.workspaceId,
+      range,
+      includeCompleted: input.includeCompleted === true
+    });
+
+    return {
+      workspaceId: input.workspaceId,
+      generatedAt: createIsoTimestamp(this.now()),
+      range,
+      includeCompleted: input.includeCompleted === true,
+      totalCount: items.length,
+      days: buildCalendarDaysForRange({
+        range,
+        now: this.now(),
+        items
+      })
+    };
+  }
+
+  async rescheduleCalendarItem(
+    input: CalendarRescheduleItemInput
+  ): Promise<CalendarRescheduleItemResult> {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+    validateNonEmptyString(input.itemId, "itemId");
+
+    if (input.kind === "task") {
+      const result = await new TaskService({
+        connection: this.connection,
+        now: this.now
+      }).rescheduleTask({
+        itemId: input.itemId,
+        dueAt: input.dueAt,
+        ...(input.startAt === undefined ? {} : { startAt: input.startAt }),
+        ...(input.allDay === undefined ? {} : { allDay: input.allDay })
+      });
+
+      if (result.item.workspaceId !== input.workspaceId) {
+        throw new Error("Calendar item workspace mismatch.");
+      }
+
+      return {
+        itemId: result.item.id,
+        kind: "task",
+        startAt: result.task.startAt,
+        dueAt: result.task.dueAt,
+        allDay: result.task.allDay
+      };
+    }
+
+    const result = await new ListService({
+      connection: this.connection,
+      now: this.now
+    }).updateListItem({
+      listItemId: input.itemId,
+      dueAt: input.dueAt,
+      ...(input.startAt === undefined ? {} : { startAt: input.startAt })
+    });
+
+    if (result.listItem.workspaceId !== input.workspaceId) {
+      throw new Error("Calendar item workspace mismatch.");
+    }
+
+    return {
+      itemId: result.listItem.id,
+      kind: "list_item",
+      startAt: result.listItem.startAt,
+      dueAt: result.listItem.dueAt,
+      allDay: true
+    };
+  }
+
+  private listCalendarItems(input: {
+    workspaceId: string;
+    range: CalendarRange | CalendarMonthRange;
+    includeCompleted: boolean;
+  }): CalendarItem[] {
+    const tasks = new TaskRepository(this.connection).listTimelineBetween({
+      workspaceId: input.workspaceId,
+      range: input.range,
+      includeCompleted: input.includeCompleted
+    });
+    const listItems = new ListRepository(this.connection).listDatedItemsBetween({
+      workspaceId: input.workspaceId,
+      range: input.range,
+      includeCompleted: input.includeCompleted
+    });
+
+    return [
+      ...this.hydrateTaskItems(input.workspaceId, tasks),
+      ...this.hydrateListItems(input.workspaceId, listItems)
+    ].sort(compareCalendarItems);
   }
 
   private hydrateTaskItems(
@@ -234,6 +389,41 @@ export function createCalendarMonthRange(month: string | Date): CalendarMonthRan
   };
 }
 
+export function createCalendarWeekRange(weekOf: string | Date): CalendarRange {
+  const date = parseDateInput(weekOf, "weekOf");
+  const start = new Date(Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate()
+  ));
+  start.setUTCDate(start.getUTCDate() - start.getUTCDay());
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 7);
+
+  return {
+    month: toUtcDayKey(start).slice(0, 7),
+    label: `${toUtcDayKey(start)} week`,
+    ...createTaskDateRange({ start, end })
+  };
+}
+
+export function createCalendarDayRange(day: string | Date): CalendarRange {
+  const date = parseDateInput(day, "date");
+  const start = new Date(Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate()
+  ));
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 1);
+
+  return {
+    month: toUtcDayKey(start).slice(0, 7),
+    label: toUtcDayKey(start),
+    ...createTaskDateRange({ start, end })
+  };
+}
+
 function createHydrationContext(connection: DatabaseConnection, workspaceId: string): {
   getCategory: (categoryId: string | null) => CategoryRecord | null;
   getContainer: (containerId: string) => ContainerRecord;
@@ -295,6 +485,32 @@ function buildCalendarDays(input: {
       dayOfMonth: cursor.getUTCDate(),
       weekday: cursor.getUTCDay(),
       inCurrentMonth: true,
+      isToday: date === today,
+      items: input.items.filter((item) => itemTouchesDay(item, date))
+    });
+  }
+
+  return days;
+}
+
+function buildCalendarDaysForRange(input: {
+  range: CalendarRange | CalendarMonthRange;
+  now: Date;
+  items: CalendarItem[];
+}): CalendarDay[] {
+  const start = new Date(input.range.startInclusive);
+  const end = new Date(input.range.endExclusive);
+  const today = toUtcDayKey(input.now);
+  const days: CalendarDay[] = [];
+  const rangeMonth = input.range.month;
+
+  for (const cursor = new Date(start); cursor < end; cursor.setUTCDate(cursor.getUTCDate() + 1)) {
+    const date = toUtcDayKey(cursor);
+    days.push({
+      date,
+      dayOfMonth: cursor.getUTCDate(),
+      weekday: cursor.getUTCDay(),
+      inCurrentMonth: date.startsWith(rangeMonth),
       isToday: date === today,
       items: input.items.filter((item) => itemTouchesDay(item, date))
     });

@@ -248,6 +248,15 @@ export {
   type MonthCalendarProps
 } from "./components/MonthCalendar";
 export {
+  CalendarDayView,
+  CalendarWeekView,
+  type CalendarDayViewProps,
+  type CalendarRescheduleDrop,
+  type CalendarScheduleDay,
+  type CalendarScheduleItem,
+  type CalendarWeekViewProps
+} from "./components/CalendarWeekDay";
+export {
   TodayTaskCard,
   type TodayTaskCardProps,
   type TodayTaskCardViewModel

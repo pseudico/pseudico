@@ -95,7 +95,9 @@ export {
 export {
   CalendarService,
   calendarModuleContract,
-  createCalendarMonthRange
+  createCalendarDayRange,
+  createCalendarMonthRange,
+  createCalendarWeekRange
 } from "./calendar";
 export {
   ContactRelationshipService,
@@ -371,11 +373,16 @@ export type {
 } from "./bulkActions";
 export type {
   CalendarDay,
+  CalendarDayInput,
   CalendarItem,
   CalendarMonthInput,
   CalendarMonthRange,
   CalendarMonthViewModel,
-  CalendarNavigationTarget
+  CalendarNavigationTarget,
+  CalendarRange,
+  CalendarRescheduleItemInput,
+  CalendarRescheduleItemResult,
+  CalendarWeekInput
 } from "./calendar";
 export type {
   AddContactFieldInput,
