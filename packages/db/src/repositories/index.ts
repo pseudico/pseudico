@@ -25,6 +25,14 @@ export {
   type UpdateCategoryPatch
 } from "./CategoryRepository";
 export {
+  CalendarFeedRepository,
+  type CalendarEventRecord,
+  type CalendarSourceRecord,
+  type CalendarSourceType,
+  type UpsertCalendarEventInput,
+  type UpsertCalendarSourceInput
+} from "./CalendarFeedRepository";
+export {
   AppSettingsRepository,
   type AppSettingRecord,
   type CreateAppSettingInput,

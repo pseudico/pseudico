@@ -3,6 +3,7 @@ export { appSettings } from "./appSettings";
 export { attachments } from "./attachments";
 export { attachmentVersions } from "./attachmentVersions";
 export { categories } from "./categories";
+export { calendarEvents, calendarSources } from "./calendarFeeds";
 export { contactFields } from "./contactFields";
 export { containerTabs } from "./containerTabs";
 export { comments } from "./comments";
@@ -29,5 +30,5 @@ export { templates } from "./templates";
 export { workflowDefinitions, workflowRuns } from "./workflows";
 export { workspaces } from "./workspaces";
 
-export const schemaVersion = 13;
+export const schemaVersion = 14;
 

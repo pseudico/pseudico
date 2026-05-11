@@ -46,6 +46,7 @@ export function CalendarPage({
   const [loading, setLoading] = useState(initialCalendar === undefined);
   const [error, setError] = useState<string | null>(null);
   const [creatingTaskDate, setCreatingTaskDate] = useState<string | null>(null);
+  const [importingIcs, setImportingIcs] = useState(false);
 
   useEffect(() => {
     if (initialCalendar !== undefined) {
@@ -187,6 +188,38 @@ export function CalendarPage({
     await refreshCalendar();
   }
 
+  async function importIcsFile(): Promise<void> {
+    const workspaceId = currentWorkspace?.id ?? calendar?.workspaceId;
+
+    if (workspaceId === undefined) {
+      setError("Open a local workspace before importing an ICS file.");
+      return;
+    }
+
+    const filePath = window.prompt("Absolute path to a local .ics file");
+
+    if (filePath === null || filePath.trim().length === 0) {
+      return;
+    }
+
+    setImportingIcs(true);
+    setError(null);
+
+    const result = await apiClient.calendar!.importIcsFile({
+      workspaceId,
+      filePath: filePath.trim()
+    });
+
+    setImportingIcs(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    await refreshCalendar();
+  }
+
   function openCalendarItem(
     item: CalendarItemSummary | MonthCalendarItem | CalendarScheduleItem
   ): void {
@@ -231,15 +264,25 @@ export function CalendarPage({
           <h2>Calendar</h2>
           <p>Month view of local dated tasks and list items.</p>
         </div>
-        <button
-          className="secondary-button compact-button"
-          disabled={loading}
-          type="button"
-          onClick={() => void refreshCalendar()}
-        >
-          <RefreshCw size={16} aria-hidden="true" />
-          Refresh
-        </button>
+        <div className="button-row">
+          <button
+            className="secondary-button compact-button"
+            disabled={loading || importingIcs}
+            type="button"
+            onClick={() => void importIcsFile()}
+          >
+            Import ICS
+          </button>
+          <button
+            className="secondary-button compact-button"
+            disabled={loading}
+            type="button"
+            onClick={() => void refreshCalendar()}
+          >
+            <RefreshCw size={16} aria-hidden="true" />
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div className="calendar-filter-bar">
@@ -306,6 +349,9 @@ export function CalendarPage({
       {creatingTaskDate === null ? null : (
         <p className="muted-text">Creating task for {creatingTaskDate}...</p>
       )}
+      {importingIcs ? (
+        <p className="muted-text">Importing read-only ICS events...</p>
+      ) : null}
 
       {viewMode === "month" ? (
         <MonthCalendar
@@ -344,6 +390,10 @@ export function CalendarPage({
 }
 
 export function getCalendarItemDestination(item: CalendarItemSummary): string {
+  if (item.navigationTarget.targetType === "calendar_event") {
+    return "/calendar";
+  }
+
   const sourceItemId =
     item.navigationTarget.sourceItemId ?? item.navigationTarget.targetId;
   const itemQuery = `?item=${encodeURIComponent(sourceItemId)}`;

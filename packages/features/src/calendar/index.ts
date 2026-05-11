@@ -5,6 +5,10 @@ export {
   createCalendarMonthRange,
   createCalendarWeekRange
 } from "./CalendarService";
+export {
+  CalendarFeedService,
+  parseIcsEvents
+} from "./CalendarFeedService";
 export type {
   CalendarDay,
   CalendarDayInput,
@@ -18,3 +22,8 @@ export type {
   CalendarRescheduleItemResult,
   CalendarWeekInput
 } from "./CalendarService";
+export type {
+  CalendarFeedEventView,
+  IcsImportInput,
+  IcsImportResult
+} from "./CalendarFeedService";

@@ -380,7 +380,9 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
     calendar: {
       getMonth: (input) => callApi(() => api.calendar!.getMonth(input)),
       rescheduleItem: (input) =>
-        callApi(() => api.calendar!.rescheduleItem(input))
+        callApi(() => api.calendar!.rescheduleItem(input)),
+      importIcsFile: (input) =>
+        callApi(() => api.calendar!.importIcsFile(input))
     },
     dashboard: {
       getDefault: (input) => callApi(() => api.dashboard.getDefault(input))
@@ -906,7 +908,9 @@ export const desktopApiClient: LocalWorkOsApi = {
   calendar: {
     getMonth: (input) => getDesktopApiClient().calendar!.getMonth(input),
     rescheduleItem: (input) =>
-      getDesktopApiClient().calendar!.rescheduleItem(input)
+      getDesktopApiClient().calendar!.rescheduleItem(input),
+    importIcsFile: (input) =>
+      getDesktopApiClient().calendar!.importIcsFile(input)
   },
   dashboard: {
     getDefault: (input) =>

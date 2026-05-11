@@ -1,9 +1,11 @@
 import { createIsoTimestamp, type ListItemStatus, type TaskStatus } from "@local-work-os/core";
 import {
+  CalendarFeedRepository,
   CategoryRepository,
   ContainerRepository,
   ListRepository,
   TaskRepository,
+  type CalendarEventRecord,
   type CategoryRecord,
   type ContainerRecord,
   type DatabaseConnection,
@@ -15,7 +17,7 @@ import { ListService } from "../lists/ListService";
 import { TaskService } from "../tasks/TaskService";
 import { createTaskDateRange } from "../tasks/TaskQueries";
 
-export type CalendarEntryKind = "task" | "list_item";
+export type CalendarEntryKind = "task" | "list_item" | "calendar_event";
 
 export type CalendarMonthInput = {
   workspaceId: string;
@@ -45,13 +47,20 @@ export type CalendarRange = CalendarMonthRange & {
   label?: string;
 };
 
-export type CalendarNavigationTarget = {
-  targetType: "item" | "list_item";
-  targetId: string;
-  containerId: string;
-  workspaceId: string;
-  sourceItemId: string | null;
-};
+export type CalendarNavigationTarget =
+  | {
+      targetType: "item" | "list_item";
+      targetId: string;
+      containerId: string;
+      workspaceId: string;
+      sourceItemId: string | null;
+    }
+  | {
+      targetType: "calendar_event";
+      targetId: string;
+      workspaceId: string;
+      sourceId: string;
+    };
 
 export type CalendarItem = {
   id: string;
@@ -66,7 +75,7 @@ export type CalendarItem = {
   categoryId: string | null;
   categoryName: string | null;
   categoryColor: string | null;
-  status: TaskStatus | ListItemStatus;
+  status: TaskStatus | ListItemStatus | "read_only";
   itemStatus: string | null;
   priority: number | null;
   startAt: string | null;
@@ -140,7 +149,8 @@ export class CalendarService {
     });
     const items = [
       ...this.hydrateTaskItems(input.workspaceId, tasks),
-      ...this.hydrateListItems(input.workspaceId, listItems)
+      ...this.hydrateListItems(input.workspaceId, listItems),
+      ...this.hydrateCalendarEvents(input.workspaceId, range)
     ].sort(compareCalendarItems);
 
     return {
@@ -216,6 +226,10 @@ export class CalendarService {
     validateNonEmptyString(input.workspaceId, "workspaceId");
     validateNonEmptyString(input.itemId, "itemId");
 
+    if (input.kind === "calendar_event") {
+      throw new Error("Imported calendar feed events are read-only.");
+    }
+
     if (input.kind === "task") {
       const result = await new TaskService({
         connection: this.connection,
@@ -280,7 +294,8 @@ export class CalendarService {
 
     return [
       ...this.hydrateTaskItems(input.workspaceId, tasks),
-      ...this.hydrateListItems(input.workspaceId, listItems)
+      ...this.hydrateListItems(input.workspaceId, listItems),
+      ...this.hydrateCalendarEvents(input.workspaceId, input.range)
     ].sort(compareCalendarItems);
   }
 
@@ -366,6 +381,25 @@ export class CalendarService {
         }
       };
     });
+  }
+
+  private hydrateCalendarEvents(
+    workspaceId: string,
+    range: CalendarRange | CalendarMonthRange
+  ): CalendarItem[] {
+    const repository = new CalendarFeedRepository(this.connection);
+    const sourceNames = new Map(
+      repository.listSources(workspaceId).map((source) => [source.id, source.name])
+    );
+    const events = repository.listEventsBetween({
+      workspaceId,
+      startInclusive: range.startInclusive,
+      endExclusive: range.endExclusive
+    });
+
+    return events.map((event) =>
+      toCalendarEventItem(event, sourceNames.get(event.sourceId) ?? "Imported calendar")
+    );
   }
 }
 
@@ -463,6 +497,40 @@ function createHydrationContext(connection: DatabaseConnection, workspaceId: str
       categories.set(categoryId, category);
 
       return category;
+    }
+  };
+}
+
+function toCalendarEventItem(
+  event: CalendarEventRecord,
+  sourceName: string
+): CalendarItem {
+  return {
+    id: event.id,
+    kind: "calendar_event",
+    workspaceId: event.workspaceId,
+    title: event.title,
+    body: event.description,
+    containerId: event.sourceId,
+    containerName: sourceName,
+    containerType: "calendar_source",
+    containerColor: null,
+    categoryId: null,
+    categoryName: "Calendar feed",
+    categoryColor: null,
+    status: "read_only",
+    itemStatus: "read_only",
+    priority: null,
+    startAt: event.startAt,
+    dueAt: event.endAt,
+    allDay: event.allDay,
+    completedAt: null,
+    updatedAt: event.updatedAt,
+    navigationTarget: {
+      targetType: "calendar_event",
+      targetId: event.id,
+      workspaceId: event.workspaceId,
+      sourceId: event.sourceId
     }
   };
 }

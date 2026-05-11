@@ -191,3 +191,8 @@ Project banners and contact avatars are stored as local attachment-backed contai
 
 Comments are local-only annotations stored in a dedicated comments table. Each comment belongs to one workspace and targets a container, item, or list_item; comments use soft delete, write activity events on create/update/delete, and are folded into the target's local search projection so searching comment text returns the annotated object.
 
+
+### Calendar feeds (PSE-141)
+
+Local ICS imports persist read-only calendar sources in calendar_sources and events in calendar_events. Events store source UID, title, optional description/location, start/end timestamps, all-day flag, raw parsed metadata, soft-delete timestamp, and remain workspace-local. Network calendar sources are disabled unless an explicit network-enabled import path is used.
+

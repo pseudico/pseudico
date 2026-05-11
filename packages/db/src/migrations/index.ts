@@ -11,6 +11,7 @@ import { tabVisibilitySql } from "./0010_tab_visibility";
 import { reminderTargetsSql } from "./0011_reminder_targets";
 import { reviewTaskStatusesSql } from "./0012_review_task_statuses";
 import { commentsSql } from "./0013_comments";
+import { calendarFeedsSql } from "./0014_calendar_feeds";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -91,6 +92,12 @@ export const migrations: MigrationDefinition[] = [
     name: "comments",
     sql: commentsSql,
     checksum: "pse-129-comments-v1"
+  },
+  {
+    version: 14,
+    name: "calendar_feeds",
+    sql: calendarFeedsSql,
+    checksum: "pse-141-calendar-feeds-v1"
   }
 ];
 

@@ -876,3 +876,8 @@ Owns local visual identity assignments for projects and contacts: project banner
 
 Owns local comments and annotations for containers, items, and list rows. Comment writes go through repository/service layers, create activity events, soft-delete removed comments, and refresh the target search projection. Does not own cloud/team comments or remote sharing.
 
+
+### Calendar Feeds
+
+Owns local .ics import into read-only calendar source/event records, calendar projection integration, local search indexing, and explicit network-feed guardrails. Does not own live cloud sync, hosted accounts, editable external events, or background network refresh without user-enabled network preference.
+

@@ -101,6 +101,7 @@ export const ActivityAction = {
   backupRestored: "backup_restored",
   exportCreated: "export_created",
   exportRestored: "export_restored",
+  calendarFeedImported: "calendar_feed_imported",
   templateCreated: "template_created",
   templateApplied: "template_applied",
   workflowCreated: "workflow_created",

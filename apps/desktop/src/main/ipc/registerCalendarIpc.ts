@@ -16,4 +16,8 @@ export function registerCalendarIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.calendar.rescheduleItem,
     (_event, input) => handlers.handleRescheduleCalendarItem(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.calendar.importIcsFile,
+    (_event, input) => handlers.handleImportIcsFile(input)
+  );
 }

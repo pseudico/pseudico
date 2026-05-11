@@ -3320,3 +3320,57 @@ Files changed:
 - apps/desktop/src/renderer/pages/CalendarPage.tsx
 Open questions / risks: Full workspace checks and PR CI still pending.
 Next actions: Run lint/typecheck/test/build; fix failures; open PR.
+
+## 2026-05-11 19:20:12 +10:00
+Objective: Merge PSE-140 and prepare next ticket.
+Decisions made:
+- PR #129 passed CI, had no review threads/comments, and was squash-merged at e859ee8.
+- PSE-140 moved to Done; PSE-141 promoted as the only Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Untracked local .playwright-mcp/ and gh installer remain unrelated.
+Next actions: Start PSE-141 in next run; keep PR Open/In Progress empty.
+
+## 2026-05-11 19:22:46 +10:00
+Objective: Reconcile active work and start next Local Work OS ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found; one Codex Ready issue selected: PSE-141.
+- No open GitHub PRs found for pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-141 scope still needs source/doc inspection.
+Next actions: Move issue to In Progress; read docs; implement scoped changes.
+
+
+## 2026-05-11 19:42:15 +10:00
+Objective: Implement PSE-141 local ICS import foundation.
+Decisions made:
+- Added calendar source/event tables with read-only imported events and network import guard.
+- Imported events are projected into Calendar and indexed for local search.
+Files changed:
+- packages/db/src/schema/calendarFeeds.ts; packages/db/src/repositories/CalendarFeedRepository.ts; packages/features/src/calendar/CalendarFeedService.ts
+Open questions / risks: UI file selection uses typed local path prompt pending richer native picker.
+Next actions: Update docs; run full checks; open PR.
+
+
+## 2026-05-11 19:51:55 +10:00
+Objective: Verify PSE-141 implementation locally.
+Decisions made:
+- Updated schema-version and IPC channel-count tests for migration 14 and new calendar import IPC.
+- Re-ran test/build with escalation after Windows EPERM spawn errors.
+Files changed:
+- packages/db/tests/*; apps/desktop/tests/*; docs/session_log.md
+Open questions / risks: None from local checks.
+Next actions: Commit; push; open PR; update Linear.
+
+
+## 2026-05-11 19:55:33 +10:00
+Objective: Open PR for PSE-141.
+Decisions made:
+- Created PR #130 as ready for review after lint/typecheck/test/build passed.
+- Moved Linear PSE-141 to PR Open with PR attachment.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Awaiting GitHub CI/review status.
+Next actions: Check CI; merge if green; promote next issue.
+
