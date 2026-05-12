@@ -321,8 +321,10 @@ export {
   WORKFLOW_DEFINITION_KIND,
   WORKFLOW_DEFINITION_SCHEMA_VERSION,
   WORKFLOW_TRIGGER_REGISTRY,
+  WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
   WorkflowActionExecutor,
   WorkflowService,
+  WorkflowTriggerService,
   createWorkflowDefinitionSchema,
   createWorkflowEditorSkeletonState,
   getWorkflowActionRegistryEntry,
@@ -888,6 +890,7 @@ export type {
   WorkflowDefinitionSchema,
   WorkflowDefinitionSchemaV1,
   WorkflowEditorSkeletonState,
+  WorkflowItemCreatedTriggerFilters,
   WorkflowTrigger,
   WorkflowTriggerRegistryEntry,
   WorkflowValidationIssue,
@@ -897,6 +900,8 @@ export type {
   WorkflowActionPreview,
   WorkflowPreviewResult,
   WorkflowRunResult,
+  ItemCreatedWorkflowEvent,
+  ItemCreatedWorkflowRunResult,
   WorkflowServiceIdFactory
 } from "./workflows";
 export type {

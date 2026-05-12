@@ -28,6 +28,7 @@ export type WorkflowActionPreview = {
 export type WorkflowActionExecutionContext = {
   workspaceId: string;
   actorType?: ActivityActorType;
+  triggerItemId?: string;
 };
 
 export type WorkflowActionExecutionResult = {
@@ -61,15 +62,16 @@ export class WorkflowActionExecutor {
     context: WorkflowActionExecutionContext,
     index: number
   ): WorkflowActionPreview {
-    const validation = this.validateReferences(action, context.workspaceId);
+    const resolvedAction = resolveTriggerItemAction(action, context);
+    const validation = this.validateReferences(resolvedAction, context.workspaceId);
 
     return {
       index,
-      actionType: action.type,
-      summary: summarizeWorkflowAction(action),
+      actionType: resolvedAction.type,
+      summary: summarizeWorkflowAction(resolvedAction),
       status: validation === null ? "ready" : "blocked",
-      targetType: getActionTarget(action).targetType,
-      targetId: getActionTarget(action).targetId,
+      targetType: getActionTarget(resolvedAction).targetType,
+      targetId: getActionTarget(resolvedAction).targetId,
       reason: validation
     };
   }
@@ -79,13 +81,14 @@ export class WorkflowActionExecutor {
     context: WorkflowActionExecutionContext,
     index = 0
   ): Promise<WorkflowActionExecutionResult> {
-    const validation = this.validateReferences(action, context.workspaceId);
+    const actionToRun = resolveTriggerItemAction(action, context);
+    const validation = this.validateReferences(actionToRun, context.workspaceId);
 
     if (validation !== null) {
       throw new Error(validation);
     }
 
-    switch (action.type) {
+    switch (actionToRun.type) {
       case "add_tag": {
         await new TagService({
           connection: this.connection,
@@ -93,9 +96,9 @@ export class WorkflowActionExecutor {
           now: this.now
         }).addTagToTarget({
           workspaceId: context.workspaceId,
-          targetType: action.targetType,
-          targetId: action.targetId,
-          name: action.tagName,
+          targetType: actionToRun.targetType,
+          targetId: actionToRun.targetId,
+          name: actionToRun.tagName,
           source: "manual",
           ...(context.actorType === undefined
             ? {}
@@ -104,11 +107,11 @@ export class WorkflowActionExecutor {
 
         return {
           index,
-          actionType: action.type,
+          actionType: actionToRun.type,
           status: "completed",
-          summary: summarizeWorkflowAction(action),
-          targetType: action.targetType,
-          targetId: action.targetId
+          summary: summarizeWorkflowAction(actionToRun),
+          targetType: actionToRun.targetType,
+          targetId: actionToRun.targetId
         };
       }
       case "set_category": {
@@ -118,11 +121,11 @@ export class WorkflowActionExecutor {
           now: this.now
         });
 
-        if (action.targetType === "item") {
+        if (actionToRun.targetType === "item") {
           await service.assignCategoryToItem({
             workspaceId: context.workspaceId,
-            itemId: action.targetId,
-            categoryId: action.categoryId,
+            itemId: actionToRun.targetId,
+            categoryId: actionToRun.categoryId,
             ...(context.actorType === undefined
               ? {}
               : { actorType: context.actorType })
@@ -130,8 +133,8 @@ export class WorkflowActionExecutor {
         } else {
           await service.assignCategoryToContainer({
             workspaceId: context.workspaceId,
-            containerId: action.targetId,
-            categoryId: action.categoryId,
+            containerId: actionToRun.targetId,
+            categoryId: actionToRun.categoryId,
             ...(context.actorType === undefined
               ? {}
               : { actorType: context.actorType })
@@ -140,11 +143,11 @@ export class WorkflowActionExecutor {
 
         return {
           index,
-          actionType: action.type,
+          actionType: actionToRun.type,
           status: "completed",
-          summary: summarizeWorkflowAction(action),
-          targetType: action.targetType,
-          targetId: action.targetId
+          summary: summarizeWorkflowAction(actionToRun),
+          targetType: actionToRun.targetType,
+          targetId: actionToRun.targetId
         };
       }
       case "move_item": {
@@ -153,9 +156,9 @@ export class WorkflowActionExecutor {
           idFactory: this.idFactory,
           now: this.now
         }).moveItem({
-          itemId: action.itemId,
-          targetContainerId: action.targetContainerId,
-          targetContainerTabId: action.targetContainerTabId ?? null,
+          itemId: actionToRun.itemId,
+          targetContainerId: actionToRun.targetContainerId,
+          targetContainerTabId: actionToRun.targetContainerTabId ?? null,
           ...(context.actorType === undefined
             ? {}
             : { actorType: context.actorType })
@@ -163,9 +166,9 @@ export class WorkflowActionExecutor {
 
         return {
           index,
-          actionType: action.type,
+          actionType: actionToRun.type,
           status: "completed",
-          summary: summarizeWorkflowAction(action),
+          summary: summarizeWorkflowAction(actionToRun),
           targetType: "item",
           targetId: result.item.id
         };
@@ -177,14 +180,14 @@ export class WorkflowActionExecutor {
           now: this.now
         }).createTask({
           workspaceId: context.workspaceId,
-          containerId: action.containerId,
-          title: action.title,
-          body: action.body ?? null,
-          categoryId: action.categoryId ?? null,
-          containerTabId: action.containerTabId ?? null,
-          dueAt: action.dueAt ?? null,
-          startAt: action.startAt ?? null,
-          priority: action.priority ?? null,
+          containerId: actionToRun.containerId,
+          title: actionToRun.title,
+          body: actionToRun.body ?? null,
+          categoryId: actionToRun.categoryId ?? null,
+          containerTabId: actionToRun.containerTabId ?? null,
+          dueAt: actionToRun.dueAt ?? null,
+          startAt: actionToRun.startAt ?? null,
+          priority: actionToRun.priority ?? null,
           ...(context.actorType === undefined
             ? {}
             : { actorType: context.actorType })
@@ -192,9 +195,9 @@ export class WorkflowActionExecutor {
 
         return {
           index,
-          actionType: action.type,
+          actionType: actionToRun.type,
           status: "completed",
-          summary: summarizeWorkflowAction(action),
+          summary: summarizeWorkflowAction(actionToRun),
           targetType: "item",
           targetId: result.item.id
         };
@@ -271,6 +274,31 @@ export class WorkflowActionExecutor {
         return null;
       }
     }
+  }
+}
+
+export const WORKFLOW_TRIGGER_ITEM_ID_TOKEN = "$trigger.itemId";
+
+function resolveTriggerItemAction(
+  action: WorkflowAction,
+  context: WorkflowActionExecutionContext
+): WorkflowAction {
+  if (context.triggerItemId === undefined) {
+    return action;
+  }
+
+  switch (action.type) {
+    case "add_tag":
+    case "set_category":
+      return action.targetType === "item" && action.targetId === WORKFLOW_TRIGGER_ITEM_ID_TOKEN
+        ? { ...action, targetId: context.triggerItemId }
+        : action;
+    case "move_item":
+      return action.itemId === WORKFLOW_TRIGGER_ITEM_ID_TOKEN
+        ? { ...action, itemId: context.triggerItemId }
+        : action;
+    case "create_task":
+      return action;
   }
 }
 

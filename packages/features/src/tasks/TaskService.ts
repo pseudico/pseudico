@@ -38,6 +38,7 @@ import {
   type TaskRangeInput
 } from "./TaskQueries";
 import { TagService } from "../metadata/TagService";
+import type { ItemCreatedWorkflowHook } from "../items/ItemCommands";
 import {
   ReminderService,
   type ReminderCreationInput
@@ -128,11 +129,13 @@ export class TaskService {
   private readonly idFactory: TaskServiceIdFactory;
   private readonly now: () => Date;
   private readonly transactionService: TransactionService;
+  private readonly itemCreatedWorkflowHook: ItemCreatedWorkflowHook | null;
 
   constructor(input: {
     connection: DatabaseConnection;
     idFactory?: TaskServiceIdFactory;
     now?: () => Date;
+    itemCreatedWorkflowHook?: ItemCreatedWorkflowHook;
   }) {
     this.connection = input.connection;
     this.idFactory = input.idFactory ?? ((prefix) => createLocalId(prefix));
@@ -140,12 +143,13 @@ export class TaskService {
     this.transactionService = new TransactionService({
       connection: input.connection
     });
+    this.itemCreatedWorkflowHook = input.itemCreatedWorkflowHook ?? null;
   }
 
   async createTask(input: CreateTaskInput): Promise<TaskMutationResult> {
     this.validateCreateInput(input);
 
-    return await this.transactionService.runInTransaction(async () => {
+    const result = await this.transactionService.runInTransaction(async () => {
       const timestamp = createIsoTimestamp(this.now());
       const taskStatus = input.status ?? "open";
       const startAt = normalizeTaskDateTime(input.startAt, "startAt") ?? null;
@@ -221,6 +225,13 @@ export class TaskService {
         inlineTags: inlineTags.inlineTagSlugs
       };
     });
+    await this.itemCreatedWorkflowHook?.handleItemCreated({
+      workspaceId: result.item.workspaceId,
+      itemId: result.item.id,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+
+    return result;
   }
 
   async updateTask(input: UpdateTaskInput): Promise<TaskMutationResult> {

@@ -3931,3 +3931,56 @@ Files changed:
 - apps/desktop/src/renderer/pages/WorkflowsPage.tsx
 Open questions / risks: CI still needs GitHub verification after PR push.
 Next actions: Commit, push, open PR; check CI/review; update Linear.
+
+## 2026-05-12 12:09:58 +10:00
+Objective: Finish PSE-155 PR merge and prepare next ticket.
+Decisions made:
+- PR #144 merged cleanly after CI passed and no review threads/comments were open.
+- PSE-155 moved to Done; PSE-156 promoted as the single next Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Untracked local Playwright/GitHub installer artifacts remain unrelated.
+Next actions: Start PSE-156 in a future run; keep only one Codex Ready issue active.
+
+## 2026-05-12T14:01:38.6153642+10:00
+Objective: Reconcile active work and select next ticket.
+Decisions made:
+- No Linear PR Open or In Progress issues found.
+- Selected sole Codex Ready issue PSE-156.
+Files changed:
+- docs/session_log.md
+Open questions / risks: None yet.
+Next actions: Move PSE-156 to In Progress; read docs; implement scoped changes.
+
+## 2026-05-12T14:02:55.1291030+10:00
+Objective: Start PSE-156 implementation.
+Decisions made:
+- Moved PSE-156 to In Progress.
+- Created branch codex/PSE-156-on-item-created-workflow-trigger from up-to-date main.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked .playwright-mcp/ and gh installer left untouched.
+Next actions: Inspect workflow/item code; add trigger; add tests.
+
+## 2026-05-12T14:10:26.8273561+10:00
+Objective: Implement PSE-156 workflow trigger foundation.
+Decisions made:
+- Added item_created workflow trigger schema, DB trigger type, and migration.
+- Added WorkflowTriggerService and task/item creation hooks with trigger-item token.
+Files changed:
+- packages/features/src/workflows/*
+- packages/features/src/items/*
+- packages/features/src/tasks/TaskService.ts
+- packages/db/src/**
+Open questions / risks: Non-task direct item creators may need explicit hook wiring in future tickets.
+Next actions: Run full lint/typecheck/test/build; open PR.
+
+## 2026-05-12T14:15:14.0856967+10:00
+Objective: Verify PSE-156 locally.
+Decisions made:
+- Full lint, typecheck, test, and build were run.
+- Sandbox EPERM on Vitest/build was resolved by approved escalated reruns.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI must confirm on GitHub.
+Next actions: Commit, push branch, open PR.

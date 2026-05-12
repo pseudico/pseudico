@@ -19,10 +19,14 @@ import {
   type WorkflowServiceIdFactory
 } from "./WorkflowActionExecutor";
 import {
+  createWorkflowDefinitionSchema,
   parseWorkflowActions,
+  parseWorkflowDefinitionSchema,
   stringifyWorkflowActions,
-  validateWorkflowActions,
-  type WorkflowAction
+  stringifyWorkflowDefinitionSchema,
+  validateWorkflowDefinitionSchema,
+  type WorkflowAction,
+  type WorkflowTrigger
 } from "./WorkflowSchema";
 
 export type CreateWorkflowInput = {
@@ -32,6 +36,7 @@ export type CreateWorkflowInput = {
   actorType?: ActivityActorType;
   description?: string | null;
   status?: "enabled" | "disabled";
+  trigger?: WorkflowTrigger;
 };
 
 export type PreviewWorkflowRunInput =
@@ -53,7 +58,7 @@ export type RunManualWorkflowInput = {
 export type WorkflowPreviewResult = {
   workspaceId: string;
   workflowId: string | null;
-  triggerType: "manual";
+  triggerType: WorkflowTrigger["type"];
   canRun: boolean;
   actionPreviews: WorkflowActionPreview[];
 };
@@ -89,11 +94,13 @@ export class WorkflowService {
   async createWorkflow(input: CreateWorkflowInput): Promise<WorkflowDefinitionRecord> {
     validateNonEmptyString(input.workspaceId, "workspaceId");
     validateNonEmptyString(input.name, "name");
-    const validation = validateWorkflowActions(input.actions);
+    const trigger = input.trigger ?? { type: "manual" };
+    const definition = createWorkflowDefinitionSchema(input.actions, trigger);
+    const validation = validateWorkflowDefinitionSchema(definition);
     if ((input.status ?? "enabled") === "enabled" && !validation.canEnable) {
       throw new Error(`Workflow cannot be enabled: ${validation.issues.map((issue) => issue.message).join(" ")}`);
     }
-    const actionsJson = stringifyWorkflowActions(input.actions);
+    const actionsJson = stringifyWorkflowDefinitionSchema(definition);
 
     return await this.transactionService.runInTransaction(() => {
       const timestamp = createIsoTimestamp(this.now());
@@ -103,7 +110,7 @@ export class WorkflowService {
         name: input.name.trim(),
         description: normalizeNullableString(input.description),
         status: input.status ?? "enabled",
-        triggerType: "manual",
+        triggerType: trigger.type,
         actionsJson,
         timestamp
       });
@@ -112,7 +119,7 @@ export class WorkflowService {
         workflow,
         actorType: input.actorType ?? "local_user",
         action: ActivityAction.workflowCreated,
-        summary: `Created manual workflow "${workflow.name}".`,
+        summary: `Created ${trigger.type === "manual" ? "manual" : "item-created"} workflow "${workflow.name}".`,
         before: null,
         after: workflow,
         timestamp
@@ -246,10 +253,12 @@ export class WorkflowService {
     workflow: WorkflowDefinitionRecord,
     actorType: ActivityActorType | undefined
   ): Promise<WorkflowPreviewResult> {
+    const definition = parseWorkflowDefinitionSchema(workflow.actionsJson);
     return this.previewActions({
       workspaceId: workflow.workspaceId,
       workflowId: workflow.id,
-      actions: parseWorkflowActions(workflow.actionsJson),
+      triggerType: definition.trigger.type,
+      actions: definition.actions,
       ...(actorType === undefined ? {} : { actorType })
     });
   }
@@ -257,6 +266,7 @@ export class WorkflowService {
   private previewActions(input: {
     workspaceId: string;
     workflowId: string | null;
+    triggerType?: WorkflowTrigger["type"];
     actions: WorkflowAction[];
     actorType?: ActivityActorType;
   }): WorkflowPreviewResult {
@@ -275,7 +285,7 @@ export class WorkflowService {
     return {
       workspaceId: input.workspaceId,
       workflowId: input.workflowId,
-      triggerType: "manual",
+      triggerType: input.triggerType ?? "manual",
       canRun: actionPreviews.every((preview) => preview.status === "ready"),
       actionPreviews
     };

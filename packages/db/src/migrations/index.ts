@@ -14,6 +14,7 @@ import { commentsSql } from "./0013_comments";
 import { calendarFeedsSql } from "./0014_calendar_feeds";
 import { dashboardWidgetLayoutTypesSql } from "./0015_dashboard_widget_layout_types";
 import { dashboardExtraWidgetTypesSql } from "./0016_dashboard_extra_widget_types";
+import { workflowItemCreatedTriggerSql } from "./0017_workflow_item_created_trigger";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -112,6 +113,12 @@ export const migrations: MigrationDefinition[] = [
     name: "dashboard_extra_widget_types",
     sql: dashboardExtraWidgetTypesSql,
     checksum: "pse-153-dashboard-extra-widget-types-v1"
+  },
+  {
+    version: 17,
+    name: "workflow_item_created_trigger",
+    sql: workflowItemCreatedTriggerSql,
+    checksum: "pse-156-workflow-item-created-trigger-v1"
   }
 ];
 

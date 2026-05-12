@@ -1,4 +1,4 @@
-import { TagService, TaskService } from "@local-work-os/features";
+import { TagService, TaskService, WorkflowTriggerService } from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -178,7 +178,10 @@ async function withTaskService<T>(
     return await operation({
       connection,
       tagService: new TagService({ connection }),
-      taskService: new TaskService({ connection }),
+      taskService: new TaskService({
+        connection,
+        itemCreatedWorkflowHook: new WorkflowTriggerService({ connection })
+      }),
       workspace
     });
   } catch (error) {

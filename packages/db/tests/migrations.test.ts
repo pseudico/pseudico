@@ -60,6 +60,7 @@ const requiredIndexes = [
   "idx_templates_workspace_kind",
   "idx_attachment_versions_attachment",
   "idx_workflow_definitions_workspace_status",
+  "idx_workflow_definitions_workspace_trigger",
   "idx_workflow_runs_workspace_created",
   "idx_items_container_order",
   "idx_task_details_due",
@@ -87,7 +88,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version sixteen", () => {
+  it("runs on an empty database and records schema version seventeen", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -171,14 +172,19 @@ describe("schema migrations", () => {
           version: 16,
           name: "dashboard_extra_widget_types",
           checksum: "pse-153-dashboard-extra-widget-types-v1"
+        },
+        {
+          version: 17,
+          name: "workflow_item_created_trigger",
+          checksum: "pse-156-workflow-item-created-trigger-v1"
         }
       ],
-      currentVersion: 16
+      currentVersion: 17
     });
-    expect(service.getCurrentSchemaVersion()).toBe(16);
+    expect(service.getCurrentSchemaVersion()).toBe(17);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 16
+      currentVersion: 17
     });
   });
 
