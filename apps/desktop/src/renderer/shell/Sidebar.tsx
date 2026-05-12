@@ -29,6 +29,7 @@ const routeIcons: Partial<Record<AppRouteId, LucideIcon>> = {
   contacts: Contact,
   contactLabels: Tags,
   collections: Workflow,
+  workflows: Workflow,
   tagsCategories: Tags,
   search: Search,
   dashboard: LayoutDashboard,

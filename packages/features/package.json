@@ -13,6 +13,11 @@
       "types": "./dist/quickStart/index.d.ts",
       "import": "./dist/quickStart/index.js",
       "default": "./dist/quickStart/index.js"
+    },
+    "./workflows/schema": {
+      "types": "./dist/workflows/WorkflowSchema.d.ts",
+      "import": "./dist/workflows/WorkflowSchema.js",
+      "default": "./dist/workflows/WorkflowSchema.js"
     }
   },
   "scripts": {

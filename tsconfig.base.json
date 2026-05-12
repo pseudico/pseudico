@@ -20,6 +20,9 @@
       "@local-work-os/features/quickStart": [
         "./packages/features/src/quickStart/index.ts"
       ],
+      "@local-work-os/features/workflows/schema": [
+        "./packages/features/src/workflows/WorkflowSchema.ts"
+      ],
       "@local-work-os/ui": ["./packages/ui/src/index.ts"],
       "@local-work-os/test-utils": ["./packages/test-utils/src/index.ts"]
     }

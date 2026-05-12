@@ -14,13 +14,16 @@ import {
 } from "@local-work-os/db";
 import {
   WorkflowActionExecutor,
-  parseWorkflowActions,
-  stringifyWorkflowActions,
-  type WorkflowAction,
   type WorkflowActionExecutionResult,
   type WorkflowActionPreview,
   type WorkflowServiceIdFactory
 } from "./WorkflowActionExecutor";
+import {
+  parseWorkflowActions,
+  stringifyWorkflowActions,
+  validateWorkflowActions,
+  type WorkflowAction
+} from "./WorkflowSchema";
 
 export type CreateWorkflowInput = {
   workspaceId: string;
@@ -86,6 +89,10 @@ export class WorkflowService {
   async createWorkflow(input: CreateWorkflowInput): Promise<WorkflowDefinitionRecord> {
     validateNonEmptyString(input.workspaceId, "workspaceId");
     validateNonEmptyString(input.name, "name");
+    const validation = validateWorkflowActions(input.actions);
+    if ((input.status ?? "enabled") === "enabled" && !validation.canEnable) {
+      throw new Error(`Workflow cannot be enabled: ${validation.issues.map((issue) => issue.message).join(" ")}`);
+    }
     const actionsJson = stringifyWorkflowActions(input.actions);
 
     return await this.transactionService.runInTransaction(() => {

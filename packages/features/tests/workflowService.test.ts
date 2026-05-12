@@ -203,6 +203,25 @@ describe("WorkflowService", () => {
         .map((event) => event.action)
     ).toEqual(["workflow_created", "workflow_run_failed"]);
   });
+
+  it("rejects enabling an unsupported non-local workflow definition", async () => {
+    const service = createWorkflowService();
+
+    await expect(
+      service.createWorkflow({
+        workspaceId: "workspace_1",
+        name: "Remote webhook",
+        actions: [
+          {
+            type: "http_request",
+            url: "https://example.com/hook"
+          } as never
+        ]
+      })
+    ).rejects.toThrow("Workflow cannot be enabled");
+
+    expect(new WorkflowRepository(connection).listDefinitions({ workspaceId: "workspace_1" })).toEqual([]);
+  });
 });
 
 async function createTask(title: string) {
