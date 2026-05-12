@@ -345,6 +345,55 @@ describe("SearchService", () => {
     expect(results[0]?.excerpt?.text).toContain("<script>alert(1)</script>");
   });
 
+  it("emits a local slow-query diagnostic when search exceeds the configured threshold", () => {
+    const project = new ContainerRepository(connection).create({
+      id: "container_slow_query",
+      workspaceId: "workspace_1",
+      type: "project",
+      name: "Slow Query Project",
+      slug: "slow-query-project",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const item = new ItemRepository(connection).create({
+      id: "item_slow_query",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      type: "task",
+      title: "Slow query fixture",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const entries: unknown[] = [];
+    const service = new SearchService({
+      connection,
+      idFactory: (prefix) => `${prefix}_slow`,
+      slowQueryThresholdMs: 0.0001,
+      slowQuerySink: (entry) => entries.push(entry),
+      now: () => new Date("2026-04-30T00:00:00.000Z")
+    });
+
+    service.upsertItem(item);
+    expect(
+      service.search({
+        workspaceId: "workspace_1",
+        query: "slow",
+        limit: 10
+      })
+    ).toHaveLength(1);
+
+    expect(entries).toMatchObject([
+      {
+        label: "search.search",
+        thresholdMs: 0.0001,
+        metadata: {
+          workspaceId: "workspace_1",
+          queryLength: 4,
+          limit: 10,
+          offset: 0
+        }
+      }
+    ]);
+  });
+
 });
 
 function createService(): SearchService {

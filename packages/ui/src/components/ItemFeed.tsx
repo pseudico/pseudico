@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useState } from "react";
 import {
   LOCAL_WORK_OS_DRAG_MIME_TYPE,
   encodeDragPayload,
@@ -10,6 +11,7 @@ import {
   type UniversalItemViewModel
 } from "./ItemCard";
 import type { ItemActionId } from "./ItemActionsMenu";
+import { useVirtualizedFeed } from "./useVirtualizedFeed";
 
 export type ItemFeedProps = Pick<
   UniversalItemCardProps,
@@ -34,6 +36,12 @@ export type ItemFeedProps = Pick<
     itemId: string,
     files: readonly File[]
   ) => Promise<boolean | void> | boolean | void;
+  virtualization?: {
+    enabled?: boolean;
+    estimatedItemHeight?: number;
+    viewportHeight?: number;
+    minItems?: number;
+  };
 };
 
 export function ItemFeed({
@@ -52,8 +60,21 @@ export function ItemFeed({
   onSelectionChange,
   isItemSelectionDisabled,
   renderContent,
-  renderEmptyAction
+  renderEmptyAction,
+  virtualization
 }: ItemFeedProps): React.JSX.Element {
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const virtualized = useVirtualizedFeed({
+    items,
+    getKey: (item) => item.id,
+    estimatedItemHeight: virtualization?.estimatedItemHeight ?? 120,
+    viewportHeight: virtualization?.viewportHeight ?? 640,
+    scrollOffset,
+    minItems:
+      virtualization?.enabled === false
+        ? Number.MAX_SAFE_INTEGER
+        : (virtualization?.minItems ?? 80)
+  });
   if (loading) {
     return (
       <section className="item-feed" aria-busy="true" aria-label={ariaLabel}>
@@ -84,8 +105,20 @@ export function ItemFeed({
 
   return (
     <section className="item-feed" aria-label={ariaLabel}>
-      <div className="item-feed-list">
-        {items.map((item) => {
+      <div
+        className="item-feed-list"
+        data-virtualized={virtualized.isVirtualized ? "true" : "false"}
+        style={
+          virtualized.isVirtualized
+            ? { maxHeight: virtualization?.viewportHeight ?? 640, overflowY: "auto" }
+            : undefined
+        }
+        onScroll={(event) => setScrollOffset(event.currentTarget.scrollTop)}
+      >
+        {virtualized.beforeHeight > 0 ? (
+          <div aria-hidden="true" style={{ height: virtualized.beforeHeight }} />
+        ) : null}
+        {virtualized.virtualItems.map(({ item }) => {
           const itemDisabledActions =
             getDisabledActions?.(item) ?? disabledActions;
           const selected = selectedItemIds.includes(item.id);
@@ -171,6 +204,9 @@ export function ItemFeed({
             </div>
           );
         })}
+        {virtualized.afterHeight > 0 ? (
+          <div aria-hidden="true" style={{ height: virtualized.afterHeight }} />
+        ) : null}
       </div>
     </section>
   );

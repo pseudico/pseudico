@@ -16,6 +16,7 @@ import {
   type NoteDetailsRecord,
   SearchIndexRepository
 } from "@local-work-os/db";
+import { SlowQueryLogger, type SlowQueryLogSink } from "@local-work-os/db";
 import {
   SearchIndexOrchestrator,
   type UpsertListIndexResult,
@@ -69,11 +70,14 @@ export class SearchService {
   private readonly searchIndexOrchestrator: SearchIndexOrchestrator;
   private readonly searchIndexService: SearchIndexService;
   private readonly searchResultHydrator: SearchResultHydrator;
+  private readonly slowQueryLogger: SlowQueryLogger;
 
   constructor(input: {
     connection: DatabaseConnection;
     idFactory?: SearchIndexIdFactory;
     now?: () => Date;
+    slowQueryThresholdMs?: number;
+    slowQuerySink?: SlowQueryLogSink;
   }) {
     this.connection = input.connection;
     this.now = input.now ?? (() => new Date());
@@ -81,6 +85,13 @@ export class SearchService {
     this.searchIndexService = new SearchIndexService(input);
     this.searchIndexOrchestrator = new SearchIndexOrchestrator(input);
     this.searchResultHydrator = new SearchResultHydrator(input);
+    this.slowQueryLogger = new SlowQueryLogger({
+      ...(input.slowQueryThresholdMs === undefined
+        ? {}
+        : { thresholdMs: input.slowQueryThresholdMs }),
+      ...(input.slowQuerySink === undefined ? {} : { sink: input.slowQuerySink }),
+      clock: { now: this.now }
+    });
   }
 
   upsertContainer(
@@ -153,6 +164,19 @@ export class SearchService {
   }
 
   search(input: SearchInput): SearchResult[] {
+    return this.slowQueryLogger.time(
+      "search.search",
+      () => this.searchWithoutDiagnostics(input),
+      {
+        workspaceId: input.workspaceId,
+        queryLength: input.query.length,
+        limit: input.limit ?? 25,
+        offset: input.offset ?? 0
+      }
+    );
+  }
+
+  private searchWithoutDiagnostics(input: SearchInput): SearchResult[] {
     const parsed = this.parseStructuredQuery(input.query);
     const searchWorkspaceInput: SearchWorkspaceInput = {
       workspaceId: input.workspaceId,

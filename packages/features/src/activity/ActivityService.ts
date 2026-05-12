@@ -3,7 +3,9 @@ import {
   ActivityLogRepository,
   type ActivityLogRecord,
   type ActivityLogPageResult,
-  type DatabaseConnection
+  type DatabaseConnection,
+  SlowQueryLogger,
+  type SlowQueryLogSink
 } from "@local-work-os/db";
 import {
   formatActivityEvent,
@@ -14,17 +16,33 @@ export class ActivityService {
   readonly module = "activity";
 
   private readonly repository: ActivityLogRepository;
+  private readonly slowQueryLogger: SlowQueryLogger;
 
-  constructor(input: { connection: DatabaseConnection }) {
+  constructor(input: {
+    connection: DatabaseConnection;
+    slowQueryThresholdMs?: number;
+    slowQuerySink?: SlowQueryLogSink;
+  }) {
     this.repository = new ActivityLogRepository(input.connection);
+    this.slowQueryLogger = new SlowQueryLogger({
+      ...(input.slowQueryThresholdMs === undefined
+        ? {}
+        : { thresholdMs: input.slowQueryThresholdMs }),
+      ...(input.slowQuerySink === undefined ? {} : { sink: input.slowQuerySink })
+    });
   }
 
   listRecentActivity(workspaceId: string, limit = 20): ActivityEventView[] {
     validateNonEmptyString(workspaceId, "workspaceId");
 
-    return this.repository
-      .listRecent(workspaceId, normalizeLimit(limit))
-      .map(formatActivityEvent);
+    return this.slowQueryLogger.time(
+      "activity.listRecentActivity",
+      () =>
+        this.repository
+          .listRecent(workspaceId, normalizeLimit(limit))
+          .map(formatActivityEvent),
+      { workspaceId, limit }
+    );
   }
 
   listRecentActivityPage(input: {

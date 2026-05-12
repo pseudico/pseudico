@@ -1,7 +1,9 @@
 import { ArrowUpRight, Check, Circle } from "lucide-react";
+import { useState } from "react";
 import { TagBadge } from "./TagBadge";
 import { getItemTypeLabel, ItemTypeIcon } from "./ItemTypeIcon";
 import { SnoozeMenu, type SnoozePreset } from "./SnoozeMenu";
+import { useVirtualizedFeed } from "./useVirtualizedFeed";
 
 export type GroupedResultViewModel = {
   targetType: "container" | "item";
@@ -37,6 +39,12 @@ export type GroupedResultsListProps = {
     dueAt: string | null
   ) => Promise<void> | void;
   onSelectionChange?: (resultId: string, selected: boolean) => void;
+  virtualization?: {
+    enabled?: boolean;
+    estimatedItemHeight?: number;
+    viewportHeight?: number;
+    minItems?: number;
+  };
 };
 
 export function GroupedResultsList({
@@ -46,8 +54,10 @@ export function GroupedResultsList({
   onOpenResult,
   onSnoozeTask,
   onRescheduleTask,
-  onSelectionChange
+  onSelectionChange,
+  virtualization
 }: GroupedResultsListProps): React.JSX.Element {
+  const [scrollOffsets, setScrollOffsets] = useState<Record<string, number>>({});
   if (groups.length === 0 || groups.every((group) => group.results.length === 0)) {
     return (
       <div className="item-feed-empty-state">
@@ -66,7 +76,82 @@ export function GroupedResultsList({
             <span>{group.results.length}</span>
           </header>
           <div className="grouped-result-items">
-            {group.results.map((result) => (
+            <GroupedResultRows
+              groupKey={group.key}
+              results={group.results}
+              selectedResultIds={selectedResultIds}
+              scrollOffset={scrollOffsets[group.key] ?? 0}
+              virtualization={virtualization}
+              onScrollOffsetChange={(offset) =>
+                setScrollOffsets((current) => ({ ...current, [group.key]: offset }))
+              }
+              {...(onCompleteTask === undefined ? {} : { onCompleteTask })}
+              {...(onOpenResult === undefined ? {} : { onOpenResult })}
+              {...(onRescheduleTask === undefined ? {} : { onRescheduleTask })}
+              {...(onSelectionChange === undefined ? {} : { onSelectionChange })}
+              {...(onSnoozeTask === undefined ? {} : { onSnoozeTask })}
+            />
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function GroupedResultRows({
+  groupKey,
+  results,
+  selectedResultIds,
+  scrollOffset,
+  virtualization,
+  onScrollOffsetChange,
+  onCompleteTask,
+  onOpenResult,
+  onSnoozeTask,
+  onRescheduleTask,
+  onSelectionChange
+}: {
+  groupKey: string;
+  results: readonly GroupedResultViewModel[];
+  selectedResultIds: readonly string[];
+  scrollOffset: number;
+  virtualization: GroupedResultsListProps["virtualization"];
+  onScrollOffsetChange: (offset: number) => void;
+} & Pick<
+  GroupedResultsListProps,
+  | "onCompleteTask"
+  | "onOpenResult"
+  | "onSnoozeTask"
+  | "onRescheduleTask"
+  | "onSelectionChange"
+>): React.JSX.Element {
+  const virtualized = useVirtualizedFeed({
+    items: results,
+    getKey: (result) => `${result.targetType}:${result.targetId}`,
+    estimatedItemHeight: virtualization?.estimatedItemHeight ?? 96,
+    viewportHeight: virtualization?.viewportHeight ?? 640,
+    scrollOffset,
+    minItems:
+      virtualization?.enabled === false
+        ? Number.MAX_SAFE_INTEGER
+        : (virtualization?.minItems ?? 80)
+  });
+
+  return (
+    <div
+      data-group-key={groupKey}
+      data-virtualized={virtualized.isVirtualized ? "true" : "false"}
+      style={
+        virtualized.isVirtualized
+          ? { maxHeight: virtualization?.viewportHeight ?? 640, overflowY: "auto" }
+          : undefined
+      }
+      onScroll={(event) => onScrollOffsetChange(event.currentTarget.scrollTop)}
+    >
+      {virtualized.beforeHeight > 0 ? (
+        <div aria-hidden="true" style={{ height: virtualized.beforeHeight }} />
+      ) : null}
+      {virtualized.virtualItems.map(({ item: result }) => (
               <article
                 key={`${result.targetType}:${result.targetId}`}
                 className={`grouped-result-item${selectedResultIds.includes(result.targetId) ? " grouped-result-item-selected" : ""}`}
@@ -159,10 +244,10 @@ export function GroupedResultsList({
                   </button>
                 </div>
               </article>
-            ))}
-          </div>
-        </section>
       ))}
+      {virtualized.afterHeight > 0 ? (
+        <div aria-hidden="true" style={{ height: virtualized.afterHeight }} />
+      ) : null}
     </div>
   );
 }
