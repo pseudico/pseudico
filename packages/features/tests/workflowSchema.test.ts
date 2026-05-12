@@ -82,7 +82,7 @@ describe("workflow schema and registry", () => {
   });
 
   it("exposes only local previewable registered actions", () => {
-    expect(WORKFLOW_ACTION_REGISTRY).toHaveLength(4);
+    expect(WORKFLOW_ACTION_REGISTRY).toHaveLength(5);
     expect(WORKFLOW_ACTION_REGISTRY.every((entry) => entry.localOnly)).toBe(true);
     expect(WORKFLOW_ACTION_REGISTRY.every((entry) => entry.previewable)).toBe(true);
   });
@@ -181,6 +181,47 @@ describe("workflow schema and registry", () => {
 
     expect(tagResult.valid).toBe(true);
     expect(categoryResult.valid).toBe(true);
+  });
+
+
+  it("accepts local project/contact template creation workflow actions", () => {
+    const result = validateWorkflowDefinitionSchema({
+      kind: WORKFLOW_DEFINITION_KIND,
+      version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+      trigger: { type: "item_created" },
+      actions: [
+        {
+          type: "create_container_from_template",
+          templateId: "template_project_1",
+          name: "Project for {{item.title}}",
+          baseDate: "{{item.dueAt+1d}}"
+        },
+        {
+          type: "create_task",
+          containerId: "{{previous.targetId}}",
+          title: "Review {{item.title}}"
+        }
+      ]
+    });
+
+    expect(result.valid).toBe(true);
+    expect(createWorkflowEditorSkeletonState({
+      name: "Project starter",
+      definition: {
+        kind: WORKFLOW_DEFINITION_KIND,
+        version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+        trigger: { type: "manual" },
+        actions: [
+          {
+            type: "create_container_from_template",
+            templateId: "template_project_1",
+            name: "Project for {{item.title}}"
+          }
+        ]
+      }
+    }).actionSummaries).toEqual([
+      "Create project/contact from template template_project_1; name Project for {{item.title}}."
+    ]);
   });
 
   it("accepts templated actions with local conditional steps", () => {

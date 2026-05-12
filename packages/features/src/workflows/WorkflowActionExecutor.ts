@@ -2,6 +2,7 @@ import {
   CategoryRepository,
   ContainerRepository,
   ItemRepository,
+  TemplateRepository,
   type DatabaseConnection
 } from "@local-work-os/db";
 import type { ActivityActorType } from "@local-work-os/core";
@@ -9,6 +10,7 @@ import { CategoryService } from "../metadata/CategoryService";
 import { ItemService } from "../items/ItemService";
 import { TagService } from "../metadata/TagService";
 import { TaskService } from "../tasks/TaskService";
+import { ContainerTemplateService, validateContainerTemplateJson } from "../templates/TemplateService";
 
 import {
   summarizeWorkflowAction,
@@ -261,6 +263,37 @@ export class WorkflowActionExecutor {
           targetId: result.item.id
         };
       }
+      case "create_container_from_template": {
+        const result = await new ContainerTemplateService({
+          connection: this.connection,
+          idFactory: this.idFactory,
+          now: this.now
+        }).createContainerFromTemplate({
+          workspaceId: context.workspaceId,
+          templateId: actionToRun.templateId,
+          ...(actionToRun.name === undefined || actionToRun.name === null
+            ? {}
+            : { name: actionToRun.name }),
+          ...(actionToRun.baseDate === undefined || actionToRun.baseDate === null
+            ? {}
+            : { baseDate: actionToRun.baseDate }),
+          ...(context.actorType === undefined
+            ? {}
+            : { actorType: context.actorType })
+        });
+        const container = "project" in result.container
+          ? result.container.project
+          : result.container.contact;
+
+        return {
+          index,
+          actionType: actionToRun.type,
+          status: "completed",
+          summary: summarizeWorkflowAction(actionToRun),
+          targetType: "container",
+          targetId: container.id
+        };
+      }
     }
   }
 
@@ -359,29 +392,32 @@ export class WorkflowActionExecutor {
         return null;
       }
       case "move_item": {
-        if (isPreviewVariable(action.itemId, options)) {
-          return null;
-        }
-        const item = new ItemRepository(this.connection).getById(action.itemId);
-        if (item === null || item.workspaceId !== workspaceId) {
-          return `Workflow item to move was not found: ${action.itemId}.`;
+        if (!isPreviewVariable(action.itemId, options)) {
+          const item = new ItemRepository(this.connection).getById(action.itemId);
+          if (item === null || item.workspaceId !== workspaceId) {
+            return `Workflow item to move was not found: ${action.itemId}.`;
+          }
         }
 
-        const container = new ContainerRepository(this.connection).getById(
-          action.targetContainerId
-        );
-        if (container === null || container.workspaceId !== workspaceId) {
-          return `Workflow target container was not found: ${action.targetContainerId}.`;
+        if (!isPreviewVariable(action.targetContainerId, options)) {
+          const container = new ContainerRepository(this.connection).getById(
+            action.targetContainerId
+          );
+          if (container === null || container.workspaceId !== workspaceId) {
+            return `Workflow target container was not found: ${action.targetContainerId}.`;
+          }
         }
 
         return null;
       }
       case "create_task": {
-        const container = new ContainerRepository(this.connection).getById(
-          action.containerId
-        );
-        if (container === null || container.workspaceId !== workspaceId) {
-          return `Workflow task container was not found: ${action.containerId}.`;
+        if (!isPreviewVariable(action.containerId, options)) {
+          const container = new ContainerRepository(this.connection).getById(
+            action.containerId
+          );
+          if (container === null || container.workspaceId !== workspaceId) {
+            return `Workflow task container was not found: ${action.containerId}.`;
+          }
         }
 
         if (
@@ -395,6 +431,29 @@ export class WorkflowActionExecutor {
         const dateValidation = validateCreateTaskDates(action);
         if (dateValidation !== null) {
           return dateValidation;
+        }
+
+        return null;
+      }
+      case "create_container_from_template": {
+        const template = new TemplateRepository(this.connection).getById(action.templateId);
+        if (
+          template === null ||
+          template.workspaceId !== workspaceId ||
+          (template.kind !== "project" && template.kind !== "contact")
+        ) {
+          return `Workflow container template was not found: ${action.templateId}.`;
+        }
+
+        try {
+          validateContainerTemplateJson(JSON.parse(template.templateJson));
+        } catch {
+          return `Workflow container template JSON could not be parsed: ${action.templateId}.`;
+        }
+
+        const baseDateValidation = validateCreateContainerFromTemplateBaseDate(action.baseDate);
+        if (baseDateValidation !== null) {
+          return baseDateValidation;
         }
 
         return null;
@@ -457,6 +516,7 @@ function resolveTriggerItemAction(
 
       return action;
     case "create_task":
+    case "create_container_from_template":
       return action;
   }
 }
@@ -473,6 +533,8 @@ function getActionTarget(action: WorkflowAction): {
       return { targetType: "item", targetId: action.itemId };
     case "create_task":
       return { targetType: "item", targetId: null };
+    case "create_container_from_template":
+      return { targetType: "container", targetId: null };
   }
 }
 
@@ -481,6 +543,17 @@ function isPreviewVariable(
   options: { allowPreviewVariables?: boolean }
 ): boolean {
   return options.allowPreviewVariables === true && value.startsWith(WORKFLOW_PREVIEW_OUTPUT_PREFIX);
+}
+
+function validateCreateContainerFromTemplateBaseDate(
+  value: string | null | undefined
+): string | null {
+  if (value === undefined || value === null || value.trim().length === 0) {
+    return null;
+  }
+
+  const parsed = parseWorkflowDate(value, "baseDate");
+  return typeof parsed === "string" ? parsed : null;
 }
 
 function validateCreateTaskDates(action: Extract<WorkflowAction, { type: "create_task" }>): string | null {
@@ -503,7 +576,7 @@ function validateCreateTaskDates(action: Extract<WorkflowAction, { type: "create
 
 function parseWorkflowDate(
   value: string | null | undefined,
-  fieldName: "startAt" | "dueAt"
+  fieldName: "startAt" | "dueAt" | "baseDate"
 ): Date | string | null {
   if (value === undefined || value === null || value.trim().length === 0) {
     return null;
@@ -515,7 +588,9 @@ function parseWorkflowDate(
   const date = new Date(normalized);
 
   if (Number.isNaN(date.getTime())) {
-    return `Workflow task ${fieldName} must resolve to a valid date or ISO timestamp.`;
+    return fieldName === "baseDate"
+      ? "Workflow template baseDate must resolve to a valid date or ISO timestamp."
+      : `Workflow task ${fieldName} must resolve to a valid date or ISO timestamp.`;
   }
 
   return date;
