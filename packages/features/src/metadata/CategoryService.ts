@@ -21,6 +21,16 @@ import {
 
 export type CategoryServiceIdFactory = (prefix: string) => string;
 
+export type CategoryWorkflowHook = {
+  handleCategoryAssigned(input: {
+    workspaceId: string;
+    targetType: "container" | "item";
+    targetId: string;
+    categoryId: string | null;
+    actorType?: ActivityActorType;
+  }): Promise<unknown>;
+};
+
 export type CreateCategoryInput = {
   workspaceId: string;
   name: string;
@@ -53,6 +63,7 @@ export type AssignCategoryToItemInput = {
 
 export type CategoryAssignmentResult = {
   category: CategoryRecord | null;
+  changed: boolean;
   searchRecord: SearchIndexRecord;
 };
 
@@ -69,11 +80,13 @@ export class CategoryService {
   private readonly idFactory: CategoryServiceIdFactory;
   private readonly now: () => Date;
   private readonly transactionService: TransactionService;
+  private readonly workflowHook: CategoryWorkflowHook | null;
 
   constructor(input: {
     connection: DatabaseConnection;
     idFactory?: CategoryServiceIdFactory;
     now?: () => Date;
+    workflowHook?: CategoryWorkflowHook;
   }) {
     this.connection = input.connection;
     this.idFactory = input.idFactory ?? ((prefix) => createLocalId(prefix));
@@ -81,6 +94,7 @@ export class CategoryService {
     this.transactionService = new TransactionService({
       connection: input.connection
     });
+    this.workflowHook = input.workflowHook ?? null;
   }
 
   async createCategory(input: CreateCategoryInput): Promise<CategoryRecord> {
@@ -271,7 +285,7 @@ export class CategoryService {
     validateNonEmptyString(input.workspaceId, "workspaceId");
     validateNonEmptyString(input.containerId, "containerId");
 
-    return await this.transactionService.runInTransaction(() => {
+    const result = await this.transactionService.runInTransaction(() => {
       const timestamp = createIsoTimestamp(this.now());
       const before = this.requireContainer(input.containerId);
       this.assertWorkspaceMatch(input.workspaceId, before.workspaceId);
@@ -302,8 +316,20 @@ export class CategoryService {
         timestamp
       });
 
-      return { category, searchRecord };
+      return { category, changed: before.categoryId !== (category?.id ?? null), searchRecord };
     });
+
+    if (result.changed) {
+      await this.workflowHook?.handleCategoryAssigned({
+        workspaceId: input.workspaceId,
+        targetType: "container",
+        targetId: input.containerId,
+        categoryId: result.category?.id ?? null,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
+    }
+
+    return result;
   }
 
   async assignCategoryToItem(
@@ -312,7 +338,7 @@ export class CategoryService {
     validateNonEmptyString(input.workspaceId, "workspaceId");
     validateNonEmptyString(input.itemId, "itemId");
 
-    return await this.transactionService.runInTransaction(() => {
+    const result = await this.transactionService.runInTransaction(() => {
       const timestamp = createIsoTimestamp(this.now());
       const before = this.requireItem(input.itemId);
       this.assertWorkspaceMatch(input.workspaceId, before.workspaceId);
@@ -340,8 +366,20 @@ export class CategoryService {
         timestamp
       });
 
-      return { category, searchRecord };
+      return { category, changed: before.categoryId !== (category?.id ?? null), searchRecord };
     });
+
+    if (result.changed) {
+      await this.workflowHook?.handleCategoryAssigned({
+        workspaceId: input.workspaceId,
+        targetType: "item",
+        targetId: input.itemId,
+        categoryId: result.category?.id ?? null,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
+    }
+
+    return result;
   }
 
   listCategories(workspaceId: string): CategoryRecord[] {

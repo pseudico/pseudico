@@ -88,7 +88,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version eighteen", () => {
+  it("runs on an empty database and records schema version nineteen", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -182,14 +182,19 @@ describe("schema migrations", () => {
           version: 18,
           name: "workflow_file_imported_trigger",
           checksum: "pse-157-workflow-file-imported-trigger-v1"
+        },
+        {
+          version: 19,
+          name: "workflow_metadata_triggers",
+          checksum: "pse-158-workflow-metadata-triggers-v1"
         }
       ],
-      currentVersion: 18
+      currentVersion: 19
     });
-    expect(service.getCurrentSchemaVersion()).toBe(18);
+    expect(service.getCurrentSchemaVersion()).toBe(19);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 18
+      currentVersion: 19
     });
   });
 
