@@ -3838,3 +3838,55 @@ Files changed: packages/ui/src/components/widgets/PomodoroWidget.tsx; docs/sessi
 Open questions / risks: CI rerun required after amended push.
 Next actions: Amend commit; force-push; watch CI.
 
+
+## 2026-05-12T11:07:57.8026581+10:00
+Objective: Completed PSE-153 merge and next-ticket promotion.
+Decisions made: PR #142 merged at ddf0615; PSE-153 moved Done; PSE-154 promoted as sole Codex Ready issue.
+Files changed: docs/session_log.md
+Open questions / risks: Local untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi remain unrelated.
+Next actions: Start PSE-154 in the next run if requested.
+
+
+## 2026-05-12T11:10:26.3116620+10:00
+Objective: Reconcile active Local Work OS work and start next ticket.
+Decisions made:
+- No Linear PR Open/In Progress issues found; one Codex Ready issue PSE-154 selected.
+- No open user PRs found in pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-154 scope must be loaded from source ticket before coding.
+Next actions: Move PSE-154 to In Progress; create branch; inspect code.
+
+## 2026-05-12T11:10:58.3138597+10:00
+Objective: Start PSE-154 implementation branch.
+Decisions made:
+- Moved PSE-154 to In Progress.
+- Created branch codex/PSE-154-pagination-virtualization after sandbox git ref lock required escalation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need identify affected large-result surfaces and acceptance criteria.
+Next actions: Read source ticket; inspect search/list UI; plan tests.
+
+## 2026-05-12T11:15:34.9793958+10:00
+Objective: Implement PSE-154 performance primitives.
+Decisions made:
+- Added local slow-query logger and large-workspace performance fixture service.
+- Added virtualized feed hook and applied it to item, grouped search/result, and activity lists.
+Files changed:
+- packages/db/src/services/SlowQueryLogger.ts
+- packages/db/src/services/PerformanceFixtureService.ts
+- packages/ui/src/components/useVirtualizedFeed.ts
+Open questions / risks: Type/lint may require UI hook and service signature adjustments.
+Next actions: Run focused tests; fix type/lint; run full checks.
+
+## 2026-05-12T11:18:18.7776964+10:00
+Objective: Verify PSE-154 focused implementation.
+Decisions made:
+- Focused package tests passed after sandbox EPERM required escalation for Vitest/Vite spawning.
+- Fixed exact optional typing and cleaned lint warning.
+Files changed:
+- packages/features/src/search/SearchService.ts
+- packages/features/src/activity/ActivityService.ts
+- docs/QA_SCRIPTS.md
+Open questions / risks: Full root checks still pending and may expose integration issues.
+Next actions: Run pnpm lint/typecheck/test/build; fix failures; open PR.

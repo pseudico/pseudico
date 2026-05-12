@@ -85,3 +85,10 @@ Manual verification for a temporary workspace:
 7. Reopen the packaged app and open the same workspace.
 8. Confirm the project and task still appear, and workspace health reports the
    SQLite database path under the workspace folder.
+
+## Large result performance smoke (PSE-154)
+
+- Use the local performance fixture service (PerformanceFixtureService.seedLargeWorkspace) to seed a workspace with 10k generated items for manual QA.
+- Verify project feeds, grouped search/collection results, and recent activity lists render as virtualized windows instead of mounting every row.
+- Verify dashboard widgets request bounded pages through widget data limits and show only the configured page of items.
+- Enable a slow-query sink in service construction during diagnostics to capture local query timings without network or telemetry.

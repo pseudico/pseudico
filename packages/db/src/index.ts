@@ -61,3 +61,14 @@ export {
   type WorkspaceSeedInput,
   type WorkspaceSeedResult
 } from "./services/WorkspaceSeedService";
+export {
+  SlowQueryLogger,
+  type QueryTimerClock,
+  type SlowQueryLogEntry,
+  type SlowQueryLogSink
+} from "./services/SlowQueryLogger";
+export {
+  PerformanceFixtureService,
+  type LargeWorkspaceFixtureInput,
+  type LargeWorkspaceFixtureResult
+} from "./services/PerformanceFixtureService";

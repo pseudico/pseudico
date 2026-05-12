@@ -515,6 +515,12 @@ export {
   type LoadableState
 } from "./components/LoadableState";
 export {
+  useVirtualizedFeed,
+  type VirtualizedFeedInput,
+  type VirtualizedFeedItem,
+  type VirtualizedFeedResult
+} from "./components/useVirtualizedFeed";
+export {
   Toast,
   ToastViewport,
   type ToastProps,
