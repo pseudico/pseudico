@@ -1,6 +1,7 @@
 import {
   AppSettingsRepository,
   ActivityLogRepository,
+  CategoryRepository,
   ContainerRepository,
   ItemRepository,
   MigrationService,
@@ -14,6 +15,7 @@ import {
   DEFAULT_TODAY_BACKLOG_DAYS,
   TODAY_BACKLOG_DAYS_SETTING_KEY,
   DailyPlanService,
+  PlanningSummaryService,
   ListService,
   TaskService,
   TodayService
@@ -507,6 +509,84 @@ describe("TodayService", () => {
       "item",
       active.item.id
     ).map((event) => event.action)).toContain("task_plan_rolled_over");
+  });
+
+
+  it("builds daily and weekly planning summaries with Markdown export content", async () => {
+    new CategoryRepository(connection).create({
+      id: "category_ops",
+      workspaceId: "workspace_1",
+      name: "Operations",
+      slug: "operations",
+      color: "#445566",
+      timestamp: "2026-05-01T00:00:00.000Z"
+    });
+    const taskService = createTaskService();
+    const dailyPlanService = createDailyPlanService();
+    const planned = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Plan the review",
+      categoryId: "category_ops",
+      dueAt: new Date(2026, 4, 15, 10).toISOString()
+    });
+    const completed = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Complete the review",
+      categoryId: "category_ops",
+      dueAt: new Date(2026, 4, 15, 11).toISOString()
+    });
+    const overdue = await taskService.createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Overdue setup",
+      categoryId: "category_ops",
+      dueAt: new Date(2026, 4, 14, 11).toISOString()
+    });
+    await dailyPlanService.planTask({
+      workspaceId: "workspace_1",
+      itemId: planned.item.id,
+      lane: "today"
+    });
+    await taskService.completeTask(completed.item.id);
+    await taskService.snoozeTask({
+      itemId: overdue.item.id,
+      dueAt: new Date(2026, 4, 16, 11).toISOString()
+    });
+
+    const viewModel = createTodayService().getTodayViewModel({
+      workspaceId: "workspace_1"
+    });
+
+    expect(viewModel.planningSummary.daily).toMatchObject({
+      localDate: "2026-05-15",
+      plannedCount: 1,
+      completedCount: 1,
+      snoozedCount: 1,
+      overdueCount: 0,
+      plannedByLane: { today: 1, tomorrow: 0, backlog: 0 }
+    });
+    expect(viewModel.planningSummary.weekly.byProject[0]).toMatchObject({
+      label: "Launch Plan",
+      plannedCount: 3,
+      completedCount: 1,
+      snoozedCount: 0
+    });
+    expect(viewModel.planningSummary.weekly.byCategory[0]).toMatchObject({
+      label: "Operations",
+      plannedCount: 3,
+      completedCount: 1
+    });
+
+    const markdown = new PlanningSummaryService({
+      connection,
+      now: () => NOW
+    }).buildMarkdown({ workspaceId: "workspace_1" });
+
+    expect(markdown).toContain("# Planning summary for 2026-05-15");
+    expect(markdown).toContain("- Planned: 1");
+    expect(markdown).toContain("Launch Plan: planned 3, completed 1");
   });
 
   it("rejects invalid inputs", () => {

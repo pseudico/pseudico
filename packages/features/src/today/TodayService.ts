@@ -27,6 +27,7 @@ import {
   TodayPreferencesService,
   type TodayPreferences
 } from "./TodayPreferencesService";
+import { PlanningSummaryService } from "./PlanningSummaryService";
 
 // Owns Today/Tomorrow planning application contracts.
 // Does not own task persistence internals or calendar rendering.
@@ -95,6 +96,10 @@ export class TodayService {
         date,
         preferences
       }),
+      planningSummary: new PlanningSummaryService({
+        connection: this.connection,
+        now: this.now
+      }).getSummary({ workspaceId: input.workspaceId, date }),
       ranges: {
         today: {
           startInclusive: todayRange.startInclusive,

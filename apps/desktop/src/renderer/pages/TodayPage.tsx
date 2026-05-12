@@ -1,4 +1,4 @@
-import { RefreshCw } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,6 +15,7 @@ import type {
   LocalWorkOsApi,
   TodayTaskSummary,
   TodayViewModelSummary,
+  PlanningSummaryViewSummary,
   TodayPreferencesSummary,
   TodayPlanningModeSummary
 } from "../../preload/api";
@@ -49,6 +50,8 @@ export function TodayPage({
   const [plannerLoading, setPlannerLoading] = useState(initialViewModel === undefined);
   const [plannerError, setPlannerError] = useState<string | null>(null);
   const [preferencesSaving, setPreferencesSaving] = useState(false);
+  const [exportingSummary, setExportingSummary] = useState(false);
+  const [exportMessage, setExportMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialViewModel !== undefined) {
@@ -408,6 +411,35 @@ export function TodayPage({
     await reloadToday(workspaceId);
   }
 
+  async function exportPlanningSummary(): Promise<void> {
+    const workspaceId = resolveWorkspaceId(currentWorkspace?.id, viewModel);
+
+    if (workspaceId === null || viewModel === null) {
+      return;
+    }
+
+    setExportingSummary(true);
+    setMutationError(null);
+    setExportMessage(null);
+
+    const result = await (apiClient.export.exportPlanningSummaryMarkdown?.({
+      workspaceId,
+      date: viewModel.localDate
+    }) ?? Promise.resolve({
+      ok: false as const,
+      error: { code: "IPC_ERROR" as const, message: "Planning summary export API is not available." }
+    }));
+
+    setExportingSummary(false);
+
+    if (!result.ok) {
+      setMutationError(result.error.message);
+      return;
+    }
+
+    setExportMessage(`Planning summary exported to ${result.data.relativePath}.`);
+  }
+
   async function createPlannerTask(
     submission: DailyPlannerSubmission
   ): Promise<boolean> {
@@ -517,6 +549,15 @@ export function TodayPage({
         />
       )}
 
+      {viewModel?.planningSummary === undefined ? null : (
+        <PlanningSummaryPanel
+          disabled={exportingSummary}
+          exportMessage={exportMessage}
+          summary={viewModel.planningSummary}
+          onExport={exportPlanningSummary}
+        />
+      )}
+
       {viewModel === null ? null : (
         <TodayPreferencesPanel
           completionSummary={viewModel.completionSummary}
@@ -583,6 +624,101 @@ export function TodayPage({
         />
       </div>
     </section>
+  );
+}
+
+type PlanningSummaryPanelProps = {
+  disabled: boolean;
+  exportMessage: string | null;
+  summary: PlanningSummaryViewSummary;
+  onExport: () => Promise<void>;
+};
+
+function PlanningSummaryPanel({
+  disabled,
+  exportMessage,
+  summary,
+  onExport
+}: PlanningSummaryPanelProps): React.JSX.Element {
+  return (
+    <section className="planning-summary-panel" aria-labelledby="planning-summary-title">
+      <div className="planning-summary-heading">
+        <div>
+          <p className="top-eyebrow">Local review</p>
+          <h3 id="planning-summary-title">Daily and weekly summary</h3>
+          <p>
+            Counts are calculated locally from daily plans, task/list activity,
+            and dated work. Weekly groups cover {summary.weekly.startDate} to {summary.weekly.endDate}.
+          </p>
+        </div>
+        <button
+          className="secondary-button compact-button"
+          disabled={disabled}
+          type="button"
+          onClick={() => void onExport()}
+        >
+          <Download size={16} aria-hidden="true" />
+          {disabled ? "Exporting..." : "Export Markdown"}
+        </button>
+      </div>
+
+      <div className="planning-summary-metrics" role="list" aria-label="Daily planning metrics">
+        <PlanningMetric label="Planned" value={summary.daily.plannedCount} />
+        <PlanningMetric label="Completed" value={summary.daily.completedCount} />
+        <PlanningMetric label="Snoozed" value={summary.daily.snoozedCount} />
+        <PlanningMetric label="Overdue" value={summary.daily.overdueCount} />
+      </div>
+
+      <p className="planning-summary-lanes">
+        Today {summary.daily.plannedByLane.today} &middot; Tomorrow {summary.daily.plannedByLane.tomorrow} &middot; Backlog {summary.daily.plannedByLane.backlog}
+      </p>
+
+      <div className="planning-summary-groups">
+        <PlanningGroupList title="By project" groups={summary.weekly.byProject} />
+        <PlanningGroupList title="By category" groups={summary.weekly.byCategory} />
+      </div>
+
+      {exportMessage === null ? null : (
+        <p className="planning-summary-export" role="status">{exportMessage}</p>
+      )}
+    </section>
+  );
+}
+
+function PlanningMetric({ label, value }: { label: string; value: number }): React.JSX.Element {
+  return (
+    <div className="planning-summary-metric" role="listitem">
+      <strong>{value}</strong>
+      <span>{label}</span>
+    </div>
+  );
+}
+
+function PlanningGroupList({
+  groups,
+  title
+}: {
+  groups: PlanningSummaryViewSummary["weekly"]["byProject"];
+  title: string;
+}): React.JSX.Element {
+  return (
+    <div className="planning-summary-group-list">
+      <h4>{title}</h4>
+      {groups.length === 0 ? (
+        <p>No local planning activity this week.</p>
+      ) : (
+        <ul>
+          {groups.slice(0, 4).map((group) => (
+            <li key={`${group.id ?? group.label}-${title}`}>
+              <span>{group.label}</span>
+              <small>
+                {group.plannedCount} planned &middot; {group.completedCount} done &middot; {group.snoozedCount} snoozed &middot; {group.overdueCount} overdue
+              </small>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

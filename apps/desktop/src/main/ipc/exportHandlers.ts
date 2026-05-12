@@ -14,6 +14,7 @@ import {
   apiOk,
   type ApiResult,
   type ExportProjectMarkdownInput,
+  type ExportPlanningSummaryMarkdownInput,
   type ExportTasksCsvInput,
   type ExportWorkspaceJsonInput,
   type TextExportSummary,
@@ -39,6 +40,9 @@ export type ExportIpcHandlers = {
     input: unknown
   ) => Promise<ApiResult<TextExportSummary>>;
   handleExportTasksCsv: (input: unknown) => Promise<ApiResult<TextExportSummary>>;
+  handleExportPlanningSummaryMarkdown: (
+    input: unknown
+  ) => Promise<ApiResult<TextExportSummary>>;
 };
 
 export function createExportIpcHandlers(
@@ -89,6 +93,37 @@ export function createExportIpcHandlers(
         async ({ service }) => {
           const result = await service.exportProjectMarkdown({
             projectId: input.projectId
+          });
+
+          return apiOk(toTextExportSummary(result));
+        }
+      );
+    },
+
+    async handleExportPlanningSummaryMarkdown(input) {
+      if (!isOptionalExportPlanningSummaryMarkdownInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "exportPlanningSummaryMarkdown accepts optional workspaceId and date fields."
+        );
+      }
+
+      return await withExportService(
+        workspaceService,
+        now,
+        async ({ service, workspace }) => {
+          const workspaceId = input?.workspaceId ?? workspace.id;
+
+          if (workspaceId !== workspace.id) {
+            return apiError(
+              "WORKSPACE_ERROR",
+              "Export workspaceId must match the current workspace."
+            );
+          }
+
+          const result = await service.exportPlanningSummaryMarkdown({
+            workspaceId,
+            ...(input?.date === undefined ? {} : { date: input.date })
           });
 
           return apiOk(toTextExportSummary(result));
@@ -209,6 +244,17 @@ function isExportProjectMarkdownInput(
   input: unknown
 ): input is ExportProjectMarkdownInput {
   return isRecord(input) && isNonEmptyString(input.projectId);
+}
+
+function isOptionalExportPlanningSummaryMarkdownInput(
+  input: unknown
+): input is ExportPlanningSummaryMarkdownInput | undefined {
+  return (
+    input === undefined ||
+    (isRecord(input) &&
+      (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)) &&
+      (input.date === undefined || typeof input.date === "string" || input.date instanceof Date))
+  );
 }
 
 function isOptionalExportTasksCsvInput(

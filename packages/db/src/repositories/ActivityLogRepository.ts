@@ -169,6 +169,39 @@ export class ActivityLogRepository {
     return toActivityLogPage(rows, limit);
   }
 
+
+
+  listByActionsBetween(input: {
+    workspaceId: string;
+    actions: string[];
+    startInclusive: string;
+    endExclusive: string;
+  }): ActivityLogRecord[] {
+    if (input.actions.length === 0) {
+      return [];
+    }
+
+    const placeholders = input.actions.map(() => "?").join(", ");
+    const rows = this.connection.sqlite
+      .prepare<unknown[], ActivityLogRow>(
+        `select *
+         from activity_log
+         where workspace_id = ?
+           and action in (${placeholders})
+           and created_at >= ?
+           and created_at < ?
+         order by created_at asc, id asc`
+      )
+      .all(
+        input.workspaceId,
+        ...input.actions,
+        input.startInclusive,
+        input.endExclusive
+      );
+
+    return rows.map(toActivityLogRecord);
+  }
+
   listForTarget(
     targetType: string,
     targetId: string,

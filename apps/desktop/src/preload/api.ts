@@ -205,7 +205,11 @@ export type WorkspaceJsonExportSummary = {
   totalAttachmentBytes: number;
 };
 
-export type TextExportKind = "project_markdown" | "tasks_csv" | "tasks_tsv";
+export type TextExportKind =
+  | "project_markdown"
+  | "tasks_csv"
+  | "tasks_tsv"
+  | "planning_summary_markdown";
 
 export type TextExportSummary = {
   id: string;
@@ -229,6 +233,11 @@ export type ExportProjectMarkdownInput = {
 export type ExportTasksCsvInput = {
   workspaceId?: string;
   format?: "csv" | "tsv";
+};
+
+export type ExportPlanningSummaryMarkdownInput = {
+  workspaceId?: string;
+  date?: string | Date;
 };
 
 export type PrintPdfInput = {
@@ -1347,6 +1356,37 @@ export type TodayCompletionSummary = {
   show: boolean;
 };
 
+export type PlanningSummaryMetricSummary = {
+  plannedCount: number;
+  completedCount: number;
+  snoozedCount: number;
+  overdueCount: number;
+};
+
+export type PlanningSummaryGroupSummary = PlanningSummaryMetricSummary & {
+  id: string | null;
+  label: string;
+};
+
+export type PlanningSummaryViewSummary = {
+  workspaceId: string;
+  generatedAt: string;
+  daily: PlanningSummaryMetricSummary & {
+    localDate: string;
+    plannedByLane: {
+      today: number;
+      tomorrow: number;
+      backlog: number;
+    };
+  };
+  weekly: {
+    startDate: string;
+    endDate: string;
+    byProject: PlanningSummaryGroupSummary[];
+    byCategory: PlanningSummaryGroupSummary[];
+  };
+};
+
 export type TodayViewModelSummary = {
   workspaceId: string;
   generatedAt: string;
@@ -1355,6 +1395,7 @@ export type TodayViewModelSummary = {
   preferences: Omit<TodayPreferencesSummary, "workspaceId" | "updatedAt">;
   focusSummary: TodayFocusSummary;
   completionSummary: TodayCompletionSummary;
+  planningSummary?: PlanningSummaryViewSummary;
   ranges: {
     today: TodayDateRangeSummary;
     overdueBacklog: TodayDateRangeSummary;
@@ -3285,7 +3326,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   export: {
     exportWorkspaceJson: "local-work-os:export:export-workspace-json",
     exportProjectMarkdown: "local-work-os:export:export-project-markdown",
-    exportTasksCsv: "local-work-os:export:export-tasks-csv"
+    exportTasksCsv: "local-work-os:export:export-tasks-csv",
+    exportPlanningSummaryMarkdown:
+      "local-work-os:export:export-planning-summary-markdown"
   },
   print: {
     printPdf: "local-work-os:print:print-pdf"
@@ -4114,6 +4157,10 @@ export type LocalWorkOsIpcContracts = {
     input: ExportTasksCsvInput | undefined;
     result: ApiResult<TextExportSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.export.exportPlanningSummaryMarkdown]: {
+    input: ExportPlanningSummaryMarkdownInput | undefined;
+    result: ApiResult<TextExportSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.print.printPdf]: {
     input: PrintPdfInput;
     result: ApiResult<PrintPdfSummary>;
@@ -4830,6 +4877,9 @@ export type LocalWorkOsApi = {
     exportTasksCsv: (
       input?: ExportTasksCsvInput
     ) => Promise<ApiResult<TextExportSummary>>;
+    exportPlanningSummaryMarkdown?: (
+      input?: ExportPlanningSummaryMarkdownInput
+    ) => Promise<ApiResult<TextExportSummary>>;
   };
   print?: {
     printPdf: (input: PrintPdfInput) => Promise<ApiResult<PrintPdfSummary>>;
@@ -5543,7 +5593,12 @@ export function createLocalWorkOsApi(
       exportProjectMarkdown: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportProjectMarkdown, input),
       exportTasksCsv: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportTasksCsv, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.export.exportTasksCsv, input),
+      exportPlanningSummaryMarkdown: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.export.exportPlanningSummaryMarkdown,
+          input
+        )
     },
     print: {
       printPdf: (input) =>

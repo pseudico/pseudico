@@ -535,7 +535,15 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       exportProjectMarkdown: (input) =>
         callApi(() => api.export.exportProjectMarkdown(input)),
       exportTasksCsv: (input) =>
-        callApi(() => api.export.exportTasksCsv(input))
+        callApi(() => api.export.exportTasksCsv(input)),
+      exportPlanningSummaryMarkdown: (input) =>
+        callApi(() => {
+          if (api.export.exportPlanningSummaryMarkdown === undefined) {
+            throw new Error("Planning summary export API is not available.");
+          }
+
+          return api.export.exportPlanningSummaryMarkdown(input);
+        })
     },
     print: {
       printPdf: (input) =>
@@ -1090,7 +1098,10 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().export.exportWorkspaceJson(input),
     exportProjectMarkdown: (input) =>
       getDesktopApiClient().export.exportProjectMarkdown(input),
-    exportTasksCsv: (input) => getDesktopApiClient().export.exportTasksCsv(input)
+    exportTasksCsv: (input) => getDesktopApiClient().export.exportTasksCsv(input),
+    exportPlanningSummaryMarkdown: (input) =>
+      getDesktopApiClient().export.exportPlanningSummaryMarkdown?.(input) ??
+      unavailable("Planning summary export API is not available.")
   },
   print: {
     printPdf: (input) => getDesktopApiClient().print!.printPdf(input)

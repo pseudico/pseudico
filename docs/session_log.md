@@ -3757,3 +3757,43 @@ Files changed:
 - apps/desktop/src/preload/api.ts
 Open questions / risks: Full lint/test/build still pending.
 Next actions: Run checks; fix failures; publish PR.
+
+## 2026-05-12T10:20:18.0057180+10:00
+Objective: Merge PSE-151 and prepare next Local Work OS ticket.
+Decisions made:
+- PR #140 was clean, CI passed, and was squash-merged.
+- PSE-151 moved to Done; PSE-152 promoted as sole Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: gh CLI auth remains invalid; GitHub connector worked for PR/merge.
+Next actions: Start PSE-152; keep only one Codex Ready issue; leave unrelated untracked files untouched.
+
+## 2026-05-12 10:23:08 +10:00
+Objective: Reconcile active Linear/GitHub work and run next Local Work OS ticket end-to-end.
+Decisions made:
+- Found no Linear issues in PR Open or In Progress; one issue is Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked local files appear unrelated and will be left untouched.
+Next actions: Move PSE-152 to In Progress; inspect docs/source; implement scoped changes.
+
+## 2026-05-12 10:34:06 +10:00
+Objective: Implement PSE-152 planning summaries through local service, Today UI, and Markdown export.
+Decisions made:
+- Added read-only PlanningSummaryService; export logs export_created; renderer calls IPC only.
+Files changed:
+- packages/features/src/today/PlanningSummaryService.ts
+- packages/features/src/export/ExportService.ts
+- apps/desktop/src/renderer/pages/TodayPage.tsx
+Open questions / risks: Full CI still pending after targeted tests and typecheck passed.
+Next actions: Run lint/test/build; fix failures; open PR.
+
+## 2026-05-12 10:38:07 +10:00
+Objective: Verify PSE-152 implementation before PR.
+Decisions made:
+- Full tests/build needed escalation for Vite/esbuild EPERM and then passed; IPC count test updated.
+Files changed:
+- apps/desktop/tests/preload/api.test.ts
+- docs/session_log.md
+Open questions / risks: CI still needs to validate on GitHub after push.
+Next actions: Commit and push branch; open ready PR; update Linear.

@@ -5,6 +5,7 @@ export {
   todayModuleContract
 } from "./TodayService";
 export { DailyPlanService, normalizePlanDate } from "./DailyPlanService";
+export { PlanningSummaryService } from "./PlanningSummaryService";
 export {
   DEFAULT_TODAY_PREFERENCES,
   TODAY_PLANNING_MODES,
@@ -30,4 +31,5 @@ export type {
   RolloverTomorrowToTodayInput,
   UnplanTaskInput
 } from "./DailyPlanService";
+export type { PlanningSummaryGroup, PlanningSummaryInput, PlanningSummaryMetric, PlanningSummaryView } from "./PlanningSummaryService";
 export type { TodayTaskView, TodayViewModel, TodayPreferencesView, TodayFocusSummary, TodayCompletionSummary } from "./TodayViewModel";

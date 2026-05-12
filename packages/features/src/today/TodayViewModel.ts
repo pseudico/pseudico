@@ -1,4 +1,5 @@
 import type { ListItemStatus, TaskDateRange, TaskStatus } from "@local-work-os/core";
+import type { PlanningSummaryView } from "./PlanningSummaryService";
 import type {
   DailyPlanLane,
   ListItemWithListRecord,
@@ -65,6 +66,7 @@ export type TodayViewModel = {
   preferences: TodayPreferencesView;
   focusSummary: TodayFocusSummary;
   completionSummary: TodayCompletionSummary;
+  planningSummary: PlanningSummaryView;
   ranges: {
     today: TaskDateRange;
     overdueBacklog: TaskDateRange;
