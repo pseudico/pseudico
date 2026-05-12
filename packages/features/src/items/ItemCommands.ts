@@ -9,6 +9,14 @@ import type {
 
 export type ItemServiceIdFactory = (prefix: string) => string;
 
+export type ItemCreatedWorkflowHook = {
+  handleItemCreated(input: {
+    workspaceId: string;
+    itemId: string;
+    actorType?: ActivityActorType;
+  }): Promise<unknown>;
+};
+
 export type CreateItemInput = {
   workspaceId: string;
   containerId: string;

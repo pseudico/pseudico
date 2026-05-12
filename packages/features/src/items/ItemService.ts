@@ -23,6 +23,7 @@ import type {
   CreateItemInput,
   ItemInspectorSnapshot,
   ItemFeedPage,
+  ItemCreatedWorkflowHook,
   ItemMutationResult,
   ItemServiceIdFactory,
   ListItemsByContainerInput,
@@ -40,11 +41,13 @@ export class ItemService {
   private readonly idFactory: ItemServiceIdFactory;
   private readonly now: () => Date;
   private readonly transactionService: TransactionService;
+  private readonly itemCreatedWorkflowHook: ItemCreatedWorkflowHook | null;
 
   constructor(input: {
     connection: DatabaseConnection;
     idFactory?: ItemServiceIdFactory;
     now?: () => Date;
+    itemCreatedWorkflowHook?: ItemCreatedWorkflowHook;
   }) {
     this.connection = input.connection;
     this.idFactory = input.idFactory ?? ((prefix) => createLocalId(prefix));
@@ -52,12 +55,13 @@ export class ItemService {
     this.transactionService = new TransactionService({
       connection: input.connection
     });
+    this.itemCreatedWorkflowHook = input.itemCreatedWorkflowHook ?? null;
   }
 
   async createItem(input: CreateItemInput): Promise<ItemMutationResult> {
     this.validateCreateInput(input);
 
-    return await this.transactionService.runInTransaction(() => {
+    const result = await this.transactionService.runInTransaction(() => {
       const timestamp = createIsoTimestamp(this.now());
       const itemRepository = new ItemRepository(this.connection);
       const sortOrderService = new SortOrderService({
@@ -96,6 +100,13 @@ export class ItemService {
 
       return { item, searchRecord };
     });
+    await this.itemCreatedWorkflowHook?.handleItemCreated({
+      workspaceId: result.item.workspaceId,
+      itemId: result.item.id,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+
+    return result;
   }
 
   async updateItem(input: UpdateItemInput): Promise<ItemMutationResult> {

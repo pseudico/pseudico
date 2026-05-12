@@ -1,9 +1,22 @@
 export const WORKFLOW_DEFINITION_SCHEMA_VERSION = 1;
 export const WORKFLOW_DEFINITION_KIND = "local-work-os.workflow";
 
-export type WorkflowTrigger = {
-  type: "manual";
+export type WorkflowItemCreatedTriggerFilters = {
+  itemTypes?: string[];
+  textIncludes?: string;
+  tagSlugs?: string[];
+  categoryIds?: string[];
+  containerIds?: string[];
 };
+
+export type WorkflowTrigger =
+  | {
+      type: "manual";
+    }
+  | {
+      type: "item_created";
+      filters?: WorkflowItemCreatedTriggerFilters;
+    };
 
 export type WorkflowAction =
   | {
@@ -94,6 +107,12 @@ export const WORKFLOW_TRIGGER_REGISTRY: readonly WorkflowTriggerRegistryEntry[] 
     type: "manual",
     label: "Manual run",
     description: "Run only when the user explicitly starts the workflow in this workspace.",
+    localOnly: true
+  },
+  {
+    type: "item_created",
+    label: "Item created",
+    description: "Run locally after a new item matches configured item filters.",
     localOnly: true
   }
 ] as const;
@@ -216,6 +235,8 @@ export function validateWorkflowDefinitionSchema(value: unknown): WorkflowValida
     issues.push(error("trigger.type", "Workflow trigger type is required."));
   } else if (!triggerTypes.has(value.trigger.type)) {
     issues.push(error("trigger.type", `Unsupported or non-local workflow trigger: ${value.trigger.type}.`));
+  } else if (value.trigger.type === "item_created") {
+    issues.push(...validateItemCreatedTrigger(value.trigger, "trigger"));
   }
 
   if (!Array.isArray(value.actions) || value.actions.length === 0) {
@@ -343,6 +364,49 @@ function validateWorkflowAction(value: unknown, path: string): WorkflowValidatio
   }
 
   return issues;
+}
+
+function validateItemCreatedTrigger(
+  value: Record<string, unknown>,
+  path: string
+): WorkflowValidationIssue[] {
+  const issues: WorkflowValidationIssue[] = [];
+
+  if (value.filters === undefined) {
+    return issues;
+  }
+
+  if (!isRecord(value.filters)) {
+    return [error(`${path}.filters`, "Item-created trigger filters must be an object.")];
+  }
+
+  requireOptionalStringArray(value.filters.itemTypes, `${path}.filters.itemTypes`, issues);
+  requireOptionalStringArray(value.filters.tagSlugs, `${path}.filters.tagSlugs`, issues);
+  requireOptionalStringArray(value.filters.categoryIds, `${path}.filters.categoryIds`, issues);
+  requireOptionalStringArray(value.filters.containerIds, `${path}.filters.containerIds`, issues);
+
+  if (
+    value.filters.textIncludes !== undefined &&
+    !isNonEmptyString(value.filters.textIncludes)
+  ) {
+    issues.push(error(`${path}.filters.textIncludes`, "Must be a non-empty string when provided."));
+  }
+
+  return issues;
+}
+
+function requireOptionalStringArray(
+  value: unknown,
+  path: string,
+  issues: WorkflowValidationIssue[]
+): void {
+  if (value === undefined) {
+    return;
+  }
+
+  if (!Array.isArray(value) || value.some((entry) => !isNonEmptyString(entry))) {
+    issues.push(error(path, "Must be an array of non-empty strings when provided."));
+  }
 }
 
 function buildValidationResult(

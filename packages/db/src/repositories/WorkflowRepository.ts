@@ -1,6 +1,6 @@
 import type { DatabaseConnection } from "../connection/createDatabaseConnection";
 
-export type WorkflowTriggerType = "manual";
+export type WorkflowTriggerType = "manual" | "item_created";
 export type WorkflowDefinitionStatus = "enabled" | "disabled";
 export type WorkflowRunStatus = "running" | "completed" | "failed";
 
@@ -73,6 +73,7 @@ export type ListWorkflowDefinitionsInput = {
   workspaceId: string;
   includeDeleted?: boolean;
   status?: WorkflowDefinitionStatus;
+  triggerType?: WorkflowTriggerType;
 };
 
 export type CreateWorkflowRunInput = {
@@ -168,6 +169,11 @@ export class WorkflowRepository {
     if (input.status !== undefined) {
       where.push("status = ?");
       values.push(input.status);
+    }
+
+    if (input.triggerType !== undefined) {
+      where.push("trigger_type = ?");
+      values.push(input.triggerType);
     }
 
     if (input.includeDeleted !== true) {

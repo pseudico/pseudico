@@ -14,7 +14,12 @@ import {
 } from "@local-work-os/db";
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { TaskService, WorkflowService } from "../src";
+import {
+  TaskService,
+  WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
+  WorkflowService,
+  WorkflowTriggerService
+} from "../src";
 
 let cleanup: (() => Promise<void>) | undefined;
 let connection: DatabaseConnection;
@@ -221,6 +226,144 @@ describe("WorkflowService", () => {
     ).rejects.toThrow("Workflow cannot be enabled");
 
     expect(new WorkflowRepository(connection).listDefinitions({ workspaceId: "workspace_1" })).toEqual([]);
+  });
+
+  it("runs item-created workflows when type, text, category, and container filters match", async () => {
+    const workflowService = createWorkflowService();
+    const workflow = await workflowService.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Finance triage",
+      trigger: {
+        type: "item_created",
+        filters: {
+          itemTypes: ["task"],
+          textIncludes: "invoice",
+          categoryIds: ["category_1"],
+          containerIds: ["container_project_1"]
+        }
+      },
+      actions: [
+        {
+          type: "add_tag",
+          targetType: "item",
+          targetId: WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
+          tagName: "Finance"
+        }
+      ]
+    });
+    const triggerService = new WorkflowTriggerService({
+      connection,
+      idFactory,
+      now
+    });
+
+    const task = await new TaskService({
+      connection,
+      idFactory,
+      now,
+      itemCreatedWorkflowHook: triggerService
+    }).createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      categoryId: "category_1",
+      title: "Send invoice"
+    });
+
+    expect(
+      new TagRepository(connection)
+        .listTagsForTarget({
+          workspaceId: "workspace_1",
+          targetType: "item",
+          targetId: task.item.id
+        })
+        .map((tag) => tag.slug)
+    ).toEqual(["finance"]);
+    expect(new WorkflowRepository(connection).listRunsForWorkflow(workflow.id)).toMatchObject([
+      {
+        workflowDefinitionId: workflow.id,
+        triggerType: "item_created",
+        status: "completed"
+      }
+    ]);
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("workflow", workflow.id)
+        .map((event) => event.action)
+    ).toEqual(["workflow_created", "workflow_run_completed"]);
+  });
+
+  it("skips item-created workflows when filters do not match", async () => {
+    const workflowService = createWorkflowService();
+    const workflow = await workflowService.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Invoice-only",
+      trigger: {
+        type: "item_created",
+        filters: {
+          textIncludes: "invoice"
+        }
+      },
+      actions: [
+        {
+          type: "add_tag",
+          targetType: "item",
+          targetId: WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
+          tagName: "Finance"
+        }
+      ]
+    });
+
+    await new TaskService({
+      connection,
+      idFactory,
+      now,
+      itemCreatedWorkflowHook: new WorkflowTriggerService({ connection, idFactory, now })
+    }).createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Prepare agenda"
+    });
+
+    expect(new WorkflowRepository(connection).listRunsForWorkflow(workflow.id)).toEqual([]);
+  });
+
+  it("prevents item-created workflow loops while recording triggered run history", async () => {
+    const workflowService = createWorkflowService();
+    const workflow = await workflowService.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Spawn follow-up",
+      trigger: {
+        type: "item_created",
+        filters: {
+          textIncludes: "invoice"
+        }
+      },
+      actions: [
+        {
+          type: "create_task",
+          containerId: "container_project_1",
+          title: "Review invoice trail"
+        }
+      ]
+    });
+
+    await new TaskService({
+      connection,
+      idFactory,
+      now,
+      itemCreatedWorkflowHook: new WorkflowTriggerService({ connection, idFactory, now })
+    }).createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Invoice arrived"
+    });
+
+    expect(new WorkflowRepository(connection).listRunsForWorkflow(workflow.id)).toHaveLength(1);
+    expect(
+      new TaskRepository(connection)
+        .listByContainer("container_project_1")
+        .map((record) => record.item.title)
+    ).toEqual(["Invoice arrived", "Review invoice trail"]);
   });
 });
 

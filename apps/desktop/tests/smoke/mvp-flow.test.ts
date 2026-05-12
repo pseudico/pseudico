@@ -186,7 +186,7 @@ describe("MVP end-to-end smoke flow", () => {
       new DatabaseHealthService({ connection }).getHealthReport()
     ).resolves.toMatchObject({
       connected: true,
-      schemaVersion: 16,
+      schemaVersion: 17,
       pendingMigrationCount: 0,
       error: null
     });
