@@ -9,6 +9,7 @@ import {
   TaskRepository,
   ListRepository,
   WorkflowRepository,
+  NoteRepository,
   WorkspaceRepository,
   createDatabaseConnection,
   type DatabaseConnection
@@ -20,6 +21,7 @@ import {
   ContainerTemplateService,
   FileAttachmentService,
   ListService,
+  NoteService,
   TagService,
   TaskService,
   WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
@@ -165,6 +167,181 @@ describe("WorkflowService", () => {
         .listForTarget("workflow", workflow.id)
         .map((event) => event.action)
     ).toEqual(["workflow_created", "workflow_run_completed"]);
+  });
+
+  it("creates and updates task, list, list item, and note objects from workflow actions", async () => {
+    const seedTask = await createTask("Original task");
+    const seedNote = await new NoteService({
+      connection,
+      idFactory,
+      now
+    }).createNote({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Seed note",
+      content: "Original note body"
+    });
+    const service = createWorkflowService();
+    const workflow = await service.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Build launch checklist",
+      actions: [
+        {
+          type: "update_task",
+          itemId: seedTask.item.id,
+          title: "Updated task",
+          status: "waiting",
+          dueAt: "{{today+1d}}"
+        },
+        {
+          type: "create_list",
+          containerId: "container_project_1",
+          title: "Launch checklist",
+          body: "Created by workflow",
+          progressMode: "manual"
+        },
+        {
+          type: "add_list_item",
+          listId: "{{previous.targetId}}",
+          title: "Draft announcement"
+        },
+        {
+          type: "add_list_item",
+          listId: "{{actions.1.targetId}}",
+          title: "Book launch call"
+        },
+        {
+          type: "add_list_item",
+          listId: "{{actions.1.targetId}}",
+          title: "Send launch recap"
+        },
+        {
+          type: "update_list_item",
+          listItemId: "{{previous.targetId}}",
+          status: "waiting",
+          dueAt: "{{today+3d}}"
+        },
+        {
+          type: "update_list",
+          listId: "{{actions.1.targetId}}",
+          title: "Updated launch checklist",
+          showCompleted: false,
+          progressMode: "none"
+        },
+        {
+          type: "create_note",
+          containerId: "container_project_1",
+          title: "Launch note",
+          content: "Workflow note for {{actions.1.targetId}}"
+        },
+        {
+          type: "update_note",
+          noteId: seedNote.item.id,
+          title: "Updated seed note",
+          content: "Updated from workflow"
+        }
+      ]
+    });
+
+    const preview = await service.previewWorkflowRun({ workflowId: workflow.id });
+    const result = await service.runManualWorkflow({ workflowId: workflow.id });
+
+    expect(preview.canRun).toBe(true);
+    expect(preview.actionPreviews.map((action) => action.status)).toEqual([
+      "ready",
+      "ready",
+      "ready",
+      "ready",
+      "ready",
+      "ready",
+      "ready",
+      "ready",
+      "ready"
+    ]);
+    expect(result.run.status).toBe("completed");
+    expect(result.actionResults.map((action) => action.actionType)).toEqual([
+      "update_task",
+      "create_list",
+      "add_list_item",
+      "add_list_item",
+      "add_list_item",
+      "update_list_item",
+      "update_list",
+      "create_note",
+      "update_note"
+    ]);
+
+    expect(new TaskRepository(connection).getByItemId(seedTask.item.id)).toMatchObject({
+      item: {
+        title: "Updated task",
+        status: "waiting"
+      },
+      task: {
+        taskStatus: "waiting",
+        dueAt: "2026-05-03T00:00:00.000Z"
+      }
+    });
+
+    const createdListId = result.actionResults[1].targetId!;
+    expect(new ListRepository(connection).getByItemId(createdListId)).toMatchObject({
+      item: {
+        title: "Updated launch checklist",
+        body: "Created by workflow"
+      },
+      list: {
+        showCompleted: false,
+        progressMode: "none"
+      }
+    });
+    expect(
+      new ListRepository(connection).listItems(createdListId).map((item) => ({
+        title: item.title,
+        status: item.status,
+        dueAt: item.dueAt
+      }))
+    ).toEqual([
+      {
+        title: "Draft announcement",
+        status: "open",
+        dueAt: null
+      },
+      {
+        title: "Book launch call",
+        status: "open",
+        dueAt: null
+      },
+      {
+        title: "Send launch recap",
+        status: "waiting",
+        dueAt: "2026-05-05T00:00:00.000Z"
+      }
+    ]);
+
+    expect(new NoteRepository(connection).getByItemId(seedNote.item.id)).toMatchObject({
+      item: {
+        title: "Updated seed note"
+      },
+      note: {
+        content: "Updated from workflow"
+      }
+    });
+    expect(new NoteRepository(connection).getByItemId(result.actionResults[7].targetId!)).toMatchObject({
+      item: {
+        title: "Launch note"
+      },
+      note: {
+        content: `Workflow note for ${createdListId}`
+      }
+    });
+    expect(
+      new SearchIndexRepository(connection).getByTarget({
+        workspaceId: "workspace_1",
+        targetType: "list_item",
+        targetId: result.actionResults[5].targetId!
+      })
+    ).toMatchObject({
+      title: "Send launch recap"
+    });
   });
 
   it("blocks invalid action previews and records a failed run before writes", async () => {

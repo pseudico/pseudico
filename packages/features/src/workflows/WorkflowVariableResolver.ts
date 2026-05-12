@@ -147,6 +147,137 @@ export class WorkflowVariableResolver {
           interpolations,
           missing
         };
+      case "update_task":
+        return {
+          action: withOptionalStrings(
+            {
+              ...action,
+              itemId: resolve(action.itemId)
+            },
+            {
+              title: resolveNullable(action.title),
+              body: resolveNullable(action.body),
+              categoryId: resolveNullable(action.categoryId),
+              containerTabId: resolveNullable(action.containerTabId),
+              dueAt: resolveNullable(action.dueAt),
+              startAt: resolveNullable(action.startAt),
+              status: resolveNullable(action.status)
+            }
+          ),
+          interpolations,
+          missing
+        };
+      case "create_list":
+        return {
+          action: withOptionalStrings(
+            {
+              ...action,
+              containerId: resolve(action.containerId),
+              title: resolve(action.title)
+            },
+            {
+              body: resolveNullable(action.body),
+              categoryId: resolveNullable(action.categoryId),
+              containerTabId: resolveNullable(action.containerTabId),
+              displayMode: resolveNullable(action.displayMode),
+              progressMode: resolveNullable(action.progressMode)
+            }
+          ),
+          interpolations,
+          missing
+        };
+      case "update_list":
+        return {
+          action: withOptionalStrings(
+            {
+              ...action,
+              listId: resolve(action.listId)
+            },
+            {
+              title: resolveNullable(action.title),
+              body: resolveNullable(action.body),
+              categoryId: resolveNullable(action.categoryId),
+              containerTabId: resolveNullable(action.containerTabId),
+              displayMode: resolveNullable(action.displayMode),
+              progressMode: resolveNullable(action.progressMode)
+            }
+          ),
+          interpolations,
+          missing
+        };
+      case "add_list_item":
+        return {
+          action: withOptionalStrings(
+            {
+              ...action,
+              listId: resolve(action.listId),
+              title: resolve(action.title)
+            },
+            {
+              body: resolveNullable(action.body),
+              status: resolveNullable(action.status),
+              listItemParentId: resolveNullable(action.listItemParentId),
+              startAt: resolveNullable(action.startAt),
+              dueAt: resolveNullable(action.dueAt)
+            }
+          ),
+          interpolations,
+          missing
+        };
+      case "update_list_item":
+        return {
+          action: withOptionalStrings(
+            {
+              ...action,
+              listItemId: resolve(action.listItemId)
+            },
+            {
+              title: resolveNullable(action.title),
+              body: resolveNullable(action.body),
+              status: resolveNullable(action.status),
+              listItemParentId: resolveNullable(action.listItemParentId),
+              startAt: resolveNullable(action.startAt),
+              dueAt: resolveNullable(action.dueAt)
+            }
+          ),
+          interpolations,
+          missing
+        };
+      case "create_note":
+        return {
+          action: withOptionalStrings(
+            {
+              ...action,
+              containerId: resolve(action.containerId),
+              title: resolve(action.title),
+              content: resolve(action.content)
+            },
+            {
+              categoryId: resolveNullable(action.categoryId),
+              containerTabId: resolveNullable(action.containerTabId),
+              format: resolveNullable(action.format)
+            }
+          ),
+          interpolations,
+          missing
+        };
+      case "update_note":
+        return {
+          action: withOptionalStrings(
+            {
+              ...action,
+              noteId: resolve(action.noteId)
+            },
+            {
+              title: resolveNullable(action.title),
+              content: resolveNullable(action.content),
+              categoryId: resolveNullable(action.categoryId),
+              containerTabId: resolveNullable(action.containerTabId)
+            }
+          ),
+          interpolations,
+          missing
+        };
       case "create_container_from_template":
         return {
           action: withOptionalStrings(

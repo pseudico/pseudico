@@ -82,7 +82,20 @@ describe("workflow schema and registry", () => {
   });
 
   it("exposes only local previewable registered actions", () => {
-    expect(WORKFLOW_ACTION_REGISTRY).toHaveLength(5);
+    expect(WORKFLOW_ACTION_REGISTRY.map((entry) => entry.type)).toEqual([
+      "add_tag",
+      "set_category",
+      "move_item",
+      "create_task",
+      "update_task",
+      "create_list",
+      "update_list",
+      "add_list_item",
+      "update_list_item",
+      "create_note",
+      "update_note",
+      "create_container_from_template"
+    ]);
     expect(WORKFLOW_ACTION_REGISTRY.every((entry) => entry.localOnly)).toBe(true);
     expect(WORKFLOW_ACTION_REGISTRY.every((entry) => entry.previewable)).toBe(true);
   });
@@ -222,6 +235,58 @@ describe("workflow schema and registry", () => {
     }).actionSummaries).toEqual([
       "Create project/contact from template template_project_1; name Project for {{item.title}}."
     ]);
+  });
+
+  it("accepts local task, list, list item, and note workflow object actions", () => {
+    const result = validateWorkflowDefinitionSchema({
+      kind: WORKFLOW_DEFINITION_KIND,
+      version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+      trigger: { type: "manual" },
+      actions: [
+        {
+          type: "update_task",
+          itemId: "task_1",
+          title: "Updated task",
+          status: "waiting"
+        },
+        {
+          type: "create_list",
+          containerId: "container_1",
+          title: "Checklist",
+          displayMode: "checklist"
+        },
+        {
+          type: "update_list",
+          listId: "{{previous.targetId}}",
+          progressMode: "none"
+        },
+        {
+          type: "add_list_item",
+          listId: "{{previous.targetId}}",
+          title: "First row",
+          dueAt: "{{today+1d}}"
+        },
+        {
+          type: "update_list_item",
+          listItemId: "{{previous.targetId}}",
+          status: "done"
+        },
+        {
+          type: "create_note",
+          containerId: "container_1",
+          title: "Meeting note",
+          content: "Markdown body"
+        },
+        {
+          type: "update_note",
+          noteId: "{{previous.targetId}}",
+          content: "Updated body"
+        }
+      ]
+    });
+
+    expect(result.valid).toBe(true);
+    expect(result.canEnable).toBe(true);
   });
 
   it("accepts templated actions with local conditional steps", () => {

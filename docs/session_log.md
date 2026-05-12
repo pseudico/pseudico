@@ -4272,3 +4272,41 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI is in progress on PR #150.
 Next actions: Amend/push log; wait for CI; merge if green.
+
+## 2026-05-12 17:06:40 +10:00
+Objective: Finish PSE-161 merge and next-ticket promotion.
+Decisions made:
+- Squash-merged PR #150 at f1b80e9 after green CI and no review threads.
+- Moved PSE-161 to Done and promoted only PSE-162 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final session log entry is local-only after merge.
+Next actions: Report outcome; leave unrelated untracked files untouched.
+
+- Timestamp: 2026-05-12T22:06:12.0855458+10:00
+- Objective: Reconcile Linear/GitHub active work before next ticket.
+- Decisions made: No PR Open/In Progress issues found; PSE-162 is sole Codex Ready issue.
+- Files changed: docs/session_log.md
+- Open questions / risks: Local untracked files exist and will be left untouched.
+- Next actions: Inspect GitHub PR list; pull main; move PSE-162 In Progress.
+
+- Timestamp: 2026-05-12T22:07:28.0833379+10:00
+- Objective: Start PSE-162 implementation.
+- Decisions made: Moved PSE-162 to In Progress; created branch codex/PSE-162-workflow-actions.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need locate current workflows/tasks/lists/notes implementation seams.
+- Next actions: Read ticket docs; inspect source; draft focused plan.
+
+- Timestamp: 2026-05-12T22:22:41.1139491+10:00
+- Objective: Implement PSE-162 workflow object actions.
+- Decisions made: Added service-backed task/list/list-item/note workflow create/update actions; added ListService.updateList.
+- Files changed: packages/features/src/workflows/WorkflowSchema.ts; packages/features/src/workflows/WorkflowActionExecutor.ts; packages/features/src/workflows/WorkflowVariableResolver.ts; packages/features/src/lists/ListService.ts; packages/db/src/repositories/index.ts; packages/features/tests/workflowSchema.test.ts; packages/features/tests/workflowService.test.ts; docs/session_log.md
+- Open questions / risks: Full checks still running; UI remains schema/registry-facing only.
+- Next actions: Run lint/test/build; fix failures; open PR.
+
+- Timestamp: 2026-05-12T22:27:42.8859843+10:00
+- Objective: Publish PSE-162 PR.
+- Decisions made: Opened ready PR #151 and moved Linear PSE-162 to PR Open with link/comment.
+- Files changed: docs/session_log.md
+- Open questions / risks: GitHub CI is still in progress; merge waits on green CI.
+- Next actions: Poll CI; merge if green; promote next issue.

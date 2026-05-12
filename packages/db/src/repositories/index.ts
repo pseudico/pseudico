@@ -126,6 +126,7 @@ export {
   type ListItemWithListRecord,
   type ListItemsFilter as ListRowItemsFilter,
   type ListWithItemRecord,
+  type UpdateListDetailsPatch,
   type UpdateListItemPatch
 } from "./ListRepository";
 export {

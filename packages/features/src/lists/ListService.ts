@@ -27,6 +27,8 @@ import {
   type ListItemRecord,
   type ListWithItemRecord,
   type SearchIndexRecord,
+  type UpdateItemPatch,
+  type UpdateListDetailsPatch,
   type UpdateListItemPatch
 } from "@local-work-os/db";
 import {
@@ -76,6 +78,18 @@ export type AddListItemInput = {
   startAt?: string | null;
   dueAt?: string | null;
   reminder?: ReminderCreationInput;
+};
+
+export type UpdateListInput = {
+  itemId: string;
+  actorType?: ActivityActorType;
+  title?: string;
+  body?: string | null;
+  categoryId?: string | null;
+  containerTabId?: string | null;
+  displayMode?: ListDisplayMode;
+  showCompleted?: boolean;
+  progressMode?: ListProgressMode;
 };
 
 export type UpdateListItemInput = {
@@ -247,6 +261,84 @@ export class ListService {
         action: ActivityAction.listCreated,
         summary: `Created list "${item.title}".`,
         before: null,
+        timestamp
+      });
+
+      const searchRecord = this.upsertListSearchRecord(item, list, timestamp);
+
+      return { item, list, searchRecord };
+    });
+  }
+
+  async updateList(input: UpdateListInput): Promise<ListMutationResult> {
+    this.validateUpdateListInput(input);
+
+    return await this.transactionService.runInTransaction(() => {
+      const timestamp = createIsoTimestamp(this.now());
+      const before = this.requireList(input.itemId);
+
+      if (!hasListChanges(input, before)) {
+        const searchRecord =
+          new SearchIndexRepository(this.connection).getByTarget({
+            workspaceId: before.item.workspaceId,
+            targetType: "item",
+            targetId: before.item.id
+          }) ?? this.upsertListSearchRecord(before.item, before.list, before.list.updatedAt);
+
+        return {
+          item: before.item,
+          list: before.list,
+          searchRecord
+        };
+      }
+
+      const itemPatch: UpdateItemPatch = { timestamp };
+      const listPatch: UpdateListDetailsPatch = { timestamp };
+
+      if (input.title !== undefined) {
+        itemPatch.title = input.title.trim();
+      }
+
+      if (input.body !== undefined) {
+        itemPatch.body = normalizeNullableString(input.body);
+      }
+
+      if (input.categoryId !== undefined) {
+        itemPatch.categoryId = normalizeNullableString(input.categoryId);
+      }
+
+      if (input.containerTabId !== undefined) {
+        itemPatch.containerTabId = input.containerTabId;
+      }
+
+      if (input.displayMode !== undefined) {
+        listPatch.displayMode = input.displayMode;
+      }
+
+      if (input.showCompleted !== undefined) {
+        listPatch.showCompleted = input.showCompleted;
+      }
+
+      if (input.progressMode !== undefined) {
+        listPatch.progressMode = input.progressMode;
+      }
+
+      const item = new ItemRepository(this.connection).update(
+        input.itemId,
+        itemPatch
+      );
+      const list = new ListRepository(this.connection).updateDetails(
+        input.itemId,
+        listPatch
+      );
+
+      this.logListEvent({
+        item,
+        list,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+        action: ActivityAction.listUpdated,
+        summary: `Updated list "${item.title}".`,
+        before,
         timestamp
       });
 
@@ -1435,6 +1527,37 @@ export class ListService {
     }
   }
 
+  private validateUpdateListInput(input: UpdateListInput): void {
+    validateNonEmptyString(input.itemId, "itemId");
+
+    if (input.title !== undefined) {
+      validateNonEmptyString(input.title, "title");
+    }
+
+    if (input.displayMode !== undefined && !isListDisplayMode(input.displayMode)) {
+      throw new Error("displayMode must be checklist or pipeline.");
+    }
+
+    if (
+      input.progressMode !== undefined &&
+      !isListProgressMode(input.progressMode)
+    ) {
+      throw new Error("progressMode must be count, manual, or none.");
+    }
+
+    if (
+      input.title === undefined &&
+      input.body === undefined &&
+      input.categoryId === undefined &&
+      input.containerTabId === undefined &&
+      input.displayMode === undefined &&
+      input.showCompleted === undefined &&
+      input.progressMode === undefined
+    ) {
+      throw new Error("At least one list field must be provided.");
+    }
+  }
+
   private validateAddListItemInput(input: AddListItemInput): void {
     validateNonEmptyString(input.listId, "listId");
     validateNonEmptyString(input.title, "title");
@@ -1629,6 +1752,24 @@ function hasListItemMovePatchChanged(
       patch.listItemParentId !== before.listItemParentId) ||
     (patch.depth !== undefined && patch.depth !== before.depth) ||
     (patch.sortOrder !== undefined && patch.sortOrder !== before.sortOrder)
+  );
+}
+
+function hasListChanges(input: UpdateListInput, before: ListWithItemRecord): boolean {
+  return (
+    (input.title !== undefined && input.title.trim() !== before.item.title) ||
+    (input.body !== undefined &&
+      normalizeNullableString(input.body) !== before.item.body) ||
+    (input.categoryId !== undefined &&
+      normalizeNullableString(input.categoryId) !== before.item.categoryId) ||
+    (input.containerTabId !== undefined &&
+      input.containerTabId !== before.item.containerTabId) ||
+    (input.displayMode !== undefined &&
+      input.displayMode !== before.list.displayMode) ||
+    (input.showCompleted !== undefined &&
+      input.showCompleted !== before.list.showCompleted) ||
+    (input.progressMode !== undefined &&
+      input.progressMode !== before.list.progressMode)
   );
 }
 
