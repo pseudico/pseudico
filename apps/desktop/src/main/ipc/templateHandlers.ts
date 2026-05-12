@@ -1,5 +1,6 @@
 import {
   ContainerTemplateService,
+  TemplateService,
   type ContactRecord,
   type ProjectRecord
 } from "@local-work-os/features";
@@ -18,9 +19,12 @@ import {
   type ContainerTemplateCreationSummary,
   type ContactSummary,
   type CreateContainerFromTemplateInput,
+  type DeleteTemplateInput,
+  type DuplicateTemplateInput,
   type ProjectSummary,
   type SaveContainerAsTemplateInput,
   type TemplateSummary,
+  type UpdateTemplateInput,
   type WorkspaceSummary
 } from "../../preload/api";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
@@ -38,6 +42,9 @@ type TemplateIpcHandlers = {
     input: unknown
   ) => Promise<ApiResult<ContainerTemplateCreationSummary>>;
   handleListTemplates: (input: unknown) => Promise<ApiResult<TemplateSummary[]>>;
+  handleUpdateTemplate: (input: unknown) => Promise<ApiResult<TemplateSummary>>;
+  handleDuplicateTemplate: (input: unknown) => Promise<ApiResult<TemplateSummary>>;
+  handleDeleteTemplate: (input: unknown) => Promise<ApiResult<TemplateSummary>>;
 };
 
 export function createTemplateIpcHandlers(
@@ -104,7 +111,7 @@ export function createTemplateIpcHandlers(
         );
 
         return apiOk(
-          context.templateService
+          context.libraryService
             .listTemplates({
               workspaceId,
               ...(typeof input === "object" && input?.kind !== undefined
@@ -114,6 +121,45 @@ export function createTemplateIpcHandlers(
             .map(toTemplateSummary)
         );
       });
+    },
+
+    async handleUpdateTemplate(input) {
+      if (!isUpdateTemplateInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "updateTemplate requires templateId and name fields."
+        );
+      }
+
+      return await withTemplateService(workspaceService, async (context) =>
+        apiOk(toTemplateSummary(await context.libraryService.updateTemplate(input)))
+      );
+    },
+
+    async handleDuplicateTemplate(input) {
+      if (!isDuplicateTemplateInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "duplicateTemplate requires a templateId field."
+        );
+      }
+
+      return await withTemplateService(workspaceService, async (context) =>
+        apiOk(toTemplateSummary(await context.libraryService.duplicateTemplate(input)))
+      );
+    },
+
+    async handleDeleteTemplate(input) {
+      if (!isDeleteTemplateInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "deleteTemplate requires a templateId field."
+        );
+      }
+
+      return await withTemplateService(workspaceService, async (context) =>
+        apiOk(toTemplateSummary(await context.libraryService.deleteTemplate(input)))
+      );
     }
   };
 }
@@ -123,6 +169,7 @@ async function withTemplateService<T>(
   operation: (context: {
     connection: DatabaseConnection;
     templateService: ContainerTemplateService;
+    libraryService: TemplateService;
     workspace: WorkspaceSummary;
   }) => Promise<ApiResult<T>>
 ): Promise<ApiResult<T>> {
@@ -141,6 +188,7 @@ async function withTemplateService<T>(
     return await operation({
       connection,
       templateService: new ContainerTemplateService({ connection }),
+      libraryService: new TemplateService({ connection }),
       workspace
     });
   } catch (error) {
@@ -259,14 +307,40 @@ function isCreateContainerFromTemplateInput(
 
 function isListTemplatesInput(
   input: unknown
-): input is { workspaceId?: string; kind?: "project" | "contact" } | string | undefined {
+): input is { workspaceId?: string; kind?: "list" | "project" | "contact" } | string | undefined {
   return (
     input === undefined ||
     isNonEmptyString(input) ||
     (isRecord(input) &&
       isOptionalString(input.workspaceId) &&
-      (input.kind === undefined || input.kind === "project" || input.kind === "contact"))
+      (input.kind === undefined ||
+        input.kind === "list" ||
+        input.kind === "project" ||
+        input.kind === "contact"))
   );
+}
+
+function isUpdateTemplateInput(input: unknown): input is UpdateTemplateInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.templateId) &&
+    isNonEmptyString(input.name) &&
+    (input.description === undefined ||
+      input.description === null ||
+      typeof input.description === "string")
+  );
+}
+
+function isDuplicateTemplateInput(input: unknown): input is DuplicateTemplateInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.templateId) &&
+    isOptionalString(input.name)
+  );
+}
+
+function isDeleteTemplateInput(input: unknown): input is DeleteTemplateInput {
+  return isRecord(input) && isNonEmptyString(input.templateId);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

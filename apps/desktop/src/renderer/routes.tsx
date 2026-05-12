@@ -9,6 +9,7 @@ export type AppRouteId =
   | "contactLabels"
   | "collections"
   | "tagsCategories"
+  | "templates"
   | "search"
   | "dashboard"
   | "timeline"
@@ -105,6 +106,14 @@ export const appRoutes = [
     label: "Tags & Categories",
     title: "Tags & Categories",
     summary: "Local classification controls will appear here.",
+    nav: true
+  },
+  {
+    id: "templates",
+    path: "/templates",
+    label: "Templates",
+    title: "Templates",
+    summary: "Local reusable project, contact, and list templates.",
     nav: true
   },
   {

@@ -11,6 +11,7 @@ import {
   Settings,
   Star,
   Tags,
+  Layers3,
   Trash2,
   Workflow
 } from "lucide-react";
@@ -31,6 +32,7 @@ const routeIcons: Partial<Record<AppRouteId, LucideIcon>> = {
   collections: Workflow,
   workflows: Workflow,
   tagsCategories: Tags,
+  templates: Layers3,
   search: Search,
   dashboard: LayoutDashboard,
   settings: Settings,

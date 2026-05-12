@@ -2843,6 +2843,24 @@ export type CreateContainerFromTemplateInput = {
   actorType?: "local_user" | "system" | "importer";
 };
 
+export type UpdateTemplateInput = {
+  templateId: string;
+  name: string;
+  description?: string | null;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type DuplicateTemplateInput = {
+  templateId: string;
+  name?: string;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type DeleteTemplateInput = {
+  templateId: string;
+  actorType?: "local_user" | "system" | "importer";
+};
+
 export type ContainerTemplateCreationSummary = {
   template: TemplateSummary;
   container: ProjectSummary | ContactSummary;
@@ -3156,7 +3174,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   templates: {
     saveContainerAsTemplate: "local-work-os:templates:save-container-as-template",
     createContainerFromTemplate: "local-work-os:templates:create-container-from-template",
-    listTemplates: "local-work-os:templates:list-templates"
+    listTemplates: "local-work-os:templates:list-templates",
+    updateTemplate: "local-work-os:templates:update-template",
+    duplicateTemplate: "local-work-os:templates:duplicate-template",
+    deleteTemplate: "local-work-os:templates:delete-template"
   },
   notes: {
     createNote: "local-work-os:notes:create-note",
@@ -3587,8 +3608,20 @@ export type LocalWorkOsIpcContracts = {
     result: ApiResult<ContainerTemplateCreationSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.templates.listTemplates]: {
-    input: { workspaceId?: string; kind?: "project" | "contact" } | string | undefined;
+    input: { workspaceId?: string; kind?: "list" | "project" | "contact" } | string | undefined;
     result: ApiResult<TemplateSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.templates.updateTemplate]: {
+    input: UpdateTemplateInput;
+    result: ApiResult<TemplateSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.templates.duplicateTemplate]: {
+    input: DuplicateTemplateInput;
+    result: ApiResult<TemplateSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.templates.deleteTemplate]: {
+    input: DeleteTemplateInput;
+    result: ApiResult<TemplateSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.notes.createNote]: {
     input: CreateNoteInput;
@@ -4405,8 +4438,17 @@ export type LocalWorkOsApi = {
       input: CreateContainerFromTemplateInput
     ) => Promise<ApiResult<ContainerTemplateCreationSummary>>;
     listTemplates: (
-      input?: { workspaceId?: string; kind?: "project" | "contact" } | string
+      input?: { workspaceId?: string; kind?: "list" | "project" | "contact" } | string
     ) => Promise<ApiResult<TemplateSummary[]>>;
+    updateTemplate: (
+      input: UpdateTemplateInput
+    ) => Promise<ApiResult<TemplateSummary>>;
+    duplicateTemplate: (
+      input: DuplicateTemplateInput
+    ) => Promise<ApiResult<TemplateSummary>>;
+    deleteTemplate: (
+      input: DeleteTemplateInput
+    ) => Promise<ApiResult<TemplateSummary>>;
   };
   notes: {
     create: (input: CreateNoteInput) => Promise<ApiResult<NoteSummary>>;
@@ -5120,7 +5162,13 @@ export function createLocalWorkOsApi(
       createContainerFromTemplate: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.createContainerFromTemplate, input),
       listTemplates: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.listTemplates, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.listTemplates, input),
+      updateTemplate: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.updateTemplate, input),
+      duplicateTemplate: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.duplicateTemplate, input),
+      deleteTemplate: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.deleteTemplate, input)
     },
     notes: {
       create: (input) =>
