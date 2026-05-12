@@ -1863,13 +1863,16 @@ For local-only, workflows should be **small, safe, inspectable local rules**.
 | Preview first | Manual workflows show intended changes before applying. |
 | Activity log | Every workflow action logs activity. |
 | Undo support | Store before/after JSON. |
+| Run history | Keep local trigger, action target, success/failure, diagnostic, and rollback status records. |
 | No cloud actions | Strictly local. |
 | No arbitrary code | Exclude external scripts in early versions. |
 
 The workflow foundation supports local `{{variables}}` for trigger item,
 container, current local date, and upstream action outputs. Missing variables
 block preview/run, and action-level conditions can skip steps without invoking
-cloud, scripts, or remote services.
+cloud, scripts, or remote services. Completed runs can roll back captured
+undoable activity snapshots in reverse order and report conflicts as local
+diagnostics.
 
 ---
 

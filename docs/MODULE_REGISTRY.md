@@ -43,7 +43,8 @@ new work should account for this implemented baseline:
   item-created, file-imported, tag-added, tag-removed, and category-assigned
   definitions/runs, preview, and service-backed add-tag, set-category,
   move-item, and create-task actions. Workflow actions can interpolate local
-  trigger/upstream variables and skip conditional steps; scheduling remains
+  trigger/upstream variables, skip conditional steps, expose run-history
+  diagnostics, and roll back undoable activity snapshots; scheduling remains
   future work.
 - Local reminders now have task/list-item targets, default preferences,
   notification enablement, scheduler, IPC, and shared picker foundations;

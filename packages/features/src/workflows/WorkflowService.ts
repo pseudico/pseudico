@@ -5,6 +5,7 @@ import {
   type ActivityActorType
 } from "@local-work-os/core";
 import {
+  ActivityLogRepository,
   ActivityLogService,
   TransactionService,
   WorkflowRepository,
@@ -202,7 +203,8 @@ export class WorkflowService {
         const actionResults: WorkflowActionExecutionResult[] = [];
 
         for (const [index, action] of actions.entries()) {
-          actionResults.push(
+          const beforeActivityIds = this.listWorkspaceActivityIds(workflow.workspaceId);
+          const actionResult =
             await executor.executeWorkflowAction(
               action,
               {
@@ -211,8 +213,14 @@ export class WorkflowService {
                 previousActionResults: actionResults
               },
               index
+            );
+          actionResults.push({
+            ...actionResult,
+            activityIds: this.listNewWorkspaceActivityIds(
+              workflow.workspaceId,
+              beforeActivityIds
             )
-          );
+          });
         }
 
         const completedAt = createIsoTimestamp(this.now());
@@ -377,6 +385,29 @@ export class WorkflowService {
       idFactory: this.idFactory,
       now: this.now
     });
+  }
+
+  private listWorkspaceActivityIds(workspaceId: string): Set<string> {
+    return new Set(
+      new ActivityLogRepository(this.connection)
+        .listRecent(workspaceId, 250)
+        .map((event) => event.id)
+    );
+  }
+
+  private listNewWorkspaceActivityIds(
+    workspaceId: string,
+    beforeActivityIds: Set<string>
+  ): string[] {
+    return new ActivityLogRepository(this.connection)
+      .listRecent(workspaceId, 250)
+      .filter((event) => !beforeActivityIds.has(event.id))
+      .sort((left, right) =>
+        left.createdAt === right.createdAt
+          ? left.id.localeCompare(right.id)
+          : left.createdAt.localeCompare(right.createdAt)
+      )
+      .map((event) => event.id);
   }
 
   private logWorkflowEvent(input: {

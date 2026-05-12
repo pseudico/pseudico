@@ -93,5 +93,43 @@ describe("WorkflowRepository", () => {
       errorMessage: null
     });
     expect(repository.listRunsForWorkflow("workflow_1")).toEqual([completed]);
+    expect(repository.listRuns({ workspaceId: "workspace_1" })).toEqual([completed]);
+  });
+
+  it("persists rollback state for workflow run history", () => {
+    const repository = new WorkflowRepository(connection);
+    repository.createDefinition({
+      id: "workflow_1",
+      workspaceId: "workspace_1",
+      name: "Follow-up prep",
+      actionsJson: "[]",
+      timestamp: TEST_TIMESTAMP
+    });
+    repository.createRun({
+      id: "workflow_run_1",
+      workspaceId: "workspace_1",
+      workflowDefinitionId: "workflow_1",
+      status: "completed",
+      previewJson: JSON.stringify({ canRun: true }),
+      actionResultsJson: JSON.stringify([{ activityIds: ["activity_1"] }]),
+      startedAt: TEST_TIMESTAMP,
+      completedAt: TEST_TIMESTAMP_LATER
+    });
+
+    const updated = repository.updateRunRollback({
+      id: "workflow_run_1",
+      rollbackStatus: "completed",
+      rollbackActivityIdsJson: JSON.stringify(["activity_undo_1"]),
+      rollbackStartedAt: TEST_TIMESTAMP,
+      rollbackCompletedAt: TEST_TIMESTAMP_LATER
+    });
+
+    expect(updated).toMatchObject({
+      rollbackStatus: "completed",
+      rollbackActivityIdsJson: JSON.stringify(["activity_undo_1"]),
+      rollbackStartedAt: TEST_TIMESTAMP,
+      rollbackCompletedAt: TEST_TIMESTAMP_LATER,
+      rollbackErrorMessage: null
+    });
   });
 });

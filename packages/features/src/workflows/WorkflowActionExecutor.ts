@@ -53,6 +53,7 @@ export type WorkflowActionExecutionResult = {
   summary: string;
   targetType: string;
   targetId: string | null;
+  activityIds?: string[];
 };
 
 export type WorkflowServiceIdFactory = (prefix: string) => string;

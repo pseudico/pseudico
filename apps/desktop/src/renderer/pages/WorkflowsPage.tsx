@@ -56,7 +56,8 @@ export function WorkflowsPage(): React.JSX.Element {
           <p>
             Local-only workflow definitions are versioned, validated before
             enablement, can interpolate safe variables, and are previewed before
-            any action runs.
+            any action runs. Completed runs keep local history, diagnostics, and
+            rollback metadata for undoable activity snapshots.
           </p>
         </div>
       </section>
@@ -90,6 +91,37 @@ export function WorkflowsPage(): React.JSX.Element {
               {WORKFLOW_ACTION_REGISTRY.map((action) => (
                 <li key={action.type}>{action.label}</li>
               ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="settings-card" aria-labelledby="workflow-history-title">
+        <div className="settings-card-header">
+          <div>
+            <h2 id="workflow-history-title">Run history & rollback</h2>
+            <p>
+              Workflow runs record their trigger, action targets, captured
+              activity IDs, success or failure status, and rollback state.
+            </p>
+          </div>
+          <span className="status-pill success">Local only</span>
+        </div>
+        <div className="settings-grid compact-grid">
+          <div>
+            <h3>Diagnostics</h3>
+            <ul>
+              <li>Blocked previews surface the failure reason.</li>
+              <li>Completed actions show target type and target ID.</li>
+              <li>Runs without undoable snapshots are clearly disabled.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Rollback guardrails</h3>
+            <ul>
+              <li>Rollback applies undoable activity snapshots in reverse order.</li>
+              <li>Conflicts are reported as partial or failed rollback.</li>
+              <li>Rollback itself writes an activity-log entry.</li>
             </ul>
           </div>
         </div>
