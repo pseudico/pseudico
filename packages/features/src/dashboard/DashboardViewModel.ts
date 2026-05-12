@@ -7,6 +7,8 @@ import type { ActivityEventView } from "../activity";
 import type { ProjectHealthSummary, ProjectRecord } from "../projects";
 import type { TodayTaskView } from "../today";
 import type { PinnedFavoriteTarget } from "../navigation";
+import type { CalendarItem } from "../calendar";
+import type { TimelineGroup, TimelineWorkloadSummary } from "../timeline";
 
 export type DashboardNavigationTarget = {
   targetType: string;
@@ -62,6 +64,24 @@ export type DashboardActivityWidgetItem = {
   targetNavigationTarget: DashboardNavigationTarget;
 };
 
+export type DashboardCalendarWidgetDay = {
+  date: string;
+  dayOfMonth: number;
+  inCurrentMonth: boolean;
+  isToday: boolean;
+  itemCount: number;
+  items: Pick<CalendarItem, "id" | "kind" | "title" | "startAt" | "dueAt" | "allDay" | "status">[];
+};
+
+export type DashboardTimelineWidgetSummary = {
+  range: {
+    startInclusive: string;
+    endExclusive: string;
+  };
+  workload: TimelineWorkloadSummary;
+  groups: Pick<TimelineGroup, "key" | "label" | "itemCount" | "completedCount" | "color">[];
+};
+
 export type DashboardWidgetData =
   | {
       widgetType: "today" | "overdue" | "upcoming";
@@ -86,6 +106,18 @@ export type DashboardWidgetData =
       generatedAt: string;
       page: DashboardWidgetPage;
       items: DashboardActivityWidgetItem[];
+    }
+  | {
+      widgetType: "calendar";
+      generatedAt: string;
+      month: string;
+      totalCount: number;
+      days: DashboardCalendarWidgetDay[];
+    }
+  | {
+      widgetType: "timeline";
+      generatedAt: string;
+      summary: DashboardTimelineWidgetSummary;
     };
 
 export type DashboardWidgetViewModel = {
@@ -117,6 +149,8 @@ export function isDefaultDashboardWidgetType(
   | "favorites"
   | "recent_activity"
   | "project_health"
+  | "timeline"
+  | "calendar"
 > {
   return [
     "today",
@@ -124,7 +158,9 @@ export function isDefaultDashboardWidgetType(
     "upcoming",
     "favorites",
     "recent_activity",
-    "project_health"
+    "project_health",
+    "timeline",
+    "calendar"
   ].includes(value);
 }
 

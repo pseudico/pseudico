@@ -274,6 +274,14 @@ describe("DashboardService", () => {
       workspaceId: "workspace_1"
     });
 
+    await createTaskService().createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Timeline and calendar task",
+      startAt: new Date(2026, 4, 15, 8).toISOString(),
+      dueAt: new Date(2026, 4, 16, 8).toISOString()
+    });
+
     const added = await service.addWidget({
       workspaceId: "workspace_1",
       dashboardId: defaultDashboard.dashboard.id,
@@ -284,11 +292,15 @@ describe("DashboardService", () => {
 
     expect(added.widget).toMatchObject({
       type: "calendar",
-      title: "Calendar",
+      title: "Mini Calendar",
       configJson: JSON.stringify({ limit: 4 }),
       positionJson: JSON.stringify({ column: 0, row: 3, width: 2 })
     });
-    expect(added.data).toBeNull();
+    expect(added.data).toMatchObject({
+      widgetType: "calendar",
+      month: "2026-05",
+      totalCount: 1
+    });
 
     const updated = await service.updateWidget({
       widgetId: added.widget.id,
@@ -299,6 +311,50 @@ describe("DashboardService", () => {
     expect(updated.widget).toMatchObject({
       title: "Calendar focus",
       positionJson: JSON.stringify({ column: 1, row: 0, width: 1 })
+    });
+
+    const timeline = await service.addWidget({
+      workspaceId: "workspace_1",
+      dashboardId: defaultDashboard.dashboard.id,
+      type: "timeline",
+      config: { limit: 3, upcomingDays: 7 }
+    });
+    expect(timeline.data).toMatchObject({
+      widgetType: "timeline",
+      summary: {
+        workload: { itemCount: 1, activeCount: 1 },
+        groups: [expect.objectContaining({ label: "Launch Plan", itemCount: 1 })]
+      }
+    });
+
+    await expect(service.addWidget({
+      workspaceId: "workspace_1",
+      dashboardId: defaultDashboard.dashboard.id,
+      type: "pomodoro",
+      config: { focusMinutes: 50 }
+    })).resolves.toMatchObject({
+      widget: { type: "pomodoro", title: "Pomodoro" },
+      data: null
+    });
+
+    await expect(service.addWidget({
+      workspaceId: "workspace_1",
+      dashboardId: defaultDashboard.dashboard.id,
+      type: "web",
+      config: { url: "https://example.test", networkEnabled: false }
+    })).resolves.toMatchObject({
+      widget: { type: "web", title: "Web Link" },
+      data: null
+    });
+
+    await expect(service.addWidget({
+      workspaceId: "workspace_1",
+      dashboardId: defaultDashboard.dashboard.id,
+      type: "static_text",
+      config: { text: "Make today count." }
+    })).resolves.toMatchObject({
+      widget: { type: "static_text", title: "Static Text" },
+      data: null
     });
 
     const reordered = await service.reorderWidgets({
@@ -386,4 +442,5 @@ function createProjectService(): ProjectService {
     now: () => NOW
   });
 }
+
 

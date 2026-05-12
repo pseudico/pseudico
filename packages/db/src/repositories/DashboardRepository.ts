@@ -61,7 +61,10 @@ export type DashboardWidgetType =
   | "saved_view"
   | "project_health"
   | "timeline"
-  | "calendar";
+  | "calendar"
+  | "web"
+  | "pomodoro"
+  | "static_text";
 
 export type CreateDefaultDashboardInput = {
   id: string;

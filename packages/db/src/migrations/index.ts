@@ -13,6 +13,7 @@ import { reviewTaskStatusesSql } from "./0012_review_task_statuses";
 import { commentsSql } from "./0013_comments";
 import { calendarFeedsSql } from "./0014_calendar_feeds";
 import { dashboardWidgetLayoutTypesSql } from "./0015_dashboard_widget_layout_types";
+import { dashboardExtraWidgetTypesSql } from "./0016_dashboard_extra_widget_types";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -105,6 +106,12 @@ export const migrations: MigrationDefinition[] = [
     name: "dashboard_widget_layout_types",
     sql: dashboardWidgetLayoutTypesSql,
     checksum: "pse-144-dashboard-widget-layout-types-v1"
+  },
+  {
+    version: 16,
+    name: "dashboard_extra_widget_types",
+    sql: dashboardExtraWidgetTypesSql,
+    checksum: "pse-153-dashboard-extra-widget-types-v1"
   }
 ];
 

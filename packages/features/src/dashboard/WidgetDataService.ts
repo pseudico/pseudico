@@ -5,6 +5,8 @@ import {
 } from "@local-work-os/core";
 import type { DatabaseConnection } from "@local-work-os/db";
 import { ActivityService } from "../activity";
+import { CalendarService } from "../calendar";
+import { TimelineService } from "../timeline";
 import { ProjectHealthService } from "../projects";
 import { PinnedFavoritesService } from "../navigation";
 import { TaskService } from "../tasks";
@@ -147,6 +149,74 @@ export class WidgetDataService {
       widgetType: "recent_activity",
       generatedAt: createIsoTimestamp(this.now()),
       ...pageItems(items, normalized)
+    };
+  }
+
+  getCalendarWidgetData(input: WidgetDataQueryInput): DashboardWidgetData {
+    const normalized = this.normalizeInput(input);
+    const month = new CalendarService({
+      connection: this.connection,
+      now: this.now
+    }).getCalendarMonth({
+      workspaceId: normalized.workspaceId,
+      month: normalized.date,
+      includeCompleted: false
+    });
+
+    return {
+      widgetType: "calendar",
+      generatedAt: createIsoTimestamp(this.now()),
+      month: month.range.month,
+      totalCount: month.totalCount,
+      days: month.days.map((day) => ({
+        date: day.date,
+        dayOfMonth: day.dayOfMonth,
+        inCurrentMonth: day.inCurrentMonth,
+        isToday: day.isToday,
+        itemCount: day.items.length,
+        items: day.items.slice(0, 3).map((item) => ({
+          id: item.id,
+          kind: item.kind,
+          title: item.title,
+          startAt: item.startAt,
+          dueAt: item.dueAt,
+          allDay: item.allDay,
+          status: item.status
+        }))
+      }))
+    };
+  }
+
+  getTimelineWidgetData(input: WidgetDataQueryInput): DashboardWidgetData {
+    const normalized = this.normalizeInput(input);
+    const start = new Date(normalized.date);
+    const end = new Date(start.getTime());
+    end.setUTCDate(end.getUTCDate() + normalized.upcomingDays);
+    const timeline = new TimelineService({
+      connection: this.connection,
+      now: this.now
+    }).groupTimelineItems({
+      workspaceId: normalized.workspaceId,
+      start,
+      end,
+      includeCompleted: false,
+      filters: { hideCompleted: true }
+    });
+
+    return {
+      widgetType: "timeline",
+      generatedAt: createIsoTimestamp(this.now()),
+      summary: {
+        range: timeline.range,
+        workload: timeline.workload,
+        groups: timeline.groups.slice(0, normalized.limit).map((group) => ({
+          key: group.key,
+          label: group.label,
+          itemCount: group.itemCount,
+          completedCount: group.completedCount,
+          color: group.color
+        }))
+      }
     };
   }
 

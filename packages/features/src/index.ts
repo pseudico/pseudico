@@ -442,6 +442,7 @@ export type {
 export type {
   AddDashboardWidgetInput,
   DashboardActivityWidgetItem,
+  DashboardCalendarWidgetDay,
   DashboardFavoriteWidgetItem,
   DashboardLayoutWidgetType,
   DashboardNavigationTarget,
@@ -455,6 +456,7 @@ export type {
   DashboardWidgetData,
   DashboardWidgetPage,
   DashboardWidgetViewModel,
+  DashboardTimelineWidgetSummary,
   GetDefaultDashboardInput,
   RemoveDashboardWidgetInput,
   ReorderDashboardWidgetsInput,
@@ -924,4 +926,5 @@ export type {
   UnplanTaskInput
 } from "./today";
 export type { WorkspaceService } from "./workspace";
+
 

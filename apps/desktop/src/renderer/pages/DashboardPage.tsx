@@ -4,11 +4,16 @@ import { useNavigate } from "react-router-dom";
 import {
   DashboardWidget,
   FavoriteProjectsWidget,
+  MiniCalendarWidget,
+  MiniTimelineWidget,
+  PomodoroWidget,
   OverdueWidget,
   ProjectHealthWidget,
   RecentActivityWidget,
+  StaticTextWidget,
   TodayWidget,
   UpcomingWidget,
+  WebWidget,
   type DashboardActivityWidgetItem,
   type DashboardFavoriteWidgetItem,
   type DashboardTaskWidgetItem,
@@ -713,6 +718,67 @@ function DashboardWidgetRenderer({
           />
         </div>
       );
+    case "calendar": {
+      const data = widget.data?.widgetType === "calendar" ? widget.data : null;
+      return (
+        <div className={className}>
+          <MiniCalendarWidget
+            loading={loading}
+            month={data?.month ?? new Date().toISOString().slice(0, 7)}
+            totalCount={data?.totalCount ?? 0}
+            days={data?.days ?? []}
+          />
+        </div>
+      );
+    }
+    case "timeline": {
+      const data = widget.data?.widgetType === "timeline" ? widget.data.summary : null;
+      return (
+        <div className={className}>
+          <MiniTimelineWidget
+            loading={loading}
+            range={data?.range ?? { startInclusive: new Date().toISOString(), endExclusive: new Date().toISOString() }}
+            itemCount={data?.workload.itemCount ?? 0}
+            activeCount={data?.workload.activeCount ?? 0}
+            groups={data?.groups ?? []}
+          />
+        </div>
+      );
+    }
+    case "pomodoro": {
+      const config = readWidgetConfig(widget.widget.configJson);
+      return (
+        <div className={className}>
+          <PomodoroWidget
+            focusMinutes={readPositiveInteger(config.focusMinutes, 25)}
+            breakMinutes={readPositiveInteger(config.breakMinutes, 5)}
+          />
+        </div>
+      );
+    }
+    case "web": {
+      const config = readWidgetConfig(widget.widget.configJson);
+      return (
+        <div className={className}>
+          <WebWidget
+            title={widget.widget.title ?? readString(config.title, "Saved web link")}
+            url={readOptionalString(config.url)}
+            networkEnabled={config.networkEnabled === true}
+          />
+        </div>
+      );
+    }
+    case "static_text": {
+      const config = readWidgetConfig(widget.widget.configJson);
+      return (
+        <div className={className}>
+          <StaticTextWidget
+            title={widget.widget.title ?? readString(config.title, "Static Text")}
+            text={readOptionalString(config.text)}
+          />
+        </div>
+      );
+    }
     default:
       return (
         <div className={className}>
@@ -850,8 +916,8 @@ function readWidgetPosition(positionJson: string): { column: number; row: number
   return { column: 0, row: 0, width: 1, height: 1 };
 }
 
-function placeholderWidgetKind(type: string): "saved_view" | "timeline" | "calendar" {
-  if (type === "timeline" || type === "calendar") {
+function placeholderWidgetKind(type: string): "saved_view" | "timeline" | "calendar" | "web" | "pomodoro" | "static_text" {
+  if (type === "timeline" || type === "calendar" || type === "web" || type === "pomodoro" || type === "static_text") {
     return type;
   }
   return "saved_view";
@@ -865,6 +931,12 @@ function placeholderWidgetTitle(type: string): string {
       return "Timeline";
     case "calendar":
       return "Calendar";
+    case "web":
+      return "Web Link";
+    case "pomodoro":
+      return "Pomodoro";
+    case "static_text":
+      return "Static Text";
     default:
       return "Custom Widget";
   }
@@ -875,4 +947,27 @@ function placeholderWidgetDescription(widget: DashboardWidgetSummary): string {
     return `Saved view widget bound to ${widget.widget.savedViewId}.`;
   }
   return placeholderWidgetTitle(widget.widget.type);
+}
+
+function readWidgetConfig(configJson: string): Record<string, unknown> {
+  try {
+    const parsed = JSON.parse(configJson) as unknown;
+    return parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed as Record<string, unknown>
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function readString(value: unknown, fallback: string): string {
+  return typeof value === "string" && value.trim().length > 0 ? value : fallback;
+}
+
+function readOptionalString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+}
+
+function readPositiveInteger(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : fallback;
 }

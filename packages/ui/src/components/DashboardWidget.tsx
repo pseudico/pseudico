@@ -5,7 +5,10 @@ import {
   Clock3,
   FolderKanban,
   LayoutList,
+  Link,
+  Quote,
   Star,
+  Timer,
   type LucideIcon
 } from "lucide-react";
 
@@ -18,7 +21,10 @@ export type DashboardWidgetKind =
   | "project_health"
   | "saved_view"
   | "timeline"
-  | "calendar";
+  | "calendar"
+  | "web"
+  | "pomodoro"
+  | "static_text";
 
 export type DashboardWidgetProps = {
   title: string;
@@ -41,7 +47,10 @@ const widgetIcons = {
   project_health: FolderKanban,
   saved_view: LayoutList,
   timeline: CalendarClock,
-  calendar: CalendarDays
+  calendar: CalendarDays,
+  web: Link,
+  pomodoro: Timer,
+  static_text: Quote
 } satisfies Record<DashboardWidgetKind, LucideIcon>;
 
 export function DashboardWidget({

@@ -26,6 +26,11 @@ describe("Dashboard renderer page", () => {
     expect(html).toContain("1 overdue");
     expect(html).toContain("Container Created");
     expect(html).toContain("Created project");
+    expect(html).toContain("Mini Calendar");
+    expect(html).toContain("Mini Timeline");
+    expect(html).toContain("Pomodoro");
+    expect(html).toContain("Offline mode");
+    expect(html).toContain("Make today count.");
   });
 });
 
@@ -132,6 +137,43 @@ function dashboardViewModel(): DashboardViewModelSummary {
             }
           ]
         }
+      },
+
+      {
+        widget: widget("widget_calendar", "calendar", "Mini Calendar"),
+        data: {
+          widgetType: "calendar",
+          generatedAt: "2026-05-04T08:00:00.000Z",
+          month: "2026-05",
+          totalCount: 1,
+          days: [
+            { date: "2026-05-04", dayOfMonth: 4, inCurrentMonth: true, isToday: true, itemCount: 1, items: [] }
+          ]
+        }
+      },
+      {
+        widget: widget("widget_timeline", "timeline", "Mini Timeline"),
+        data: {
+          widgetType: "timeline",
+          generatedAt: "2026-05-04T08:00:00.000Z",
+          summary: {
+            range: { startInclusive: "2026-05-04T00:00:00.000Z", endExclusive: "2026-05-11T00:00:00.000Z" },
+            workload: { itemCount: 1, activeCount: 1, completedCount: 0, density: [] },
+            groups: [{ key: "container_project_1", label: "Launch Plan", itemCount: 1, completedCount: 0, color: "#245c55" }]
+          }
+        }
+      },
+      {
+        widget: { ...widget("widget_pomodoro", "pomodoro", "Pomodoro"), configJson: JSON.stringify({ focusMinutes: 25, breakMinutes: 5 }) },
+        data: null
+      },
+      {
+        widget: { ...widget("widget_web", "web", "Reference Link"), configJson: JSON.stringify({ url: "https://example.test", networkEnabled: false }) },
+        data: null
+      },
+      {
+        widget: { ...widget("widget_static", "static_text", "Quote"), configJson: JSON.stringify({ text: "Make today count." }) },
+        data: null
       },
       {
         widget: widget("widget_activity", "recent_activity", "Recent Activity"),

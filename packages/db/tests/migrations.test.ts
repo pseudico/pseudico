@@ -87,7 +87,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version fifteen", () => {
+  it("runs on an empty database and records schema version sixteen", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -166,14 +166,19 @@ describe("schema migrations", () => {
           version: 15,
           name: "dashboard_widget_layout_types",
           checksum: "pse-144-dashboard-widget-layout-types-v1"
+        },
+        {
+          version: 16,
+          name: "dashboard_extra_widget_types",
+          checksum: "pse-153-dashboard-extra-widget-types-v1"
         }
       ],
-      currentVersion: 15
+      currentVersion: 16
     });
-    expect(service.getCurrentSchemaVersion()).toBe(15);
+    expect(service.getCurrentSchemaVersion()).toBe(16);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 15
+      currentVersion: 16
     });
   });
 
