@@ -119,4 +119,39 @@ describe("TemplateRepository", () => {
       contactTemplate
     ]);
   });
+
+  it("updates template metadata and soft-deletes from default lists", () => {
+    const repository = new TemplateRepository(connection);
+    repository.create({
+      id: "template_1",
+      workspaceId: "workspace_1",
+      kind: "list",
+      name: "Original",
+      description: "Before",
+      templateJson: "{}",
+      timestamp: TEST_TIMESTAMP
+    });
+
+    const updated = repository.update({
+      id: "template_1",
+      name: "Renamed",
+      description: null,
+      timestamp: TEST_TIMESTAMP_LATER
+    });
+
+    expect(updated).toMatchObject({
+      id: "template_1",
+      name: "Renamed",
+      description: null,
+      updatedAt: TEST_TIMESTAMP_LATER,
+      deletedAt: null
+    });
+
+    const deleted = repository.softDelete("template_1", TEST_TIMESTAMP_LATER);
+
+    expect(deleted.deletedAt).toBe(TEST_TIMESTAMP_LATER);
+    expect(repository.getById("template_1")).toBeNull();
+    expect(repository.listByWorkspace({ workspaceId: "workspace_1" })).toEqual([]);
+    expect(repository.getById("template_1", { includeDeleted: true })).toEqual(deleted);
+  });
 });

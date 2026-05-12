@@ -20,4 +20,16 @@ export function registerTemplateIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.templates.listTemplates,
     (_event, input) => handlers.handleListTemplates(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.templates.updateTemplate,
+    (_event, input) => handlers.handleUpdateTemplate(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.templates.duplicateTemplate,
+    (_event, input) => handlers.handleDuplicateTemplate(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.templates.deleteTemplate,
+    (_event, input) => handlers.handleDeleteTemplate(input)
+  );
 }

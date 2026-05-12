@@ -43,6 +43,13 @@ export type CreateTemplateInput = {
   sourceId?: string | null;
 };
 
+export type UpdateTemplateInput = {
+  id: string;
+  name: string;
+  description?: string | null;
+  timestamp: string;
+};
+
 export type ListTemplatesInput = {
   workspaceId: string;
   kind?: TemplateKind;
@@ -131,6 +138,53 @@ export class TemplateRepository {
     }
 
     return created;
+  }
+
+  update(input: UpdateTemplateInput): TemplateRecord {
+    this.connection.sqlite
+      .prepare(
+        `update templates
+         set name = ?,
+             description = ?,
+             updated_at = ?
+         where id = ?
+           and deleted_at is null`
+      )
+      .run(input.name, input.description ?? null, input.timestamp, input.id);
+
+    const updated = this.getById(input.id);
+
+    if (updated === null) {
+      throw new Error(`Template row was not updated: ${input.id}.`);
+    }
+
+    return updated;
+  }
+
+  softDelete(id: string, timestamp: string): TemplateRecord {
+    const before = this.getById(id);
+
+    if (before === null) {
+      throw new Error(`Template row was not found: ${id}.`);
+    }
+
+    this.connection.sqlite
+      .prepare(
+        `update templates
+         set deleted_at = ?,
+             updated_at = ?
+         where id = ?
+           and deleted_at is null`
+      )
+      .run(timestamp, timestamp, id);
+
+    const deleted = this.getById(id, { includeDeleted: true });
+
+    if (deleted === null) {
+      throw new Error(`Template row was not deleted: ${id}.`);
+    }
+
+    return deleted;
   }
 }
 

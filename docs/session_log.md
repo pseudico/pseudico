@@ -4357,3 +4357,49 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI still needs to run on GitHub after PR opens.
 Next actions: Stage and commit; push branch; open ready PR.
+
+## 2026-05-13T09:04:41.5216853+10:00
+Objective: Finish PSE-164 merge and promote next issue.
+Decisions made:
+- Squash-merged PR #152 at 8a3f281 after CI passed.
+- Moved PSE-164 to Done and promoted PSE-163 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked files remain unrelated.
+Next actions: Next run should start PSE-163; keep only one Codex Ready.
+
+## 2026-05-13T09:26:11.8989641+10:00
+Objective: Reconcile active Linear/GitHub work before starting next Local Work OS ticket.
+Decisions made:
+- No Linear issues in PR Open or In Progress; one Codex Ready issue found: PSE-163.
+- GitHub open PR list is empty, so proceed with PSE-163.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Existing untracked local files must remain untouched.
+Next actions:
+- Move PSE-163 to In Progress, branch, read docs, implement.
+
+## 2026-05-13T09:43:54.0473632+10:00
+Objective: Implement PSE-163 local template library manager.
+Decisions made:
+- Added service/repository CRUD, duplicate, soft-delete, preview/filter support for templates.
+- Added /templates renderer page with type/tag/search filters, preview panel, edit/duplicate/delete/use flows.
+Files changed:
+- packages/core/src/events/ActivityAction.ts; packages/db/src/repositories/TemplateRepository.ts; packages/features/src/templates/TemplateService.ts; apps/desktop/src/renderer/pages/TemplatesPage.tsx
+Open questions / risks:
+- Full workspace checks still pending; template import/export remains separate scope.
+Next actions:
+- Run lint/typecheck/test/build, then publish PR.
+
+## 2026-05-13T09:47:56.4649884+10:00
+Objective: Verify PSE-163 implementation before PR.
+Decisions made:
+- Full lint/typecheck/test/build are required because renderer, IPC, service, and DB surfaces changed.
+- Sandbox EPERM on Vitest/build was retried with approved escalation as tooling, not code failure.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Manual QA should create/instantiate a meeting-note-style template in app.
+Next actions:
+- Commit, push, open ready PR; move Linear to PR Open.

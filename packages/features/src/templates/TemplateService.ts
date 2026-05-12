@@ -1,5 +1,6 @@
 import type {
   ActivityActorType,
+  ActivityActionValue,
   AttachmentRecord,
   ContactFieldType,
   ListDisplayMode,
@@ -239,11 +240,74 @@ export type ContainerTemplateCreationResult = {
   items: ItemRecord[];
 };
 
-export class TemplateService {
-  private readonly repository: TemplateRepository;
+export type TemplatePreviewSummary = {
+  templateId: string;
+  kind: TemplateKind;
+  title: string;
+  description: string | null;
+  tags: string[];
+  counts: {
+    tabs: number;
+    tasks: number;
+    lists: number;
+    notes: number;
+    files: number;
+    links: number;
+    listItems: number;
+    contactFields: number;
+  };
+  sections: string[];
+};
 
-  constructor(input: { connection: DatabaseConnection }) {
+export type TemplateLibraryEntry = {
+  template: TemplateRecord;
+  preview: TemplatePreviewSummary;
+};
+
+export type ListTemplateLibraryInput = {
+  workspaceId: string;
+  kind?: TemplateKind;
+  query?: string;
+  tag?: string;
+};
+
+export type UpdateTemplateInput = {
+  templateId: string;
+  name: string;
+  description?: string | null;
+  actorType?: ActivityActorType;
+};
+
+export type DuplicateTemplateInput = {
+  templateId: string;
+  name?: string;
+  actorType?: ActivityActorType;
+};
+
+export type DeleteTemplateInput = {
+  templateId: string;
+  actorType?: ActivityActorType;
+};
+
+export class TemplateService {
+  readonly module = "templates";
+
+  private readonly connection: DatabaseConnection;
+  private readonly repository: TemplateRepository;
+  private readonly idFactory: TemplateServiceIdFactory;
+  private readonly now: () => Date;
+  private readonly transactionService: TransactionService;
+
+  constructor(input: {
+    connection: DatabaseConnection;
+    idFactory?: TemplateServiceIdFactory;
+    now?: () => Date;
+  }) {
+    this.connection = input.connection;
     this.repository = new TemplateRepository(input.connection);
+    this.idFactory = input.idFactory ?? ((prefix) => createLocalId(prefix));
+    this.now = input.now ?? (() => new Date());
+    this.transactionService = new TransactionService({ connection: input.connection });
   }
 
   validateTemplateJson(json: unknown): TemplateJsonV1 {
@@ -256,6 +320,173 @@ export class TemplateService {
     return this.repository.listByWorkspace({
       workspaceId: input.workspaceId,
       ...(input.kind === undefined ? {} : { kind: input.kind })
+    });
+  }
+
+  listLibraryTemplates(input: ListTemplateLibraryInput): TemplateLibraryEntry[] {
+    const query = normalizeOptionalString(input.query)?.toLocaleLowerCase();
+    const tag = normalizeOptionalString(input.tag)?.toLocaleLowerCase();
+
+    return this.listTemplates(input)
+      .map((template) => ({
+        template,
+        preview: summarizeTemplatePreview(template)
+      }))
+      .filter((entry) => {
+        if (
+          query !== undefined &&
+          ![
+            entry.template.name,
+            entry.template.description ?? "",
+            entry.preview.sections.join(" "),
+            entry.preview.tags.join(" ")
+          ]
+            .join(" ")
+            .toLocaleLowerCase()
+            .includes(query)
+        ) {
+          return false;
+        }
+
+        if (
+          tag !== undefined &&
+          !entry.preview.tags.some((previewTag) =>
+            previewTag.toLocaleLowerCase().includes(tag)
+          )
+        ) {
+          return false;
+        }
+
+        return true;
+      });
+  }
+
+  previewTemplate(templateId: string): TemplatePreviewSummary {
+    validateNonEmptyString(templateId, "templateId");
+    const template = this.requireTemplate(templateId);
+
+    return summarizeTemplatePreview(template);
+  }
+
+  async updateTemplate(input: UpdateTemplateInput): Promise<TemplateRecord> {
+    validateNonEmptyString(input.templateId, "templateId");
+    const name = normalizeOptionalString(input.name);
+
+    if (name === undefined) {
+      throw new Error("Template name must be a non-empty string.");
+    }
+
+    return await this.transactionService.runInTransaction(() => {
+      const timestamp = createIsoTimestamp(this.now());
+      const before = this.requireTemplate(input.templateId);
+      const template = this.repository.update({
+        id: input.templateId,
+        name,
+        description: normalizeNullableString(input.description),
+        timestamp
+      });
+
+      this.logTemplateEvent({
+        template,
+        actorType: input.actorType,
+        action: ActivityAction.templateUpdated,
+        summary: `Updated template "${template.name}".`,
+        before,
+        after: template,
+        timestamp
+      });
+
+      return template;
+    });
+  }
+
+  async duplicateTemplate(input: DuplicateTemplateInput): Promise<TemplateRecord> {
+    validateNonEmptyString(input.templateId, "templateId");
+
+    return await this.transactionService.runInTransaction(() => {
+      const timestamp = createIsoTimestamp(this.now());
+      const source = this.requireTemplate(input.templateId);
+      const name = normalizeOptionalString(input.name) ?? `${source.name} copy`;
+      const template = this.repository.create({
+        id: this.idFactory("template"),
+        workspaceId: source.workspaceId,
+        kind: source.kind,
+        name,
+        description: source.description,
+        sourceType: source.sourceType,
+        sourceId: source.sourceId,
+        templateJson: source.templateJson,
+        timestamp
+      });
+
+      this.logTemplateEvent({
+        template,
+        actorType: input.actorType,
+        action: ActivityAction.templateDuplicated,
+        summary: `Duplicated template "${source.name}" as "${template.name}".`,
+        before: source,
+        after: template,
+        timestamp
+      });
+
+      return template;
+    });
+  }
+
+  async deleteTemplate(input: DeleteTemplateInput): Promise<TemplateRecord> {
+    validateNonEmptyString(input.templateId, "templateId");
+
+    return await this.transactionService.runInTransaction(() => {
+      const timestamp = createIsoTimestamp(this.now());
+      const before = this.requireTemplate(input.templateId);
+      const template = this.repository.softDelete(input.templateId, timestamp);
+
+      this.logTemplateEvent({
+        template,
+        actorType: input.actorType,
+        action: ActivityAction.templateDeleted,
+        summary: `Deleted template "${before.name}".`,
+        before,
+        after: template,
+        timestamp
+      });
+
+      return template;
+    });
+  }
+
+  private requireTemplate(templateId: string): TemplateRecord {
+    const template = this.repository.getById(templateId);
+
+    if (template === null) {
+      throw new Error(`Template not found: ${templateId}.`);
+    }
+
+    return template;
+  }
+
+  private logTemplateEvent(input: {
+    template: TemplateRecord;
+    actorType?: ActivityActorType | undefined;
+    action: ActivityActionValue;
+    summary: string;
+    before: unknown;
+    after: unknown;
+    timestamp: string;
+  }): void {
+    new ActivityLogService({
+      connection: this.connection,
+      idFactory: this.idFactory
+    }).logEvent({
+      workspaceId: input.template.workspaceId,
+      actorType: input.actorType ?? "local_user",
+      action: input.action,
+      targetType: "template",
+      targetId: input.template.id,
+      summary: input.summary,
+      beforeJson: JSON.stringify(input.before),
+      afterJson: JSON.stringify(input.after),
+      timestamp: input.timestamp
     });
   }
 }
@@ -1363,9 +1594,10 @@ export class ContainerTemplateService {
 
 export const templatesModuleContract = {
   module: "templates",
-  purpose: "Define reusable local list, project, and contact template structures.",
+  purpose: "Define, manage, preview, and apply reusable local list, project, and contact template structures.",
   owns: [
     "template definitions",
+    "template library management",
     "list template save/apply behavior",
     "container template save/apply behavior",
     "portable template file validation"
@@ -1374,6 +1606,91 @@ export const templatesModuleContract = {
   integrationPoints: ["lists", "projects", "contacts", "metadata", "search", "activity", "export", "import"],
   priority: "V2"
 } as const satisfies FeatureModuleContract;
+
+export function summarizeTemplatePreview(
+  template: TemplateRecord
+): TemplatePreviewSummary {
+  const json = validateTemplateJson(JSON.parse(template.templateJson));
+  const tags = new Set<string>();
+  const sections: string[] = [];
+  const counts = {
+    tabs: 0,
+    tasks: 0,
+    lists: 0,
+    notes: 0,
+    files: 0,
+    links: 0,
+    listItems: 0,
+    contactFields: 0
+  };
+
+  if (json.kind === "list") {
+    collectTagNames(json.list.tags, tags);
+    for (const item of json.list.items) {
+      collectTagNames(item.tags, tags);
+    }
+
+    counts.lists = 1;
+    counts.listItems = json.list.items.length;
+    sections.push(json.list.title);
+
+    if (json.list.body !== null) {
+      sections.push(json.list.body);
+    }
+  } else {
+    collectTagNames(json.container.tags, tags);
+    counts.tabs = json.container.tabs.length;
+    counts.contactFields = json.container.contactFields.length;
+
+    for (const item of json.container.items) {
+      counts[`${item.type}s` as "tasks" | "lists" | "notes" | "files" | "links"] += 1;
+      collectTagNames(item.tags, tags);
+
+      if (item.type === "list" && item.list !== undefined) {
+        counts.listItems += item.list.items.length;
+        for (const listItem of item.list.items) {
+          collectTagNames(listItem.tags, tags);
+        }
+      }
+    }
+
+    sections.push(json.container.name);
+
+    if (json.container.description !== null) {
+      sections.push(json.container.description);
+    }
+
+    sections.push(...json.container.tabs.map((tab) => `Tab: ${tab.name}`));
+    sections.push(
+      ...json.container.items
+        .slice(0, 8)
+        .map((item) => `${formatTemplateKindLabel(item.type)}: ${item.title}`)
+    );
+  }
+
+  return {
+    templateId: template.id,
+    kind: template.kind,
+    title: template.name,
+    description: template.description,
+    tags: [...tags].sort((a, b) => a.localeCompare(b)),
+    counts,
+    sections
+  };
+}
+
+function collectTagNames(tags: readonly TemplateTagRef[], target: Set<string>): void {
+  for (const tag of tags) {
+    target.add(tag.name);
+  }
+}
+
+function formatTemplateKindLabel(kind: string): string {
+  return kind
+    .split("_")
+    .map((part) => part[0]?.toUpperCase() + part.slice(1))
+    .join(" ");
+}
 
 export function validateTemplateJson(json: unknown): TemplateJsonV1 {
   if (isRecord(json) && (json.kind === "project" || json.kind === "contact")) {

@@ -312,6 +312,7 @@ export {
   applyContainerRelativeDates,
   applyRelativeDates,
   deriveCapabilities,
+  summarizeTemplatePreview,
   templatesModuleContract,
   validateContainerTemplateJson,
   validateTemplateJson
@@ -849,7 +850,10 @@ export type {
 export type {
   ContainerTemplateCreationResult,
   CreateContainerFromTemplateInput,
+  DeleteTemplateInput,
+  DuplicateTemplateInput,
   CreateListFromTemplateInput,
+  ListTemplateLibraryInput,
   ListTemplateCreationResult,
   SaveContainerAsTemplateInput,
   SaveListAsTemplateInput,
@@ -876,11 +880,14 @@ export type {
   TemplateImportValidatorFileSystemAdapter,
   TemplateJsonV1,
   TemplateKind,
+  TemplateLibraryEntry,
   TemplateListDefinitionJsonV1,
   TemplateListItemJsonV1,
   TemplateListJsonV1,
+  TemplatePreviewSummary,
   TemplateServiceIdFactory,
   TemplateTagRef,
+  UpdateTemplateInput,
   WriteTemplateFileInput
 } from "./templates";
 export type {
