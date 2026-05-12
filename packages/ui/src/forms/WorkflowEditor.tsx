@@ -26,6 +26,7 @@ export type WorkflowEditorAction =
       title: string;
       body?: string | null;
       categoryId?: string | null;
+      startAt?: string | null;
       dueAt?: string | null;
     };
 
@@ -346,6 +347,24 @@ function ActionSpecificFields({
             value={action.title}
             disabled={disabled}
             onChange={(title) => onChange({ ...action, title })}
+          />
+          <TextField
+            label="Start date expression"
+            value={action.startAt ?? ""}
+            disabled={disabled}
+            placeholder="{{today.startOfWeek}}"
+            onChange={(startAt) =>
+              onChange({ ...action, startAt: startAt.trim() || null })
+            }
+          />
+          <TextField
+            label="Due date expression"
+            value={action.dueAt ?? ""}
+            disabled={disabled}
+            placeholder="{{today+3d}} or {{item.dueAt+1w}}"
+            onChange={(dueAt) =>
+              onChange({ ...action, dueAt: dueAt.trim() || null })
+            }
           />
         </>
       );

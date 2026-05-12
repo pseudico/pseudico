@@ -4103,3 +4103,60 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI and PR review still need to confirm remotely.
 Next actions: Commit/push; open PR; update Linear.
+## 2026-05-12T15:32:49.2344258+10:00
+Objective: Publish PSE-159 PR.
+Decisions made:
+- Committed 15a0311 and opened ready PR #148 against main.
+- PSE-159 moved to PR Open with PR link and local-check summary.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Await CI/review before merge; untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi left untouched.
+Next actions: Check PR CI/reviews; merge if clean; promote next issue.
+## 2026-05-12T15:36:09.4880058+10:00
+Objective: Merge PSE-159 and sync local main.
+Decisions made:
+- PR #148 merged via squash at d10adfc after CI passed and no review threads were present.
+- Remote feature branch deleted; local main fast-forwarded; local branch deletion required force because squash merge is non-ancestral.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need choose and promote the next single Codex Ready issue.
+Next actions: Move PSE-159 to Done; promote next issue; report final status.
+## 2026-05-12T15:37:52.9162242+10:00
+Objective: Prepare next Local Work OS ticket.
+Decisions made:
+- PSE-159 moved to Done with merge summary and CI proof.
+- PSE-160 promoted as the sole next Codex Ready issue in M13 dependency order.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Session log has local post-merge entries not committed; unrelated untracked files remain untouched.
+Next actions: Start PSE-160 next; keep other issues out of Codex Ready; monitor any follow-up review.
+
+- Timestamp: 2026-05-12T15:44:16.1774829+10:00
+- Objective: Reconcile Linear/GitHub active work before starting next ticket.
+- Decisions made: No PR Open/In Progress issues found; selected sole Codex Ready issue PSE-160.
+- Files changed: docs/session_log.md
+- Open questions / risks: Existing unrelated untracked files remain untouched.
+- Next actions: Move PSE-160 to In Progress; read docs; implement scoped changes.
+
+- Timestamp: 2026-05-12T15:49:42.2401494+10:00
+- Objective: Plan PSE-160 workflow date manipulation implementation.
+- Decisions made: Add core DateExpressionParser; extend workflow variable resolution; validate resolved create_task dates in preview; expose start/due fields in workflow editor.
+- Files changed: docs/session_log.md
+- Open questions / risks: List-item date application is limited to metadata trigger variable resolution because workflow has no list-item date action yet.
+- Next actions: Patch parser/resolver/schema UI; add parser and workflow tests; run checks.
+
+- Timestamp: 2026-05-12T15:58:00.6541804+10:00
+- Objective: Implement and verify PSE-160 locally.
+- Decisions made: Date expressions now support offsets and week/month boundaries; workflow preview blocks invalid resolved dates; list-item date variables are available for metadata triggers.
+- Files changed: apps/desktop/src/renderer/pages/WorkflowsPage.tsx; packages/core/src/services/dateExpressionParser.ts; packages/features/src/workflows/*; packages/ui/src/forms/WorkflowEditor.tsx; tests; docs/session_log.md
+- Open questions / risks: CI and PR review still need remote confirmation.
+- Next actions: Commit and push branch; open ready PR; update Linear to PR Open.
+
+- Timestamp: 2026-05-12T16:01:50.5236088+10:00
+- Objective: Publish PSE-160 PR and update Linear.
+- Decisions made: Committed and pushed codex/PSE-160-date-manipulation, opened ready PR #149, and moved PSE-160 to PR Open with PR link.
+- Files changed: docs/session_log.md
+- Open questions / risks: Await CI/review before merge; unrelated untracked files remain untouched.
+- Next actions: Check CI/review threads; merge if clean; promote next issue after Done.
+
+

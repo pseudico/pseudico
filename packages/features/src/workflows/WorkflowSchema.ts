@@ -377,7 +377,11 @@ export function summarizeWorkflowAction(action: WorkflowAction): string {
     case "move_item":
       return `Move item ${action.itemId} to container ${action.targetContainerId}.`;
     case "create_task":
-      return `Create task "${action.title}" in container ${action.containerId}.`;
+      return [
+        `Create task "${action.title}" in container ${action.containerId}`,
+        action.startAt === undefined || action.startAt === null ? null : `start ${action.startAt}`,
+        action.dueAt === undefined || action.dueAt === null ? null : `due ${action.dueAt}`
+      ].filter(Boolean).join("; ") + ".";
   }
 }
 

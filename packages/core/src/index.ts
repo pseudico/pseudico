@@ -169,6 +169,19 @@ export {
 } from "./services/dateRangeParser";
 export type { DateRangeParserOptions, ParsedDateRange } from "./services/dateRangeParser";
 export {
+  isDateExpressionCandidate,
+  parseDateExpression,
+  resolveDateExpression
+} from "./services/dateExpressionParser";
+export type {
+  DateExpressionBoundary,
+  DateExpressionOffsetUnit,
+  DateExpressionOperation,
+  DateExpressionResolverOptions,
+  ParsedDateExpression,
+  ResolvedDateExpression
+} from "./services/dateExpressionParser";
+export {
   createTimelineDateScale,
   createTimelineZoomRange,
   mapTimelineRangeToScale
