@@ -25,8 +25,13 @@ const draftExample: WorkflowDefinitionSchema = {
   actions: [
     {
       type: "create_task",
-      containerId: "container_project_id",
-      title: "Draft a follow-up task"
+      containerId: "{{item.containerId}}",
+      title: "Review {{item.title}} on {{today}}",
+      condition: {
+        left: "{{item.type}}",
+        op: "eq",
+        right: "task"
+      }
     }
   ]
 };
@@ -48,8 +53,9 @@ export function WorkflowsPage(): React.JSX.Element {
           <p className="eyebrow">Automation</p>
           <h1 id="workflows-title">Workflows</h1>
           <p>
-            Local-only manual workflow definitions are versioned, validated before
-            enablement, and previewed before any action runs.
+            Local-only workflow definitions are versioned, validated before
+            enablement, can interpolate safe variables, and are previewed before
+            any action runs.
           </p>
         </div>
       </section>
@@ -64,6 +70,8 @@ export function WorkflowsPage(): React.JSX.Element {
         <p>
           Only registered local triggers and actions can be enabled. Network,
           shell, webhook, cloud sync, and remote storage actions are rejected.
+          Action inputs may use variables like {"{{item.title}}"}, {"{{container.name}}"},
+          {"{{today}}"}, and {"{{previous.targetId}}"}; missing variables block the preview.
         </p>
         <div className="settings-grid compact-grid">
           <div>

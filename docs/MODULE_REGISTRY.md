@@ -42,7 +42,9 @@ new work should account for this implemented baseline:
 - Workflows now have a local service foundation with persisted manual,
   item-created, file-imported, tag-added, tag-removed, and category-assigned
   definitions/runs, preview, and service-backed add-tag, set-category,
-  move-item, and create-task actions; scheduling remains future work.
+  move-item, and create-task actions. Workflow actions can interpolate local
+  trigger/upstream variables and skip conditional steps; scheduling remains
+  future work.
 - Local reminders now have task/list-item targets, default preferences,
   notification enablement, scheduler, IPC, and shared picker foundations;
   deeper renderer workflows remain future work.
@@ -104,7 +106,7 @@ renderer-only implementation.
 | Database | Own SQLite setup, Drizzle schema, migrations, repositories, transaction helpers, and database health checks. | Schema, migrations, repositories, transactions | Core types | All data-backed modules | MVP |
 | Activity Log | Record meaningful data-changing operations in the same write flow as domain mutations. | Activity events, audit metadata | Database, domain services | Search, dashboard, maintenance | MVP |
 | Templates | Define reusable local project, contact, tab, list, note, and workflow templates; currently implements local list templates first. | Template definitions, template instances | Projects, contacts, lists, notes, metadata | Workflows, import/export | V2 |
-| Workflows | Provide safe local manual and scheduled workflow actions after core operations are stable. | Workflow definitions, runs, action history | Templates, activity log, all mutable modules | Automation views, maintenance | V2 |
+| Workflows | Provide safe local manual and scheduled workflow actions after core operations are stable. | Workflow definitions, runs, action history, variable interpolation, conditional steps | Templates, activity log, all mutable modules | Automation views, maintenance | V2 |
 
 ## Module Boundaries
 

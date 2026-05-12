@@ -13,6 +13,8 @@ describe("WorkflowsPage", () => {
     expect(html).toContain("Cannot enable until validation issues are fixed");
     expect(html).toContain("Ready to enable");
     expect(html).toContain("Only registered local triggers and actions can be enabled");
+    expect(html).toContain("{{item.title}}");
+    expect(html).toContain("{{previous.targetId}}");
     expect(html).toContain("Create task");
   });
 });
