@@ -2,6 +2,7 @@ export {
   SavedViewService,
   savedViewsModuleContract
 } from "./SavedViewService";
+export { SavedViewDiagnosticsService } from "./SavedViewDiagnosticsService";
 export {
   CollectionService,
   createKeywordCollectionQuery,
@@ -17,6 +18,7 @@ export {
 export {
   SAVED_VIEW_QUERY_VERSION,
   parseSavedViewQueryJson,
+  migrateSavedViewQuery,
   stringifySavedViewQuery,
   validateSavedViewQuery
 } from "./SavedViewQuery";
@@ -27,6 +29,14 @@ export type {
   SavedViewServiceIdFactory,
   UpdateSavedViewInput
 } from "./SavedViewService";
+export type {
+  SavedViewDiagnosticEntry,
+  SavedViewDiagnosticIssue,
+  SavedViewDiagnosticSeverity,
+  SavedViewDiagnosticsReport,
+  SavedViewDiagnosticsServiceIdFactory,
+  SavedViewRepairResult
+} from "./SavedViewDiagnosticsService";
 export type {
   CollectionEvaluationResult,
   CollectionKind,
@@ -58,6 +68,7 @@ export type {
   SavedViewQueryMatch,
   SavedViewQueryTarget,
   SavedViewQueryV1,
+  SavedViewQueryMigrationResult,
   SavedViewQueryValidationResult,
   SavedViewSort,
   SavedViewSortDirection,

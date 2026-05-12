@@ -894,7 +894,9 @@ function createMockApi(projects: ProjectSummary[] = []): LocalWorkOsApi {
     },
     diagnostics: {
       runWorkspaceIntegrityCheck: async () => apiOk(null as never),
-      repairAttachment: async () => apiOk(null)
+      repairAttachment: async () => apiOk(null),
+      runSavedViewDiagnostics: async () => apiOk(null as never),
+      repairSavedViewQuery: async () => apiOk(null as never)
     },
     navigation: {
       listRecentTargets: async () => apiOk([]),

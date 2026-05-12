@@ -39,6 +39,7 @@ import type {
   ImportValidationSummary,
   LocalWorkOsApi,
   RestoreWorkspaceSummary,
+  SavedViewDiagnosticsSummary,
   WorkspaceIntegritySummary
 } from "../../preload/api";
 
@@ -94,6 +95,9 @@ export function SettingsPage({
   const [repairingAttachmentId, setRepairingAttachmentId] = useState<string | null>(null);
   const [diagnosticsReport, setDiagnosticsReport] =
     useState<WorkspaceIntegritySummary | null>(null);
+  const [savedViewDiagnosticsReport, setSavedViewDiagnosticsReport] =
+    useState<SavedViewDiagnosticsSummary | null>(null);
+  const [repairingSavedViewId, setRepairingSavedViewId] = useState<string | null>(null);
   const [importSummary, setImportSummary] =
     useState<ImportValidationSummary | null>(null);
 
@@ -348,6 +352,9 @@ export function SettingsPage({
     const result = await apiClient.diagnostics.runWorkspaceIntegrityCheck({
       workspaceId: currentWorkspace.id
     });
+    const savedViewResult = await apiClient.diagnostics.runSavedViewDiagnostics(
+      currentWorkspace.id
+    );
 
     setDiagnosticsBusy(false);
 
@@ -356,16 +363,50 @@ export function SettingsPage({
       return;
     }
 
+    if (!savedViewResult.ok) {
+      setUserError(savedViewResult.error, "Saved-view diagnostics failed");
+      return;
+    }
+
     setDiagnosticsReport(result.data);
+    setSavedViewDiagnosticsReport(savedViewResult.data);
     showToast(
-      result.data.status === "healthy"
+      result.data.status === "healthy" && savedViewResult.data.errors === 0
         ? "Workspace diagnostics passed."
-        : `${result.data.issueCount} workspace diagnostics issue(s) found.`,
+        : `${result.data.issueCount + savedViewResult.data.errors + savedViewResult.data.warnings} workspace diagnostics issue(s) found.`,
       {
         title: "Diagnostics complete",
-        tone: result.data.status === "healthy" ? "success" : "error"
+        tone:
+          result.data.status === "healthy" && savedViewResult.data.errors === 0
+            ? "success"
+            : "error"
       }
     );
+  }
+
+  async function repairSavedViewQuery(savedViewId: string): Promise<void> {
+    setRepairingSavedViewId(savedViewId);
+    setError(null);
+
+    const result = await apiClient.diagnostics.repairSavedViewQuery({ savedViewId });
+
+    setRepairingSavedViewId(null);
+
+    if (!result.ok) {
+      setUserError(result.error, "Saved-view repair failed");
+      return;
+    }
+
+    showToast(
+      result.data.changed
+        ? `Repaired ${result.data.name}.`
+        : `${result.data.name} did not need repair.`,
+      {
+        title: "Saved view diagnostics",
+        tone: "success"
+      }
+    );
+    await runWorkspaceDiagnostics();
   }
 
   async function repairMissingAttachment(attachmentId: string): Promise<void> {
@@ -694,11 +735,20 @@ export function SettingsPage({
             title="No diagnostics run"
           />
         ) : (
-          <DiagnosticsSummaryPanel
-            repairBusyAttachmentId={repairingAttachmentId}
-            report={diagnosticsReport}
-            onRepairAttachment={repairMissingAttachment}
-          />
+          <>
+            <DiagnosticsSummaryPanel
+              repairBusyAttachmentId={repairingAttachmentId}
+              report={diagnosticsReport}
+              onRepairAttachment={repairMissingAttachment}
+            />
+            {savedViewDiagnosticsReport === null ? null : (
+              <SavedViewDiagnosticsPanel
+                repairBusySavedViewId={repairingSavedViewId}
+                report={savedViewDiagnosticsReport}
+                onRepairSavedView={repairSavedViewQuery}
+              />
+            )}
+          </>
         )}
       </section>
       <section className="backup-management-panel" aria-label="Backups">
@@ -1049,6 +1099,73 @@ function ImportValidationSummaryPanel({
           >
             {issue.path}: {issue.message}
           </p>
+        ))
+      )}
+    </div>
+  );
+}
+
+function SavedViewDiagnosticsPanel({
+  repairBusySavedViewId,
+  report,
+  onRepairSavedView
+}: {
+  repairBusySavedViewId: string | null;
+  report: SavedViewDiagnosticsSummary;
+  onRepairSavedView: (savedViewId: string) => Promise<void>;
+}): React.JSX.Element {
+  const problemEntries = report.entries.filter((entry) => entry.status !== "ok");
+
+  return (
+    <div className="backup-list" aria-label="Saved view diagnostics summary">
+      <div className="backup-list-row">
+        <div>
+          <strong>
+            {report.errors === 0 && report.warnings === 0
+              ? "Saved views healthy"
+              : "Saved-view query issues found"}
+          </strong>
+          <span>{formatDiagnosticDate(report.checkedAt)}</span>
+        </div>
+        <div className="backup-list-meta">
+          <span>{report.total} checked</span>
+          <span>{report.errors} errors</span>
+          <span>{report.warnings} warnings</span>
+          <span>{report.repairable} repairable</span>
+        </div>
+      </div>
+      {problemEntries.length === 0 ? (
+        <EmptyState
+          description="Saved-view query JSON, references, and schema versions are valid."
+          title="No saved-view repairs needed"
+        />
+      ) : (
+        problemEntries.map((entry) => (
+          <div className="backup-list-row" key={entry.savedViewId}>
+            <div>
+              <strong>{entry.name}</strong>
+              <span>{entry.type}</span>
+            </div>
+            <div className="diagnostics-issue-list">
+              {entry.issues.map((issue, index) => (
+                <span key={`${issue.code}-${issue.value ?? index}`}>
+                  {issue.severity}: {issue.message}
+                </span>
+              ))}
+              {entry.repairable ? (
+                <button
+                  className="secondary-button compact-button"
+                  disabled={repairBusySavedViewId === entry.savedViewId}
+                  type="button"
+                  onClick={() => void onRepairSavedView(entry.savedViewId)}
+                >
+                  {repairBusySavedViewId === entry.savedViewId
+                    ? "Repairing..."
+                    : "Repair query"}
+                </button>
+              ) : null}
+            </div>
+          </div>
         ))
       )}
     </div>

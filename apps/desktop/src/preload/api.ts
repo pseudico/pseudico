@@ -355,6 +355,46 @@ export type WorkspaceIntegritySummary = {
   sections: IntegrityCheckSectionSummary[];
 };
 
+export type SavedViewDiagnosticIssueSummary = {
+  code: string;
+  severity: "error" | "warning" | "info";
+  message: string;
+  conditionIndex?: number;
+  value?: string;
+  repairable: boolean;
+};
+
+export type SavedViewDiagnosticEntrySummary = {
+  savedViewId: string;
+  name: string;
+  type: string;
+  status: "ok" | "warning" | "error";
+  issues: SavedViewDiagnosticIssueSummary[];
+  repairable: boolean;
+};
+
+export type SavedViewDiagnosticsSummary = {
+  workspaceId: string;
+  checkedAt: string;
+  total: number;
+  ok: number;
+  warnings: number;
+  errors: number;
+  repairable: number;
+  entries: SavedViewDiagnosticEntrySummary[];
+};
+
+export type RepairSavedViewQueryInput = {
+  savedViewId: string;
+};
+
+export type RepairSavedViewQuerySummary = {
+  savedViewId: string;
+  name: string;
+  changed: boolean;
+  issueCount: number;
+};
+
 export type ValidateWorkspaceExportJsonInput = {
   filePath: string;
 };
@@ -3258,7 +3298,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     runWorkspaceIntegrityCheck:
       "local-work-os:diagnostics:run-workspace-integrity-check",
     repairAttachment:
-      "local-work-os:diagnostics:repair-attachment"
+      "local-work-os:diagnostics:repair-attachment",
+    runSavedViewDiagnostics:
+      "local-work-os:diagnostics:run-saved-view-diagnostics",
+    repairSavedViewQuery:
+      "local-work-os:diagnostics:repair-saved-view-query"
   },
   navigation: {
     listRecentTargets: "local-work-os:navigation:list-recent-targets",
@@ -4090,6 +4134,14 @@ export type LocalWorkOsIpcContracts = {
     input: RepairAttachmentInput;
     result: ApiResult<RepairAttachmentSummary | null>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runSavedViewDiagnostics]: {
+    input: string | undefined;
+    result: ApiResult<SavedViewDiagnosticsSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairSavedViewQuery]: {
+    input: RepairSavedViewQueryInput;
+    result: ApiResult<RepairSavedViewQuerySummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.navigation.listRecentTargets]: {
     input: string | undefined;
     result: ApiResult<NavigationRecentTargetSummary[]>;
@@ -4795,6 +4847,12 @@ export type LocalWorkOsApi = {
     repairAttachment: (
       input: RepairAttachmentInput
     ) => Promise<ApiResult<RepairAttachmentSummary | null>>;
+    runSavedViewDiagnostics: (
+      workspaceId?: string
+    ) => Promise<ApiResult<SavedViewDiagnosticsSummary>>;
+    repairSavedViewQuery: (
+      input: RepairSavedViewQueryInput
+    ) => Promise<ApiResult<RepairSavedViewQuerySummary>>;
   };
   navigation: {
     listRecentTargets: (
@@ -5504,7 +5562,14 @@ export function createLocalWorkOsApi(
           input
         ),
       repairAttachment: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairAttachment, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairAttachment, input),
+      runSavedViewDiagnostics: (workspaceId) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runSavedViewDiagnostics,
+          workspaceId
+        ),
+      repairSavedViewQuery: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairSavedViewQuery, input)
     },
     navigation: {
       listRecentTargets: (workspaceId) =>

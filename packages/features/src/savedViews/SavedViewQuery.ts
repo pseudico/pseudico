@@ -116,6 +116,10 @@ export type SavedViewQueryValidationResult =
   | { ok: true; query: SavedViewQuery }
   | { ok: false; errors: string[] };
 
+export type SavedViewQueryMigrationResult =
+  | { ok: true; query: SavedViewQuery; migrated: boolean; messages: string[] }
+  | { ok: false; errors: string[] };
+
 const CONTAINER_TYPES = ["inbox", "project", "contact"] as const;
 const CONDITION_FIELDS = [
   "itemType",
@@ -255,6 +259,22 @@ export function parseSavedViewQueryJson(queryJson: string): SavedViewQuery {
   return validation.query;
 }
 
+export function migrateSavedViewQuery(input: unknown): SavedViewQueryMigrationResult {
+  const migrated = migrateLegacyQueryShape(input);
+  const validation = validateSavedViewQuery(migrated.query);
+
+  if (!validation.ok) {
+    return { ok: false, errors: validation.errors };
+  }
+
+  return {
+    ok: true,
+    query: validation.query,
+    migrated: migrated.migrated,
+    messages: migrated.messages
+  };
+}
+
 export function stringifySavedViewQuery(query: SavedViewQuery): string {
   const validation = validateSavedViewQuery(query);
 
@@ -326,6 +346,94 @@ function validateCondition(
       errors.push(`${path}.value must be a non-empty string.`);
     }
   }
+}
+
+function migrateLegacyQueryShape(input: unknown): {
+  query: unknown;
+  migrated: boolean;
+  messages: string[];
+} {
+  if (!isRecord(input)) {
+    return { query: input, migrated: false, messages: [] };
+  }
+
+  if (input.version === SAVED_VIEW_QUERY_VERSION) {
+    return { query: input, migrated: false, messages: [] };
+  }
+
+  if (input.version === undefined && Array.isArray(input.conditions)) {
+    return {
+      query: {
+        ...input,
+        version: SAVED_VIEW_QUERY_VERSION,
+        match: input.match === "any" ? "any" : "all"
+      },
+      migrated: true,
+      messages: ["Added missing saved-view query version."]
+    };
+  }
+
+  const legacyFilters = Array.isArray(input.filters) ? input.filters : [];
+
+  if (input.version === 0 || legacyFilters.length > 0) {
+    const conditions = legacyFilters
+      .map(migrateLegacyFilter)
+      .filter((condition): condition is SavedViewQueryCondition => condition !== null);
+    const targets: SavedViewQueryTarget[] = [];
+
+    if (input.includeContainers !== false) {
+      targets.push("container");
+    }
+
+    if (input.includeItems !== false) {
+      targets.push("item");
+    }
+
+    return {
+      query: {
+        version: SAVED_VIEW_QUERY_VERSION,
+        match: input.match === "any" || input.operator === "any" ? "any" : "all",
+        conditions,
+        targets: targets.length === 0 ? ["container", "item"] : targets,
+        includeArchived: input.includeArchived === true
+      },
+      migrated: true,
+      messages: ["Migrated legacy saved-view query filters to version 1."]
+    };
+  }
+
+  return { query: input, migrated: false, messages: [] };
+}
+
+function migrateLegacyFilter(filter: unknown): SavedViewQueryCondition | null {
+  if (!isRecord(filter)) {
+    return null;
+  }
+
+  const field = filter.field ?? filter.type;
+  const value = filter.value ?? filter.id ?? filter.slug;
+
+  if (field === "tag" || field === "tagSlug") {
+    return { field: "tag", operator: "has", value: value as string | string[] };
+  }
+
+  if (field === "category" || field === "categoryId") {
+    return { field: "category", operator: "is", value: value as string | string[] };
+  }
+
+  if (field === "container" || field === "containerId") {
+    return { field: "container", operator: "is", value: value as string | string[] };
+  }
+
+  if (field === "itemType" || field === "type") {
+    return { field: "itemType", operator: "is", value: value as string | string[] };
+  }
+
+  if (field === "text" || field === "search") {
+    return { field: "text", operator: "contains", value: String(value ?? "") };
+  }
+
+  return null;
 }
 
 function validatePriorityCondition(

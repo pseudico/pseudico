@@ -25,4 +25,12 @@ export function registerDiagnosticsIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairAttachment,
     (_event, input) => handlers.handleRepairAttachment(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runSavedViewDiagnostics,
+    (_event, input) => handlers.handleRunSavedViewDiagnostics(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairSavedViewQuery,
+    (_event, input) => handlers.handleRepairSavedViewQuery(input)
+  );
 }

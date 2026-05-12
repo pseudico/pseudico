@@ -16,7 +16,9 @@ import {
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  SavedViewDiagnosticsService,
   SavedViewService,
+  migrateSavedViewQuery,
   validateSavedViewQuery,
   type SavedViewQuery
 } from "../src";
@@ -88,6 +90,36 @@ describe("SavedViewService", () => {
         "query.version must be 1.",
         "conditions[0].value includes unsupported item type: project."
       ])
+    });
+  });
+
+  it("migrates legacy saved view query filters to v1", () => {
+    expect(
+      migrateSavedViewQuery({
+        version: 0,
+        operator: "any",
+        includeContainers: false,
+        filters: [
+          { type: "tag", slug: "phone-call" },
+          { type: "category", id: "category_1" },
+          { type: "container", id: "container_1" },
+          { type: "search", value: "supplier" }
+        ]
+      })
+    ).toMatchObject({
+      ok: true,
+      migrated: true,
+      query: {
+        version: 1,
+        match: "any",
+        targets: ["item"],
+        conditions: [
+          { field: "tag", value: "phone-call" },
+          { field: "category", value: "category_1" },
+          { field: "container", value: "container_1" },
+          { field: "text", value: "supplier" }
+        ]
+      }
     });
   });
 
@@ -271,6 +303,75 @@ describe("SavedViewService", () => {
       { targetId: "item_1" }
     ]);
   });
+
+  it("diagnoses invalid JSON and repairs by resetting to an empty query", async () => {
+    createRawSavedView("saved_view_bad_json", "Broken", "{not json");
+
+    const diagnostics = createDiagnosticsService();
+    const report = diagnostics.diagnoseWorkspace("workspace_1");
+
+    expect(report).toMatchObject({
+      total: 1,
+      errors: 1,
+      repairable: 1,
+      entries: [
+        {
+          status: "error",
+          issues: [{ code: "invalid_json", repairable: true }]
+        }
+      ]
+    });
+
+    const repaired = await diagnostics.repairSavedView("saved_view_bad_json");
+
+    expect(repaired.changed).toBe(true);
+    expect(JSON.parse(repaired.afterQueryJson)).toEqual({
+      version: 1,
+      match: "all",
+      conditions: [],
+      targets: ["container", "item"]
+    });
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("saved_view", "saved_view_bad_json")
+        .map((event) => event.summary)
+    ).toContain('Repaired saved view "Broken" query diagnostics.');
+  });
+
+  it("diagnoses legacy schemas and missing refs, then removes broken conditions", async () => {
+    seedEvaluationData();
+    createRawSavedView(
+      "saved_view_legacy",
+      "Legacy refs",
+      JSON.stringify({
+        version: 0,
+        filters: [
+          { type: "tag", slug: "phone-call" },
+          { type: "tag", slug: "missing-tag" },
+          { type: "category", id: "missing-category" },
+          { type: "container", id: "missing-container" }
+        ]
+      })
+    );
+
+    const diagnostics = createDiagnosticsService();
+    const entry = diagnostics.diagnoseWorkspace("workspace_1").entries[0];
+
+    expect(entry?.issues.map((issue) => issue.code)).toEqual([
+      "migrated_schema",
+      "missing_tag",
+      "missing_category",
+      "missing_container"
+    ]);
+
+    const repaired = await diagnostics.repairSavedView("saved_view_legacy");
+    const repairedQuery = JSON.parse(repaired.afterQueryJson) as SavedViewQuery;
+
+    expect(repairedQuery).toMatchObject({
+      version: 1,
+      conditions: [{ field: "tag", value: "phone-call" }]
+    });
+  });
 });
 
 function createService(): SavedViewService {
@@ -282,6 +383,42 @@ function createService(): SavedViewService {
     },
     now: () => new Date("2026-05-03T00:00:00.000Z")
   });
+}
+
+function createDiagnosticsService(): SavedViewDiagnosticsService {
+  return new SavedViewDiagnosticsService({
+    connection,
+    idFactory: (prefix) => {
+      idCounter += 1;
+      return `${prefix}_${idCounter}`;
+    },
+    now: () => new Date("2026-05-03T00:00:00.000Z")
+  });
+}
+
+function createRawSavedView(id: string, name: string, queryJson: string): void {
+  connection.sqlite
+    .prepare(
+      `insert into saved_views (
+        id,
+        workspace_id,
+        type,
+        name,
+        query_json,
+        display_json,
+        is_favorite,
+        created_at,
+        updated_at
+      ) values (?, ?, 'smart_list', ?, ?, '{}', 0, ?, ?)`
+    )
+    .run(
+      id,
+      "workspace_1",
+      name,
+      queryJson,
+      "2026-04-30T00:00:00.000Z",
+      "2026-04-30T00:00:00.000Z"
+    );
 }
 
 function seedEvaluationData(): void {

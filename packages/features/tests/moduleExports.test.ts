@@ -45,6 +45,7 @@ import {
   recurrenceModuleContract,
   RecurrenceService,
   CollectionService,
+  SavedViewDiagnosticsService,
   SavedViewService,
   relationshipsModuleContract,
   remindersModuleContract,
@@ -220,6 +221,7 @@ describe("feature module exports", () => {
 
   it("exports the saved-view and collection service implementations", () => {
     expect(SavedViewService).toBeDefined();
+    expect(SavedViewDiagnosticsService).toBeDefined();
     expect(CollectionService).toBeDefined();
   });
 
