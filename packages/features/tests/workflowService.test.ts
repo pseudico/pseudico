@@ -17,6 +17,7 @@ import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   CategoryService,
+  ContainerTemplateService,
   FileAttachmentService,
   ListService,
   TagService,
@@ -583,6 +584,119 @@ describe("WorkflowService", () => {
       reason: "Workflow variables could not be resolved: item.title."
     });
     expect(new TaskRepository(connection).listByContainer("container_project_1")).toEqual([]);
+  });
+
+
+  it("creates a project from a template in a workflow and returns its container ID downstream", async () => {
+    const templateSeedTask = await new TaskService({
+      connection,
+      idFactory,
+      now
+    }).createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_2",
+      title: "Template kickoff",
+      dueAt: "2026-05-06"
+    });
+    const template = await new ContainerTemplateService({
+      connection,
+      idFactory,
+      now
+    }).saveContainerAsTemplate({
+      containerId: "container_project_2",
+      name: "Follow-up project template",
+      baseDate: "2026-05-04"
+    });
+    const workflowService = createWorkflowService();
+    const workflow = await workflowService.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Project from template",
+      trigger: {
+        type: "item_created",
+        filters: {
+          textIncludes: "client"
+        }
+      },
+      actions: [
+        {
+          type: "create_container_from_template",
+          templateId: template.id,
+          name: "Project for {{item.title}}",
+          baseDate: "{{item.dueAt+1d}}"
+        },
+        {
+          type: "create_task",
+          containerId: "{{previous.targetId}}",
+          title: "Review new project for {{item.title}}",
+          dueAt: "{{today+2d}}"
+        }
+      ]
+    });
+
+    await new TaskService({
+      connection,
+      idFactory,
+      now,
+      itemCreatedWorkflowHook: new WorkflowTriggerService({ connection, idFactory, now })
+    }).createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Client Alpha",
+      dueAt: "2026-06-01"
+    });
+
+    const createdProject = new ContainerRepository(connection)
+      .listByWorkspace("workspace_1", { type: "project" })
+      .find((container) => container.name === "Project for Client Alpha");
+
+    expect(createdProject).toBeDefined();
+    expect(
+      new TaskRepository(connection)
+        .listByContainer(createdProject!.id)
+        .map((record) => ({
+          title: record.item.title,
+          dueAt: record.task.dueAt
+        }))
+    ).toEqual([
+      {
+        title: "Template kickoff",
+        dueAt: "2026-06-04T00:00:00.000Z"
+      },
+      {
+        title: "Review new project for Client Alpha",
+        dueAt: "2026-05-04T00:00:00.000Z"
+      }
+    ]);
+    const [run] = new WorkflowRepository(connection).listRunsForWorkflow(workflow.id);
+    expect(JSON.parse(run.actionResultsJson ?? "[]")).toMatchObject([
+      {
+        actionType: "create_container_from_template",
+        status: "completed",
+        targetType: "container",
+        targetId: createdProject!.id
+      },
+      {
+        actionType: "create_task",
+        status: "completed",
+        targetType: "item"
+      }
+    ]);
+    const firstPreview = JSON.parse(run.previewJson).actionPreviews[0];
+    expect(firstPreview).toMatchObject({
+      actionType: "create_container_from_template",
+      status: "ready",
+      targetType: "container"
+    });
+    expect(firstPreview.interpolations).toEqual(expect.arrayContaining([
+      { token: "{{item.title}}", path: "item.title", value: "Client Alpha" },
+      { token: "{{item.dueAt+1d}}", path: "item.dueAt+1d", value: "2026-06-02" }
+    ]));
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("template", template.id)
+        .map((event) => event.action)
+    ).toEqual(["template_created", "template_applied"]);
+    expect(templateSeedTask.task.dueAt).toBe("2026-05-06T00:00:00.000Z");
   });
 
   it("skips item-created workflows when filters do not match", async () => {

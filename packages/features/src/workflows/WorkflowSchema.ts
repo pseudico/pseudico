@@ -91,6 +91,12 @@ export type WorkflowAction = WorkflowActionBase &
       startAt?: string | null;
       priority?: number | null;
     }
+  | {
+      type: "create_container_from_template";
+      templateId: string;
+      name?: string | null;
+      baseDate?: string | null;
+    }
   );
 
 export type WorkflowDefinitionSchemaV1 = {
@@ -217,6 +223,14 @@ export const WORKFLOW_ACTION_REGISTRY: readonly WorkflowActionRegistryEntry[] = 
     localOnly: true,
     previewable: true,
     targetTypes: ["container"]
+  },
+  {
+    type: "create_container_from_template",
+    label: "Create container from template",
+    description: "Create a local project or contact from a saved container template.",
+    localOnly: true,
+    previewable: true,
+    targetTypes: ["template"]
   }
 ] as const;
 
@@ -382,6 +396,12 @@ export function summarizeWorkflowAction(action: WorkflowAction): string {
         action.startAt === undefined || action.startAt === null ? null : `start ${action.startAt}`,
         action.dueAt === undefined || action.dueAt === null ? null : `due ${action.dueAt}`
       ].filter(Boolean).join("; ") + ".";
+    case "create_container_from_template":
+      return [
+        `Create project/contact from template ${action.templateId}`,
+        action.name === undefined || action.name === null ? null : `name ${action.name}`,
+        action.baseDate === undefined || action.baseDate === null ? null : `base date ${action.baseDate}`
+      ].filter(Boolean).join("; ") + ".";
   }
 }
 
@@ -444,6 +464,11 @@ function validateWorkflowAction(value: unknown, path: string): WorkflowValidatio
       if (value.priority !== undefined && value.priority !== null && typeof value.priority !== "number") {
         issues.push(error(`${path}.priority`, "Task priority must be a number when provided."));
       }
+      break;
+    case "create_container_from_template":
+      requireNonEmptyString(value.templateId, `${path}.templateId`, issues);
+      if (value.name !== undefined) requireNullableString(value.name, `${path}.name`, issues);
+      if (value.baseDate !== undefined) requireNullableString(value.baseDate, `${path}.baseDate`, issues);
       break;
   }
 

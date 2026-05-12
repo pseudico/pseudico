@@ -4160,3 +4160,115 @@ Next actions: Start PSE-160 next; keep other issues out of Codex Ready; monitor 
 - Next actions: Check CI/review threads; merge if clean; promote next issue after Done.
 
 
+
+- Timestamp: 2026-05-12T16:08:12.2062088+10:00
+- Objective: Merge PSE-160 and prepare next Codex Ready ticket.
+- Decisions made: PR #149 merged via squash at e68fb00 after CI success and no review threads; branch deleted; PSE-160 moved Done; PSE-161 promoted Codex Ready.
+- Files changed: docs/session_log.md
+- Open questions / risks: Local session log has post-merge entry pending next commit; unrelated untracked files remain untouched.
+- Next actions: Start PSE-161 next; keep exactly one Codex Ready issue; monitor follow-up review if any.
+
+## 2026-05-12 16:24:19 +10:00
+Objective: Start end-to-end Local Work OS ticket run.
+Decisions made:
+- Reconcile Linear/GitHub before implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Active PR/issue state unknown.
+Next actions: Reconcile active states; inspect PRs; select one issue.
+
+## 2026-05-12 16:26:19 +10:00
+Objective: Reconcile active work and claim PSE-161.
+Decisions made:
+- No active PR Open or In Progress issues found; PSE-161 was sole Codex Ready issue.
+- Moved PSE-161 to In Progress and pulled main after sandbox escalation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need identify existing template/workflow extension points.
+Next actions: Create issue branch; inspect source; implement scoped feature.
+
+## 2026-05-12 16:29:32 +10:00
+Objective: Resume PSE-161 implementation after premature stop.
+Decisions made:
+- Continue on codex/pse-161-template-create-action without abandoning ticket.
+- Preserve unrelated untracked local files.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need locate template/workflow APIs.
+Next actions: Read source ticket; inspect modules; implement tests.
+
+## 2026-05-12 16:35:41 +10:00
+Objective: Implement workflow container-template action.
+Decisions made:
+- Added local create_container_from_template action to workflow schema/executor.
+- Reused ContainerTemplateService for project/contact creation, relative dates, activity/search behavior.
+Files changed:
+- packages/features/src/workflows/WorkflowSchema.ts
+- packages/features/src/workflows/WorkflowActionExecutor.ts
+- packages/features/src/workflows/WorkflowVariableResolver.ts
+- packages/features/tests/workflowSchema.test.ts
+- packages/features/tests/workflowService.test.ts
+- docs/session_log.md
+Open questions / risks: Awaiting relevant test results.
+Next actions: Fix test/type failures; run checks; open PR.
+
+## 2026-05-12 16:38:11 +10:00
+Objective: Verify PSE-161 focused tests.
+Decisions made:
+- Reran Vitest with escalation after Vite spawn EPERM.
+- Focused workflow/template tests pass: 3 files, 28 tests.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Full workspace checks still pending.
+Next actions: Run typecheck; lint/test/build; fix failures.
+
+## 2026-05-12 16:39:51 +10:00
+Objective: Fix PSE-161 typecheck issue.
+Decisions made:
+- Omitted optional template action fields unless defined to satisfy exactOptionalPropertyTypes.
+- Full pnpm typecheck now passes.
+Files changed:
+- packages/features/src/workflows/WorkflowActionExecutor.ts
+- docs/session_log.md
+Open questions / risks: Lint/test/build remain pending.
+Next actions: Run lint; run full tests; run build.
+
+## 2026-05-12 16:41:53 +10:00
+Objective: Run full test verification for PSE-161.
+Decisions made:
+- pnpm lint passed.
+- pnpm test needed escalation after Vite spawn EPERM and then passed 184 files / 724 tests.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Build still pending.
+Next actions: Run build; inspect diff; prepare PR.
+
+## 2026-05-12 16:47:31 +10:00
+Objective: Complete full local verification for PSE-161.
+Decisions made:
+- pnpm build needed escalation after electron-vite/esbuild EPERM and then passed.
+- Ready to review diff and publish PR.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need ensure generated build artifacts are not staged if untracked.
+Next actions: Inspect status; commit; push/open PR.
+
+## 2026-05-12 16:50:13 +10:00
+Objective: Commit PSE-161 implementation.
+Decisions made:
+- Staged scoped workflow/template files and session log only.
+- Created commit 03e5eb9 for PSE-161.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Session log now has post-commit entry pending next commit/amend.
+Next actions: Amend log; push branch; open PR.
+
+## 2026-05-12 16:58:59 +10:00
+Objective: Open PR and update Linear for PSE-161.
+Decisions made:
+- GitHub connector PR creation failed; used gh fallback to open PR #150.
+- Moved Linear PSE-161 to PR Open and linked/commented PR.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI is in progress on PR #150.
+Next actions: Amend/push log; wait for CI; merge if green.

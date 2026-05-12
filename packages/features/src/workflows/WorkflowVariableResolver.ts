@@ -147,6 +147,21 @@ export class WorkflowVariableResolver {
           interpolations,
           missing
         };
+      case "create_container_from_template":
+        return {
+          action: withOptionalStrings(
+            {
+              ...action,
+              templateId: resolve(action.templateId)
+            },
+            {
+              name: resolveNullable(action.name),
+              baseDate: resolveNullable(action.baseDate)
+            }
+          ),
+          interpolations,
+          missing
+        };
     }
   }
 
