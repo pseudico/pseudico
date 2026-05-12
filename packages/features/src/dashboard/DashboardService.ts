@@ -42,7 +42,10 @@ export type DashboardLayoutWidgetType =
   | "project_health"
   | "saved_view"
   | "timeline"
-  | "calendar";
+  | "calendar"
+  | "web"
+  | "pomodoro"
+  | "static_text";
 
 export type DashboardWidgetPositionInput = {
   column: number;
@@ -105,8 +108,11 @@ export const DASHBOARD_WIDGET_REGISTRY: DashboardWidgetDefinition[] = [
   { type: "recent_activity", title: "Recent Activity", description: "Latest local activity events.", configurable: true, requiresSavedView: false },
   { type: "project_health", title: "Project Health", description: "Project status and workload summaries.", configurable: true, requiresSavedView: false },
   { type: "saved_view", title: "Saved View", description: "Placeholder for a selected saved view widget.", configurable: true, requiresSavedView: true },
-  { type: "timeline", title: "Timeline", description: "Timeline summary placeholder.", configurable: true, requiresSavedView: false },
-  { type: "calendar", title: "Calendar", description: "Calendar summary placeholder.", configurable: true, requiresSavedView: false }
+  { type: "timeline", title: "Mini Timeline", description: "Dated work summary for the next planning window.", configurable: true, requiresSavedView: false },
+  { type: "calendar", title: "Mini Calendar", description: "Month-at-a-glance local dated work and imported events.", configurable: true, requiresSavedView: false },
+  { type: "web", title: "Web Link", description: "Saved external link with offline and security guardrails.", configurable: true, requiresSavedView: false },
+  { type: "pomodoro", title: "Pomodoro", description: "Local focus timer for dashboard planning.", configurable: true, requiresSavedView: false },
+  { type: "static_text", title: "Static Text", description: "Pinned quote, note, or dashboard instruction text.", configurable: true, requiresSavedView: false }
 ];
 
 export class DashboardService {
@@ -184,6 +190,14 @@ export class DashboardService {
 
   getProjectHealthWidgetData(input: WidgetDataQueryInput): DashboardWidgetData {
     return this.widgetDataService.getProjectHealthWidgetData(input);
+  }
+
+  getTimelineWidgetData(input: WidgetDataQueryInput): DashboardWidgetData {
+    return this.widgetDataService.getTimelineWidgetData(input);
+  }
+
+  getCalendarWidgetData(input: WidgetDataQueryInput): DashboardWidgetData {
+    return this.widgetDataService.getCalendarWidgetData(input);
   }
 
   listWidgetDefinitions(): DashboardWidgetDefinition[] {
@@ -412,6 +426,10 @@ export class DashboardService {
         return this.widgetDataService.getRecentActivityWidgetData(input);
       case "project_health":
         return this.widgetDataService.getProjectHealthWidgetData(input);
+      case "timeline":
+        return this.widgetDataService.getTimelineWidgetData(input);
+      case "calendar":
+        return this.widgetDataService.getCalendarWidgetData(input);
       default:
         throw new Error(`Unsupported dashboard widget type: ${widget.type}.`);
     }

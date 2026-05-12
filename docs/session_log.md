@@ -3797,3 +3797,44 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI still needs to validate on GitHub after push.
 Next actions: Commit and push branch; open ready PR; update Linear.
+
+## 2026-05-12 10:43:08 +10:00
+Objective: Merge PSE-152 and prepare next Codex Ready issue.
+Decisions made:
+- PR #141 merged via squash after CI passed; PSE-153 promoted as next M12 ticket.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local main now has an uncommitted session log entry from post-merge logging.
+Next actions: Start PSE-153 in next run; leave unrelated untracked files untouched.
+
+## 2026-05-12T10:45:10.3865382+10:00
+Objective: Reconciled active Linear/GitHub work and selected next Codex Ready issue.
+Decisions made: No PR Open/In Progress issues or open GitHub PRs; selected PSE-153.
+Files changed: docs/session_log.md
+Open questions / risks: Need full acceptance criteria from ticket/docs.
+Next actions: Move PSE-153 to In Progress; read docs; implement scoped changes.
+
+
+## 2026-05-12T10:47:24.6117467+10:00
+Objective: Started PSE-153 implementation planning.
+Decisions made: Branch codex/PSE-153-calendar-timeline-widgets; scope will extend existing dashboard registry/service/UI without schema changes.
+Files changed: docs/session_log.md
+Open questions / risks: Web widget must remain offline/explicit-link only; Pomodoro state can be local UI state.
+Next actions: Add widget types/data providers; add UI widgets; add tests.
+
+
+## 2026-05-12T10:59:27.8269165+10:00
+Objective: Implemented and verified PSE-153 dashboard extra widgets.
+Decisions made: Added schema migration 0016; calendar/timeline use service projections; web is external-link only; Pomodoro state is local UI state.
+Files changed: packages/features/src/dashboard/**; packages/db/src/migrations/**; packages/ui/src/components/widgets/**; apps/desktop/src/renderer/**; tests
+Open questions / risks: Full manual dashboard edit QA remains via PR review/CI environment.
+Next actions: Inspect diff; commit/push; open ready PR.
+
+
+## 2026-05-12T11:03:14.1770207+10:00
+Objective: Hardened Pomodoro widget behavior after self-review.
+Decisions made: Replaced static Pomodoro display with local countdown, pause, reset, and mode switching.
+Files changed: packages/ui/src/components/widgets/PomodoroWidget.tsx; docs/session_log.md
+Open questions / risks: CI rerun required after amended push.
+Next actions: Amend commit; force-push; watch CI.
+

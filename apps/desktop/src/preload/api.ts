@@ -2173,7 +2173,12 @@ export type DashboardWidgetType =
   | "favorites"
   | "recent_activity"
   | "saved_view"
-  | "project_health";
+  | "project_health"
+  | "timeline"
+  | "calendar"
+  | "web"
+  | "pomodoro"
+  | "static_text";
 
 export type DashboardRecordSummary = {
   id: string;
@@ -2255,6 +2260,40 @@ export type DashboardProjectHealthWidgetItemSummary = ProjectHealthSummary & {
   navigationTarget: DashboardNavigationTargetSummary;
 };
 
+export type DashboardCalendarWidgetDaySummary = {
+  date: string;
+  dayOfMonth: number;
+  inCurrentMonth: boolean;
+  isToday: boolean;
+  itemCount: number;
+  items: Array<{
+    id: string;
+    kind: string;
+    title: string;
+    startAt: string | null;
+    dueAt: string | null;
+    allDay: boolean;
+    status: string;
+  }>;
+};
+
+export type DashboardTimelineWidgetSummary = {
+  range: { startInclusive: string; endExclusive: string };
+  workload: {
+    itemCount: number;
+    activeCount: number;
+    completedCount: number;
+    density: Array<{ date: string; itemCount: number; completedCount: number }>;
+  };
+  groups: Array<{
+    key: string;
+    label: string;
+    itemCount: number;
+    completedCount: number;
+    color: string | null;
+  }>;
+};
+
 export type DashboardWidgetDataSummary =
   | {
       widgetType: "today" | "overdue" | "upcoming";
@@ -2279,6 +2318,18 @@ export type DashboardWidgetDataSummary =
       generatedAt: string;
       page: DashboardWidgetPageSummary;
       items: DashboardActivityWidgetItemSummary[];
+    }
+  | {
+      widgetType: "calendar";
+      generatedAt: string;
+      month: string;
+      totalCount: number;
+      days: DashboardCalendarWidgetDaySummary[];
+    }
+  | {
+      widgetType: "timeline";
+      generatedAt: string;
+      summary: DashboardTimelineWidgetSummary;
     };
 
 export type DashboardWidgetSummary = {
@@ -2300,7 +2351,10 @@ export type DashboardLayoutWidgetType =
   | "project_health"
   | "saved_view"
   | "timeline"
-  | "calendar";
+  | "calendar"
+  | "web"
+  | "pomodoro"
+  | "static_text";
 
 export type DashboardWidgetDefinitionSummary = {
   type: DashboardLayoutWidgetType;

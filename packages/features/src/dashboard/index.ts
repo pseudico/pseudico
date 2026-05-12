@@ -18,6 +18,7 @@ export type {
 } from "./DashboardService";
 export type {
   DashboardActivityWidgetItem,
+  DashboardCalendarWidgetDay,
   DashboardFavoriteWidgetItem,
   DashboardNavigationTarget,
   DashboardProjectHealthWidgetItem,
@@ -27,5 +28,6 @@ export type {
   DashboardWidgetData,
   DashboardWidgetPage,
   DashboardWidgetViewModel,
+  DashboardTimelineWidgetSummary,
   WidgetDataQueryInput
 } from "./DashboardViewModel";

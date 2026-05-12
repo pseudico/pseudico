@@ -488,6 +488,19 @@ export {
   type ProjectHealthWidgetProps
 } from "./components/widgets/ProjectHealthWidget";
 export {
+  MiniCalendarWidget,
+  type MiniCalendarWidgetDay,
+  type MiniCalendarWidgetProps
+} from "./components/widgets/MiniCalendarWidget";
+export {
+  MiniTimelineWidget,
+  type MiniTimelineWidgetGroup,
+  type MiniTimelineWidgetProps
+} from "./components/widgets/MiniTimelineWidget";
+export { PomodoroWidget, type PomodoroWidgetProps } from "./components/widgets/PomodoroWidget";
+export { StaticTextWidget, type StaticTextWidgetProps } from "./components/widgets/StaticTextWidget";
+export { WebWidget, type WebWidgetProps } from "./components/widgets/WebWidget";
+export {
   EmptyState,
   type EmptyStateProps
 } from "./components/EmptyState";
