@@ -176,6 +176,35 @@ describe("ExportService", () => {
     ]);
   });
 
+
+  it("exports planning summaries as Markdown and logs the local export", async () => {
+    const result = await createService().exportPlanningSummaryMarkdown({
+      workspaceId: "workspace_1",
+      date: "2026-05-06",
+      exportRelativePath: "exports/planning-summary.md"
+    });
+
+    expect(result).toMatchObject({
+      kind: "planning_summary_markdown",
+      sourceId: "workspace_1",
+      relativePath: "exports/planning-summary.md"
+    });
+    expect(writtenExports.get("exports/planning-summary.md")).toContain(
+      "# Planning summary for 2026-05-06"
+    );
+    expect(writtenExports.get("exports/planning-summary.md")).toContain(
+      "Launch Plan: planned 1"
+    );
+    expect(
+      new ActivityLogRepository(connection).listForTarget("export", "export_1")
+    ).toMatchObject([
+      {
+        action: "export_created",
+        summary: "Created planning summary Markdown export exports/planning-summary.md."
+      }
+    ]);
+  });
+
   it("exports tasks as escaped CSV and TSV", async () => {
     const csv = await createService().exportTasksCsv({
       workspaceId: "workspace_1",

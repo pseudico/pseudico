@@ -2,6 +2,7 @@ export { ExportService, exportModuleContract } from "./ExportService";
 export type {
   BuildWorkspaceExportInput,
   ExportProjectMarkdownInput,
+  ExportPlanningSummaryMarkdownInput,
   ExportFileSystemAdapter,
   ExportServiceIdFactory,
   ExportTasksCsvInput,

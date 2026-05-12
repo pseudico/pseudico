@@ -26,6 +26,10 @@ describe("Today renderer page", () => {
     expect(html).toContain("Tomorrow");
     expect(html).toContain("Remove");
     expect(html).toContain("Move down");
+    expect(html).toContain("Daily and weekly summary");
+    expect(html).toContain("Export Markdown");
+    expect(html).toContain("Client Launch");
+    expect(html).toContain("Operations");
     expect(html).toContain("Planning preferences");
     expect(html).toContain("2/6 focus tasks planned");
     expect(html).toContain("Completed today:");
@@ -57,6 +61,28 @@ function todayViewModel(): TodayViewModelSummary {
       completedTodayCount: 1,
       plannedTodayCompletedCount: 1,
       show: true
+    },
+    planningSummary: {
+      workspaceId: "workspace_1",
+      generatedAt: "2026-05-04T08:00:00.000Z",
+      daily: {
+        localDate: "2026-05-04",
+        plannedCount: 2,
+        completedCount: 1,
+        snoozedCount: 1,
+        overdueCount: 1,
+        plannedByLane: { today: 2, tomorrow: 0, backlog: 0 }
+      },
+      weekly: {
+        startDate: "2026-05-04",
+        endDate: "2026-05-10",
+        byProject: [
+          { id: "container_project_1", label: "Client Launch", plannedCount: 3, completedCount: 1, snoozedCount: 0, overdueCount: 1 }
+        ],
+        byCategory: [
+          { id: "category_1", label: "Operations", plannedCount: 3, completedCount: 1, snoozedCount: 0, overdueCount: 1 }
+        ]
+      }
     },
     ranges: {
       today: {

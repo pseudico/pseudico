@@ -55,6 +55,7 @@ import {
   type TaskDelimitedExportFormat,
   type TaskDelimitedExportRow
 } from "./TaskCsvExporter";
+import { PlanningSummaryService } from "../today/PlanningSummaryService";
 
 // Owns export orchestration application contracts.
 // Does not own backup lifecycle or direct renderer filesystem writes.
@@ -103,6 +104,13 @@ export type ExportTasksCsvInput = {
   actorType?: ActivityActorType;
 };
 
+export type ExportPlanningSummaryMarkdownInput = {
+  workspaceId: string;
+  date?: string | Date;
+  exportRelativePath?: string;
+  actorType?: ActivityActorType;
+};
+
 export type WorkspaceJsonExportResult = {
   id: string;
   workspaceId: string;
@@ -121,7 +129,7 @@ export type TextExportResult = {
   createdAt: string;
   relativePath: string;
   sizeBytes: number;
-  kind: "project_markdown" | "tasks_csv" | "tasks_tsv";
+  kind: "project_markdown" | "tasks_csv" | "tasks_tsv" | "planning_summary_markdown";
   sourceId: string;
   rowCount: number;
 };
@@ -404,6 +412,67 @@ export class ExportService {
     };
   }
 
+  async exportPlanningSummaryMarkdown(
+    input: ExportPlanningSummaryMarkdownInput
+  ): Promise<TextExportResult> {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+
+    const workspace = new WorkspaceRepository(this.connection).getById(
+      input.workspaceId
+    );
+
+    if (workspace === null) {
+      throw new Error(`Workspace row was not found: ${input.workspaceId}.`);
+    }
+
+    const createdAt = createIsoTimestamp(this.now());
+    const exportId = this.idFactory("export");
+    const summaryService = new PlanningSummaryService({
+      connection: this.connection,
+      now: this.now
+    });
+    const summary = summaryService.getSummary({
+      workspaceId: input.workspaceId,
+      date: input.date ?? this.now()
+    });
+    const exportRelativePath =
+      input.exportRelativePath ??
+      createPlanningSummaryRelativePath(createdAt, summary.daily.localDate);
+    const contents = summaryService.buildMarkdown({
+      workspaceId: input.workspaceId,
+      date: input.date ?? this.now()
+    });
+    const written = await this.writeTextExport({
+      exportRelativePath,
+      contents
+    });
+
+    this.logTextExport({
+      workspaceId: input.workspaceId,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType }),
+      exportId,
+      createdAt,
+      kind: "planning_summary_markdown",
+      relativePath: written.relativePath,
+      sizeBytes: written.sizeBytes,
+      sourceId: input.workspaceId,
+      rowCount:
+        summary.weekly.byProject.length + summary.weekly.byCategory.length,
+      summary: `Created planning summary Markdown export ${written.relativePath}.`
+    });
+
+    return {
+      id: exportId,
+      workspaceId: input.workspaceId,
+      createdAt,
+      relativePath: written.relativePath,
+      sizeBytes: written.sizeBytes,
+      kind: "planning_summary_markdown",
+      sourceId: input.workspaceId,
+      rowCount: summary.weekly.byProject.length + summary.weekly.byCategory.length
+    };
+  }
+
   async exportTasksCsv(input: ExportTasksCsvInput): Promise<TextExportResult> {
     validateNonEmptyString(input.workspaceId, "workspaceId");
 
@@ -517,6 +586,13 @@ function createTasksRelativePath(
   format: TaskDelimitedExportFormat
 ): string {
   return `exports/${createdAt.replace(/[:.]/g, "-")}-tasks.${format}`;
+}
+
+function createPlanningSummaryRelativePath(
+  createdAt: string,
+  localDate: string
+): string {
+  return `exports/${createdAt.replace(/[:.]/g, "-")}-${localDate}-planning-summary.md`;
 }
 
 function validateNonEmptyString(value: string, fieldName: string): void {

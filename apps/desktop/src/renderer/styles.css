@@ -1952,6 +1952,107 @@ a {
 }
 
 
+
+.planning-summary-panel {
+  display: grid;
+  max-width: 1180px;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--app-border, #ded8cb);
+  border-radius: 18px;
+  background: var(--app-surface, #fffaf0);
+  box-shadow: 0 16px 36px rgb(78 66 40 / 8%);
+}
+
+.planning-summary-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.planning-summary-heading h3 {
+  margin: 0 0 6px;
+  color: var(--app-text, #262624);
+  font-size: 22px;
+}
+
+.planning-summary-heading p:last-child {
+  max-width: 72ch;
+  margin: 0;
+  color: var(--app-text-muted, #514e49);
+  line-height: 1.5;
+}
+
+.planning-summary-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.planning-summary-metric {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--app-border, #ded8cb);
+  border-radius: 14px;
+  background: var(--app-surface-strong, #fffdf8);
+}
+
+.planning-summary-metric strong {
+  color: var(--app-text, #262624);
+  font-size: 24px;
+}
+
+.planning-summary-metric span,
+.planning-summary-lanes,
+.planning-summary-export {
+  color: var(--app-text-muted, #514e49);
+  font-size: 13px;
+}
+
+.planning-summary-lanes,
+.planning-summary-export {
+  margin: 0;
+}
+
+.planning-summary-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.planning-summary-group-list {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--app-border, #ded8cb);
+  border-radius: 14px;
+  background: var(--app-surface-strong, #fffdf8);
+}
+
+.planning-summary-group-list h4,
+.planning-summary-group-list p,
+.planning-summary-group-list ul {
+  margin: 0;
+}
+
+.planning-summary-group-list ul {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.planning-summary-group-list li {
+  display: grid;
+  gap: 2px;
+}
+
+.planning-summary-group-list small {
+  color: var(--app-text-muted, #514e49);
+}
+
 .today-preferences-panel {
   display: grid;
   max-width: 1180px;
