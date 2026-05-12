@@ -1866,6 +1866,11 @@ For local-only, workflows should be **small, safe, inspectable local rules**.
 | No cloud actions | Strictly local. |
 | No arbitrary code | Exclude external scripts in early versions. |
 
+The workflow foundation supports local `{{variables}}` for trigger item,
+container, current local date, and upstream action outputs. Missing variables
+block preview/run, and action-level conditions can skip steps without invoking
+cloud, scripts, or remote services.
+
 ---
 
 ## 27. Reminders and notifications specification

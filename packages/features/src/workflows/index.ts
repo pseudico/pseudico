@@ -8,6 +8,8 @@ export {
 export { WorkflowTriggerService } from "./WorkflowTriggerService";
 export type {
   WorkflowAction,
+  WorkflowActionCondition,
+  WorkflowActionConditionOperator,
   WorkflowActionRegistryEntry,
   WorkflowDefinitionSchema,
   WorkflowDefinitionSchemaV1,
@@ -37,6 +39,14 @@ export {
   validateWorkflowActions,
   validateWorkflowDefinitionSchema
 } from "./WorkflowSchema";
+export { WorkflowVariableResolver } from "./WorkflowVariableResolver";
+export type {
+  WorkflowActionResolution,
+  WorkflowConditionEvaluation,
+  WorkflowStringResolution,
+  WorkflowVariableInterpolation,
+  WorkflowVariableResolutionContext
+} from "./WorkflowVariableResolver";
 export { WorkflowService } from "./WorkflowService";
 export type {
   WorkflowActionExecutionContext,

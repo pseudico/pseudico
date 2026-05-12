@@ -296,6 +296,128 @@ describe("WorkflowService", () => {
     ).toEqual(["workflow_created", "workflow_run_completed"]);
   });
 
+  it("interpolates item, container, today, and upstream action variables while honoring conditions", async () => {
+    const workflowService = createWorkflowService();
+    const workflow = await workflowService.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Variable follow-up",
+      trigger: {
+        type: "item_created",
+        filters: {
+          textIncludes: "invoice"
+        }
+      },
+      actions: [
+        {
+          type: "create_task",
+          containerId: "{{item.containerId}}",
+          title: "Review {{item.title}} for {{container.name}} on {{today}}",
+          condition: {
+            left: "{{item.title}}",
+            op: "contains",
+            right: "invoice"
+          }
+        },
+        {
+          type: "add_tag",
+          targetType: "item",
+          targetId: "{{previous.targetId}}",
+          tagName: "Spawned from {{item.title}}"
+        },
+        {
+          type: "create_task",
+          containerId: "{{item.containerId}}",
+          title: "Skipped quote task",
+          condition: {
+            left: "{{item.title}}",
+            op: "contains",
+            right: "quote"
+          }
+        }
+      ]
+    });
+
+    await new TaskService({
+      connection,
+      idFactory,
+      now,
+      itemCreatedWorkflowHook: new WorkflowTriggerService({ connection, idFactory, now })
+    }).createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Send invoice"
+    });
+
+    const tasks = new TaskRepository(connection).listByContainer("container_project_1");
+    expect(tasks.map((record) => record.item.title)).toEqual([
+      "Send invoice",
+      "Review Send invoice for Launch Plan on 2026-05-02"
+    ]);
+    expect(
+      new TagRepository(connection)
+        .listTagsForTarget({
+          workspaceId: "workspace_1",
+          targetType: "item",
+          targetId: tasks[1].item.id
+        })
+        .map((tag) => tag.slug)
+    ).toEqual(["spawned-from-send-invoice"]);
+
+    const [run] = new WorkflowRepository(connection).listRunsForWorkflow(workflow.id);
+    expect(run).toMatchObject({
+      workflowDefinitionId: workflow.id,
+      triggerType: "item_created",
+      status: "completed"
+    });
+    expect(JSON.parse(run.actionResultsJson ?? "[]")).toMatchObject([
+      { actionType: "create_task", status: "completed", targetId: tasks[1].item.id },
+      { actionType: "add_tag", status: "completed", targetId: tasks[1].item.id },
+      { actionType: "create_task", status: "skipped", targetId: null }
+    ]);
+    const firstPreview = JSON.parse(run.previewJson).actionPreviews[0];
+    expect(firstPreview).toMatchObject({
+      actionType: "create_task",
+      status: "ready"
+    });
+    expect(firstPreview.interpolations).toEqual(expect.arrayContaining([
+      { token: "{{item.title}}", path: "item.title", value: "Send invoice" },
+      { token: "{{item.containerId}}", path: "item.containerId", value: "container_project_1" },
+      { token: "{{container.name}}", path: "container.name", value: "Launch Plan" },
+      { token: "{{today}}", path: "today", value: "2026-05-02" }
+    ]));
+  });
+
+  it("fails safely when workflow variables are missing from the execution context", async () => {
+    const service = createWorkflowService();
+    const workflow = await service.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Needs item context",
+      actions: [
+        {
+          type: "create_task",
+          containerId: "container_project_1",
+          title: "Review {{item.title}}"
+        }
+      ]
+    });
+
+    const preview = await service.previewWorkflowRun({ workflowId: workflow.id });
+    const result = await service.runManualWorkflow({ workflowId: workflow.id });
+
+    expect(preview).toMatchObject({
+      canRun: false,
+      actionPreviews: [{ status: "blocked" }]
+    });
+    expect(result.run).toMatchObject({
+      status: "failed",
+      errorMessage: "Workflow preview has blocked actions."
+    });
+    expect(JSON.parse(result.run.previewJson).actionPreviews[0]).toMatchObject({
+      reason: "Workflow variables could not be resolved: item.title."
+    });
+    expect(new TaskRepository(connection).listByContainer("container_project_1")).toEqual([]);
+  });
+
   it("skips item-created workflows when filters do not match", async () => {
     const workflowService = createWorkflowService();
     const workflow = await workflowService.createWorkflow({

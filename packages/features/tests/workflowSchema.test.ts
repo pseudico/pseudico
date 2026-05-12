@@ -183,6 +183,50 @@ describe("workflow schema and registry", () => {
     expect(categoryResult.valid).toBe(true);
   });
 
+  it("accepts templated actions with local conditional steps", () => {
+    const result = validateWorkflowDefinitionSchema({
+      kind: WORKFLOW_DEFINITION_KIND,
+      version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+      trigger: { type: "item_created" },
+      actions: [
+        {
+          type: "create_task",
+          containerId: "{{item.containerId}}",
+          title: "Follow up {{item.title}} on {{today}}",
+          condition: {
+            left: "{{item.type}}",
+            op: "eq",
+            right: "task"
+          }
+        }
+      ]
+    });
+
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects invalid conditional workflow step definitions", () => {
+    const result = validateWorkflowDefinitionSchema({
+      kind: WORKFLOW_DEFINITION_KIND,
+      version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+      trigger: { type: "manual" },
+      actions: [
+        {
+          type: "create_task",
+          containerId: "container_1",
+          title: "Broken condition",
+          condition: {
+            left: "{{item.title}}",
+            op: "eq"
+          }
+        }
+      ]
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.issues.map((issue) => issue.path)).toContain("actions[0].condition.right");
+  });
+
   it("builds editor skeleton state that disables invalid workflows", () => {
     const state = createWorkflowEditorSkeletonState({
       name: "Webhook draft",

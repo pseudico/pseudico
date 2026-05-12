@@ -13,6 +13,7 @@ import {
   type WorkflowRunRecord
 } from "@local-work-os/db";
 import {
+  WORKFLOW_PREVIEW_OUTPUT_PREFIX,
   WorkflowActionExecutor,
   type WorkflowActionExecutionResult,
   type WorkflowActionPreview,
@@ -206,7 +207,8 @@ export class WorkflowService {
               action,
               {
                 workspaceId: workflow.workspaceId,
-                actorType: input.actorType ?? "local_user"
+                actorType: input.actorType ?? "local_user",
+                previousActionResults: actionResults
               },
               index
             )
@@ -271,22 +273,47 @@ export class WorkflowService {
     actorType?: ActivityActorType;
   }): WorkflowPreviewResult {
     const executor = this.createExecutor();
-    const actionPreviews = input.actions.map((action, index) =>
-      executor.previewWorkflowAction(
+    const actionPreviews: WorkflowActionPreview[] = [];
+    const previewResults: WorkflowActionExecutionResult[] = [];
+    for (const [index, action] of input.actions.entries()) {
+      const preview = executor.previewWorkflowAction(
         action,
         {
           workspaceId: input.workspaceId,
-          actorType: input.actorType ?? "local_user"
+          actorType: input.actorType ?? "local_user",
+          previousActionResults: previewResults
         },
         index
-      )
-    );
+      );
+      actionPreviews.push(preview);
+      if (preview.status === "ready") {
+        previewResults.push({
+          index,
+          actionType: preview.actionType,
+          status: "completed",
+          summary: preview.summary,
+          targetType: preview.targetType,
+          targetId:
+            preview.targetId ??
+            `${WORKFLOW_PREVIEW_OUTPUT_PREFIX}actions.${index}.targetId`
+        });
+      } else if (preview.status === "skipped") {
+        previewResults.push({
+          index,
+          actionType: preview.actionType,
+          status: "skipped",
+          summary: preview.summary,
+          targetType: preview.targetType,
+          targetId: preview.targetId
+        });
+      }
+    }
 
     return {
       workspaceId: input.workspaceId,
       workflowId: input.workflowId,
       triggerType: input.triggerType ?? "manual",
-      canRun: actionPreviews.every((preview) => preview.status === "ready"),
+      canRun: actionPreviews.every((preview) => preview.status !== "blocked"),
       actionPreviews
     };
   }

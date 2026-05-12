@@ -4056,3 +4056,50 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI must confirm after PR opens.
 Next actions: Commit/push branch; open ready PR; update Linear.
+## 2026-05-12T15:07:29.6243884+10:00
+Objective: Finish PSE-158 and prepare next ticket.
+Decisions made:
+- PR #147 merged via squash at 0e92ea4 and merged branch deleted after main fast-forward.
+- PSE-158 moved to Done; PSE-159 promoted to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Session log has post-merge local entry not included in PR #147.
+Next actions: Start PSE-159 in next run.
+## 2026-05-12T15:15:55.7931892+10:00
+Objective: Reconcile active Local Work OS work before starting next ticket.
+Decisions made:
+- Linear has no PR Open or In Progress issues; PSE-159 is the only Codex Ready issue.
+- Proceeding to verify GitHub open PR state, then start PSE-159 if no active PR blocks.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub may still have untracked open PRs not reflected in Linear.
+Next actions: Check open PRs; move PSE-159 to In Progress; inspect scope/docs.
+## 2026-05-12T15:20:01.9232230+10:00
+Objective: Plan PSE-159 implementation scope.
+Decisions made:
+- Implement workflow {{variables}}, upstream action interpolation, and lightweight action conditions in feature services.
+- No schema migration needed; persisted workflow JSON remains versioned and local-only.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Full UI editor is skeletal, so renderer update will document preview capability rather than add full builder UX.
+Next actions: Add resolver/executor support; add schema/service/renderer tests; update docs.
+## 2026-05-12T15:30:28.0804306+10:00
+Objective: Implement and verify PSE-159 locally.
+Decisions made:
+- Added workflow variable interpolation, upstream action outputs, and conditional step skipping in service execution/preview.
+- Targeted workflow tests, lint, typecheck, full test, and build passed after sandbox EPERM reruns where needed.
+Files changed:
+- apps/desktop/src/renderer/pages/WorkflowsPage.tsx
+- apps/desktop/tests/renderer/workflowsPage.test.tsx
+- packages/features/src/workflows/WorkflowActionExecutor.ts
+- packages/features/src/workflows/WorkflowSchema.ts
+- packages/features/src/workflows/WorkflowService.ts
+- packages/features/src/workflows/WorkflowTriggerService.ts
+- packages/features/src/workflows/WorkflowVariableResolver.ts
+- packages/features/tests/workflowSchema.test.ts
+- packages/features/tests/workflowService.test.ts
+- docs/PRODUCT_SPEC.md
+- docs/MODULE_REGISTRY.md
+- docs/session_log.md
+Open questions / risks: CI and PR review still need to confirm remotely.
+Next actions: Commit/push; open PR; update Linear.

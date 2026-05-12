@@ -18,6 +18,7 @@ import {
   type WorkflowRunRecord
 } from "@local-work-os/db";
 import {
+  WORKFLOW_PREVIEW_OUTPUT_PREFIX,
   WorkflowActionExecutor,
   type WorkflowActionExecutionResult,
   type WorkflowActionPreview,
@@ -380,7 +381,8 @@ export class WorkflowTriggerService {
                 actorType: "system",
                 ...(input.item === undefined ? {} : { triggerItemId: input.item.id }),
                 triggerTargetType: input.triggerTargetType,
-                triggerTargetId: input.triggerTargetId
+                triggerTargetId: input.triggerTargetId,
+                previousActionResults: actionResults
               },
               index
             )
@@ -452,19 +454,44 @@ export class WorkflowTriggerService {
       idFactory: this.idFactory,
       now: this.now
     });
-    const actionPreviews = input.actions.map((action, index) =>
-      executor.previewWorkflowAction(
+    const actionPreviews: WorkflowActionPreview[] = [];
+    const previewResults: WorkflowActionExecutionResult[] = [];
+    for (const [index, action] of input.actions.entries()) {
+      const preview = executor.previewWorkflowAction(
         action,
         {
           workspaceId: input.workflow.workspaceId,
           actorType: "system",
           ...(input.item === undefined ? {} : { triggerItemId: input.item.id }),
           triggerTargetType: input.triggerTargetType,
-          triggerTargetId: input.triggerTargetId
+          triggerTargetId: input.triggerTargetId,
+          previousActionResults: previewResults
         },
         index
-      )
-    );
+      );
+      actionPreviews.push(preview);
+      if (preview.status === "ready") {
+        previewResults.push({
+          index,
+          actionType: preview.actionType,
+          status: "completed",
+          summary: preview.summary,
+          targetType: preview.targetType,
+          targetId:
+            preview.targetId ??
+            `${WORKFLOW_PREVIEW_OUTPUT_PREFIX}actions.${index}.targetId`
+        });
+      } else if (preview.status === "skipped") {
+        previewResults.push({
+          index,
+          actionType: preview.actionType,
+          status: "skipped",
+          summary: preview.summary,
+          targetType: preview.targetType,
+          targetId: preview.targetId
+        });
+      }
+    }
 
     return {
       workspaceId: input.workflow.workspaceId,
@@ -485,7 +512,7 @@ export class WorkflowTriggerService {
               containerId: input.item?.containerId ?? input.triggerTargetId
             }
           }),
-      canRun: actionPreviews.every((preview) => preview.status === "ready"),
+      canRun: actionPreviews.every((preview) => preview.status !== "blocked"),
       actionPreviews
     };
   }

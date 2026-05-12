@@ -43,7 +43,25 @@ export type WorkflowTrigger =
       filters?: WorkflowMetadataTriggerFilters;
     };
 
-export type WorkflowAction =
+export type WorkflowActionConditionOperator =
+  | "exists"
+  | "not_exists"
+  | "eq"
+  | "not_eq"
+  | "contains";
+
+export type WorkflowActionCondition = {
+  left: string;
+  op: WorkflowActionConditionOperator;
+  right?: string;
+};
+
+type WorkflowActionBase = {
+  condition?: WorkflowActionCondition;
+};
+
+export type WorkflowAction = WorkflowActionBase &
+  (
   | {
       type: "add_tag";
       targetType: "item";
@@ -72,7 +90,8 @@ export type WorkflowAction =
       dueAt?: string | null;
       startAt?: string | null;
       priority?: number | null;
-    };
+    }
+  );
 
 export type WorkflowDefinitionSchemaV1 = {
   kind: typeof WORKFLOW_DEFINITION_KIND;
@@ -386,6 +405,10 @@ function validateWorkflowAction(value: unknown, path: string): WorkflowValidatio
     return [error(`${path}.type`, `Unsupported or non-local workflow action: ${value.type}.`)];
   }
 
+  if (value.condition !== undefined) {
+    issues.push(...validateWorkflowActionCondition(value.condition, `${path}.condition`));
+  }
+
   switch (value.type) {
     case "add_tag":
       requireEqual(value.targetType, "item", `${path}.targetType`, issues);
@@ -418,6 +441,43 @@ function validateWorkflowAction(value: unknown, path: string): WorkflowValidatio
         issues.push(error(`${path}.priority`, "Task priority must be a number when provided."));
       }
       break;
+  }
+
+  return issues;
+}
+
+function validateWorkflowActionCondition(
+  value: unknown,
+  path: string
+): WorkflowValidationIssue[] {
+  const issues: WorkflowValidationIssue[] = [];
+
+  if (!isRecord(value)) {
+    return [error(path, "Workflow action condition must be an object.")];
+  }
+
+  requireNonEmptyString(value.left, `${path}.left`, issues);
+  requireOneOf(
+    value.op,
+    ["exists", "not_exists", "eq", "not_eq", "contains"],
+    `${path}.op`,
+    issues
+  );
+
+  if (
+    value.op !== "exists" &&
+    value.op !== "not_exists" &&
+    !isNonEmptyString(value.right)
+  ) {
+    issues.push(error(`${path}.right`, "Condition right side must be a non-empty string for this operator."));
+  }
+
+  if (
+    (value.op === "exists" || value.op === "not_exists") &&
+    value.right !== undefined &&
+    typeof value.right !== "string"
+  ) {
+    issues.push(error(`${path}.right`, "Condition right side must be a string when provided."));
   }
 
   return issues;

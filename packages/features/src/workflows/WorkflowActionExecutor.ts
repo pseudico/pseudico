@@ -14,15 +14,20 @@ import {
   summarizeWorkflowAction,
   type WorkflowAction
 } from "./WorkflowSchema";
+import {
+  WorkflowVariableResolver,
+  type WorkflowVariableInterpolation
+} from "./WorkflowVariableResolver";
 
 export type WorkflowActionPreview = {
   index: number;
   actionType: WorkflowAction["type"];
   summary: string;
-  status: "ready" | "blocked";
+  status: "ready" | "blocked" | "skipped";
   targetType: string;
   targetId: string | null;
   reason: string | null;
+  interpolations: WorkflowVariableInterpolation[];
 };
 
 export type WorkflowActionExecutionContext = {
@@ -31,15 +36,16 @@ export type WorkflowActionExecutionContext = {
   triggerItemId?: string;
   triggerTargetType?: string;
   triggerTargetId?: string;
+  previousActionResults?: readonly WorkflowActionExecutionResult[];
 };
 
 export type WorkflowActionExecutionResult = {
   index: number;
   actionType: WorkflowAction["type"];
-  status: "completed";
+  status: "completed" | "skipped";
   summary: string;
   targetType: string;
-  targetId: string;
+  targetId: string | null;
 };
 
 export type WorkflowServiceIdFactory = (prefix: string) => string;
@@ -64,8 +70,38 @@ export class WorkflowActionExecutor {
     context: WorkflowActionExecutionContext,
     index: number
   ): WorkflowActionPreview {
-    const resolvedAction = resolveTriggerItemAction(action, context);
-    const validation = this.validateReferences(resolvedAction, context.workspaceId);
+    const condition = this.evaluateActionCondition(action, context);
+    if (condition?.status === "blocked" || condition?.status === "skipped") {
+      return {
+        index,
+        actionType: action.type,
+        summary: condition.summary,
+        status: condition.status,
+        targetType: getActionTarget(action).targetType,
+        targetId: getActionTarget(action).targetId,
+        reason: condition.reason,
+        interpolations: condition.interpolations
+      };
+    }
+
+    const resolution = this.resolveAction(action, context);
+    const resolvedAction = resolution.action;
+    if (resolution.missing.length > 0) {
+      const reason = `Workflow variables could not be resolved: ${resolution.missing.join(", ")}.`;
+      return {
+        index,
+        actionType: resolvedAction.type,
+        summary: reason,
+        status: "blocked",
+        targetType: getActionTarget(resolvedAction).targetType,
+        targetId: getActionTarget(resolvedAction).targetId,
+        reason,
+        interpolations: resolution.interpolations
+      };
+    }
+    const validation = this.validateReferences(resolvedAction, context.workspaceId, {
+      allowPreviewVariables: true
+    });
 
     return {
       index,
@@ -74,7 +110,8 @@ export class WorkflowActionExecutor {
       status: validation === null ? "ready" : "blocked",
       targetType: getActionTarget(resolvedAction).targetType,
       targetId: getActionTarget(resolvedAction).targetId,
-      reason: validation
+      reason: validation,
+      interpolations: resolution.interpolations
     };
   }
 
@@ -83,7 +120,27 @@ export class WorkflowActionExecutor {
     context: WorkflowActionExecutionContext,
     index = 0
   ): Promise<WorkflowActionExecutionResult> {
-    const actionToRun = resolveTriggerItemAction(action, context);
+    const condition = this.evaluateActionCondition(action, context);
+    if (condition?.status === "skipped") {
+      return {
+        index,
+        actionType: action.type,
+        status: "skipped",
+        summary: condition.summary,
+        targetType: getActionTarget(action).targetType,
+        targetId: getActionTarget(action).targetId
+      };
+    }
+    if (condition?.status === "blocked") {
+      throw new Error(condition.reason ?? condition.summary);
+    }
+
+    const resolution = this.resolveAction(action, context);
+    if (resolution.missing.length > 0) {
+      throw new Error(`Workflow variables could not be resolved: ${resolution.missing.join(", ")}.`);
+    }
+
+    const actionToRun = resolution.action;
     const validation = this.validateReferences(actionToRun, context.workspaceId);
 
     if (validation !== null) {
@@ -207,12 +264,65 @@ export class WorkflowActionExecutor {
     }
   }
 
+  private resolveAction(
+    action: WorkflowAction,
+    context: WorkflowActionExecutionContext
+  ) {
+    return new WorkflowVariableResolver({
+      connection: this.connection,
+      now: this.now
+    }).resolveAction(resolveTriggerItemAction(action, context), context);
+  }
+
+  private evaluateActionCondition(
+    action: WorkflowAction,
+    context: WorkflowActionExecutionContext
+  ): {
+    status: "blocked" | "skipped";
+    summary: string;
+    reason: string | null;
+    interpolations: WorkflowVariableInterpolation[];
+  } | null {
+    if (action.condition === undefined) {
+      return null;
+    }
+
+    const evaluation = new WorkflowVariableResolver({
+      connection: this.connection,
+      now: this.now
+    }).evaluateCondition(action.condition, context);
+
+    if (evaluation.missing.length > 0) {
+      return {
+        status: "blocked",
+        summary: evaluation.summary,
+        reason: evaluation.summary,
+        interpolations: evaluation.interpolations
+      };
+    }
+
+    if (!evaluation.matches) {
+      return {
+        status: "skipped",
+        summary: evaluation.summary,
+        reason: evaluation.summary,
+        interpolations: evaluation.interpolations
+      };
+    }
+
+    return null;
+  }
+
   private validateReferences(
     action: WorkflowAction,
-    workspaceId: string
+    workspaceId: string,
+    options: { allowPreviewVariables?: boolean } = {}
   ): string | null {
     switch (action.type) {
       case "add_tag": {
+        if (isPreviewVariable(action.targetId, options)) {
+          return null;
+        }
         if (new ItemRepository(this.connection).getById(action.targetId) === null) {
           return `Workflow action ${action.type} target item was not found: ${action.targetId}.`;
         }
@@ -227,11 +337,17 @@ export class WorkflowActionExecutor {
         }
 
         if (action.targetType === "item") {
+          if (isPreviewVariable(action.targetId, options)) {
+            return null;
+          }
           const item = new ItemRepository(this.connection).getById(action.targetId);
           if (item === null || item.workspaceId !== workspaceId) {
             return `Workflow target item was not found: ${action.targetId}.`;
           }
         } else {
+          if (isPreviewVariable(action.targetId, options)) {
+            return null;
+          }
           const container = new ContainerRepository(this.connection).getById(
             action.targetId
           );
@@ -243,6 +359,9 @@ export class WorkflowActionExecutor {
         return null;
       }
       case "move_item": {
+        if (isPreviewVariable(action.itemId, options)) {
+          return null;
+        }
         const item = new ItemRepository(this.connection).getById(action.itemId);
         if (item === null || item.workspaceId !== workspaceId) {
           return `Workflow item to move was not found: ${action.itemId}.`;
@@ -281,6 +400,7 @@ export class WorkflowActionExecutor {
 
 export const WORKFLOW_TRIGGER_ITEM_ID_TOKEN = "$trigger.itemId";
 export const WORKFLOW_TRIGGER_TARGET_ID_TOKEN = "$trigger.targetId";
+export const WORKFLOW_PREVIEW_OUTPUT_PREFIX = "$preview.";
 
 function resolveTriggerItemAction(
   action: WorkflowAction,
@@ -349,4 +469,11 @@ function getActionTarget(action: WorkflowAction): {
     case "create_task":
       return { targetType: "item", targetId: null };
   }
+}
+
+function isPreviewVariable(
+  value: string,
+  options: { allowPreviewVariables?: boolean }
+): boolean {
+  return options.allowPreviewVariables === true && value.startsWith(WORKFLOW_PREVIEW_OUTPUT_PREFIX);
 }
