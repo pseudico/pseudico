@@ -20,6 +20,7 @@ import { TodayPage } from "./pages/TodayPage";
 import { TrashPage } from "./pages/TrashPage";
 import { WelcomePage } from "./pages/WelcomePage";
 import { WorkspaceHomePage } from "./pages/WorkspaceHomePage";
+import { WorkflowsPage } from "./pages/WorkflowsPage";
 import { ThemeProvider } from "./theme/ThemeProvider";
 
 export function AppRoutes(): React.JSX.Element {
@@ -43,6 +44,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/timeline" element={<TimelinePage />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/workflows" element={<WorkflowsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/trash" element={<TrashPage />} />
       </Route>

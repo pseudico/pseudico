@@ -1,0 +1,108 @@
+import {
+  WORKFLOW_ACTION_REGISTRY,
+  WORKFLOW_DEFINITION_KIND,
+  WORKFLOW_DEFINITION_SCHEMA_VERSION,
+  createWorkflowDefinitionSchema,
+  createWorkflowEditorSkeletonState,
+  parseWorkflowActions,
+  parseWorkflowDefinitionSchema,
+  stringifyWorkflowActions,
+  validateWorkflowDefinitionSchema
+} from "../src";
+import { describe, expect, it } from "vitest";
+
+describe("workflow schema and registry", () => {
+  it("serializes workflow actions in a versioned local schema envelope", () => {
+    const json = stringifyWorkflowActions([
+      {
+        type: "create_task",
+        containerId: "container_1",
+        title: "Follow up"
+      }
+    ]);
+
+    expect(JSON.parse(json)).toMatchObject({
+      kind: WORKFLOW_DEFINITION_KIND,
+      version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+      trigger: { type: "manual" },
+      actions: [{ type: "create_task", title: "Follow up" }]
+    });
+    expect(parseWorkflowActions(json)).toEqual([
+      {
+        type: "create_task",
+        containerId: "container_1",
+        title: "Follow up"
+      }
+    ]);
+  });
+
+  it("keeps backwards compatibility with legacy action arrays", () => {
+    const parsed = parseWorkflowDefinitionSchema(
+      JSON.stringify([
+        {
+          type: "add_tag",
+          targetType: "item",
+          targetId: "item_1",
+          tagName: "Next"
+        }
+      ])
+    );
+
+    expect(parsed).toEqual(
+      createWorkflowDefinitionSchema([
+        {
+          type: "add_tag",
+          targetType: "item",
+          targetId: "item_1",
+          tagName: "Next"
+        }
+      ])
+    );
+  });
+
+  it("rejects unsupported non-local triggers and actions before enablement", () => {
+    const result = validateWorkflowDefinitionSchema({
+      kind: WORKFLOW_DEFINITION_KIND,
+      version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+      trigger: { type: "webhook" },
+      actions: [
+        {
+          type: "http_request",
+          url: "https://example.com/hook"
+        }
+      ]
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.canEnable).toBe(false);
+    expect(result.issues.map((issue) => issue.message)).toEqual([
+      "Unsupported or non-local workflow trigger: webhook.",
+      "Unsupported or non-local workflow action: http_request."
+    ]);
+  });
+
+  it("exposes only local previewable registered actions", () => {
+    expect(WORKFLOW_ACTION_REGISTRY).toHaveLength(4);
+    expect(WORKFLOW_ACTION_REGISTRY.every((entry) => entry.localOnly)).toBe(true);
+    expect(WORKFLOW_ACTION_REGISTRY.every((entry) => entry.previewable)).toBe(true);
+  });
+
+  it("builds editor skeleton state that disables invalid workflows", () => {
+    const state = createWorkflowEditorSkeletonState({
+      name: "Webhook draft",
+      definition: {
+        kind: WORKFLOW_DEFINITION_KIND,
+        version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+        trigger: { type: "webhook" },
+        actions: []
+      }
+    });
+
+    expect(state.canEnable).toBe(false);
+    expect(state.statusLabel).toBe("Cannot enable until validation issues are fixed");
+    expect(state.issues.map((issue) => issue.path)).toEqual([
+      "trigger.type",
+      "actions"
+    ]);
+  });
+});

@@ -13,6 +13,7 @@ export type AppRouteId =
   | "dashboard"
   | "timeline"
   | "calendar"
+  | "workflows"
   | "settings"
   | "trash";
 
@@ -136,6 +137,14 @@ export const appRoutes = [
     label: "Calendar",
     title: "Calendar",
     summary: "Month view of local dated tasks and list items.",
+    nav: true
+  },
+  {
+    id: "workflows",
+    path: "/workflows",
+    label: "Workflows",
+    title: "Workflows",
+    summary: "Versioned local-only manual workflow definitions and validation.",
     nav: true
   },
   {

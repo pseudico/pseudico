@@ -1,9 +1,36 @@
 import type { FeatureModuleContract } from "../featureModuleContract";
 
-export { WorkflowActionExecutor, parseWorkflowActions, stringifyWorkflowActions } from "./WorkflowActionExecutor";
-export { WorkflowService } from "./WorkflowService";
+export { WorkflowActionExecutor } from "./WorkflowActionExecutor";
 export type {
   WorkflowAction,
+  WorkflowActionRegistryEntry,
+  WorkflowDefinitionSchema,
+  WorkflowDefinitionSchemaV1,
+  WorkflowEditorSkeletonState,
+  WorkflowTrigger,
+  WorkflowTriggerRegistryEntry,
+  WorkflowValidationIssue,
+  WorkflowValidationResult
+} from "./WorkflowSchema";
+export {
+  WORKFLOW_ACTION_REGISTRY,
+  WORKFLOW_DEFINITION_KIND,
+  WORKFLOW_DEFINITION_SCHEMA_VERSION,
+  WORKFLOW_TRIGGER_REGISTRY,
+  createWorkflowDefinitionSchema,
+  createWorkflowEditorSkeletonState,
+  getWorkflowActionRegistryEntry,
+  getWorkflowTriggerRegistryEntry,
+  parseWorkflowActions,
+  parseWorkflowDefinitionSchema,
+  stringifyWorkflowActions,
+  stringifyWorkflowDefinitionSchema,
+  summarizeWorkflowAction,
+  validateWorkflowActions,
+  validateWorkflowDefinitionSchema
+} from "./WorkflowSchema";
+export { WorkflowService } from "./WorkflowService";
+export type {
   WorkflowActionExecutionContext,
   WorkflowActionExecutionResult,
   WorkflowActionPreview,

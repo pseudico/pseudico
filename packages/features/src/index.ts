@@ -317,10 +317,23 @@ export {
   validateTemplateJson
 } from "./templates";
 export {
+  WORKFLOW_ACTION_REGISTRY,
+  WORKFLOW_DEFINITION_KIND,
+  WORKFLOW_DEFINITION_SCHEMA_VERSION,
+  WORKFLOW_TRIGGER_REGISTRY,
   WorkflowActionExecutor,
   WorkflowService,
+  createWorkflowDefinitionSchema,
+  createWorkflowEditorSkeletonState,
+  getWorkflowActionRegistryEntry,
+  getWorkflowTriggerRegistryEntry,
   parseWorkflowActions,
+  parseWorkflowDefinitionSchema,
   stringifyWorkflowActions,
+  stringifyWorkflowDefinitionSchema,
+  summarizeWorkflowAction,
+  validateWorkflowActions,
+  validateWorkflowDefinitionSchema,
   workflowsModuleContract
 } from "./workflows";
 export { TabService, TabTemplateService, tabsModuleContract } from "./tabs";
@@ -871,6 +884,14 @@ export type {
   PreviewWorkflowRunInput,
   RunManualWorkflowInput,
   WorkflowAction,
+  WorkflowActionRegistryEntry,
+  WorkflowDefinitionSchema,
+  WorkflowDefinitionSchemaV1,
+  WorkflowEditorSkeletonState,
+  WorkflowTrigger,
+  WorkflowTriggerRegistryEntry,
+  WorkflowValidationIssue,
+  WorkflowValidationResult,
   WorkflowActionExecutionContext,
   WorkflowActionExecutionResult,
   WorkflowActionPreview,
@@ -926,5 +947,3 @@ export type {
   UnplanTaskInput
 } from "./today";
 export type { WorkspaceService } from "./workspace";
-
-

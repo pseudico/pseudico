@@ -10,36 +10,10 @@ import { ItemService } from "../items/ItemService";
 import { TagService } from "../metadata/TagService";
 import { TaskService } from "../tasks/TaskService";
 
-export type WorkflowAction =
-  | {
-      type: "add_tag";
-      targetType: "item";
-      targetId: string;
-      tagName: string;
-    }
-  | {
-      type: "set_category";
-      targetType: "item" | "container";
-      targetId: string;
-      categoryId: string | null;
-    }
-  | {
-      type: "move_item";
-      itemId: string;
-      targetContainerId: string;
-      targetContainerTabId?: string | null;
-    }
-  | {
-      type: "create_task";
-      containerId: string;
-      title: string;
-      body?: string | null;
-      categoryId?: string | null;
-      containerTabId?: string | null;
-      dueAt?: string | null;
-      startAt?: string | null;
-      priority?: number | null;
-    };
+import {
+  summarizeWorkflowAction,
+  type WorkflowAction
+} from "./WorkflowSchema";
 
 export type WorkflowActionPreview = {
   index: number;
@@ -92,7 +66,7 @@ export class WorkflowActionExecutor {
     return {
       index,
       actionType: action.type,
-      summary: summarizeAction(action),
+      summary: summarizeWorkflowAction(action),
       status: validation === null ? "ready" : "blocked",
       targetType: getActionTarget(action).targetType,
       targetId: getActionTarget(action).targetId,
@@ -132,7 +106,7 @@ export class WorkflowActionExecutor {
           index,
           actionType: action.type,
           status: "completed",
-          summary: summarizeAction(action),
+          summary: summarizeWorkflowAction(action),
           targetType: action.targetType,
           targetId: action.targetId
         };
@@ -168,7 +142,7 @@ export class WorkflowActionExecutor {
           index,
           actionType: action.type,
           status: "completed",
-          summary: summarizeAction(action),
+          summary: summarizeWorkflowAction(action),
           targetType: action.targetType,
           targetId: action.targetId
         };
@@ -191,7 +165,7 @@ export class WorkflowActionExecutor {
           index,
           actionType: action.type,
           status: "completed",
-          summary: summarizeAction(action),
+          summary: summarizeWorkflowAction(action),
           targetType: "item",
           targetId: result.item.id
         };
@@ -220,7 +194,7 @@ export class WorkflowActionExecutor {
           index,
           actionType: action.type,
           status: "completed",
-          summary: summarizeAction(action),
+          summary: summarizeWorkflowAction(action),
           targetType: "item",
           targetId: result.item.id
         };
@@ -300,80 +274,6 @@ export class WorkflowActionExecutor {
   }
 }
 
-export function isWorkflowAction(value: unknown): value is WorkflowAction {
-  if (!isRecord(value) || typeof value.type !== "string") {
-    return false;
-  }
-
-  switch (value.type) {
-    case "add_tag":
-      return (
-        value.targetType === "item" &&
-        isNonEmptyString(value.targetId) &&
-        isNonEmptyString(value.tagName)
-      );
-    case "set_category":
-      return (
-        (value.targetType === "item" || value.targetType === "container") &&
-        isNonEmptyString(value.targetId) &&
-        (value.categoryId === null || isNonEmptyString(value.categoryId))
-      );
-    case "move_item":
-      return (
-        isNonEmptyString(value.itemId) &&
-        isNonEmptyString(value.targetContainerId) &&
-        (value.targetContainerTabId === undefined ||
-          value.targetContainerTabId === null ||
-          isNonEmptyString(value.targetContainerTabId))
-      );
-    case "create_task":
-      return isNonEmptyString(value.containerId) && isNonEmptyString(value.title);
-    default:
-      return false;
-  }
-}
-
-export function parseWorkflowActions(actionsJson: string): WorkflowAction[] {
-  const parsed = JSON.parse(actionsJson) as unknown;
-
-  if (!Array.isArray(parsed) || parsed.length === 0) {
-    throw new Error("Workflow actions must be a non-empty array.");
-  }
-
-  if (!parsed.every(isWorkflowAction)) {
-    throw new Error("Workflow actions contain unsupported or invalid actions.");
-  }
-
-  return parsed;
-}
-
-export function stringifyWorkflowActions(actions: readonly WorkflowAction[]): string {
-  if (actions.length === 0) {
-    throw new Error("Workflow actions must include at least one action.");
-  }
-
-  if (!actions.every(isWorkflowAction)) {
-    throw new Error("Workflow actions contain unsupported or invalid actions.");
-  }
-
-  return JSON.stringify(actions);
-}
-
-function summarizeAction(action: WorkflowAction): string {
-  switch (action.type) {
-    case "add_tag":
-      return `Add tag "${action.tagName}" to item ${action.targetId}.`;
-    case "set_category":
-      return action.categoryId === null
-        ? `Clear category from ${action.targetType} ${action.targetId}.`
-        : `Set category ${action.categoryId} on ${action.targetType} ${action.targetId}.`;
-    case "move_item":
-      return `Move item ${action.itemId} to container ${action.targetContainerId}.`;
-    case "create_task":
-      return `Create task "${action.title}" in container ${action.containerId}.`;
-  }
-}
-
 function getActionTarget(action: WorkflowAction): {
   targetType: string;
   targetId: string | null;
@@ -387,12 +287,4 @@ function getActionTarget(action: WorkflowAction): {
     case "create_task":
       return { targetType: "item", targetId: null };
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isNonEmptyString(value: unknown): value is string {
-  return typeof value === "string" && value.trim().length > 0;
 }

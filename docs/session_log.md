@@ -3890,3 +3890,44 @@ Files changed:
 - docs/QA_SCRIPTS.md
 Open questions / risks: Full root checks still pending and may expose integration issues.
 Next actions: Run pnpm lint/typecheck/test/build; fix failures; open PR.
+
+## 2026-05-12T11:26:31.5288875+10:00
+Objective: Complete PSE-154 PR merge and next-ticket prep.
+Decisions made:
+- PR #143 merged with squash commit b216539; branch deleted locally/remotely.
+- PSE-154 moved Done; PSE-155 promoted as sole Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local unrelated untracked files remain: .playwright-mcp/, gh_2.92.0_windows_amd64.msi.
+Next actions: Start PSE-155 when requested; keep exactly one Codex Ready; monitor no active PRs.
+
+## 2026-05-12 11:49:32 +10:00
+Objective: Reconcile Linear/GitHub and start next Local Work OS ticket.
+Decisions made:
+- No PR Open or In Progress issues found; PSE-155 is the single Codex Ready issue.
+- Proceeding with PSE-155 and moving it to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Full ticket scope still to read from imported source.
+Next actions: Read ticket/docs; branch; implement scoped changes.
+
+## 2026-05-12 11:51:05 +10:00
+Objective: Plan PSE-155 implementation after reading ticket/docs/source.
+Decisions made:
+- Build versioned workflow definition schema, registry, validator, and preview gating in feature layer.
+- Add a small renderer editor skeleton for invalid workflow feedback without database/filesystem access.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing DB stores actions JSON only; avoid schema migration unless required.
+Next actions: Add workflow schema/registry/validator; add tests; wire UI skeleton.
+
+## 2026-05-12 12:03:26 +10:00
+Objective: Complete PSE-155 implementation and local verification.
+Decisions made:
+- Added pure workflow schema subpath to keep renderer free of DB/Node imports.
+- Preserved legacy action-array parsing while storing versioned schema envelopes.
+Files changed:
+- packages/features/src/workflows/WorkflowSchema.ts
+- apps/desktop/src/renderer/pages/WorkflowsPage.tsx
+Open questions / risks: CI still needs GitHub verification after PR push.
+Next actions: Commit, push, open PR; check CI/review; update Linear.
