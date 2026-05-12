@@ -1,10 +1,18 @@
 import {
   ContainerRepository,
   ItemRepository,
+  ListRepository,
+  TaskRepository,
   type ContainerRecord,
   type DatabaseConnection,
-  type ItemRecord
+  type ItemRecord,
+  type ListItemRecord,
+  type TaskRecord
 } from "@local-work-os/db";
+import {
+  isDateExpressionCandidate,
+  resolveDateExpression
+} from "@local-work-os/core";
 import type {
   WorkflowAction,
   WorkflowActionCondition
@@ -52,7 +60,7 @@ export type WorkflowConditionEvaluation = {
   missing: string[];
 };
 
-const VARIABLE_PATTERN = /\{\{\s*([A-Za-z0-9_.-]+)\s*\}\}/g;
+const VARIABLE_PATTERN = /\{\{\s*([^{}]+?)\s*\}\}/g;
 
 export class WorkflowVariableResolver {
   private readonly connection: DatabaseConnection;
@@ -219,6 +227,9 @@ export class WorkflowVariableResolver {
     path: string,
     context: WorkflowVariableResolutionContext
   ): string | null {
+    if (isDateExpressionCandidate(path)) {
+      return this.resolveDateExpressionVariable(path, context);
+    }
     if (path === "today") {
       return formatLocalDate(this.now());
     }
@@ -235,7 +246,18 @@ export class WorkflowVariableResolver {
       return context.triggerTargetType ?? null;
     }
     if (path.startsWith("item.")) {
-      return readItemValue(this.getContextItem(context), path.slice("item.".length));
+      const property = path.slice("item.".length);
+      if (this.getContextListItem(context) !== null) {
+        return readListItemValue(this.getContextListItem(context), property);
+      }
+      return readItemValue(
+        this.getContextItem(context),
+        this.getContextTask(context),
+        property
+      );
+    }
+    if (path.startsWith("listItem.")) {
+      return readListItemValue(this.getContextListItem(context), path.slice("listItem.".length));
     }
     if (path.startsWith("container.")) {
       return readContainerValue(this.getContextContainer(context), path.slice("container.".length));
@@ -254,6 +276,49 @@ export class WorkflowVariableResolver {
         context.previousActionResults?.[index],
         propertyParts.join(".")
       );
+    }
+
+    return null;
+  }
+
+  private resolveDateExpressionVariable(
+    expression: string,
+    context: WorkflowVariableResolutionContext
+  ): string | null {
+    try {
+      return resolveDateExpression(expression, {
+        referenceDate: this.now(),
+        resolveBaseDate: (basePath) => this.resolveDateBaseVariable(basePath, context)
+      }).value;
+    } catch {
+      return null;
+    }
+  }
+
+  private resolveDateBaseVariable(
+    path: string,
+    context: WorkflowVariableResolutionContext
+  ): string | null {
+    if (path === "today") {
+      return formatLocalDate(this.now());
+    }
+    if (path === "now") {
+      return this.now().toISOString();
+    }
+    if (path.startsWith("item.")) {
+      const property = path.slice("item.".length);
+      const listItem = this.getContextListItem(context);
+      if (listItem !== null) {
+        return readListItemValue(listItem, property);
+      }
+      return readItemValue(
+        this.getContextItem(context),
+        this.getContextTask(context),
+        property
+      );
+    }
+    if (path.startsWith("listItem.")) {
+      return readListItemValue(this.getContextListItem(context), path.slice("listItem.".length));
     }
 
     return null;
@@ -291,9 +356,40 @@ export class WorkflowVariableResolver {
 
     return container;
   }
+
+  private getContextTask(context: WorkflowVariableResolutionContext): TaskRecord | null {
+    const item = this.getContextItem(context);
+    if (item === null || item.type !== "task") {
+      return null;
+    }
+
+    const task = new TaskRepository(this.connection).getDetailsByItemId(item.id);
+    if (task === null || task.workspaceId !== context.workspaceId) {
+      return null;
+    }
+
+    return task;
+  }
+
+  private getContextListItem(context: WorkflowVariableResolutionContext): ListItemRecord | null {
+    if (context.triggerTargetType !== "list_item" || context.triggerTargetId === undefined) {
+      return null;
+    }
+
+    const listItem = new ListRepository(this.connection).getListItemById(context.triggerTargetId);
+    if (listItem === null || listItem.workspaceId !== context.workspaceId) {
+      return null;
+    }
+
+    return listItem;
+  }
 }
 
-function readItemValue(item: ItemRecord | null, property: string): string | null {
+function readItemValue(
+  item: ItemRecord | null,
+  task: TaskRecord | null,
+  property: string
+): string | null {
   if (item === null) {
     return null;
   }
@@ -319,6 +415,47 @@ function readItemValue(item: ItemRecord | null, property: string): string | null
       return item.createdAt;
     case "updatedAt":
       return item.updatedAt;
+    case "taskStatus":
+      return task?.taskStatus ?? null;
+    case "priority":
+      return task?.priority === null || task?.priority === undefined ? null : String(task.priority);
+    case "startAt":
+      return task?.startAt ?? null;
+    case "dueAt":
+      return task?.dueAt ?? null;
+    default:
+      return null;
+  }
+}
+
+function readListItemValue(listItem: ListItemRecord | null, property: string): string | null {
+  if (listItem === null) {
+    return null;
+  }
+
+  switch (property) {
+    case "id":
+      return listItem.id;
+    case "title":
+      return listItem.title;
+    case "body":
+      return listItem.body;
+    case "status":
+      return listItem.status;
+    case "listId":
+      return listItem.listId;
+    case "listItemParentId":
+      return listItem.listItemParentId;
+    case "startAt":
+      return listItem.startAt;
+    case "dueAt":
+      return listItem.dueAt;
+    case "completedAt":
+      return listItem.completedAt;
+    case "createdAt":
+      return listItem.createdAt;
+    case "updatedAt":
+      return listItem.updatedAt;
     default:
       return null;
   }

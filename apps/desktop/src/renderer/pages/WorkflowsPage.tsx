@@ -27,6 +27,7 @@ const draftExample: WorkflowDefinitionSchema = {
       type: "create_task",
       containerId: "{{item.containerId}}",
       title: "Review {{item.title}} on {{today}}",
+      dueAt: "{{item.dueAt+1w}}",
       condition: {
         left: "{{item.type}}",
         op: "eq",
@@ -71,7 +72,8 @@ export function WorkflowsPage(): React.JSX.Element {
           Only registered local triggers and actions can be enabled. Network,
           shell, webhook, cloud sync, and remote storage actions are rejected.
           Action inputs may use variables like {"{{item.title}}"}, {"{{container.name}}"},
-          {"{{today}}"}, and {"{{previous.targetId}}"}; missing variables block the preview.
+          {"{{today}}"}, {"{{today+3d}}"}, {"{{item.dueAt+1w}}"}, and
+          {"{{previous.targetId}}"}; missing or invalid date variables block the preview.
         </p>
         <div className="settings-grid compact-grid">
           <div>

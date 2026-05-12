@@ -7,6 +7,7 @@ import {
   SearchIndexRepository,
   TagRepository,
   TaskRepository,
+  ListRepository,
   WorkflowRepository,
   WorkspaceRepository,
   createDatabaseConnection,
@@ -17,6 +18,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   CategoryService,
   FileAttachmentService,
+  ListService,
   TagService,
   TaskService,
   WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
@@ -164,7 +166,7 @@ describe("WorkflowService", () => {
     ).toEqual(["workflow_created", "workflow_run_completed"]);
   });
 
-  it("rolls back action writes and records a failed run when an action fails", async () => {
+  it("blocks invalid action previews and records a failed run before writes", async () => {
     const task = await createTask("Prepare launch");
     const service = createWorkflowService();
     const workflow = await service.createWorkflow({
@@ -190,9 +192,11 @@ describe("WorkflowService", () => {
     const result = await service.runManualWorkflow({ workflowId: workflow.id });
 
     expect(result.run.status).toBe("failed");
-    expect(result.run.errorMessage).toContain(
-      "startAt must be before or equal to dueAt"
-    );
+    expect(result.run.errorMessage).toBe("Workflow preview has blocked actions.");
+    expect(JSON.parse(result.run.previewJson).actionPreviews[1]).toMatchObject({
+      status: "blocked",
+      reason: "Workflow task startAt must be before or equal to dueAt."
+    });
     expect(
       new TagRepository(connection).listTagsForTarget({
         workspaceId: "workspace_1",
@@ -385,6 +389,169 @@ describe("WorkflowService", () => {
       { token: "{{container.name}}", path: "container.name", value: "Launch Plan" },
       { token: "{{today}}", path: "today", value: "2026-05-02" }
     ]));
+  });
+
+  it("resolves date manipulation expressions for workflow-created task dates", async () => {
+    const workflowService = createWorkflowService();
+    const workflow = await workflowService.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Dated follow-up",
+      trigger: {
+        type: "item_created",
+        filters: {
+          textIncludes: "invoice"
+        }
+      },
+      actions: [
+        {
+          type: "create_task",
+          containerId: "{{item.containerId}}",
+          title: "Follow up {{item.title}}",
+          startAt: "{{today.startOfWeek}}",
+          dueAt: "{{item.dueAt+1w}}"
+        }
+      ]
+    });
+
+    await new TaskService({
+      connection,
+      idFactory,
+      now,
+      itemCreatedWorkflowHook: new WorkflowTriggerService({ connection, idFactory, now })
+    }).createTask({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Send invoice",
+      dueAt: "2026-05-10"
+    });
+
+    const tasks = new TaskRepository(connection).listByContainer("container_project_1");
+    expect(tasks.map((record) => ({
+      title: record.item.title,
+      startAt: record.task.startAt,
+      dueAt: record.task.dueAt
+    }))).toEqual([
+      {
+        title: "Send invoice",
+        startAt: null,
+        dueAt: "2026-05-10T00:00:00.000Z"
+      },
+      {
+        title: "Follow up Send invoice",
+        startAt: "2026-04-27T00:00:00.000Z",
+        dueAt: "2026-05-17T00:00:00.000Z"
+      }
+    ]);
+
+    const [run] = new WorkflowRepository(connection).listRunsForWorkflow(workflow.id);
+    const firstPreview = JSON.parse(run.previewJson).actionPreviews[0];
+    expect(firstPreview).toMatchObject({
+      actionType: "create_task",
+      status: "ready"
+    });
+    expect(firstPreview.interpolations).toEqual(expect.arrayContaining([
+      { token: "{{today.startOfWeek}}", path: "today.startOfWeek", value: "2026-04-27" },
+      { token: "{{item.dueAt+1w}}", path: "item.dueAt+1w", value: "2026-05-17" }
+    ]));
+  });
+
+  it("blocks preview when date expressions resolve to an invalid task date range", async () => {
+    const service = createWorkflowService();
+    const workflow = await service.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Invalid date math",
+      actions: [
+        {
+          type: "create_task",
+          containerId: "container_project_1",
+          title: "Impossible follow-up",
+          startAt: "{{today+1w}}",
+          dueAt: "{{today}}"
+        }
+      ]
+    });
+
+    const preview = await service.previewWorkflowRun({ workflowId: workflow.id });
+    const result = await service.runManualWorkflow({ workflowId: workflow.id });
+
+    expect(preview).toMatchObject({
+      canRun: false,
+      actionPreviews: [
+        {
+          actionType: "create_task",
+          status: "blocked",
+          reason: "Workflow task startAt must be before or equal to dueAt."
+        }
+      ]
+    });
+    expect(result.run).toMatchObject({
+      status: "failed",
+      errorMessage: "Workflow preview has blocked actions."
+    });
+    expect(new TaskRepository(connection).listByContainer("container_project_1")).toEqual([]);
+  });
+
+  it("uses list-item date variables when metadata workflows target list items", async () => {
+    const listService = new ListService({ connection, idFactory, now });
+    const list = await listService.createList({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Launch checklist"
+    });
+    const listItem = await listService.addListItem({
+      listId: list.item.id,
+      title: "Confirm launch copy",
+      dueAt: "2026-05-12"
+    });
+    const workflowService = createWorkflowService();
+    await workflowService.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "List item follow-up",
+      trigger: {
+        type: "tag_added",
+        filters: {
+          targetTypes: ["list_item"],
+          tagSlugs: ["waiting"]
+        }
+      },
+      actions: [
+        {
+          type: "create_task",
+          containerId: "container_project_1",
+          title: "Follow up {{listItem.title}}",
+          dueAt: "{{listItem.dueAt+2d}}"
+        }
+      ]
+    });
+
+    await new TagService({
+      connection,
+      idFactory,
+      now,
+      workflowHook: new WorkflowTriggerService({ connection, idFactory, now })
+    }).addTagToTarget({
+      workspaceId: "workspace_1",
+      targetType: "list_item",
+      targetId: listItem.listItem.id,
+      name: "Waiting"
+    });
+
+    expect(new ListRepository(connection).getListItemById(listItem.listItem.id)).toMatchObject({
+      dueAt: "2026-05-12T00:00:00.000Z"
+    });
+    expect(
+      new TaskRepository(connection)
+        .listByContainer("container_project_1")
+        .map((record) => ({
+          title: record.item.title,
+          dueAt: record.task.dueAt
+        }))
+    ).toEqual([
+      {
+        title: "Follow up Confirm launch copy",
+        dueAt: "2026-05-14T00:00:00.000Z"
+      }
+    ]);
   });
 
   it("fails safely when workflow variables are missing from the execution context", async () => {

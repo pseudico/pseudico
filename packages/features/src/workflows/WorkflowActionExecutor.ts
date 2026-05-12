@@ -392,6 +392,11 @@ export class WorkflowActionExecutor {
           return `Workflow task category was not found: ${action.categoryId}.`;
         }
 
+        const dateValidation = validateCreateTaskDates(action);
+        if (dateValidation !== null) {
+          return dateValidation;
+        }
+
         return null;
       }
     }
@@ -476,4 +481,42 @@ function isPreviewVariable(
   options: { allowPreviewVariables?: boolean }
 ): boolean {
   return options.allowPreviewVariables === true && value.startsWith(WORKFLOW_PREVIEW_OUTPUT_PREFIX);
+}
+
+function validateCreateTaskDates(action: Extract<WorkflowAction, { type: "create_task" }>): string | null {
+  const startAt = parseWorkflowDate(action.startAt, "startAt");
+  if (typeof startAt === "string") {
+    return startAt;
+  }
+
+  const dueAt = parseWorkflowDate(action.dueAt, "dueAt");
+  if (typeof dueAt === "string") {
+    return dueAt;
+  }
+
+  if (startAt !== null && dueAt !== null && startAt.getTime() > dueAt.getTime()) {
+    return "Workflow task startAt must be before or equal to dueAt.";
+  }
+
+  return null;
+}
+
+function parseWorkflowDate(
+  value: string | null | undefined,
+  fieldName: "startAt" | "dueAt"
+): Date | string | null {
+  if (value === undefined || value === null || value.trim().length === 0) {
+    return null;
+  }
+
+  const normalized = /^\d{4}-\d{2}-\d{2}$/.test(value.trim())
+    ? `${value.trim()}T00:00:00.000Z`
+    : value.trim();
+  const date = new Date(normalized);
+
+  if (Number.isNaN(date.getTime())) {
+    return `Workflow task ${fieldName} must resolve to a valid date or ISO timestamp.`;
+  }
+
+  return date;
 }
