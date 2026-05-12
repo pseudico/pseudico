@@ -23,6 +23,15 @@ import {
 // Does not own direct renderer filesystem access.
 export type FileAttachmentServiceIdFactory = (prefix: string) => string;
 
+export type FileImportedWorkflowHook = {
+  handleFileImported(input: {
+    workspaceId: string;
+    itemId: string;
+    attachmentId: string;
+    actorType?: ActivityActorType;
+  }): Promise<unknown>;
+};
+
 export type CopiedAttachmentFileInput = {
   attachmentId?: string;
   originalName: string;
@@ -85,11 +94,13 @@ export class FileAttachmentService {
   private readonly idFactory: FileAttachmentServiceIdFactory;
   private readonly now: () => Date;
   private readonly transactionService: TransactionService;
+  private readonly fileImportedWorkflowHook: FileImportedWorkflowHook | null;
 
   constructor(input: {
     connection: DatabaseConnection;
     idFactory?: FileAttachmentServiceIdFactory;
     now?: () => Date;
+    fileImportedWorkflowHook?: FileImportedWorkflowHook;
   }) {
     this.connection = input.connection;
     this.idFactory = input.idFactory ?? ((prefix) => createLocalId(prefix));
@@ -97,6 +108,7 @@ export class FileAttachmentService {
     this.transactionService = new TransactionService({
       connection: input.connection
     });
+    this.fileImportedWorkflowHook = input.fileImportedWorkflowHook ?? null;
   }
 
   async attachFileToContainer(
@@ -104,7 +116,7 @@ export class FileAttachmentService {
   ): Promise<FileAttachmentMutationResult> {
     this.validateAttachFileToContainerInput(input);
 
-    return await this.transactionService.runInTransaction(() => {
+    const result = await this.transactionService.runInTransaction(() => {
       const timestamp = createIsoTimestamp(this.now());
       const itemRepository = new ItemRepository(this.connection);
       const sortOrderService = new SortOrderService({
@@ -158,6 +170,14 @@ export class FileAttachmentService {
         attachmentSearchRecord
       };
     });
+    await this.fileImportedWorkflowHook?.handleFileImported({
+      workspaceId: result.item.workspaceId,
+      itemId: result.item.id,
+      attachmentId: result.attachment.id,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+
+    return result;
   }
 
   async attachFileToItem(
@@ -165,7 +185,7 @@ export class FileAttachmentService {
   ): Promise<FileAttachmentMutationResult> {
     this.validateAttachFileToItemInput(input);
 
-    return await this.transactionService.runInTransaction(() => {
+    const result = await this.transactionService.runInTransaction(() => {
       const timestamp = createIsoTimestamp(this.now());
       const item = new ItemRepository(this.connection).getById(input.itemId);
 
@@ -205,6 +225,14 @@ export class FileAttachmentService {
         attachmentSearchRecord
       };
     });
+    await this.fileImportedWorkflowHook?.handleFileImported({
+      workspaceId: result.item.workspaceId,
+      itemId: result.item.id,
+      attachmentId: result.attachment.id,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+
+    return result;
   }
 
   listAttachmentsForItem(input: {

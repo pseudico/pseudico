@@ -1,6 +1,6 @@
 import type { DatabaseConnection } from "../connection/createDatabaseConnection";
 
-export type WorkflowTriggerType = "manual" | "item_created";
+export type WorkflowTriggerType = "manual" | "item_created" | "file_imported";
 export type WorkflowDefinitionStatus = "enabled" | "disabled";
 export type WorkflowRunStatus = "running" | "completed" | "failed";
 

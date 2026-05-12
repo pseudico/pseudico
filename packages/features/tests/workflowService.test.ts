@@ -15,6 +15,7 @@ import {
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  FileAttachmentService,
   TaskService,
   WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
   WorkflowService,
@@ -364,6 +365,144 @@ describe("WorkflowService", () => {
         .listByContainer("container_project_1")
         .map((record) => record.item.title)
     ).toEqual(["Invoice arrived", "Review invoice trail"]);
+  });
+
+  it("runs file-imported workflows when extension, MIME, name, size, and container filters match", async () => {
+    const workflowService = createWorkflowService();
+    const workflow = await workflowService.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Receipt triage",
+      trigger: {
+        type: "file_imported",
+        filters: {
+          extensions: [".PDF"],
+          mimeTypes: ["application/pdf"],
+          nameIncludes: "receipt",
+          minSizeBytes: 100,
+          maxSizeBytes: 5_000,
+          containerIds: ["container_project_1"]
+        }
+      },
+      actions: [
+        {
+          type: "add_tag",
+          targetType: "item",
+          targetId: WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
+          tagName: "Receipt"
+        },
+        {
+          type: "set_category",
+          targetType: "item",
+          targetId: WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
+          categoryId: "category_1"
+        },
+        {
+          type: "create_task",
+          containerId: "container_project_1",
+          title: "Review imported receipt"
+        }
+      ]
+    });
+
+    const result = await new FileAttachmentService({
+      connection,
+      idFactory,
+      now,
+      fileImportedWorkflowHook: new WorkflowTriggerService({ connection, idFactory, now })
+    }).attachFileToContainer({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      copiedFile: {
+        attachmentId: "attachment_receipt",
+        originalName: "May Receipt.PDF",
+        storedName: "May Receipt.PDF",
+        storagePath: "attachments/2026/05/attachment_receipt/May Receipt.PDF",
+        sizeBytes: 512,
+        checksum: "c".repeat(64),
+        mimeType: "application/pdf"
+      }
+    });
+
+    expect(
+      new TagRepository(connection)
+        .listTagsForTarget({
+          workspaceId: "workspace_1",
+          targetType: "item",
+          targetId: result.item.id
+        })
+        .map((tag) => tag.slug)
+    ).toEqual(["receipt"]);
+    expect(new ItemRepository(connection).getById(result.item.id)).toMatchObject({
+      categoryId: "category_1"
+    });
+    expect(
+      new TaskRepository(connection)
+        .listByContainer("container_project_1")
+        .map((record) => record.item.title)
+    ).toEqual(["Review imported receipt"]);
+
+    const [run] = new WorkflowRepository(connection).listRunsForWorkflow(workflow.id);
+    expect(run).toMatchObject({
+      workflowDefinitionId: workflow.id,
+      triggerType: "file_imported",
+      status: "completed"
+    });
+    expect(JSON.parse(run.previewJson)).toMatchObject({
+      triggerType: "file_imported",
+      triggerItemId: result.item.id,
+      triggerAttachmentId: "attachment_receipt",
+      file: {
+        originalName: "May Receipt.PDF",
+        extension: "pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 512,
+        containerId: "container_project_1"
+      }
+    });
+  });
+
+  it("skips file-imported workflows when file metadata filters do not match", async () => {
+    const workflowService = createWorkflowService();
+    const workflow = await workflowService.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "PDF receipts",
+      trigger: {
+        type: "file_imported",
+        filters: {
+          extensions: ["pdf"],
+          nameIncludes: "receipt"
+        }
+      },
+      actions: [
+        {
+          type: "add_tag",
+          targetType: "item",
+          targetId: WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
+          tagName: "Receipt"
+        }
+      ]
+    });
+
+    await new FileAttachmentService({
+      connection,
+      idFactory,
+      now,
+      fileImportedWorkflowHook: new WorkflowTriggerService({ connection, idFactory, now })
+    }).attachFileToContainer({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      copiedFile: {
+        attachmentId: "attachment_image",
+        originalName: "Whiteboard.png",
+        storedName: "Whiteboard.png",
+        storagePath: "attachments/2026/05/attachment_image/Whiteboard.png",
+        sizeBytes: 512,
+        checksum: "d".repeat(64),
+        mimeType: "image/png"
+      }
+    });
+
+    expect(new WorkflowRepository(connection).listRunsForWorkflow(workflow.id)).toEqual([]);
   });
 });
 

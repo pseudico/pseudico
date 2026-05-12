@@ -8,6 +8,7 @@ export type {
   WorkflowDefinitionSchema,
   WorkflowDefinitionSchemaV1,
   WorkflowEditorSkeletonState,
+  WorkflowFileImportedTriggerFilters,
   WorkflowItemCreatedTriggerFilters,
   WorkflowTrigger,
   WorkflowTriggerRegistryEntry,
@@ -40,7 +41,10 @@ export type {
 } from "./WorkflowActionExecutor";
 export type {
   ItemCreatedWorkflowEvent,
-  ItemCreatedWorkflowRunResult
+  ItemCreatedWorkflowRunResult,
+  FileImportedWorkflowEvent,
+  FileImportedWorkflowRunResult,
+  TriggeredWorkflowRunResult
 } from "./WorkflowTriggerService";
 export type {
   CreateWorkflowInput,

@@ -15,6 +15,7 @@ import { calendarFeedsSql } from "./0014_calendar_feeds";
 import { dashboardWidgetLayoutTypesSql } from "./0015_dashboard_widget_layout_types";
 import { dashboardExtraWidgetTypesSql } from "./0016_dashboard_extra_widget_types";
 import { workflowItemCreatedTriggerSql } from "./0017_workflow_item_created_trigger";
+import { workflowFileImportedTriggerSql } from "./0018_workflow_file_imported_trigger";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -119,6 +120,12 @@ export const migrations: MigrationDefinition[] = [
     name: "workflow_item_created_trigger",
     sql: workflowItemCreatedTriggerSql,
     checksum: "pse-156-workflow-item-created-trigger-v1"
+  },
+  {
+    version: 18,
+    name: "workflow_file_imported_trigger",
+    sql: workflowFileImportedTriggerSql,
+    checksum: "pse-157-workflow-file-imported-trigger-v1"
   }
 ];
 
