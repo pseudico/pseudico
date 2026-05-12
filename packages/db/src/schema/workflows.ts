@@ -25,7 +25,7 @@ export const workflowDefinitions = sqliteTable(
       table.deletedAt,
       table.updatedAt
     ),
-    check("ck_workflow_definitions_trigger_type", sql`${table.triggerType} in ('manual', 'item_created')`),
+    check("ck_workflow_definitions_trigger_type", sql`${table.triggerType} in ('manual', 'item_created', 'file_imported')`),
     check("ck_workflow_definitions_status", sql`${table.status} in ('enabled', 'disabled')`)
   ]
 );
@@ -59,7 +59,7 @@ export const workflowRuns = sqliteTable(
       table.workflowDefinitionId,
       table.createdAt
     ),
-    check("ck_workflow_runs_trigger_type", sql`${table.triggerType} in ('manual', 'item_created')`),
+    check("ck_workflow_runs_trigger_type", sql`${table.triggerType} in ('manual', 'item_created', 'file_imported')`),
     check("ck_workflow_runs_status", sql`${table.status} in ('running', 'completed', 'failed')`)
   ]
 );

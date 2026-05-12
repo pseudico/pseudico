@@ -2,10 +2,12 @@ import {
   ActivityAction,
   createIsoTimestamp,
   createLocalId,
+  type AttachmentRecord,
   type ActivityActorType
 } from "@local-work-os/core";
 import {
   ActivityLogService,
+  AttachmentRepository,
   ItemRepository,
   TagRepository,
   TransactionService,
@@ -24,6 +26,7 @@ import {
 import {
   parseWorkflowDefinitionSchema,
   type WorkflowAction,
+  type WorkflowFileImportedTriggerFilters,
   type WorkflowItemCreatedTriggerFilters
 } from "./WorkflowSchema";
 
@@ -34,12 +37,23 @@ export type ItemCreatedWorkflowEvent = {
   triggerDepth?: number;
 };
 
-export type ItemCreatedWorkflowRunResult = {
+export type FileImportedWorkflowEvent = {
+  workspaceId: string;
+  itemId: string;
+  attachmentId: string;
+  actorType?: ActivityActorType;
+  triggerDepth?: number;
+};
+
+export type TriggeredWorkflowRunResult = {
   workflow: WorkflowDefinitionRecord;
   run: WorkflowRunRecord;
   matched: boolean;
   actionResults: WorkflowActionExecutionResult[];
 };
+
+export type ItemCreatedWorkflowRunResult = TriggeredWorkflowRunResult;
+export type FileImportedWorkflowRunResult = TriggeredWorkflowRunResult;
 
 export class WorkflowTriggerService {
   readonly module = "workflow-triggers";
@@ -95,6 +109,67 @@ export class WorkflowTriggerService {
         await this.runTriggeredWorkflow({
           workflow,
           item,
+          triggerType: "item_created",
+          triggerLabel: "item-created",
+          actions: definition.actions,
+          actorType: event.actorType ?? "system"
+        })
+      );
+    }
+
+    return results;
+  }
+
+  async handleFileImported(
+    event: FileImportedWorkflowEvent
+  ): Promise<FileImportedWorkflowRunResult[]> {
+    validateNonEmptyString(event.workspaceId, "workspaceId");
+    validateNonEmptyString(event.itemId, "itemId");
+    validateNonEmptyString(event.attachmentId, "attachmentId");
+
+    if ((event.triggerDepth ?? 0) > 0) {
+      return [];
+    }
+
+    const item = new ItemRepository(this.connection).getById(event.itemId);
+    if (item === null || item.workspaceId !== event.workspaceId) {
+      throw new Error(`Imported file item was not found: ${event.itemId}.`);
+    }
+
+    const attachment = new AttachmentRepository(this.connection).getById(
+      event.attachmentId
+    );
+    if (
+      attachment === null ||
+      attachment.workspaceId !== event.workspaceId ||
+      attachment.itemId !== event.itemId
+    ) {
+      throw new Error(`Imported attachment was not found: ${event.attachmentId}.`);
+    }
+
+    const workflows = new WorkflowRepository(this.connection).listDefinitions({
+      workspaceId: event.workspaceId,
+      status: "enabled",
+      triggerType: "file_imported"
+    });
+    const results: FileImportedWorkflowRunResult[] = [];
+
+    for (const workflow of workflows) {
+      const definition = parseWorkflowDefinitionSchema(workflow.actionsJson);
+      if (definition.trigger.type !== "file_imported") {
+        continue;
+      }
+      if (!this.matchesFileImportedFilters(item, attachment, definition.trigger.filters)) {
+        continue;
+      }
+
+      results.push(
+        await this.runTriggeredWorkflow({
+          workflow,
+          item,
+          attachment,
+          triggerType: "file_imported",
+          triggerLabel: "file-imported",
           actions: definition.actions,
           actorType: event.actorType ?? "system"
         })
@@ -107,9 +182,12 @@ export class WorkflowTriggerService {
   private async runTriggeredWorkflow(input: {
     workflow: WorkflowDefinitionRecord;
     item: ItemRecord;
+    attachment?: AttachmentRecord;
+    triggerType: "item_created" | "file_imported";
+    triggerLabel: "item-created" | "file-imported";
     actions: WorkflowAction[];
     actorType: ActivityActorType;
-  }): Promise<ItemCreatedWorkflowRunResult> {
+  }): Promise<TriggeredWorkflowRunResult> {
     const preview = this.previewTriggeredWorkflow(input);
 
     if (!preview.canRun) {
@@ -129,7 +207,7 @@ export class WorkflowTriggerService {
           id: this.idFactory("workflow_run"),
           workspaceId: input.workflow.workspaceId,
           workflowDefinitionId: input.workflow.id,
-          triggerType: "item_created",
+          triggerType: input.triggerType,
           status: "running",
           previewJson: JSON.stringify(preview),
           startedAt: timestamp
@@ -166,7 +244,7 @@ export class WorkflowTriggerService {
         this.logWorkflowEvent({
           workflow: input.workflow,
           action: ActivityAction.workflowRunCompleted,
-          summary: `Ran item-created workflow "${input.workflow.name}" for ${input.item.type} "${input.item.title}".`,
+          summary: `Ran ${input.triggerLabel} workflow "${input.workflow.name}" for ${input.item.type} "${input.item.title}".`,
           before: run,
           after: completedRun,
           timestamp: completedAt
@@ -192,12 +270,22 @@ export class WorkflowTriggerService {
   private previewTriggeredWorkflow(input: {
     workflow: WorkflowDefinitionRecord;
     item: ItemRecord;
+    attachment?: AttachmentRecord;
+    triggerType: "item_created" | "file_imported";
     actions: WorkflowAction[];
   }): {
     workspaceId: string;
     workflowId: string;
-    triggerType: "item_created";
+    triggerType: "item_created" | "file_imported";
     triggerItemId: string;
+    triggerAttachmentId?: string;
+    file?: {
+      originalName: string;
+      mimeType: string | null;
+      sizeBytes: number;
+      extension: string | null;
+      containerId: string;
+    };
     canRun: boolean;
     actionPreviews: WorkflowActionPreview[];
   } {
@@ -221,8 +309,20 @@ export class WorkflowTriggerService {
     return {
       workspaceId: input.workflow.workspaceId,
       workflowId: input.workflow.id,
-      triggerType: "item_created",
+      triggerType: input.triggerType,
       triggerItemId: input.item.id,
+      ...(input.attachment === undefined
+        ? {}
+        : {
+            triggerAttachmentId: input.attachment.id,
+            file: {
+              originalName: input.attachment.originalName,
+              mimeType: input.attachment.mimeType,
+              sizeBytes: input.attachment.sizeBytes,
+              extension: getFileExtension(input.attachment.originalName),
+              containerId: input.item.containerId
+            }
+          }),
       canRun: actionPreviews.every((preview) => preview.status === "ready"),
       actionPreviews
     };
@@ -234,7 +334,9 @@ export class WorkflowTriggerService {
     preview: unknown;
     actionResults: WorkflowActionExecutionResult[];
     error: unknown;
-  }): ItemCreatedWorkflowRunResult {
+    triggerType: "item_created" | "file_imported";
+    triggerLabel: "item-created" | "file-imported";
+  }): TriggeredWorkflowRunResult {
     const timestamp = createIsoTimestamp(this.now());
     const message =
       input.error instanceof Error
@@ -244,7 +346,7 @@ export class WorkflowTriggerService {
       id: this.idFactory("workflow_run"),
       workspaceId: input.workflow.workspaceId,
       workflowDefinitionId: input.workflow.id,
-      triggerType: "item_created",
+      triggerType: input.triggerType,
       status: "failed",
       previewJson: JSON.stringify(input.preview),
       actionResultsJson: JSON.stringify(input.actionResults),
@@ -256,7 +358,7 @@ export class WorkflowTriggerService {
     this.logWorkflowEvent({
       workflow: input.workflow,
       action: ActivityAction.workflowRunFailed,
-      summary: `Item-created workflow "${input.workflow.name}" failed for ${input.item.type} "${input.item.title}": ${message}`,
+      summary: `${capitalize(input.triggerLabel)} workflow "${input.workflow.name}" failed for ${input.item.type} "${input.item.title}": ${message}`,
       before: null,
       after: run,
       timestamp
@@ -321,6 +423,70 @@ export class WorkflowTriggerService {
     return true;
   }
 
+  private matchesFileImportedFilters(
+    item: ItemRecord,
+    attachment: AttachmentRecord,
+    filters: WorkflowFileImportedTriggerFilters | undefined
+  ): boolean {
+    if (filters === undefined) {
+      return true;
+    }
+
+    if (
+      filters.containerIds !== undefined &&
+      !filters.containerIds.includes(item.containerId)
+    ) {
+      return false;
+    }
+
+    if (filters.extensions !== undefined) {
+      const extension = getFileExtension(attachment.originalName);
+      if (
+        extension === null ||
+        !filters.extensions
+          .map((value) => normalizeExtension(value))
+          .includes(extension)
+      ) {
+        return false;
+      }
+    }
+
+    if (filters.mimeTypes !== undefined) {
+      const mimeType = attachment.mimeType?.toLocaleLowerCase() ?? null;
+      if (
+        mimeType === null ||
+        !filters.mimeTypes
+          .map((value) => value.trim().toLocaleLowerCase())
+          .includes(mimeType)
+      ) {
+        return false;
+      }
+    }
+
+    if (filters.nameIncludes !== undefined) {
+      const needle = filters.nameIncludes.trim().toLocaleLowerCase();
+      if (!attachment.originalName.toLocaleLowerCase().includes(needle)) {
+        return false;
+      }
+    }
+
+    if (
+      filters.minSizeBytes !== undefined &&
+      attachment.sizeBytes < filters.minSizeBytes
+    ) {
+      return false;
+    }
+
+    if (
+      filters.maxSizeBytes !== undefined &&
+      attachment.sizeBytes > filters.maxSizeBytes
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
   private logWorkflowEvent(input: {
     workflow: WorkflowDefinitionRecord;
     action: typeof ActivityAction[keyof typeof ActivityAction];
@@ -344,6 +510,27 @@ export class WorkflowTriggerService {
       timestamp: input.timestamp
     });
   }
+}
+
+function getFileExtension(fileName: string): string | null {
+  const trimmed = fileName.trim();
+  const lastSeparator = Math.max(trimmed.lastIndexOf("/"), trimmed.lastIndexOf("\\"));
+  const baseName = trimmed.slice(lastSeparator + 1);
+  const dotIndex = baseName.lastIndexOf(".");
+
+  if (dotIndex <= 0 || dotIndex === baseName.length - 1) {
+    return null;
+  }
+
+  return normalizeExtension(baseName.slice(dotIndex + 1));
+}
+
+function normalizeExtension(value: string): string {
+  return value.trim().replace(/^\.+/, "").toLocaleLowerCase();
+}
+
+function capitalize(value: string): string {
+  return `${value.charAt(0).toLocaleUpperCase()}${value.slice(1)}`;
 }
 
 function validateNonEmptyString(value: string, name: string): void {

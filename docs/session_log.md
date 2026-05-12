@@ -3984,3 +3984,44 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI must confirm on GitHub.
 Next actions: Commit, push branch, open PR.
+
+## 2026-05-12T14:22:00.7693830+10:00
+Objective: Finish PSE-156 and prepare next ticket.
+Decisions made:
+- PR #145 merged via squash at 2a7e107.
+- PSE-156 moved to Done; PSE-157 promoted to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Session log has post-merge local entry not included in PR #145.
+Next actions: Start PSE-157 in next run.
+## 2026-05-12T14:32:40.1447115+10:00
+Objective: Reconcile active work and start PSE-157.
+Decisions made:
+- Found no PR Open or In Progress Linear issues; selected sole Codex Ready issue PSE-157.
+- Pulled main after sandbox git retry and moved PSE-157 to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked .playwright-mcp/ and gh installer left untouched.
+Next actions: Create issue branch; read ticket/docs/source; implement scoped trigger.
+## 2026-05-12T14:39:01.7768955+10:00
+Objective: Implement PSE-157 file-imported workflow trigger.
+Decisions made:
+- Added file_imported trigger schema, DB trigger type migration, and workflow trigger handling.
+- Wired file attachment imports to emit trigger events after successful local attachment writes.
+Files changed:
+- packages/features/src/workflows/*
+- packages/features/src/files/FileAttachmentService.ts
+- packages/db/src/**
+- packages/features/tests/*
+- docs/session_log.md
+Open questions / risks: Need checks to confirm migration and trigger behavior across full workspace.
+Next actions: Run targeted tests; run lint/typecheck/test/build; fix failures.
+## 2026-05-12T14:43:39.0795289+10:00
+Objective: Verify PSE-157 locally.
+Decisions made:
+- Targeted feature tests, lint, typecheck, full test, and build passed.
+- Sandbox EPERM on Vitest/build was resolved with approved escalated reruns.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI must confirm on GitHub after PR opens.
+Next actions: Commit and push branch; open ready PR; update Linear.

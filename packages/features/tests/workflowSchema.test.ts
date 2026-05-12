@@ -87,6 +87,61 @@ describe("workflow schema and registry", () => {
     expect(WORKFLOW_ACTION_REGISTRY.every((entry) => entry.previewable)).toBe(true);
   });
 
+  it("accepts local file-imported triggers with file metadata filters", () => {
+    const result = validateWorkflowDefinitionSchema({
+      kind: WORKFLOW_DEFINITION_KIND,
+      version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+      trigger: {
+        type: "file_imported",
+        filters: {
+          extensions: [".pdf"],
+          mimeTypes: ["application/pdf"],
+          nameIncludes: "receipt",
+          minSizeBytes: 1,
+          maxSizeBytes: 1_000_000,
+          containerIds: ["container_finance"]
+        }
+      },
+      actions: [
+        {
+          type: "add_tag",
+          targetType: "item",
+          targetId: "$trigger.itemId",
+          tagName: "Receipt"
+        }
+      ]
+    });
+
+    expect(result.valid).toBe(true);
+    expect(result.canEnable).toBe(true);
+  });
+
+  it("rejects invalid file-imported size filters", () => {
+    const result = validateWorkflowDefinitionSchema({
+      kind: WORKFLOW_DEFINITION_KIND,
+      version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+      trigger: {
+        type: "file_imported",
+        filters: {
+          minSizeBytes: 20,
+          maxSizeBytes: 10
+        }
+      },
+      actions: [
+        {
+          type: "create_task",
+          containerId: "container_1",
+          title: "Follow up"
+        }
+      ]
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.issues.map((issue) => issue.path)).toContain(
+      "trigger.filters.maxSizeBytes"
+    );
+  });
+
   it("builds editor skeleton state that disables invalid workflows", () => {
     const state = createWorkflowEditorSkeletonState({
       name: "Webhook draft",

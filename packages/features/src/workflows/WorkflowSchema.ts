@@ -9,6 +9,15 @@ export type WorkflowItemCreatedTriggerFilters = {
   containerIds?: string[];
 };
 
+export type WorkflowFileImportedTriggerFilters = {
+  extensions?: string[];
+  mimeTypes?: string[];
+  nameIncludes?: string;
+  minSizeBytes?: number;
+  maxSizeBytes?: number;
+  containerIds?: string[];
+};
+
 export type WorkflowTrigger =
   | {
       type: "manual";
@@ -16,6 +25,10 @@ export type WorkflowTrigger =
   | {
       type: "item_created";
       filters?: WorkflowItemCreatedTriggerFilters;
+    }
+  | {
+      type: "file_imported";
+      filters?: WorkflowFileImportedTriggerFilters;
     };
 
 export type WorkflowAction =
@@ -113,6 +126,12 @@ export const WORKFLOW_TRIGGER_REGISTRY: readonly WorkflowTriggerRegistryEntry[] 
     type: "item_created",
     label: "Item created",
     description: "Run locally after a new item matches configured item filters.",
+    localOnly: true
+  },
+  {
+    type: "file_imported",
+    label: "File imported",
+    description: "Run locally after an imported file matches file metadata filters.",
     localOnly: true
   }
 ] as const;
@@ -237,6 +256,8 @@ export function validateWorkflowDefinitionSchema(value: unknown): WorkflowValida
     issues.push(error("trigger.type", `Unsupported or non-local workflow trigger: ${value.trigger.type}.`));
   } else if (value.trigger.type === "item_created") {
     issues.push(...validateItemCreatedTrigger(value.trigger, "trigger"));
+  } else if (value.trigger.type === "file_imported") {
+    issues.push(...validateFileImportedTrigger(value.trigger, "trigger"));
   }
 
   if (!Array.isArray(value.actions) || value.actions.length === 0) {
@@ -395,6 +416,53 @@ function validateItemCreatedTrigger(
   return issues;
 }
 
+function validateFileImportedTrigger(
+  value: Record<string, unknown>,
+  path: string
+): WorkflowValidationIssue[] {
+  const issues: WorkflowValidationIssue[] = [];
+
+  if (value.filters === undefined) {
+    return issues;
+  }
+
+  if (!isRecord(value.filters)) {
+    return [error(`${path}.filters`, "File-imported trigger filters must be an object.")];
+  }
+
+  requireOptionalStringArray(value.filters.extensions, `${path}.filters.extensions`, issues);
+  requireOptionalStringArray(value.filters.mimeTypes, `${path}.filters.mimeTypes`, issues);
+  requireOptionalStringArray(value.filters.containerIds, `${path}.filters.containerIds`, issues);
+
+  if (
+    value.filters.nameIncludes !== undefined &&
+    !isNonEmptyString(value.filters.nameIncludes)
+  ) {
+    issues.push(error(`${path}.filters.nameIncludes`, "Must be a non-empty string when provided."));
+  }
+
+  requireOptionalNonNegativeInteger(
+    value.filters.minSizeBytes,
+    `${path}.filters.minSizeBytes`,
+    issues
+  );
+  requireOptionalNonNegativeInteger(
+    value.filters.maxSizeBytes,
+    `${path}.filters.maxSizeBytes`,
+    issues
+  );
+
+  if (
+    typeof value.filters.minSizeBytes === "number" &&
+    typeof value.filters.maxSizeBytes === "number" &&
+    value.filters.minSizeBytes > value.filters.maxSizeBytes
+  ) {
+    issues.push(error(`${path}.filters.maxSizeBytes`, "Must be greater than or equal to minSizeBytes."));
+  }
+
+  return issues;
+}
+
 function requireOptionalStringArray(
   value: unknown,
   path: string,
@@ -406,6 +474,20 @@ function requireOptionalStringArray(
 
   if (!Array.isArray(value) || value.some((entry) => !isNonEmptyString(entry))) {
     issues.push(error(path, "Must be an array of non-empty strings when provided."));
+  }
+}
+
+function requireOptionalNonNegativeInteger(
+  value: unknown,
+  path: string,
+  issues: WorkflowValidationIssue[]
+): void {
+  if (value === undefined) {
+    return;
+  }
+
+  if (!Number.isInteger(value) || (value as number) < 0) {
+    issues.push(error(path, "Must be a non-negative integer when provided."));
   }
 }
 
