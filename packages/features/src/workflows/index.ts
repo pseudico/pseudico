@@ -1,6 +1,10 @@
 import type { FeatureModuleContract } from "../featureModuleContract";
 
-export { WorkflowActionExecutor, WORKFLOW_TRIGGER_ITEM_ID_TOKEN } from "./WorkflowActionExecutor";
+export {
+  WorkflowActionExecutor,
+  WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
+  WORKFLOW_TRIGGER_TARGET_ID_TOKEN
+} from "./WorkflowActionExecutor";
 export { WorkflowTriggerService } from "./WorkflowTriggerService";
 export type {
   WorkflowAction,
@@ -10,6 +14,7 @@ export type {
   WorkflowEditorSkeletonState,
   WorkflowFileImportedTriggerFilters,
   WorkflowItemCreatedTriggerFilters,
+  WorkflowMetadataTriggerFilters,
   WorkflowTrigger,
   WorkflowTriggerRegistryEntry,
   WorkflowValidationIssue,
@@ -44,6 +49,9 @@ export type {
   ItemCreatedWorkflowRunResult,
   FileImportedWorkflowEvent,
   FileImportedWorkflowRunResult,
+  TagWorkflowEvent,
+  CategoryAssignedWorkflowEvent,
+  MetadataWorkflowRunResult,
   TriggeredWorkflowRunResult
 } from "./WorkflowTriggerService";
 export type {

@@ -110,8 +110,9 @@ object graph:
   placeholders, contact fields, copied tag/category references, and relative day
   offsets for dated tasks/list rows.
 - `workflow_definitions` and `workflow_runs` store local workflow definitions,
-  trigger type (`manual`, `item_created`, or `file_imported`), preview
-  snapshots, action result logs, and failure details.
+  trigger type (`manual`, `item_created`, `file_imported`, `tag_added`,
+  `tag_removed`, or `category_assigned`), preview snapshots, action result logs,
+  and failure details.
 - `recurrence_rules` stores narrow local task recurrence definitions for daily
   and weekly/custom-weekday repeating tasks.
 - `activity_log` records the activity trail used by later write services.
@@ -166,8 +167,8 @@ weekday rules in `recurrence_rules`, with task rows pointing at the active local
 rule when one exists and recurring completion rolling the same task to the next
 occurrence. The template foundation stores list templates and project/contact
 container templates; note/tab imports and portable template files remain future
-work. The workflow foundation stores manual, item-created, and file-imported
-definitions/runs; scheduled or external automation remains future work. The data model still intentionally
+work. The workflow foundation stores manual, item-created, file-imported,
+tag-added, tag-removed, and category-assigned definitions/runs; scheduled or external automation remains future work. The data model still intentionally
 reserves future shape for timeline/calendar views, monthly/yearly recurrence,
 backup restore/import execution, and richer saved-view builder state. Add those
 through scoped migrations and repository/service tickets rather than expanding

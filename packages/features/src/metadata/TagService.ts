@@ -28,6 +28,25 @@ import {
 // Does not own saved-view storage or external taxonomy systems.
 export type TagServiceIdFactory = (prefix: string) => string;
 
+export type TagWorkflowHook = {
+  handleTagAdded(input: {
+    workspaceId: string;
+    targetType: TaggingTargetType;
+    targetId: string;
+    tagId: string;
+    tagSlug: string;
+    actorType?: ActivityActorType;
+  }): Promise<unknown>;
+  handleTagRemoved(input: {
+    workspaceId: string;
+    targetType: TaggingTargetType;
+    targetId: string;
+    tagId: string;
+    tagSlug: string;
+    actorType?: ActivityActorType;
+  }): Promise<unknown>;
+};
+
 export type TaggingTargetInput = {
   workspaceId: string;
   targetType: TaggingTargetType;
@@ -93,11 +112,13 @@ export class TagService {
   private readonly idFactory: TagServiceIdFactory;
   private readonly now: () => Date;
   private readonly transactionService: TransactionService;
+  private readonly workflowHook: TagWorkflowHook | null;
 
   constructor(input: {
     connection: DatabaseConnection;
     idFactory?: TagServiceIdFactory;
     now?: () => Date;
+    workflowHook?: TagWorkflowHook;
   }) {
     this.connection = input.connection;
     this.idFactory = input.idFactory ?? ((prefix) => createLocalId(prefix));
@@ -105,6 +126,7 @@ export class TagService {
     this.transactionService = new TransactionService({
       connection: input.connection
     });
+    this.workflowHook = input.workflowHook ?? null;
   }
 
   parseInlineTags(text: string | string[]): string[] {
@@ -137,7 +159,7 @@ export class TagService {
       throw new Error("source must be inline, manual, or imported.");
     }
 
-    return await this.transactionService.runInTransaction(() => {
+    const result = await this.transactionService.runInTransaction(() => {
       const timestamp = createIsoTimestamp(this.now());
       const tag = this.findOrCreateTagInCurrentTransaction({
         workspaceId: input.workspaceId,
@@ -181,6 +203,19 @@ export class TagService {
 
       return { tag, tagging, changed, searchRecord };
     });
+
+    if (result.changed && result.tagging !== null) {
+      await this.workflowHook?.handleTagAdded({
+        workspaceId: input.workspaceId,
+        targetType: input.targetType,
+        targetId: input.targetId,
+        tagId: result.tag.id,
+        tagSlug: result.tag.slug,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
+    }
+
+    return result;
   }
 
   async removeTagFromTarget(
@@ -192,7 +227,7 @@ export class TagService {
       throw new Error("Either tagId or name must be provided.");
     }
 
-    return await this.transactionService.runInTransaction(() => {
+    const result = await this.transactionService.runInTransaction(() => {
       const timestamp = createIsoTimestamp(this.now());
       const repository = new TagRepository(this.connection);
       const tag =
@@ -233,6 +268,19 @@ export class TagService {
 
       return { tag, tagging: removed, changed: true, searchRecord };
     });
+
+    if (result?.changed === true) {
+      await this.workflowHook?.handleTagRemoved({
+        workspaceId: input.workspaceId,
+        targetType: input.targetType,
+        targetId: input.targetId,
+        tagId: result.tag.id,
+        tagSlug: result.tag.slug,
+        ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+      });
+    }
+
+    return result;
   }
 
   async syncInlineTags(input: SyncInlineTagsInput): Promise<SyncInlineTagsResult> {

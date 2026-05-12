@@ -18,6 +18,14 @@ export type WorkflowFileImportedTriggerFilters = {
   containerIds?: string[];
 };
 
+export type WorkflowMetadataTriggerFilters = {
+  targetTypes?: string[];
+  targetIds?: string[];
+  tagIds?: string[];
+  tagSlugs?: string[];
+  categoryIds?: string[];
+};
+
 export type WorkflowTrigger =
   | {
       type: "manual";
@@ -29,6 +37,10 @@ export type WorkflowTrigger =
   | {
       type: "file_imported";
       filters?: WorkflowFileImportedTriggerFilters;
+    }
+  | {
+      type: "tag_added" | "tag_removed" | "category_assigned";
+      filters?: WorkflowMetadataTriggerFilters;
     };
 
 export type WorkflowAction =
@@ -132,6 +144,24 @@ export const WORKFLOW_TRIGGER_REGISTRY: readonly WorkflowTriggerRegistryEntry[] 
     type: "file_imported",
     label: "File imported",
     description: "Run locally after an imported file matches file metadata filters.",
+    localOnly: true
+  },
+  {
+    type: "tag_added",
+    label: "Tag added",
+    description: "Run locally after a tag is added to a matching local target.",
+    localOnly: true
+  },
+  {
+    type: "tag_removed",
+    label: "Tag removed",
+    description: "Run locally after a tag is removed from a matching local target.",
+    localOnly: true
+  },
+  {
+    type: "category_assigned",
+    label: "Category assigned",
+    description: "Run locally after a category is assigned to a matching local target.",
     localOnly: true
   }
 ] as const;
@@ -258,6 +288,12 @@ export function validateWorkflowDefinitionSchema(value: unknown): WorkflowValida
     issues.push(...validateItemCreatedTrigger(value.trigger, "trigger"));
   } else if (value.trigger.type === "file_imported") {
     issues.push(...validateFileImportedTrigger(value.trigger, "trigger"));
+  } else if (
+    value.trigger.type === "tag_added" ||
+    value.trigger.type === "tag_removed" ||
+    value.trigger.type === "category_assigned"
+  ) {
+    issues.push(...validateMetadataTrigger(value.trigger, "trigger"));
   }
 
   if (!Array.isArray(value.actions) || value.actions.length === 0) {
@@ -459,6 +495,29 @@ function validateFileImportedTrigger(
   ) {
     issues.push(error(`${path}.filters.maxSizeBytes`, "Must be greater than or equal to minSizeBytes."));
   }
+
+  return issues;
+}
+
+function validateMetadataTrigger(
+  value: Record<string, unknown>,
+  path: string
+): WorkflowValidationIssue[] {
+  const issues: WorkflowValidationIssue[] = [];
+
+  if (value.filters === undefined) {
+    return issues;
+  }
+
+  if (!isRecord(value.filters)) {
+    return [error(`${path}.filters`, "Metadata trigger filters must be an object.")];
+  }
+
+  requireOptionalStringArray(value.filters.targetTypes, `${path}.filters.targetTypes`, issues);
+  requireOptionalStringArray(value.filters.targetIds, `${path}.filters.targetIds`, issues);
+  requireOptionalStringArray(value.filters.tagIds, `${path}.filters.tagIds`, issues);
+  requireOptionalStringArray(value.filters.tagSlugs, `${path}.filters.tagSlugs`, issues);
+  requireOptionalStringArray(value.filters.categoryIds, `${path}.filters.categoryIds`, issues);
 
   return issues;
 }

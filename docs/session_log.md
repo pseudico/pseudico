@@ -4025,3 +4025,34 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI must confirm on GitHub after PR opens.
 Next actions: Commit and push branch; open ready PR; update Linear.
+## 2026-05-12T14:50:57.9382485+10:00
+Objective: Finish PSE-157 and start PSE-158.
+Decisions made:
+- PR #146 merged via squash at 8c7cce4 and merged branch deleted after main fast-forward.
+- PSE-157 moved to Done; PSE-158 promoted then moved to In Progress for same-run implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked .playwright-mcp/ and gh installer remain untouched.
+Next actions: Create PSE-158 branch; read ticket; implement tag/category-added trigger.
+## 2026-05-12T14:59:40.4794847+10:00
+Objective: Implement PSE-158 metadata workflow triggers.
+Decisions made:
+- Added tag_added, tag_removed, and category_assigned trigger schema, DB trigger migration, and run handling.
+- Wired TagService/CategoryService hooks after successful metadata writes with loop-safe workflow action execution.
+Files changed:
+- packages/features/src/workflows/*
+- packages/features/src/metadata/*
+- packages/db/src/**
+- packages/features/tests/*
+- docs/**
+Open questions / risks: Full lint/test/build and CI still required.
+Next actions: Run full checks; commit/push; open PR.
+## 2026-05-12T15:01:43.7140738+10:00
+Objective: Verify PSE-158 locally.
+Decisions made:
+- Targeted metadata workflow tests plus lint, typecheck, full test, and build passed.
+- Schema version expectations updated for migration v19.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI must confirm after PR opens.
+Next actions: Commit/push branch; open ready PR; update Linear.

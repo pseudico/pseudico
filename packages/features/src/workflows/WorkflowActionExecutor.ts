@@ -29,6 +29,8 @@ export type WorkflowActionExecutionContext = {
   workspaceId: string;
   actorType?: ActivityActorType;
   triggerItemId?: string;
+  triggerTargetType?: string;
+  triggerTargetId?: string;
 };
 
 export type WorkflowActionExecutionResult = {
@@ -278,25 +280,57 @@ export class WorkflowActionExecutor {
 }
 
 export const WORKFLOW_TRIGGER_ITEM_ID_TOKEN = "$trigger.itemId";
+export const WORKFLOW_TRIGGER_TARGET_ID_TOKEN = "$trigger.targetId";
 
 function resolveTriggerItemAction(
   action: WorkflowAction,
   context: WorkflowActionExecutionContext
 ): WorkflowAction {
-  if (context.triggerItemId === undefined) {
+  if (
+    context.triggerItemId === undefined &&
+    context.triggerTargetId === undefined
+  ) {
     return action;
   }
 
   switch (action.type) {
     case "add_tag":
-    case "set_category":
-      return action.targetType === "item" && action.targetId === WORKFLOW_TRIGGER_ITEM_ID_TOKEN
-        ? { ...action, targetId: context.triggerItemId }
-        : action;
+    case "set_category": {
+      if (
+        action.targetType === "item" &&
+        action.targetId === WORKFLOW_TRIGGER_ITEM_ID_TOKEN &&
+        context.triggerItemId !== undefined
+      ) {
+        return { ...action, targetId: context.triggerItemId };
+      }
+
+      if (
+        action.targetId === WORKFLOW_TRIGGER_TARGET_ID_TOKEN &&
+        context.triggerTargetId !== undefined &&
+        context.triggerTargetType === action.targetType
+      ) {
+        return { ...action, targetId: context.triggerTargetId };
+      }
+
+      return action;
+    }
     case "move_item":
-      return action.itemId === WORKFLOW_TRIGGER_ITEM_ID_TOKEN
-        ? { ...action, itemId: context.triggerItemId }
-        : action;
+      if (
+        action.itemId === WORKFLOW_TRIGGER_ITEM_ID_TOKEN &&
+        context.triggerItemId !== undefined
+      ) {
+        return { ...action, itemId: context.triggerItemId };
+      }
+
+      if (
+        action.itemId === WORKFLOW_TRIGGER_TARGET_ID_TOKEN &&
+        context.triggerTargetType === "item" &&
+        context.triggerTargetId !== undefined
+      ) {
+        return { ...action, itemId: context.triggerTargetId };
+      }
+
+      return action;
     case "create_task":
       return action;
   }

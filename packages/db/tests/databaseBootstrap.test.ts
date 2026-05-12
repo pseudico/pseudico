@@ -43,9 +43,9 @@ describe("DatabaseBootstrapService", () => {
     expect(result).toMatchObject({
       databasePath,
       workspaceId: "workspace_1",
-      schemaVersion: 18,
+      schemaVersion: 19,
       migrations: {
-        currentVersion: 18
+        currentVersion: 19
       },
       seed: {
         workspace: {
@@ -62,7 +62,7 @@ describe("DatabaseBootstrapService", () => {
         }
       }
     });
-    expect(result.migrations.appliedMigrations).toHaveLength(18);
+    expect(result.migrations.appliedMigrations).toHaveLength(19);
 
     connection = await createDatabaseConnection({
       databasePath,
@@ -72,7 +72,7 @@ describe("DatabaseBootstrapService", () => {
     expect(readOne("workspaces")).toMatchObject({
       id: "workspace_1",
       name: "Personal Work",
-      schema_version: 18
+      schema_version: 19
     });
     expect(readOne("containers")).toMatchObject({
       workspace_id: "workspace_1",

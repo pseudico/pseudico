@@ -27,7 +27,9 @@ import {
   parseWorkflowDefinitionSchema,
   type WorkflowAction,
   type WorkflowFileImportedTriggerFilters,
-  type WorkflowItemCreatedTriggerFilters
+  type WorkflowItemCreatedTriggerFilters,
+  type WorkflowMetadataTriggerFilters,
+  type WorkflowTrigger
 } from "./WorkflowSchema";
 
 export type ItemCreatedWorkflowEvent = {
@@ -45,6 +47,25 @@ export type FileImportedWorkflowEvent = {
   triggerDepth?: number;
 };
 
+export type TagWorkflowEvent = {
+  workspaceId: string;
+  targetType: "container" | "item" | "list_item";
+  targetId: string;
+  tagId: string;
+  tagSlug: string;
+  actorType?: ActivityActorType;
+  triggerDepth?: number;
+};
+
+export type CategoryAssignedWorkflowEvent = {
+  workspaceId: string;
+  targetType: "container" | "item";
+  targetId: string;
+  categoryId: string | null;
+  actorType?: ActivityActorType;
+  triggerDepth?: number;
+};
+
 export type TriggeredWorkflowRunResult = {
   workflow: WorkflowDefinitionRecord;
   run: WorkflowRunRecord;
@@ -54,6 +75,7 @@ export type TriggeredWorkflowRunResult = {
 
 export type ItemCreatedWorkflowRunResult = TriggeredWorkflowRunResult;
 export type FileImportedWorkflowRunResult = TriggeredWorkflowRunResult;
+export type MetadataWorkflowRunResult = TriggeredWorkflowRunResult;
 
 export class WorkflowTriggerService {
   readonly module = "workflow-triggers";
@@ -109,6 +131,9 @@ export class WorkflowTriggerService {
         await this.runTriggeredWorkflow({
           workflow,
           item,
+          triggerTargetType: "item",
+          triggerTargetId: item.id,
+          triggerTargetLabel: `${item.type} "${item.title}"`,
           triggerType: "item_created",
           triggerLabel: "item-created",
           actions: definition.actions,
@@ -168,6 +193,9 @@ export class WorkflowTriggerService {
           workflow,
           item,
           attachment,
+          triggerTargetType: "item",
+          triggerTargetId: item.id,
+          triggerTargetLabel: `${item.type} "${item.title}"`,
           triggerType: "file_imported",
           triggerLabel: "file-imported",
           actions: definition.actions,
@@ -179,12 +207,136 @@ export class WorkflowTriggerService {
     return results;
   }
 
+  async handleTagAdded(event: TagWorkflowEvent): Promise<MetadataWorkflowRunResult[]> {
+    return await this.handleTagChanged("tag_added", "tag-added", event);
+  }
+
+  async handleTagRemoved(event: TagWorkflowEvent): Promise<MetadataWorkflowRunResult[]> {
+    return await this.handleTagChanged("tag_removed", "tag-removed", event);
+  }
+
+  async handleCategoryAssigned(
+    event: CategoryAssignedWorkflowEvent
+  ): Promise<MetadataWorkflowRunResult[]> {
+    validateNonEmptyString(event.workspaceId, "workspaceId");
+    validateNonEmptyString(event.targetType, "targetType");
+    validateNonEmptyString(event.targetId, "targetId");
+
+    if ((event.triggerDepth ?? 0) > 0) {
+      return [];
+    }
+
+    const item = this.getTriggerItem(event);
+    const workflows = new WorkflowRepository(this.connection).listDefinitions({
+      workspaceId: event.workspaceId,
+      status: "enabled",
+      triggerType: "category_assigned"
+    });
+    const results: MetadataWorkflowRunResult[] = [];
+
+    for (const workflow of workflows) {
+      const definition = parseWorkflowDefinitionSchema(workflow.actionsJson);
+      if (definition.trigger.type !== "category_assigned") {
+        continue;
+      }
+      if (
+        !this.matchesMetadataFilters(
+          event,
+          definition.trigger.filters,
+          { categoryId: event.categoryId }
+        )
+      ) {
+        continue;
+      }
+
+      results.push(
+        await this.runTriggeredWorkflow({
+          workflow,
+          ...(item === undefined ? {} : { item }),
+          triggerTargetType: event.targetType,
+          triggerTargetId: event.targetId,
+          triggerTargetLabel: `${event.targetType} ${event.targetId}`,
+          triggerType: "category_assigned",
+          triggerLabel: "category-assigned",
+          actions: definition.actions,
+          actorType: event.actorType ?? "system"
+        })
+      );
+    }
+
+    return results;
+  }
+
+  private async handleTagChanged(
+    triggerType: "tag_added" | "tag_removed",
+    triggerLabel: "tag-added" | "tag-removed",
+    event: TagWorkflowEvent
+  ): Promise<MetadataWorkflowRunResult[]> {
+    validateNonEmptyString(event.workspaceId, "workspaceId");
+    validateNonEmptyString(event.targetType, "targetType");
+    validateNonEmptyString(event.targetId, "targetId");
+    validateNonEmptyString(event.tagId, "tagId");
+    validateNonEmptyString(event.tagSlug, "tagSlug");
+
+    if ((event.triggerDepth ?? 0) > 0) {
+      return [];
+    }
+
+    const item = this.getTriggerItem(event);
+    const workflows = new WorkflowRepository(this.connection).listDefinitions({
+      workspaceId: event.workspaceId,
+      status: "enabled",
+      triggerType
+    });
+    const results: MetadataWorkflowRunResult[] = [];
+
+    for (const workflow of workflows) {
+      const definition = parseWorkflowDefinitionSchema(workflow.actionsJson);
+      if (definition.trigger.type !== triggerType) {
+        continue;
+      }
+      if (
+        !this.matchesMetadataFilters(
+          event,
+          definition.trigger.filters,
+          { tagId: event.tagId, tagSlug: event.tagSlug }
+        )
+      ) {
+        continue;
+      }
+
+      results.push(
+        await this.runTriggeredWorkflow({
+          workflow,
+          ...(item === undefined ? {} : { item }),
+          triggerTargetType: event.targetType,
+          triggerTargetId: event.targetId,
+          triggerTargetLabel: `${event.targetType} ${event.targetId}`,
+          triggerType,
+          triggerLabel,
+          actions: definition.actions,
+          actorType: event.actorType ?? "system"
+        })
+      );
+    }
+
+    return results;
+  }
+
   private async runTriggeredWorkflow(input: {
     workflow: WorkflowDefinitionRecord;
-    item: ItemRecord;
+    item?: ItemRecord;
     attachment?: AttachmentRecord;
-    triggerType: "item_created" | "file_imported";
-    triggerLabel: "item-created" | "file-imported";
+    triggerTargetType: string;
+    triggerTargetId: string;
+    triggerTargetLabel: string;
+    triggerType: WorkflowTrigger["type"];
+    triggerLabel:
+      | "item-created"
+      | "file-imported"
+      | "tag-added"
+      | "tag-removed"
+      | "category-assigned";
     actions: WorkflowAction[];
     actorType: ActivityActorType;
   }): Promise<TriggeredWorkflowRunResult> {
@@ -226,7 +378,9 @@ export class WorkflowTriggerService {
               {
                 workspaceId: input.workflow.workspaceId,
                 actorType: "system",
-                triggerItemId: input.item.id
+                ...(input.item === undefined ? {} : { triggerItemId: input.item.id }),
+                triggerTargetType: input.triggerTargetType,
+                triggerTargetId: input.triggerTargetId
               },
               index
             )
@@ -244,7 +398,7 @@ export class WorkflowTriggerService {
         this.logWorkflowEvent({
           workflow: input.workflow,
           action: ActivityAction.workflowRunCompleted,
-          summary: `Ran ${input.triggerLabel} workflow "${input.workflow.name}" for ${input.item.type} "${input.item.title}".`,
+          summary: `Ran ${input.triggerLabel} workflow "${input.workflow.name}" for ${input.triggerTargetLabel}.`,
           before: run,
           after: completedRun,
           timestamp: completedAt
@@ -269,15 +423,19 @@ export class WorkflowTriggerService {
 
   private previewTriggeredWorkflow(input: {
     workflow: WorkflowDefinitionRecord;
-    item: ItemRecord;
+    item?: ItemRecord;
     attachment?: AttachmentRecord;
-    triggerType: "item_created" | "file_imported";
+    triggerTargetType: string;
+    triggerTargetId: string;
+    triggerType: WorkflowTrigger["type"];
     actions: WorkflowAction[];
   }): {
     workspaceId: string;
     workflowId: string;
-    triggerType: "item_created" | "file_imported";
-    triggerItemId: string;
+    triggerType: WorkflowTrigger["type"];
+    triggerTargetType: string;
+    triggerTargetId: string;
+    triggerItemId?: string;
     triggerAttachmentId?: string;
     file?: {
       originalName: string;
@@ -300,7 +458,9 @@ export class WorkflowTriggerService {
         {
           workspaceId: input.workflow.workspaceId,
           actorType: "system",
-          triggerItemId: input.item.id
+          ...(input.item === undefined ? {} : { triggerItemId: input.item.id }),
+          triggerTargetType: input.triggerTargetType,
+          triggerTargetId: input.triggerTargetId
         },
         index
       )
@@ -310,7 +470,9 @@ export class WorkflowTriggerService {
       workspaceId: input.workflow.workspaceId,
       workflowId: input.workflow.id,
       triggerType: input.triggerType,
-      triggerItemId: input.item.id,
+      triggerTargetType: input.triggerTargetType,
+      triggerTargetId: input.triggerTargetId,
+      ...(input.item === undefined ? {} : { triggerItemId: input.item.id }),
       ...(input.attachment === undefined
         ? {}
         : {
@@ -320,7 +482,7 @@ export class WorkflowTriggerService {
               mimeType: input.attachment.mimeType,
               sizeBytes: input.attachment.sizeBytes,
               extension: getFileExtension(input.attachment.originalName),
-              containerId: input.item.containerId
+              containerId: input.item?.containerId ?? input.triggerTargetId
             }
           }),
       canRun: actionPreviews.every((preview) => preview.status === "ready"),
@@ -330,12 +492,18 @@ export class WorkflowTriggerService {
 
   private recordFailedRun(input: {
     workflow: WorkflowDefinitionRecord;
-    item: ItemRecord;
+    item?: ItemRecord;
     preview: unknown;
     actionResults: WorkflowActionExecutionResult[];
     error: unknown;
-    triggerType: "item_created" | "file_imported";
-    triggerLabel: "item-created" | "file-imported";
+    triggerTargetLabel: string;
+    triggerType: WorkflowTrigger["type"];
+    triggerLabel:
+      | "item-created"
+      | "file-imported"
+      | "tag-added"
+      | "tag-removed"
+      | "category-assigned";
   }): TriggeredWorkflowRunResult {
     const timestamp = createIsoTimestamp(this.now());
     const message =
@@ -358,7 +526,7 @@ export class WorkflowTriggerService {
     this.logWorkflowEvent({
       workflow: input.workflow,
       action: ActivityAction.workflowRunFailed,
-      summary: `${capitalize(input.triggerLabel)} workflow "${input.workflow.name}" failed for ${input.item.type} "${input.item.title}": ${message}`,
+      summary: `${capitalize(input.triggerLabel)} workflow "${input.workflow.name}" failed for ${input.triggerTargetLabel}: ${message}`,
       before: null,
       after: run,
       timestamp
@@ -485,6 +653,79 @@ export class WorkflowTriggerService {
     }
 
     return true;
+  }
+
+  private matchesMetadataFilters(
+    event: {
+      targetType: string;
+      targetId: string;
+    },
+    filters: WorkflowMetadataTriggerFilters | undefined,
+    metadata: {
+      tagId?: string;
+      tagSlug?: string;
+      categoryId?: string | null;
+    }
+  ): boolean {
+    if (filters === undefined) {
+      return true;
+    }
+
+    if (
+      filters.targetTypes !== undefined &&
+      !filters.targetTypes.includes(event.targetType)
+    ) {
+      return false;
+    }
+
+    if (
+      filters.targetIds !== undefined &&
+      !filters.targetIds.includes(event.targetId)
+    ) {
+      return false;
+    }
+
+    if (
+      filters.tagIds !== undefined &&
+      (metadata.tagId === undefined || !filters.tagIds.includes(metadata.tagId))
+    ) {
+      return false;
+    }
+
+    if (
+      filters.tagSlugs !== undefined &&
+      (metadata.tagSlug === undefined || !filters.tagSlugs.includes(metadata.tagSlug))
+    ) {
+      return false;
+    }
+
+    if (
+      filters.categoryIds !== undefined &&
+      (metadata.categoryId === undefined ||
+        metadata.categoryId === null ||
+        !filters.categoryIds.includes(metadata.categoryId))
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private getTriggerItem(event: {
+    workspaceId: string;
+    targetType: string;
+    targetId: string;
+  }): ItemRecord | undefined {
+    if (event.targetType !== "item") {
+      return undefined;
+    }
+
+    const item = new ItemRepository(this.connection).getById(event.targetId);
+    if (item === null || item.workspaceId !== event.workspaceId) {
+      throw new Error(`Workflow trigger item was not found: ${event.targetId}.`);
+    }
+
+    return item;
   }
 
   private logWorkflowEvent(input: {

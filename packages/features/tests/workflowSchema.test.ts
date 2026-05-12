@@ -142,6 +142,47 @@ describe("workflow schema and registry", () => {
     );
   });
 
+  it("accepts local metadata triggers with target and tag/category filters", () => {
+    const tagResult = validateWorkflowDefinitionSchema({
+      kind: WORKFLOW_DEFINITION_KIND,
+      version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+      trigger: {
+        type: "tag_added",
+        filters: {
+          targetTypes: ["item"],
+          tagSlugs: ["waiting"]
+        }
+      },
+      actions: [
+        {
+          type: "move_item",
+          itemId: "$trigger.targetId",
+          targetContainerId: "container_waiting"
+        }
+      ]
+    });
+    const categoryResult = validateWorkflowDefinitionSchema({
+      kind: WORKFLOW_DEFINITION_KIND,
+      version: WORKFLOW_DEFINITION_SCHEMA_VERSION,
+      trigger: {
+        type: "category_assigned",
+        filters: {
+          categoryIds: ["category_finance"]
+        }
+      },
+      actions: [
+        {
+          type: "create_task",
+          containerId: "container_1",
+          title: "Review metadata"
+        }
+      ]
+    });
+
+    expect(tagResult.valid).toBe(true);
+    expect(categoryResult.valid).toBe(true);
+  });
+
   it("builds editor skeleton state that disables invalid workflows", () => {
     const state = createWorkflowEditorSkeletonState({
       name: "Webhook draft",

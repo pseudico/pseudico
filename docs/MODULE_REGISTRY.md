@@ -40,9 +40,9 @@ new work should account for this implemented baseline:
   broader import execution beyond workspace JSON restore,
   custom dashboard editing, advanced saved-view builder UX, and browser capture.
 - Workflows now have a local service foundation with persisted manual,
-  item-created, and file-imported definitions/runs, preview, and service-backed
-  add-tag, set-category, move-item, and create-task actions; scheduling remains
-  future work.
+  item-created, file-imported, tag-added, tag-removed, and category-assigned
+  definitions/runs, preview, and service-backed add-tag, set-category,
+  move-item, and create-task actions; scheduling remains future work.
 - Local reminders now have task/list-item targets, default preferences,
   notification enablement, scheduler, IPC, and shared picker foundations;
   deeper renderer workflows remain future work.

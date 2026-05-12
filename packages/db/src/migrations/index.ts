@@ -16,6 +16,7 @@ import { dashboardWidgetLayoutTypesSql } from "./0015_dashboard_widget_layout_ty
 import { dashboardExtraWidgetTypesSql } from "./0016_dashboard_extra_widget_types";
 import { workflowItemCreatedTriggerSql } from "./0017_workflow_item_created_trigger";
 import { workflowFileImportedTriggerSql } from "./0018_workflow_file_imported_trigger";
+import { workflowMetadataTriggersSql } from "./0019_workflow_metadata_triggers";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -126,6 +127,12 @@ export const migrations: MigrationDefinition[] = [
     name: "workflow_file_imported_trigger",
     sql: workflowFileImportedTriggerSql,
     checksum: "pse-157-workflow-file-imported-trigger-v1"
+  },
+  {
+    version: 19,
+    name: "workflow_metadata_triggers",
+    sql: workflowMetadataTriggersSql,
+    checksum: "pse-158-workflow-metadata-triggers-v1"
   }
 ];
 

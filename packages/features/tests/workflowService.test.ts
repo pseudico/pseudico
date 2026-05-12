@@ -15,9 +15,12 @@ import {
 import { createTestDatabase } from "@local-work-os/test-utils";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  CategoryService,
   FileAttachmentService,
+  TagService,
   TaskService,
   WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
+  WORKFLOW_TRIGGER_TARGET_ID_TOKEN,
   WorkflowService,
   WorkflowTriggerService
 } from "../src";
@@ -503,6 +506,109 @@ describe("WorkflowService", () => {
     });
 
     expect(new WorkflowRepository(connection).listRunsForWorkflow(workflow.id)).toEqual([]);
+  });
+
+  it("runs tag-added workflows and avoids loops when workflow actions add metadata", async () => {
+    const task = await createTask("Waiting on contract");
+    const workflowService = createWorkflowService();
+    const workflow = await workflowService.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Move waiting work",
+      trigger: {
+        type: "tag_added",
+        filters: {
+          targetTypes: ["item"],
+          tagSlugs: ["waiting"]
+        }
+      },
+      actions: [
+        {
+          type: "move_item",
+          itemId: WORKFLOW_TRIGGER_TARGET_ID_TOKEN,
+          targetContainerId: "container_project_2"
+        },
+        {
+          type: "add_tag",
+          targetType: "item",
+          targetId: WORKFLOW_TRIGGER_TARGET_ID_TOKEN,
+          tagName: "Automated"
+        }
+      ]
+    });
+
+    await new TagService({
+      connection,
+      idFactory,
+      now,
+      workflowHook: new WorkflowTriggerService({ connection, idFactory, now })
+    }).addTagToTarget({
+      workspaceId: "workspace_1",
+      targetType: "item",
+      targetId: task.item.id,
+      name: "Waiting"
+    });
+
+    expect(new ItemRepository(connection).getById(task.item.id)).toMatchObject({
+      containerId: "container_project_2"
+    });
+    expect(
+      new TagRepository(connection)
+        .listTagsForTarget({
+          workspaceId: "workspace_1",
+          targetType: "item",
+          targetId: task.item.id
+        })
+        .map((tag) => tag.slug)
+        .sort()
+    ).toEqual(["automated", "waiting"]);
+    expect(new WorkflowRepository(connection).listRunsForWorkflow(workflow.id)).toHaveLength(1);
+  });
+
+  it("runs category-assigned workflows when target and category filters match", async () => {
+    const task = await createTask("Categorize invoice");
+    const workflowService = createWorkflowService();
+    const workflow = await workflowService.createWorkflow({
+      workspaceId: "workspace_1",
+      name: "Finance follow-up",
+      trigger: {
+        type: "category_assigned",
+        filters: {
+          targetTypes: ["item"],
+          categoryIds: ["category_1"]
+        }
+      },
+      actions: [
+        {
+          type: "create_task",
+          containerId: "container_project_1",
+          title: "Review categorized item"
+        }
+      ]
+    });
+
+    await new CategoryService({
+      connection,
+      idFactory,
+      now,
+      workflowHook: new WorkflowTriggerService({ connection, idFactory, now })
+    }).assignCategoryToItem({
+      workspaceId: "workspace_1",
+      itemId: task.item.id,
+      categoryId: "category_1"
+    });
+
+    expect(
+      new TaskRepository(connection)
+        .listByContainer("container_project_1")
+        .map((record) => record.item.title)
+    ).toEqual(["Categorize invoice", "Review categorized item"]);
+    expect(new WorkflowRepository(connection).listRunsForWorkflow(workflow.id)).toMatchObject([
+      {
+        workflowDefinitionId: workflow.id,
+        triggerType: "category_assigned",
+        status: "completed"
+      }
+    ]);
   });
 });
 
