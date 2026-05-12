@@ -557,7 +557,11 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       runWorkspaceIntegrityCheck: (input) =>
         callApi(() => api.diagnostics.runWorkspaceIntegrityCheck(input)),
       repairAttachment: (input) =>
-        callApi(() => api.diagnostics.repairAttachment(input))
+        callApi(() => api.diagnostics.repairAttachment(input)),
+      runSavedViewDiagnostics: (workspaceId) =>
+        callApi(() => api.diagnostics.runSavedViewDiagnostics(workspaceId)),
+      repairSavedViewQuery: (input) =>
+        callApi(() => api.diagnostics.repairSavedViewQuery(input))
     },
     navigation: {
       listRecentTargets: (workspaceId) =>
@@ -1101,7 +1105,11 @@ export const desktopApiClient: LocalWorkOsApi = {
     runWorkspaceIntegrityCheck: (input) =>
       getDesktopApiClient().diagnostics.runWorkspaceIntegrityCheck(input),
     repairAttachment: (input) =>
-      getDesktopApiClient().diagnostics.repairAttachment(input)
+      getDesktopApiClient().diagnostics.repairAttachment(input),
+    runSavedViewDiagnostics: (workspaceId) =>
+      getDesktopApiClient().diagnostics.runSavedViewDiagnostics(workspaceId),
+    repairSavedViewQuery: (input) =>
+      getDesktopApiClient().diagnostics.repairSavedViewQuery(input)
   },
   navigation: {
     listRecentTargets: (workspaceId) =>

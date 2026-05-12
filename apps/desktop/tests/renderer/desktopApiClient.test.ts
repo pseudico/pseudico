@@ -746,7 +746,25 @@ function createMockApi(
     },
     diagnostics: {
       runWorkspaceIntegrityCheck: async () => apiOk(workspaceIntegritySummary()),
-      repairAttachment: async () => apiOk(null)
+      repairAttachment: async () => apiOk(null),
+      runSavedViewDiagnostics: async () =>
+        apiOk({
+          workspaceId: "workspace_1",
+          checkedAt: "2026-05-03T00:00:00.000Z",
+          total: 0,
+          ok: 0,
+          warnings: 0,
+          errors: 0,
+          repairable: 0,
+          entries: []
+        }),
+      repairSavedViewQuery: async () =>
+        apiOk({
+          savedViewId: "saved_view_1",
+          name: "Saved view",
+          changed: false,
+          issueCount: 0
+        })
     },
     navigation: {
       listRecentTargets: async () => apiOk([]),

@@ -6,6 +6,9 @@ import {
 import {
   FileAttachmentService,
   IntegrityCheckService,
+  SavedViewDiagnosticsService,
+  type SavedViewDiagnosticsReport,
+  type SavedViewRepairResult,
   type WorkspaceIntegrityReport
 } from "@local-work-os/features";
 import {
@@ -14,7 +17,10 @@ import {
   type ApiResult,
   type RepairAttachmentInput,
   type RepairAttachmentSummary,
+  type RepairSavedViewQueryInput,
+  type RepairSavedViewQuerySummary,
   type RunWorkspaceIntegrityCheckInput,
+  type SavedViewDiagnosticsSummary,
   type WorkspaceIntegritySummary,
   type WorkspaceSummary
 } from "../../preload/api";
@@ -38,6 +44,12 @@ type DiagnosticsIpcHandlers = {
   handleRepairAttachment: (
     input: unknown
   ) => Promise<ApiResult<RepairAttachmentSummary | null>>;
+  handleRunSavedViewDiagnostics: (
+    input: unknown
+  ) => Promise<ApiResult<SavedViewDiagnosticsSummary>>;
+  handleRepairSavedViewQuery: (
+    input: unknown
+  ) => Promise<ApiResult<RepairSavedViewQuerySummary>>;
 };
 
 export type DiagnosticsIpcPlatform = {
@@ -117,6 +129,48 @@ export function createDiagnosticsIpcHandlers(
           });
         }
       );
+    },
+
+    async handleRunSavedViewDiagnostics(input) {
+      if (!isOptionalString(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "runSavedViewDiagnostics accepts an optional workspaceId string."
+        );
+      }
+
+      return await withIntegrityCheckService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(
+          typeof input === "string" ? input : undefined,
+          context.workspace
+        );
+        const report = new SavedViewDiagnosticsService({
+          connection: context.connection
+        }).diagnoseWorkspace(workspaceId);
+
+        return apiOk(toSavedViewDiagnosticsSummary(report));
+      });
+    },
+
+    async handleRepairSavedViewQuery(input) {
+      if (!isRepairSavedViewQueryInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "repairSavedViewQuery requires a savedViewId string."
+        );
+      }
+
+      return await withIntegrityCheckService(workspaceService, async (context) => {
+        const result = await new SavedViewDiagnosticsService({
+          connection: context.connection
+        }).repairSavedView(input.savedViewId);
+
+        if (result.savedView.workspaceId !== context.workspace.id) {
+          throw new Error("Saved view workspace must match the current workspace.");
+        }
+
+        return apiOk(toRepairSavedViewQuerySummary(result));
+      });
     }
   };
 }
@@ -188,6 +242,39 @@ function toWorkspaceIntegritySummary(
   return report;
 }
 
+function toSavedViewDiagnosticsSummary(
+  report: SavedViewDiagnosticsReport
+): SavedViewDiagnosticsSummary {
+  return {
+    workspaceId: report.workspaceId,
+    checkedAt: report.checkedAt,
+    total: report.total,
+    ok: report.ok,
+    warnings: report.warnings,
+    errors: report.errors,
+    repairable: report.repairable,
+    entries: report.entries.map((entry) => ({
+      savedViewId: entry.savedView.id,
+      name: entry.savedView.name,
+      type: entry.savedView.type,
+      status: entry.status,
+      issues: entry.issues,
+      repairable: entry.repairedQueryJson !== null
+    }))
+  };
+}
+
+function toRepairSavedViewQuerySummary(
+  result: SavedViewRepairResult
+): RepairSavedViewQuerySummary {
+  return {
+    savedViewId: result.savedView.id,
+    name: result.savedView.name,
+    changed: result.changed,
+    issueCount: result.issues.length
+  };
+}
+
 function isRepairAttachmentInput(input: unknown): input is RepairAttachmentInput {
   return (
     isRecord(input) &&
@@ -203,6 +290,12 @@ function isRunWorkspaceIntegrityCheckInput(
     input === undefined ||
     (isRecord(input) && isOptionalString(input.workspaceId))
   );
+}
+
+function isRepairSavedViewQueryInput(
+  input: unknown
+): input is RepairSavedViewQueryInput {
+  return isRecord(input) && isNonEmptyString(input.savedViewId);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

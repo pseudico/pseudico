@@ -3725,3 +3725,35 @@ Files changed:
 - packages/ui/tests/searchResultCard.test.tsx
 Open questions / risks: CI still needs GitHub validation after push.
 Next actions: Commit; push; open ready PR.
+## 2026-05-12T09:16:17.4492481+10:00
+Objective: Merge PSE-150 and promote the next Local Work OS ticket.
+Decisions made:
+- PR #139 CI passed and was squash-merged at 180ec1ba.
+- Deleted merged branch and fast-forwarded local main; moved PSE-150 to Done.
+- Promoted PSE-151 to the single Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: This post-merge log entry is local-only until the next PR.
+Next actions: Start PSE-151 next; leave unrelated untracked files untouched.
+
+## 2026-05-12T10:02:12.7495338+10:00
+Objective: Reconcile active Local Work OS work and select next ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found for PSE Local Work OS.
+- Selected PSE-151 as the only Codex Ready issue and pulled main.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked local files remain untouched.
+Next actions: Move PSE-151 to In Progress; read docs; implement diagnostics repair.
+
+## 2026-05-12T10:10:42.1855742+10:00
+Objective: Implement PSE-151 saved-view diagnostics and repair.
+Decisions made:
+- Added service-level query migration, invalid JSON detection, missing ref repair.
+- Added Settings diagnostics IPC/UI entry points and tests.
+Files changed:
+- packages/features/src/savedViews/SavedViewDiagnosticsService.ts
+- packages/features/src/savedViews/SavedViewQuery.ts
+- apps/desktop/src/preload/api.ts
+Open questions / risks: Full lint/test/build still pending.
+Next actions: Run checks; fix failures; publish PR.

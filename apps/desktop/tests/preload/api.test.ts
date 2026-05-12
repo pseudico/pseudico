@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(212);
+    expect(channels).toHaveLength(214);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -1711,6 +1711,10 @@ describe("typed preload API", () => {
     await api.diagnostics.runWorkspaceIntegrityCheck({
       workspaceId: "workspace_1"
     });
+    await api.diagnostics.runSavedViewDiagnostics("workspace_1");
+    await api.diagnostics.repairSavedViewQuery({
+      savedViewId: "saved_view_1"
+    });
 
     expect(calls).toEqual([
       {
@@ -1718,6 +1722,17 @@ describe("typed preload API", () => {
           LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runWorkspaceIntegrityCheck,
         input: {
           workspaceId: "workspace_1"
+        }
+      },
+      {
+        channel:
+          LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runSavedViewDiagnostics,
+        input: "workspace_1"
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairSavedViewQuery,
+        input: {
+          savedViewId: "saved_view_1"
         }
       }
     ]);
