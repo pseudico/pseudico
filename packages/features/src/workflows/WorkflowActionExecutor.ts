@@ -2,12 +2,17 @@ import {
   CategoryRepository,
   ContainerRepository,
   ItemRepository,
+  ListRepository,
+  NoteRepository,
   TemplateRepository,
+  TaskRepository,
   type DatabaseConnection
 } from "@local-work-os/db";
 import type { ActivityActorType } from "@local-work-os/core";
 import { CategoryService } from "../metadata/CategoryService";
 import { ItemService } from "../items/ItemService";
+import { ListService } from "../lists/ListService";
+import { NoteService } from "../notes/NoteService";
 import { TagService } from "../metadata/TagService";
 import { TaskService } from "../tasks/TaskService";
 import { ContainerTemplateService, validateContainerTemplateJson } from "../templates/TemplateService";
@@ -263,6 +268,202 @@ export class WorkflowActionExecutor {
           targetId: result.item.id
         };
       }
+      case "update_task": {
+        const result = await new TaskService({
+          connection: this.connection,
+          idFactory: this.idFactory,
+          now: this.now
+        }).updateTask({
+          itemId: actionToRun.itemId,
+          ...(actionToRun.title === undefined ? {} : { title: actionToRun.title }),
+          ...(actionToRun.body === undefined ? {} : { body: actionToRun.body }),
+          ...(actionToRun.categoryId === undefined ? {} : { categoryId: actionToRun.categoryId }),
+          ...(actionToRun.containerTabId === undefined ? {} : { containerTabId: actionToRun.containerTabId }),
+          ...(actionToRun.dueAt === undefined ? {} : { dueAt: actionToRun.dueAt }),
+          ...(actionToRun.startAt === undefined ? {} : { startAt: actionToRun.startAt }),
+          ...(actionToRun.priority === undefined ? {} : { priority: actionToRun.priority }),
+          ...(actionToRun.status === undefined ? {} : { status: actionToRun.status }),
+          ...(context.actorType === undefined
+            ? {}
+            : { actorType: context.actorType })
+        });
+
+        return {
+          index,
+          actionType: actionToRun.type,
+          status: "completed",
+          summary: summarizeWorkflowAction(actionToRun),
+          targetType: "item",
+          targetId: result.item.id
+        };
+      }
+      case "create_list": {
+        const result = await new ListService({
+          connection: this.connection,
+          idFactory: this.idFactory,
+          now: this.now
+        }).createList({
+          workspaceId: context.workspaceId,
+          containerId: actionToRun.containerId,
+          title: actionToRun.title,
+          body: actionToRun.body ?? null,
+          categoryId: actionToRun.categoryId ?? null,
+          containerTabId: actionToRun.containerTabId ?? null,
+          ...(actionToRun.displayMode === undefined ? {} : { displayMode: actionToRun.displayMode }),
+          ...(actionToRun.showCompleted === undefined ? {} : { showCompleted: actionToRun.showCompleted }),
+          ...(actionToRun.progressMode === undefined ? {} : { progressMode: actionToRun.progressMode }),
+          ...(context.actorType === undefined
+            ? {}
+            : { actorType: context.actorType })
+        });
+
+        return {
+          index,
+          actionType: actionToRun.type,
+          status: "completed",
+          summary: summarizeWorkflowAction(actionToRun),
+          targetType: "item",
+          targetId: result.item.id
+        };
+      }
+      case "update_list": {
+        const result = await new ListService({
+          connection: this.connection,
+          idFactory: this.idFactory,
+          now: this.now
+        }).updateList({
+          itemId: actionToRun.listId,
+          ...(actionToRun.title === undefined ? {} : { title: actionToRun.title }),
+          ...(actionToRun.body === undefined ? {} : { body: actionToRun.body }),
+          ...(actionToRun.categoryId === undefined ? {} : { categoryId: actionToRun.categoryId }),
+          ...(actionToRun.containerTabId === undefined ? {} : { containerTabId: actionToRun.containerTabId }),
+          ...(actionToRun.displayMode === undefined ? {} : { displayMode: actionToRun.displayMode }),
+          ...(actionToRun.showCompleted === undefined ? {} : { showCompleted: actionToRun.showCompleted }),
+          ...(actionToRun.progressMode === undefined ? {} : { progressMode: actionToRun.progressMode }),
+          ...(context.actorType === undefined
+            ? {}
+            : { actorType: context.actorType })
+        });
+
+        return {
+          index,
+          actionType: actionToRun.type,
+          status: "completed",
+          summary: summarizeWorkflowAction(actionToRun),
+          targetType: "item",
+          targetId: result.item.id
+        };
+      }
+      case "add_list_item": {
+        const result = await new ListService({
+          connection: this.connection,
+          idFactory: this.idFactory,
+          now: this.now
+        }).addListItem({
+          listId: actionToRun.listId,
+          title: actionToRun.title,
+          body: actionToRun.body ?? null,
+          ...(actionToRun.status === undefined ? {} : { status: actionToRun.status }),
+          ...(actionToRun.depth === undefined ? {} : { depth: actionToRun.depth }),
+          ...(actionToRun.sortOrder === undefined ? {} : { sortOrder: actionToRun.sortOrder }),
+          ...(actionToRun.listItemParentId === undefined ? {} : { listItemParentId: actionToRun.listItemParentId }),
+          ...(actionToRun.startAt === undefined ? {} : { startAt: actionToRun.startAt }),
+          ...(actionToRun.dueAt === undefined ? {} : { dueAt: actionToRun.dueAt }),
+          ...(context.actorType === undefined
+            ? {}
+            : { actorType: context.actorType })
+        });
+
+        return {
+          index,
+          actionType: actionToRun.type,
+          status: "completed",
+          summary: summarizeWorkflowAction(actionToRun),
+          targetType: "list_item",
+          targetId: result.listItem.id
+        };
+      }
+      case "update_list_item": {
+        const result = await new ListService({
+          connection: this.connection,
+          idFactory: this.idFactory,
+          now: this.now
+        }).updateListItem({
+          listItemId: actionToRun.listItemId,
+          ...(actionToRun.title === undefined ? {} : { title: actionToRun.title }),
+          ...(actionToRun.body === undefined ? {} : { body: actionToRun.body }),
+          ...(actionToRun.status === undefined ? {} : { status: actionToRun.status }),
+          ...(actionToRun.depth === undefined ? {} : { depth: actionToRun.depth }),
+          ...(actionToRun.sortOrder === undefined ? {} : { sortOrder: actionToRun.sortOrder }),
+          ...(actionToRun.listItemParentId === undefined ? {} : { listItemParentId: actionToRun.listItemParentId }),
+          ...(actionToRun.startAt === undefined ? {} : { startAt: actionToRun.startAt }),
+          ...(actionToRun.dueAt === undefined ? {} : { dueAt: actionToRun.dueAt }),
+          ...(context.actorType === undefined
+            ? {}
+            : { actorType: context.actorType })
+        });
+
+        return {
+          index,
+          actionType: actionToRun.type,
+          status: "completed",
+          summary: summarizeWorkflowAction(actionToRun),
+          targetType: "list_item",
+          targetId: result.listItem.id
+        };
+      }
+      case "create_note": {
+        const result = await new NoteService({
+          connection: this.connection,
+          idFactory: this.idFactory,
+          now: this.now
+        }).createNote({
+          workspaceId: context.workspaceId,
+          containerId: actionToRun.containerId,
+          title: actionToRun.title,
+          content: actionToRun.content,
+          categoryId: actionToRun.categoryId ?? null,
+          containerTabId: actionToRun.containerTabId ?? null,
+          ...(actionToRun.format === undefined ? {} : { format: actionToRun.format }),
+          ...(context.actorType === undefined
+            ? {}
+            : { actorType: context.actorType })
+        });
+
+        return {
+          index,
+          actionType: actionToRun.type,
+          status: "completed",
+          summary: summarizeWorkflowAction(actionToRun),
+          targetType: "item",
+          targetId: result.item.id
+        };
+      }
+      case "update_note": {
+        const result = await new NoteService({
+          connection: this.connection,
+          idFactory: this.idFactory,
+          now: this.now
+        }).updateNote({
+          itemId: actionToRun.noteId,
+          ...(actionToRun.title === undefined ? {} : { title: actionToRun.title }),
+          ...(actionToRun.content === undefined ? {} : { content: actionToRun.content }),
+          ...(actionToRun.categoryId === undefined ? {} : { categoryId: actionToRun.categoryId }),
+          ...(actionToRun.containerTabId === undefined ? {} : { containerTabId: actionToRun.containerTabId }),
+          ...(context.actorType === undefined
+            ? {}
+            : { actorType: context.actorType })
+        });
+
+        return {
+          index,
+          actionType: actionToRun.type,
+          status: "completed",
+          summary: summarizeWorkflowAction(actionToRun),
+          targetType: "item",
+          targetId: result.item.id
+        };
+      }
       case "create_container_from_template": {
         const result = await new ContainerTemplateService({
           connection: this.connection,
@@ -435,6 +636,167 @@ export class WorkflowActionExecutor {
 
         return null;
       }
+      case "update_task": {
+        if (!isPreviewVariable(action.itemId, options)) {
+          const task = new TaskRepository(this.connection).getByItemId(action.itemId);
+          if (task === null || task.item.workspaceId !== workspaceId) {
+            return `Workflow task was not found: ${action.itemId}.`;
+          }
+        }
+
+        if (
+          action.categoryId !== undefined &&
+          action.categoryId !== null &&
+          new CategoryRepository(this.connection).getById(action.categoryId) === null
+        ) {
+          return `Workflow task category was not found: ${action.categoryId}.`;
+        }
+
+        const dateValidation = validateTaskDateFields(action.startAt, action.dueAt);
+        if (dateValidation !== null) {
+          return dateValidation;
+        }
+
+        return null;
+      }
+      case "create_list": {
+        if (!isPreviewVariable(action.containerId, options)) {
+          const container = new ContainerRepository(this.connection).getById(
+            action.containerId
+          );
+          if (container === null || container.workspaceId !== workspaceId) {
+            return `Workflow list container was not found: ${action.containerId}.`;
+          }
+        }
+
+        if (
+          action.categoryId !== undefined &&
+          action.categoryId !== null &&
+          new CategoryRepository(this.connection).getById(action.categoryId) === null
+        ) {
+          return `Workflow list category was not found: ${action.categoryId}.`;
+        }
+
+        return null;
+      }
+      case "update_list": {
+        if (!isPreviewVariable(action.listId, options)) {
+          const list = new ListRepository(this.connection).getByItemId(action.listId);
+          if (list === null || list.item.workspaceId !== workspaceId) {
+            return `Workflow list was not found: ${action.listId}.`;
+          }
+        }
+
+        if (
+          action.categoryId !== undefined &&
+          action.categoryId !== null &&
+          new CategoryRepository(this.connection).getById(action.categoryId) === null
+        ) {
+          return `Workflow list category was not found: ${action.categoryId}.`;
+        }
+
+        return null;
+      }
+      case "add_list_item": {
+        if (!isPreviewVariable(action.listId, options)) {
+          const list = new ListRepository(this.connection).getByItemId(action.listId);
+          if (list === null || list.item.workspaceId !== workspaceId) {
+            return `Workflow list was not found: ${action.listId}.`;
+          }
+        }
+
+        if (
+          action.listItemParentId !== undefined &&
+          action.listItemParentId !== null &&
+          !isPreviewVariable(action.listItemParentId, options)
+        ) {
+          const parent = new ListRepository(this.connection).getListItemById(
+            action.listItemParentId
+          );
+          if (
+            parent === null ||
+            parent.workspaceId !== workspaceId ||
+            (!isPreviewVariable(action.listId, options) && parent.listId !== action.listId)
+          ) {
+            return `Workflow list item parent was not found in list: ${action.listItemParentId}.`;
+          }
+        }
+
+        const dateValidation = validateListItemDateFields(action.startAt, action.dueAt);
+        if (dateValidation !== null) {
+          return dateValidation;
+        }
+
+        return null;
+      }
+      case "update_list_item": {
+        if (!isPreviewVariable(action.listItemId, options)) {
+          const listItem = new ListRepository(this.connection).getListItemById(
+            action.listItemId
+          );
+          if (listItem === null || listItem.workspaceId !== workspaceId) {
+            return `Workflow list item was not found: ${action.listItemId}.`;
+          }
+        }
+
+        if (
+          action.listItemParentId !== undefined &&
+          action.listItemParentId !== null &&
+          !isPreviewVariable(action.listItemParentId, options)
+        ) {
+          const parent = new ListRepository(this.connection).getListItemById(
+            action.listItemParentId
+          );
+          if (parent === null || parent.workspaceId !== workspaceId) {
+            return `Workflow list item parent was not found: ${action.listItemParentId}.`;
+          }
+        }
+
+        const dateValidation = validateListItemDateFields(action.startAt, action.dueAt);
+        if (dateValidation !== null) {
+          return dateValidation;
+        }
+
+        return null;
+      }
+      case "create_note": {
+        if (!isPreviewVariable(action.containerId, options)) {
+          const container = new ContainerRepository(this.connection).getById(
+            action.containerId
+          );
+          if (container === null || container.workspaceId !== workspaceId) {
+            return `Workflow note container was not found: ${action.containerId}.`;
+          }
+        }
+
+        if (
+          action.categoryId !== undefined &&
+          action.categoryId !== null &&
+          new CategoryRepository(this.connection).getById(action.categoryId) === null
+        ) {
+          return `Workflow note category was not found: ${action.categoryId}.`;
+        }
+
+        return null;
+      }
+      case "update_note": {
+        if (!isPreviewVariable(action.noteId, options)) {
+          const note = new NoteRepository(this.connection).getByItemId(action.noteId);
+          if (note === null || note.item.workspaceId !== workspaceId) {
+            return `Workflow note was not found: ${action.noteId}.`;
+          }
+        }
+
+        if (
+          action.categoryId !== undefined &&
+          action.categoryId !== null &&
+          new CategoryRepository(this.connection).getById(action.categoryId) === null
+        ) {
+          return `Workflow note category was not found: ${action.categoryId}.`;
+        }
+
+        return null;
+      }
       case "create_container_from_template": {
         const template = new TemplateRepository(this.connection).getById(action.templateId);
         if (
@@ -515,8 +877,73 @@ function resolveTriggerItemAction(
       }
 
       return action;
-    case "create_task":
-    case "create_container_from_template":
+      case "create_task":
+      case "create_list":
+      case "create_note":
+      case "create_container_from_template":
+      return action;
+    case "update_task":
+      if (
+        action.itemId === WORKFLOW_TRIGGER_ITEM_ID_TOKEN &&
+        context.triggerItemId !== undefined
+      ) {
+        return { ...action, itemId: context.triggerItemId };
+      }
+
+      if (
+        action.itemId === WORKFLOW_TRIGGER_TARGET_ID_TOKEN &&
+        context.triggerTargetType === "item" &&
+        context.triggerTargetId !== undefined
+      ) {
+        return { ...action, itemId: context.triggerTargetId };
+      }
+
+      return action;
+    case "update_list":
+      if (
+        action.listId === WORKFLOW_TRIGGER_ITEM_ID_TOKEN &&
+        context.triggerItemId !== undefined
+      ) {
+        return { ...action, listId: context.triggerItemId };
+      }
+
+      if (
+        action.listId === WORKFLOW_TRIGGER_TARGET_ID_TOKEN &&
+        context.triggerTargetType === "item" &&
+        context.triggerTargetId !== undefined
+      ) {
+        return { ...action, listId: context.triggerTargetId };
+      }
+
+      return action;
+    case "add_list_item":
+      return action;
+    case "update_list_item":
+      if (
+        action.listItemId === WORKFLOW_TRIGGER_TARGET_ID_TOKEN &&
+        context.triggerTargetType === "list_item" &&
+        context.triggerTargetId !== undefined
+      ) {
+        return { ...action, listItemId: context.triggerTargetId };
+      }
+
+      return action;
+    case "update_note":
+      if (
+        action.noteId === WORKFLOW_TRIGGER_ITEM_ID_TOKEN &&
+        context.triggerItemId !== undefined
+      ) {
+        return { ...action, noteId: context.triggerItemId };
+      }
+
+      if (
+        action.noteId === WORKFLOW_TRIGGER_TARGET_ID_TOKEN &&
+        context.triggerTargetType === "item" &&
+        context.triggerTargetId !== undefined
+      ) {
+        return { ...action, noteId: context.triggerTargetId };
+      }
+
       return action;
   }
 }
@@ -533,6 +960,20 @@ function getActionTarget(action: WorkflowAction): {
       return { targetType: "item", targetId: action.itemId };
     case "create_task":
       return { targetType: "item", targetId: null };
+    case "update_task":
+      return { targetType: "item", targetId: action.itemId };
+    case "create_list":
+      return { targetType: "item", targetId: null };
+    case "update_list":
+      return { targetType: "item", targetId: action.listId };
+    case "add_list_item":
+      return { targetType: "list_item", targetId: null };
+    case "update_list_item":
+      return { targetType: "list_item", targetId: action.listItemId };
+    case "create_note":
+      return { targetType: "item", targetId: null };
+    case "update_note":
+      return { targetType: "item", targetId: action.noteId };
     case "create_container_from_template":
       return { targetType: "container", targetId: null };
   }
@@ -557,12 +998,19 @@ function validateCreateContainerFromTemplateBaseDate(
 }
 
 function validateCreateTaskDates(action: Extract<WorkflowAction, { type: "create_task" }>): string | null {
-  const startAt = parseWorkflowDate(action.startAt, "startAt");
+  return validateTaskDateFields(action.startAt, action.dueAt);
+}
+
+function validateTaskDateFields(
+  startAtValue: string | null | undefined,
+  dueAtValue: string | null | undefined
+): string | null {
+  const startAt = parseWorkflowDate(startAtValue, "startAt");
   if (typeof startAt === "string") {
     return startAt;
   }
 
-  const dueAt = parseWorkflowDate(action.dueAt, "dueAt");
+  const dueAt = parseWorkflowDate(dueAtValue, "dueAt");
   if (typeof dueAt === "string") {
     return dueAt;
   }
@@ -572,6 +1020,16 @@ function validateCreateTaskDates(action: Extract<WorkflowAction, { type: "create
   }
 
   return null;
+}
+
+function validateListItemDateFields(
+  startAtValue: string | null | undefined,
+  dueAtValue: string | null | undefined
+): string | null {
+  const validation = validateTaskDateFields(startAtValue, dueAtValue);
+  return validation === null
+    ? null
+    : validation.replace("Workflow task", "Workflow list item");
 }
 
 function parseWorkflowDate(

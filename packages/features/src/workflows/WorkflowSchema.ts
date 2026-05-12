@@ -92,6 +92,81 @@ export type WorkflowAction = WorkflowActionBase &
       priority?: number | null;
     }
   | {
+      type: "update_task";
+      itemId: string;
+      title?: string;
+      body?: string | null;
+      categoryId?: string | null;
+      containerTabId?: string | null;
+      dueAt?: string | null;
+      startAt?: string | null;
+      priority?: number | null;
+      status?: "open" | "done" | "waiting" | "someday" | "deferred" | "cancelled";
+    }
+  | {
+      type: "create_list";
+      containerId: string;
+      title: string;
+      body?: string | null;
+      categoryId?: string | null;
+      containerTabId?: string | null;
+      displayMode?: "checklist" | "pipeline";
+      showCompleted?: boolean;
+      progressMode?: "count" | "manual" | "none";
+    }
+  | {
+      type: "update_list";
+      listId: string;
+      title?: string;
+      body?: string | null;
+      categoryId?: string | null;
+      containerTabId?: string | null;
+      displayMode?: "checklist" | "pipeline";
+      showCompleted?: boolean;
+      progressMode?: "count" | "manual" | "none";
+    }
+  | {
+      type: "add_list_item";
+      listId: string;
+      title: string;
+      body?: string | null;
+      status?: "open" | "done" | "waiting" | "cancelled";
+      depth?: number;
+      sortOrder?: number;
+      listItemParentId?: string | null;
+      startAt?: string | null;
+      dueAt?: string | null;
+    }
+  | {
+      type: "update_list_item";
+      listItemId: string;
+      title?: string;
+      body?: string | null;
+      status?: "open" | "done" | "waiting" | "cancelled";
+      depth?: number;
+      sortOrder?: number;
+      listItemParentId?: string | null;
+      startAt?: string | null;
+      dueAt?: string | null;
+    }
+  | {
+      type: "create_note";
+      containerId: string;
+      title: string;
+      content: string;
+      categoryId?: string | null;
+      containerTabId?: string | null;
+      format?: "markdown";
+    }
+  | {
+      type: "update_note";
+      noteId: string;
+      title?: string;
+      content?: string;
+      categoryId?: string | null;
+      containerTabId?: string | null;
+    }
+  | {
       type: "create_container_from_template";
       templateId: string;
       name?: string | null;
@@ -223,6 +298,62 @@ export const WORKFLOW_ACTION_REGISTRY: readonly WorkflowActionRegistryEntry[] = 
     localOnly: true,
     previewable: true,
     targetTypes: ["container"]
+  },
+  {
+    type: "update_task",
+    label: "Update task",
+    description: "Update local task fields through the task service.",
+    localOnly: true,
+    previewable: true,
+    targetTypes: ["item"]
+  },
+  {
+    type: "create_list",
+    label: "Create list",
+    description: "Create a local checklist in a selected container.",
+    localOnly: true,
+    previewable: true,
+    targetTypes: ["container"]
+  },
+  {
+    type: "update_list",
+    label: "Update list",
+    description: "Update local checklist metadata and display settings.",
+    localOnly: true,
+    previewable: true,
+    targetTypes: ["item"]
+  },
+  {
+    type: "add_list_item",
+    label: "Add list item",
+    description: "Add a local row to a checklist.",
+    localOnly: true,
+    previewable: true,
+    targetTypes: ["list"]
+  },
+  {
+    type: "update_list_item",
+    label: "Update list item",
+    description: "Update a local checklist row.",
+    localOnly: true,
+    previewable: true,
+    targetTypes: ["list_item"]
+  },
+  {
+    type: "create_note",
+    label: "Create note",
+    description: "Create a local Markdown note in a selected container.",
+    localOnly: true,
+    previewable: true,
+    targetTypes: ["container"]
+  },
+  {
+    type: "update_note",
+    label: "Update note",
+    description: "Update a local Markdown note through the note service.",
+    localOnly: true,
+    previewable: true,
+    targetTypes: ["item"]
   },
   {
     type: "create_container_from_template",
@@ -396,6 +527,20 @@ export function summarizeWorkflowAction(action: WorkflowAction): string {
         action.startAt === undefined || action.startAt === null ? null : `start ${action.startAt}`,
         action.dueAt === undefined || action.dueAt === null ? null : `due ${action.dueAt}`
       ].filter(Boolean).join("; ") + ".";
+    case "update_task":
+      return `Update task ${action.itemId}.`;
+    case "create_list":
+      return `Create list "${action.title}" in container ${action.containerId}.`;
+    case "update_list":
+      return `Update list ${action.listId}.`;
+    case "add_list_item":
+      return `Add list item "${action.title}" to list ${action.listId}.`;
+    case "update_list_item":
+      return `Update list item ${action.listItemId}.`;
+    case "create_note":
+      return `Create note "${action.title}" in container ${action.containerId}.`;
+    case "update_note":
+      return `Update note ${action.noteId}.`;
     case "create_container_from_template":
       return [
         `Create project/contact from template ${action.templateId}`,
@@ -464,6 +609,86 @@ function validateWorkflowAction(value: unknown, path: string): WorkflowValidatio
       if (value.priority !== undefined && value.priority !== null && typeof value.priority !== "number") {
         issues.push(error(`${path}.priority`, "Task priority must be a number when provided."));
       }
+      break;
+    case "update_task":
+      requireNonEmptyString(value.itemId, `${path}.itemId`, issues);
+      validateOptionalItemFields(value, path, issues, "Task");
+      if (value.dueAt !== undefined) requireNullableString(value.dueAt, `${path}.dueAt`, issues);
+      if (value.startAt !== undefined) requireNullableString(value.startAt, `${path}.startAt`, issues);
+      if (value.priority !== undefined && value.priority !== null && typeof value.priority !== "number") {
+        issues.push(error(`${path}.priority`, "Task priority must be a number when provided."));
+      }
+      if (value.status !== undefined) {
+        requireOneOf(
+          value.status,
+          ["open", "done", "waiting", "someday", "deferred", "cancelled"],
+          `${path}.status`,
+          issues
+        );
+      }
+      requireAtLeastOne(value, path, issues, [
+        "title",
+        "body",
+        "categoryId",
+        "containerTabId",
+        "dueAt",
+        "startAt",
+        "priority",
+        "status"
+      ]);
+      break;
+    case "create_list":
+      requireNonEmptyString(value.containerId, `${path}.containerId`, issues);
+      requireNonEmptyString(value.title, `${path}.title`, issues);
+      validateOptionalListFields(value, path, issues, "List");
+      break;
+    case "update_list":
+      requireNonEmptyString(value.listId, `${path}.listId`, issues);
+      validateOptionalListFields(value, path, issues, "List");
+      requireAtLeastOne(value, path, issues, [
+        "title",
+        "body",
+        "categoryId",
+        "containerTabId",
+        "displayMode",
+        "showCompleted",
+        "progressMode"
+      ]);
+      break;
+    case "add_list_item":
+      requireNonEmptyString(value.listId, `${path}.listId`, issues);
+      requireNonEmptyString(value.title, `${path}.title`, issues);
+      validateOptionalListItemFields(value, path, issues, "List item");
+      break;
+    case "update_list_item":
+      requireNonEmptyString(value.listItemId, `${path}.listItemId`, issues);
+      validateOptionalListItemFields(value, path, issues, "List item");
+      requireAtLeastOne(value, path, issues, [
+        "title",
+        "body",
+        "status",
+        "depth",
+        "sortOrder",
+        "listItemParentId",
+        "startAt",
+        "dueAt"
+      ]);
+      break;
+    case "create_note":
+      requireNonEmptyString(value.containerId, `${path}.containerId`, issues);
+      requireNonEmptyString(value.title, `${path}.title`, issues);
+      requireNonEmptyString(value.content, `${path}.content`, issues);
+      validateOptionalNoteFields(value, path, issues, "Note");
+      break;
+    case "update_note":
+      requireNonEmptyString(value.noteId, `${path}.noteId`, issues);
+      validateOptionalNoteFields(value, path, issues, "Note");
+      requireAtLeastOne(value, path, issues, [
+        "title",
+        "content",
+        "categoryId",
+        "containerTabId"
+      ]);
       break;
     case "create_container_from_template":
       requireNonEmptyString(value.templateId, `${path}.templateId`, issues);
@@ -609,6 +834,89 @@ function validateMetadataTrigger(
   requireOptionalStringArray(value.filters.categoryIds, `${path}.filters.categoryIds`, issues);
 
   return issues;
+}
+
+function validateOptionalItemFields(
+  value: Record<string, unknown>,
+  path: string,
+  issues: WorkflowValidationIssue[],
+  label: string
+): void {
+  if (value.title !== undefined) requireNonEmptyString(value.title, `${path}.title`, issues);
+  if (value.body !== undefined && value.body !== null && typeof value.body !== "string") {
+    issues.push(error(`${path}.body`, `${label} body must be a string when provided.`));
+  }
+  if (value.categoryId !== undefined) requireNullableString(value.categoryId, `${path}.categoryId`, issues);
+  if (value.containerTabId !== undefined) requireNullableString(value.containerTabId, `${path}.containerTabId`, issues);
+}
+
+function validateOptionalListFields(
+  value: Record<string, unknown>,
+  path: string,
+  issues: WorkflowValidationIssue[],
+  label: string
+): void {
+  validateOptionalItemFields(value, path, issues, label);
+  if (value.displayMode !== undefined) {
+    requireOneOf(value.displayMode, ["checklist", "pipeline"], `${path}.displayMode`, issues);
+  }
+  if (value.progressMode !== undefined) {
+    requireOneOf(value.progressMode, ["count", "manual", "none"], `${path}.progressMode`, issues);
+  }
+  if (value.showCompleted !== undefined && typeof value.showCompleted !== "boolean") {
+    issues.push(error(`${path}.showCompleted`, `${label} showCompleted must be a boolean when provided.`));
+  }
+}
+
+function validateOptionalListItemFields(
+  value: Record<string, unknown>,
+  path: string,
+  issues: WorkflowValidationIssue[],
+  label: string
+): void {
+  if (value.title !== undefined) requireNonEmptyString(value.title, `${path}.title`, issues);
+  if (value.body !== undefined && value.body !== null && typeof value.body !== "string") {
+    issues.push(error(`${path}.body`, `${label} body must be a string when provided.`));
+  }
+  if (value.status !== undefined) {
+    requireOneOf(
+      value.status,
+      ["open", "done", "waiting", "cancelled"],
+      `${path}.status`,
+      issues
+    );
+  }
+  if (value.depth !== undefined && typeof value.depth !== "number") {
+    issues.push(error(`${path}.depth`, `${label} depth must be a number when provided.`));
+  }
+  if (value.sortOrder !== undefined && typeof value.sortOrder !== "number") {
+    issues.push(error(`${path}.sortOrder`, `${label} sortOrder must be a number when provided.`));
+  }
+  if (value.listItemParentId !== undefined) requireNullableString(value.listItemParentId, `${path}.listItemParentId`, issues);
+  if (value.startAt !== undefined) requireNullableString(value.startAt, `${path}.startAt`, issues);
+  if (value.dueAt !== undefined) requireNullableString(value.dueAt, `${path}.dueAt`, issues);
+}
+
+function validateOptionalNoteFields(
+  value: Record<string, unknown>,
+  path: string,
+  issues: WorkflowValidationIssue[],
+  label: string
+): void {
+  validateOptionalItemFields(value, path, issues, label);
+  if (value.content !== undefined) requireNonEmptyString(value.content, `${path}.content`, issues);
+  if (value.format !== undefined) requireEqual(value.format, "markdown", `${path}.format`, issues);
+}
+
+function requireAtLeastOne(
+  value: Record<string, unknown>,
+  path: string,
+  issues: WorkflowValidationIssue[],
+  keys: readonly string[]
+): void {
+  if (keys.every((key) => value[key] === undefined)) {
+    issues.push(error(path, `At least one field must be provided: ${keys.join(", ")}.`));
+  }
 }
 
 function requireOptionalStringArray(
