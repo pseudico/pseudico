@@ -40,6 +40,7 @@ export {
   validateWorkflowDefinitionSchema
 } from "./WorkflowSchema";
 export { WorkflowVariableResolver } from "./WorkflowVariableResolver";
+export { WorkflowRunHistoryService } from "./WorkflowRunHistoryService";
 export type {
   WorkflowActionResolution,
   WorkflowConditionEvaluation,
@@ -54,6 +55,15 @@ export type {
   WorkflowActionPreview,
   WorkflowServiceIdFactory
 } from "./WorkflowActionExecutor";
+export type {
+  ListWorkflowRunHistoryInput,
+  RollbackWorkflowRunInput,
+  WorkflowRunDiagnostics,
+  WorkflowRunHistoryAction,
+  WorkflowRunHistoryEntry,
+  WorkflowRunHistoryServiceIdFactory,
+  WorkflowRunRollbackResult
+} from "./WorkflowRunHistoryService";
 export type {
   ItemCreatedWorkflowEvent,
   ItemCreatedWorkflowRunResult,
@@ -75,8 +85,8 @@ export type {
 export const workflowsModuleContract: FeatureModuleContract = {
   module: "workflows",
   purpose:
-    "Define and run local manual workflows with previewed, service-backed actions.",
-  owns: ["manual workflow definitions", "run previews", "workflow run records"],
+    "Define and run local workflows with previewed actions, run history, diagnostics, and safe rollback hooks.",
+  owns: ["workflow definitions", "run previews", "workflow run records", "run rollback diagnostics"],
   doesNotOwn: ["scheduled automation", "cloud workflows", "external integrations"],
   integrationPoints: ["metadata", "items", "tasks", "activity", "search"],
   priority: "V2"

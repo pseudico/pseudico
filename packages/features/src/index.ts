@@ -324,6 +324,7 @@ export {
   WORKFLOW_TRIGGER_ITEM_ID_TOKEN,
   WORKFLOW_TRIGGER_TARGET_ID_TOKEN,
   WorkflowActionExecutor,
+  WorkflowRunHistoryService,
   WorkflowService,
   WorkflowTriggerService,
   createWorkflowDefinitionSchema,
@@ -900,9 +901,16 @@ export type {
   WorkflowActionExecutionResult,
   WorkflowActionPreview,
   WorkflowPreviewResult,
+  WorkflowRunDiagnostics,
+  WorkflowRunHistoryAction,
+  WorkflowRunHistoryEntry,
+  WorkflowRunHistoryServiceIdFactory,
+  WorkflowRunRollbackResult,
   WorkflowRunResult,
+  ListWorkflowRunHistoryInput,
   ItemCreatedWorkflowEvent,
   ItemCreatedWorkflowRunResult,
+  RollbackWorkflowRunInput,
   WorkflowServiceIdFactory
 } from "./workflows";
 export type {

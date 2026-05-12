@@ -65,6 +65,7 @@ import {
   UndoService,
   undoModuleContract,
   workflowsModuleContract,
+  WorkflowRunHistoryService,
   WorkflowService,
   workspaceModuleContract,
   WikilinkService,
@@ -284,6 +285,7 @@ describe("feature module exports", () => {
 
   it("exports the workflow service implementation", () => {
     expect(WorkflowService).toBeDefined();
+    expect(WorkflowRunHistoryService).toBeDefined();
   });
 
   it("exports the undo service implementation", () => {

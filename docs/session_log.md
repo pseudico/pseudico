@@ -4310,3 +4310,50 @@ Next actions: Report outcome; leave unrelated untracked files untouched.
 - Files changed: docs/session_log.md
 - Open questions / risks: GitHub CI is still in progress; merge waits on green CI.
 - Next actions: Poll CI; merge if green; promote next issue.
+
+- Timestamp: 2026-05-12T22:34:53.6129626+10:00
+- Objective: Complete PSE-162 merge and next-ticket promotion.
+- Decisions made: Squash-merged PR #151 at 9badf5e; deleted merged branch; moved PSE-162 Done; promoted PSE-164 Codex Ready.
+- Files changed: docs/session_log.md
+- Open questions / risks: Final session log entry is local-only after merge; unrelated untracked files remain.
+- Next actions: Start PSE-164 next run; keep only PSE-164 Codex Ready.
+
+## 2026-05-13T07:50:17.5423811+10:00
+Objective: Reconcile Linear/GitHub active work before selecting next Local Work OS ticket.
+Decisions made:
+- No PSE issues found in PR Open or In Progress for the target project.
+- Found exactly one Codex Ready issue: PSE-164.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked files exist and will be left untouched.
+Next actions: Move PSE-164 to In Progress; read docs/source; implement scope.
+
+## 2026-05-13T08:40:30.6503279+10:00
+Objective: Resume PSE-164 implementation after premature stop.
+Decisions made:
+- Continue on branch codex/PSE-164-workflow-run-history.
+- Keep unrelated untracked files untouched.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need scope fit after inspecting workflow services/schema.
+Next actions: Inspect workflow code; implement history/rollback/diagnostics; run checks.
+
+## 2026-05-13T08:55:57.0449810+10:00
+Objective: Implement and verify PSE-164 workflow run history/rollback locally.
+Decisions made:
+- Added rollback metadata columns, run history service, captured activity IDs, diagnostics, and docs/UI copy.
+- Rollback uses UndoService for captured undoable activities in reverse order.
+Files changed:
+- packages/**; apps/desktop/**; docs/**
+Open questions / risks: Full rollback limited to activity types supported by UndoService.
+Next actions: Commit, push, open PR; move Linear to PR Open.
+
+## 2026-05-13T08:56:32.8440149+10:00
+Objective: Complete local verification for PSE-164.
+Decisions made:
+- Reran sandbox-failing Vitest/build commands with escalation per EPERM rule.
+- Full lint, typecheck, test, and build now pass.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI still needs to run on GitHub after PR opens.
+Next actions: Stage and commit; push branch; open ready PR.

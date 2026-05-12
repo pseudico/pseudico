@@ -46,6 +46,11 @@ export const workflowRuns = sqliteTable(
     previewJson: text("preview_json").notNull(),
     actionResultsJson: text("action_results_json").notNull().default("[]"),
     errorMessage: text("error_message"),
+    rollbackStatus: text("rollback_status"),
+    rollbackActivityIdsJson: text("rollback_activity_ids_json"),
+    rollbackErrorMessage: text("rollback_error_message"),
+    rollbackStartedAt: text("rollback_started_at"),
+    rollbackCompletedAt: text("rollback_completed_at"),
     startedAt: text("started_at").notNull(),
     completedAt: text("completed_at"),
     createdAt: text("created_at").notNull()
@@ -60,6 +65,7 @@ export const workflowRuns = sqliteTable(
       table.createdAt
     ),
     check("ck_workflow_runs_trigger_type", sql`${table.triggerType} in ('manual', 'item_created', 'file_imported', 'tag_added', 'tag_removed', 'category_assigned')`),
-    check("ck_workflow_runs_status", sql`${table.status} in ('running', 'completed', 'failed')`)
+    check("ck_workflow_runs_status", sql`${table.status} in ('running', 'completed', 'failed')`),
+    check("ck_workflow_runs_rollback_status", sql`${table.rollbackStatus} is null or ${table.rollbackStatus} in ('completed', 'partial', 'failed', 'not_available')`)
   ]
 );

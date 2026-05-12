@@ -259,11 +259,14 @@ export {
   WorkflowRepository,
   type CreateWorkflowDefinitionInput,
   type CreateWorkflowRunInput,
+  type ListWorkflowRunsInput,
   type ListWorkflowDefinitionsInput,
+  type UpdateWorkflowRunRollbackInput,
   type UpdateWorkflowRunInput,
   type WorkflowDefinitionRecord,
   type WorkflowDefinitionStatus,
   type WorkflowRunRecord,
+  type WorkflowRunRollbackStatus,
   type WorkflowRunStatus,
   type WorkflowTriggerType
 } from "./WorkflowRepository";

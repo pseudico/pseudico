@@ -17,6 +17,7 @@ import { dashboardExtraWidgetTypesSql } from "./0016_dashboard_extra_widget_type
 import { workflowItemCreatedTriggerSql } from "./0017_workflow_item_created_trigger";
 import { workflowFileImportedTriggerSql } from "./0018_workflow_file_imported_trigger";
 import { workflowMetadataTriggersSql } from "./0019_workflow_metadata_triggers";
+import { workflowRunRollbackSql } from "./0020_workflow_run_rollback";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -133,6 +134,12 @@ export const migrations: MigrationDefinition[] = [
     name: "workflow_metadata_triggers",
     sql: workflowMetadataTriggersSql,
     checksum: "pse-158-workflow-metadata-triggers-v1"
+  },
+  {
+    version: 20,
+    name: "workflow_run_rollback",
+    sql: workflowRunRollbackSql,
+    checksum: "pse-164-workflow-run-rollback-v1"
   }
 ];
 

@@ -9,6 +9,11 @@ export type WorkflowTriggerType =
   | "category_assigned";
 export type WorkflowDefinitionStatus = "enabled" | "disabled";
 export type WorkflowRunStatus = "running" | "completed" | "failed";
+export type WorkflowRunRollbackStatus =
+  | "completed"
+  | "partial"
+  | "failed"
+  | "not_available";
 
 type WorkflowDefinitionRow = {
   id: string;
@@ -32,6 +37,11 @@ type WorkflowRunRow = {
   preview_json: string;
   action_results_json: string;
   error_message: string | null;
+  rollback_status: string | null;
+  rollback_activity_ids_json: string | null;
+  rollback_error_message: string | null;
+  rollback_started_at: string | null;
+  rollback_completed_at: string | null;
   started_at: string;
   completed_at: string | null;
   created_at: string;
@@ -59,6 +69,11 @@ export type WorkflowRunRecord = {
   previewJson: string;
   actionResultsJson: string;
   errorMessage: string | null;
+  rollbackStatus: WorkflowRunRollbackStatus | null;
+  rollbackActivityIdsJson: string | null;
+  rollbackErrorMessage: string | null;
+  rollbackStartedAt: string | null;
+  rollbackCompletedAt: string | null;
   startedAt: string;
   completedAt: string | null;
   createdAt: string;
@@ -101,6 +116,22 @@ export type UpdateWorkflowRunInput = {
   actionResultsJson: string;
   completedAt: string;
   errorMessage?: string | null;
+};
+
+export type ListWorkflowRunsInput = {
+  workspaceId: string;
+  workflowDefinitionId?: string;
+  status?: WorkflowRunStatus;
+  limit?: number;
+};
+
+export type UpdateWorkflowRunRollbackInput = {
+  id: string;
+  rollbackStatus: WorkflowRunRollbackStatus;
+  rollbackActivityIdsJson: string;
+  rollbackStartedAt: string;
+  rollbackCompletedAt: string;
+  rollbackErrorMessage?: string | null;
 };
 
 export class WorkflowRepository {
@@ -289,6 +320,64 @@ export class WorkflowRepository {
 
     return rows.map(toWorkflowRunRecord);
   }
+
+  listRuns(input: ListWorkflowRunsInput): WorkflowRunRecord[] {
+    const where = ["workspace_id = ?"];
+    const values: unknown[] = [input.workspaceId];
+
+    if (input.workflowDefinitionId !== undefined) {
+      where.push("workflow_definition_id = ?");
+      values.push(input.workflowDefinitionId);
+    }
+
+    if (input.status !== undefined) {
+      where.push("status = ?");
+      values.push(input.status);
+    }
+
+    values.push(normalizeRunLimit(input.limit));
+
+    const rows = this.connection.sqlite
+      .prepare<unknown[], WorkflowRunRow>(
+        `select *
+         from workflow_runs
+         where ${where.join(" and ")}
+         order by created_at desc, id desc
+         limit ?`
+      )
+      .all(...values);
+
+    return rows.map(toWorkflowRunRecord);
+  }
+
+  updateRunRollback(input: UpdateWorkflowRunRollbackInput): WorkflowRunRecord {
+    this.connection.sqlite
+      .prepare(
+        `update workflow_runs
+         set rollback_status = ?,
+             rollback_activity_ids_json = ?,
+             rollback_error_message = ?,
+             rollback_started_at = ?,
+             rollback_completed_at = ?
+         where id = ?`
+      )
+      .run(
+        input.rollbackStatus,
+        input.rollbackActivityIdsJson,
+        input.rollbackErrorMessage ?? null,
+        input.rollbackStartedAt,
+        input.rollbackCompletedAt,
+        input.id
+      );
+
+    const updated = this.getRunById(input.id);
+
+    if (updated === null) {
+      throw new Error(`Workflow run row was not found: ${input.id}.`);
+    }
+
+    return updated;
+  }
 }
 
 function toWorkflowDefinitionRecord(
@@ -318,8 +407,21 @@ function toWorkflowRunRecord(row: WorkflowRunRow): WorkflowRunRecord {
     previewJson: row.preview_json,
     actionResultsJson: row.action_results_json,
     errorMessage: row.error_message,
+    rollbackStatus: row.rollback_status as WorkflowRunRollbackStatus | null,
+    rollbackActivityIdsJson: row.rollback_activity_ids_json,
+    rollbackErrorMessage: row.rollback_error_message,
+    rollbackStartedAt: row.rollback_started_at,
+    rollbackCompletedAt: row.rollback_completed_at,
     startedAt: row.started_at,
     completedAt: row.completed_at,
     createdAt: row.created_at
   };
+}
+
+function normalizeRunLimit(limit: number | undefined): number {
+  if (limit === undefined || !Number.isFinite(limit) || limit <= 0) {
+    return 50;
+  }
+
+  return Math.min(Math.floor(limit), 250);
 }

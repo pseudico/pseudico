@@ -110,6 +110,7 @@ export const ActivityAction = {
   workflowCreated: "workflow_created",
   workflowRunCompleted: "workflow_run_completed",
   workflowRunFailed: "workflow_run_failed",
+  workflowRunRolledBack: "workflow_run_rolled_back",
   operationUndone: "operation_undone",
   operationRedone: "operation_redone",
   trashRestored: "trash_restored",
