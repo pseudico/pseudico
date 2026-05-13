@@ -902,6 +902,14 @@ attachments. Does not own cloud migration, remote storage, renderer filesystem
 access, or arbitrary path traversal. Integrates with Projects, Tabs, Notes,
 Files/attachments, Search, and Activity Log through existing service write flows.
 
+### External Import Research
+
+Owns docs-only evaluation of local export files from common productivity apps,
+including importer order, tradeoffs, fixture requirements, and proposed follow-up
+tickets. Does not own app-specific production importers, cloud connectors,
+account login, telemetry, remote attachment fetching, or proprietary UI/assets.
+See `docs/import-research/COMMON_APP_IMPORT_FORMATS.md`.
+
 ### Printing
 
 Owns:
