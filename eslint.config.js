@@ -27,7 +27,7 @@ export default [
     }
   },
   {
-    files: ["apps/**/*.mjs", "packages/**/*.mjs", "*.mjs"],
+    files: ["apps/**/*.mjs", "packages/**/*.mjs", "scripts/**/*.mjs", "*.mjs"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",

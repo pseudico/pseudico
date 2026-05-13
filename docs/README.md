@@ -38,6 +38,8 @@ docs and the linked Linear issue.
 - `ROADMAP.md` summarizes the staged implementation path.
 - `MODULE_REGISTRY.md` names planned product modules and their responsibilities.
 - `QA_SCRIPTS.md` lists manual and automated smoke checks for MVP workflows.
+- `PERFORMANCE.md` defines large-workspace benchmark fixtures, budgets, and
+  report artifacts.
 - `ACCESSIBILITY.md` documents keyboard behavior and manual accessibility checks.
 - `DECISIONS/` stores accepted architecture decision records.
 

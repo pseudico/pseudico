@@ -44,6 +44,16 @@ pnpm --filter @local-work-os/db test
 pnpm --filter @local-work-os/desktop test
 ```
 
+Large-workspace performance tickets should run the local benchmark harness after
+the standard checks:
+
+```bash
+pnpm benchmark:large -- --sizes 1000,10000 --out docs/performance/reports/latest.json
+```
+
+Use the full `1000,10000,100000` size set for release-gate or hardware-baseline
+runs. See `docs/PERFORMANCE.md` for budgets and report expectations.
+
 ## Domain Logic
 
 Domain logic belongs in `packages/core` or `packages/features` and should be

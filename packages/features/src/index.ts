@@ -39,6 +39,7 @@ export const plannedFeatureAreas = [
   "export",
   "printing",
   "appearance",
+  "performance",
   "privacy",
   "templates",
   "workflows",
@@ -62,6 +63,21 @@ export {
   appearanceModuleContract,
   normalizeAppearanceSettingsValue
 } from "./appearance";
+export {
+  LARGE_WORKSPACE_BENCHMARK_BUDGETS,
+  LargeWorkspaceBenchmarkService,
+  getLargeWorkspaceBenchmarkBudgets,
+  performanceModuleContract
+} from "./performance";
+export type {
+  LargeWorkspaceBenchmarkBudget,
+  LargeWorkspaceBenchmarkBudgetSet,
+  LargeWorkspaceBenchmarkInput,
+  LargeWorkspaceBenchmarkOperation,
+  LargeWorkspaceBenchmarkOperationResult,
+  LargeWorkspaceBenchmarkResult,
+  LargeWorkspaceBenchmarkSize
+} from "./performance";
 export {
   DEFAULT_PRIVACY_NETWORK_SETTINGS,
   NETWORK_FEATURE_IDS,

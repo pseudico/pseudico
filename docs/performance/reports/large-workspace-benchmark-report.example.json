@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-14T00:00:00.000Z",
+  "localOnly": true,
+  "command": "pnpm benchmark:large -- --sizes 1000 --out docs/performance/reports/latest.json",
+  "sizes": [
+    {
+      "itemCount": 1000,
+      "workspaceRoot": null,
+      "seedElapsedMs": 250,
+      "seed": {
+        "workspaceId": "benchmark_workspace_1000",
+        "containerCount": 100,
+        "itemCount": 1000,
+        "taskCount": 800,
+        "noteCount": 100,
+        "listCount": 100,
+        "listItemCount": 300,
+        "searchRecordCount": 1000,
+        "activityEventCount": 1000
+      },
+      "benchmark": {
+        "workspaceId": "benchmark_workspace_1000",
+        "itemCount": 1000,
+        "generatedAt": "2026-05-14T00:00:00.000Z",
+        "passed": true,
+        "operations": [
+          {
+            "operation": "open",
+            "elapsedMs": 20,
+            "maxMs": 200,
+            "passedBudget": true,
+            "rowCount": 2101,
+            "notes": "Open summary should use bounded startup counts, not unbounded feed reads."
+          },
+          {
+            "operation": "search",
+            "elapsedMs": 40,
+            "maxMs": 150,
+            "passedBudget": true,
+            "rowCount": 25,
+            "notes": "Search budget covers indexed query hydration for the first 25 results."
+          }
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "Example values document report shape only.",
+    "Run the benchmark script on the target machine for current baseline numbers."
+  ]
+}
