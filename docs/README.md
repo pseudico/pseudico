@@ -28,6 +28,8 @@ docs and the linked Linear issue.
   extension scaffold, pairing token, and localhost/native messaging setup.
 - `IMAP_IMPORT.md` documents the optional local IMAP importer boundary,
   credential approach, duplicate prevention, and current adapter limitation.
+- `CSV_TSV_IMPORT.md` documents local CSV/TSV task, contact, and project
+  import preview, mapping, conflict behavior, and activity logging.
 - `ROADMAP.md` summarizes the staged implementation path.
 - `MODULE_REGISTRY.md` names planned product modules and their responsibilities.
 - `QA_SCRIPTS.md` lists manual and automated smoke checks for MVP workflows.

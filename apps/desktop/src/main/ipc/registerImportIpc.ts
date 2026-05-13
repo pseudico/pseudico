@@ -46,5 +46,13 @@ export function registerImportIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndImportEmailsAsTasks,
     (_event, input) => handlers.handleChooseAndImportEmailsAsTasks(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.import.previewDelimitedFileImport,
+    (_event, input) => handlers.handlePreviewDelimitedFileImport(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.import.importDelimitedFile,
+    (_event, input) => handlers.handleImportDelimitedFile(input)
+  );
 }
 

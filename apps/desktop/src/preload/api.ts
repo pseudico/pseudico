@@ -345,6 +345,80 @@ export type EmailTaskImportSummary = {
   issues: EmailImportIssueSummary[];
 };
 
+export type CsvImportTargetType = "task" | "contact" | "project";
+export type CsvImportConflictStrategy = "create_new" | "skip_existing";
+export type CsvImportMissingContainerStrategy = "create_project" | "inbox" | "error";
+export type CsvImportMappingField =
+  | "title"
+  | "name"
+  | "description"
+  | "body"
+  | "status"
+  | "priority"
+  | "startAt"
+  | "dueAt"
+  | "container"
+  | "category"
+  | "tags"
+  | "email"
+  | "phone"
+  | "company"
+  | "role"
+  | "website";
+export type CsvImportColumnMapping = Partial<Record<CsvImportMappingField, string>>;
+export type CsvImportValidationIssueSummary = {
+  severity: "error" | "warning";
+  code: string;
+  rowNumber: number | null;
+  field?: CsvImportMappingField;
+  message: string;
+};
+export type CsvImportPreviewRowSummary = {
+  rowNumber: number;
+  targetType: CsvImportTargetType;
+  action: "create" | "skip";
+  title: string;
+  containerName: string | null;
+  tags: string[];
+  categoryName: string | null;
+  issues: CsvImportValidationIssueSummary[];
+};
+export type CsvImportPreviewSummary = {
+  valid: boolean;
+  workspaceId: string;
+  targetType: CsvImportTargetType;
+  format: "csv" | "tsv";
+  headers: string[];
+  mapping: CsvImportColumnMapping;
+  rowCount: number;
+  creatableCount: number;
+  skippedCount: number;
+  errorCount: number;
+  warningCount: number;
+  issues: CsvImportValidationIssueSummary[];
+  rows: CsvImportPreviewRowSummary[];
+};
+export type CsvImportCreatedTargetSummary = {
+  targetType: CsvImportTargetType;
+  id: string;
+  title: string;
+  rowNumber: number;
+};
+export type CsvImportExecuteSummary = CsvImportPreviewSummary & {
+  importedAt: string;
+  importedCount: number;
+  created: CsvImportCreatedTargetSummary[];
+};
+export type CsvImportPreviewFileInput = {
+  workspaceId?: string;
+  filePath: string;
+  targetType: CsvImportTargetType;
+  mapping?: CsvImportColumnMapping;
+  conflictStrategy?: CsvImportConflictStrategy;
+  missingContainerStrategy?: CsvImportMissingContainerStrategy;
+};
+export type CsvImportExecuteFileInput = CsvImportPreviewFileInput;
+
 export type RunWorkspaceIntegrityCheckInput = {
   workspaceId?: string;
 };
@@ -3545,7 +3619,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     previewEmails: "local-work-os:import:preview-emails",
     importEmailsAsTasks: "local-work-os:import:emails-as-tasks",
     chooseAndImportEmailsAsTasks:
-      "local-work-os:import:choose-and-import-emails-as-tasks"
+      "local-work-os:import:choose-and-import-emails-as-tasks",
+    previewDelimitedFileImport:
+      "local-work-os:import:preview-delimited-file",
+    importDelimitedFile: "local-work-os:import:delimited-file"
   },
   export: {
     exportWorkspaceJson: "local-work-os:export:export-workspace-json",
@@ -4409,6 +4486,14 @@ export type LocalWorkOsIpcContracts = {
     input: ChooseAndImportEmailsInput | undefined;
     result: ApiResult<EmailTaskImportSummary | null>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.import.previewDelimitedFileImport]: {
+    input: CsvImportPreviewFileInput;
+    result: ApiResult<CsvImportPreviewSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.import.importDelimitedFile]: {
+    input: CsvImportExecuteFileInput;
+    result: ApiResult<CsvImportExecuteSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.export.exportWorkspaceJson]: {
     input: ExportWorkspaceJsonInput | undefined;
     result: ApiResult<WorkspaceJsonExportSummary>;
@@ -5160,6 +5245,12 @@ export type LocalWorkOsApi = {
     chooseAndImportEmailsAsTasks?: (
       input?: ChooseAndImportEmailsInput
     ) => Promise<ApiResult<EmailTaskImportSummary | null>>;
+    previewDelimitedFileImport?: (
+      input: CsvImportPreviewFileInput
+    ) => Promise<ApiResult<CsvImportPreviewSummary>>;
+    importDelimitedFile?: (
+      input: CsvImportExecuteFileInput
+    ) => Promise<ApiResult<CsvImportExecuteSummary>>;
   };
   export: {
     exportWorkspaceJson: (
@@ -5901,6 +5992,16 @@ export function createLocalWorkOsApi(
       chooseAndImportEmailsAsTasks: (input) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndImportEmailsAsTasks,
+          input
+        ),
+      previewDelimitedFileImport: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.import.previewDelimitedFileImport,
+          input
+        ),
+      importDelimitedFile: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.import.importDelimitedFile,
           input
         )
     },

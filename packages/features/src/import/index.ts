@@ -5,6 +5,9 @@ export {
   sanitizeEmailBody
 } from "./EmailImportService";
 export {
+  CsvImportService
+} from "./CsvImportService";
+export {
   ImapImportService,
   IMAP_IMPORT_SETTINGS_KEY
 } from "./ImapImportService";
@@ -36,6 +39,21 @@ export type {
   ImportEmailMessagesAsTasksInput,
   ParsedEmailMessage
 } from "./EmailImportService";
+export type {
+  CsvImportColumnMapping,
+  CsvImportConflictStrategy,
+  CsvImportCreatedTarget,
+  CsvImportExecuteInput,
+  CsvImportExecuteSummary,
+  CsvImportFormat,
+  CsvImportMappingField,
+  CsvImportMissingContainerStrategy,
+  CsvImportPreviewInput,
+  CsvImportPreviewRow,
+  CsvImportPreviewSummary,
+  CsvImportTargetType,
+  CsvImportValidationIssue
+} from "./CsvImportService";
 export type {
   ImportValidationCounts,
   ImportValidationIssue,

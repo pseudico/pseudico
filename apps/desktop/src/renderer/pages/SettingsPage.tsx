@@ -37,6 +37,9 @@ import type {
   AppearanceThemePreference,
   BackupSnapshotSummary,
   CategorySummary,
+  CsvImportExecuteSummary,
+  CsvImportPreviewSummary,
+  CsvImportTargetType,
   EmailTaskImportSummary,
   ImportValidationSummary,
   LocalWorkOsApi,
@@ -104,6 +107,13 @@ export function SettingsPage({
     useState<ImportValidationSummary | null>(null);
   const [emailImportSummary, setEmailImportSummary] =
     useState<EmailTaskImportSummary | null>(null);
+  const [csvImportPath, setCsvImportPath] = useState("");
+  const [csvImportTarget, setCsvImportTarget] =
+    useState<CsvImportTargetType>("task");
+  const [csvImportPreview, setCsvImportPreview] =
+    useState<CsvImportPreviewSummary | null>(null);
+  const [csvImportSummary, setCsvImportSummary] =
+    useState<CsvImportExecuteSummary | null>(null);
 
   function setUserError(error: unknown, title = "Settings action failed"): void {
     const message = formatUserError(error);
@@ -571,6 +581,104 @@ export function SettingsPage({
     }
   }
 
+  async function previewCsvImport(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before importing CSV/TSV files.");
+      return;
+    }
+
+    if (csvImportPath.trim().length === 0) {
+      setUserError("Enter a CSV or TSV file path before previewing.");
+      return;
+    }
+
+    setImportBusy(true);
+    setCsvImportPreview(null);
+    setCsvImportSummary(null);
+    setError(null);
+
+    const result =
+      apiClient.import.previewDelimitedFileImport === undefined
+        ? {
+            ok: false as const,
+            error: {
+              code: "IPC_ERROR" as const,
+              message: "CSV/TSV import preview API is not available."
+            }
+          }
+        : await apiClient.import.previewDelimitedFileImport({
+            workspaceId: currentWorkspace.id,
+            filePath: csvImportPath.trim(),
+            targetType: csvImportTarget,
+            conflictStrategy: "skip_existing",
+            missingContainerStrategy: "create_project"
+          });
+
+    setImportBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "CSV/TSV import preview failed");
+      return;
+    }
+
+    setCsvImportPreview(result.data);
+    showToast(
+      result.data.valid
+        ? `Previewed ${result.data.creatableCount} creatable row(s).`
+        : `CSV/TSV preview found ${result.data.errorCount} error(s).`,
+      {
+        title: "CSV/TSV import preview",
+        tone: result.data.valid ? "success" : "error"
+      }
+    );
+  }
+
+  async function importCsvRows(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before importing CSV/TSV files.");
+      return;
+    }
+
+    if (csvImportPath.trim().length === 0) {
+      setUserError("Enter a CSV or TSV file path before importing.");
+      return;
+    }
+
+    setImportBusy(true);
+    setError(null);
+
+    const result =
+      apiClient.import.importDelimitedFile === undefined
+        ? {
+            ok: false as const,
+            error: {
+              code: "IPC_ERROR" as const,
+              message: "CSV/TSV import API is not available."
+            }
+          }
+        : await apiClient.import.importDelimitedFile({
+            workspaceId: currentWorkspace.id,
+            filePath: csvImportPath.trim(),
+            targetType: csvImportTarget,
+            conflictStrategy: "skip_existing",
+            missingContainerStrategy: "create_project"
+          });
+
+    setImportBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "CSV/TSV import failed");
+      return;
+    }
+
+    setCsvImportSummary(result.data);
+    setCsvImportPreview(result.data);
+    showToast(`Imported ${result.data.importedCount} row(s).`, {
+      title: "CSV/TSV import complete",
+      tone: result.data.errorCount === 0 ? "success" : "error"
+    });
+  }
+
   async function restoreBackup(backup: BackupSnapshotSummary): Promise<void> {
     if (restoreTargetPath.trim().length === 0) {
       setUserError("Enter a new target workspace folder before restoring.");
@@ -931,6 +1039,62 @@ export function SettingsPage({
           </div>
         </div>
 
+        <div className="category-form" aria-label="CSV or TSV import wizard">
+          <label>
+            <span>CSV/TSV file path</span>
+            <input
+              disabled={importBusy}
+              placeholder="C:\\Users\\you\\imports\\tasks.csv"
+              value={csvImportPath}
+              onChange={(event) => setCsvImportPath(event.target.value)}
+            />
+          </label>
+          <label>
+            <span>Import as</span>
+            <select
+              disabled={importBusy}
+              value={csvImportTarget}
+              onChange={(event) =>
+                setCsvImportTarget(event.target.value as CsvImportTargetType)
+              }
+            >
+              <option value="task">Tasks</option>
+              <option value="contact">Contacts</option>
+              <option value="project">Projects</option>
+            </select>
+          </label>
+          <button
+            className="secondary-button"
+            disabled={importBusy || currentWorkspace === null}
+            type="button"
+            onClick={() => void previewCsvImport()}
+          >
+            <FileSpreadsheet size={17} aria-hidden="true" />
+            Preview CSV/TSV
+          </button>
+          <button
+            className="primary-button"
+            disabled={
+              importBusy ||
+              currentWorkspace === null ||
+              csvImportPreview === null ||
+              !csvImportPreview.valid
+            }
+            type="button"
+            onClick={() => void importCsvRows()}
+          >
+            <Upload size={17} aria-hidden="true" />
+            Import previewed rows
+          </button>
+        </div>
+
+        {csvImportPreview === null ? null : (
+          <CsvImportSummaryPanel
+            preview={csvImportPreview}
+            summary={csvImportSummary}
+          />
+        )}
+
         <div className="category-form" aria-label="Restore workspace export">
           <label>
             <span>Workspace export JSON path</span>
@@ -1207,6 +1371,77 @@ function ImportValidationSummaryPanel({
           </p>
         ))
       )}
+    </div>
+  );
+}
+
+function CsvImportSummaryPanel({
+  preview,
+  summary
+}: {
+  preview: CsvImportPreviewSummary;
+  summary: CsvImportExecuteSummary | null;
+}): React.JSX.Element {
+  return (
+    <div className="backup-list" aria-label="CSV import summary">
+      <div className="backup-list-row">
+        <div>
+          <strong>
+            {preview.valid ? "CSV/TSV preview ready" : "CSV/TSV import blocked"}
+          </strong>
+          <span>
+            {preview.rowCount} row(s), {preview.creatableCount} creatable,{" "}
+            {preview.skippedCount} duplicate skip(s)
+          </span>
+        </div>
+        <div className="backup-list-meta">
+          <span>{preview.targetType}</span>
+          <span>{preview.format.toUpperCase()}</span>
+          <span>{preview.errorCount} errors</span>
+          <span>{preview.warningCount} warnings</span>
+        </div>
+      </div>
+      <p className="muted-text">
+        Mapping:{" "}
+        {Object.entries(preview.mapping)
+          .map(([field, header]) => `${field} ← ${header}`)
+          .join(", ") || "No fields mapped"}
+      </p>
+      {summary === null ? null : (
+        <p className="form-message form-message-ok">
+          Imported {summary.importedCount} row(s) at {formatDiagnosticDate(summary.importedAt)}.
+        </p>
+      )}
+      {preview.rows.slice(0, 5).map((row) => (
+        <div className="backup-list-row" key={row.rowNumber}>
+          <div>
+            <strong>
+              Row {row.rowNumber}: {row.title || "(missing title)"}
+            </strong>
+            <span>
+              {row.action === "skip" ? "Will skip duplicate" : "Will create"}{" "}
+              {row.containerName === null ? "" : `in ${row.containerName}`}
+            </span>
+          </div>
+          <div className="backup-list-meta">
+            <span>{row.tags.length} tag(s)</span>
+            <span>{row.categoryName ?? "No category"}</span>
+          </div>
+        </div>
+      ))}
+      {preview.issues.slice(0, 5).map((issue) => (
+        <p
+          className={
+            issue.severity === "error"
+              ? "form-message form-message-error"
+              : "form-message"
+          }
+          key={`${issue.rowNumber}:${issue.code}:${issue.message}`}
+        >
+          {issue.rowNumber === null ? "File" : `Row ${issue.rowNumber}`}:{" "}
+          {issue.message}
+        </p>
+      ))}
     </div>
   );
 }
