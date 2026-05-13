@@ -98,6 +98,7 @@ renderer-only implementation.
 | Calendar | Own month/week/day calendar projections and date interactions. | Calendar entries, local dated work, local imports later | Tasks, timeline, metadata, workspace | Today, dashboard, planning views | V1 |
 | Backup | Own local backup orchestration, restore into a new workspace, and backup integrity checks. | Backup snapshots, manifests, restore summaries, integrity reports | Workspace, files, database services, Electron main/preload IPC | Maintenance, export/import, restore | MVP |
 | Export | Own local export orchestration and portable archive outputs. | JSON exports, Markdown exports, CSV/TSV exports, manifests | Workspace, files, metadata, projects, contacts, tasks, notes | Backup, import later, maintenance | MVP |
+| Local Email Import | Own local EML/Maildir parsing, preview summaries, task creation, and original-email attachment preservation. | Imported email task payloads, original `.eml` attachments | Tasks, files/attachments, metadata, search, activity log, Electron main/preload IPC | Inbox, Quick Add/import workflows, search | V2 |
 | Printing | Own sanitized local print/PDF rendering for selected items and container/view projections. | Print HTML documents, PDF export summaries, print export activity | Workspace, items, projects, contacts, collections, dashboard, Electron printToPDF | Export, activity, files metadata | V1 |
 
 ## Platform And Future Modules
@@ -836,6 +837,32 @@ Integration points:
 - Workspace, projects, contacts, tasks, notes, files, links, and metadata.
 - Backup for archive workflows.
 - Electron main/preload IPC for safe destination handling.
+
+### Local Email Import
+
+Owns:
+
+- Local EML file and Maildir folder scanning through Electron main-process IPC.
+- EML header/body parsing, sanitized preview text, and email-to-task task body shaping.
+- Original email preservation by copying `.eml`/Maildir message files into local attachments.
+
+Does not own:
+
+- Hosted email-to-task, cloud mailboxes, IMAP sync, or background network polling.
+- Direct renderer filesystem access.
+- A dedicated email item schema; imported email currently becomes task items with attachments.
+
+Implemented service methods:
+
+- `previewMessages`
+- `importMessagesAsTasks`
+
+Integration points:
+
+- Tasks for imported work items.
+- Files/attachments for original email preservation.
+- Tags/search/activity via the existing task and file write flows.
+- Settings import action and future Quick Add target integration.
 
 ### Printing
 

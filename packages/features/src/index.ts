@@ -180,7 +180,13 @@ export {
   printingModuleContract
 } from "./printing";
 export { FileAttachmentService, FileVersionService, filesModuleContract } from "./files";
-export { ImportValidationService, importModuleContract } from "./import";
+export {
+  EmailImportService,
+  ImportValidationService,
+  importModuleContract,
+  parseEmailMessage,
+  sanitizeEmailBody
+} from "./import";
 export {
   AttachmentIntegrityService,
   IntegrityCheckService,
@@ -548,11 +554,20 @@ export type {
   RepairAttachmentFileInput
 } from "./files";
 export type {
+  EmailImportIssue,
+  EmailImportMessageSource,
+  EmailImportPreview,
+  EmailImportServiceIdFactory,
+  EmailImportSourceKind,
+  EmailTaskImportResult,
+  EmailTaskImportSummary,
+  ImportEmailMessagesAsTasksInput,
   ImportValidationCounts,
   ImportValidationFileSystemAdapter,
   ImportValidationIssue,
   ImportValidationSeverity,
-  ImportValidationSummary
+  ImportValidationSummary,
+  ParsedEmailMessage
 } from "./import";
 export type {
   DuplicateAttachmentGroup,

@@ -36,6 +36,7 @@ import type {
   AppearanceThemePreference,
   BackupSnapshotSummary,
   CategorySummary,
+  EmailTaskImportSummary,
   ImportValidationSummary,
   LocalWorkOsApi,
   RestoreWorkspaceSummary,
@@ -100,6 +101,8 @@ export function SettingsPage({
   const [repairingSavedViewId, setRepairingSavedViewId] = useState<string | null>(null);
   const [importSummary, setImportSummary] =
     useState<ImportValidationSummary | null>(null);
+  const [emailImportSummary, setEmailImportSummary] =
+    useState<EmailTaskImportSummary | null>(null);
 
   function setUserError(error: unknown, title = "Settings action failed"): void {
     const message = formatUserError(error);
@@ -524,6 +527,49 @@ export function SettingsPage({
     }
   }
 
+  async function importEmailMessages(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before importing email files.");
+      return;
+    }
+
+    setImportBusy(true);
+    setEmailImportSummary(null);
+    setError(null);
+
+    const result =
+      apiClient.import.chooseAndImportEmailsAsTasks === undefined
+        ? {
+            ok: false as const,
+            error: {
+              code: "IPC_ERROR" as const,
+              message: "Email import API is not available."
+            }
+          }
+        : await apiClient.import.chooseAndImportEmailsAsTasks({
+            workspaceId: currentWorkspace.id,
+            extractTags: true
+          });
+
+    setImportBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Email import failed");
+      return;
+    }
+
+    setEmailImportSummary(result.data);
+    if (result.data !== null) {
+      showToast(
+        `Imported ${result.data.importedCount} email task(s) into Inbox.`,
+        {
+          title: "Email import complete",
+          tone: result.data.issues.length === 0 ? "success" : "info"
+        }
+      );
+    }
+  }
+
   async function restoreBackup(backup: BackupSnapshotSummary): Promise<void> {
     if (restoreTargetPath.trim().length === 0) {
       setUserError("Enter a new target workspace folder before restoring.");
@@ -864,6 +910,15 @@ export function SettingsPage({
           </div>
           <div className="top-actions">
             <button
+              className="secondary-button compact-button"
+              disabled={importBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void importEmailMessages()}
+            >
+              <Upload size={16} aria-hidden="true" />
+              Import EML/Maildir to Inbox
+            </button>
+            <button
               className="primary-button compact-button"
               disabled={importBusy}
               type="button"
@@ -901,6 +956,30 @@ export function SettingsPage({
         )}
         {restoreSummary === null ? null : (
           <RestoreSummaryPanel summary={restoreSummary} />
+        )}
+        {emailImportSummary === null ? null : (
+          <div className="backup-list" aria-label="Email import summary">
+            <article className="backup-card">
+              <div>
+                <strong>
+                  Imported {emailImportSummary.importedCount} email task(s)
+                </strong>
+                <p className="muted-text">
+                  Originals were copied into local attachments.{" "}
+                  {emailImportSummary.skippedCount} skipped;{" "}
+                  {emailImportSummary.issues.length} issue(s).
+                </p>
+              </div>
+              <ul>
+                {emailImportSummary.importedTasks.slice(0, 5).map((task) => (
+                  <li key={task.itemId}>
+                    {task.title}
+                    {task.attachmentId === null ? "" : " — original attached"}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </div>
         )}
 
         {importSummary === null ? (
