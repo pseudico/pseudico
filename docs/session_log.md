@@ -4767,3 +4767,62 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Remote CI/review may still raise issues.
 Next actions: Stage and commit; push branch; open PR and update Linear.
+
+## 2026-05-13T17:24:55+10:00
+Objective: Finish PSE-169 merge handoff and prepare next Codex Ready ticket.
+Decisions made:
+- Promoted PSE-170 as the single next Codex Ready issue after PSE-169 merged.
+- Added Linear handoff comment with PR proof and merge commit.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Session log entry is local-only after merge unless committed in a later housekeeping change.
+Next actions: Pull PSE-170 into In Progress; read its ticket/docs; implement Markdown folder import.
+
+- Timestamp: 2026-05-13T17:28:35.0587742+10:00
+- Objective: Start end-to-end Local Work OS ticket reconciliation/run.
+- Decisions made: Use structured Linear/GitHub tools first; inspect repo state before code.
+- Files changed: docs/session_log.md
+- Open questions / risks: Active PR/CI state unknown.
+- Next actions: Reconcile Linear states; inspect active PR; select next issue if clear.
+
+- Timestamp: 2026-05-13T17:30:01.0958765+10:00
+- Objective: Claim PSE-170 for implementation.
+- Decisions made: No PR Open/In Progress issues found; PSE-170 was the single Codex Ready issue and is now In Progress.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need derive acceptance criteria from ticket source file.
+- Next actions: Read ticket docs; branch from main; implement scoped import.
+
+- Timestamp: 2026-05-13T18:00:50.6848546+10:00
+- Objective: Implement PSE-170 Markdown folder import foundation.
+- Decisions made: Map root folder to project; top-level folders to tabs; nested folders to headings; Markdown to notes; other files to attachments.
+- Files changed: packages/features/src/import/MarkdownFolderImportService.ts; apps/desktop/src/main/ipc/importHandlers.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/SettingsPage.tsx; docs/MODULE_REGISTRY.md
+- Open questions / risks: Full app-wide checks still pending.
+- Next actions: Run lint/typecheck/test/build; fix failures; open PR.
+
+- Timestamp: 2026-05-13T18:08:42.6512901+10:00
+- Objective: Verify PSE-170 before PR.
+- Decisions made: Full lint/typecheck/test/build pass; sandbox EPERM required escalated reruns for Vitest/build spawns.
+- Files changed: docs/session_log.md
+- Open questions / risks: CI/review still pending after PR creation.
+- Next actions: Commit branch; push; open ready PR.
+
+- Timestamp: 2026-05-13T18:16:19.7125537+10:00
+- Objective: Self-review PR #159 before CI merge gate.
+- Decisions made: Cleaned confusing attachment assertion while reviewing PR diff; no scope changes.
+- Files changed: packages/features/tests/markdownFolderImportService.test.ts; docs/session_log.md
+- Open questions / risks: CI still in progress.
+- Next actions: Rerun checks; amend/push; recheck CI.
+
+- Timestamp: 2026-05-13T18:20:40.5096494+10:00
+- Objective: Re-verify amended PR #159 changes.
+- Decisions made: Full lint/typecheck/test/build pass after self-review cleanup.
+- Files changed: docs/session_log.md
+- Open questions / risks: Awaiting GitHub CI status for amended branch.
+- Next actions: Amend commit; force-push safely; check CI/reviews.
+
+## 2026-05-13T18:24:34.7623229+10:00
+Objective: Amend and repush PSE-170 after self-review cleanup.
+Decisions made: - Tightened attachment assertion without changing scope.
+Files changed: docs/session_log.md; packages/features/tests/markdownFolderImportService.test.ts
+Open questions / risks: CI rerun pending on amended head.
+Next actions: Check PR CI/reviews; merge if green; update Linear.

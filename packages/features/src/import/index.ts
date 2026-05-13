@@ -8,6 +8,9 @@ export {
   CsvImportService
 } from "./CsvImportService";
 export {
+  MarkdownFolderImportService
+} from "./MarkdownFolderImportService";
+export {
   ImapImportService,
   IMAP_IMPORT_SETTINGS_KEY
 } from "./ImapImportService";
@@ -39,6 +42,17 @@ export type {
   ImportEmailMessagesAsTasksInput,
   ParsedEmailMessage
 } from "./EmailImportService";
+export type {
+  MarkdownFolderImportCreatedTarget,
+  MarkdownFolderImportEntryKind,
+  MarkdownFolderImportExecuteInput,
+  MarkdownFolderImportExecuteSummary,
+  MarkdownFolderImportPreviewInput,
+  MarkdownFolderImportPreviewRow,
+  MarkdownFolderImportPreviewSummary,
+  MarkdownFolderImportSourceEntry,
+  MarkdownFolderImportValidationIssue
+} from "./MarkdownFolderImportService";
 export type {
   CsvImportColumnMapping,
   CsvImportConflictStrategy,

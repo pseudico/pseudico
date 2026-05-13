@@ -892,6 +892,16 @@ Integration points:
 - Tasks, contacts, projects, categories, tags, search, activity log, and
   Electron main/preload IPC for safe local file access.
 
+
+### Markdown Folder Import
+
+Owns local Markdown folder scanning through Electron main-process IPC, previewing
+folder-to-project mappings, importing Markdown files as notes, first-level folders
+as project tabs, nested folders as headings, and non-Markdown files as local
+attachments. Does not own cloud migration, remote storage, renderer filesystem
+access, or arbitrary path traversal. Integrates with Projects, Tabs, Notes,
+Files/attachments, Search, and Activity Log through existing service write flows.
+
 ### Printing
 
 Owns:

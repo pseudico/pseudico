@@ -1,6 +1,14 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import {
+  AttachmentRepository,
+  ContainerRepository,
+  DatabaseBootstrapService,
+  NoteRepository,
+  createDatabaseConnection,
+  resolveWorkspaceDatabasePath
+} from "@local-work-os/db";
 import { afterEach, describe, expect, it } from "vitest";
 import { createImportIpcHandlers } from "../../src/main/ipc/importHandlers";
 
@@ -50,6 +58,77 @@ describe("import IPC handlers", () => {
       ok: true,
       data: null
     });
+  });
+
+
+  it("previews and imports a Markdown folder fixture into the open workspace", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-markdown-import-ipc-"));
+    const workspaceRoot = join(tempRoot, "workspace");
+    const sourceRoot = join(tempRoot, "source-notes");
+    await mkdir(join(sourceRoot, "Research"), { recursive: true });
+    await writeFile(join(sourceRoot, "Research", "brief.md"), "# Brief\nLocal note body", "utf8");
+    await writeFile(join(sourceRoot, "Research", "source.pdf"), "pdf", "utf8");
+
+    const databasePath = resolveWorkspaceDatabasePath(workspaceRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: workspaceRoot,
+        databasePath,
+        schemaVersion: 1,
+        openedAt: "2026-05-13T00:00:00.000Z"
+      })
+    };
+    const handlers = createImportIpcHandlers(workspaceService);
+
+    const preview = await handlers.handlePreviewMarkdownFolderImport({
+      workspaceId: "workspace_1",
+      folderPath: sourceRoot
+    });
+
+    expect(preview).toMatchObject({
+      ok: true,
+      data: {
+        valid: true,
+        markdownCount: 1,
+        fileCount: 1,
+        tabCount: 1
+      }
+    });
+
+    const imported = await handlers.handleImportMarkdownFolder({
+      workspaceId: "workspace_1",
+      folderPath: sourceRoot
+    });
+
+    expect(imported).toMatchObject({
+      ok: true,
+      data: {
+        valid: true,
+        fileCount: 1,
+        markdownCount: 1
+      }
+    });
+
+    const connection = await createDatabaseConnection({ databasePath, fileMustExist: true });
+    try {
+      const project = new ContainerRepository(connection).listByWorkspace("workspace_1", { type: "project" })[0]!;
+      expect(project.name).toBe("source-notes");
+      expect(new NoteRepository(connection).listByContainer(project.id)).toMatchObject([
+        { item: { title: "Brief" }, note: { content: expect.stringContaining("Local note body") } }
+      ]);
+      expect(new AttachmentRepository(connection).getById(
+        imported.ok ? imported.data.created.find((entry) => entry.targetType === "attachment")!.id : ""
+      )).toMatchObject({ originalName: "source.pdf" });
+    } finally {
+      connection.close();
+    }
   });
 
   it("rejects non-JSON file paths before reading", async () => {

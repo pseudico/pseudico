@@ -2,6 +2,7 @@ import {
   Archive,
   FileJson,
   FileSpreadsheet,
+  FolderOpen,
   Keyboard,
   Mail,
   Palette,
@@ -43,6 +44,8 @@ import type {
   EmailTaskImportSummary,
   ImportValidationSummary,
   LocalWorkOsApi,
+  MarkdownFolderImportExecuteSummary,
+  MarkdownFolderImportPreviewSummary,
   RestoreWorkspaceSummary,
   SavedViewDiagnosticsSummary,
   WorkspaceIntegritySummary
@@ -114,6 +117,11 @@ export function SettingsPage({
     useState<CsvImportPreviewSummary | null>(null);
   const [csvImportSummary, setCsvImportSummary] =
     useState<CsvImportExecuteSummary | null>(null);
+  const [markdownFolderPath, setMarkdownFolderPath] = useState("");
+  const [markdownFolderPreview, setMarkdownFolderPreview] =
+    useState<MarkdownFolderImportPreviewSummary | null>(null);
+  const [markdownFolderSummary, setMarkdownFolderSummary] =
+    useState<MarkdownFolderImportExecuteSummary | null>(null);
 
   function setUserError(error: unknown, title = "Settings action failed"): void {
     const message = formatUserError(error);
@@ -581,6 +589,146 @@ export function SettingsPage({
     }
   }
 
+  async function chooseAndPreviewMarkdownFolder(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before importing Markdown folders.");
+      return;
+    }
+
+    setImportBusy(true);
+    setMarkdownFolderPreview(null);
+    setMarkdownFolderSummary(null);
+    setError(null);
+
+    const result =
+      apiClient.import.chooseAndPreviewMarkdownFolderImport === undefined
+        ? {
+            ok: false as const,
+            error: {
+              code: "IPC_ERROR" as const,
+              message: "Markdown folder import preview API is not available."
+            }
+          }
+        : await apiClient.import.chooseAndPreviewMarkdownFolderImport({
+            workspaceId: currentWorkspace.id
+          });
+
+    setImportBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Markdown folder preview failed");
+      return;
+    }
+
+    setMarkdownFolderPreview(result.data);
+    setMarkdownFolderSummary(null);
+    if (result.data !== null) {
+      setMarkdownFolderPath(result.data.sourceRootPath ?? markdownFolderPath);
+      showToast(
+        result.data.valid
+          ? `Previewed ${result.data.creatableCount} Markdown folder item(s).`
+          : `Markdown folder preview found ${result.data.errorCount} error(s).`,
+        {
+          title: "Markdown folder preview",
+          tone: result.data.valid ? "success" : "error"
+        }
+      );
+    }
+  }
+
+  async function previewMarkdownFolderPath(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before importing Markdown folders.");
+      return;
+    }
+
+    if (markdownFolderPath.trim().length === 0) {
+      setUserError("Enter a Markdown folder path before previewing.");
+      return;
+    }
+
+    setImportBusy(true);
+    setMarkdownFolderPreview(null);
+    setMarkdownFolderSummary(null);
+    setError(null);
+
+    const result =
+      apiClient.import.previewMarkdownFolderImport === undefined
+        ? {
+            ok: false as const,
+            error: {
+              code: "IPC_ERROR" as const,
+              message: "Markdown folder import preview API is not available."
+            }
+          }
+        : await apiClient.import.previewMarkdownFolderImport({
+            workspaceId: currentWorkspace.id,
+            folderPath: markdownFolderPath.trim()
+          });
+
+    setImportBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Markdown folder preview failed");
+      return;
+    }
+
+    setMarkdownFolderPreview(result.data);
+    showToast(
+      result.data.valid
+        ? `Previewed ${result.data.creatableCount} Markdown folder item(s).`
+        : `Markdown folder preview found ${result.data.errorCount} error(s).`,
+      {
+        title: "Markdown folder preview",
+        tone: result.data.valid ? "success" : "error"
+      }
+    );
+  }
+
+  async function importMarkdownFolder(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before importing Markdown folders.");
+      return;
+    }
+
+    const folderPath = markdownFolderPreview?.sourceRootPath ?? markdownFolderPath.trim();
+    if (folderPath.length === 0) {
+      setUserError("Preview or enter a Markdown folder path before importing.");
+      return;
+    }
+
+    setImportBusy(true);
+    setError(null);
+
+    const result =
+      apiClient.import.importMarkdownFolder === undefined
+        ? {
+            ok: false as const,
+            error: {
+              code: "IPC_ERROR" as const,
+              message: "Markdown folder import API is not available."
+            }
+          }
+        : await apiClient.import.importMarkdownFolder({
+            workspaceId: currentWorkspace.id,
+            folderPath
+          });
+
+    setImportBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Markdown folder import failed");
+      return;
+    }
+
+    setMarkdownFolderSummary(result.data);
+    setMarkdownFolderPreview(result.data);
+    showToast(`Imported ${result.data.importedCount} Markdown folder record(s).`, {
+      title: "Markdown folder import complete",
+      tone: result.data.errorCount === 0 ? "success" : "error"
+    });
+  }
+
   async function previewCsvImport(): Promise<void> {
     if (currentWorkspace === null) {
       setUserError("Open a workspace before importing CSV/TSV files.");
@@ -1039,6 +1187,57 @@ export function SettingsPage({
           </div>
         </div>
 
+        <div className="category-form" aria-label="Markdown folder import wizard">
+          <label>
+            <span>Markdown folder path</span>
+            <input
+              disabled={importBusy}
+              placeholder="C:\Users\you\imports\project-notes"
+              value={markdownFolderPath}
+              onChange={(event) => setMarkdownFolderPath(event.target.value)}
+            />
+          </label>
+          <button
+            className="secondary-button"
+            disabled={importBusy || currentWorkspace === null}
+            type="button"
+            onClick={() => void chooseAndPreviewMarkdownFolder()}
+          >
+            <FolderOpen size={17} aria-hidden="true" />
+            Choose folder
+          </button>
+          <button
+            className="secondary-button"
+            disabled={importBusy || currentWorkspace === null}
+            type="button"
+            onClick={() => void previewMarkdownFolderPath()}
+          >
+            <FileJson size={17} aria-hidden="true" />
+            Preview folder
+          </button>
+          <button
+            className="primary-button"
+            disabled={
+              importBusy ||
+              currentWorkspace === null ||
+              markdownFolderPreview === null ||
+              !markdownFolderPreview.valid
+            }
+            type="button"
+            onClick={() => void importMarkdownFolder()}
+          >
+            <Upload size={17} aria-hidden="true" />
+            Import previewed folder
+          </button>
+        </div>
+
+        {markdownFolderPreview === null ? null : (
+          <MarkdownFolderImportSummaryPanel
+            preview={markdownFolderPreview}
+            summary={markdownFolderSummary}
+          />
+        )}
+
         <div className="category-form" aria-label="CSV or TSV import wizard">
           <label>
             <span>CSV/TSV file path</span>
@@ -1371,6 +1570,63 @@ function ImportValidationSummaryPanel({
           </p>
         ))
       )}
+    </div>
+  );
+}
+
+function MarkdownFolderImportSummaryPanel({
+  preview,
+  summary
+}: {
+  preview: MarkdownFolderImportPreviewSummary;
+  summary: MarkdownFolderImportExecuteSummary | null;
+}): React.JSX.Element {
+  return (
+    <div className="backup-list" aria-label="Markdown folder import summary">
+      <div className="backup-list-row">
+        <div>
+          <strong>
+            {preview.valid ? "Markdown folder preview ready" : "Markdown folder import blocked"}
+          </strong>
+          <span>
+            {preview.projectName}: {preview.markdownCount} note(s), {preview.fileCount} file(s), {preview.tabCount} tab(s)
+          </span>
+        </div>
+        <div className="backup-list-meta">
+          <span>{preview.headingCount} heading(s)</span>
+          <span>{preview.errorCount} errors</span>
+          <span>{preview.warningCount} warnings</span>
+        </div>
+      </div>
+      {summary === null ? null : (
+        <p className="form-message form-message-ok">
+          Imported {summary.importedCount} record(s) at {formatDiagnosticDate(summary.importedAt)}.
+        </p>
+      )}
+      {preview.rows.slice(0, 6).map((row) => (
+        <div className="backup-list-row" key={`${row.kind}:${row.relativePath}`}>
+          <div>
+            <strong>{row.title}</strong>
+            <span>{row.kind} from {row.relativePath}</span>
+          </div>
+          <div className="backup-list-meta">
+            <span>{row.targetTabName}</span>
+            <span>{row.action}</span>
+          </div>
+        </div>
+      ))}
+      {preview.issues.slice(0, 5).map((issue) => (
+        <p
+          className={
+            issue.severity === "error"
+              ? "form-message form-message-error"
+              : "form-message"
+          }
+          key={`${issue.relativePath}:${issue.code}:${issue.message}`}
+        >
+          {issue.relativePath ?? "Folder"}: {issue.message}
+        </p>
+      ))}
     </div>
   );
 }
