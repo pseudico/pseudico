@@ -1,7 +1,8 @@
 import { app } from "electron";
 import { registerAppLifecycle } from "./appLifecycle";
-import { registerDesktopIpc } from "./ipc";
+import { createDesktopIpcServices, registerDesktopIpc } from "./ipc";
 import { runPackageSmoke } from "./packageSmoke";
+import { startConfiguredCaptureBridge } from "./services/capture/configuredCaptureBridge";
 import { createWorkspaceWindow } from "./workspaceWindow";
 
 app.whenReady().then(async () => {
@@ -22,8 +23,18 @@ app.whenReady().then(async () => {
   }
 
   const createWindow = () => createWorkspaceWindow();
+  const services = createDesktopIpcServices();
+  const configuredCaptureBridge = await startConfiguredCaptureBridge(
+    services.workspaceService
+  );
 
-  registerDesktopIpc();
+  if (configuredCaptureBridge !== null) {
+    app.once("before-quit", () => {
+      void configuredCaptureBridge.bridge.stop();
+    });
+  }
+
+  registerDesktopIpc(services);
   createWindow();
   registerAppLifecycle(createWindow);
 });

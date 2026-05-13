@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Local Work OS Capture",
+  "description": "Local-only page capture bridge for a running Local Work OS desktop app.",
+  "version": "0.1.0",
+  "permissions": ["activeTab", "contextMenus", "nativeMessaging", "scripting", "storage"],
+  "host_permissions": ["http://127.0.0.1/*"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Capture to Local Work OS",
+    "default_popup": "popup.html"
+  }
+}

@@ -4,7 +4,9 @@ export type {
   CaptureLinkResult,
   CaptureServiceIdFactory,
   CaptureTaskResult,
+  CreateLinkFromCaptureInput,
   CreateInboxLinkFromCaptureInput,
   CreateInboxTaskFromCaptureInput,
+  CreateTaskFromCaptureInput,
   NormalizedBrowserCapture
 } from "./CaptureService";

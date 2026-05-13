@@ -2,12 +2,13 @@
 
 Owns the local-only browser capture payload contract and conversion of captured pages into Inbox links or tasks.
 
-Current PSE-82 scope:
+Implemented scope:
 
 - Capture payload normalization and URL protocol guardrails.
 - Inbox link creation through `LinkService`.
 - Inbox task creation through `TaskService`.
-- Disabled-by-default desktop bridge stub for future native messaging or localhost experiments.
+- Optional target container/tab capture for the current workspace.
+- Disabled-by-default desktop bridge integration for native messaging or localhost experiments.
 
 Does not own:
 

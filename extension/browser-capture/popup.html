@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Local Work OS Capture</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h1>Local Work OS</h1>
+    <label>
+      Pairing token
+      <input id="pairing-token" type="password" autocomplete="off" />
+    </label>
+    <label>
+      Bridge
+      <select id="capture-bridge">
+        <option value="native">Native messaging</option>
+        <option value="localhost">Localhost development bridge</option>
+      </select>
+    </label>
+    <label>
+      Localhost URL
+      <input id="localhost-url" type="url" placeholder="http://127.0.0.1:43210/capture" />
+    </label>
+    <button id="save-settings" type="button">Save settings</button>
+    <hr />
+    <button id="capture-link" type="button">Capture link</button>
+    <button id="capture-task" type="button">Capture task</button>
+    <p id="status" role="status"></p>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

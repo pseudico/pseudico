@@ -157,6 +157,31 @@ describe("CaptureService", () => {
       body: expect.stringContaining("Selected source text")
     });
   });
+
+  it("creates capture items in an explicit current target when provided", async () => {
+    new ContainerRepository(connection).create({
+      id: "container_project_1",
+      workspaceId: "workspace_1",
+      type: "project",
+      name: "Launch",
+      slug: "launch",
+      timestamp
+    });
+
+    const result = await createService().createLinkFromCapture({
+      workspaceId: "workspace_1",
+      sourceUrl: "https://example.com/current",
+      title: "Current tab",
+      containerId: "container_project_1"
+    });
+
+    expect(result.link.item).toMatchObject({
+      id: "item_1",
+      containerId: "container_project_1",
+      type: "link",
+      title: "Current tab"
+    });
+  });
 });
 
 function createService(): CaptureService {

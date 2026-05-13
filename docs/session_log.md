@@ -4481,3 +4481,78 @@ Open questions / risks:
 Next actions:
 - Inspect diff/status.
 - Commit, push, open PR.
+
+## 2026-05-13 14:26:37 +10:00
+Objective: Reconcile active Linear/GitHub state before next ticket.
+Decisions made:
+- Found no Linear issues in PR Open or In Progress for PSE project.
+- Selected single Codex Ready candidate PSE-166 for implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need confirm no open GitHub PR blocks workflow.
+Next actions:
+- Inspect GitHub PR state.
+- Move PSE-166 to In Progress.
+- Read docs and source scope.
+
+## 2026-05-13 14:27:41 +10:00
+Objective: Start PSE-166 browser capture bridge implementation.
+Decisions made:
+- Moved PSE-166 from Codex Ready to In Progress.
+- Confirmed no open GitHub PRs and main is up to date.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need derive acceptance criteria from ticket source docs.
+Next actions:
+- Create issue branch.
+- Read linked docs/source files.
+- Implement scoped bridge.
+
+## 2026-05-13 14:30:26 +10:00
+Objective: Plan PSE-166 scoped implementation.
+Decisions made:
+- Reuse existing CaptureService, LinkService, TaskService write paths.
+- Add opt-in local bridge/native-message processing with token checks, no default listener.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Native host packaging remains setup-driven; bridge stays opt-in for security.
+Next actions:
+- Extend capture service target support.
+- Wire bridge intake and tests.
+- Add extension scaffold/docs.
+
+## 2026-05-13 14:38:55 +10:00
+Objective: Implement PSE-166 browser capture bridge slice.
+Decisions made:
+- Added explicit target capture support while preserving Inbox default.
+- Added opt-in token-protected localhost bridge and native-message validation.
+- Added unpacked extension scaffold and setup docs.
+Files changed:
+- packages/features/src/capture/CaptureService.ts
+- apps/desktop/src/main/services/CaptureBridge.ts
+- extension/browser-capture/manifest.json
+Open questions / risks:
+- Native host registration remains explicit setup, not automatic install.
+Next actions:
+- Run lint/typecheck/test/build.
+- Fix any verification failures.
+
+## 2026-05-13 14:41:29 +10:00
+Objective: Verify PSE-166 implementation locally.
+Decisions made:
+- Fixed extension ESLint globals.
+- Reran test/build with escalation after sandbox EPERM helper-spawn failures.
+- Full lint, typecheck, test, and build pass.
+Files changed:
+- extension/browser-capture/background.js
+- extension/browser-capture/popup.js
+- docs/session_log.md
+Open questions / risks:
+- Need inspect diff and publish PR.
+Next actions:
+- Review git diff/status.
+- Commit and push branch.
+- Open ready PR and move Linear to PR Open.

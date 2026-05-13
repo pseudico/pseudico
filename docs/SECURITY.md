@@ -26,6 +26,8 @@ Do not add these without explicit approval:
 - Validate IPC inputs at the boundary.
 - Prefer narrow IPC methods with explicit return types.
 - Keep browser capture and automation local when those features are added.
+- Browser capture bridges must stay disabled by default, bind only to loopback
+  when localhost mode is explicitly enabled, and require a long pairing token.
 
 ## Filesystem Guardrails
 
@@ -48,7 +50,9 @@ Do not add these without explicit approval:
 - Do not introduce telemetry by default.
 - Treat attachments, notes, project data, contacts, and imported files as local
   private user data.
-- Document any future network capability before implementation.
+- Document any future network capability before implementation. Localhost-only
+  browser capture is documented in `BROWSER_CAPTURE.md` and must not add cloud
+  transfer, telemetry, hosted accounts, or remote storage.
 
 ## Review Triggers
 

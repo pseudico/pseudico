@@ -592,6 +592,8 @@ export type {
   CaptureTaskResult,
   CreateInboxLinkFromCaptureInput,
   CreateInboxTaskFromCaptureInput,
+  CreateLinkFromCaptureInput,
+  CreateTaskFromCaptureInput,
   NormalizedBrowserCapture
 } from "./capture";
 export type {

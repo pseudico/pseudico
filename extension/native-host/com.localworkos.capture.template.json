@@ -1,0 +1,7 @@
+{
+  "name": "com.localworkos.capture",
+  "description": "Local Work OS browser capture native messaging host",
+  "path": "ABSOLUTE_PATH_TO_LOCAL_WORK_OS_NATIVE_HOST",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://REPLACE_WITH_EXTENSION_ID/"]
+}
