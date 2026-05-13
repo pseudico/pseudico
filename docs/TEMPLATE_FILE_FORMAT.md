@@ -35,6 +35,18 @@ Validation does not read or write arbitrary renderer paths. File-based reads
 must be provided by an Electron main/preload adapter, and actual template
 instantiation continues through existing template services.
 
+## Template pack exports
+
+Template packs use `.lwo-template-pack` JSON files for local-only transfer of
+multiple saved templates between workspaces. A v1 pack contains
+`fileType: "local-work-os.template-pack"`, pack metadata, aggregate capability
+flags, and a `templates` array of normal v1 `.lwo-template` envelopes.
+
+`TemplatePackImportValidator` validates the pack envelope and every embedded
+template before import. Successful imports create local template rows and
+activity events with `importer` as the actor; binary attachment bytes are not
+copied into template packs.
+
 ## Versioning policy
 
 - Additive fields may be introduced only when v1 validators can safely ignore

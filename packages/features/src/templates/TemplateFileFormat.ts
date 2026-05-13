@@ -8,6 +8,7 @@ import {
   ActivityLogService,
   CategoryRepository,
   TemplateRepository,
+  TransactionService,
   type CategoryRecord,
   type DatabaseConnection,
   type TemplateRecord
@@ -25,6 +26,9 @@ import {
 export const LWO_TEMPLATE_FILE_TYPE = "local-work-os.template";
 export const LWO_TEMPLATE_FILE_VERSION = 1;
 export const LWO_TEMPLATE_FILE_EXTENSION = ".lwo-template";
+export const LWO_TEMPLATE_PACK_FILE_TYPE = "local-work-os.template-pack";
+export const LWO_TEMPLATE_PACK_FILE_VERSION = 1;
+export const LWO_TEMPLATE_PACK_FILE_EXTENSION = ".lwo-template-pack";
 
 export type TemplateFileCategoryRef = {
   categoryId: string;
@@ -78,10 +82,15 @@ export type TemplateExportFileSystemAdapter = {
     exportRelativePath: string;
     contents: string;
   }) => Promise<{ sizeBytes: number }>;
+  writeTemplatePackFile?: (input: {
+    exportRelativePath: string;
+    contents: string;
+  }) => Promise<{ sizeBytes: number }>;
   writeTextExport?: (input: {
     exportRelativePath: string;
     contents: string;
   }) => Promise<{ sizeBytes: number }>;
+  readTextFile?: (filePath: string) => Promise<string>;
 };
 
 export type TemplateExportServiceIdFactory = (prefix: string) => string;
@@ -110,6 +119,54 @@ export type TemplateFileExportResult = {
   fileVersion: typeof LWO_TEMPLATE_FILE_VERSION;
   kind: TemplateKind;
   name: string;
+};
+
+export type TemplatePackFileV1 = {
+  fileType: typeof LWO_TEMPLATE_PACK_FILE_TYPE;
+  fileVersion: typeof LWO_TEMPLATE_PACK_FILE_VERSION;
+  exportedAt: string;
+  source: {
+    app: "Local Work OS";
+    workspaceId: string;
+    templateIds: string[];
+  };
+  metadata: {
+    name: string;
+    description: string | null;
+    templateCount: number;
+    recommendedExtension: typeof LWO_TEMPLATE_PACK_FILE_EXTENSION;
+  };
+  capabilities: TemplateFileCapabilities;
+  templates: TemplateFileV1[];
+};
+
+export type BuildTemplatePackInput = {
+  workspaceId: string;
+  templateIds?: string[];
+  name?: string;
+  description?: string | null;
+};
+
+export type WriteTemplatePackFileInput = {
+  exportRelativePath: string;
+  templatePackFile: TemplatePackFileV1;
+};
+
+export type ExportTemplatePackFileInput = BuildTemplatePackInput & {
+  exportRelativePath?: string;
+  actorType?: ActivityActorType;
+};
+
+export type TemplatePackFileExportResult = {
+  id: string;
+  workspaceId: string;
+  createdAt: string;
+  relativePath: string;
+  sizeBytes: number;
+  fileVersion: typeof LWO_TEMPLATE_PACK_FILE_VERSION;
+  name: string;
+  templateCount: number;
+  templateIds: string[];
 };
 
 export type TemplateImportValidationSeverity = "error" | "warning";
@@ -146,6 +203,33 @@ export type TemplateImportValidationSummary = {
   capabilities: TemplateFileCapabilities | null;
   counts: TemplateImportValidationCounts;
   issues: TemplateImportValidationIssue[];
+};
+
+export type TemplatePackImportValidationSummary = {
+  valid: boolean;
+  sourcePath: string | null;
+  fileVersion: number | null;
+  exportedAt: string | null;
+  name: string | null;
+  description: string | null;
+  templateCount: number;
+  capabilities: TemplateFileCapabilities | null;
+  counts: TemplateImportValidationCounts;
+  templates: TemplateImportValidationSummary[];
+  issues: TemplateImportValidationIssue[];
+};
+
+export type ImportTemplatePackFileInput = {
+  workspaceId: string;
+  fileData: unknown;
+  actorType?: ActivityActorType;
+};
+
+export type TemplatePackImportResult = {
+  workspaceId: string;
+  importedAt: string;
+  importedTemplates: TemplateRecord[];
+  templateCount: number;
 };
 
 export type TemplateImportValidatorFileSystemAdapter = {
@@ -223,6 +307,59 @@ export class TemplateExportService {
     };
   }
 
+  buildTemplatePackFile(input: BuildTemplatePackInput): TemplatePackFileV1 {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+
+    const requestedTemplateIds = input.templateIds?.map((templateId) => {
+      validateNonEmptyString(templateId, "templateId");
+      return templateId;
+    });
+    const repository = new TemplateRepository(this.connection);
+    const templates =
+      requestedTemplateIds === undefined
+        ? repository.listByWorkspace({ workspaceId: input.workspaceId })
+        : requestedTemplateIds.map((templateId) => {
+            const template = repository.getById(templateId);
+
+            if (template === null || template.workspaceId !== input.workspaceId) {
+              throw new Error(`Template row was not found in this workspace: ${templateId}.`);
+            }
+
+            return template;
+          });
+
+    if (templates.length === 0) {
+      throw new Error("Template pack export requires at least one template.");
+    }
+
+    const templateFiles = templates.map((template) => this.buildTemplateFileFromRecord(template));
+    const exportedAt = createIsoTimestamp(this.now());
+    const name =
+      normalizeOptionalString(input.name) ??
+      (templateFiles.length === 1
+        ? `${templateFiles[0]!.metadata.name} pack`
+        : "Template library pack");
+
+    return {
+      fileType: LWO_TEMPLATE_PACK_FILE_TYPE,
+      fileVersion: LWO_TEMPLATE_PACK_FILE_VERSION,
+      exportedAt,
+      source: {
+        app: "Local Work OS",
+        workspaceId: input.workspaceId,
+        templateIds: templates.map((template) => template.id)
+      },
+      metadata: {
+        name,
+        description: normalizeNullableString(input.description),
+        templateCount: templateFiles.length,
+        recommendedExtension: LWO_TEMPLATE_PACK_FILE_EXTENSION
+      },
+      capabilities: mergeCapabilities(templateFiles.map((template) => template.capabilities)),
+      templates: templateFiles
+    };
+  }
+
   async writeTemplateFile(input: WriteTemplateFileInput): Promise<{
     relativePath: string;
     sizeBytes: number;
@@ -245,6 +382,38 @@ export class TemplateExportService {
     const written = await writeTemplateFile({
       exportRelativePath: input.exportRelativePath,
       contents: `${JSON.stringify(input.templateFile, null, 2)}\n`
+    });
+
+    return {
+      relativePath: input.exportRelativePath,
+      sizeBytes: written.sizeBytes
+    };
+  }
+
+  async writeTemplatePackFile(input: WriteTemplatePackFileInput): Promise<{
+    relativePath: string;
+    sizeBytes: number;
+  }> {
+    validateTemplatePackExportRelativePath(input.exportRelativePath, "exportRelativePath");
+    const summary = new TemplatePackImportValidator().validateTemplatePackFileData(
+      input.templatePackFile
+    );
+
+    if (!summary.valid) {
+      const firstError = summary.issues.find((issue) => issue.severity === "error");
+      throw new Error(firstError?.message ?? "Template pack file data is not valid.");
+    }
+
+    const writeTemplatePackFile =
+      this.fileSystem.writeTemplatePackFile ?? this.fileSystem.writeTextExport;
+
+    if (writeTemplatePackFile === undefined) {
+      throw new Error("Template export file system adapter cannot write template pack files.");
+    }
+
+    const written = await writeTemplatePackFile({
+      exportRelativePath: input.exportRelativePath,
+      contents: `${JSON.stringify(input.templatePackFile, null, 2)}\n`
     });
 
     return {
@@ -300,6 +469,138 @@ export class TemplateExportService {
       kind: templateFile.metadata.kind,
       name: templateFile.metadata.name
     };
+  }
+
+  async exportTemplatePackFile(
+    input: ExportTemplatePackFileInput
+  ): Promise<TemplatePackFileExportResult> {
+    const templatePackFile = this.buildTemplatePackFile(input);
+    const exportId = this.idFactory("export");
+    const relativePath =
+      input.exportRelativePath ??
+      createTemplatePackExportRelativePath(
+        templatePackFile.exportedAt,
+        templatePackFile.metadata.name
+      );
+    const written = await this.writeTemplatePackFile({
+      exportRelativePath: relativePath,
+      templatePackFile
+    });
+
+    new ActivityLogService({
+      connection: this.connection,
+      idFactory: this.idFactory
+    }).logEvent({
+      workspaceId: templatePackFile.source.workspaceId,
+      actorType: input.actorType ?? "local_user",
+      action: ActivityAction.exportCreated,
+      targetType: "export",
+      targetId: exportId,
+      summary: `Created template pack export ${written.relativePath}.`,
+      beforeJson: null,
+      afterJson: JSON.stringify({
+        export: {
+          id: exportId,
+          kind: "template_pack",
+          relativePath: written.relativePath,
+          sizeBytes: written.sizeBytes,
+          templateIds: templatePackFile.source.templateIds,
+          templateCount: templatePackFile.metadata.templateCount,
+          fileVersion: templatePackFile.fileVersion
+        }
+      }),
+      timestamp: templatePackFile.exportedAt
+    });
+
+    return {
+      id: exportId,
+      workspaceId: templatePackFile.source.workspaceId,
+      createdAt: templatePackFile.exportedAt,
+      relativePath: written.relativePath,
+      sizeBytes: written.sizeBytes,
+      fileVersion: templatePackFile.fileVersion,
+      name: templatePackFile.metadata.name,
+      templateCount: templatePackFile.metadata.templateCount,
+      templateIds: templatePackFile.source.templateIds
+    };
+  }
+
+  async importTemplatePackFile(input: ImportTemplatePackFileInput): Promise<TemplatePackImportResult> {
+    validateNonEmptyString(input.workspaceId, "workspaceId");
+
+    const summary = new TemplatePackImportValidator().validateTemplatePackFileData(input.fileData);
+
+    if (!summary.valid) {
+      const firstError = summary.issues.find((issue) => issue.severity === "error");
+      throw new Error(firstError?.message ?? "Template pack file data is not valid.");
+    }
+
+    if (!isRecord(input.fileData) || !Array.isArray(input.fileData.templates)) {
+      throw new Error("Template pack file data is not valid.");
+    }
+
+    const templateFiles = input.fileData.templates;
+
+    return await new TransactionService({ connection: this.connection }).runInTransaction(() => {
+      const timestamp = createIsoTimestamp(this.now());
+      const repository = new TemplateRepository(this.connection);
+      const activity = new ActivityLogService({
+        connection: this.connection,
+        idFactory: this.idFactory
+      });
+      const importedTemplates = templateFiles.map((templateFile, index) => {
+        const templateSummary = summary.templates[index];
+
+        if (templateSummary === undefined || templateSummary.template === null) {
+          throw new Error("Template pack file data is not valid.");
+        }
+
+        const source = isRecord(templateFile.source) ? templateFile.source : {};
+        const metadata = isRecord(templateFile.metadata) ? templateFile.metadata : {};
+        const template = repository.create({
+          id: this.idFactory("template"),
+          workspaceId: input.workspaceId,
+          kind: templateSummary.template.kind,
+          name: String(metadata.name),
+          description:
+            typeof metadata.description === "string" || metadata.description === null
+              ? metadata.description
+              : null,
+          sourceType: templateSummary.template.kind,
+          sourceId:
+            typeof source.sourceId === "string" && source.sourceId.trim() !== ""
+              ? source.sourceId
+              : null,
+          templateJson: JSON.stringify(templateSummary.template),
+          timestamp
+        });
+
+        activity.logEvent({
+          workspaceId: input.workspaceId,
+          actorType: input.actorType ?? "importer",
+          action: ActivityAction.templateCreated,
+          targetType: "template",
+          targetId: template.id,
+          summary: `Imported template "${template.name}" from template pack.`,
+          beforeJson: null,
+          afterJson: JSON.stringify({
+            template,
+            sourceTemplateId: typeof source.templateId === "string" ? source.templateId : null,
+            packName: summary.name
+          }),
+          timestamp
+        });
+
+        return template;
+      });
+
+      return {
+        workspaceId: input.workspaceId,
+        importedAt: timestamp,
+        importedTemplates,
+        templateCount: importedTemplates.length
+      };
+    });
   }
 }
 
@@ -405,6 +706,130 @@ export class TemplateImportValidator {
       sourcePath,
       fileData,
       template,
+      issues
+    });
+  }
+}
+
+export class TemplatePackImportValidator {
+  readonly module = "templates";
+
+  private readonly fileSystem: TemplateImportValidatorFileSystemAdapter | undefined;
+
+  constructor(input: { fileSystem?: TemplateImportValidatorFileSystemAdapter } = {}) {
+    this.fileSystem = input.fileSystem;
+  }
+
+  async validateTemplatePackFile(filePath: string): Promise<TemplatePackImportValidationSummary> {
+    validateNonEmptyString(filePath, "filePath");
+
+    if (!filePath.endsWith(LWO_TEMPLATE_PACK_FILE_EXTENSION)) {
+      return createPackValidationSummary({
+        sourcePath: filePath,
+        fileData: null,
+        templates: [],
+        issues: [
+          {
+            severity: "error",
+            code: "invalid_extension",
+            path: "$",
+            message: `Template pack files must use the ${LWO_TEMPLATE_PACK_FILE_EXTENSION} extension.`
+          }
+        ]
+      });
+    }
+
+    if (this.fileSystem === undefined) {
+      throw new Error("Template pack import validator file system adapter is required.");
+    }
+
+    let parsed: unknown;
+
+    try {
+      parsed = JSON.parse(await this.fileSystem.readTextFile(filePath));
+    } catch (error) {
+      return createPackValidationSummary({
+        sourcePath: filePath,
+        fileData: null,
+        templates: [],
+        issues: [
+          {
+            severity: "error",
+            code: "invalid_json",
+            path: "$",
+            message:
+              error instanceof SyntaxError
+                ? "Template pack file must contain valid JSON."
+                : error instanceof Error
+                  ? error.message
+                  : "Template pack file could not be read."
+          }
+        ]
+      });
+    }
+
+    return this.validateTemplatePackFileData(parsed, filePath);
+  }
+
+  validateTemplatePackFileData(
+    fileData: unknown,
+    sourcePath: string | null = null
+  ): TemplatePackImportValidationSummary {
+    const issues: TemplateImportValidationIssue[] = [];
+
+    if (!isRecord(fileData)) {
+      issues.push({
+        severity: "error",
+        code: "invalid_schema",
+        path: "$",
+        message: "Template pack file must be a JSON object."
+      });
+
+      return createPackValidationSummary({
+        sourcePath,
+        fileData: null,
+        templates: [],
+        issues
+      });
+    }
+
+    validatePackEnvelopeShape(fileData, issues);
+
+    const templateSummaries = Array.isArray(fileData.templates)
+      ? fileData.templates.map((templateFile, index) => {
+          const summary = new TemplateImportValidator().validateTemplateFileData(
+            templateFile,
+            `${sourcePath ?? "template-pack"}#templates[${index}]`
+          );
+
+          for (const issue of summary.issues) {
+            issues.push({
+              ...issue,
+              path: `$.templates[${index}]${issue.path === "$" ? "" : issue.path.slice(1)}`
+            });
+          }
+
+          return summary;
+        })
+      : [];
+
+    if (
+      isRecord(fileData.metadata) &&
+      typeof fileData.metadata.templateCount === "number" &&
+      fileData.metadata.templateCount !== templateSummaries.length
+    ) {
+      issues.push({
+        severity: "error",
+        code: "template_count_mismatch",
+        path: "$.metadata.templateCount",
+        message: "metadata.templateCount must match the number of packed templates."
+      });
+    }
+
+    return createPackValidationSummary({
+      sourcePath,
+      fileData,
+      templates: templateSummaries,
       issues
     });
   }
@@ -757,6 +1182,36 @@ function createValidationSummary(input: {
   };
 }
 
+function createPackValidationSummary(input: {
+  sourcePath: string | null;
+  fileData: Record<string, unknown> | null;
+  templates: TemplateImportValidationSummary[];
+  issues: TemplateImportValidationIssue[];
+}): TemplatePackImportValidationSummary {
+  const fileData = input.fileData;
+  const metadata = isRecord(fileData?.metadata) ? fileData.metadata : null;
+  const capabilities = isCapabilities(fileData?.capabilities)
+    ? fileData.capabilities
+    : null;
+
+  return {
+    valid: !input.issues.some((issue) => issue.severity === "error"),
+    sourcePath: input.sourcePath,
+    fileVersion: typeof fileData?.fileVersion === "number" ? fileData.fileVersion : null,
+    exportedAt: typeof fileData?.exportedAt === "string" ? fileData.exportedAt : null,
+    name: typeof metadata?.name === "string" ? metadata.name : null,
+    description:
+      typeof metadata?.description === "string" || metadata?.description === null
+        ? metadata.description
+        : null,
+    templateCount: input.templates.length,
+    capabilities,
+    counts: sumCounts(input.templates.map((template) => template.counts)),
+    templates: input.templates,
+    issues: input.issues
+  };
+}
+
 function countTemplate(template: TemplateJsonV1): TemplateImportValidationCounts {
   const refs = collectTemplateReferences(template);
 
@@ -804,6 +1259,140 @@ function emptyCounts(): TemplateImportValidationCounts {
     tags: 0,
     categories: 0
   };
+}
+
+function sumCounts(counts: TemplateImportValidationCounts[]): TemplateImportValidationCounts {
+  return counts.reduce<TemplateImportValidationCounts>(
+    (total, count) => ({
+      tabs: total.tabs + count.tabs,
+      items: total.items + count.items,
+      tasks: total.tasks + count.tasks,
+      notes: total.notes + count.notes,
+      lists: total.lists + count.lists,
+      links: total.links + count.links,
+      filePlaceholders: total.filePlaceholders + count.filePlaceholders,
+      listItems: total.listItems + count.listItems,
+      tags: total.tags + count.tags,
+      categories: total.categories + count.categories
+    }),
+    emptyCounts()
+  );
+}
+
+function validatePackEnvelopeShape(
+  fileData: Record<string, unknown>,
+  issues: TemplateImportValidationIssue[]
+): void {
+  if (fileData.fileType !== LWO_TEMPLATE_PACK_FILE_TYPE) {
+    issues.push({
+      severity: "error",
+      code: "invalid_file_type",
+      path: "$.fileType",
+      message: `Template pack fileType must be ${LWO_TEMPLATE_PACK_FILE_TYPE}.`
+    });
+  }
+
+  if (fileData.fileVersion !== LWO_TEMPLATE_PACK_FILE_VERSION) {
+    issues.push({
+      severity: "error",
+      code: "unsupported_file_version",
+      path: "$.fileVersion",
+      message: `Template pack fileVersion must be ${LWO_TEMPLATE_PACK_FILE_VERSION}.`
+    });
+  }
+
+  requireString(fileData, "exportedAt", "$.exportedAt", issues);
+
+  if (!isRecord(fileData.source)) {
+    issues.push({
+      severity: "error",
+      code: "missing_source",
+      path: "$.source",
+      message: "Template pack file must include source metadata."
+    });
+  } else {
+    requireString(fileData.source, "app", "$.source.app", issues);
+    if (fileData.source.app !== "Local Work OS") {
+      issues.push({
+        severity: "error",
+        code: "invalid_source_app",
+        path: "$.source.app",
+        message: "source.app must be Local Work OS."
+      });
+    }
+    requireString(fileData.source, "workspaceId", "$.source.workspaceId", issues);
+    if (!Array.isArray(fileData.source.templateIds)) {
+      issues.push({
+        severity: "error",
+        code: "invalid_template_ids",
+        path: "$.source.templateIds",
+        message: "source.templateIds must be an array."
+      });
+    } else {
+      fileData.source.templateIds.forEach((templateId, index) => {
+        if (typeof templateId !== "string" || templateId.trim().length === 0) {
+          issues.push({
+            severity: "error",
+            code: "invalid_template_id",
+            path: `$.source.templateIds[${index}]`,
+            message: "Packed template IDs must be non-empty strings."
+          });
+        }
+      });
+    }
+  }
+
+  if (!isRecord(fileData.metadata)) {
+    issues.push({
+      severity: "error",
+      code: "missing_metadata",
+      path: "$.metadata",
+      message: "Template pack file must include metadata."
+    });
+  } else {
+    requireString(fileData.metadata, "name", "$.metadata.name", issues);
+    requireOptionalNullableString(fileData.metadata, "description", "$.metadata.description", issues);
+
+    if (
+      typeof fileData.metadata.templateCount !== "number" ||
+      !Number.isInteger(fileData.metadata.templateCount) ||
+      fileData.metadata.templateCount <= 0
+    ) {
+      issues.push({
+        severity: "error",
+        code: "invalid_template_count",
+        path: "$.metadata.templateCount",
+        message: "metadata.templateCount must be a positive integer."
+      });
+    }
+
+    if (fileData.metadata.recommendedExtension !== LWO_TEMPLATE_PACK_FILE_EXTENSION) {
+      issues.push({
+        severity: "error",
+        code: "invalid_recommended_extension",
+        path: "$.metadata.recommendedExtension",
+        message: `recommendedExtension must be ${LWO_TEMPLATE_PACK_FILE_EXTENSION}.`
+      });
+    }
+  }
+
+  if (!isCapabilities(fileData.capabilities)) {
+    issues.push({
+      severity: "error",
+      code: "missing_capabilities",
+      path: "$.capabilities",
+      message: "Template pack file must include capability flags."
+    });
+  }
+
+  if (!Array.isArray(fileData.templates) || fileData.templates.length === 0) {
+    issues.push({
+      severity: "error",
+      code: "missing_templates",
+      path: "$.templates",
+      message: "Template pack file must include at least one template."
+    });
+  }
 }
 
 function validateCategoryReference(
@@ -861,6 +1450,10 @@ function createTemplateExportRelativePath(exportedAt: string, name: string): str
   return `exports/templates/${exportedAt.replace(/[:.]/g, "-")}-${slugifyFileName(name)}${LWO_TEMPLATE_FILE_EXTENSION}`;
 }
 
+function createTemplatePackExportRelativePath(exportedAt: string, name: string): string {
+  return `exports/templates/${exportedAt.replace(/[:.]/g, "-")}-${slugifyFileName(name)}${LWO_TEMPLATE_PACK_FILE_EXTENSION}`;
+}
+
 function validateTemplateExportRelativePath(value: string, fieldName: string): void {
   validateNonEmptyString(value, fieldName);
 
@@ -877,6 +1470,26 @@ function validateTemplateExportRelativePath(value: string, fieldName: string): v
   if (!normalized.startsWith("exports/") || !normalized.endsWith(LWO_TEMPLATE_FILE_EXTENSION)) {
     throw new Error(
       `${fieldName} must be a ${LWO_TEMPLATE_FILE_EXTENSION} file inside workspace exports.`
+    );
+  }
+}
+
+function validateTemplatePackExportRelativePath(value: string, fieldName: string): void {
+  validateNonEmptyString(value, fieldName);
+
+  const normalized = value.replace(/\\/g, "/");
+
+  if (
+    normalized.startsWith("/") ||
+    /^[a-zA-Z]:/.test(normalized) ||
+    normalized.split("/").some((segment) => segment === "." || segment === "..")
+  ) {
+    throw new Error(`${fieldName} must be workspace-relative.`);
+  }
+
+  if (!normalized.startsWith("exports/") || !normalized.endsWith(LWO_TEMPLATE_PACK_FILE_EXTENSION)) {
+    throw new Error(
+      `${fieldName} must be a ${LWO_TEMPLATE_PACK_FILE_EXTENSION} file inside workspace exports.`
     );
   }
 }
@@ -901,6 +1514,27 @@ function isCapabilities(value: unknown): value is TemplateFileCapabilities {
   );
 }
 
+function mergeCapabilities(capabilities: TemplateFileCapabilities[]): TemplateFileCapabilities {
+  return capabilityKeys.reduce(
+    (merged, key) => ({
+      ...merged,
+      [key]: capabilities.some((capability) => capability[key])
+    }),
+    {
+      tabs: false,
+      tasks: false,
+      notes: false,
+      lists: false,
+      links: false,
+      filePlaceholders: false,
+      tags: false,
+      categories: false,
+      relativeDates: false,
+      contactFields: false
+    } satisfies TemplateFileCapabilities
+  );
+}
+
 function hasTags(tagGroups: readonly (readonly TemplateTagRef[])[]): boolean {
   return tagGroups.some((tags) => tags.length > 0);
 }
@@ -917,6 +1551,24 @@ function validateNonEmptyString(value: string, fieldName: string): void {
   if (value.trim().length === 0) {
     throw new Error(`${fieldName} must be a non-empty string.`);
   }
+}
+
+function normalizeOptionalString(value: string | undefined): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? undefined : trimmed;
+}
+
+function normalizeNullableString(value: string | null | undefined): string | null {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? null : trimmed;
 }
 
 function requireString(

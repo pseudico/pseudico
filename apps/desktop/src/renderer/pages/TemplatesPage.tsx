@@ -1,4 +1,4 @@
-import { Copy, FileText, Layers3, Play, Search, Trash2 } from "lucide-react";
+import { Copy, Download, FileText, Layers3, Play, Search, Trash2, Upload } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type {
@@ -55,6 +55,8 @@ export function TemplatesPage({
   const [baseDate, setBaseDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [loading, setLoading] = useState(false);
   const [mutatingTemplateId, setMutatingTemplateId] = useState<string | null>(null);
+  const [packBusy, setPackBusy] = useState(false);
+  const [packMessage, setPackMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -226,6 +228,66 @@ export function TemplatesPage({
     setSelectedTemplateId((current) => (current === template.id ? null : current));
   }
 
+  async function exportTemplatePack(): Promise<void> {
+    if (apiClient.templates === undefined || currentWorkspace === null) {
+      setError("Template library API is unavailable.");
+      return;
+    }
+
+    if (templates.length === 0) {
+      setError("Create or save at least one template before exporting a pack.");
+      return;
+    }
+
+    setPackBusy(true);
+    setPackMessage(null);
+    setError(null);
+    const result = await apiClient.templates.exportTemplatePack({
+      workspaceId: currentWorkspace.id,
+      templateIds: templates.map((template) => template.id),
+      name: "Template library pack"
+    });
+    setPackBusy(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setPackMessage(
+      `Exported ${result.data.templateCount} templates to ${result.data.relativePath}.`
+    );
+  }
+
+  async function importTemplatePack(): Promise<void> {
+    if (apiClient.templates === undefined || currentWorkspace === null) {
+      setError("Template library API is unavailable.");
+      return;
+    }
+
+    setPackBusy(true);
+    setPackMessage(null);
+    setError(null);
+    const result = await apiClient.templates.chooseAndImportTemplatePack({
+      workspaceId: currentWorkspace.id
+    });
+    setPackBusy(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    if (result.data === null) {
+      setPackMessage("Template pack import cancelled.");
+      return;
+    }
+
+    setTemplates((current) => [...result.data!.importedTemplates, ...current]);
+    setSelectedTemplateId(result.data.importedTemplates[0]?.id ?? selectedTemplateId);
+    setPackMessage(`Imported ${result.data.templateCount} templates from template pack.`);
+  }
+
   async function instantiateSelectedTemplate(): Promise<void> {
     if (instantiateTemplate === null || currentWorkspace === null) {
       return;
@@ -304,6 +366,24 @@ export function TemplatesPage({
         <Link to="/projects" className="secondary-button">
           Save templates from projects
         </Link>
+        <button
+          type="button"
+          className="secondary-button"
+          disabled={packBusy || templates.length === 0}
+          onClick={() => void exportTemplatePack()}
+        >
+          <Download size={16} aria-hidden="true" />
+          Export pack
+        </button>
+        <button
+          type="button"
+          className="secondary-button"
+          disabled={packBusy}
+          onClick={() => void importTemplatePack()}
+        >
+          <Upload size={16} aria-hidden="true" />
+          Import pack
+        </button>
       </div>
 
       <div className="toolbar-row template-library-toolbar">
@@ -342,6 +422,7 @@ export function TemplatesPage({
       </div>
 
       {error === null ? null : <p className="error-text">{error}</p>}
+      {packMessage === null ? null : <p className="success-text">{packMessage}</p>}
 
       <div className="template-manager-layout">
         <div className="template-manager-list" aria-label="Templates">

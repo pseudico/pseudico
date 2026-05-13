@@ -13,6 +13,8 @@ describe("TemplatesPage", () => {
     );
 
     expect(html).toContain("Local template manager");
+    expect(html).toContain("Export pack");
+    expect(html).toContain("Import pack");
     expect(html).toContain("Client launch");
     expect(html).toContain("Project");
     expect(html).toContain("Schedule kickoff");
@@ -84,6 +86,68 @@ function createMockApi(): LocalWorkOsApi {
         apiOk({
           ...template,
           deletedAt: "2026-05-02T00:00:00.000Z"
+        }),
+      exportTemplatePack: async () =>
+        apiOk({
+          id: "export_1",
+          workspaceId: "workspace_1",
+          createdAt: "2026-05-02T00:00:00.000Z",
+          relativePath: "exports/templates/template-library-pack.lwo-template-pack",
+          sizeBytes: 1234,
+          fileVersion: 1,
+          name: "Template library pack",
+          templateCount: 1,
+          templateIds: ["template_project"]
+        }),
+      validateTemplatePack: async () =>
+        apiOk({
+          valid: true,
+          sourcePath: "template-pack.lwo-template-pack",
+          fileVersion: 1,
+          exportedAt: "2026-05-02T00:00:00.000Z",
+          name: "Template library pack",
+          description: null,
+          templateCount: 1,
+          capabilities: {
+            tabs: true,
+            tasks: true,
+            notes: false,
+            lists: false,
+            links: false,
+            filePlaceholders: false,
+            tags: true,
+            categories: false,
+            relativeDates: false,
+            contactFields: false
+          },
+          counts: {
+            tabs: 1,
+            items: 1,
+            tasks: 1,
+            notes: 0,
+            lists: 0,
+            links: 0,
+            filePlaceholders: 0,
+            listItems: 0,
+            tags: 1,
+            categories: 0
+          },
+          templates: [],
+          issues: []
+        }),
+      importTemplatePack: async () =>
+        apiOk({
+          workspaceId: "workspace_1",
+          importedAt: "2026-05-02T00:00:00.000Z",
+          templateCount: 1,
+          importedTemplates: [template]
+        }),
+      chooseAndImportTemplatePack: async () =>
+        apiOk({
+          workspaceId: "workspace_1",
+          importedAt: "2026-05-02T00:00:00.000Z",
+          templateCount: 1,
+          importedTemplates: [template]
         })
     },
     projects: {

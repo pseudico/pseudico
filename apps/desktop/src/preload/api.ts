@@ -2861,6 +2861,99 @@ export type DeleteTemplateInput = {
   actorType?: "local_user" | "system" | "importer";
 };
 
+export type TemplatePackCountsSummary = {
+  tabs: number;
+  items: number;
+  tasks: number;
+  notes: number;
+  lists: number;
+  links: number;
+  filePlaceholders: number;
+  listItems: number;
+  tags: number;
+  categories: number;
+};
+
+export type TemplatePackCapabilitySummary = {
+  tabs: boolean;
+  tasks: boolean;
+  notes: boolean;
+  lists: boolean;
+  links: boolean;
+  filePlaceholders: boolean;
+  tags: boolean;
+  categories: boolean;
+  relativeDates: boolean;
+  contactFields: boolean;
+};
+
+export type ExportTemplatePackInput = {
+  workspaceId?: string;
+  templateIds?: string[];
+  name?: string;
+  description?: string | null;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type TemplatePackExportSummary = {
+  id: string;
+  workspaceId: string;
+  createdAt: string;
+  relativePath: string;
+  sizeBytes: number;
+  fileVersion: 1;
+  name: string;
+  templateCount: number;
+  templateIds: string[];
+};
+
+export type ValidateTemplatePackInput = {
+  filePath: string;
+};
+
+export type ImportTemplatePackInput = {
+  workspaceId?: string;
+  filePath: string;
+  actorType?: "local_user" | "system" | "importer";
+};
+
+export type TemplatePackValidationIssueSummary = {
+  severity: "error" | "warning";
+  code: string;
+  path: string;
+  message: string;
+};
+
+export type TemplatePackValidationTemplateSummary = {
+  valid: boolean;
+  kind: TemplateSummary["kind"] | null;
+  name: string | null;
+  description: string | null;
+  counts: TemplatePackCountsSummary;
+  issues: TemplatePackValidationIssueSummary[];
+};
+
+export type TemplatePackValidationSummary = {
+  valid: boolean;
+  sourcePath: string | null;
+  fileVersion: number | null;
+  exportedAt: string | null;
+  name: string | null;
+  description: string | null;
+  templateCount: number;
+  capabilities: TemplatePackCapabilitySummary | null;
+  counts: TemplatePackCountsSummary;
+  templates: TemplatePackValidationTemplateSummary[];
+  issues: TemplatePackValidationIssueSummary[];
+};
+
+export type TemplatePackImportSummary = {
+  workspaceId: string;
+  importedAt: string;
+  templateCount: number;
+  importedTemplates: TemplateSummary[];
+};
+
 export type ContainerTemplateCreationSummary = {
   template: TemplateSummary;
   container: ProjectSummary | ContactSummary;
@@ -3177,7 +3270,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     listTemplates: "local-work-os:templates:list-templates",
     updateTemplate: "local-work-os:templates:update-template",
     duplicateTemplate: "local-work-os:templates:duplicate-template",
-    deleteTemplate: "local-work-os:templates:delete-template"
+    deleteTemplate: "local-work-os:templates:delete-template",
+    exportTemplatePack: "local-work-os:templates:export-template-pack",
+    validateTemplatePack: "local-work-os:templates:validate-template-pack",
+    importTemplatePack: "local-work-os:templates:import-template-pack",
+    chooseAndImportTemplatePack: "local-work-os:templates:choose-and-import-template-pack"
   },
   notes: {
     createNote: "local-work-os:notes:create-note",
@@ -3622,6 +3719,22 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.templates.deleteTemplate]: {
     input: DeleteTemplateInput;
     result: ApiResult<TemplateSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.templates.exportTemplatePack]: {
+    input: ExportTemplatePackInput | undefined;
+    result: ApiResult<TemplatePackExportSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.templates.validateTemplatePack]: {
+    input: ValidateTemplatePackInput;
+    result: ApiResult<TemplatePackValidationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.templates.importTemplatePack]: {
+    input: ImportTemplatePackInput;
+    result: ApiResult<TemplatePackImportSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.templates.chooseAndImportTemplatePack]: {
+    input: { workspaceId?: string } | undefined;
+    result: ApiResult<TemplatePackImportSummary | null>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.notes.createNote]: {
     input: CreateNoteInput;
@@ -4449,6 +4562,18 @@ export type LocalWorkOsApi = {
     deleteTemplate: (
       input: DeleteTemplateInput
     ) => Promise<ApiResult<TemplateSummary>>;
+    exportTemplatePack: (
+      input?: ExportTemplatePackInput
+    ) => Promise<ApiResult<TemplatePackExportSummary>>;
+    validateTemplatePack: (
+      input: ValidateTemplatePackInput
+    ) => Promise<ApiResult<TemplatePackValidationSummary>>;
+    importTemplatePack: (
+      input: ImportTemplatePackInput
+    ) => Promise<ApiResult<TemplatePackImportSummary>>;
+    chooseAndImportTemplatePack: (
+      input?: { workspaceId?: string }
+    ) => Promise<ApiResult<TemplatePackImportSummary | null>>;
   };
   notes: {
     create: (input: CreateNoteInput) => Promise<ApiResult<NoteSummary>>;
@@ -5168,7 +5293,15 @@ export function createLocalWorkOsApi(
       duplicateTemplate: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.duplicateTemplate, input),
       deleteTemplate: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.deleteTemplate, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.deleteTemplate, input),
+      exportTemplatePack: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.exportTemplatePack, input),
+      validateTemplatePack: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.validateTemplatePack, input),
+      importTemplatePack: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.importTemplatePack, input),
+      chooseAndImportTemplatePack: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.chooseAndImportTemplatePack, input)
     },
     notes: {
       create: (input) =>

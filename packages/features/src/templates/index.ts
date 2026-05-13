@@ -14,7 +14,11 @@ export {
   LWO_TEMPLATE_FILE_EXTENSION,
   LWO_TEMPLATE_FILE_TYPE,
   LWO_TEMPLATE_FILE_VERSION,
+  LWO_TEMPLATE_PACK_FILE_EXTENSION,
+  LWO_TEMPLATE_PACK_FILE_TYPE,
+  LWO_TEMPLATE_PACK_FILE_VERSION,
   TemplateExportService,
+  TemplatePackImportValidator,
   TemplateImportValidator,
   deriveCapabilities
 } from "./TemplateFileFormat";
@@ -49,7 +53,10 @@ export type {
 } from "./TemplateService";
 export type {
   BuildTemplateFileInput,
+  BuildTemplatePackInput,
   ExportTemplateFileInput,
+  ExportTemplatePackFileInput,
+  ImportTemplatePackFileInput,
   TemplateExportFileSystemAdapter,
   TemplateExportServiceIdFactory,
   TemplateFileCapabilities,
@@ -61,5 +68,10 @@ export type {
   TemplateImportValidationSeverity,
   TemplateImportValidationSummary,
   TemplateImportValidatorFileSystemAdapter,
+  TemplatePackFileExportResult,
+  TemplatePackFileV1,
+  TemplatePackImportResult,
+  TemplatePackImportValidationSummary,
+  WriteTemplatePackFileInput,
   WriteTemplateFileInput
 } from "./TemplateFileFormat";

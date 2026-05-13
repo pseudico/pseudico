@@ -131,7 +131,15 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       duplicateTemplate: (input) =>
         callApi(() => api.templates!.duplicateTemplate(input)),
       deleteTemplate: (input) =>
-        callApi(() => api.templates!.deleteTemplate(input))
+        callApi(() => api.templates!.deleteTemplate(input)),
+      exportTemplatePack: (input) =>
+        callApi(() => api.templates!.exportTemplatePack(input)),
+      validateTemplatePack: (input) =>
+        callApi(() => api.templates!.validateTemplatePack(input)),
+      importTemplatePack: (input) =>
+        callApi(() => api.templates!.importTemplatePack(input)),
+      chooseAndImportTemplatePack: (input) =>
+        callApi(() => api.templates!.chooseAndImportTemplatePack(input))
     },
     notes: {
       create: (input) => callApi(() => api.notes.create(input)),
@@ -704,7 +712,15 @@ export const desktopApiClient: LocalWorkOsApi = {
     duplicateTemplate: (input) =>
       getDesktopApiClient().templates!.duplicateTemplate(input),
     deleteTemplate: (input) =>
-      getDesktopApiClient().templates!.deleteTemplate(input)
+      getDesktopApiClient().templates!.deleteTemplate(input),
+    exportTemplatePack: (input) =>
+      getDesktopApiClient().templates!.exportTemplatePack(input),
+    validateTemplatePack: (input) =>
+      getDesktopApiClient().templates!.validateTemplatePack(input),
+    importTemplatePack: (input) =>
+      getDesktopApiClient().templates!.importTemplatePack(input),
+    chooseAndImportTemplatePack: (input) =>
+      getDesktopApiClient().templates!.chooseAndImportTemplatePack(input)
   },
   notes: {
     create: (input) => getDesktopApiClient().notes.create(input),
