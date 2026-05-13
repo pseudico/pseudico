@@ -1,10 +1,14 @@
-import { copyFile, readFile, readdir, stat } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { copyFile, readFile, readdir, rm, stat } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { basename, resolve } from "node:path";
 import {
+  BackupSchedulerService,
   BackupService,
   RestoreService,
   type BackupManifest,
   type BackupManifestAttachment,
+  type ScheduledBackupTrigger,
   type WorkspaceExportV1,
   type BackupSnapshotSummary as FeatureBackupSnapshotSummary
 } from "@local-work-os/features";
@@ -19,13 +23,18 @@ import {
   apiOk,
   type ApiResult,
   type BackupSnapshotSummary,
+  type BackupSchedulerSettings,
+  type BackupSchedulerStatus,
   type CreateManualBackupInput,
   type ListBackupsInput,
   type ManualBackupSnapshotSummary,
+  type RunAutomaticBackupInput,
+  type AutomaticBackupRunSummary,
   type RestoreBackupToNewWorkspaceInput,
   type RestoreValidationSummary,
   type RestoreWorkspaceSummary,
   type RestoreExportToNewWorkspaceInput,
+  type UpdateBackupSchedulerSettingsInput,
   type ValidateRestoreSourceInput
 } from "../../preload/api";
 import {
@@ -58,6 +67,21 @@ export type BackupIpcHandlers = {
   handleListBackups: (
     input: unknown
   ) => Promise<ApiResult<BackupSnapshotSummary[]>>;
+  handleGetAutomaticBackupSettings: (
+    input: unknown
+  ) => Promise<ApiResult<{
+    settings: BackupSchedulerSettings;
+    status: BackupSchedulerStatus;
+  }>>;
+  handleUpdateAutomaticBackupSettings: (
+    input: unknown
+  ) => Promise<ApiResult<{
+    settings: BackupSchedulerSettings;
+    status: BackupSchedulerStatus;
+  }>>;
+  handleRunAutomaticBackupCheck: (
+    input: unknown
+  ) => Promise<ApiResult<AutomaticBackupRunSummary>>;
   handleValidateRestoreSource: (
     input: unknown
   ) => Promise<ApiResult<RestoreValidationSummary>>;
@@ -107,7 +131,8 @@ export function createBackupIpcHandlers(
           void connection;
 
           return apiOk(snapshot);
-        }
+        },
+        now
       );
     },
 
@@ -134,7 +159,127 @@ export function createBackupIpcHandlers(
           const backups = await listBackupSnapshots(workspace.rootPath);
 
           return apiOk(service.listBackups({ workspaceId, backups }));
-        }
+        },
+        now
+      );
+    },
+
+    async handleGetAutomaticBackupSettings(input) {
+      if (!isOptionalListBackupsInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "getAutomaticBackupSettings accepts an optional workspaceId string."
+        );
+      }
+
+      return await withBackupService(
+        workspaceService,
+        async ({ connection, workspace }) => {
+          const workspaceId = input?.workspaceId ?? workspace.id;
+
+          if (workspaceId !== workspace.id) {
+            return apiError(
+              "WORKSPACE_ERROR",
+              "Backup workspaceId must match the current workspace."
+            );
+          }
+
+          const scheduler = new BackupSchedulerService({
+            connection,
+            now
+          });
+
+          return apiOk({
+            settings: scheduler.getSettings(workspaceId),
+            status: scheduler.getStatus(workspaceId)
+          });
+        },
+        now
+      );
+    },
+
+    async handleUpdateAutomaticBackupSettings(input) {
+      if (!isUpdateBackupSchedulerSettingsInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "updateAutomaticBackupSettings requires workspaceId and valid backup settings."
+        );
+      }
+
+      return await withBackupService(
+        workspaceService,
+        async ({ connection, workspace }) => {
+          if (input.workspaceId !== workspace.id) {
+            return apiError(
+              "WORKSPACE_ERROR",
+              "Backup workspaceId must match the current workspace."
+            );
+          }
+
+          const scheduler = new BackupSchedulerService({
+            connection,
+            now
+          });
+          const settings = await scheduler.updateSettings(input);
+
+          return apiOk({
+            settings,
+            status: scheduler.getStatus(input.workspaceId)
+          });
+        },
+        now
+      );
+    },
+
+    async handleRunAutomaticBackupCheck(input) {
+      if (!isRunAutomaticBackupInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "runAutomaticBackupCheck requires a workspaceId and scheduler trigger."
+        );
+      }
+
+      return await withBackupService(
+        workspaceService,
+        async ({ connection, service, workspace }) => {
+          if (input.workspaceId !== workspace.id) {
+            return apiError(
+              "WORKSPACE_ERROR",
+              "Backup workspaceId must match the current workspace."
+            );
+          }
+
+          const scheduler = new BackupSchedulerService({
+            connection,
+            now
+          });
+          const backups = await listBackupSnapshots(workspace.rootPath);
+          const summary = await scheduler.runAutomaticBackup({
+            workspaceId: input.workspaceId,
+            trigger: input.trigger,
+            backups,
+            createBackup: async (kind) => {
+              const backupRelativePath = createBackupRelativePath(now(), kind);
+
+              return await service.createManualBackup({
+                workspaceId: input.workspaceId,
+                workspaceName: workspace.name,
+                databaseRelativePath: WORKSPACE_DATABASE_RELATIVE_PATH,
+                backupRelativePath,
+                backupDatabaseRelativePath: `${backupRelativePath}/local-work-os.sqlite`,
+                manifestRelativePath: `${backupRelativePath}/attachment-manifest.json`,
+                kind,
+                actorType: "system"
+              });
+            },
+            deleteBackup: async (backup) => {
+              await deleteBackupSnapshot(workspace.rootPath, backup.relativePath);
+            }
+          });
+
+          return apiOk(summary);
+        },
+        now
       );
     },
 
@@ -375,7 +520,8 @@ async function withBackupService<T>(
     connection: DatabaseConnection;
     service: BackupService;
     workspace: NonNullable<ReturnType<CurrentWorkspaceService["getCurrentWorkspace"]>>;
-  }) => Promise<ApiResult<T>>
+  }) => Promise<ApiResult<T>>,
+  now: () => Date = () => new Date()
 ): Promise<ApiResult<T>> {
   const workspace = workspaceService.getCurrentWorkspace();
 
@@ -391,6 +537,7 @@ async function withBackupService<T>(
   try {
     const service = new BackupService({
       connection,
+      now,
       fileSystem: {
         async copyDatabase({ sourceRelativePath, destinationRelativePath }) {
           const sourcePath = resolveInsideWorkspace(
@@ -409,7 +556,8 @@ async function withBackupService<T>(
           await copyFile(sourcePath, destinationPath);
 
           return {
-            sizeBytes: (await stat(destinationPath)).size
+            sizeBytes: (await stat(destinationPath)).size,
+            checksum: await createFileChecksum(destinationPath)
           };
         },
         async writeManifest({ manifestRelativePath, manifest }) {
@@ -592,12 +740,32 @@ async function listBackupSnapshots(
           manifestRelativePath: manifest === null ? null : manifestRelativePath,
           attachmentCount: manifest?.attachmentCount ?? 0,
           totalAttachmentBytes: manifest?.totalAttachmentBytes ?? 0,
-          databaseSizeBytes
+          databaseSizeBytes,
+          ...(manifest?.kind === undefined ? {} : { kind: manifest.kind })
         };
       })
   );
 
   return summaries;
+}
+
+async function deleteBackupSnapshot(
+  workspaceRootPath: string,
+  backupRelativePath: string
+): Promise<void> {
+  const normalizedBackupPath = backupRelativePath.replace(/\\/g, "/");
+
+  if (
+    !normalizedBackupPath.startsWith("backups/") ||
+    normalizedBackupPath.split("/").some((segment) => segment === "." || segment === "..")
+  ) {
+    throw new Error("Backup retention cleanup must stay inside workspace backups.");
+  }
+
+  await rm(resolveInsideWorkspace(workspaceRootPath, normalizedBackupPath), {
+    force: true,
+    recursive: true
+  });
 }
 
 async function readBackupManifestIfPresent(
@@ -632,8 +800,14 @@ async function readFileSizeIfPresent(
   return (await stat(localPath)).size;
 }
 
-function createBackupRelativePath(date: Date): string {
-  return `backups/${createIsoTimestamp(date).replace(/[:.]/g, "-")}`;
+function createBackupRelativePath(
+  date: Date,
+  kind: "manual" | "automatic" | "pre_migration" = "manual"
+): string {
+  const suffix =
+    kind === "manual" ? "" : `-${kind === "pre_migration" ? "pre-migration" : kind}`;
+
+  return `backups/${createIsoTimestamp(date).replace(/[:.]/g, "-")}${suffix}`;
 }
 
 function backupNameToTimestamp(name: string): string {
@@ -704,7 +878,9 @@ function isRestoreExportToNewWorkspaceInput(
 function isBackupManifest(value: unknown): value is BackupManifest {
   return (
     isRecord(value) &&
-    value.kind === "manual" &&
+    (value.kind === "manual" ||
+      value.kind === "automatic" ||
+      value.kind === "pre_migration") &&
     isNonEmptyString(value.id) &&
     isNonEmptyString(value.workspaceId) &&
     isNonEmptyString(value.workspaceName) &&
@@ -714,6 +890,67 @@ function isBackupManifest(value: unknown): value is BackupManifest {
     typeof value.attachmentCount === "number" &&
     typeof value.totalAttachmentBytes === "number"
   );
+}
+
+function isUpdateBackupSchedulerSettingsInput(
+  input: unknown
+): input is UpdateBackupSchedulerSettingsInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.workspaceId) &&
+    (input.enabled === undefined || typeof input.enabled === "boolean") &&
+    (input.intervalHours === undefined || typeof input.intervalHours === "number") &&
+    (input.runOnAppClose === undefined ||
+      typeof input.runOnAppClose === "boolean") &&
+    (input.runBeforeMigration === undefined ||
+      typeof input.runBeforeMigration === "boolean") &&
+    (input.retention === undefined || isRetentionSettingsPatch(input.retention))
+  );
+}
+
+function isRetentionSettingsPatch(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    (value.maxCount === undefined || typeof value.maxCount === "number") &&
+    (value.maxAgeDays === undefined || typeof value.maxAgeDays === "number") &&
+    (value.maxSizeBytes === undefined ||
+      typeof value.maxSizeBytes === "number")
+  );
+}
+
+function isRunAutomaticBackupInput(
+  input: unknown
+): input is RunAutomaticBackupInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.workspaceId) &&
+    isScheduledBackupTrigger(input.trigger)
+  );
+}
+
+function isScheduledBackupTrigger(
+  value: unknown
+): value is ScheduledBackupTrigger {
+  return (
+    value === "app_open" ||
+    value === "interval" ||
+    value === "app_close" ||
+    value === "pre_migration" ||
+    value === "manual_check"
+  );
+}
+
+async function createFileChecksum(filePath: string): Promise<string> {
+  const hash = createHash("sha256");
+  const stream = createReadStream(filePath);
+
+  await new Promise<void>((resolvePromise, reject) => {
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("error", reject);
+    stream.on("end", resolvePromise);
+  });
+
+  return hash.digest("hex");
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

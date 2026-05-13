@@ -58,7 +58,7 @@ new work should account for this implemented baseline:
   collapsed-group preferences,
   workspace-scoped appearance preferences,
   unified context menu action providers for local targets, packaged smoke checks,
-  and MVP smoke coverage.
+  automatic backup scheduling/retention, and MVP smoke coverage.
 
 When adding a future module slice, prefer extending the owning feature service
 and matching repository/preload/client boundary rather than creating a parallel
@@ -788,7 +788,8 @@ Owns:
 
 - Backup application service contracts.
 - Backup snapshot orchestration and integrity-report behavior.
-- Backup-before-migration coordination once migrations exist.
+- Automatic backup scheduler settings/status and retention cleanup.
+- Backup-before-migration coordination hooks for migrations.
 
 Does not own:
 
@@ -800,6 +801,8 @@ Expected service methods later:
 
 - `createBackup`
 - `listBackups`
+- `getAutomaticBackupSettings`
+- `runAutomaticBackupCheck`
 - `verifyBackup`
 - `prepareBackupBeforeMigration`
 - `restoreBackupIntoNewWorkspace`

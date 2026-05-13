@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(232);
+    expect(channels).toHaveLength(235);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -666,6 +666,19 @@ describe("typed preload API", () => {
     const api = createLocalWorkOsApi(invoke);
     await api.backup.createManualBackup({ workspaceId: "workspace_1" });
     await api.backup.listBackups({ workspaceId: "workspace_1" });
+    await api.backup.getAutomaticBackupSettings({ workspaceId: "workspace_1" });
+    await api.backup.updateAutomaticBackupSettings({
+      workspaceId: "workspace_1",
+      enabled: true,
+      intervalHours: 24,
+      retention: {
+        maxCount: 10
+      }
+    });
+    await api.backup.runAutomaticBackupCheck({
+      workspaceId: "workspace_1",
+      trigger: "manual_check"
+    });
     await api.backup.validateRestoreSource({
       sourceType: "backup",
       backupRelativePath: "backups/snapshot"
@@ -690,6 +703,30 @@ describe("typed preload API", () => {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackups,
         input: {
           workspaceId: "workspace_1"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.getAutomaticBackupSettings,
+        input: {
+          workspaceId: "workspace_1"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.updateAutomaticBackupSettings,
+        input: {
+          workspaceId: "workspace_1",
+          enabled: true,
+          intervalHours: 24,
+          retention: {
+            maxCount: 10
+          }
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.runAutomaticBackupCheck,
+        input: {
+          workspaceId: "workspace_1",
+          trigger: "manual_check"
         }
       },
       {

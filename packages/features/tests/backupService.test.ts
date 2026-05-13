@@ -88,7 +88,8 @@ describe("BackupService", () => {
       workspaceId: "workspace_1",
       attachmentCount: 1,
       totalAttachmentBytes: 42,
-      databaseSizeBytes: 2048
+      databaseSizeBytes: 2048,
+      kind: "manual"
     });
     expect(copiedDatabases).toEqual([
       {
@@ -102,6 +103,9 @@ describe("BackupService", () => {
       id: "backup_1",
       kind: "manual",
       workspaceId: "workspace_1",
+      database: {
+        checksum: "b".repeat(64)
+      },
       attachmentCount: 1,
       attachments: [
         {
@@ -135,7 +139,8 @@ describe("BackupService", () => {
             manifestRelativePath: "backups/old/attachment-manifest.json",
             attachmentCount: 0,
             totalAttachmentBytes: 0,
-            databaseSizeBytes: 10
+            databaseSizeBytes: 10,
+            kind: "manual"
           },
           {
             id: "backup_other",
@@ -146,7 +151,8 @@ describe("BackupService", () => {
             manifestRelativePath: "backups/other/attachment-manifest.json",
             attachmentCount: 0,
             totalAttachmentBytes: 0,
-            databaseSizeBytes: 10
+            databaseSizeBytes: 10,
+            kind: "manual"
           },
           {
             id: "backup_new",
@@ -157,7 +163,8 @@ describe("BackupService", () => {
             manifestRelativePath: "backups/new/attachment-manifest.json",
             attachmentCount: 1,
             totalAttachmentBytes: 42,
-            databaseSizeBytes: 20
+            databaseSizeBytes: 20,
+            kind: "automatic"
           }
         ]
       })
@@ -177,7 +184,7 @@ function createService(): BackupService {
           destination: input.destinationRelativePath
         });
 
-        return { sizeBytes: 2048 };
+        return { sizeBytes: 2048, checksum: "b".repeat(64) };
       },
       async writeManifest(input) {
         manifests.set(input.manifestRelativePath, input.manifest);

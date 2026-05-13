@@ -764,6 +764,9 @@ function createMockApi(): LocalWorkOsApi {
     backup: {
       createManualBackup: async () => apiOk(null as never),
       listBackups: async () => apiOk([]),
+      getAutomaticBackupSettings: async () => apiOk(null as never),
+      updateAutomaticBackupSettings: async () => apiOk(null as never),
+      runAutomaticBackupCheck: async () => apiOk(null as never),
       validateRestoreSource: async () => apiOk(null as never),
       restoreBackupToNewWorkspace: async () => apiOk(null as never),
       restoreExportToNewWorkspace: async () => apiOk(null as never)

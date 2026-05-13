@@ -530,6 +530,12 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       createManualBackup: (input) =>
         callApi(() => api.backup.createManualBackup(input)),
       listBackups: (input) => callApi(() => api.backup.listBackups(input)),
+      getAutomaticBackupSettings: (input) =>
+        callApi(() => api.backup.getAutomaticBackupSettings(input)),
+      updateAutomaticBackupSettings: (input) =>
+        callApi(() => api.backup.updateAutomaticBackupSettings(input)),
+      runAutomaticBackupCheck: (input) =>
+        callApi(() => api.backup.runAutomaticBackupCheck(input)),
       validateRestoreSource: (input) =>
         callApi(() => api.backup.validateRestoreSource(input)),
       restoreBackupToNewWorkspace: (input) =>
@@ -1163,6 +1169,12 @@ export const desktopApiClient: LocalWorkOsApi = {
     createManualBackup: (input) =>
       getDesktopApiClient().backup.createManualBackup(input),
     listBackups: (input) => getDesktopApiClient().backup.listBackups(input),
+    getAutomaticBackupSettings: (input) =>
+      getDesktopApiClient().backup.getAutomaticBackupSettings(input),
+    updateAutomaticBackupSettings: (input) =>
+      getDesktopApiClient().backup.updateAutomaticBackupSettings(input),
+    runAutomaticBackupCheck: (input) =>
+      getDesktopApiClient().backup.runAutomaticBackupCheck(input),
     validateRestoreSource: (input) =>
       getDesktopApiClient().backup.validateRestoreSource(input),
     restoreBackupToNewWorkspace: (input) =>

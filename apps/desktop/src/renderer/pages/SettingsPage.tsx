@@ -36,6 +36,8 @@ import type {
   AppearanceDensityPreference,
   AppearanceFontSizePreference,
   AppearanceThemePreference,
+  BackupSchedulerSettings,
+  BackupSchedulerStatus,
   BackupSnapshotSummary,
   CategorySummary,
   CsvImportExecuteSummary,
@@ -91,6 +93,10 @@ export function SettingsPage({
   const [importBusy, setImportBusy] = useState(false);
   const [restoreBusy, setRestoreBusy] = useState(false);
   const [backups, setBackups] = useState<BackupSnapshotSummary[]>([]);
+  const [backupSchedulerSettings, setBackupSchedulerSettings] =
+    useState<BackupSchedulerSettings | null>(null);
+  const [backupSchedulerStatus, setBackupSchedulerStatus] =
+    useState<BackupSchedulerStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
@@ -151,6 +157,8 @@ export function SettingsPage({
   useEffect(() => {
     if (currentWorkspace === null) {
       setBackups([]);
+      setBackupSchedulerSettings(null);
+      setBackupSchedulerStatus(null);
       return;
     }
 
@@ -158,9 +166,12 @@ export function SettingsPage({
 
     async function loadSettingsData(): Promise<void> {
       setError(null);
-      const [categoryResult, backupResult] = await Promise.all([
+      const [categoryResult, backupResult, backupSettingsResult] = await Promise.all([
         apiClient.categories.list(currentWorkspace!.id),
-        apiClient.backup.listBackups({ workspaceId: currentWorkspace!.id })
+        apiClient.backup.listBackups({ workspaceId: currentWorkspace!.id }),
+        apiClient.backup.getAutomaticBackupSettings({
+          workspaceId: currentWorkspace!.id
+        })
       ]);
 
       if (!active) {
@@ -177,8 +188,18 @@ export function SettingsPage({
         return;
       }
 
+      if (!backupSettingsResult.ok) {
+        setUserError(
+          backupSettingsResult.error,
+          "Backup scheduler unavailable"
+        );
+        return;
+      }
+
       setCategories(categoryResult.data);
       setBackups(backupResult.data);
+      setBackupSchedulerSettings(backupSettingsResult.data.settings);
+      setBackupSchedulerStatus(backupSettingsResult.data.status);
     }
 
     void loadSettingsData();
@@ -358,6 +379,93 @@ export function SettingsPage({
     showToast(message, {
       title: "Backup complete",
       tone: "success"
+    });
+  }
+
+  async function saveAutomaticBackupSettings(): Promise<void> {
+    if (currentWorkspace === null || backupSchedulerSettings === null) {
+      setUserError("Open a workspace before updating backup settings.");
+      return;
+    }
+
+    setBackupBusy(true);
+    setBackupMessage(null);
+    setError(null);
+
+    const result = await apiClient.backup.updateAutomaticBackupSettings({
+      workspaceId: currentWorkspace.id,
+      enabled: backupSchedulerSettings.enabled,
+      intervalHours: backupSchedulerSettings.intervalHours,
+      runOnAppClose: backupSchedulerSettings.runOnAppClose,
+      runBeforeMigration: backupSchedulerSettings.runBeforeMigration,
+      retention: backupSchedulerSettings.retention
+    });
+
+    setBackupBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Backup scheduler update failed");
+      return;
+    }
+
+    setBackupSchedulerSettings(result.data.settings);
+    setBackupSchedulerStatus(result.data.status);
+    setBackupMessage("Automatic backup settings saved.");
+    showToast("Automatic backup settings saved.", {
+      title: "Backups",
+      tone: "success"
+    });
+  }
+
+  async function runAutomaticBackupCheck(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before checking automatic backups.");
+      return;
+    }
+
+    setBackupBusy(true);
+    setBackupMessage(null);
+    setError(null);
+
+    const result = await apiClient.backup.runAutomaticBackupCheck({
+      workspaceId: currentWorkspace.id,
+      trigger: "manual_check"
+    });
+
+    setBackupBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Automatic backup check failed");
+      return;
+    }
+
+    setBackupSchedulerSettings(result.data.settings);
+    setBackupSchedulerStatus(result.data.status);
+
+    setBackups((current) =>
+      [
+        ...(result.data.createdBackup === null
+          ? []
+          : [result.data.createdBackup]),
+        ...current.filter((backup) =>
+          !result.data.retentionDeletedBackups.some(
+            (deleted) => deleted.relativePath === backup.relativePath
+          ) &&
+          (result.data.createdBackup === null ||
+            backup.id !== result.data.createdBackup.id)
+        )
+      ].sort(compareBackups)
+    );
+
+    const message =
+      result.data.createdBackup === null
+        ? `Automatic backup skipped: ${result.data.skippedReason ?? "not due"}.`
+        : `Automatic backup created at ${result.data.createdBackup.relativePath}; removed ${result.data.retentionDeletedBackups.length} old automatic backup(s).`;
+
+    setBackupMessage(message);
+    showToast(message, {
+      title: "Automatic backups",
+      tone: result.data.createdBackup === null ? "info" : "success"
     });
   }
 
@@ -1121,6 +1229,157 @@ export function SettingsPage({
 
         {backupMessage === null ? null : (
           <p className="form-message">{backupMessage}</p>
+        )}
+
+        {backupSchedulerSettings === null ? null : (
+          <div className="category-form" aria-label="Automatic backup settings">
+            <label className="checkbox-label">
+              <input
+                checked={backupSchedulerSettings.enabled}
+                disabled={backupBusy}
+                type="checkbox"
+                onChange={(event) =>
+                  setBackupSchedulerSettings({
+                    ...backupSchedulerSettings,
+                    enabled: event.target.checked
+                  })
+                }
+              />
+              <span>Enable automatic backups</span>
+            </label>
+            <label>
+              <span>Interval hours</span>
+              <input
+                disabled={backupBusy}
+                min={1}
+                max={168}
+                type="number"
+                value={backupSchedulerSettings.intervalHours}
+                onChange={(event) =>
+                  setBackupSchedulerSettings({
+                    ...backupSchedulerSettings,
+                    intervalHours: Number(event.target.value)
+                  })
+                }
+              />
+            </label>
+            <label className="checkbox-label">
+              <input
+                checked={backupSchedulerSettings.runOnAppClose}
+                disabled={backupBusy}
+                type="checkbox"
+                onChange={(event) =>
+                  setBackupSchedulerSettings({
+                    ...backupSchedulerSettings,
+                    runOnAppClose: event.target.checked
+                  })
+                }
+              />
+              <span>Also check when the app closes</span>
+            </label>
+            <label className="checkbox-label">
+              <input
+                checked={backupSchedulerSettings.runBeforeMigration}
+                disabled={backupBusy}
+                type="checkbox"
+                onChange={(event) =>
+                  setBackupSchedulerSettings({
+                    ...backupSchedulerSettings,
+                    runBeforeMigration: event.target.checked
+                  })
+                }
+              />
+              <span>Always back up before migrations</span>
+            </label>
+            <label>
+              <span>Keep automatic backups</span>
+              <input
+                disabled={backupBusy}
+                min={1}
+                type="number"
+                value={backupSchedulerSettings.retention.maxCount}
+                onChange={(event) =>
+                  setBackupSchedulerSettings({
+                    ...backupSchedulerSettings,
+                    retention: {
+                      ...backupSchedulerSettings.retention,
+                      maxCount: Number(event.target.value)
+                    }
+                  })
+                }
+              />
+            </label>
+            <label>
+              <span>Max age days</span>
+              <input
+                disabled={backupBusy}
+                min={1}
+                type="number"
+                value={backupSchedulerSettings.retention.maxAgeDays}
+                onChange={(event) =>
+                  setBackupSchedulerSettings({
+                    ...backupSchedulerSettings,
+                    retention: {
+                      ...backupSchedulerSettings.retention,
+                      maxAgeDays: Number(event.target.value)
+                    }
+                  })
+                }
+              />
+            </label>
+            <label>
+              <span>Max size MiB</span>
+              <input
+                disabled={backupBusy}
+                min={1}
+                type="number"
+                value={Math.round(
+                  backupSchedulerSettings.retention.maxSizeBytes /
+                    (1024 * 1024)
+                )}
+                onChange={(event) =>
+                  setBackupSchedulerSettings({
+                    ...backupSchedulerSettings,
+                    retention: {
+                      ...backupSchedulerSettings.retention,
+                      maxSizeBytes: Number(event.target.value) * 1024 * 1024
+                    }
+                  })
+                }
+              />
+            </label>
+            <button
+              className="secondary-button"
+              disabled={backupBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void saveAutomaticBackupSettings()}
+            >
+              Save automatic backup settings
+            </button>
+            <button
+              className="secondary-button"
+              disabled={backupBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void runAutomaticBackupCheck()}
+            >
+              Run due check now
+            </button>
+          </div>
+        )}
+
+        {backupSchedulerStatus === null ? null : (
+          <p className="muted-text">
+            Automatic backup status: last successful{" "}
+            {backupSchedulerStatus.lastSuccessfulBackupAt === null
+              ? "never"
+              : formatBackupDate(backupSchedulerStatus.lastSuccessfulBackupAt)}
+            ; next run{" "}
+            {backupSchedulerStatus.nextRunAt === null
+              ? "not scheduled"
+              : formatBackupDate(backupSchedulerStatus.nextRunAt)}
+            ; last cleanup removed{" "}
+            {backupSchedulerStatus.lastRetentionDeletedCount} backup(s).
+          </p>
         )}
 
         <div className="category-form" aria-label="Restore target">
@@ -1915,7 +2174,10 @@ function BackupListRow({
     <div className="backup-list-row">
       <div>
         <strong>{formatBackupDate(backup.createdAt)}</strong>
-        <span>{backup.relativePath}</span>
+        <span>
+          {backup.relativePath}
+          {backup.kind === undefined ? "" : ` · ${formatBackupKind(backup.kind)}`}
+        </span>
       </div>
       <div className="backup-list-meta">
         <span>{backup.attachmentCount} attachments</span>
@@ -1951,6 +2213,12 @@ function compareBackups(
 
 function formatBackupDate(value: string): string {
   return formatDiagnosticDate(value);
+}
+
+function formatBackupKind(kind: BackupSnapshotSummary["kind"]): string {
+  return kind === "pre_migration"
+    ? "pre-migration"
+    : kind ?? "manual";
 }
 
 function formatDiagnosticDate(value: string): string {

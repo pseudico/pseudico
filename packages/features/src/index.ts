@@ -83,9 +83,11 @@ export {
 export type { ActivityEventView } from "./activity";
 export {
   BackupService,
+  BackupSchedulerService,
   RestoreService,
   backupModuleContract,
-  createBackupManifest
+  createBackupManifest,
+  selectRetentionDeletionCandidates
 } from "./backup";
 export {
   BulkActionService,
@@ -384,14 +386,20 @@ export {
 export { workspaceModuleContract } from "./workspace";
 export type {
   BackupFileSystemAdapter,
+  BackupKind,
   BackupManifest,
   BackupManifestAttachment,
+  BackupRetentionDeletionSummary,
+  BackupRetentionSettings,
+  BackupSchedulerSettings,
+  BackupSchedulerStatus,
   BackupServiceIdFactory,
   BackupSnapshotSummary,
   CreateBackupManifestInput,
   CreateManualBackupInput,
   ListBackupsInput,
   ManualBackupSnapshot,
+  AutomaticBackupRunSummary,
   RestoreBackupToNewWorkspaceInput,
   RestoreExportToNewWorkspaceInput,
   RestoreIssue,
@@ -399,6 +407,8 @@ export type {
   RestoreServiceIdFactory,
   RestoreSourceType,
   RestoreValidationSummary,
+  ScheduledBackupTrigger,
+  UpdateBackupSchedulerSettingsInput,
   ValidateRestoreSourceInput
 } from "./backup";
 export type {
