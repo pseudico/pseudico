@@ -65,3 +65,8 @@ paths.
 ## Optional IMAP Import Guardrails
 
 The optional IMAP importer is local-desktop initiated only. It must not add hosted accounts, cloud forwarding, telemetry, or background cloud workers. Persisted settings exclude passwords; credentials must live in an OS keychain or session-only adapter. Imports are bounded, explicit, and duplicate-protected by local metadata.
+
+
+## Local maintenance tools
+
+Maintenance actions stay local to the open workspace. Renderer controls call typed preload IPC only; Electron main opens the SQLite connection, creates the preflight backup under `backups/`, scans only workspace-relative `attachments/` files, and runs SQLite maintenance commands without exposing arbitrary SQL or filesystem access to the renderer. Orphan scans report paths but do not delete files in this slice.

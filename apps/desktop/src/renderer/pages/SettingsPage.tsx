@@ -10,7 +10,8 @@ import {
   RefreshCw,
   ShieldCheck,
   Upload,
-  Trash2
+  Trash2,
+  Wrench
 } from "lucide-react";
 import {
   createShortcutRegistry,
@@ -48,6 +49,7 @@ import type {
   LocalWorkOsApi,
   MarkdownFolderImportExecuteSummary,
   MarkdownFolderImportPreviewSummary,
+  MaintenanceJobSummary,
   RestoreWorkspaceSummary,
   SavedViewDiagnosticsSummary,
   WorkspaceIntegritySummary
@@ -106,6 +108,8 @@ export function SettingsPage({
   const [restoreSummary, setRestoreSummary] =
     useState<RestoreWorkspaceSummary | null>(null);
   const [diagnosticsBusy, setDiagnosticsBusy] = useState(false);
+  const [maintenanceBusy, setMaintenanceBusy] = useState(false);
+  const [maintenanceJobs, setMaintenanceJobs] = useState<MaintenanceJobSummary[]>([]);
   const [repairingAttachmentId, setRepairingAttachmentId] = useState<string | null>(null);
   const [diagnosticsReport, setDiagnosticsReport] =
     useState<WorkspaceIntegritySummary | null>(null);
@@ -159,6 +163,7 @@ export function SettingsPage({
       setBackups([]);
       setBackupSchedulerSettings(null);
       setBackupSchedulerStatus(null);
+      setMaintenanceJobs([]);
       return;
     }
 
@@ -166,10 +171,13 @@ export function SettingsPage({
 
     async function loadSettingsData(): Promise<void> {
       setError(null);
-      const [categoryResult, backupResult, backupSettingsResult] = await Promise.all([
+      const [categoryResult, backupResult, backupSettingsResult, maintenanceResult] = await Promise.all([
         apiClient.categories.list(currentWorkspace!.id),
         apiClient.backup.listBackups({ workspaceId: currentWorkspace!.id }),
         apiClient.backup.getAutomaticBackupSettings({
+          workspaceId: currentWorkspace!.id
+        }),
+        apiClient.diagnostics.listMaintenanceJobs({
           workspaceId: currentWorkspace!.id
         })
       ]);
@@ -196,10 +204,16 @@ export function SettingsPage({
         return;
       }
 
+      if (!maintenanceResult.ok) {
+        setUserError(maintenanceResult.error, "Maintenance logs unavailable");
+        return;
+      }
+
       setCategories(categoryResult.data);
       setBackups(backupResult.data);
       setBackupSchedulerSettings(backupSettingsResult.data.settings);
       setBackupSchedulerStatus(backupSettingsResult.data.status);
+      setMaintenanceJobs(maintenanceResult.data);
     }
 
     void loadSettingsData();
@@ -566,6 +580,75 @@ export function SettingsPage({
     });
     await runWorkspaceDiagnostics();
   }
+
+  async function refreshMaintenanceJobs(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before listing maintenance jobs.");
+      return;
+    }
+
+    setMaintenanceBusy(true);
+    setError(null);
+
+    const result = await apiClient.diagnostics.listMaintenanceJobs({
+      workspaceId: currentWorkspace.id
+    });
+
+    setMaintenanceBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Maintenance logs unavailable");
+      return;
+    }
+
+    setMaintenanceJobs(result.data);
+  }
+
+  async function runMaintenanceJob(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before running maintenance.");
+      return;
+    }
+
+    setMaintenanceBusy(true);
+    setError(null);
+
+    const result = await apiClient.diagnostics.runMaintenanceJob({
+      workspaceId: currentWorkspace.id,
+      requireBackup: true,
+      operations: [
+        "sqlite_integrity_check",
+        "orphan_attachment_scan",
+        "rebuild_search_index",
+        "vacuum"
+      ]
+    });
+
+    setMaintenanceBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Maintenance failed");
+      return;
+    }
+
+    setMaintenanceJobs((current) => [
+      result.data,
+      ...current.filter((job) => job.id !== result.data.id)
+    ]);
+    if (result.data.backup !== null) {
+      await refreshBackups();
+    }
+    showToast(
+      result.data.status === "completed"
+        ? "Maintenance completed after creating a local backup."
+        : `Maintenance failed: ${result.data.error ?? "unknown error"}.`,
+      {
+        title: "Maintenance",
+        tone: result.data.status === "completed" ? "success" : "error"
+      }
+    );
+  }
+
 
   async function exportWorkspaceJson(): Promise<void> {
     if (currentWorkspace === null) {
@@ -1200,6 +1283,45 @@ export function SettingsPage({
           </>
         )}
       </section>
+      <section className="backup-management-panel" aria-label="Maintenance">
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <h3>Maintenance</h3>
+            <p className="muted-text">
+              Run local SQLite integrity, orphan attachment scan, search reindex,
+              and VACUUM with a backup preflight before write maintenance.
+            </p>
+          </div>
+          <div className="top-actions">
+            <button
+              className="secondary-button compact-button"
+              disabled={maintenanceBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void refreshMaintenanceJobs()}
+            >
+              <RefreshCw size={16} aria-hidden="true" />
+              Refresh logs
+            </button>
+            <button
+              className="primary-button compact-button"
+              disabled={maintenanceBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void runMaintenanceJob()}
+            >
+              <Wrench size={16} aria-hidden="true" />
+              Run maintenance
+            </button>
+          </div>
+        </div>
+        {maintenanceJobs.length === 0 ? (
+          <EmptyState
+            description="Maintenance job progress and results will appear after the first run."
+            title="No maintenance jobs yet"
+          />
+        ) : (
+          <MaintenanceJobsPanel jobs={maintenanceJobs} />
+        )}
+      </section>
       <section className="backup-management-panel" aria-label="Backups">
         <div className="panel-heading-actions">
           <div className="panel-heading">
@@ -1758,6 +1880,53 @@ export function SettingsPage({
         </div>
       </aside>
     </section>
+  );
+}
+
+function MaintenanceJobsPanel({
+  jobs
+}: {
+  jobs: MaintenanceJobSummary[];
+}): React.JSX.Element {
+  return (
+    <div className="backup-list" aria-label="Maintenance job logs">
+      {jobs.slice(0, 5).map((job) => (
+        <div className="backup-list-row" key={job.id}>
+          <div>
+            <strong>
+              {job.status === "completed" ? "Maintenance completed" : "Maintenance failed"}
+            </strong>
+            <span>
+              {formatDiagnosticDate(job.completedAt)} - {job.operations.join(", ")}
+            </span>
+            {job.error === null ? null : (
+              <span className="form-message form-message-error">{job.error}</span>
+            )}
+          </div>
+          <div className="backup-list-meta">
+            <span>{job.backup === null ? "No backup" : `Backup ${job.backup.id}`}</span>
+            <span>
+              {job.sqliteIntegrity === null
+                ? "Integrity not run"
+                : job.sqliteIntegrity.ok
+                  ? "Integrity ok"
+                  : "Integrity issues"}
+            </span>
+            <span>
+              {job.orphanAttachmentScan === null
+                ? "Orphan scan not run"
+                : `${job.orphanAttachmentScan.orphanedRelativePaths.length} orphan file(s)`}
+            </span>
+            <span>{job.vacuum?.completed ? "Vacuumed" : "Vacuum not run"}</span>
+          </div>
+          {job.entries.map((entry) => (
+            <span key={`${job.id}:${entry.step}`} className="muted-text">
+              {entry.status}: {entry.message}
+            </span>
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }
 

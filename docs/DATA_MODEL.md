@@ -213,3 +213,8 @@ and file metadata model.
 ### Optional local IMAP import (PSE-168)
 
 Optional IMAP import stores non-secret account settings in `app_settings`, run history in `imap_import_jobs`, and duplicate-prevention markers in `imap_imported_messages`. Passwords are excluded from SQLite and must be provided by an OS keychain or session-only credential adapter. Imported messages are converted through the existing email-to-task flow so task activity and search indexing remain aligned.
+
+
+### Maintenance jobs (PSE-174)
+
+Local maintenance job history is stored in `app_settings` under `maintenance.jobs.v1` so integrity checks, search reindex runs, SQLite VACUUM runs, backup preflight IDs, and orphan attachment scan summaries survive app restart without a new schema table. Maintenance writes activity events for the job summary, and search rebuilds continue to write `search_index_rebuilt` activity records. Orphan attachment scans compare files under workspace-relative `attachments/` paths with attachment rows and do not delete files automatically.

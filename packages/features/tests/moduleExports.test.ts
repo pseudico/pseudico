@@ -29,6 +29,8 @@ import {
   filesModuleContract,
   ImportValidationService,
   IntegrityCheckService,
+  MaintenanceService,
+  maintenanceModuleContract,
   importModuleContract,
   inboxModuleContract,
   itemsModuleContract,
@@ -120,6 +122,7 @@ describe("feature module exports", () => {
       "quickStart",
       "activity",
       "diagnostics",
+      "maintenance",
       "wikilinks"
     ]);
   });
@@ -167,6 +170,7 @@ describe("feature module exports", () => {
       undoModuleContract.module,
       activityModuleContract.module,
       diagnosticsModuleContract.module,
+      maintenanceModuleContract.module,
       wikilinksModuleContract.module
     ];
 
@@ -212,6 +216,7 @@ describe("feature module exports", () => {
       "undo",
       "activity",
       "diagnostics",
+      "maintenance",
       "wikilinks"
     ]);
   });
@@ -259,8 +264,9 @@ describe("feature module exports", () => {
     expect(ImportValidationService).toBeDefined();
   });
 
-  it("exports the diagnostics service implementation", () => {
+  it("exports the diagnostics and maintenance service implementations", () => {
     expect(IntegrityCheckService).toBeDefined();
+    expect(MaintenanceService).toBeDefined();
   });
 
   it("exports the tab service implementation", () => {

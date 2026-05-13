@@ -939,6 +939,33 @@ Integration points:
 - Items, tasks, notes, lists, links, file metadata, projects, contacts,
   collections, dashboards, export folders, and activity logs.
 
+
+### Maintenance
+
+Owns:
+
+- Local database maintenance job orchestration for SQLite integrity checks, VACUUM, search-index rebuilds, and orphan attachment scans.
+- App-settings-backed maintenance job logs and user-visible progress summaries.
+- Backup preflight coordination before write maintenance.
+
+Does not own:
+
+- Cloud diagnostics, telemetry, or remote repair services.
+- Direct renderer filesystem or SQLite access.
+- Automatic deletion of orphan attachment files without a future explicit repair ticket.
+
+Implemented service methods:
+
+- `runMaintenanceJob`
+- `listJobLogs`
+
+Integration points:
+
+- Backup service for preflight snapshots.
+- Search index service for local rebuilds.
+- Electron main/preload IPC and Settings > Maintenance.
+- Activity Log for maintenance and search-rebuild events.
+
 ## Cross-Cutting Rules
 
 - All modules preserve local-only behavior.

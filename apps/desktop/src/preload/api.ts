@@ -605,6 +605,58 @@ export type ChooseMarkdownFolderImportInput = {
 };
 
 
+
+export type MaintenanceOperation =
+  | "sqlite_integrity_check"
+  | "rebuild_search_index"
+  | "vacuum"
+  | "orphan_attachment_scan";
+
+export type RunMaintenanceJobInput = {
+  workspaceId?: string;
+  operations?: MaintenanceOperation[];
+  requireBackup?: boolean;
+};
+
+export type MaintenanceJobLogEntrySummary = {
+  step: string;
+  status: "completed" | "failed";
+  message: string;
+  startedAt: string;
+  completedAt: string;
+  details?: Record<string, unknown>;
+};
+
+export type MaintenanceJobSummary = {
+  id: string;
+  workspaceId: string;
+  status: "completed" | "failed";
+  operations: MaintenanceOperation[];
+  startedAt: string;
+  completedAt: string;
+  backup: { id: string; relativePath: string } | null;
+  sqliteIntegrity: { ok: boolean; messages: string[] } | null;
+  searchReindex: {
+    indexedContainerCount: number;
+    indexedItemCount: number;
+    indexedListItemCount: number;
+    indexedAttachmentCount: number;
+  } | null;
+  vacuum: { completed: boolean } | null;
+  orphanAttachmentScan: {
+    scannedFileCount: number;
+    referencedFileCount: number;
+    orphanedRelativePaths: string[];
+  } | null;
+  entries: MaintenanceJobLogEntrySummary[];
+  error: string | null;
+};
+
+export type ListMaintenanceJobsInput = {
+  workspaceId?: string;
+  limit?: number;
+};
+
 export type RunWorkspaceIntegrityCheckInput = {
   workspaceId?: string;
 };
@@ -3847,7 +3899,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     runSavedViewDiagnostics:
       "local-work-os:diagnostics:run-saved-view-diagnostics",
     repairSavedViewQuery:
-      "local-work-os:diagnostics:repair-saved-view-query"
+      "local-work-os:diagnostics:repair-saved-view-query",
+    runMaintenanceJob:
+      "local-work-os:diagnostics:run-maintenance-job",
+    listMaintenanceJobs:
+      "local-work-os:diagnostics:list-maintenance-jobs"
   },
   navigation: {
     listRecentTargets: "local-work-os:navigation:list-recent-targets",
@@ -4771,6 +4827,14 @@ export type LocalWorkOsIpcContracts = {
     input: RepairSavedViewQueryInput;
     result: ApiResult<RepairSavedViewQuerySummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runMaintenanceJob]: {
+    input: RunMaintenanceJobInput | undefined;
+    result: ApiResult<MaintenanceJobSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.listMaintenanceJobs]: {
+    input: ListMaintenanceJobsInput | undefined;
+    result: ApiResult<MaintenanceJobSummary[]>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.navigation.listRecentTargets]: {
     input: string | undefined;
     result: ApiResult<NavigationRecentTargetSummary[]>;
@@ -5545,6 +5609,12 @@ export type LocalWorkOsApi = {
     repairSavedViewQuery: (
       input: RepairSavedViewQueryInput
     ) => Promise<ApiResult<RepairSavedViewQuerySummary>>;
+    runMaintenanceJob: (
+      input?: RunMaintenanceJobInput
+    ) => Promise<ApiResult<MaintenanceJobSummary>>;
+    listMaintenanceJobs: (
+      input?: ListMaintenanceJobsInput
+    ) => Promise<ApiResult<MaintenanceJobSummary[]>>;
   };
   navigation: {
     listRecentTargets: (
@@ -6333,7 +6403,11 @@ export function createLocalWorkOsApi(
           workspaceId
         ),
       repairSavedViewQuery: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairSavedViewQuery, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairSavedViewQuery, input),
+      runMaintenanceJob: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runMaintenanceJob, input),
+      listMaintenanceJobs: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.listMaintenanceJobs, input)
     },
     navigation: {
       listRecentTargets: (workspaceId) =>

@@ -4950,3 +4950,38 @@ Next actions: Start PSE-172; keep follow-up importer tickets in Backlog; preserv
 - Files changed: apps/desktop/src/main/index.ts; docs/session_log.md
 - Risks: CI restarted after amended push.
 - Next: Amend/push; monitor CI; merge if green.
+[2026-05-13 20:58:23 +10:00] Objective: Complete PSE-173 merge and next-ticket promotion.
+- Decisions: PR #162 merged after green CI/review check; PSE-174 promoted as the single Codex Ready issue.
+- Files changed: docs/session_log.md
+- Risks: Local untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi remain unrelated.
+- Next: Claim PSE-174 in the next run; keep other issues out of Codex Ready; maintain CI gate.
+[2026-05-14 06:09:35 +10:00] Objective: Reconcile active Local Work OS tickets.
+- Decisions: No PR Open or In Progress Linear issues; no open GitHub PRs; PSE-174 is the single Codex Ready issue.
+- Files changed: docs/session_log.md
+- Risks: Existing unrelated untracked files remain untouched.
+- Next: Move PSE-174 to In Progress; read docs/source; implement scoped maintenance tools.
+[2026-05-14 06:10:39 +10:00] Objective: Claim PSE-174 for implementation.
+- Decisions: Moved PSE-174 to In Progress; synced main; created branch codex/PSE-174-maintenance-tools.
+- Files changed: docs/session_log.md
+- Risks: Git required escalation for FETCH_HEAD/ref lock; unrelated untracked files remain.
+- Next: Read ticket/docs/source; identify maintenance module boundaries; add tests.
+[2026-05-14 06:28:27 +10:00] Objective: Implement PSE-174 maintenance service and IPC/UI slice.
+- Decisions: Added app_settings-backed maintenance job logs; backup preflight before integrity/reindex/vacuum/orphan scan; Settings Maintenance panel.
+- Files changed: packages/features/src/maintenance/*; apps/desktop/src/main/ipc/*; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/*; tests
+- Risks: Full lint/test/build still pending; maintenance backup kind remains manual with maintenance path suffix.
+- Next: Update docs; run full checks; open PR.
+[2026-05-14 06:33:13 +10:00] Objective: Validate PSE-174 locally.
+- Decisions: Full lint/typecheck/test/build pass; test/build needed sandbox escalation for Vite/esbuild spawn EPERM.
+- Files changed: packages/features/src/maintenance/*; apps/desktop/src/main/ipc/*; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/*; docs/*; tests
+- Risks: CI still pending after PR; build artifacts generated under dist.
+- Next: Review diff; commit/push; open ready PR.
+[2026-05-14 06:35:14 +10:00] Objective: Finalize PSE-174 validation.
+- Decisions: Re-ran full lint, typecheck, test, and build after cleanup; all pass.
+- Files changed: apps/desktop/*; packages/core/*; packages/features/*; docs/*
+- Risks: CI/review pending after PR; unrelated untracked files remain untouched.
+- Next: Stage scoped files; commit/push; open ready PR.
+[2026-05-14 06:38:12 +10:00] Objective: Open PSE-174 PR and start review gate.
+- Decisions: PR #163 opened ready-for-review; PSE-174 moved to PR Open with link/comment; no review threads yet.
+- Files changed: none after commit
+- Risks: GitHub CI is still in progress; merge blocked until green.
+- Next: Poll CI; merge if clean; promote next issue only after Done.
