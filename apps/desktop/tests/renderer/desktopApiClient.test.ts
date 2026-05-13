@@ -712,6 +712,17 @@ function createMockApi(
     backup: {
       createManualBackup: async () => apiOk(backupSnapshotSummary()),
       listBackups: async () => apiOk([backupSnapshotSummary()]),
+      getAutomaticBackupSettings: async () => apiOk(backupSchedulerSummary()),
+      updateAutomaticBackupSettings: async () => apiOk(backupSchedulerSummary()),
+      runAutomaticBackupCheck: async () => apiOk({
+        workspaceId: "workspace_1",
+        trigger: "manual_check",
+        due: false,
+        skippedReason: "Automatic backups are disabled.",
+        createdBackup: null,
+        retentionDeletedBackups: [],
+        ...backupSchedulerSummary()
+      }),
       validateRestoreSource: async () => apiOk(restoreValidationSummary()),
       restoreBackupToNewWorkspace: async () => apiOk(restoreWorkspaceSummary()),
       restoreExportToNewWorkspace: async () => apiOk(restoreWorkspaceSummary())
@@ -1095,6 +1106,7 @@ function backupSnapshotSummary(): ManualBackupSnapshotSummary {
     attachmentCount: 1,
     totalAttachmentBytes: 42,
     databaseSizeBytes: 2048,
+    kind: "manual",
     manifest: {
       id: "backup_1",
       kind: "manual",
@@ -1105,11 +1117,41 @@ function backupSnapshotSummary(): ManualBackupSnapshotSummary {
         sourceRelativePath: "data/local-work-os.sqlite",
         backupRelativePath:
           "backups/2026-05-01T00-00-00-000Z/local-work-os.sqlite",
-        sizeBytes: 2048
+        sizeBytes: 2048,
+        checksum: "a".repeat(64)
       },
       attachments: [],
       attachmentCount: 1,
       totalAttachmentBytes: 42
+    }
+  };
+}
+
+function backupSchedulerSummary() {
+  return {
+    settings: {
+      workspaceId: "workspace_1",
+      enabled: false,
+      intervalHours: 24,
+      runOnAppClose: true,
+      runBeforeMigration: true,
+      retention: {
+        maxCount: 10,
+        maxAgeDays: 30,
+        maxSizeBytes: 5 * 1024 * 1024 * 1024
+      },
+      updatedAt: null
+    },
+    status: {
+      workspaceId: "workspace_1",
+      lastCheckedAt: null,
+      lastRunAt: null,
+      lastSuccessfulBackupAt: null,
+      lastBackupId: null,
+      lastError: null,
+      nextRunAt: null,
+      lastRetentionDeletedCount: 0,
+      updatedAt: null
     }
   };
 }

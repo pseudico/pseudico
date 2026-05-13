@@ -13,6 +13,7 @@ import {
 } from "@local-work-os/db";
 import {
   createBackupManifest,
+  type BackupKind,
   type BackupManifest,
   type BackupManifestAttachment
 } from "./BackupManifest";
@@ -31,6 +32,7 @@ export type ManualBackupSnapshot = {
   attachmentCount: number;
   totalAttachmentBytes: number;
   databaseSizeBytes: number;
+  kind: BackupKind;
   manifest: BackupManifest;
 };
 
@@ -44,6 +46,7 @@ export type BackupSnapshotSummary = {
   attachmentCount: number;
   totalAttachmentBytes: number;
   databaseSizeBytes: number | null;
+  kind?: BackupKind;
 };
 
 export type CreateManualBackupInput = {
@@ -53,6 +56,7 @@ export type CreateManualBackupInput = {
   backupRelativePath: string;
   backupDatabaseRelativePath: string;
   manifestRelativePath: string;
+  kind?: BackupKind;
   actorType?: ActivityActorType;
 };
 
@@ -60,7 +64,7 @@ export type BackupFileSystemAdapter = {
   copyDatabase: (input: {
     sourceRelativePath: string;
     destinationRelativePath: string;
-  }) => Promise<{ sizeBytes: number }>;
+  }) => Promise<{ sizeBytes: number; checksum?: string | null }>;
   writeManifest: (input: {
     manifestRelativePath: string;
     manifest: BackupManifest;
@@ -109,13 +113,15 @@ export class BackupService {
     });
     const manifest = createBackupManifest({
       id: this.idFactory("backup"),
+      kind: input.kind ?? "manual",
       workspaceId: input.workspaceId,
       workspaceName: input.workspaceName,
       createdAt: timestamp,
       database: {
         sourceRelativePath: input.databaseRelativePath,
         backupRelativePath: input.backupDatabaseRelativePath,
-        sizeBytes: copiedDatabase.sizeBytes
+        sizeBytes: copiedDatabase.sizeBytes,
+        checksum: copiedDatabase.checksum ?? null
       },
       attachments: attachments.map(toBackupManifestAttachment)
     });
@@ -134,7 +140,7 @@ export class BackupService {
       action: ActivityAction.backupCreated,
       targetType: "backup",
       targetId: manifest.id,
-      summary: `Created manual backup ${input.backupRelativePath}.`,
+      summary: `Created ${formatBackupKind(input.kind ?? "manual")} backup ${input.backupRelativePath}.`,
       beforeJson: null,
       afterJson: JSON.stringify({
         backup: {
@@ -143,6 +149,7 @@ export class BackupService {
           databaseRelativePath: input.backupDatabaseRelativePath,
           manifestRelativePath: input.manifestRelativePath,
           databaseSizeBytes: copiedDatabase.sizeBytes,
+          kind: manifest.kind,
           attachmentCount: manifest.attachments.length,
           totalAttachmentBytes: manifest.totalAttachmentBytes
         }
@@ -160,6 +167,7 @@ export class BackupService {
       attachmentCount: manifest.attachments.length,
       totalAttachmentBytes: manifest.totalAttachmentBytes,
       databaseSizeBytes: copiedDatabase.sizeBytes,
+      kind: manifest.kind,
       manifest
     };
   }
@@ -185,6 +193,10 @@ export class BackupService {
     );
     validateBackupRelativePath(input.manifestRelativePath, "manifestRelativePath");
   }
+}
+
+function formatBackupKind(kind: BackupKind): string {
+  return kind.replace("_", "-");
 }
 
 export const backupModuleContract = {

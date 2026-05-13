@@ -2,6 +2,7 @@ import { app } from "electron";
 import { registerAppLifecycle } from "./appLifecycle";
 import { createDesktopIpcServices, registerDesktopIpc } from "./ipc";
 import { runPackageSmoke } from "./packageSmoke";
+import { AutomaticBackupRunner } from "./services/backup/AutomaticBackupRunner";
 import { startConfiguredCaptureBridge } from "./services/capture/configuredCaptureBridge";
 import { createWorkspaceWindow } from "./workspaceWindow";
 
@@ -27,6 +28,9 @@ app.whenReady().then(async () => {
   const configuredCaptureBridge = await startConfiguredCaptureBridge(
     services.workspaceService
   );
+  const automaticBackupRunner = new AutomaticBackupRunner({
+    workspaceService: services.workspaceService
+  });
 
   if (configuredCaptureBridge !== null) {
     app.once("before-quit", () => {
@@ -34,7 +38,23 @@ app.whenReady().then(async () => {
     });
   }
 
+  let appCloseBackupCompleted = false;
+
+  app.on("before-quit", (event) => {
+    if (appCloseBackupCompleted) {
+      return;
+    }
+
+    event.preventDefault();
+    automaticBackupRunner.stop();
+    void automaticBackupRunner.runOnce("app_close").finally(() => {
+      appCloseBackupCompleted = true;
+      app.quit();
+    });
+  });
+
   registerDesktopIpc(services);
   createWindow();
+  automaticBackupRunner.start();
   registerAppLifecycle(createWindow);
 });

@@ -20,9 +20,12 @@ Manual verification for a temporary workspace:
 8. Search for the note text.
 9. Create a category and assign it to the project or task.
 10. Create a manual backup.
-11. Export workspace JSON, task CSV, and the portable HTML/CSV/TSV/Markdown bundle.
-12. Quit and reopen the workspace.
-13. Confirm the project, completed task, note, category, backup, and exports persist.
+11. Enable daily automatic backups, run a due check, and confirm automatic
+    backup status plus retention settings update.
+12. Export workspace JSON, task CSV, and the portable HTML/CSV/TSV/Markdown bundle.
+13. Quit and reopen the workspace.
+14. Confirm the project, completed task, note, category, backup settings,
+    backup snapshots, and exports persist.
 
 Known limitations to confirm during MVP QA:
 

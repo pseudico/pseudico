@@ -4918,3 +4918,35 @@ Next actions: Start PSE-172; keep follow-up importer tickets in Backlog; preserv
 - Files changed: docs/session_log.md
 - Risks: CI/review pending; local commit does not include this final log entry unless amended.
 - Next: Inspect PR diff; wait for CI; merge if green.
+
+[2026-05-13 20:11:35 +10:00] Objective: Merge PSE-172 and prepare next ticket.
+- Decisions: PR #161 squash-merged at 82898c28; remote/local branch cleaned; PSE-172 Done; PSE-173 selected next.
+- Files changed: docs/session_log.md
+- Risks: Need commit this post-merge log only if next ticket changes files.
+- Next: Move PSE-173 to In Progress; read ticket/docs; implement scheduler.
+
+[2026-05-13 20:12:42 +10:00] Objective: Claim and plan PSE-173.
+- Decisions: Promoted and claimed PSE-173 after PSE-172; branch codex/PSE-173-auto-backup-scheduler.
+- Files changed: docs/session_log.md
+- Risks: Ticket file name differs from Linear source path; need inspect actual backup/retention spec.
+- Next: Read backup ticket and existing services; implement scheduler; test.
+[2026-05-13 20:16:51 +10:00] Objective: Scope PSE-173 implementation.
+- Decisions: Use app_settings-backed backup settings/status; scheduler service will create automatic backups via main IPC and prune backups by count/age/size.
+- Files changed: docs/session_log.md
+- Risks: Existing manifests are manual-only; keep backwards-compatible parsing.
+- Next: Add feature service/types; wire IPC/preload/UI; add tests.
+[2026-05-13 20:27:58 +10:00] Objective: Implement PSE-173 core backup scheduler.
+- Decisions: Added app_settings scheduler/status, automatic/pre-migration manifest kinds, SHA-256 database checksums, retention on automatic backups only.
+- Files changed: packages/features/src/backup/*; apps/desktop/src/main/ipc/*; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/*; tests
+- Risks: Main-process periodic/app-close hooks still need final wiring/validation.
+- Next: Add lifecycle hook/docs; run full checks; open PR.
+[2026-05-13 20:40:41 +10:00] Objective: Validate PSE-173 changes.
+- Decisions: Focused tests passed; full test passed after rerunning one transient timeout; build needed escalation for esbuild EPERM.
+- Files changed: packages/features/src/backup/*; apps/desktop/src/main/*; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/*; docs/*; tests
+- Risks: CI still pending after PR.
+- Next: Review diff; commit and push; open PR.
+[2026-05-13 20:47:48 +10:00] Objective: Harden PSE-173 app-close backup behavior.
+- Decisions: before-quit now prevents quit until app-close automatic backup check finishes, then quits once.
+- Files changed: apps/desktop/src/main/index.ts; docs/session_log.md
+- Risks: CI restarted after amended push.
+- Next: Amend/push; monitor CI; merge if green.

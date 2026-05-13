@@ -89,7 +89,7 @@ export type BackupManifestAttachment = {
 
 export type BackupManifestSummary = {
   id: string;
-  kind: "manual";
+  kind: "manual" | "automatic" | "pre_migration";
   workspaceId: string;
   workspaceName: string;
   createdAt: string;
@@ -97,6 +97,7 @@ export type BackupManifestSummary = {
     sourceRelativePath: string;
     backupRelativePath: string;
     sizeBytes: number;
+    checksum: string | null;
   };
   attachments: BackupManifestAttachment[];
   attachmentCount: number;
@@ -113,6 +114,7 @@ export type BackupSnapshotSummary = {
   attachmentCount: number;
   totalAttachmentBytes: number;
   databaseSizeBytes: number | null;
+  kind?: "manual" | "automatic" | "pre_migration";
 };
 
 export type ManualBackupSnapshotSummary = BackupSnapshotSummary & {
@@ -128,6 +130,78 @@ export type CreateManualBackupInput = {
 
 export type ListBackupsInput = {
   workspaceId?: string;
+};
+
+export type ScheduledBackupTrigger =
+  | "app_open"
+  | "interval"
+  | "app_close"
+  | "pre_migration"
+  | "manual_check";
+
+export type BackupRetentionSettings = {
+  maxCount: number;
+  maxAgeDays: number;
+  maxSizeBytes: number;
+};
+
+export type BackupSchedulerSettings = {
+  workspaceId: string;
+  enabled: boolean;
+  intervalHours: number;
+  runOnAppClose: boolean;
+  runBeforeMigration: boolean;
+  retention: BackupRetentionSettings;
+  updatedAt: string | null;
+};
+
+export type BackupSchedulerStatus = {
+  workspaceId: string;
+  lastCheckedAt: string | null;
+  lastRunAt: string | null;
+  lastSuccessfulBackupAt: string | null;
+  lastBackupId: string | null;
+  lastError: string | null;
+  nextRunAt: string | null;
+  lastRetentionDeletedCount: number;
+  updatedAt: string | null;
+};
+
+export type BackupSchedulerSettingsSummary = {
+  settings: BackupSchedulerSettings;
+  status: BackupSchedulerStatus;
+};
+
+export type UpdateBackupSchedulerSettingsInput = {
+  workspaceId: string;
+  enabled?: boolean;
+  intervalHours?: number;
+  runOnAppClose?: boolean;
+  runBeforeMigration?: boolean;
+  retention?: Partial<BackupRetentionSettings>;
+};
+
+export type RunAutomaticBackupInput = {
+  workspaceId: string;
+  trigger: ScheduledBackupTrigger;
+};
+
+export type BackupRetentionDeletionSummary = {
+  id: string;
+  relativePath: string;
+  createdAt: string;
+  reason: "count" | "age" | "size";
+};
+
+export type AutomaticBackupRunSummary = {
+  workspaceId: string;
+  trigger: ScheduledBackupTrigger;
+  due: boolean;
+  skippedReason: string | null;
+  createdBackup: ManualBackupSnapshotSummary | null;
+  retentionDeletedBackups: BackupRetentionDeletionSummary[];
+  settings: BackupSchedulerSettings;
+  status: BackupSchedulerStatus;
 };
 
 export type RestoreIssueSummary = {
@@ -3717,6 +3791,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   backup: {
     createManualBackup: "local-work-os:backup:create-manual-backup",
     listBackups: "local-work-os:backup:list-backups",
+    getAutomaticBackupSettings:
+      "local-work-os:backup:get-automatic-backup-settings",
+    updateAutomaticBackupSettings:
+      "local-work-os:backup:update-automatic-backup-settings",
+    runAutomaticBackupCheck:
+      "local-work-os:backup:run-automatic-backup-check",
     validateRestoreSource: "local-work-os:backup:validate-restore-source",
     restoreBackupToNewWorkspace:
       "local-work-os:backup:restore-backup-to-new-workspace",
@@ -4575,6 +4655,18 @@ export type LocalWorkOsIpcContracts = {
     input: ListBackupsInput | undefined;
     result: ApiResult<BackupSnapshotSummary[]>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.getAutomaticBackupSettings]: {
+    input: ListBackupsInput | undefined;
+    result: ApiResult<BackupSchedulerSettingsSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.updateAutomaticBackupSettings]: {
+    input: UpdateBackupSchedulerSettingsInput;
+    result: ApiResult<BackupSchedulerSettingsSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.runAutomaticBackupCheck]: {
+    input: RunAutomaticBackupInput;
+    result: ApiResult<AutomaticBackupRunSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.backup.validateRestoreSource]: {
     input: ValidateRestoreSourceInput;
     result: ApiResult<RestoreValidationSummary>;
@@ -5360,6 +5452,15 @@ export type LocalWorkOsApi = {
     listBackups: (
       input?: ListBackupsInput
     ) => Promise<ApiResult<BackupSnapshotSummary[]>>;
+    getAutomaticBackupSettings: (
+      input?: ListBackupsInput
+    ) => Promise<ApiResult<BackupSchedulerSettingsSummary>>;
+    updateAutomaticBackupSettings: (
+      input: UpdateBackupSchedulerSettingsInput
+    ) => Promise<ApiResult<BackupSchedulerSettingsSummary>>;
+    runAutomaticBackupCheck: (
+      input: RunAutomaticBackupInput
+    ) => Promise<ApiResult<AutomaticBackupRunSummary>>;
     validateRestoreSource: (
       input: ValidateRestoreSourceInput
     ) => Promise<ApiResult<RestoreValidationSummary>>;
@@ -6117,6 +6218,18 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.createManualBackup, input),
       listBackups: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackups, input),
+      getAutomaticBackupSettings: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.backup.getAutomaticBackupSettings,
+          input
+        ),
+      updateAutomaticBackupSettings: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.backup.updateAutomaticBackupSettings,
+          input
+        ),
+      runAutomaticBackupCheck: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.runAutomaticBackupCheck, input),
       validateRestoreSource: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.validateRestoreSource, input),
       restoreBackupToNewWorkspace: (input) =>

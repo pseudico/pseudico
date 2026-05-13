@@ -109,6 +109,7 @@ describe("backup IPC handlers", () => {
           "backups/2026-05-01T00-00-00-000Z/local-work-os.sqlite",
         manifestRelativePath:
           "backups/2026-05-01T00-00-00-000Z/attachment-manifest.json",
+        kind: "manual",
         attachmentCount: 1,
         totalAttachmentBytes: 14
       }
@@ -152,6 +153,107 @@ describe("backup IPC handlers", () => {
     } finally {
       verifyConnection.close();
     }
+  });
+
+  it("updates automatic backup settings, creates a due backup, and prunes retention", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-auto-backup-ipc-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+    const handlers = createBackupIpcHandlers(
+      {
+        getCurrentWorkspace: () => ({
+          id: "workspace_1",
+          name: "Personal",
+          rootPath: tempRoot!,
+          openedAt: "2026-05-01T00:00:00.000Z",
+          schemaVersion: 1
+        })
+      },
+      () => new Date("2026-05-13T00:00:00.000Z")
+    );
+
+    await expect(
+      handlers.handleUpdateAutomaticBackupSettings({
+        workspaceId: "workspace_1",
+        enabled: true,
+        intervalHours: 24,
+        retention: {
+          maxCount: 1,
+          maxAgeDays: 30,
+          maxSizeBytes: 1024 * 1024
+        }
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        settings: {
+          enabled: true,
+          retention: {
+            maxCount: 1
+          }
+        }
+      }
+    });
+
+    const first = await handlers.handleRunAutomaticBackupCheck({
+      workspaceId: "workspace_1",
+      trigger: "manual_check"
+    });
+
+    expect(first).toMatchObject({
+      ok: true,
+      data: {
+        due: true,
+        createdBackup: {
+          kind: "automatic",
+          manifest: {
+            database: {
+              checksum: expect.any(String)
+            }
+          }
+        }
+      }
+    });
+
+    if (!first.ok || first.data.createdBackup === null) {
+      throw new Error("Expected automatic backup.");
+    }
+
+    const secondHandlers = createBackupIpcHandlers(
+      {
+        getCurrentWorkspace: () => ({
+          id: "workspace_1",
+          name: "Personal",
+          rootPath: tempRoot!,
+          openedAt: "2026-05-01T00:00:00.000Z",
+          schemaVersion: 1
+        })
+      },
+      () => new Date("2026-05-14T00:00:00.000Z")
+    );
+    const second = await secondHandlers.handleRunAutomaticBackupCheck({
+      workspaceId: "workspace_1",
+      trigger: "manual_check"
+    });
+
+    expect(second).toMatchObject({
+      ok: true,
+      data: {
+        retentionDeletedBackups: [
+          {
+            relativePath: first.data.createdBackup.relativePath,
+            reason: "count"
+          }
+        ],
+        status: {
+          lastRetentionDeletedCount: 1
+        }
+      }
+    });
   });
 
   it("restores a manual backup into a separate workspace folder", async () => {

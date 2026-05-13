@@ -17,6 +17,18 @@ export function registerBackupIpc(
     (_event, input) => handlers.handleListBackups(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.backup.getAutomaticBackupSettings,
+    (_event, input) => handlers.handleGetAutomaticBackupSettings(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.backup.updateAutomaticBackupSettings,
+    (_event, input) => handlers.handleUpdateAutomaticBackupSettings(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.backup.runAutomaticBackupCheck,
+    (_event, input) => handlers.handleRunAutomaticBackupCheck(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.backup.validateRestoreSource,
     (_event, input) => handlers.handleValidateRestoreSource(input)
   );

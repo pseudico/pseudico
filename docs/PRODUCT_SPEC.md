@@ -47,9 +47,10 @@ Known limitations for MVP release planning:
   can now be restored into a separate new workspace folder where feasible, and
   local EML/Maildir messages can be imported as Inbox tasks with the original
   email copied into attachments.
-- Backups and exports are manual local actions. Manual backup restore into a new
-  workspace is available; automatic backup scheduling and release-grade
-  integrity reporting remain future work.
+- Backups and exports are local actions. Manual backup restore into a new
+  workspace is available; automatic backup interval/app-close checks,
+  scheduler settings/status, retention cleanup, and database checksums are
+  implemented. Release-grade integrity reporting remains future work.
 - Packaged builds are development verification builds without installer,
   signing, notarization, or auto-update support.
 
@@ -2166,7 +2167,7 @@ MVP should prove the object graph and core usability.
 | Today | Today + overdue | Implemented with due/overdue lanes, manual Today/Tomorrow planning, ordering, rollover, snooze, and reschedule. |
 | Dashboard | Default overview | Implemented with default widgets, widget data services, project health, recent activity, and source-object navigation. Custom widget editing remains future work. |
 | Activity | Log core writes | Implemented for core data-changing services and exposed through recent activity projections. |
-| Backup/export | Manual backup + JSON export | Implemented for manual backups, backup restore into a new workspace, workspace JSON export/restore where feasible, project Markdown export, task CSV/TSV export, HTML/CSV/TSV/Markdown portable bundle export, sanitized print/PDF export for selected items and container/view projections, and JSON import validation. |
+| Backup/export | Manual backup + JSON export | Implemented for manual backups, automatic backup scheduler settings/status with interval/app-close checks, automatic backup retention cleanup, backup restore into a new workspace, workspace JSON export/restore where feasible, project Markdown export, task CSV/TSV export, HTML/CSV/TSV/Markdown portable bundle export, sanitized print/PDF export for selected items and container/view projections, and JSON import validation. |
 
 ### 32.2 V1 — Pagico-like usability depth
 

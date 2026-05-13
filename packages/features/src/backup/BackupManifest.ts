@@ -12,9 +12,11 @@ export type BackupManifestAttachment = {
   updatedAt: string;
 };
 
+export type BackupKind = "manual" | "automatic" | "pre_migration";
+
 export type BackupManifest = {
   id: string;
-  kind: "manual";
+  kind: BackupKind;
   workspaceId: string;
   workspaceName: string;
   createdAt: string;
@@ -22,6 +24,7 @@ export type BackupManifest = {
     sourceRelativePath: string;
     backupRelativePath: string;
     sizeBytes: number;
+    checksum: string | null;
   };
   attachments: BackupManifestAttachment[];
   attachmentCount: number;
@@ -30,6 +33,7 @@ export type BackupManifest = {
 
 export type CreateBackupManifestInput = {
   id: string;
+  kind?: BackupKind;
   workspaceId: string;
   workspaceName: string;
   createdAt: string;
@@ -46,7 +50,7 @@ export function createBackupManifest(
 
   return {
     id: input.id,
-    kind: "manual",
+    kind: input.kind ?? "manual",
     workspaceId: input.workspaceId,
     workspaceName: input.workspaceName,
     createdAt: input.createdAt,
