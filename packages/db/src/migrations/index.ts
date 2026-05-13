@@ -18,6 +18,7 @@ import { workflowItemCreatedTriggerSql } from "./0017_workflow_item_created_trig
 import { workflowFileImportedTriggerSql } from "./0018_workflow_file_imported_trigger";
 import { workflowMetadataTriggersSql } from "./0019_workflow_metadata_triggers";
 import { workflowRunRollbackSql } from "./0020_workflow_run_rollback";
+import { imapImportJobsSql } from "./0021_imap_import_jobs";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -140,8 +141,11 @@ export const migrations: MigrationDefinition[] = [
     name: "workflow_run_rollback",
     sql: workflowRunRollbackSql,
     checksum: "pse-164-workflow-run-rollback-v1"
+  },
+  {
+    version: 21,
+    name: "imap_import_jobs",
+    sql: imapImportJobsSql,
+    checksum: "pse-168-imap-import-jobs-v1"
   }
 ];
-
-
-

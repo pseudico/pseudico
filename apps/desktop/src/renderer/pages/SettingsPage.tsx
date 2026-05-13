@@ -3,6 +3,7 @@ import {
   FileJson,
   FileSpreadsheet,
   Keyboard,
+  Mail,
   Palette,
   Plus,
   RefreshCw,
@@ -990,6 +991,32 @@ export function SettingsPage({
         ) : (
           <ImportValidationSummaryPanel summary={importSummary} />
         )}
+      </section>
+      <section className="export-management-panel" aria-label="Optional local IMAP import">
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <h3>Optional local IMAP import</h3>
+            <p className="muted-text">
+              IMAP import is a local-only adapter-backed capability. Account settings
+              exclude passwords, duplicate messages are skipped, and live mailbox
+              import stays disabled until an OS keychain IMAP adapter is configured.
+            </p>
+          </div>
+          <Mail size={20} aria-hidden="true" />
+        </div>
+        <div className="backup-list-row">
+          <div>
+            <strong>Adapter required</strong>
+            <span>
+              Use EML/Maildir import today; IMAP connection testing and unread/labelled
+              imports are service-backed for the next desktop adapter slice.
+            </span>
+          </div>
+          <div className="backup-list-meta">
+            <span>No password storage in SQLite</span>
+            <span>Duplicate protected</span>
+          </div>
+        </div>
       </section>
       <section className="category-management-panel" aria-label="Categories">
         <div className="panel-heading-actions">

@@ -26,6 +26,8 @@ docs and the linked Linear issue.
   envelope for portable local templates.
 - `BROWSER_CAPTURE.md` explains the disabled-by-default local browser capture
   extension scaffold, pairing token, and localhost/native messaging setup.
+- `IMAP_IMPORT.md` documents the optional local IMAP importer boundary,
+  credential approach, duplicate prevention, and current adapter limitation.
 - `ROADMAP.md` summarizes the staged implementation path.
 - `MODULE_REGISTRY.md` names planned product modules and their responsibilities.
 - `QA_SCRIPTS.md` lists manual and automated smoke checks for MVP workflows.

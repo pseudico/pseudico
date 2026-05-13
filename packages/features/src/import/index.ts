@@ -4,6 +4,24 @@ export {
   parseEmailMessage,
   sanitizeEmailBody
 } from "./EmailImportService";
+export {
+  ImapImportService,
+  IMAP_IMPORT_SETTINGS_KEY
+} from "./ImapImportService";
+export type {
+  ImapClientAdapter,
+  ImapConnectionTestResult,
+  ImapCredential,
+  ImapCredentialStore,
+  ImapFetchedMessage,
+  ImapImportFilter,
+  ImapImportFilterMode,
+  ImapImportSettings,
+  ImapImportSkippedMessage,
+  ImapTaskImportSummary,
+  ImportImapMessagesInput,
+  SaveImapImportSettingsInput
+} from "./ImapImportService";
 export type {
   ImportValidationFileSystemAdapter
 } from "./ImportValidationService";

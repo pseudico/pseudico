@@ -182,6 +182,8 @@ export {
 export { FileAttachmentService, FileVersionService, filesModuleContract } from "./files";
 export {
   EmailImportService,
+  ImapImportService,
+  IMAP_IMPORT_SETTINGS_KEY,
   ImportValidationService,
   importModuleContract,
   parseEmailMessage,
@@ -567,7 +569,19 @@ export type {
   ImportValidationIssue,
   ImportValidationSeverity,
   ImportValidationSummary,
-  ParsedEmailMessage
+  ParsedEmailMessage,
+  ImapClientAdapter,
+  ImapConnectionTestResult,
+  ImapCredential,
+  ImapCredentialStore,
+  ImapFetchedMessage,
+  ImapImportFilter,
+  ImapImportFilterMode,
+  ImapImportSettings,
+  ImapImportSkippedMessage,
+  ImapTaskImportSummary,
+  ImportImapMessagesInput,
+  SaveImapImportSettingsInput
 } from "./import";
 export type {
   DuplicateAttachmentGroup,

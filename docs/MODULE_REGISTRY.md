@@ -912,3 +912,8 @@ Owns local comments and annotations for containers, items, and list rows. Commen
 
 Owns local .ics import into read-only calendar source/event records, calendar projection integration, local search indexing, and explicit network-feed guardrails. Does not own live cloud sync, hosted accounts, editable external events, or background network refresh without user-enabled network preference.
 
+
+
+### Optional IMAP Import
+
+Owns optional local IMAP account settings, connection-test/import orchestration, duplicate-prevention markers, and run history. Does not own hosted email capture, cloud sync, telemetry, or password storage in SQLite. Integrates with the existing local email-to-task importer so imported mailbox messages use task/search/activity flows already present in the app.
