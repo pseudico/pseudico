@@ -1,9 +1,10 @@
 import { readFile, readdir, stat } from "node:fs/promises";
-import { basename, extname, join } from "node:path";
+import { basename, extname, join, relative, resolve } from "node:path";
 import { createLocalId } from "@local-work-os/core";
 import {
   CsvImportService,
   EmailImportService,
+  MarkdownFolderImportService,
   InboxService,
   ImportValidationService
 } from "@local-work-os/features";
@@ -21,10 +22,15 @@ import {
   type CsvImportExecuteSummary,
   type CsvImportPreviewFileInput,
   type CsvImportPreviewSummary,
+  type ChooseMarkdownFolderImportInput,
   type EmailImportPreviewSummary,
   type EmailTaskImportSummary,
   type ImportEmailsAsTasksInput,
   type ImportValidationSummary,
+  type MarkdownFolderImportExecuteFolderInput,
+  type MarkdownFolderImportExecuteSummary,
+  type MarkdownFolderImportPreviewFolderInput,
+  type MarkdownFolderImportPreviewSummary,
   type ValidateWorkspaceExportJsonInput
 } from "../../preload/api";
 import {
@@ -60,11 +66,24 @@ export type ImportIpcHandlers = {
   handleImportDelimitedFile: (
     input: unknown
   ) => Promise<ApiResult<CsvImportExecuteSummary>>;
+  handlePreviewMarkdownFolderImport: (
+    input: unknown
+  ) => Promise<ApiResult<MarkdownFolderImportPreviewSummary>>;
+  handleImportMarkdownFolder: (
+    input: unknown
+  ) => Promise<ApiResult<MarkdownFolderImportExecuteSummary>>;
+  handleChooseAndPreviewMarkdownFolderImport: (
+    input: unknown
+  ) => Promise<ApiResult<MarkdownFolderImportPreviewSummary | null>>;
+  handleChooseAndImportMarkdownFolder: (
+    input: unknown
+  ) => Promise<ApiResult<MarkdownFolderImportExecuteSummary | null>>;
 };
 
 export type ImportIpcPlatform = {
   chooseExportJsonPath: () => Promise<string | null>;
   chooseEmailImportPath?: () => Promise<string | null>;
+  chooseMarkdownFolderPath?: () => Promise<string | null>;
 };
 
 export function createImportIpcHandlers(
@@ -82,7 +101,8 @@ export function createImportIpcHandlers(
       ? workspaceServiceOrPlatform
       : {
     chooseExportJsonPath: async () => null,
-    chooseEmailImportPath: async () => null
+    chooseEmailImportPath: async () => null,
+    chooseMarkdownFolderPath: async () => null
   });
 
   return {
@@ -249,6 +269,85 @@ export function createImportIpcHandlers(
           return apiOk(summary);
         }
       );
+    },
+
+    async handlePreviewMarkdownFolderImport(input) {
+      if (!isMarkdownFolderImportPreviewFolderInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "previewMarkdownFolderImport requires a folderPath string."
+        );
+      }
+
+      return await withMarkdownFolderImportContext(
+        workspaceService,
+        input,
+        async (context) => {
+          const source = await scanMarkdownFolder(input.folderPath, false, context.workspace.rootPath);
+          const summary = context.markdownFolderImportService.previewImport({
+            workspaceId: context.workspace.id,
+            rootName: source.rootName,
+            entries: source.entries,
+            ...(input.projectName === undefined ? {} : { projectName: input.projectName })
+          });
+
+          return apiOk({ ...summary, sourceRootPath: source.rootPath });
+        }
+      );
+    },
+
+    async handleImportMarkdownFolder(input) {
+      if (!isMarkdownFolderImportExecuteFolderInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "importMarkdownFolder requires a folderPath string."
+        );
+      }
+
+      return await withMarkdownFolderImportContext(
+        workspaceService,
+        input,
+        async (context) => {
+          const source = await scanMarkdownFolder(input.folderPath, true, context.workspace.rootPath);
+          const summary = await context.markdownFolderImportService.executeImport({
+            workspaceId: context.workspace.id,
+            rootName: source.rootName,
+            entries: source.entries,
+            actorType: "importer",
+            ...(input.projectName === undefined ? {} : { projectName: input.projectName })
+          });
+
+          return apiOk({ ...summary, sourceRootPath: source.rootPath });
+        }
+      );
+    },
+
+    async handleChooseAndPreviewMarkdownFolderImport(input) {
+      if (!isChooseMarkdownFolderImportInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "chooseAndPreviewMarkdownFolderImport accepts optional workspaceId and projectName."
+        );
+      }
+      const folderPath = await (platform.chooseMarkdownFolderPath?.() ?? null);
+      if (folderPath === null) {
+        return apiOk(null);
+      }
+      return await this.handlePreviewMarkdownFolderImport({ ...(input ?? {}), folderPath });
+    },
+
+    async handleChooseAndImportMarkdownFolder(input) {
+      if (!isChooseMarkdownFolderImportInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "chooseAndImportMarkdownFolder accepts optional workspaceId and projectName."
+        );
+      }
+      const folderPath = await (platform.chooseMarkdownFolderPath?.() ?? null);
+      if (folderPath === null) {
+        return apiOk(null);
+      }
+      return await this.handleImportMarkdownFolder({ ...(input ?? {}), folderPath });
     }
   };
 }
@@ -375,6 +474,167 @@ async function withCsvImportContext<T>(
     );
   } finally {
     connection.close();
+  }
+}
+
+
+async function withMarkdownFolderImportContext<T>(
+  workspaceService: CurrentWorkspaceService,
+  input: MarkdownFolderImportPreviewFolderInput,
+  operation: (context: {
+    connection: DatabaseConnection;
+    markdownFolderImportService: MarkdownFolderImportService;
+    workspace: NonNullable<ReturnType<CurrentWorkspaceService["getCurrentWorkspace"]>>;
+  }) => Promise<ApiResult<T>>
+): Promise<ApiResult<T>> {
+  const workspace = workspaceService.getCurrentWorkspace();
+
+  if (workspace === null) {
+    return apiError("WORKSPACE_ERROR", "No workspace is open.");
+  }
+
+  if (input.workspaceId !== undefined && input.workspaceId !== workspace.id) {
+    return apiError(
+      "WORKSPACE_ERROR",
+      "Markdown folder import workspaceId must match the current workspace."
+    );
+  }
+
+  const connection = await createDatabaseConnection({
+    databasePath: resolveWorkspaceDatabasePath(workspace.rootPath),
+    fileMustExist: true
+  });
+
+  try {
+    return await operation({
+      connection,
+      markdownFolderImportService: new MarkdownFolderImportService({ connection }),
+      workspace
+    });
+  } catch (error) {
+    return apiError(
+      "WORKSPACE_ERROR",
+      error instanceof Error ? error.message : "Markdown folder import failed."
+    );
+  } finally {
+    connection.close();
+  }
+}
+
+type ScannedMarkdownFolderEntry = {
+  relativePath: string;
+  kind: "directory" | "markdown" | "file";
+  content?: string;
+  sizeBytes?: number;
+  mimeType?: string | null;
+  copiedFile?: Awaited<ReturnType<typeof copyFileIntoWorkspace>> & { mimeType?: string | null };
+};
+
+async function scanMarkdownFolder(
+  folderPathInput: string,
+  copyFiles: boolean,
+  workspaceRootPath: string
+): Promise<{ rootPath: string; rootName: string; entries: ScannedMarkdownFolderEntry[] }> {
+  const rootPath = normalizeLocalPath(folderPathInput);
+  const rootStats = await stat(rootPath);
+  if (!rootStats.isDirectory()) {
+    throw new Error("Markdown folder import path must be a folder.");
+  }
+
+  const entries: ScannedMarkdownFolderEntry[] = [];
+  const queue = [rootPath];
+
+  while (queue.length > 0) {
+    const currentPath = queue.shift()!;
+    const dirents = await readdir(currentPath, { withFileTypes: true });
+
+    for (const dirent of dirents) {
+      if (dirent.name.startsWith(".") || dirent.isSymbolicLink()) {
+        continue;
+      }
+
+      const entryPath = resolve(currentPath, dirent.name);
+      const relativePath = normalizeScannedRelativePath(rootPath, entryPath);
+
+      if (dirent.isDirectory()) {
+        entries.push({ relativePath, kind: "directory" });
+        queue.push(entryPath);
+        continue;
+      }
+
+      if (!dirent.isFile()) {
+        continue;
+      }
+
+      const extension = extname(dirent.name).toLowerCase();
+      if (extension === ".md" || extension === ".markdown") {
+        entries.push({
+          relativePath,
+          kind: "markdown",
+          content: await readFile(entryPath, "utf8"),
+          sizeBytes: (await stat(entryPath)).size,
+          mimeType: "text/markdown"
+        });
+        continue;
+      }
+
+      const stats = await stat(entryPath);
+      const attachmentId = createLocalId("attachment");
+      const copiedFile = copyFiles
+        ? {
+            ...(await copyFileIntoWorkspace({
+              workspaceRootPath,
+              sourcePath: entryPath,
+              attachmentId
+            })),
+            mimeType: guessMimeType(entryPath)
+          }
+        : undefined;
+      entries.push({
+        relativePath,
+        kind: "file",
+        sizeBytes: stats.size,
+        mimeType: guessMimeType(entryPath),
+        ...(copiedFile === undefined ? {} : { copiedFile })
+      });
+    }
+
+    if (entries.length > 1000) {
+      throw new Error("Markdown folder import is limited to 1000 folders/files per run.");
+    }
+  }
+
+  return { rootPath, rootName: basename(rootPath), entries };
+}
+
+function normalizeScannedRelativePath(rootPath: string, entryPath: string): string {
+  const relativePath = relative(rootPath, entryPath).replace(/\\/g, "/");
+  if (
+    relativePath.length === 0 ||
+    relativePath === ".." ||
+    relativePath.startsWith("../") ||
+    /^[a-zA-Z]:/.test(relativePath)
+  ) {
+    throw new Error("Markdown folder import entry escaped the selected folder.");
+  }
+  return relativePath;
+}
+
+function guessMimeType(filePath: string): string | null {
+  switch (extname(filePath).toLowerCase()) {
+    case ".pdf":
+      return "application/pdf";
+    case ".png":
+      return "image/png";
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".gif":
+      return "image/gif";
+    case ".txt":
+      return "text/plain";
+    default:
+      return null;
   }
 }
 
@@ -553,6 +813,34 @@ function isChooseAndImportEmailsInput(
       (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)) &&
       (input.containerId === undefined || isNonEmptyString(input.containerId)) &&
       (input.extractTags === undefined || typeof input.extractTags === "boolean"))
+  );
+}
+
+function isMarkdownFolderImportPreviewFolderInput(
+  input: unknown
+): input is MarkdownFolderImportPreviewFolderInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.folderPath) &&
+    (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)) &&
+    (input.projectName === undefined || typeof input.projectName === "string")
+  );
+}
+
+function isMarkdownFolderImportExecuteFolderInput(
+  input: unknown
+): input is MarkdownFolderImportExecuteFolderInput {
+  return isMarkdownFolderImportPreviewFolderInput(input);
+}
+
+function isChooseMarkdownFolderImportInput(
+  input: unknown
+): input is ChooseMarkdownFolderImportInput | undefined {
+  return (
+    input === undefined ||
+    (isRecord(input) &&
+      (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)) &&
+      (input.projectName === undefined || typeof input.projectName === "string"))
   );
 }
 

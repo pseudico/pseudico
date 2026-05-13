@@ -23,6 +23,14 @@ export function registerImportIpc(
       });
 
       return result.canceled ? null : (result.filePaths[0] ?? null);
+    },
+    async chooseMarkdownFolderPath() {
+      const result = await dialog.showOpenDialog({
+        filters: [{ name: "Markdown folders", extensions: ["md", "markdown", "*"] }],
+        properties: ["openDirectory"]
+      });
+
+      return result.canceled ? null : (result.filePaths[0] ?? null);
     }
   });
 
@@ -53,6 +61,22 @@ export function registerImportIpc(
   registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.import.importDelimitedFile,
     (_event, input) => handlers.handleImportDelimitedFile(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.import.previewMarkdownFolderImport,
+    (_event, input) => handlers.handlePreviewMarkdownFolderImport(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.import.importMarkdownFolder,
+    (_event, input) => handlers.handleImportMarkdownFolder(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndPreviewMarkdownFolderImport,
+    (_event, input) => handlers.handleChooseAndPreviewMarkdownFolderImport(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndImportMarkdownFolder,
+    (_event, input) => handlers.handleChooseAndImportMarkdownFolder(input)
   );
 }
 

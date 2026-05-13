@@ -566,6 +566,26 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
           callApi(() =>
             api.import.importDelimitedFile?.(input) ??
             unavailable("CSV/TSV import API is not available.")
+          ),
+        previewMarkdownFolderImport: (input) =>
+          callApi(() =>
+            api.import.previewMarkdownFolderImport?.(input) ??
+            unavailable("Markdown folder import preview API is not available.")
+          ),
+        importMarkdownFolder: (input) =>
+          callApi(() =>
+            api.import.importMarkdownFolder?.(input) ??
+            unavailable("Markdown folder import API is not available.")
+          ),
+        chooseAndPreviewMarkdownFolderImport: (input) =>
+          callApi(() =>
+            api.import.chooseAndPreviewMarkdownFolderImport?.(input) ??
+            unavailable("Markdown folder import chooser API is not available.")
+          ),
+        chooseAndImportMarkdownFolder: (input) =>
+          callApi(() =>
+            api.import.chooseAndImportMarkdownFolder?.(input) ??
+            unavailable("Markdown folder import chooser API is not available.")
           )
       },
     export: {
@@ -1159,7 +1179,19 @@ export const desktopApiClient: LocalWorkOsApi = {
         unavailable("CSV/TSV import preview API is not available."),
       importDelimitedFile: (input) =>
         getDesktopApiClient().import.importDelimitedFile?.(input) ??
-        unavailable("CSV/TSV import API is not available.")
+        unavailable("CSV/TSV import API is not available."),
+      previewMarkdownFolderImport: (input) =>
+        getDesktopApiClient().import.previewMarkdownFolderImport?.(input) ??
+        unavailable("Markdown folder import preview API is not available."),
+      importMarkdownFolder: (input) =>
+        getDesktopApiClient().import.importMarkdownFolder?.(input) ??
+        unavailable("Markdown folder import API is not available."),
+      chooseAndPreviewMarkdownFolderImport: (input) =>
+        getDesktopApiClient().import.chooseAndPreviewMarkdownFolderImport?.(input) ??
+        unavailable("Markdown folder import chooser API is not available."),
+      chooseAndImportMarkdownFolder: (input) =>
+        getDesktopApiClient().import.chooseAndImportMarkdownFolder?.(input) ??
+        unavailable("Markdown folder import chooser API is not available.")
     },
   export: {
     exportWorkspaceJson: (input) =>

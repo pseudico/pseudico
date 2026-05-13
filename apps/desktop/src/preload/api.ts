@@ -419,6 +419,61 @@ export type CsvImportPreviewFileInput = {
 };
 export type CsvImportExecuteFileInput = CsvImportPreviewFileInput;
 
+export type MarkdownFolderImportValidationIssueSummary = {
+  severity: "error" | "warning";
+  code: string;
+  relativePath: string | null;
+  message: string;
+};
+export type MarkdownFolderImportPreviewRowSummary = {
+  relativePath: string;
+  kind: "directory" | "markdown" | "file" | "project" | "tab" | "heading";
+  action: "create" | "skip";
+  title: string;
+  targetTabName: string;
+  issues: MarkdownFolderImportValidationIssueSummary[];
+};
+export type MarkdownFolderImportPreviewSummary = {
+  valid: boolean;
+  workspaceId: string;
+  projectName: string;
+  sourceRootPath?: string;
+  rowCount: number;
+  directoryCount: number;
+  markdownCount: number;
+  fileCount: number;
+  tabCount: number;
+  headingCount: number;
+  creatableCount: number;
+  skippedCount: number;
+  errorCount: number;
+  warningCount: number;
+  issues: MarkdownFolderImportValidationIssueSummary[];
+  rows: MarkdownFolderImportPreviewRowSummary[];
+};
+export type MarkdownFolderImportCreatedTargetSummary = {
+  targetType: "project" | "container_tab" | "item" | "attachment";
+  id: string;
+  title: string;
+  relativePath: string;
+};
+export type MarkdownFolderImportExecuteSummary = MarkdownFolderImportPreviewSummary & {
+  importedAt: string;
+  importedCount: number;
+  created: MarkdownFolderImportCreatedTargetSummary[];
+};
+export type MarkdownFolderImportPreviewFolderInput = {
+  workspaceId?: string;
+  folderPath: string;
+  projectName?: string;
+};
+export type MarkdownFolderImportExecuteFolderInput = MarkdownFolderImportPreviewFolderInput;
+export type ChooseMarkdownFolderImportInput = {
+  workspaceId?: string;
+  projectName?: string;
+};
+
+
 export type RunWorkspaceIntegrityCheckInput = {
   workspaceId?: string;
 };
@@ -3622,7 +3677,14 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
       "local-work-os:import:choose-and-import-emails-as-tasks",
     previewDelimitedFileImport:
       "local-work-os:import:preview-delimited-file",
-    importDelimitedFile: "local-work-os:import:delimited-file"
+    importDelimitedFile: "local-work-os:import:delimited-file",
+    previewMarkdownFolderImport:
+      "local-work-os:import:preview-markdown-folder",
+    importMarkdownFolder: "local-work-os:import:markdown-folder",
+    chooseAndPreviewMarkdownFolderImport:
+      "local-work-os:import:choose-and-preview-markdown-folder",
+    chooseAndImportMarkdownFolder:
+      "local-work-os:import:choose-and-import-markdown-folder"
   },
   export: {
     exportWorkspaceJson: "local-work-os:export:export-workspace-json",
@@ -4494,6 +4556,22 @@ export type LocalWorkOsIpcContracts = {
     input: CsvImportExecuteFileInput;
     result: ApiResult<CsvImportExecuteSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.import.previewMarkdownFolderImport]: {
+    input: MarkdownFolderImportPreviewFolderInput;
+    result: ApiResult<MarkdownFolderImportPreviewSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.import.importMarkdownFolder]: {
+    input: MarkdownFolderImportExecuteFolderInput;
+    result: ApiResult<MarkdownFolderImportExecuteSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndPreviewMarkdownFolderImport]: {
+    input: ChooseMarkdownFolderImportInput | undefined;
+    result: ApiResult<MarkdownFolderImportPreviewSummary | null>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndImportMarkdownFolder]: {
+    input: ChooseMarkdownFolderImportInput | undefined;
+    result: ApiResult<MarkdownFolderImportExecuteSummary | null>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.export.exportWorkspaceJson]: {
     input: ExportWorkspaceJsonInput | undefined;
     result: ApiResult<WorkspaceJsonExportSummary>;
@@ -5251,6 +5329,18 @@ export type LocalWorkOsApi = {
     importDelimitedFile?: (
       input: CsvImportExecuteFileInput
     ) => Promise<ApiResult<CsvImportExecuteSummary>>;
+    previewMarkdownFolderImport?: (
+      input: MarkdownFolderImportPreviewFolderInput
+    ) => Promise<ApiResult<MarkdownFolderImportPreviewSummary>>;
+    importMarkdownFolder?: (
+      input: MarkdownFolderImportExecuteFolderInput
+    ) => Promise<ApiResult<MarkdownFolderImportExecuteSummary>>;
+    chooseAndPreviewMarkdownFolderImport?: (
+      input?: ChooseMarkdownFolderImportInput
+    ) => Promise<ApiResult<MarkdownFolderImportPreviewSummary | null>>;
+    chooseAndImportMarkdownFolder?: (
+      input?: ChooseMarkdownFolderImportInput
+    ) => Promise<ApiResult<MarkdownFolderImportExecuteSummary | null>>;
   };
   export: {
     exportWorkspaceJson: (
@@ -6002,6 +6092,23 @@ export function createLocalWorkOsApi(
       importDelimitedFile: (input) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.import.importDelimitedFile,
+          input
+        ),
+      previewMarkdownFolderImport: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.import.previewMarkdownFolderImport,
+          input
+        ),
+      importMarkdownFolder: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.import.importMarkdownFolder, input),
+      chooseAndPreviewMarkdownFolderImport: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndPreviewMarkdownFolderImport,
+          input
+        ),
+      chooseAndImportMarkdownFolder: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndImportMarkdownFolder,
           input
         )
     },
