@@ -644,7 +644,11 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       runSavedViewDiagnostics: (workspaceId) =>
         callApi(() => api.diagnostics.runSavedViewDiagnostics(workspaceId)),
       repairSavedViewQuery: (input) =>
-        callApi(() => api.diagnostics.repairSavedViewQuery(input))
+        callApi(() => api.diagnostics.repairSavedViewQuery(input)),
+      runMaintenanceJob: (input) =>
+        callApi(() => api.diagnostics.runMaintenanceJob(input)),
+      listMaintenanceJobs: (input) =>
+        callApi(() => api.diagnostics.listMaintenanceJobs(input))
     },
     navigation: {
       listRecentTargets: (workspaceId) =>
@@ -1245,7 +1249,11 @@ export const desktopApiClient: LocalWorkOsApi = {
     runSavedViewDiagnostics: (workspaceId) =>
       getDesktopApiClient().diagnostics.runSavedViewDiagnostics(workspaceId),
     repairSavedViewQuery: (input) =>
-      getDesktopApiClient().diagnostics.repairSavedViewQuery(input)
+      getDesktopApiClient().diagnostics.repairSavedViewQuery(input),
+    runMaintenanceJob: (input) =>
+      getDesktopApiClient().diagnostics.runMaintenanceJob(input),
+    listMaintenanceJobs: (input) =>
+      getDesktopApiClient().diagnostics.listMaintenanceJobs(input)
   },
   navigation: {
     listRecentTargets: (workspaceId) =>

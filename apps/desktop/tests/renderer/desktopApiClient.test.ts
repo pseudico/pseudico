@@ -20,6 +20,7 @@ import {
   type ListSummary,
   type LocalWorkOsApi,
   type ManualBackupSnapshotSummary,
+  type MaintenanceJobSummary,
   type MetadataTargetSummary,
   type NoteSummary,
   type ProjectHealthSummary,
@@ -775,7 +776,9 @@ function createMockApi(
           name: "Saved view",
           changed: false,
           issueCount: 0
-        })
+        }),
+      runMaintenanceJob: async () => apiOk(maintenanceJobSummary()),
+      listMaintenanceJobs: async () => apiOk([maintenanceJobSummary()])
     },
     navigation: {
       listRecentTargets: async () => apiOk([]),
@@ -1290,6 +1293,25 @@ function workspaceIntegritySummary(): WorkspaceIntegritySummary {
         issues: []
       }
     ]
+  };
+}
+
+
+function maintenanceJobSummary(): MaintenanceJobSummary {
+  return {
+    id: "maintenance_job_1",
+    workspaceId: "workspace_1",
+    status: "completed",
+    operations: ["sqlite_integrity_check"],
+    startedAt: "2026-05-01T00:00:00.000Z",
+    completedAt: "2026-05-01T00:00:01.000Z",
+    backup: { id: "backup_1", relativePath: "backups/pre-maintenance" },
+    sqliteIntegrity: { ok: true, messages: ["ok"] },
+    searchReindex: null,
+    vacuum: null,
+    orphanAttachmentScan: null,
+    entries: [],
+    error: null
   };
 }
 

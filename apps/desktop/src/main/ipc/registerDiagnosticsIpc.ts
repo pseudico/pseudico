@@ -33,4 +33,12 @@ export function registerDiagnosticsIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.repairSavedViewQuery,
     (_event, input) => handlers.handleRepairSavedViewQuery(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runMaintenanceJob,
+    (_event, input) => handlers.handleRunMaintenanceJob(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.listMaintenanceJobs,
+    (_event, input) => handlers.handleListMaintenanceJobs(input)
+  );
 }

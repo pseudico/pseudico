@@ -100,6 +100,7 @@ export const ActivityAction = {
   containerMediaRemoved: "container_media_removed",
   systemRowsRepaired: "system_rows_repaired",
   searchIndexRebuilt: "search_index_rebuilt",
+  databaseMaintenanceRun: "database_maintenance_run",
   backupCreated: "backup_created",
   backupRestored: "backup_restored",
   exportCreated: "export_created",
@@ -126,4 +127,3 @@ export const ActivityAction = {
 
 export type ActivityAction =
   (typeof ActivityAction)[keyof typeof ActivityAction];
-

@@ -802,7 +802,9 @@ function createMockApi(): LocalWorkOsApi {
       runWorkspaceIntegrityCheck: async () => apiOk(null as never),
       repairAttachment: async () => apiOk(null),
       runSavedViewDiagnostics: async () => apiOk(null as never),
-      repairSavedViewQuery: async () => apiOk(null as never)
+      repairSavedViewQuery: async () => apiOk(null as never),
+      runMaintenanceJob: async () => apiOk(null as never),
+      listMaintenanceJobs: async () => apiOk([])
     },
     navigation: {
       listRecentTargets: async () => apiOk([]),

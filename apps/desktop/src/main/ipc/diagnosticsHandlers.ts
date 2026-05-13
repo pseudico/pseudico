@@ -1,11 +1,17 @@
+import { copyFile, readdir, stat } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { createHash } from "node:crypto";
+
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
   type DatabaseConnection
 } from "@local-work-os/db";
 import {
+  BackupService,
   FileAttachmentService,
   IntegrityCheckService,
+  MaintenanceService,
   SavedViewDiagnosticsService,
   type SavedViewDiagnosticsReport,
   type SavedViewRepairResult,
@@ -18,7 +24,10 @@ import {
   type RepairAttachmentInput,
   type RepairAttachmentSummary,
   type RepairSavedViewQueryInput,
+  type ListMaintenanceJobsInput,
+  type MaintenanceJobSummary,
   type RepairSavedViewQuerySummary,
+  type RunMaintenanceJobInput,
   type RunWorkspaceIntegrityCheckInput,
   type SavedViewDiagnosticsSummary,
   type WorkspaceIntegritySummary,
@@ -26,10 +35,16 @@ import {
 } from "../../preload/api";
 import {
   calculateChecksum,
+  ensureDirectoryInsideWorkspace,
   localPathExists,
   resolveInsideWorkspace,
+  writeTextFileInsideWorkspace,
   restoreAttachmentFileFromReplacement
 } from "../services/safeFileSystem";
+import {
+  WORKSPACE_DATABASE_RELATIVE_PATH,
+  createIsoTimestamp
+} from "../services/workspace/WorkspaceManifest";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
 
 type CurrentWorkspaceService = Pick<
@@ -50,6 +65,12 @@ type DiagnosticsIpcHandlers = {
   handleRepairSavedViewQuery: (
     input: unknown
   ) => Promise<ApiResult<RepairSavedViewQuerySummary>>;
+  handleRunMaintenanceJob: (
+    input: unknown
+  ) => Promise<ApiResult<MaintenanceJobSummary>>;
+  handleListMaintenanceJobs: (
+    input: unknown
+  ) => Promise<ApiResult<MaintenanceJobSummary[]>>;
 };
 
 export type DiagnosticsIpcPlatform = {
@@ -171,6 +192,98 @@ export function createDiagnosticsIpcHandlers(
 
         return apiOk(toRepairSavedViewQuerySummary(result));
       });
+    },
+
+    async handleRunMaintenanceJob(input) {
+      if (!isRunMaintenanceJobInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "runMaintenanceJob accepts workspaceId, operations, and requireBackup."
+        );
+      }
+
+      return await withIntegrityCheckService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input?.workspaceId, context.workspace);
+        const service = new MaintenanceService({
+          connection: context.connection,
+          fileSystem: {
+            listWorkspaceFilesUnder: async (workspaceRelativePath) =>
+              await listWorkspaceFilesUnder(
+                context.workspace.rootPath,
+                workspaceRelativePath
+              )
+          },
+          createBackup: async () => {
+            const backupRelativePath = createMaintenanceBackupRelativePath(new Date());
+            const backup = await new BackupService({
+              connection: context.connection,
+              fileSystem: {
+                async copyDatabase({ sourceRelativePath, destinationRelativePath }) {
+                  const sourcePath = resolveInsideWorkspace(
+                    context.workspace.rootPath,
+                    sourceRelativePath
+                  );
+                  const destinationPath = resolveInsideWorkspace(
+                    context.workspace.rootPath,
+                    destinationRelativePath
+                  );
+
+                  await ensureDirectoryInsideWorkspace(
+                    context.workspace.rootPath,
+                    dirnameRelativePath(destinationRelativePath)
+                  );
+                  await copyFile(sourcePath, destinationPath);
+
+                  return {
+                    sizeBytes: (await stat(destinationPath)).size,
+                    checksum: await createFileChecksum(destinationPath)
+                  };
+                },
+                async writeManifest({ manifestRelativePath, manifest }) {
+                  await writeTextFileInsideWorkspace(
+                    context.workspace.rootPath,
+                    manifestRelativePath,
+                    `${JSON.stringify(manifest, null, 2)}\n`
+                  );
+                }
+              }
+            }).createManualBackup({
+              workspaceId,
+              workspaceName: context.workspace.name,
+              databaseRelativePath: WORKSPACE_DATABASE_RELATIVE_PATH,
+              backupRelativePath,
+              backupDatabaseRelativePath: `${backupRelativePath}/local-work-os.sqlite`,
+              manifestRelativePath: `${backupRelativePath}/attachment-manifest.json`
+            });
+
+            return { id: backup.id, relativePath: backup.relativePath };
+          }
+        });
+
+        return apiOk(await service.runMaintenanceJob({
+          workspaceId,
+          ...(input?.operations === undefined ? {} : { operations: input.operations }),
+          requireBackup: input?.requireBackup ?? true
+        }));
+      });
+    },
+
+    async handleListMaintenanceJobs(input) {
+      if (!isListMaintenanceJobsInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "listMaintenanceJobs accepts optional workspaceId and limit."
+        );
+      }
+
+      return await withIntegrityCheckService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input?.workspaceId, context.workspace);
+        const service = new MaintenanceService({
+          connection: context.connection
+        });
+
+        return apiOk(service.listJobLogs(workspaceId, input?.limit));
+      });
     }
   };
 }
@@ -275,11 +388,98 @@ function toRepairSavedViewQuerySummary(
   };
 }
 
+
+async function listWorkspaceFilesUnder(
+  workspaceRootPath: string,
+  workspaceRelativePath: string
+): Promise<string[]> {
+  const root = resolveInsideWorkspace(workspaceRootPath, workspaceRelativePath);
+
+  if (!(await localPathExists(root))) {
+    return [];
+  }
+
+  const entries = await readdir(root, { withFileTypes: true });
+  const files: string[] = [];
+
+  for (const entry of entries) {
+    const childRelativePath = `${workspaceRelativePath.replace(/\\/g, "/").replace(/\/$/, "")}/${entry.name}`;
+
+    if (entry.isDirectory()) {
+      files.push(...(await listWorkspaceFilesUnder(workspaceRootPath, childRelativePath)));
+      continue;
+    }
+
+    if (entry.isFile()) {
+      files.push(childRelativePath);
+    }
+  }
+
+  return files;
+}
+
+function createMaintenanceBackupRelativePath(date: Date): string {
+  return `backups/${createIsoTimestamp(date).replace(/[:.]/g, "-")}-maintenance`;
+}
+
+function dirnameRelativePath(relativePath: string): string {
+  const normalized = relativePath.replace(/\\/g, "/");
+  const index = normalized.lastIndexOf("/");
+
+  return index === -1 ? "." : normalized.slice(0, index);
+}
+
+async function createFileChecksum(filePath: string): Promise<string> {
+  const hash = createHash("sha256");
+  const stream = createReadStream(filePath);
+
+  await new Promise<void>((resolvePromise, reject) => {
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("error", reject);
+    stream.on("end", resolvePromise);
+  });
+
+  return hash.digest("hex");
+}
+
 function isRepairAttachmentInput(input: unknown): input is RepairAttachmentInput {
   return (
     isRecord(input) &&
     isNonEmptyString(input.attachmentId) &&
     isOptionalString(input.replacementPath)
+  );
+}
+
+function isRunMaintenanceJobInput(
+  input: unknown
+): input is RunMaintenanceJobInput | undefined {
+  return (
+    input === undefined ||
+    (isRecord(input) &&
+      isOptionalString(input.workspaceId) &&
+      (input.requireBackup === undefined || typeof input.requireBackup === "boolean") &&
+      (input.operations === undefined ||
+        (Array.isArray(input.operations) &&
+          input.operations.every((operation) =>
+            typeof operation === "string" &&
+            [
+              "sqlite_integrity_check",
+              "rebuild_search_index",
+              "vacuum",
+              "orphan_attachment_scan"
+            ].includes(operation)
+          ))))
+  );
+}
+
+function isListMaintenanceJobsInput(
+  input: unknown
+): input is ListMaintenanceJobsInput | undefined {
+  return (
+    input === undefined ||
+    (isRecord(input) &&
+      isOptionalString(input.workspaceId) &&
+      (input.limit === undefined || typeof input.limit === "number"))
   );
 }
 

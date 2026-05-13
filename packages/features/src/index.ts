@@ -46,6 +46,7 @@ export const plannedFeatureAreas = [
   "quickStart",
   "activity",
   "diagnostics",
+  "maintenance",
   "wikilinks"
 ] as const;
 
@@ -198,6 +199,12 @@ export {
   IntegrityCheckService,
   diagnosticsModuleContract
 } from "./diagnostics";
+export {
+  MaintenanceService,
+  maintenanceModuleContract,
+  MAINTENANCE_JOB_LOG_SETTING_KEY,
+  DEFAULT_MAINTENANCE_JOB_LIMIT
+} from "./maintenance";
 export { InboxService, inboxModuleContract } from "./inbox";
 export { ItemService, itemsModuleContract } from "./items";
 export { CaptureService, captureModuleContract } from "./capture";
@@ -621,6 +628,20 @@ export type {
   ImportImapMessagesInput,
   SaveImapImportSettingsInput
 } from "./import";
+export type {
+  MaintenanceBackupSummary,
+  MaintenanceDatabaseAdapter,
+  MaintenanceFileSystemAdapter,
+  MaintenanceJobLogEntry,
+  MaintenanceJobStatus,
+  MaintenanceJobStepStatus,
+  MaintenanceJobSummary,
+  MaintenanceOperation,
+  MaintenanceServiceIdFactory,
+  OrphanAttachmentScanSummary,
+  RunMaintenanceJobInput,
+  SqliteIntegrityCheckSummary
+} from "./maintenance";
 export type {
   DuplicateAttachmentGroup,
   IntegrityCheckIssue,
