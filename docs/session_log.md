@@ -4826,3 +4826,52 @@ Decisions made: - Tightened attachment assertion without changing scope.
 Files changed: docs/session_log.md; packages/features/tests/markdownFolderImportService.test.ts
 Open questions / risks: CI rerun pending on amended head.
 Next actions: Check PR CI/reviews; merge if green; update Linear.
+
+## 2026-05-13T18:36:18.7275890+10:00
+Objective: Complete PSE-170 merge and queue next M13 issue.
+Decisions made: - Squash-merged PR #159 after green CI and no review threads; promoted PSE-171 only.
+Files changed: docs/session_log.md
+Open questions / risks: Next issue is research/planning, not implementation-heavy.
+Next actions: Start PSE-171; keep other issues out of Codex Ready; preserve local-only scope.
+
+## 2026-05-13T18:38:22.1092495+10:00
+Objective: Start PSE-171 common import format research.
+Decisions made: - Moved PSE-171 to In Progress; created codex/pse-171-research-common-app-import-formats.
+Files changed: docs/session_log.md
+Open questions / risks: Research scope may be docs-only unless ticket asks code changes.
+Next actions: Read ticket/docs; implement artifact; run checks.
+
+## 2026-05-13T18:47:01.0858296+10:00
+Objective: Draft PSE-171 research deliverable and follow-up tickets.
+Decisions made: - Recommended Notion, Todoist, Trello, Evernote, then Obsidian enhancement; created PSE-190..PSE-194 in Backlog.
+Files changed: docs/import-research/COMMON_APP_IMPORT_FORMATS.md; docs/README.md; docs/MODULE_REGISTRY.md; docs/session_log.md
+Open questions / risks: Fixture shapes need validation with synthetic/user-scrubbed exports.
+Next actions: Run checks; open PR; update Linear.
+
+## 2026-05-13T18:50:28.1162409+10:00
+Objective: Verify PSE-171 research changes locally.
+Decisions made: - Full lint/typecheck/test/build pass; reran test/build with escalation after spawn EPERM sandbox errors.
+Files changed: docs/session_log.md
+Open questions / risks: CI still required after PR opens.
+Next actions: Commit; push; open PR.
+
+## 2026-05-13T18:52:35.9679892+10:00
+Objective: Commit PSE-171 research deliverable.
+Decisions made: - Committed docs-only research, README/module registry links, and session log.
+Files changed: docs/session_log.md
+Open questions / risks: PR/CI still pending.
+Next actions: Amend session log; push branch; open PR.
+
+## 2026-05-13T18:55:17.2098357+10:00
+Objective: Open PSE-171 PR and update Linear.
+Decisions made: - Opened ready PR #160; moved PSE-171 to PR Open with link/comment.
+Files changed: docs/session_log.md
+Open questions / risks: CI/review pending on PR head.
+Next actions: Amend log; push; check CI/reviews; merge if green.
+
+## 2026-05-13T18:57:06.9838475+10:00
+Objective: Clean PSE-171 research doc encoding after PR diff review.
+Decisions made: - Removed UTF-8 BOM from new Markdown file; no content change.
+Files changed: docs/import-research/COMMON_APP_IMPORT_FORMATS.md; docs/session_log.md
+Open questions / risks: CI will rerun after amended push.
+Next actions: Amend commit; force-push; check CI/reviews.
