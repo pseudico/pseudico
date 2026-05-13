@@ -155,6 +155,17 @@ export {
 } from "./services/linkParser";
 export type { ExternalLinkKind, ExternalLinkToken } from "./services/linkParser";
 export {
+  ALLOWED_EXTERNAL_URL_PROTOCOLS,
+  areSafeLocalFilePaths,
+  isAllowedExternalUrlProtocol,
+  isSafeLocalFilePath,
+  validateExternalOpenUrl
+} from "./services/electronSecurity";
+export type {
+  AllowedExternalUrlProtocol,
+  ExternalUrlValidationResult
+} from "./services/electronSecurity";
+export {
   normalizeTagName,
   parseInlineTagSlugs,
   parseInlineTags,

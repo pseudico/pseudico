@@ -4985,3 +4985,71 @@ Next actions: Start PSE-172; keep follow-up importer tickets in Backlog; preserv
 - Files changed: none after commit
 - Risks: GitHub CI is still in progress; merge blocked until green.
 - Next: Poll CI; merge if clean; promote next issue only after Done.
+## 2026-05-14 06:45:47 +10:00
+Objective: Merge PSE-174 and prepare next Local Work OS ticket.
+Decisions made:
+- Squash-merged PR #163 after CI success and no review threads/comments.
+- Moved PSE-174 to Done and promoted PSE-175 as the only Codex Ready issue.
+Files changed: docs/session_log.md
+Open questions / risks: Final session log entry is local-only unless a future commit includes it.
+Next actions: Start PSE-175; review Electron IPC/preload security docs; keep one active issue.
+
+## 2026-05-14T06:46:52.5418526+10:00
+Objective: Run next Local Work OS ticket end-to-end.
+Decisions made:
+- Using Linear as plan and GitHub as proof per request.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Active PR/CI state not reconciled yet.
+Next actions:
+- Reconcile Linear statuses and GitHub PRs.
+
+## 2026-05-14T06:47:27.5341429+10:00
+Objective: Reconcile active Linear/GitHub work.
+Decisions made:
+- No PR Open or In Progress issues found; selected PSE-175 from Codex Ready.
+- Moved PSE-175 to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need confirm latest main and detailed ticket scope.
+Next actions:
+- Pull main, branch, read docs/source.
+
+## 2026-05-14T06:50:47.3512363+10:00
+Objective: Plan PSE-175 implementation.
+Decisions made:
+- Scope focused on external URL, webview/window navigation, IPC path validators, docs/tests.
+- No schema/data model changes required.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need preserve dev renderer navigation while blocking external/file schemes.
+Next actions:
+- Implement validators and window/IPC hardening.
+- Add tests and security audit doc.
+
+## 2026-05-14T06:56:31.8277472+10:00
+Objective: Implement PSE-175 security hardening.
+Decisions made:
+- Added shared URL/path validators and denied unsafe window navigation/webviews.
+- Wired file and drag/drop IPC to reject URL-like path payloads.
+Files changed:
+- AGENTS.md; apps/desktop/src/main/**; apps/desktop/src/preload/index.ts; docs/**; packages/core/src/**; tests
+Open questions / risks:
+- Manual unsafe link/drop QA remains documented, not interactively run.
+Next actions:
+- Create PR, update Linear, monitor CI.
+
+## 2026-05-14T07:03:18.8078619+10:00
+Objective: Tighten PSE-175 review findings.
+Decisions made:
+- Required dropped/attached file paths to be absolute local paths, not relative cwd paths.
+- Re-ran lint, typecheck, full test, and build successfully.
+Files changed:
+- docs/session_log.md; packages/core/src/services/electronSecurity.ts; packages/core/tests/electronSecurity.test.ts
+Open questions / risks:
+- CI must rerun after force-push.
+Next actions:
+- Amend/push PR and wait for CI.
