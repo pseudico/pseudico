@@ -636,6 +636,24 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       updateSettings: (input) =>
         callApi(() => api.appearance.updateSettings(input))
     },
+    privacy: {
+      getSettings: (workspaceId) =>
+        callApi(() => {
+          if (api.privacy === undefined) {
+            throw new Error("Privacy settings API is not available.");
+          }
+
+          return api.privacy.getSettings(workspaceId);
+        }),
+      updateSettings: (input) =>
+        callApi(() => {
+          if (api.privacy === undefined) {
+            throw new Error("Privacy settings API is not available.");
+          }
+
+          return api.privacy.updateSettings(input);
+        })
+    },
     diagnostics: {
       runWorkspaceIntegrityCheck: (input) =>
         callApi(() => api.diagnostics.runWorkspaceIntegrityCheck(input)),
@@ -1240,6 +1258,14 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().appearance.getSettings(workspaceId),
     updateSettings: (input) =>
       getDesktopApiClient().appearance.updateSettings(input)
+  },
+  privacy: {
+    getSettings: (workspaceId) =>
+      getDesktopApiClient().privacy?.getSettings(workspaceId) ??
+      unavailable("Privacy settings API is not available."),
+    updateSettings: (input) =>
+      getDesktopApiClient().privacy?.updateSettings(input) ??
+      unavailable("Privacy settings API is not available.")
   },
   diagnostics: {
     runWorkspaceIntegrityCheck: (input) =>

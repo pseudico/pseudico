@@ -148,11 +148,31 @@ describe("CalendarFeedService", () => {
       icsText: ICS_FIXTURE
     })).resolves.toMatchObject({ importedEventCount: 2 });
   });
+
+  it("honors the central privacy guard for network ICS imports", async () => {
+    const service = createCalendarFeedService({
+      assertFeatureAllowed: () => {
+        throw new Error("ICS URL imports are disabled in Privacy & Network settings.");
+      }
+    });
+
+    await expect(service.importIcs({
+      workspaceId: "workspace_1",
+      sourceName: "Remote events",
+      sourceType: "network",
+      sourceUrl: "https://example.test/calendar.ics",
+      networkEnabled: true,
+      icsText: ICS_FIXTURE
+    })).rejects.toThrow("ICS URL imports are disabled in Privacy & Network settings.");
+  });
 });
 
-function createCalendarFeedService(): CalendarFeedService {
+function createCalendarFeedService(
+  networkFeatureGuard?: ConstructorParameters<typeof CalendarFeedService>[0]["networkFeatureGuard"]
+): CalendarFeedService {
   return new CalendarFeedService({
     connection,
+    ...(networkFeatureGuard === undefined ? {} : { networkFeatureGuard }),
     now: () => NOW,
     idFactory: (prefix) => {
       idCounter += 1;

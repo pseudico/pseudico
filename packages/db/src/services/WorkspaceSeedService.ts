@@ -54,6 +54,18 @@ export const DEFAULT_APP_SETTINGS = [
         leadMinutes: 1440
       }
     }
+  },
+  {
+    key: "privacy.network.settings.v1",
+    value: {
+      version: 1,
+      telemetryEnabled: false,
+      metadataFetchEnabled: false,
+      webWidgetsEnabled: false,
+      icsUrlImportEnabled: false,
+      imapImportEnabled: false,
+      browserCaptureEnabled: false
+    }
   }
 ] as const;
 

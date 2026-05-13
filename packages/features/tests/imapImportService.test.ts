@@ -151,6 +151,27 @@ describe("ImapImportService", () => {
       ])
     );
   });
+
+  it("blocks connection tests and imports when the central IMAP preference is disabled", async () => {
+    const service = createService({
+      client: clientAdapter([]),
+      credentialStore: memoryCredentialStore(),
+      networkFeatureGuard: {
+        assertFeatureAllowed: () => {
+          throw new Error("IMAP import is disabled in Privacy & Network settings.");
+        }
+      }
+    });
+    const settings = await saveDefaultSettings(service);
+
+    await expect(service.testConnection({ workspaceId: "workspace_1" }))
+      .rejects.toThrow("IMAP import is disabled in Privacy & Network settings.");
+    await expect(service.importMessages({
+      workspaceId: "workspace_1",
+      containerId: "container_inbox_1",
+      settings
+    })).rejects.toThrow("IMAP import is disabled in Privacy & Network settings.");
+  });
 });
 
 async function saveDefaultSettings(service: ImapImportService): Promise<ImapImportSettings> {
@@ -171,11 +192,15 @@ async function saveDefaultSettings(service: ImapImportService): Promise<ImapImpo
 function createService(input: {
   client: ImapClientAdapter;
   credentialStore: ImapCredentialStore;
+  networkFeatureGuard?: ConstructorParameters<typeof ImapImportService>[0]["networkFeatureGuard"];
 }): ImapImportService {
   return new ImapImportService({
     connection,
     client: input.client,
     credentialStore: input.credentialStore,
+    ...(input.networkFeatureGuard === undefined
+      ? {}
+      : { networkFeatureGuard: input.networkFeatureGuard }),
     idFactory: (prefix) => {
       idCounter += 1;
       return `${prefix}_${idCounter}`;

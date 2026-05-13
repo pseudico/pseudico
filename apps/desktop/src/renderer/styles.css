@@ -5615,6 +5615,29 @@ body,
   color: var(--app-text);
 }
 
+.appearance-settings-form .settings-checkbox-label {
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  background: var(--app-surface);
+}
+
+.settings-checkbox-label input {
+  margin-top: 3px;
+}
+
+.settings-checkbox-label span {
+  display: grid;
+  gap: 4px;
+}
+
+.settings-checkbox-label small {
+  color: var(--app-text-muted);
+  font-weight: 500;
+}
+
 @media (max-width: 900px) {
   .container-preferences-form {
     grid-template-columns: 1fr;

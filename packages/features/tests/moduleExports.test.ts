@@ -40,6 +40,8 @@ import {
   NavigationHistoryService,
   notesModuleContract,
   plannedFeatureAreas,
+  privacyModuleContract,
+  PrivacySettingsService,
   PrintService,
   printingModuleContract,
   projectsModuleContract,
@@ -115,6 +117,7 @@ describe("feature module exports", () => {
       "export",
       "printing",
       "appearance",
+      "privacy",
       "templates",
       "workflows",
       "undo",
@@ -165,6 +168,7 @@ describe("feature module exports", () => {
       exportModuleContract.module,
       printingModuleContract.module,
       appearanceModuleContract.module,
+      privacyModuleContract.module,
       templatesModuleContract.module,
       workflowsModuleContract.module,
       undoModuleContract.module,
@@ -211,6 +215,7 @@ describe("feature module exports", () => {
       "export",
       "printing",
       "appearance",
+      "privacy",
       "templates",
       "workflows",
       "undo",
@@ -254,6 +259,10 @@ describe("feature module exports", () => {
 
   it("exports the appearance settings service implementation", () => {
     expect(AppearanceSettingsService).toBeDefined();
+  });
+
+  it("exports the privacy settings service implementation", () => {
+    expect(PrivacySettingsService).toBeDefined();
   });
 
   it("exports the bulk action service implementation", () => {
