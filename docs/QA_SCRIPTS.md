@@ -20,7 +20,7 @@ Manual verification for a temporary workspace:
 8. Search for the note text.
 9. Create a category and assign it to the project or task.
 10. Create a manual backup.
-11. Export workspace JSON and task CSV.
+11. Export workspace JSON, task CSV, and the portable HTML/CSV/TSV/Markdown bundle.
 12. Quit and reopen the workspace.
 13. Confirm the project, completed task, note, category, backup, and exports persist.
 

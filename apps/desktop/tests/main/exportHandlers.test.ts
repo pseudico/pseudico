@@ -144,4 +144,78 @@ describe("export IPC handlers", () => {
       verifyConnection.close();
     }
   });
+
+  it("exports the portable HTML/CSV/TSV/Markdown bundle inside the workspace", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-export-bundle-ipc-"));
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+    const connection = await createDatabaseConnection({
+      databasePath,
+      fileMustExist: true
+    });
+
+    try {
+      new ContainerRepository(connection).create({
+        id: "container_project_1",
+        workspaceId: "workspace_1",
+        type: "project",
+        name: "Launch Plan",
+        slug: "launch-plan",
+        timestamp: "2026-05-01T00:00:00.000Z"
+      });
+    } finally {
+      connection.close();
+    }
+
+    const handlers = createExportIpcHandlers(
+      {
+        getCurrentWorkspace: () => ({
+          id: "workspace_1",
+          name: "Personal",
+          rootPath: tempRoot!,
+          openedAt: "2026-05-01T00:00:00.000Z",
+          schemaVersion: 1
+        })
+      },
+      () => new Date("2026-05-01T00:00:00.000Z")
+    );
+    const created = await handlers.handleExportHtmlCsvTsvMarkdownBundle({
+      workspaceId: "workspace_1"
+    });
+
+    expect(created).toMatchObject({
+      ok: true,
+      data: {
+        workspaceId: "workspace_1",
+        relativePath:
+          "exports/2026-05-01T00-00-00-000Z-personal-export-bundle",
+        kind: "html_csv_tsv_markdown_bundle",
+        containerCount: 1
+      }
+    });
+
+    if (!created.ok) {
+      throw new Error(created.error.message);
+    }
+
+    const manifestPath = join(tempRoot, created.data.relativePath, "manifest.json");
+    await expect(stat(manifestPath)).resolves.toMatchObject({
+      size: expect.any(Number)
+    });
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      kind: string;
+      files: Array<{ relativePath: string }>;
+    };
+    expect(manifest.kind).toBe("html_csv_tsv_markdown_bundle");
+    expect(manifest.files.map((file) => file.relativePath)).toContain(
+      `${created.data.relativePath}/html/index.html`
+    );
+    await expect(
+      stat(join(tempRoot, created.data.relativePath, "containers/project-launch-plan.md"))
+    ).resolves.toMatchObject({ size: expect.any(Number) });
+  });
 });

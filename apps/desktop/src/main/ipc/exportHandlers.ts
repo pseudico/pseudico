@@ -1,6 +1,7 @@
 import { stat } from "node:fs/promises";
 import {
   ExportService,
+  type BundleExportResult as FeatureBundleExportResult,
   type TextExportResult as FeatureTextExportResult,
   type WorkspaceJsonExportResult as FeatureWorkspaceJsonExportResult
 } from "@local-work-os/features";
@@ -13,6 +14,8 @@ import {
   apiError,
   apiOk,
   type ApiResult,
+  type BundleExportSummary,
+  type ExportHtmlCsvTsvMarkdownBundleInput,
   type ExportProjectMarkdownInput,
   type ExportPlanningSummaryMarkdownInput,
   type ExportTasksCsvInput,
@@ -43,6 +46,9 @@ export type ExportIpcHandlers = {
   handleExportPlanningSummaryMarkdown: (
     input: unknown
   ) => Promise<ApiResult<TextExportSummary>>;
+  handleExportHtmlCsvTsvMarkdownBundle: (
+    input: unknown
+  ) => Promise<ApiResult<BundleExportSummary>>;
 };
 
 export function createExportIpcHandlers(
@@ -159,6 +165,35 @@ export function createExportIpcHandlers(
           return apiOk(toTextExportSummary(result));
         }
       );
+    },
+    async handleExportHtmlCsvTsvMarkdownBundle(input) {
+      if (!isOptionalExportHtmlCsvTsvMarkdownBundleInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "exportHtmlCsvTsvMarkdownBundle accepts an optional workspaceId string."
+        );
+      }
+
+      return await withExportService(
+        workspaceService,
+        now,
+        async ({ service, workspace }) => {
+          const workspaceId = input?.workspaceId ?? workspace.id;
+
+          if (workspaceId !== workspace.id) {
+            return apiError(
+              "WORKSPACE_ERROR",
+              "Export workspaceId must match the current workspace."
+            );
+          }
+
+          const result = await service.exportHtmlCsvTsvMarkdownBundle({
+            workspaceId
+          });
+
+          return apiOk(toBundleExportSummary(result));
+        }
+      );
     }
   };
 }
@@ -270,6 +305,16 @@ function isOptionalExportTasksCsvInput(
   );
 }
 
+function isOptionalExportHtmlCsvTsvMarkdownBundleInput(
+  input: unknown
+): input is ExportHtmlCsvTsvMarkdownBundleInput | undefined {
+  return (
+    input === undefined ||
+    (isRecord(input) &&
+      (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)))
+  );
+}
+
 function toExportSummary(
   result: FeatureWorkspaceJsonExportResult
 ): WorkspaceJsonExportSummary {
@@ -296,6 +341,27 @@ function toTextExportSummary(result: FeatureTextExportResult): TextExportSummary
     kind: result.kind,
     sourceId: result.sourceId,
     rowCount: result.rowCount
+  };
+}
+
+function toBundleExportSummary(
+  result: FeatureBundleExportResult
+): BundleExportSummary {
+  return {
+    id: result.id,
+    workspaceId: result.workspaceId,
+    createdAt: result.createdAt,
+    relativePath: result.relativePath,
+    sizeBytes: result.sizeBytes,
+    kind: result.kind,
+    fileCount: result.fileCount,
+    containerCount: result.containerCount,
+    taskCount: result.taskCount,
+    listItemCount: result.listItemCount,
+    savedViewCount: result.savedViewCount,
+    searchRecordCount: result.searchRecordCount,
+    attachmentCount: result.attachmentCount,
+    manifest: result.manifest
   };
 }
 

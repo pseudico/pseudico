@@ -20,6 +20,7 @@ Likely service methods later:
 - `exportProjectMarkdown`
 - `exportTasksCsv`
 - `exportContactMarkdown`
+- `exportHtmlCsvTsvMarkdownBundle`
 - `createAttachmentManifest`
 
 Implemented focused exports:
@@ -29,6 +30,10 @@ Implemented focused exports:
   including tasks, lists, notes, links, and file attachment metadata.
 - Task CSV/TSV export writes active workspace tasks with project context,
   status, dates, priority, tags, body, and item IDs.
+- HTML/CSV/TSV/Markdown bundle export writes a local folder under `exports/`
+  with project/contact Markdown files, task and list CSV/TSV files, sanitized
+  static HTML indexes for containers/search/collections, an attachment metadata
+  CSV, and a JSON manifest.
 
 Integration points:
 

@@ -1,6 +1,10 @@
 export { ExportService, exportModuleContract } from "./ExportService";
 export type {
   BuildWorkspaceExportInput,
+  BundleExportFileSummary,
+  BundleExportManifest,
+  BundleExportResult,
+  ExportHtmlCsvTsvMarkdownBundleInput,
   ExportProjectMarkdownInput,
   ExportPlanningSummaryMarkdownInput,
   ExportFileSystemAdapter,

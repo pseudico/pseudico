@@ -518,6 +518,44 @@ export function SettingsPage({
     });
   }
 
+  async function exportAdvancedBundle(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before exporting a portable bundle.");
+      return;
+    }
+
+    setExportBusy(true);
+    setExportMessage(null);
+    setError(null);
+
+    const result =
+      apiClient.export.exportHtmlCsvTsvMarkdownBundle === undefined
+        ? {
+            ok: false as const,
+            error: {
+              code: "IPC_ERROR" as const,
+              message: "HTML/CSV/TSV/Markdown export bundle API is not available."
+            }
+          }
+        : await apiClient.export.exportHtmlCsvTsvMarkdownBundle({
+            workspaceId: currentWorkspace.id
+          });
+
+    setExportBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Export failed");
+      return;
+    }
+
+    const message = `Portable export bundle created at ${result.data.relativePath} with ${result.data.fileCount} file(s).`;
+    setExportMessage(message);
+    showToast(message, {
+      title: "Export complete",
+      tone: "success"
+    });
+  }
+
   async function validateWorkspaceImport(): Promise<void> {
     setImportBusy(true);
     setImportSummary(null);
@@ -1148,12 +1186,21 @@ export function SettingsPage({
               <FileSpreadsheet size={16} aria-hidden="true" />
               Export tasks TSV
             </button>
+            <button
+              className="primary-button compact-button"
+              disabled={exportBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void exportAdvancedBundle()}
+            >
+              <Archive size={16} aria-hidden="true" />
+              Export portable bundle
+            </button>
           </div>
         </div>
 
         {exportMessage === null ? (
           <EmptyState
-            description="JSON, CSV, and TSV export results will appear here for this session."
+            description="JSON, CSV/TSV, and HTML/Markdown bundle export results will appear here for this session."
             title="No export created this session"
           />
         ) : (
