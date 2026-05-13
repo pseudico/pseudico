@@ -1,9 +1,16 @@
 import {
   ContainerTemplateService,
   TemplateService,
+  TemplateExportService,
+  TemplatePackImportValidator,
   type ContactRecord,
-  type ProjectRecord
+  type ProjectRecord,
+  type TemplatePackFileExportResult as FeatureTemplatePackFileExportResult,
+  type TemplatePackImportResult as FeatureTemplatePackImportResult,
+  type TemplatePackImportValidationSummary as FeatureTemplatePackImportValidationSummary
 } from "@local-work-os/features";
+import { readFile, stat } from "node:fs/promises";
+import { extname } from "node:path";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -21,12 +28,24 @@ import {
   type CreateContainerFromTemplateInput,
   type DeleteTemplateInput,
   type DuplicateTemplateInput,
+  type ExportTemplatePackInput,
+  type ImportTemplatePackInput,
   type ProjectSummary,
   type SaveContainerAsTemplateInput,
+  type TemplatePackExportSummary,
+  type TemplatePackImportSummary,
+  type TemplatePackValidationSummary,
   type TemplateSummary,
   type UpdateTemplateInput,
+  type ValidateTemplatePackInput,
   type WorkspaceSummary
 } from "../../preload/api";
+import {
+  ensureDirectoryInsideWorkspace,
+  normalizeLocalPath,
+  resolveInsideWorkspace,
+  writeTextFileInsideWorkspace
+} from "../services/safeFileSystem";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
 
 type CurrentWorkspaceService = Pick<
@@ -45,10 +64,29 @@ type TemplateIpcHandlers = {
   handleUpdateTemplate: (input: unknown) => Promise<ApiResult<TemplateSummary>>;
   handleDuplicateTemplate: (input: unknown) => Promise<ApiResult<TemplateSummary>>;
   handleDeleteTemplate: (input: unknown) => Promise<ApiResult<TemplateSummary>>;
+  handleExportTemplatePack: (
+    input: unknown
+  ) => Promise<ApiResult<TemplatePackExportSummary>>;
+  handleValidateTemplatePack: (
+    input: unknown
+  ) => Promise<ApiResult<TemplatePackValidationSummary>>;
+  handleImportTemplatePack: (
+    input: unknown
+  ) => Promise<ApiResult<TemplatePackImportSummary>>;
+  handleChooseAndImportTemplatePack: (
+    input: unknown
+  ) => Promise<ApiResult<TemplatePackImportSummary | null>>;
+};
+
+export type TemplateIpcPlatform = {
+  chooseTemplatePackPath: () => Promise<string | null>;
 };
 
 export function createTemplateIpcHandlers(
-  workspaceService: CurrentWorkspaceService
+  workspaceService: CurrentWorkspaceService,
+  platform: TemplateIpcPlatform = {
+    chooseTemplatePackPath: async () => null
+  }
 ): TemplateIpcHandlers {
   return {
     async handleSaveContainerAsTemplate(input) {
@@ -160,6 +198,65 @@ export function createTemplateIpcHandlers(
       return await withTemplateService(workspaceService, async (context) =>
         apiOk(toTemplateSummary(await context.libraryService.deleteTemplate(input)))
       );
+    },
+
+    async handleExportTemplatePack(input) {
+      if (!isOptionalExportTemplatePackInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "exportTemplatePack accepts optional workspaceId, templateIds, name, and description fields."
+        );
+      }
+
+      return await withTemplateService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input?.workspaceId, context.workspace);
+        const exportService = createTemplateExportService(context.connection, context.workspace);
+        const result = await exportService.exportTemplatePackFile({
+          workspaceId,
+          ...(input?.templateIds === undefined ? {} : { templateIds: input.templateIds }),
+          ...(input?.name === undefined ? {} : { name: input.name }),
+          ...(input?.description === undefined ? {} : { description: input.description }),
+          ...(input?.actorType === undefined ? {} : { actorType: input.actorType })
+        });
+
+        return apiOk(toTemplatePackExportSummary(result));
+      });
+    },
+
+    async handleValidateTemplatePack(input) {
+      if (!isValidateTemplatePackInput(input)) {
+        return apiError("INVALID_INPUT", "validateTemplatePack requires a filePath string.");
+      }
+
+      return await validateTemplatePackFile(input.filePath);
+    },
+
+    async handleImportTemplatePack(input) {
+      if (!isImportTemplatePackInput(input)) {
+        return apiError("INVALID_INPUT", "importTemplatePack requires a filePath string.");
+      }
+
+      return await importTemplatePackFile(workspaceService, input);
+    },
+
+    async handleChooseAndImportTemplatePack(input) {
+      if (!isOptionalChooseAndImportTemplatePackInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "chooseAndImportTemplatePack accepts an optional workspaceId field."
+        );
+      }
+
+      const filePath = await platform.chooseTemplatePackPath();
+
+      if (filePath === null) {
+        return apiOk(null);
+      }
+
+      return await importTemplatePackFile(workspaceService, {
+        ...(input?.workspaceId === undefined ? {} : { workspaceId: input.workspaceId }),
+        filePath
+      });
     }
   };
 }
@@ -201,6 +298,94 @@ async function withTemplateService<T>(
   }
 }
 
+function createTemplateExportService(
+  connection: DatabaseConnection,
+  workspace: WorkspaceSummary
+): TemplateExportService {
+  return new TemplateExportService({
+    connection,
+    fileSystem: {
+      async writeTemplatePackFile({ exportRelativePath, contents }) {
+        await ensureDirectoryInsideWorkspace(workspace.rootPath, "exports");
+        await writeTextFileInsideWorkspace(workspace.rootPath, exportRelativePath, contents);
+
+        return {
+          sizeBytes: (await stat(resolveInsideWorkspace(workspace.rootPath, exportRelativePath))).size
+        };
+      },
+      async writeTextExport({ exportRelativePath, contents }) {
+        await ensureDirectoryInsideWorkspace(workspace.rootPath, "exports");
+        await writeTextFileInsideWorkspace(workspace.rootPath, exportRelativePath, contents);
+
+        return {
+          sizeBytes: (await stat(resolveInsideWorkspace(workspace.rootPath, exportRelativePath))).size
+        };
+      }
+    }
+  });
+}
+
+async function validateTemplatePackFile(
+  inputPath: string
+): Promise<ApiResult<TemplatePackValidationSummary>> {
+  try {
+    const filePath = normalizeLocalPath(inputPath);
+
+    if (extname(filePath).toLowerCase() !== ".lwo-template-pack") {
+      return apiError(
+        "INVALID_INPUT",
+        "Template pack validation requires a .lwo-template-pack file."
+      );
+    }
+
+    const fileStats = await stat(filePath);
+
+    if (!fileStats.isFile()) {
+      return apiError("INVALID_INPUT", "Template pack path must be a file.");
+    }
+
+    const summary = await new TemplatePackImportValidator({
+      fileSystem: {
+        readTextFile: async () => readFile(filePath, "utf8")
+      }
+    }).validateTemplatePackFile(filePath);
+
+    return apiOk(toTemplatePackValidationSummary(summary));
+  } catch (error) {
+    return apiError(
+      "WORKSPACE_ERROR",
+      error instanceof Error ? error.message : "Template pack validation failed."
+    );
+  }
+}
+
+async function importTemplatePackFile(
+  workspaceService: CurrentWorkspaceService,
+  input: ImportTemplatePackInput
+): Promise<ApiResult<TemplatePackImportSummary>> {
+  const validated = await validateTemplatePackFile(input.filePath);
+
+  if (!validated.ok) {
+    return validated;
+  }
+
+  return await withTemplateService(workspaceService, async (context) => {
+    const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+    const filePath = normalizeLocalPath(input.filePath);
+    const fileData = JSON.parse(await readFile(filePath, "utf8")) as unknown;
+    const result = await createTemplateExportService(
+      context.connection,
+      context.workspace
+    ).importTemplatePackFile({
+      workspaceId,
+      fileData,
+      ...(input.actorType === undefined ? {} : { actorType: input.actorType })
+    });
+
+    return apiOk(toTemplatePackImportSummary(result));
+  });
+}
+
 function resolveWorkspaceId(
   requestedWorkspaceId: string | undefined,
   currentWorkspace: WorkspaceSummary
@@ -213,6 +398,58 @@ function resolveWorkspaceId(
   }
 
   return currentWorkspace.id;
+}
+
+function toTemplatePackExportSummary(
+  result: FeatureTemplatePackFileExportResult
+): TemplatePackExportSummary {
+  return {
+    id: result.id,
+    workspaceId: result.workspaceId,
+    createdAt: result.createdAt,
+    relativePath: result.relativePath,
+    sizeBytes: result.sizeBytes,
+    fileVersion: result.fileVersion,
+    name: result.name,
+    templateCount: result.templateCount,
+    templateIds: result.templateIds
+  };
+}
+
+function toTemplatePackValidationSummary(
+  summary: FeatureTemplatePackImportValidationSummary
+): TemplatePackValidationSummary {
+  return {
+    valid: summary.valid,
+    sourcePath: summary.sourcePath,
+    fileVersion: summary.fileVersion,
+    exportedAt: summary.exportedAt,
+    name: summary.name,
+    description: summary.description,
+    templateCount: summary.templateCount,
+    capabilities: summary.capabilities,
+    counts: summary.counts,
+    templates: summary.templates.map((template) => ({
+      valid: template.valid,
+      kind: template.kind,
+      name: template.name,
+      description: template.description,
+      counts: template.counts,
+      issues: template.issues
+    })),
+    issues: summary.issues
+  };
+}
+
+function toTemplatePackImportSummary(
+  result: FeatureTemplatePackImportResult
+): TemplatePackImportSummary {
+  return {
+    workspaceId: result.workspaceId,
+    importedAt: result.importedAt,
+    templateCount: result.templateCount,
+    importedTemplates: result.importedTemplates.map(toTemplateSummary)
+  };
 }
 
 function toTemplateSummary(template: TemplateRecord): TemplateSummary {
@@ -341,6 +578,52 @@ function isDuplicateTemplateInput(input: unknown): input is DuplicateTemplateInp
 
 function isDeleteTemplateInput(input: unknown): input is DeleteTemplateInput {
   return isRecord(input) && isNonEmptyString(input.templateId);
+}
+
+function isOptionalExportTemplatePackInput(
+  input: unknown
+): input is ExportTemplatePackInput | undefined {
+  return (
+    input === undefined ||
+    (isRecord(input) &&
+      isOptionalString(input.workspaceId) &&
+      (input.templateIds === undefined ||
+        (Array.isArray(input.templateIds) &&
+          input.templateIds.every((templateId) => isNonEmptyString(templateId)))) &&
+      isOptionalString(input.name) &&
+      (input.description === undefined ||
+        input.description === null ||
+        typeof input.description === "string") &&
+      isOptionalActorType(input.actorType))
+  );
+}
+
+function isValidateTemplatePackInput(input: unknown): input is ValidateTemplatePackInput {
+  return isRecord(input) && isNonEmptyString(input.filePath);
+}
+
+function isImportTemplatePackInput(input: unknown): input is ImportTemplatePackInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.filePath) &&
+    isOptionalString(input.workspaceId) &&
+    isOptionalActorType(input.actorType)
+  );
+}
+
+function isOptionalChooseAndImportTemplatePackInput(
+  input: unknown
+): input is { workspaceId?: string } | undefined {
+  return input === undefined || (isRecord(input) && isOptionalString(input.workspaceId));
+}
+
+function isOptionalActorType(value: unknown): boolean {
+  return (
+    value === undefined ||
+    value === "local_user" ||
+    value === "system" ||
+    value === "importer"
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
