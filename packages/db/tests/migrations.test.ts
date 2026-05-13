@@ -43,7 +43,9 @@ const requiredTables = [
   "activity_log",
   "search_index",
   "calendar_sources",
-  "calendar_events"
+  "calendar_events",
+  "imap_import_jobs",
+  "imap_imported_messages"
 ];
 
 const requiredIndexes = [
@@ -69,7 +71,10 @@ const requiredIndexes = [
   "idx_search_index_target",
   "idx_calendar_sources_workspace",
   "idx_calendar_events_workspace_range",
-  "idx_calendar_events_source"
+  "idx_calendar_events_source",
+  "idx_imap_import_jobs_workspace",
+  "idx_imap_imported_messages_workspace",
+  "idx_imap_imported_messages_message_id"
 ];
 
 let tempRoot: string;
@@ -88,7 +93,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version twenty", () => {
+  it("runs on an empty database and records schema version twenty-one", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -192,14 +197,19 @@ describe("schema migrations", () => {
           version: 20,
           name: "workflow_run_rollback",
           checksum: "pse-164-workflow-run-rollback-v1"
+        },
+        {
+          version: 21,
+          name: "imap_import_jobs",
+          checksum: "pse-168-imap-import-jobs-v1"
         }
       ],
-      currentVersion: 20
+      currentVersion: 21
     });
-    expect(service.getCurrentSchemaVersion()).toBe(20);
+    expect(service.getCurrentSchemaVersion()).toBe(21);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 20
+      currentVersion: 21
     });
   });
 

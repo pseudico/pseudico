@@ -208,3 +208,8 @@ copied into workspace attachment storage and linked to the task through existing
 attachment rows, so backup/export/search/activity flows use the established item
 and file metadata model.
 
+
+
+### Optional local IMAP import (PSE-168)
+
+Optional IMAP import stores non-secret account settings in `app_settings`, run history in `imap_import_jobs`, and duplicate-prevention markers in `imap_imported_messages`. Passwords are excluded from SQLite and must be provided by an OS keychain or session-only credential adapter. Imported messages are converted through the existing email-to-task flow so task activity and search indexing remain aligned.

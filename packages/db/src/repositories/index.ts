@@ -109,6 +109,15 @@ export {
   type WorkspaceRecord
 } from "./WorkspaceRepository";
 export {
+  ImapImportRepository,
+  type CompleteImapImportJobInput,
+  type CreateImapImportedMessageInput,
+  type CreateImapImportJobInput,
+  type ImapImportedMessageRecord,
+  type ImapImportJobRecord,
+  type ImapImportJobStatus
+} from "./ImapImportRepository";
+export {
   ItemRepository,
   type CreateItemInput,
   type ItemPageResult,
@@ -286,4 +295,3 @@ export {
   type TrashEntryRecord,
   type TrashTargetType
 } from "./TrashRepository";
-

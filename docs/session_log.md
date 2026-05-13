@@ -4643,3 +4643,39 @@ Next actions:
 - Check PR CI.
 - Review diff/threads.
 - Merge only if green.
+
+## 2026-05-13T15:55:01.1924923+10:00
+Objective: Finish PSE-167 GitHub/Linear flow after PR publication and explain fix.
+Decisions made:
+- Treated GitHub as proof: PR #156 CI was green, no review threads, squash-merged.
+- Promoted next dependency-order M13 issue PSE-168 to Codex Ready.
+Files changed: docs/session_log.md
+Open questions / risks: Local session-log append is post-merge only; unrelated untracked files remain untouched.
+Next actions: Start PSE-168; keep only one Codex Ready issue; avoid direct main changes beyond logs.
+
+## 2026-05-13T15:56:51.2445378+10:00
+Objective: Start end-to-end Local Work OS ticket run with reconciliation first.
+Decisions made:
+- Use Linear as plan and GitHub as proof per request.
+- Begin by discovering structured Linear/GitHub tooling and repo state.
+Files changed: docs/session_log.md
+Open questions / risks: Active PR or CI/review state may redirect work.
+Next actions: Reconcile Linear states; inspect active PRs; pick one Codex Ready issue if clear.
+
+## 2026-05-13T15:58:46.6768928+10:00
+Objective: Reconcile active work and start PSE-168 implementation.
+Decisions made:
+- Found no PR Open or In Progress Linear issues and no open GitHub PRs.
+- Pulled main, moved PSE-168 to In Progress, and created branch codex/PSE-168-local-imap-import-spike.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-168 is a spike; exact deliverable must be inferred from ticket docs.
+Next actions: Read docs; inspect import/export code; implement scoped spike.
+
+## 2026-05-13T16:17:13.1021606+10:00
+Objective: Implement PSE-168 optional local IMAP import foundation.
+Decisions made:
+- Added adapter-based IMAP settings/test/import service without cloud or password-in-SQLite storage.
+- Added import job/message duplicate tables and docs; UI advertises disabled adapter boundary.
+Files changed: docs/session_log.md
+Open questions / risks: Live desktop IMAP adapter/keychain integration remains a follow-up.
+Next actions: Review diff; open PR; monitor CI.

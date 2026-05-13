@@ -13,6 +13,7 @@ export { dailyPlanItems } from "./dailyPlanItems";
 export { dailyPlans } from "./dailyPlans";
 export { dashboardWidgets } from "./dashboardWidgets";
 export { dashboards } from "./dashboards";
+export { imapImportedMessages, imapImportJobs } from "./imapImport";
 export { items } from "./items";
 export { links } from "./links";
 export { listDetails } from "./listDetails";
@@ -30,5 +31,4 @@ export { templates } from "./templates";
 export { workflowDefinitions, workflowRuns } from "./workflows";
 export { workspaces } from "./workspaces";
 
-export const schemaVersion = 15;
-
+export const schemaVersion = 16;

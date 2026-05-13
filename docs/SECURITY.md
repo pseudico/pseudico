@@ -60,3 +60,8 @@ Flag a change for careful review if it adds network access, broad IPC,
 filesystem writes outside the workspace, direct renderer filesystem access,
 direct renderer database access, hard delete behavior, or user-data export
 paths.
+
+
+## Optional IMAP Import Guardrails
+
+The optional IMAP importer is local-desktop initiated only. It must not add hosted accounts, cloud forwarding, telemetry, or background cloud workers. Persisted settings exclude passwords; credentials must live in an OS keychain or session-only adapter. Imports are bounded, explicit, and duplicate-protected by local metadata.

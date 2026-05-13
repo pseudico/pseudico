@@ -105,6 +105,8 @@ export const ActivityAction = {
   exportCreated: "export_created",
   exportRestored: "export_restored",
   calendarFeedImported: "calendar_feed_imported",
+  imapImportCompleted: "imap_import_completed",
+  imapImportFailed: "imap_import_failed",
   templateCreated: "template_created",
   templateUpdated: "template_updated",
   templateDuplicated: "template_duplicated",
