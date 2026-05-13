@@ -3,9 +3,12 @@ import {
   ActivityLogRepository,
   ContainerRepository,
   ItemRepository,
+  ListRepository,
+  NoteRepository,
   PerformanceFixtureService,
   SearchIndexRepository,
   SlowQueryLogger,
+  TaskRepository,
   type DatabaseConnection
 } from "../src";
 import {
@@ -69,6 +72,10 @@ describe("performance diagnostics", () => {
       workspaceId: "workspace_1",
       containerCount: 3,
       itemCount: 150,
+      taskCount: 120,
+      noteCount: 15,
+      listCount: 15,
+      listItemCount: 45,
       searchRecordCount: 150,
       activityEventCount: 150
     });
@@ -85,6 +92,18 @@ describe("performance diagnostics", () => {
         limit: 200
       })
     ).toHaveLength(150);
+    expect(
+      new TaskRepository(connection).listDetailsByWorkspace("workspace_1")
+    ).toHaveLength(120);
+    expect(
+      new NoteRepository(connection).listByWorkspace("workspace_1")
+    ).toHaveLength(15);
+    expect(
+      new ListRepository(connection).listDetailsByWorkspace("workspace_1")
+    ).toHaveLength(15);
+    expect(
+      new ListRepository(connection).listItemsByWorkspace("workspace_1")
+    ).toHaveLength(45);
     expect(
       new ActivityLogRepository(connection).listRecentPage("workspace_1", {
         limit: 25

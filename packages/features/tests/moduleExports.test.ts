@@ -31,6 +31,7 @@ import {
   IntegrityCheckService,
   MaintenanceService,
   maintenanceModuleContract,
+  LargeWorkspaceBenchmarkService,
   importModuleContract,
   inboxModuleContract,
   itemsModuleContract,
@@ -40,6 +41,7 @@ import {
   NavigationHistoryService,
   notesModuleContract,
   plannedFeatureAreas,
+  performanceModuleContract,
   privacyModuleContract,
   PrivacySettingsService,
   PrintService,
@@ -117,6 +119,7 @@ describe("feature module exports", () => {
       "export",
       "printing",
       "appearance",
+      "performance",
       "privacy",
       "templates",
       "workflows",
@@ -168,6 +171,7 @@ describe("feature module exports", () => {
       exportModuleContract.module,
       printingModuleContract.module,
       appearanceModuleContract.module,
+      performanceModuleContract.module,
       privacyModuleContract.module,
       templatesModuleContract.module,
       workflowsModuleContract.module,
@@ -215,6 +219,7 @@ describe("feature module exports", () => {
       "export",
       "printing",
       "appearance",
+      "performance",
       "privacy",
       "templates",
       "workflows",
@@ -263,6 +268,10 @@ describe("feature module exports", () => {
 
   it("exports the privacy settings service implementation", () => {
     expect(PrivacySettingsService).toBeDefined();
+  });
+
+  it("exports the large workspace benchmark service implementation", () => {
+    expect(LargeWorkspaceBenchmarkService).toBeDefined();
   });
 
   it("exports the bulk action service implementation", () => {

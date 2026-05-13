@@ -95,3 +95,20 @@ Manual verification for a temporary workspace:
 - Verify project feeds, grouped search/collection results, and recent activity lists render as virtualized windows instead of mounting every row.
 - Verify dashboard widgets request bounded pages through widget data limits and show only the configured page of items.
 - Enable a slow-query sink in service construction during diagnostics to capture local query timings without network or telemetry.
+
+## Large workspace benchmark budgets
+
+Run the local benchmark harness from a clean checkout:
+
+```bash
+pnpm benchmark:large -- --sizes 1000,10000 --out docs/performance/reports/latest.json
+```
+
+For release gates, include the 100k fixture:
+
+```bash
+pnpm benchmark:large -- --sizes 1000,10000,100000 --out docs/performance/reports/full.json
+```
+
+Compare each operation against `docs/PERFORMANCE.md` budgets and attach the JSON
+report to the PR or release notes when it is part of the acceptance criteria.

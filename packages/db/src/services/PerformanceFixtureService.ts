@@ -2,7 +2,10 @@ import type { DatabaseConnection } from "../connection/createDatabaseConnection"
 import { ActivityLogRepository } from "../repositories/ActivityLogRepository";
 import { ContainerRepository } from "../repositories/ContainerRepository";
 import { ItemRepository } from "../repositories/ItemRepository";
+import { ListRepository } from "../repositories/ListRepository";
+import { NoteRepository } from "../repositories/NoteRepository";
 import { SearchIndexRepository } from "../repositories/SearchIndexRepository";
+import { TaskRepository } from "../repositories/TaskRepository";
 
 export type LargeWorkspaceFixtureInput = {
   workspaceId: string;
@@ -16,6 +19,10 @@ export type LargeWorkspaceFixtureResult = {
   workspaceId: string;
   containerCount: number;
   itemCount: number;
+  taskCount: number;
+  noteCount: number;
+  listCount: number;
+  listItemCount: number;
   searchRecordCount: number;
   activityEventCount: number;
 };
@@ -35,8 +42,17 @@ export class PerformanceFixtureService {
     const normalized = normalizeFixtureInput(input);
     const containers = new ContainerRepository(this.connection);
     const items = new ItemRepository(this.connection);
+    const tasks = new TaskRepository(this.connection);
+    const notes = new NoteRepository(this.connection);
+    const lists = new ListRepository(this.connection);
     const search = new SearchIndexRepository(this.connection);
     const activity = new ActivityLogRepository(this.connection);
+    const counts = {
+      taskCount: 0,
+      noteCount: 0,
+      listCount: 0,
+      listItemCount: 0
+    };
 
     const transaction = this.connection.sqlite.transaction(() => {
       for (let index = 0; index < normalized.containerCount; index += 1) {
@@ -57,17 +73,62 @@ export class PerformanceFixtureService {
         const itemId = `${normalized.idPrefix}_item_${index}`;
         const title = `Performance fixture item ${index + 1}`;
         const body = `Generated large-workspace fixture row ${index + 1} for pagination, virtualization, search, and activity diagnostics.`;
+        const itemType = getFixtureItemType(index);
 
         items.create({
           id: itemId,
           workspaceId: normalized.workspaceId,
           containerId,
-          type: index % 5 === 0 ? "note" : "task",
+          type: itemType,
           title,
           body,
           sortOrder: index,
           timestamp: normalized.timestamp
         });
+
+        if (itemType === "task") {
+          tasks.createDetails({
+            itemId,
+            workspaceId: normalized.workspaceId,
+            taskStatus: index % 17 === 0 ? "waiting" : "open",
+            priority: index % 6,
+            dueAt: createFixtureDueAt(normalized.timestamp, index),
+            allDay: true,
+            timestamp: normalized.timestamp
+          });
+          counts.taskCount += 1;
+        } else if (itemType === "note") {
+          notes.createDetails({
+            itemId,
+            workspaceId: normalized.workspaceId,
+            content: `# ${title}\n\n${body}`,
+            preview: body,
+            timestamp: normalized.timestamp
+          });
+          counts.noteCount += 1;
+        } else {
+          lists.createDetails({
+            itemId,
+            workspaceId: normalized.workspaceId,
+            timestamp: normalized.timestamp
+          });
+          counts.listCount += 1;
+
+          for (let listIndex = 0; listIndex < 3; listIndex += 1) {
+            const listItemId = `${normalized.idPrefix}_list_item_${index}_${listIndex}`;
+            lists.createListItem({
+              id: listItemId,
+              workspaceId: normalized.workspaceId,
+              listId: itemId,
+              title: `Checklist row ${listIndex + 1} for ${title}`,
+              body: `Generated row for large-workspace list ${index + 1}.`,
+              sortOrder: listIndex,
+              dueAt: createFixtureDueAt(normalized.timestamp, index + listIndex),
+              timestamp: normalized.timestamp
+            });
+            counts.listItemCount += 1;
+          }
+        }
 
         search.upsert({
           id: `${normalized.idPrefix}_search_${index}`,
@@ -100,10 +161,32 @@ export class PerformanceFixtureService {
       workspaceId: normalized.workspaceId,
       containerCount: normalized.containerCount,
       itemCount: normalized.itemCount,
+      taskCount: counts.taskCount,
+      noteCount: counts.noteCount,
+      listCount: counts.listCount,
+      listItemCount: counts.listItemCount,
       searchRecordCount: normalized.itemCount,
       activityEventCount: normalized.itemCount
     };
   }
+}
+
+function getFixtureItemType(index: number): "task" | "note" | "list" {
+  if (index % 10 === 0) {
+    return "list";
+  }
+
+  if (index % 5 === 0) {
+    return "note";
+  }
+
+  return "task";
+}
+
+function createFixtureDueAt(timestamp: string, index: number): string {
+  const date = new Date(timestamp);
+  date.setUTCDate(date.getUTCDate() + (index % 21) - 10);
+  return date.toISOString();
 }
 
 function normalizeFixtureInput(

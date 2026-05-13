@@ -5193,3 +5193,54 @@ Next actions: None requested.
 - Files changed: docs/session_log.md
 - Open questions / risks: Need PR CI/review before merge.
 - Next actions: Stage intended files; commit; push/open ready PR.
+
+- Timestamp: 2026-05-14T07:53:45.1271240+10:00
+- Objective: Finish PSE-177 merge and next-ticket prep.
+- Decisions made: PR #166 passed CI and was squash-merged; branch deleted; PSE-177 moved Done; PSE-178 promoted as the only Codex Ready issue.
+- Files changed: docs/session_log.md
+- Open questions / risks: Post-merge session log entry is local-only until next change cycle.
+- Next actions: Start PSE-178 when asked; keep other issues out of Codex Ready.
+
+## 2026-05-14T08:23:33.0709357+10:00
+Objective: Run next Local Work OS ticket end-to-end.
+Decisions made:
+- Started reconciliation before implementation per operating rule.
+- Will leave pre-existing untracked local files untouched unless in scope.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Active PR/Linear state not yet reconciled.
+Next actions: Check Linear active states; inspect any active PR; select or continue one issue.
+
+## 2026-05-14T08:28:03.0476347+10:00
+Objective: Start PSE-178 large workspace benchmarks.
+Decisions made:
+- Linear/GitHub connectors are unavailable; proceeded from prior log that PSE-178 is sole Codex Ready.
+- Created branch codex/PSE-178-large-workspace-benchmarks-budgets from updated main.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Cannot mutate Linear or inspect private GitHub PRs until connector/gh auth recovers.
+Next actions: Extend benchmark fixture; add runner script; document budgets.
+
+## 2026-05-14T08:34:35.2194321+10:00
+Objective: Implement PSE-178 benchmark harness.
+Decisions made:
+- Extended fixture seeding with task/note/list detail rows and checklist rows.
+- Added feature benchmark budgets/runner, CLI script, docs/PERFORMANCE, and report example.
+- Targeted benchmark tests passed after sandbox EPERM rerun.
+Files changed:
+- packages/db/src/services/PerformanceFixtureService.ts
+- packages/features/src/performance/*
+- scripts/run-large-workspace-benchmark.mjs
+- docs/PERFORMANCE.md
+Open questions / risks: Need full lint/typecheck/test/build and benchmark script smoke.
+Next actions: Run build-dependent benchmark smoke; run full checks; publish PR if auth recovers.
+
+## 2026-05-14T08:42:19.8772885+10:00
+Objective: Validate PSE-178 locally.
+Decisions made:
+- pnpm lint, typecheck, full test, build, and benchmark:large smoke passed.
+- Full test/build/benchmark used escalation for known Vite/esbuild spawn EPERM paths.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub/Linear connector and gh auth still need recovery for PR/Linear updates.
+Next actions: Review diff; commit scoped files; push/open PR if credentials work.

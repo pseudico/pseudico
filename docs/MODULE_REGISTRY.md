@@ -59,6 +59,9 @@ new work should account for this implemented baseline:
   workspace-scoped appearance preferences,
   unified context menu action providers for local targets, packaged smoke checks,
   automatic backup scheduling/retention, and MVP smoke coverage.
+- Large-workspace benchmark services now provide deterministic local fixture
+  seeding, service-level budgets, and report generation for open/search,
+  dashboard, Today, and export performance gates.
 
 When adding a future module slice, prefer extending the owning feature service
 and matching repository/preload/client boundary rather than creating a parallel
@@ -101,6 +104,7 @@ renderer-only implementation.
 | Local Email Import | Own local EML/Maildir parsing, preview summaries, task creation, and original-email attachment preservation. | Imported email task payloads, original `.eml` attachments | Tasks, files/attachments, metadata, search, activity log, Electron main/preload IPC | Inbox, Quick Add/import workflows, search | V2 |
 | Printing | Own sanitized local print/PDF rendering for selected items and container/view projections. | Print HTML documents, PDF export summaries, print export activity | Workspace, items, projects, contacts, collections, dashboard, Electron printToPDF | Export, activity, files metadata | V1 |
 | Optional Workspace Encryption | Research and gated future implementation planning for opt-in local at-rest encryption of SQLite data, attachments, backups, exports, and derived caches. | Encryption gates, unlock contract, recovery plan, encrypted workspace migration plan | Workspace, Database, Files, Backup, Export, Search, Electron main/preload IPC | Future security hardening tickets | Future |
+| Performance | Own deterministic local large-workspace fixtures, benchmark operation budgets, and report artifacts for service-layer performance gates. | Benchmark budgets, fixture summaries, benchmark reports | Database fixtures, Search, Dashboard, Today, Export | Release QA, maintenance, performance regressions | V1 |
 
 ## Platform And Future Modules
 
