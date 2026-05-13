@@ -2,25 +2,27 @@
 
 ## Status
 
-Accepted for prototype, disabled by default.
+Accepted; implemented as an explicit opt-in local bridge.
 
 ## Context
 
 Local Work OS should eventually let a user capture the current browser page into a local Inbox link or follow-up task. The feature is useful, but it creates a new boundary between a browser and the local desktop app. That boundary must not introduce cloud dependencies, remote file storage, telemetry, public sharing, renderer filesystem access, or direct database access from browser-originated code.
 
-PSE-82 / LWO-M8-007 scopes this to a specification plus a safe prototype. Publishing a browser extension, enabling a background listener by default, or accepting arbitrary external writes is out of scope.
+PSE-82 / LWO-M8-007 scoped this to a specification plus a safe prototype. PSE-166 / LWO-M13-012 extends that into an unpacked extension scaffold, native-message contract validation, and a token-protected localhost development bridge. Publishing or silently installing a browser extension, enabling a background listener by default, or accepting arbitrary external writes remains out of scope.
 
 ## Decision
 
-Use a local-only capture contract in `CaptureService` and keep the desktop bridge disabled by default.
+Use a local-only capture contract in `CaptureService` and keep the desktop bridge disabled by default unless the user explicitly starts it with local configuration.
 
 The preferred future bridge is browser native messaging because it is explicit, browser-mediated, and avoids opening a network port. A localhost HTTP endpoint remains a fallback only for development or browsers where native messaging is not practical. Any localhost bridge must bind to `127.0.0.1`, require an unguessable token, reject non-POST routes, and stay disabled unless the user explicitly opts in.
 
-The prototype adds:
+The implementation adds:
 
 - `packages/features/src/capture/CaptureService.ts` for validating capture payloads and creating Inbox links/tasks through existing services.
-- `apps/desktop/src/main/services/CaptureBridge.ts` as a disabled-by-default bridge stub.
-- Tests proving capture writes use existing link/task service paths and that the bridge does not listen by default.
+- `apps/desktop/src/main/services/CaptureBridge.ts` as an opt-in localhost bridge that requires a pairing token, loopback binding, and a capture handler before listening.
+- `apps/desktop/src/main/services/capture/NativeMessagingService.ts` for validating token-protected native messaging capture messages.
+- `extension/browser-capture/` as an unpacked extension scaffold.
+- Tests proving capture writes use existing link/task service paths, explicit current targets work, unauthorized bridge/native messages are rejected, and the bridge does not listen by default.
 
 ## Bridge options compared
 
@@ -59,11 +61,11 @@ Rules:
 - No cloud service, account, telemetry, or remote storage is added.
 - Browser-originated input never writes SQLite directly.
 - Renderer code does not gain filesystem or database access.
-- The prototype does not publish or install an extension.
-- Future enablement requires explicit user opt-in and packaging/install review.
+- The scaffold does not publish or install an extension.
+- Enablement requires explicit user opt-in and packaging/install review.
 
 ## Consequences
 
-- PSE-82 delivers a concrete local capture contract and safe prototype without exposing a listener by default.
-- A future extension/native messaging ticket can reuse the payload and service methods.
-- Manual QA for real browser capture remains a follow-up because no extension is shipped here.
+- PSE-82 delivered a concrete local capture contract and safe prototype without exposing a listener by default.
+- PSE-166 adds a development-ready extension/bridge path while preserving the disabled-by-default security posture.
+- Manual QA requires explicit local setup because no browser integration is installed automatically.

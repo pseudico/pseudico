@@ -35,10 +35,20 @@ export type CreateInboxLinkFromCaptureInput = BrowserCapturePayload & {
   pinned?: boolean;
 };
 
+export type CreateLinkFromCaptureInput = CreateInboxLinkFromCaptureInput & {
+  containerId?: string | null;
+  containerTabId?: string | null;
+};
+
 export type CreateInboxTaskFromCaptureInput = BrowserCapturePayload & {
   taskTitle?: string | null;
   dueAt?: string | null;
   priority?: number | null;
+};
+
+export type CreateTaskFromCaptureInput = CreateInboxTaskFromCaptureInput & {
+  containerId?: string | null;
+  containerTabId?: string | null;
 };
 
 export type CaptureLinkResult = {
@@ -108,12 +118,19 @@ export class CaptureService {
   async createInboxLinkFromCapture(
     input: CreateInboxLinkFromCaptureInput
   ): Promise<CaptureLinkResult> {
+    return await this.createLinkFromCapture(input);
+  }
+
+  async createLinkFromCapture(
+    input: CreateLinkFromCaptureInput
+  ): Promise<CaptureLinkResult> {
     const capture = this.captureWebPage(input);
-    const inbox = this.createInboxService().getInbox(capture.workspaceId);
+    const containerId = this.resolveTargetContainerId(input, capture.workspaceId);
     const description = buildLinkDescription(capture);
     const link = await this.createLinkService().createLink({
       workspaceId: capture.workspaceId,
-      containerId: inbox.id,
+      containerId,
+      containerTabId: normalizeNullableString(input.containerTabId),
       url: capture.sourceUrl,
       title: capture.title,
       description,
@@ -127,14 +144,21 @@ export class CaptureService {
   async createInboxTaskFromCapture(
     input: CreateInboxTaskFromCaptureInput
   ): Promise<CaptureTaskResult> {
+    return await this.createTaskFromCapture(input);
+  }
+
+  async createTaskFromCapture(
+    input: CreateTaskFromCaptureInput
+  ): Promise<CaptureTaskResult> {
     const capture = this.captureWebPage(input);
-    const inbox = this.createInboxService().getInbox(capture.workspaceId);
+    const containerId = this.resolveTargetContainerId(input, capture.workspaceId);
     const taskTitle =
       truncateText(normalizeNullableString(input.taskTitle), MAX_TITLE_LENGTH) ??
       `Review ${capture.title}`;
     const task = await this.createTaskService().createTask({
       workspaceId: capture.workspaceId,
-      containerId: inbox.id,
+      containerId,
+      containerTabId: normalizeNullableString(input.containerTabId),
       title: taskTitle,
       body: buildTaskBody(capture),
       dueAt: input.dueAt ?? null,
@@ -167,6 +191,19 @@ export class CaptureService {
       idFactory: this.idFactory,
       now: this.now
     });
+  }
+
+  private resolveTargetContainerId(
+    input: { containerId?: string | null },
+    workspaceId: string
+  ): string {
+    const requestedContainerId = normalizeNullableString(input.containerId);
+
+    if (requestedContainerId !== null) {
+      return requestedContainerId;
+    }
+
+    return this.createInboxService().getInbox(workspaceId).id;
   }
 }
 
