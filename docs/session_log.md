@@ -4679,3 +4679,91 @@ Decisions made:
 Files changed: docs/session_log.md
 Open questions / risks: Live desktop IMAP adapter/keychain integration remains a follow-up.
 Next actions: Review diff; open PR; monitor CI.
+
+## 2026-05-13T16:27:05.2856656+10:00
+Objective: Complete PSE-168 merge and prepare next ticket.
+Decisions made:
+- CI for PR #157 passed and PR was squash-merged at d2dafce.
+- Deleted merged branch and promoted PSE-169 as the only Codex Ready issue.
+Files changed: docs/session_log.md
+Open questions / risks: Main has a local post-merge session-log append only.
+Next actions: Start PSE-169 next; keep Codex Ready count at one; leave unrelated untracked files untouched.
+## 2026-05-13T16:45:20.1924191+10:00
+Objective: Start end-to-end Local Work OS ticket run.
+Decisions made:
+- Use Linear as plan and GitHub as proof.
+- Reconcile active PR/Open/In Progress/Codex Ready before new work.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Linear/GitHub state not yet inspected.
+Next actions: Reconcile active issues; inspect PRs; update plan.
+## 2026-05-13T16:45:52.1357354+10:00
+Objective: Reconcile active Linear/GitHub work.
+Decisions made:
+- No Linear issues found in PR Open or In Progress for PSE project.
+- Selected the only Codex Ready issue PSE-169 for work.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub open PR list and local main freshness still need verification.
+Next actions: Check GitHub PRs; pull main; move PSE-169 In Progress.
+## 2026-05-13T16:48:19.0852418+10:00
+Objective: Start implementation for PSE-169.
+Decisions made:
+- Moved PSE-169 from Codex Ready to In Progress.
+- Created branch codex/PSE-169-csv-tsv-import-mapping from up-to-date main.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Acceptance criteria still need extraction from source ticket/docs.
+Next actions: Read ticket docs; inspect import architecture; plan tests.
+## 2026-05-13T16:59:05.1442048+10:00
+Objective: Implement CSV/TSV import service foundation.
+Decisions made:
+- Added CsvImportService with parsing, inferred mapping, preview validation, conflict skipping, and execution.
+- Reused project/contact/task services for activity/search/tag/category flows instead of direct writes.
+Files changed:
+- packages/core/src/events/ActivityAction.ts
+- packages/features/src/import/CsvImportService.ts
+- packages/features/src/import/index.ts
+- packages/features/src/index.ts
+- packages/features/tests/csvImportService.test.ts
+- docs/session_log.md
+Open questions / risks: Desktop IPC/UI integration still pending.
+Next actions: Add IPC/preload/settings wizard; run focused checks; fix type issues.
+## 2026-05-13T17:03:50.8159638+10:00
+Objective: Add desktop CSV/TSV import wizard integration.
+Decisions made:
+- Added main/preload IPC to read local .csv/.tsv files safely outside renderer.
+- Added Settings import panel for previewing/importing tasks, contacts, and projects.
+Files changed:
+- apps/desktop/src/main/ipc/importHandlers.ts
+- apps/desktop/src/main/ipc/registerImportIpc.ts
+- apps/desktop/src/preload/api.ts
+- apps/desktop/src/renderer/api/desktopApiClient.ts
+- apps/desktop/src/renderer/pages/SettingsPage.tsx
+- docs/CSV_TSV_IMPORT.md
+- docs/README.md
+- docs/MODULE_REGISTRY.md
+- docs/session_log.md
+Open questions / risks: Full workspace checks still pending.
+Next actions: Run lint/typecheck/test/build; fix failures; open PR.
+## 2026-05-13T17:09:12.2800358+10:00
+Objective: Verify PSE-169 implementation.
+Decisions made:
+- Fixed lint and preload channel-count test after adding import IPC channels.
+- Accepted sandbox EPERM reruns for Vitest and electron-vite build via escalation.
+Files changed:
+- apps/desktop/tests/preload/api.test.ts
+- docs/session_log.md
+Open questions / risks: PR/CI review still pending.
+Next actions: Inspect diff; commit/push branch; open ready PR.
+## 2026-05-13T17:12:54.4957479+10:00
+Objective: Complete local verification for PSE-169.
+Decisions made:
+- Full lint, typecheck, test, and build pass after final CSV import refinements.
+- Ready to publish PR for PSE-169.
+Files changed:
+- apps/desktop/tests/preload/api.test.ts
+- packages/features/src/import/CsvImportService.ts
+- docs/session_log.md
+Open questions / risks: Remote CI/review may still raise issues.
+Next actions: Stage and commit; push branch; open PR and update Linear.

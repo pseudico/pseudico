@@ -864,6 +864,34 @@ Integration points:
 - Tags/search/activity via the existing task and file write flows.
 - Settings import action and future Quick Add target integration.
 
+### CSV/TSV Import
+
+Owns:
+
+- Local CSV/TSV parsing, inferred field mapping, validation previews, and
+  conflict-aware execution for task, contact, and project imports.
+- Import job activity summaries plus created-record activity/search/tag/category
+  integration through existing domain services.
+
+Does not own:
+
+- Renderer filesystem reads, cloud spreadsheet sources, remote sync, or hosted
+  import services.
+- Arbitrary schema migration/import beyond the mapped task/contact/project
+  spreadsheet workflow.
+
+Implemented service methods:
+
+- `parse`
+- `inferMapping`
+- `previewImport`
+- `executeImport`
+
+Integration points:
+
+- Tasks, contacts, projects, categories, tags, search, activity log, and
+  Electron main/preload IPC for safe local file access.
+
 ### Printing
 
 Owns:

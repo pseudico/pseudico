@@ -552,12 +552,22 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
           api.import.importEmailsAsTasks?.(input) ??
           unavailable("Email import API is not available.")
         ),
-      chooseAndImportEmailsAsTasks: (input) =>
-        callApi(() =>
-          api.import.chooseAndImportEmailsAsTasks?.(input) ??
-          unavailable("Email import chooser API is not available.")
-        )
-    },
+        chooseAndImportEmailsAsTasks: (input) =>
+          callApi(() =>
+            api.import.chooseAndImportEmailsAsTasks?.(input) ??
+            unavailable("Email import chooser API is not available.")
+          ),
+        previewDelimitedFileImport: (input) =>
+          callApi(() =>
+            api.import.previewDelimitedFileImport?.(input) ??
+            unavailable("CSV/TSV import preview API is not available.")
+          ),
+        importDelimitedFile: (input) =>
+          callApi(() =>
+            api.import.importDelimitedFile?.(input) ??
+            unavailable("CSV/TSV import API is not available.")
+          )
+      },
     export: {
       exportWorkspaceJson: (input) =>
         callApi(() => api.export.exportWorkspaceJson(input)),
@@ -1141,10 +1151,16 @@ export const desktopApiClient: LocalWorkOsApi = {
     importEmailsAsTasks: (input) =>
       getDesktopApiClient().import.importEmailsAsTasks?.(input) ??
       unavailable("Email import API is not available."),
-    chooseAndImportEmailsAsTasks: (input) =>
-      getDesktopApiClient().import.chooseAndImportEmailsAsTasks?.(input) ??
-      unavailable("Email import chooser API is not available.")
-  },
+      chooseAndImportEmailsAsTasks: (input) =>
+        getDesktopApiClient().import.chooseAndImportEmailsAsTasks?.(input) ??
+        unavailable("Email import chooser API is not available."),
+      previewDelimitedFileImport: (input) =>
+        getDesktopApiClient().import.previewDelimitedFileImport?.(input) ??
+        unavailable("CSV/TSV import preview API is not available."),
+      importDelimitedFile: (input) =>
+        getDesktopApiClient().import.importDelimitedFile?.(input) ??
+        unavailable("CSV/TSV import API is not available.")
+    },
   export: {
     exportWorkspaceJson: (input) =>
       getDesktopApiClient().export.exportWorkspaceJson(input),

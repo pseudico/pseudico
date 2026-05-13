@@ -2,6 +2,7 @@ import { readFile, readdir, stat } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { createLocalId } from "@local-work-os/core";
 import {
+  CsvImportService,
   EmailImportService,
   InboxService,
   ImportValidationService
@@ -16,6 +17,10 @@ import {
   apiOk,
   type ApiResult,
   type ChooseAndImportEmailsInput,
+  type CsvImportExecuteFileInput,
+  type CsvImportExecuteSummary,
+  type CsvImportPreviewFileInput,
+  type CsvImportPreviewSummary,
   type EmailImportPreviewSummary,
   type EmailTaskImportSummary,
   type ImportEmailsAsTasksInput,
@@ -49,6 +54,12 @@ export type ImportIpcHandlers = {
   handleChooseAndImportEmailsAsTasks: (
     input: unknown
   ) => Promise<ApiResult<EmailTaskImportSummary | null>>;
+  handlePreviewDelimitedFileImport: (
+    input: unknown
+  ) => Promise<ApiResult<CsvImportPreviewSummary>>;
+  handleImportDelimitedFile: (
+    input: unknown
+  ) => Promise<ApiResult<CsvImportExecuteSummary>>;
 };
 
 export type ImportIpcPlatform = {
@@ -169,6 +180,75 @@ export function createImportIpcHandlers(
         ...(input ?? {}),
         sourcePath
       });
+    },
+
+    async handlePreviewDelimitedFileImport(input) {
+      if (!isCsvImportPreviewFileInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "previewDelimitedFileImport requires filePath, targetType, and optional mapping."
+        );
+      }
+
+      return await withCsvImportContext(
+        workspaceService,
+        input,
+        async (context) => {
+          const contents = await readDelimitedImportFile(input.filePath);
+          const summary = context.csvImportService.previewImport({
+            workspaceId: context.workspace.id,
+            contents,
+            targetType: input.targetType,
+            ...(inferDelimitedFormat(input.filePath) === undefined
+              ? {}
+              : { format: inferDelimitedFormat(input.filePath)! }),
+            ...(input.mapping === undefined ? {} : { mapping: input.mapping }),
+            ...(input.conflictStrategy === undefined
+              ? {}
+              : { conflictStrategy: input.conflictStrategy }),
+            ...(input.missingContainerStrategy === undefined
+              ? {}
+              : { missingContainerStrategy: input.missingContainerStrategy })
+          });
+
+          return apiOk(summary);
+        }
+      );
+    },
+
+    async handleImportDelimitedFile(input) {
+      if (!isCsvImportExecuteFileInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "importDelimitedFile requires filePath, targetType, and optional mapping."
+        );
+      }
+
+      return await withCsvImportContext(
+        workspaceService,
+        input,
+        async (context) => {
+          const contents = await readDelimitedImportFile(input.filePath);
+          const summary = await context.csvImportService.executeImport({
+            workspaceId: context.workspace.id,
+            contents,
+            targetType: input.targetType,
+            actorType: "importer",
+            ...(inferDelimitedFormat(input.filePath) === undefined
+              ? {}
+              : { format: inferDelimitedFormat(input.filePath)! }),
+            ...(input.mapping === undefined ? {} : { mapping: input.mapping }),
+            ...(input.conflictStrategy === undefined
+              ? {}
+              : { conflictStrategy: input.conflictStrategy }),
+            ...(input.missingContainerStrategy === undefined
+              ? {}
+              : { missingContainerStrategy: input.missingContainerStrategy })
+          });
+
+          return apiOk(summary);
+        }
+      );
     }
   };
 }
@@ -250,6 +330,79 @@ async function withEmailImportContext<T>(
   } finally {
     connection.close();
   }
+}
+
+async function withCsvImportContext<T>(
+  workspaceService: CurrentWorkspaceService,
+  input: CsvImportPreviewFileInput,
+  operation: (context: {
+    connection: DatabaseConnection;
+    csvImportService: CsvImportService;
+    workspace: NonNullable<ReturnType<CurrentWorkspaceService["getCurrentWorkspace"]>>;
+  }) => Promise<ApiResult<T>>
+): Promise<ApiResult<T>> {
+  const workspace = workspaceService.getCurrentWorkspace();
+
+  if (workspace === null) {
+    return apiError("WORKSPACE_ERROR", "No workspace is open.");
+  }
+
+  if (
+    input.workspaceId !== undefined &&
+    input.workspaceId !== workspace.id
+  ) {
+    return apiError(
+      "WORKSPACE_ERROR",
+      "CSV import workspaceId must match the current workspace."
+    );
+  }
+
+  const connection = await createDatabaseConnection({
+    databasePath: resolveWorkspaceDatabasePath(workspace.rootPath),
+    fileMustExist: true
+  });
+
+  try {
+    return await operation({
+      connection,
+      csvImportService: new CsvImportService({ connection }),
+      workspace
+    });
+  } catch (error) {
+    return apiError(
+      "WORKSPACE_ERROR",
+      error instanceof Error ? error.message : "CSV import failed."
+    );
+  } finally {
+    connection.close();
+  }
+}
+
+async function readDelimitedImportFile(filePathInput: string): Promise<string> {
+  const filePath = normalizeLocalPath(filePathInput);
+  const extension = extname(filePath).toLowerCase();
+
+  if (extension !== ".csv" && extension !== ".tsv") {
+    throw new Error("CSV/TSV import requires a .csv or .tsv file.");
+  }
+
+  const fileStats = await stat(filePath);
+  if (!fileStats.isFile()) {
+    throw new Error("CSV/TSV import path must be a file.");
+  }
+
+  return await readFile(filePath, "utf8");
+}
+
+function inferDelimitedFormat(filePath: string): "csv" | "tsv" | undefined {
+  const extension = extname(filePath).toLowerCase();
+  if (extension === ".csv") {
+    return "csv";
+  }
+  if (extension === ".tsv") {
+    return "tsv";
+  }
+  return undefined;
 }
 
 function resolveContainerId(
@@ -401,6 +554,33 @@ function isChooseAndImportEmailsInput(
       (input.containerId === undefined || isNonEmptyString(input.containerId)) &&
       (input.extractTags === undefined || typeof input.extractTags === "boolean"))
   );
+}
+
+function isCsvImportPreviewFileInput(
+  input: unknown
+): input is CsvImportPreviewFileInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.filePath) &&
+    (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)) &&
+    (input.targetType === "task" ||
+      input.targetType === "contact" ||
+      input.targetType === "project") &&
+    (input.mapping === undefined || isRecord(input.mapping)) &&
+    (input.conflictStrategy === undefined ||
+      input.conflictStrategy === "create_new" ||
+      input.conflictStrategy === "skip_existing") &&
+    (input.missingContainerStrategy === undefined ||
+      input.missingContainerStrategy === "create_project" ||
+      input.missingContainerStrategy === "inbox" ||
+      input.missingContainerStrategy === "error")
+  );
+}
+
+function isCsvImportExecuteFileInput(
+  input: unknown
+): input is CsvImportExecuteFileInput {
+  return isCsvImportPreviewFileInput(input);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

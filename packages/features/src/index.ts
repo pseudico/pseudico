@@ -181,6 +181,7 @@ export {
 } from "./printing";
 export { FileAttachmentService, FileVersionService, filesModuleContract } from "./files";
 export {
+  CsvImportService,
   EmailImportService,
   ImapImportService,
   IMAP_IMPORT_SETTINGS_KEY,
@@ -556,6 +557,19 @@ export type {
   RepairAttachmentFileInput
 } from "./files";
 export type {
+  CsvImportColumnMapping,
+  CsvImportConflictStrategy,
+  CsvImportCreatedTarget,
+  CsvImportExecuteInput,
+  CsvImportExecuteSummary,
+  CsvImportFormat,
+  CsvImportMappingField,
+  CsvImportMissingContainerStrategy,
+  CsvImportPreviewInput,
+  CsvImportPreviewRow,
+  CsvImportPreviewSummary,
+  CsvImportTargetType,
+  CsvImportValidationIssue,
   EmailImportIssue,
   EmailImportMessageSource,
   EmailImportPreview,
