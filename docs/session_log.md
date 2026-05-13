@@ -5121,3 +5121,13 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Need push and PR creation.
 Next actions: Amend log into commit; push branch; open PR.
+
+## 2026-05-14T07:20:05.1713573+10:00
+Objective: Open PSE-176 PR.
+Decisions made:
+- Opened ready-for-review PR #165 for PSE-176 against main.
+- PR body links Linear issue and documents checks, scope, non-scope, and follow-up gates.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need CI status and review/mergeability confirmation.
+Next actions: Commit/push this log update; move Linear to PR Open; inspect PR checks/reviews.
