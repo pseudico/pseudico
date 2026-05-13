@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, webUtils } from "electron";
+import { isSafeLocalFilePath } from "@local-work-os/core";
 import {
   createLocalWorkOsApi,
   type LocalWorkOsIpcChannel,
@@ -24,7 +25,7 @@ contextBridge.exposeInMainWorld("localWorkOs", {
     getDroppedFilePaths(files: readonly File[]): string[] {
       return files
         .map((file) => webUtils.getPathForFile(file))
-        .filter((path) => path.trim().length > 0);
+        .filter(isSafeLocalFilePath);
     }
   }
 });

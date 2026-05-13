@@ -58,6 +58,11 @@ Out of scope unless explicitly approved:
 - React components must not call SQLite directly.
 - Renderer code must not access Node filesystem APIs directly.
 - Filesystem actions must go through Electron main/preload IPC.
+- External URLs must go through the shared allowlisted opener; never call
+  `shell.openExternal` on unvalidated renderer input.
+- New BrowserWindow, webview, widget, browser-capture, or navigation behavior
+  must preserve sandbox, context isolation, disabled Node integration, and
+  explicit URL/path validation.
 - All data-changing operations must create activity log entries.
 - Searchable content changes must update the search index when the search
   service exists.
@@ -155,6 +160,8 @@ Flag as high priority:
 - Searchable data changes without search-index updates.
 - Destructive deletes where soft delete is expected.
 - Electron security regressions.
+- Unsafe external URL handling, webview enablement, broad navigation, or
+  URL-like drag/drop file paths accepted through IPC.
 - Missing tests for new domain logic.
 - Scope creep beyond the Linear issue.
 

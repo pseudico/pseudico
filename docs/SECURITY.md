@@ -25,6 +25,11 @@ Do not add these without explicit approval:
 - Do not expose arbitrary Node APIs to the renderer.
 - Validate IPC inputs at the boundary.
 - Prefer narrow IPC methods with explicit return types.
+- Validate external URLs before opening them in the OS browser; only allow
+  explicit safe protocols and never open `file:`, `javascript:`, `data:`, or
+  custom-scheme renderer input.
+- Keep `<webview>` and embedded web/widget surfaces disabled unless a future
+  ticket adds an explicit sandboxed allowlist.
 - Keep browser capture and automation local when those features are added.
 - Browser capture bridges must stay disabled by default, bind only to loopback
   when localhost mode is explicitly enabled, and require a long pairing token.

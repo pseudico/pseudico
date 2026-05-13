@@ -1,5 +1,6 @@
 import {
   createLocalId,
+  isSafeLocalFilePath,
   type AttachmentRecord,
   type AttachmentVersionRecord
 } from "@local-work-os/core";
@@ -698,7 +699,7 @@ function isAttachFileToContainerInput(
   return (
     isRecord(input) &&
     isNonEmptyString(input.containerId) &&
-    isNonEmptyString(input.sourcePath) &&
+    isSafeLocalFilePath(input.sourcePath) &&
     isOptionalString(input.workspaceId) &&
     isOptionalActorType(input.actorType) &&
     isOptionalNullableString(input.containerTabId) &&
@@ -711,7 +712,7 @@ function isAttachFileToItemInput(input: unknown): input is AttachFileToItemInput
   return (
     isRecord(input) &&
     isNonEmptyString(input.itemId) &&
-    isNonEmptyString(input.sourcePath) &&
+    isSafeLocalFilePath(input.sourcePath) &&
     isOptionalActorType(input.actorType) &&
     isOptionalNullableString(input.description)
   );

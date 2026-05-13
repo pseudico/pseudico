@@ -1,4 +1,8 @@
-import { createLocalId, type AttachmentRecord } from "@local-work-os/core";
+import {
+  areSafeLocalFilePaths,
+  createLocalId,
+  type AttachmentRecord
+} from "@local-work-os/core";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -390,9 +394,7 @@ function isAttachDroppedFilesToContainerInput(
     isOptionalNullableString(input.containerTabId) &&
     isOptionalNullableString(input.description) &&
     isOptionalNumber(input.startSortOrder) &&
-    Array.isArray(input.sourcePaths) &&
-    input.sourcePaths.length > 0 &&
-    input.sourcePaths.every(isNonEmptyString)
+    areSafeLocalFilePaths(input.sourcePaths)
   );
 }
 
@@ -403,9 +405,7 @@ function isAttachDroppedFilesToItemInput(
     isRecord(input) &&
     isNonEmptyString(input.itemId) &&
     isOptionalNullableString(input.description) &&
-    Array.isArray(input.sourcePaths) &&
-    input.sourcePaths.length > 0 &&
-    input.sourcePaths.every(isNonEmptyString)
+    areSafeLocalFilePaths(input.sourcePaths)
   );
 }
 

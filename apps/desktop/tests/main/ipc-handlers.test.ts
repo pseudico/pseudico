@@ -15,6 +15,7 @@ import { createActivityIpcHandlers } from "../../src/main/ipc/activityHandlers";
 import { createCategoryIpcHandlers } from "../../src/main/ipc/categoryHandlers";
 import { createCollectionIpcHandlers } from "../../src/main/ipc/collectionHandlers";
 import { createDashboardIpcHandlers } from "../../src/main/ipc/dashboardHandlers";
+import { createDragDropIpcHandlers } from "../../src/main/ipc/dragDropHandlers";
 import { createFileIpcHandlers } from "../../src/main/ipc/fileHandlers";
 import { createInboxIpcHandlers } from "../../src/main/ipc/inboxHandlers";
 import { createItemIpcHandlers } from "../../src/main/ipc/itemHandlers";
@@ -318,6 +319,19 @@ describe("file IPC handlers", () => {
         message: "No workspace is open."
       }
     });
+    await expect(
+      handlers.handleAttachFileToContainer({
+        containerId: "container_project_1",
+        sourcePath: "file:///C:/Users/Alice/secret.txt"
+      })
+    ).resolves.toEqual({
+      ok: false,
+      error: {
+        code: "INVALID_INPUT",
+        message:
+          "attachFileToContainer requires containerId and sourcePath strings."
+      }
+    });
   });
 
   it("copies source files through main and creates attachment metadata", async () => {
@@ -542,6 +556,39 @@ describe("file IPC handlers", () => {
         item: {
           type: "file"
         }
+      }
+    });
+  });
+});
+
+describe("drag/drop IPC handlers", () => {
+  it("rejects URL-like dropped file paths before service access", async () => {
+    const handlers = createDragDropIpcHandlers(createMockWorkspaceService());
+
+    await expect(
+      handlers.handleAttachFilesToContainer({
+        containerId: "container_project_1",
+        sourcePaths: ["file:///C:/Users/Alice/secret.txt"]
+      })
+    ).resolves.toEqual({
+      ok: false,
+      error: {
+        code: "INVALID_INPUT",
+        message:
+          "attachFilesToContainer requires containerId and sourcePaths fields."
+      }
+    });
+
+    await expect(
+      handlers.handleAttachFilesToItem({
+        itemId: "item_1",
+        sourcePaths: ["javascript:alert(1)"]
+      })
+    ).resolves.toEqual({
+      ok: false,
+      error: {
+        code: "INVALID_INPUT",
+        message: "attachFilesToItem requires itemId and sourcePaths fields."
       }
     });
   });

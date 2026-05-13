@@ -22,6 +22,8 @@ docs and the linked Linear issue.
   database work, Electron IPC, renderer work, and release checks.
 - `SECURITY.md` records local-only, Electron, filesystem, database, and privacy
   guardrails.
+- `SECURITY_AUDIT.md` records the current Electron IPC, external link, widget,
+  and drag/drop hardening posture plus manual QA checks.
 - `TEMPLATE_FILE_FORMAT.md` defines the versioned `.lwo-template` JSON
   envelope for portable local templates.
 - `BROWSER_CAPTURE.md` explains the disabled-by-default local browser capture
