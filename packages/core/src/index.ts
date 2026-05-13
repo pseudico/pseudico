@@ -166,6 +166,22 @@ export type {
   ExternalUrlValidationResult
 } from "./services/electronSecurity";
 export {
+  WORKSPACE_ENCRYPTION_GATE_IDS,
+  WORKSPACE_ENCRYPTION_MODES,
+  WORKSPACE_KEY_STORAGE_MODES,
+  createWorkspaceEncryptionPrototypePlan,
+  isWorkspaceEncryptionMode,
+  isWorkspaceKeyStorageMode
+} from "./services/workspaceEncryption";
+export type {
+  WorkspaceEncryptionGate,
+  WorkspaceEncryptionGateId,
+  WorkspaceEncryptionMode,
+  WorkspaceEncryptionPrototypeInput,
+  WorkspaceEncryptionPrototypePlan,
+  WorkspaceKeyStorageMode
+} from "./services/workspaceEncryption";
+export {
   normalizeTagName,
   parseInlineTagSlugs,
   parseInlineTags,

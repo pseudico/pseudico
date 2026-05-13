@@ -71,6 +71,17 @@ paths.
 
 The optional IMAP importer is local-desktop initiated only. It must not add hosted accounts, cloud forwarding, telemetry, or background cloud workers. Persisted settings exclude passwords; credentials must live in an OS keychain or session-only adapter. Imports are bounded, explicit, and duplicate-protected by local metadata.
 
+## Optional Workspace Encryption Spike
+
+Current production workspaces are local-only but not application-encrypted at
+rest. Optional encryption remains a proposed future capability, not a production
+format change. Any future implementation must follow
+`docs/DECISIONS/ADR-0004-optional-workspace-encryption-spike.md`: use a
+SQLCipher-compatible native database adapter rather than homegrown SQLite
+crypto, keep passphrases and derived keys behind Electron main/preload IPC,
+encrypt attachment bytes separately, and define backup/export/search/recovery
+behavior before migrating existing workspaces.
+
 
 ## Local maintenance tools
 
