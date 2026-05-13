@@ -24,4 +24,8 @@ export function registerExportIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.export.exportPlanningSummaryMarkdown,
     (_event, input) => handlers.handleExportPlanningSummaryMarkdown(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.export.exportHtmlCsvTsvMarkdownBundle,
+    (_event, input) => handlers.handleExportHtmlCsvTsvMarkdownBundle(input)
+  );
 }

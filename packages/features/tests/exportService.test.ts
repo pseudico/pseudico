@@ -233,6 +233,85 @@ describe("ExportService", () => {
       'Launch Plan\tCall supplier\topen\t2\t\t2026-05-07T00:00:00.000Z\t\tlaunch\t"Confirm ""launch"", then call."\titem_task_1'
     );
   });
+
+  it("exports a portable HTML/CSV/TSV/Markdown bundle with manifest metadata", async () => {
+    new SearchIndexRepository(connection).upsert({
+      id: "search_index_2",
+      workspaceId: "workspace_1",
+      targetType: "item",
+      targetId: "item_note_1",
+      title: "<script>alert(1)</script>",
+      body: "Searchable note body",
+      timestamp
+    });
+
+    const result = await createService().exportHtmlCsvTsvMarkdownBundle({
+      workspaceId: "workspace_1",
+      exportRelativePath: "exports/test-bundle"
+    });
+
+    expect(result).toMatchObject({
+      id: "export_1",
+      workspaceId: "workspace_1",
+      relativePath: "exports/test-bundle",
+      kind: "html_csv_tsv_markdown_bundle",
+      containerCount: 1,
+      taskCount: 1,
+      listItemCount: 1,
+      savedViewCount: 1,
+      searchRecordCount: 2,
+      attachmentCount: 1
+    });
+    expect(result.fileCount).toBe(12);
+
+    const manifest = JSON.parse(
+      writtenExports.get("exports/test-bundle/manifest.json") ?? ""
+    ) as typeof result.manifest;
+    expect(manifest).toMatchObject({
+      kind: "html_csv_tsv_markdown_bundle",
+      workspace: { id: "workspace_1", name: "Personal Work" },
+      counts: {
+        projects: 1,
+        contacts: 0,
+        tasks: 1,
+        listItems: 1,
+        searchRecords: 2,
+        attachments: 1
+      }
+    });
+    expect(manifest.files.map((file) => file.relativePath)).toEqual(
+      expect.arrayContaining([
+        "exports/test-bundle/containers/project-launch-plan.md",
+        "exports/test-bundle/tasks/tasks.csv",
+        "exports/test-bundle/tasks/tasks.tsv",
+        "exports/test-bundle/lists/lists.csv",
+        "exports/test-bundle/lists/lists.tsv",
+        "exports/test-bundle/html/index.html",
+        "exports/test-bundle/html/containers.html",
+        "exports/test-bundle/html/search.html",
+        "exports/test-bundle/html/collections.html",
+        "exports/test-bundle/attachments/manifest.csv"
+      ])
+    );
+    expect(writtenExports.get("exports/test-bundle/tasks/tasks.csv")).toContain(
+      "Call supplier"
+    );
+    expect(writtenExports.get("exports/test-bundle/lists/lists.tsv")).toContain(
+      "Confirm export"
+    );
+    const searchHtml = writtenExports.get("exports/test-bundle/html/search.html");
+    expect(searchHtml).not.toContain("<script>alert");
+    expect(searchHtml).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(
+      new ActivityLogRepository(connection).listForTarget("export", "export_1")
+    ).toMatchObject([
+      {
+        action: "export_created",
+        summary:
+          "Created HTML/CSV/TSV/Markdown export bundle exports/test-bundle."
+      }
+    ]);
+  });
 });
 
 function seedWorkspace(): void {

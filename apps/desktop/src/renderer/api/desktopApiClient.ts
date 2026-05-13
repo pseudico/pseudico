@@ -602,6 +602,16 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
           }
 
           return api.export.exportPlanningSummaryMarkdown(input);
+        }),
+      exportHtmlCsvTsvMarkdownBundle: (input) =>
+        callApi(() => {
+          if (api.export.exportHtmlCsvTsvMarkdownBundle === undefined) {
+            throw new Error(
+              "HTML/CSV/TSV/Markdown export bundle API is not available."
+            );
+          }
+
+          return api.export.exportHtmlCsvTsvMarkdownBundle(input);
         })
     },
     print: {
@@ -1201,7 +1211,10 @@ export const desktopApiClient: LocalWorkOsApi = {
     exportTasksCsv: (input) => getDesktopApiClient().export.exportTasksCsv(input),
     exportPlanningSummaryMarkdown: (input) =>
       getDesktopApiClient().export.exportPlanningSummaryMarkdown?.(input) ??
-      unavailable("Planning summary export API is not available.")
+      unavailable("Planning summary export API is not available."),
+    exportHtmlCsvTsvMarkdownBundle: (input) =>
+      getDesktopApiClient().export.exportHtmlCsvTsvMarkdownBundle?.(input) ??
+      unavailable("HTML/CSV/TSV/Markdown export bundle API is not available.")
   },
   print: {
     printPdf: (input) => getDesktopApiClient().print!.printPdf(input)

@@ -815,7 +815,7 @@ Integration points:
 Owns:
 
 - Export application service contracts.
-- Full JSON, Markdown, CSV/TSV, and manifest export orchestration.
+- Full JSON, Markdown, CSV/TSV, HTML bundle, and manifest export orchestration.
 - Export validation and portable-output boundaries.
 
 Does not own:
@@ -830,6 +830,7 @@ Expected service methods later:
 - `exportProjectMarkdown`
 - `exportContactMarkdown`
 - `exportTasksCsv`
+- `exportHtmlCsvTsvMarkdownBundle`
 - `createAttachmentManifest`
 
 Integration points:

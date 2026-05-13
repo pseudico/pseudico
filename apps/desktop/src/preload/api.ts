@@ -209,7 +209,8 @@ export type TextExportKind =
   | "project_markdown"
   | "tasks_csv"
   | "tasks_tsv"
-  | "planning_summary_markdown";
+  | "planning_summary_markdown"
+  | "html_csv_tsv_markdown_bundle";
 
 export type TextExportSummary = {
   id: string;
@@ -238,6 +239,62 @@ export type ExportTasksCsvInput = {
 export type ExportPlanningSummaryMarkdownInput = {
   workspaceId?: string;
   date?: string | Date;
+};
+
+export type ExportHtmlCsvTsvMarkdownBundleInput = {
+  workspaceId?: string;
+};
+
+export type BundleExportFileSummary = {
+  relativePath: string;
+  role: string;
+  mediaType: string;
+  sizeBytes: number;
+  sourceType?: string;
+  sourceId?: string;
+  rowCount?: number;
+};
+
+export type BundleExportManifestSummary = {
+  schemaVersion: number;
+  kind: "html_csv_tsv_markdown_bundle";
+  workspace: {
+    id: string;
+    name: string;
+    schemaVersion: number;
+  };
+  createdAt: string;
+  files: BundleExportFileSummary[];
+  counts: {
+    containers: number;
+    projects: number;
+    contacts: number;
+    tasks: number;
+    lists: number;
+    listItems: number;
+    savedViews: number;
+    collections: number;
+    searchRecords: number;
+    attachments: number;
+    totalAttachmentBytes: number;
+  };
+};
+
+export type BundleExportSummary = {
+  id: string;
+  workspaceId: string;
+  createdAt: string;
+  relativePath: string;
+  sizeBytes: number;
+  kind: "html_csv_tsv_markdown_bundle";
+  fileCount: number;
+  containerCount: number;
+  taskCount: number;
+  listItemCount: number;
+  savedViewCount: number;
+  searchRecordCount: number;
+  attachmentCount: number;
+  manifest: BundleExportManifestSummary;
 };
 
 export type PrintPdfInput = {
@@ -3691,7 +3748,9 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     exportProjectMarkdown: "local-work-os:export:export-project-markdown",
     exportTasksCsv: "local-work-os:export:export-tasks-csv",
     exportPlanningSummaryMarkdown:
-      "local-work-os:export:export-planning-summary-markdown"
+      "local-work-os:export:export-planning-summary-markdown",
+    exportHtmlCsvTsvMarkdownBundle:
+      "local-work-os:export:export-html-csv-tsv-markdown-bundle"
   },
   print: {
     printPdf: "local-work-os:print:print-pdf"
@@ -4588,6 +4647,10 @@ export type LocalWorkOsIpcContracts = {
     input: ExportPlanningSummaryMarkdownInput | undefined;
     result: ApiResult<TextExportSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.export.exportHtmlCsvTsvMarkdownBundle]: {
+    input: ExportHtmlCsvTsvMarkdownBundleInput | undefined;
+    result: ApiResult<BundleExportSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.print.printPdf]: {
     input: PrintPdfInput;
     result: ApiResult<PrintPdfSummary>;
@@ -5355,6 +5418,9 @@ export type LocalWorkOsApi = {
     exportPlanningSummaryMarkdown?: (
       input?: ExportPlanningSummaryMarkdownInput
     ) => Promise<ApiResult<TextExportSummary>>;
+    exportHtmlCsvTsvMarkdownBundle?: (
+      input?: ExportHtmlCsvTsvMarkdownBundleInput
+    ) => Promise<ApiResult<BundleExportSummary>>;
   };
   print?: {
     printPdf: (input: PrintPdfInput) => Promise<ApiResult<PrintPdfSummary>>;
@@ -6122,6 +6188,11 @@ export function createLocalWorkOsApi(
       exportPlanningSummaryMarkdown: (input) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.export.exportPlanningSummaryMarkdown,
+          input
+        ),
+      exportHtmlCsvTsvMarkdownBundle: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.export.exportHtmlCsvTsvMarkdownBundle,
           input
         )
     },

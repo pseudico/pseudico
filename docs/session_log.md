@@ -4875,3 +4875,46 @@ Decisions made: - Removed UTF-8 BOM from new Markdown file; no content change.
 Files changed: docs/import-research/COMMON_APP_IMPORT_FORMATS.md; docs/session_log.md
 Open questions / risks: CI will rerun after amended push.
 Next actions: Amend commit; force-push; check CI/reviews.
+
+## 2026-05-13T19:04:09.6067487+10:00
+Objective: Complete PSE-171 merge and queue PSE-172.
+Decisions made: - Squash-merged PR #160 after green CI/no review threads; moved PSE-171 Done; promoted PSE-172 only.
+Files changed: docs/session_log.md
+Open questions / risks: Final session log entry is local after merge.
+Next actions: Start PSE-172; keep follow-up importer tickets in Backlog; preserve local-only export scope.
+
+[2026-05-13 19:32:13 +10:00] Objective: Run next Local Work OS ticket end-to-end.
+- Decisions: Use Linear as plan; reconcile PR/Open/In Progress/Codex Ready before coding.
+- Files changed: docs/session_log.md
+- Risks: External CI/review state may block merge; sandbox may require escalation.
+- Next: Inspect Linear states, GitHub PRs, local repo status.
+
+[2026-05-13 19:34:01 +10:00] Objective: Reconcile and claim next ticket.
+- Decisions: No Linear PR Open/In Progress and no open GitHub PRs; selected PSE-172.
+- Files changed: docs/session_log.md
+- Risks: Local unrelated untracked .playwright-mcp/ and gh MSI must remain untouched.
+- Next: Read docs/ticket details; create PSE-172 branch; implement export bundle.
+
+[2026-05-13 19:36:11 +10:00] Objective: Plan PSE-172 implementation.
+- Decisions: Branch codex/PSE-172-export-bundle; scope export renderers/service/UI only, no schema change unless discovered.
+- Files changed: docs/session_log.md
+- Risks: Ticket broad; must reuse existing export architecture and keep renderer file access via IPC.
+- Next: Inspect export/import code; add focused tests; wire UI/IPC if missing.
+
+[2026-05-13 19:55:25 +10:00] Objective: Implement PSE-172 export bundle.
+- Decisions: Added workspace-level portable bundle with Markdown containers, task/list CSV+TSV, static HTML, and JSON manifest.
+- Files changed: packages/features/src/export/ExportService.ts; apps/desktop/src/main/ipc/exportHandlers.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/SettingsPage.tsx
+- Risks: Full checks still pending; bundle manifest lists generated payload files, not itself.
+- Next: Run full tests/build; update docs; open PR.
+
+[2026-05-13 20:01:35 +10:00] Objective: Validate PSE-172 locally.
+- Decisions: Full lint/typecheck/test/build pass; build required sandbox escalation for esbuild EPERM.
+- Files changed: docs/session_log.md
+- Risks: CI and review still pending after PR creation.
+- Next: Stage intended files; commit/push; open ready PR.
+
+[2026-05-13 20:04:04 +10:00] Objective: Open PSE-172 PR.
+- Decisions: Created ready PR #161 against main and moved Linear issue to PR Open.
+- Files changed: docs/session_log.md
+- Risks: CI/review pending; local commit does not include this final log entry unless amended.
+- Next: Inspect PR diff; wait for CI; merge if green.

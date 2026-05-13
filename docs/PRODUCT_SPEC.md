@@ -1945,6 +1945,7 @@ Because this app is local-only, backup is a first-class feature.
 | Project Markdown export | P1 |
 | Contact Markdown export | P1 |
 | Task CSV/TSV export | P1 |
+| HTML/CSV/TSV/Markdown portable bundle export | P1 |
 | Attachment manifest | P1 |
 | Search index excluded | P0 |
 
@@ -2165,7 +2166,7 @@ MVP should prove the object graph and core usability.
 | Today | Today + overdue | Implemented with due/overdue lanes, manual Today/Tomorrow planning, ordering, rollover, snooze, and reschedule. |
 | Dashboard | Default overview | Implemented with default widgets, widget data services, project health, recent activity, and source-object navigation. Custom widget editing remains future work. |
 | Activity | Log core writes | Implemented for core data-changing services and exposed through recent activity projections. |
-| Backup/export | Manual backup + JSON export | Implemented for manual backups, backup restore into a new workspace, workspace JSON export/restore where feasible, project Markdown export, task CSV/TSV export, sanitized print/PDF export for selected items and container/view projections, and JSON import validation. |
+| Backup/export | Manual backup + JSON export | Implemented for manual backups, backup restore into a new workspace, workspace JSON export/restore where feasible, project Markdown export, task CSV/TSV export, HTML/CSV/TSV/Markdown portable bundle export, sanitized print/PDF export for selected items and container/view projections, and JSON import validation. |
 
 ### 32.2 V1 — Pagico-like usability depth
 

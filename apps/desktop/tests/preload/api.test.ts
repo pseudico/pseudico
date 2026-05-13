@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(231);
+    expect(channels).toHaveLength(232);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -732,6 +732,9 @@ describe("typed preload API", () => {
     await api.export.exportWorkspaceJson({ workspaceId: "workspace_1" });
     await api.export.exportProjectMarkdown({ projectId: "container_1" });
     await api.export.exportTasksCsv({ workspaceId: "workspace_1", format: "tsv" });
+    await api.export.exportHtmlCsvTsvMarkdownBundle?.({
+      workspaceId: "workspace_1"
+    });
 
     expect(calls).toEqual([
       {
@@ -751,6 +754,13 @@ describe("typed preload API", () => {
         input: {
           workspaceId: "workspace_1",
           format: "tsv"
+        }
+      },
+      {
+        channel:
+          LOCAL_WORK_OS_IPC_CHANNELS.export.exportHtmlCsvTsvMarkdownBundle,
+        input: {
+          workspaceId: "workspace_1"
         }
       }
     ]);
