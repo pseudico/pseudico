@@ -53,6 +53,10 @@ Do not add these without explicit approval:
 
 - Do not send workspace data to external services by default.
 - Do not introduce telemetry by default.
+- Keep optional network-capable features behind the workspace Privacy &
+  Network settings. Link metadata fetch, web widgets, ICS URL import, IMAP
+  import, and browser capture default to off and require explicit enablement
+  before their service path can perform network-capable work.
 - Treat attachments, notes, project data, contacts, and imported files as local
   private user data.
 - Document any future network capability before implementation. Localhost-only

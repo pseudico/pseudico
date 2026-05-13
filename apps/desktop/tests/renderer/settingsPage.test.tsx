@@ -24,6 +24,11 @@ describe("SettingsPage", () => {
     expect(html).toContain("Save appearance");
     expect(html).toContain("System");
     expect(html).toContain("Comfortable");
+    expect(html).toContain("Privacy &amp; Network");
+    expect(html).toContain("No telemetry");
+    expect(html).toContain("Save privacy settings");
+    expect(html).toContain("Link metadata fetch");
+    expect(html).toContain("Browser capture");
     expect(html).toContain("Diagnostics");
     expect(html).toContain("Run audit");
     expect(html).toContain("No diagnostics run");

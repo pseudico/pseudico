@@ -39,6 +39,7 @@ export const plannedFeatureAreas = [
   "export",
   "printing",
   "appearance",
+  "privacy",
   "templates",
   "workflows",
   "undo",
@@ -61,6 +62,17 @@ export {
   appearanceModuleContract,
   normalizeAppearanceSettingsValue
 } from "./appearance";
+export {
+  DEFAULT_PRIVACY_NETWORK_SETTINGS,
+  NETWORK_FEATURE_IDS,
+  PRIVACY_NETWORK_SETTINGS_KEY,
+  PRIVACY_TELEMETRY_NOTICE,
+  PrivacySettingsService,
+  isNetworkFeatureEnabled,
+  networkFeatureDisabledMessage,
+  normalizePrivacyNetworkSettingsValue,
+  privacyModuleContract
+} from "./privacy";
 export {
   CommentService,
   commentsModuleContract,
@@ -565,6 +577,12 @@ export type {
   AppearanceThemePreference,
   UpdateAppearanceSettingsInput
 } from "./appearance";
+export type {
+  NetworkFeatureId,
+  PrivacyNetworkSettings,
+  PrivacyNetworkSettingsValue,
+  UpdatePrivacyNetworkSettingsInput
+} from "./privacy";
 export type {
   AttachFileToContainerInput,
   AttachFileToItemInput,

@@ -25,6 +25,7 @@ import { registerNavigationIpc } from "./registerNavigationIpc";
 import { registerNoteIpc } from "./registerNoteIpc";
 import { registerProjectIpc } from "./registerProjectIpc";
 import { registerPrintIpc } from "./registerPrintIpc";
+import { registerPrivacyIpc } from "./registerPrivacyIpc";
 import { registerRelationshipIpc } from "./registerRelationshipIpc";
 import { registerReminderIpc } from "./registerReminderIpc";
 import { registerSearchIpc } from "./registerSearchIpc";
@@ -69,6 +70,7 @@ export function registerDesktopIpc(
   registerExportIpc(services.workspaceService);
   registerPrintIpc(services.workspaceService);
   registerAppearanceIpc(services.workspaceService);
+  registerPrivacyIpc(services.workspaceService);
   registerImportIpc(services.workspaceService);
   registerDatabaseIpc(services.workspaceService);
   registerInboxIpc(services.workspaceService);

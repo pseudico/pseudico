@@ -15,6 +15,7 @@ import {
   type DatabaseConnection,
   type UpsertCalendarEventInput
 } from "@local-work-os/db";
+import type { NetworkFeatureId } from "../privacy";
 
 export type IcsImportSourceType = "file" | "network";
 
@@ -49,22 +50,31 @@ export type CalendarFeedEventView = CalendarEventRecord & {
 };
 
 export type CalendarFeedServiceIdFactory = (prefix: string) => string;
+export type CalendarNetworkFeatureGuard = {
+  assertFeatureAllowed: (
+    workspaceId: string,
+    featureId: Extract<NetworkFeatureId, "icsUrlImport">
+  ) => void;
+};
 
 export class CalendarFeedService {
   readonly module = "calendar.feeds";
 
   private readonly connection: DatabaseConnection;
   private readonly idFactory: CalendarFeedServiceIdFactory;
+  private readonly networkFeatureGuard: CalendarNetworkFeatureGuard | null;
   private readonly now: Clock;
   private readonly transactionService: TransactionService;
 
   constructor(input: {
     connection: DatabaseConnection;
     idFactory?: CalendarFeedServiceIdFactory;
+    networkFeatureGuard?: CalendarNetworkFeatureGuard;
     now?: Clock;
   }) {
     this.connection = input.connection;
     this.idFactory = input.idFactory ?? ((prefix) => createLocalId(prefix));
+    this.networkFeatureGuard = input.networkFeatureGuard ?? null;
     this.now = input.now ?? (() => new Date());
     this.transactionService = new TransactionService({ connection: input.connection });
   }
@@ -78,6 +88,13 @@ export class CalendarFeedService {
 
     if (sourceType === "network" && input.networkEnabled !== true) {
       throw new Error("Network calendar feeds are disabled. Enable the explicit network preference before importing a URL feed.");
+    }
+
+    if (sourceType === "network") {
+      this.networkFeatureGuard?.assertFeatureAllowed(
+        input.workspaceId,
+        "icsUrlImport"
+      );
     }
 
     if (sourceType === "network" && !isSafeCalendarUrl(input.sourceUrl)) {

@@ -16,6 +16,7 @@ import {
   parseEmailMessage,
   type EmailTaskImportSummary
 } from "./EmailImportService";
+import type { NetworkFeatureId } from "../privacy";
 
 export const IMAP_IMPORT_SETTINGS_KEY = "import.imap.settings.v1";
 
@@ -91,6 +92,13 @@ export type ImapClientAdapter = {
   ) => Promise<ImapFetchedMessage[]>;
 };
 
+export type ImapNetworkFeatureGuard = {
+  assertFeatureAllowed: (
+    workspaceId: string,
+    featureId: Extract<NetworkFeatureId, "imapImport">
+  ) => void;
+};
+
 export type ImportImapMessagesInput = {
   workspaceId: string;
   containerId: string;
@@ -118,6 +126,7 @@ export class ImapImportService {
   private readonly connection: DatabaseConnection;
   private readonly credentialStore: ImapCredentialStore;
   private readonly idFactory: (prefix: string) => string;
+  private readonly networkFeatureGuard: ImapNetworkFeatureGuard | null;
   private readonly now: () => Date;
 
   constructor(input: {
@@ -125,12 +134,14 @@ export class ImapImportService {
     client?: ImapClientAdapter;
     credentialStore?: ImapCredentialStore;
     idFactory?: (prefix: string) => string;
+    networkFeatureGuard?: ImapNetworkFeatureGuard;
     now?: () => Date;
   }) {
     this.connection = input.connection;
     this.client = input.client ?? unavailableImapClientAdapter;
     this.credentialStore = input.credentialStore ?? unavailableCredentialStore;
     this.idFactory = input.idFactory ?? ((prefix) => createLocalId(prefix));
+    this.networkFeatureGuard = input.networkFeatureGuard ?? null;
     this.now = input.now ?? (() => new Date());
   }
 
@@ -202,6 +213,7 @@ export class ImapImportService {
     settings?: ImapImportSettings;
   }): Promise<ImapConnectionTestResult> {
     const settings = this.resolveSettings(input);
+    this.assertImapEnabled(settings.workspaceId);
     const credential = await this.requireCredential(settings.accountKey);
     return this.client.testConnection(settings, credential);
   }
@@ -210,6 +222,7 @@ export class ImapImportService {
     validateNonEmptyString(input.workspaceId, "workspaceId");
     validateNonEmptyString(input.containerId, "containerId");
     const settings = this.resolveSettings(input);
+    this.assertImapEnabled(settings.workspaceId);
     const credential = await this.requireCredential(settings.accountKey);
     const timestamp = this.now().toISOString();
     const repository = new ImapImportRepository(this.connection);
@@ -385,6 +398,10 @@ export class ImapImportService {
     }
 
     return credential;
+  }
+
+  private assertImapEnabled(workspaceId: string): void {
+    this.networkFeatureGuard?.assertFeatureAllowed(workspaceId, "imapImport");
   }
 }
 

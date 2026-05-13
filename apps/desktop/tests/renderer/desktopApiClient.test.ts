@@ -756,6 +756,32 @@ function createMockApi(
           updatedAt: "2026-05-10T03:20:00.000Z"
         })
     },
+    privacy: {
+      getSettings: async () =>
+        apiOk({
+          workspaceId: "workspace_1",
+          metadataFetchEnabled: false,
+          webWidgetsEnabled: false,
+          icsUrlImportEnabled: false,
+          imapImportEnabled: false,
+          browserCaptureEnabled: false,
+          telemetryEnabled: false,
+          telemetryNotice: "Local Work OS does not include telemetry.",
+          updatedAt: null
+        }),
+      updateSettings: async () =>
+        apiOk({
+          workspaceId: "workspace_1",
+          metadataFetchEnabled: true,
+          webWidgetsEnabled: true,
+          icsUrlImportEnabled: false,
+          imapImportEnabled: false,
+          browserCaptureEnabled: false,
+          telemetryEnabled: false,
+          telemetryNotice: "Local Work OS does not include telemetry.",
+          updatedAt: "2026-05-14T02:30:00.000Z"
+        })
+    },
     diagnostics: {
       runWorkspaceIntegrityCheck: async () => apiOk(workspaceIntegritySummary()),
       repairAttachment: async () => apiOk(null),
@@ -2061,6 +2087,27 @@ describe("desktop API client", () => {
         theme: "dark",
         density: "compact",
         fontSize: "large"
+      }
+    });
+    await expect(client.privacy!.getSettings("workspace_1")).resolves.toMatchObject({
+      ok: true,
+      data: {
+        telemetryEnabled: false,
+        metadataFetchEnabled: false
+      }
+    });
+    await expect(
+      client.privacy!.updateSettings({
+        workspaceId: "workspace_1",
+        metadataFetchEnabled: true,
+        webWidgetsEnabled: true
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        metadataFetchEnabled: true,
+        webWidgetsEnabled: true,
+        telemetryEnabled: false
       }
     });
     await expect(client.diagnostics.runWorkspaceIntegrityCheck()).resolves.toMatchObject({

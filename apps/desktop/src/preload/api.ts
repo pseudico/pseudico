@@ -3570,6 +3570,27 @@ export type UpdateAppearanceSettingsInput = {
   fontSize?: AppearanceFontSizePreference;
 };
 
+export type PrivacyNetworkSettingsSummary = {
+  workspaceId: string;
+  metadataFetchEnabled: boolean;
+  webWidgetsEnabled: boolean;
+  icsUrlImportEnabled: boolean;
+  imapImportEnabled: boolean;
+  browserCaptureEnabled: boolean;
+  telemetryEnabled: false;
+  telemetryNotice: string;
+  updatedAt: string | null;
+};
+
+export type UpdatePrivacyNetworkSettingsInput = {
+  workspaceId?: string;
+  metadataFetchEnabled?: boolean;
+  webWidgetsEnabled?: boolean;
+  icsUrlImportEnabled?: boolean;
+  imapImportEnabled?: boolean;
+  browserCaptureEnabled?: boolean;
+};
+
 export const LOCAL_WORK_OS_IPC_CHANNELS = {
   workspace: {
     createWorkspace: "local-work-os:workspace:create-workspace",
@@ -3890,6 +3911,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   appearance: {
     getSettings: "local-work-os:appearance:get-settings",
     updateSettings: "local-work-os:appearance:update-settings"
+  },
+  privacy: {
+    getSettings: "local-work-os:privacy:get-settings",
+    updateSettings: "local-work-os:privacy:update-settings"
   },
   diagnostics: {
     runWorkspaceIntegrityCheck:
@@ -4811,6 +4836,14 @@ export type LocalWorkOsIpcContracts = {
     input: UpdateAppearanceSettingsInput;
     result: ApiResult<AppearanceSettingsSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.privacy.getSettings]: {
+    input: string | undefined;
+    result: ApiResult<PrivacyNetworkSettingsSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.privacy.updateSettings]: {
+    input: UpdatePrivacyNetworkSettingsInput;
+    result: ApiResult<PrivacyNetworkSettingsSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.diagnostics.runWorkspaceIntegrityCheck]: {
     input: RunWorkspaceIntegrityCheckInput | undefined;
     result: ApiResult<WorkspaceIntegritySummary>;
@@ -5595,6 +5628,14 @@ export type LocalWorkOsApi = {
     updateSettings: (
       input: UpdateAppearanceSettingsInput
     ) => Promise<ApiResult<AppearanceSettingsSummary>>;
+  };
+  privacy?: {
+    getSettings: (
+      workspaceId?: string
+    ) => Promise<ApiResult<PrivacyNetworkSettingsSummary>>;
+    updateSettings: (
+      input: UpdatePrivacyNetworkSettingsInput
+    ) => Promise<ApiResult<PrivacyNetworkSettingsSummary>>;
   };
   diagnostics: {
     runWorkspaceIntegrityCheck: (
@@ -6388,6 +6429,12 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.appearance.getSettings, workspaceId),
       updateSettings: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.appearance.updateSettings, input)
+    },
+    privacy: {
+      getSettings: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.privacy.getSettings, workspaceId),
+      updateSettings: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.privacy.updateSettings, input)
     },
     diagnostics: {
       runWorkspaceIntegrityCheck: (input) =>

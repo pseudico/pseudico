@@ -58,6 +58,7 @@ export function DashboardPage({
   const [selectedWidgetType, setSelectedWidgetType] = useState("today");
   const [savedViewId, setSavedViewId] = useState("");
   const [widgetMutationBusy, setWidgetMutationBusy] = useState(false);
+  const [webWidgetsEnabled, setWebWidgetsEnabled] = useState(false);
 
   useEffect(() => {
     if (initialDashboard !== undefined) {
@@ -66,6 +67,7 @@ export function DashboardPage({
 
     if (currentWorkspace === null) {
       setDashboard(null);
+      setWebWidgetsEnabled(false);
       setLoading(false);
       setError(null);
       return;
@@ -78,7 +80,11 @@ export function DashboardPage({
       setLoading(true);
       setError(null);
 
-      const result = await apiClient.dashboard.getDefault({ workspaceId });
+      const [result, privacyResult] = await Promise.all([
+        apiClient.dashboard.getDefault({ workspaceId }),
+        apiClient.privacy?.getSettings(workspaceId) ??
+          Promise.resolve({ ok: true as const, data: null })
+      ]);
 
       if (!active) {
         return;
@@ -92,6 +98,11 @@ export function DashboardPage({
       }
 
       setDashboard(result.data);
+      setWebWidgetsEnabled(
+        privacyResult.ok && privacyResult.data !== null
+          ? privacyResult.data.webWidgetsEnabled
+          : false
+      );
     }
 
     void loadDashboard();
@@ -480,6 +491,7 @@ export function DashboardPage({
             busyTaskId={busyTaskId}
             loading={loading && dashboard === null}
             widget={widget}
+            webWidgetsEnabled={webWidgetsEnabled}
             onOpenActivityTarget={openActivityTarget}
             onOpenFavorite={openFavorite}
             onOpenProjectHealth={openProjectHealth}
@@ -629,6 +641,7 @@ type DashboardWidgetRendererProps = {
   widget: DashboardWidgetSummary;
   loading: boolean;
   busyTaskId: string | null;
+  webWidgetsEnabled: boolean;
   onOpenTask: (task: DashboardTaskWidgetItem) => void;
   onSnoozeTask: (task: DashboardTaskWidgetItem, preset: SnoozePreset) => Promise<void>;
   onRescheduleTask: (task: DashboardTaskWidgetItem, dueAt: string | null) => Promise<void>;
@@ -641,6 +654,7 @@ function DashboardWidgetRenderer({
   widget,
   loading,
   busyTaskId,
+  webWidgetsEnabled,
   onOpenTask,
   onSnoozeTask,
   onRescheduleTask,
@@ -763,7 +777,7 @@ function DashboardWidgetRenderer({
           <WebWidget
             title={widget.widget.title ?? readString(config.title, "Saved web link")}
             url={readOptionalString(config.url)}
-            networkEnabled={config.networkEnabled === true}
+            networkEnabled={config.networkEnabled === true && webWidgetsEnabled}
           />
         </div>
       );

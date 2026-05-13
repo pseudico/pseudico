@@ -1,4 +1,8 @@
-import { CaptureService, type BrowserCapturePayload } from "@local-work-os/features";
+import {
+  CaptureService,
+  PrivacySettingsService,
+  type BrowserCapturePayload
+} from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath
@@ -58,6 +62,10 @@ export class CaptureIntakeService {
     });
 
     try {
+      new PrivacySettingsService({ connection }).assertFeatureAllowed(
+        workspace.id,
+        "browserCapture"
+      );
       const captureService = new CaptureService({ connection });
       const basePayload = {
         ...input.payload,

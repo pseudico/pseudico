@@ -5131,3 +5131,65 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Need CI status and review/mergeability confirmation.
 Next actions: Commit/push this log update; move Linear to PR Open; inspect PR checks/reviews.
+
+## 2026-05-14T07:25:19.1311199+10:00
+Objective: Complete PSE-176 merge and prepare next ticket.
+Decisions made:
+- Squash-merged PR #165 at 7d45fe830082d45520dfc5ee8f631dbc20015e0b after CI passed and diff review was clean.
+- Deleted merged feature branch, pulled main locally, moved PSE-176 to Done, and promoted PSE-177 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Post-merge log entry is local-only until the next commit includes it.
+Next actions: Start PSE-177 next; leave all other issues outside Codex Ready.
+
+## 2026-05-14T07:28:49.6021057+10:00
+Objective: Answer ticket count and product-readiness question without changing plan/code.
+Decisions made:
+- Linear read-only counts show 163 Done and 26 remaining; PSE-177 is the sole Codex Ready issue.
+- Product is inspectable now as an alpha/dev app; better demo/release confidence comes after remaining M14 hardening/demo/packaging tickets.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Counts may change as new follow-up tickets are added.
+Next actions: None requested.
+
+- Timestamp: 2026-05-14T07:30:00.5906412+10:00
+- Objective: Run next Local Work OS ticket end-to-end.
+- Decisions made: Started reconciliation per Linear/GitHub workflow.
+- Files changed: docs/session_log.md
+- Open questions / risks: Active PR/issue state unknown until reconciliation completes.
+- Next actions: Reconcile Linear statuses; inspect GitHub PRs; update local checkout.
+
+- Timestamp: 2026-05-14T07:30:57.0867560+10:00
+- Objective: Reconcile active work before PSE-177 implementation.
+- Decisions made: No PR Open or In Progress issues; selected PSE-177; moved it to In Progress; pulled main after sandbox FETCH_HEAD denial.
+- Files changed: docs/session_log.md
+- Open questions / risks: Ticket acceptance criteria still need extraction from docs/tickets.
+- Next actions: Read docs; inspect code; create issue branch.
+
+- Timestamp: 2026-05-14T07:32:36.5717488+10:00
+- Objective: Resume PSE-177 execution after erroneous stop.
+- Decisions made: Continue on branch codex/PSE-177-no-telemetry-privacy-controls; keep scope limited to PSE-177.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need verify exact acceptance criteria and privacy-sensitive code paths.
+- Next actions: Read ticket docs; inspect Electron/network code; implement tests.
+
+- Timestamp: 2026-05-14T07:42:56.9605454+10:00
+- Objective: Implement PSE-177 privacy and network controls.
+- Decisions made: Added workspace app-setting defaults; centralized PrivacySettingsService; gated ICS URL, IMAP, browser capture; dashboard web widgets read privacy state.
+- Files changed: packages/features/src/privacy/*; apps/desktop/src/main/ipc/*Privacy*; apps/desktop/src/preload/api.ts; Settings/Dashboard; tests; docs/SECURITY.md
+- Open questions / risks: Typecheck may reveal mock/API surface updates needed.
+- Next actions: Run targeted tests; fix failures; run full checks.
+
+- Timestamp: 2026-05-14T07:44:14.3696809+10:00
+- Objective: Validate PSE-177 targeted implementation.
+- Decisions made: Fixed preload channel count after adding privacy get/update channels; targeted suite now passes unsandboxed due Vite spawn EPERM.
+- Files changed: apps/desktop/tests/preload/api.test.ts; docs/session_log.md
+- Open questions / risks: Full lint/typecheck/test/build still pending.
+- Next actions: Run full checks; fix any failures; publish PR.
+
+- Timestamp: 2026-05-14T07:47:34.7842107+10:00
+- Objective: Complete PSE-177 local validation.
+- Decisions made: pnpm lint/typecheck/test/build passed; test/build required escalation after Vite/electron-vite spawn EPERM in sandbox.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need PR CI/review before merge.
+- Next actions: Stage intended files; commit; push/open ready PR.

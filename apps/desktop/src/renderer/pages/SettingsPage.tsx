@@ -50,8 +50,10 @@ import type {
   MarkdownFolderImportExecuteSummary,
   MarkdownFolderImportPreviewSummary,
   MaintenanceJobSummary,
+  PrivacyNetworkSettingsSummary,
   RestoreWorkspaceSummary,
   SavedViewDiagnosticsSummary,
+  UpdatePrivacyNetworkSettingsInput,
   WorkspaceIntegritySummary
 } from "../../preload/api";
 
@@ -71,6 +73,30 @@ type AppearanceDraft = {
   fontSize: AppearanceFontSizePreference;
 };
 
+type PrivacyNetworkDraft = Required<
+  Pick<
+    UpdatePrivacyNetworkSettingsInput,
+    | "metadataFetchEnabled"
+    | "webWidgetsEnabled"
+    | "icsUrlImportEnabled"
+    | "imapImportEnabled"
+    | "browserCaptureEnabled"
+  >
+>;
+
+const defaultPrivacyNetworkSettings: PrivacyNetworkSettingsSummary = {
+  workspaceId: "",
+  metadataFetchEnabled: false,
+  webWidgetsEnabled: false,
+  icsUrlImportEnabled: false,
+  imapImportEnabled: false,
+  browserCaptureEnabled: false,
+  telemetryEnabled: false,
+  telemetryNotice:
+    "Local Work OS does not include telemetry or analytics. Optional network features stay off until explicitly enabled.",
+  updatedAt: null
+};
+
 export function SettingsPage({
   apiClient = desktopApiClient,
   initialCategories = []
@@ -85,6 +111,12 @@ export function SettingsPage({
     fontSize: appearance.settings.fontSize
   });
   const [appearanceSaving, setAppearanceSaving] = useState(false);
+  const [privacySettings, setPrivacySettings] =
+    useState<PrivacyNetworkSettingsSummary>(defaultPrivacyNetworkSettings);
+  const [privacyDraft, setPrivacyDraft] = useState<PrivacyNetworkDraft>(
+    toPrivacyNetworkDraft(defaultPrivacyNetworkSettings)
+  );
+  const [privacySaving, setPrivacySaving] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState(defaultCategoryColor);
   const [description, setDescription] = useState("");
@@ -164,6 +196,8 @@ export function SettingsPage({
       setBackupSchedulerSettings(null);
       setBackupSchedulerStatus(null);
       setMaintenanceJobs([]);
+      setPrivacySettings(defaultPrivacyNetworkSettings);
+      setPrivacyDraft(toPrivacyNetworkDraft(defaultPrivacyNetworkSettings));
       return;
     }
 
@@ -171,7 +205,13 @@ export function SettingsPage({
 
     async function loadSettingsData(): Promise<void> {
       setError(null);
-      const [categoryResult, backupResult, backupSettingsResult, maintenanceResult] = await Promise.all([
+      const [
+        categoryResult,
+        backupResult,
+        backupSettingsResult,
+        maintenanceResult,
+        privacyResult
+      ] = await Promise.all([
         apiClient.categories.list(currentWorkspace!.id),
         apiClient.backup.listBackups({ workspaceId: currentWorkspace!.id }),
         apiClient.backup.getAutomaticBackupSettings({
@@ -179,7 +219,15 @@ export function SettingsPage({
         }),
         apiClient.diagnostics.listMaintenanceJobs({
           workspaceId: currentWorkspace!.id
-        })
+        }),
+        apiClient.privacy?.getSettings(currentWorkspace!.id) ??
+          Promise.resolve({
+            ok: true as const,
+            data: {
+              ...defaultPrivacyNetworkSettings,
+              workspaceId: currentWorkspace!.id
+            }
+          })
       ]);
 
       if (!active) {
@@ -209,11 +257,18 @@ export function SettingsPage({
         return;
       }
 
+      if (!privacyResult.ok) {
+        setUserError(privacyResult.error, "Privacy settings unavailable");
+        return;
+      }
+
       setCategories(categoryResult.data);
       setBackups(backupResult.data);
       setBackupSchedulerSettings(backupSettingsResult.data.settings);
       setBackupSchedulerStatus(backupSettingsResult.data.status);
       setMaintenanceJobs(maintenanceResult.data);
+      setPrivacySettings(privacyResult.data);
+      setPrivacyDraft(toPrivacyNetworkDraft(privacyResult.data));
     }
 
     void loadSettingsData();
@@ -287,6 +342,44 @@ export function SettingsPage({
     } finally {
       setAppearanceSaving(false);
     }
+  }
+
+  async function savePrivacyNetworkSettings(
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> {
+    event.preventDefault();
+
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before changing privacy settings.");
+      return;
+    }
+
+    if (apiClient.privacy === undefined) {
+      setUserError("Privacy settings API is not available.");
+      return;
+    }
+
+    setPrivacySaving(true);
+    setError(null);
+
+    const result = await apiClient.privacy.updateSettings({
+      workspaceId: currentWorkspace.id,
+      ...privacyDraft
+    });
+
+    setPrivacySaving(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Privacy update failed");
+      return;
+    }
+
+    setPrivacySettings(result.data);
+    setPrivacyDraft(toPrivacyNetworkDraft(result.data));
+    showToast("Privacy and network preferences saved.", {
+      title: "Privacy updated",
+      tone: "success"
+    });
   }
 
   async function updateCategory(
@@ -1212,6 +1305,60 @@ export function SettingsPage({
         <p className="form-helper">
           Current: {appearance.settings.theme} theme, {appearance.settings.density} density,
           {appearance.settings.fontSize} font.
+        </p>
+      </section>
+
+      <section className="backup-management-panel" aria-label="Privacy and network">
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <h3>Privacy &amp; Network</h3>
+            <p className="muted-text">
+              Optional network-capable features are off by default and must be
+              enabled explicitly for this local workspace.
+            </p>
+          </div>
+          <ShieldCheck size={20} aria-hidden="true" />
+        </div>
+        <div className="backup-list-row">
+          <div>
+            <strong>No telemetry</strong>
+            <span>{privacySettings.telemetryNotice}</span>
+          </div>
+          <div className="backup-list-meta">
+            <span>Telemetry: off</span>
+            <span>Cloud sync: not included</span>
+          </div>
+        </div>
+        <form className="appearance-settings-form" onSubmit={savePrivacyNetworkSettings}>
+          {privacyNetworkOptions.map((option) => (
+            <label className="settings-checkbox-label" key={option.field}>
+              <input
+                checked={privacyDraft[option.field]}
+                disabled={privacySaving || currentWorkspace === null}
+                type="checkbox"
+                onChange={(event) =>
+                  setPrivacyDraft((current) => ({
+                    ...current,
+                    [option.field]: event.target.checked
+                  }))
+                }
+              />
+              <span>
+                <strong>{option.label}</strong>
+                <small>{option.description}</small>
+              </span>
+            </label>
+          ))}
+          <button
+            className="primary-button compact-button"
+            disabled={privacySaving || currentWorkspace === null}
+            type="submit"
+          >
+            Save privacy settings
+          </button>
+        </form>
+        <p className="form-helper">
+          Current network controls: {formatEnabledPrivacyFeatures(privacySettings)}.
         </p>
       </section>
 
@@ -2328,6 +2475,60 @@ function CategoryListRow({
 
 function compareCategories(left: CategorySummary, right: CategorySummary): number {
   return left.name.localeCompare(right.name);
+}
+
+const privacyNetworkOptions: Array<{
+  field: keyof PrivacyNetworkDraft;
+  label: string;
+  description: string;
+}> = [
+  {
+    field: "metadataFetchEnabled",
+    label: "Link metadata fetch",
+    description: "Allow optional title/description/favicon fetching for web links."
+  },
+  {
+    field: "webWidgetsEnabled",
+    label: "Web widgets",
+    description: "Allow saved dashboard web links to be opened from widget cards."
+  },
+  {
+    field: "icsUrlImportEnabled",
+    label: "ICS URL import",
+    description: "Allow calendar feeds to be imported from explicit http(s) URLs."
+  },
+  {
+    field: "imapImportEnabled",
+    label: "IMAP import",
+    description: "Allow local adapter-backed mailbox connection tests and imports."
+  },
+  {
+    field: "browserCaptureEnabled",
+    label: "Browser capture",
+    description: "Allow the local browser capture bridge to accept paired captures."
+  }
+];
+
+function toPrivacyNetworkDraft(
+  settings: PrivacyNetworkSettingsSummary
+): PrivacyNetworkDraft {
+  return {
+    metadataFetchEnabled: settings.metadataFetchEnabled,
+    webWidgetsEnabled: settings.webWidgetsEnabled,
+    icsUrlImportEnabled: settings.icsUrlImportEnabled,
+    imapImportEnabled: settings.imapImportEnabled,
+    browserCaptureEnabled: settings.browserCaptureEnabled
+  };
+}
+
+function formatEnabledPrivacyFeatures(
+  settings: PrivacyNetworkSettingsSummary
+): string {
+  const enabled = privacyNetworkOptions
+    .filter((option) => settings[option.field])
+    .map((option) => option.label);
+
+  return enabled.length === 0 ? "all optional network features off" : enabled.join(", ");
 }
 
 function BackupListRow({
