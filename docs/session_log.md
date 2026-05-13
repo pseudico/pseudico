@@ -5053,3 +5053,81 @@ Open questions / risks:
 - CI must rerun after force-push.
 Next actions:
 - Amend/push PR and wait for CI.
+
+## 2026-05-14T07:08:35.6441537+10:00
+Objective: Merge PSE-175 and prepare next ticket.
+Decisions made:
+- Squash-merged PR #164 at 80d8c901 after CI passed and no review threads.
+- Moved PSE-175 to Done; promoted PSE-176 as the only Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Final session log entry is local-only until a future commit includes it.
+Next actions:
+- Start PSE-176 next; keep other issues in Backlog.
+
+## 2026-05-14T07:10:47.2611907+10:00
+Objective: Reconcile active Linear/GitHub work before starting next Local Work OS ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found; one Codex Ready issue found: PSE-176.
+- No open GitHub PRs found for pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked files exist and will be left untouched.
+Next actions: Move PSE-176 to In Progress; read docs; implement scoped spike deliverable.
+
+## 2026-05-14T07:11:49.6835824+10:00
+Objective: Start PSE-176 optional workspace encryption spike.
+Decisions made:
+- Moved PSE-176 to In Progress and created branch codex/PSE-176-optional-workspace-encryption-research.
+- Treat ticket as docs-first spike with optional prototype only; avoid production format changes.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need find best repo-aligned prototype surface without changing persisted workspace format.
+Next actions: Inspect code/docs for existing security patterns; draft ADR; add lightweight testable contracts if useful.
+
+## 2026-05-14T07:15:40.0823308+10:00
+Objective: Implement PSE-176 encryption spike artifacts.
+Decisions made:
+- Added proposed ADR recommending SQLCipher-backed DB encryption plus separate attachment envelopes.
+- Added pure core prototype planner; no production workspace format or migration changes.
+Files changed:
+- packages/core/src/services/workspaceEncryption.ts
+- packages/core/src/index.ts
+- packages/core/tests/workspaceEncryption.test.ts
+- docs/DECISIONS/ADR-0004-optional-workspace-encryption-spike.md
+- docs/SECURITY.md
+- docs/MODULE_REGISTRY.md
+- docs/session_log.md
+Open questions / risks: Need validation from checks and PR/CI.
+Next actions: Run targeted tests; run lint/typecheck/test/build; fix failures.
+
+## 2026-05-14T07:17:52.7561894+10:00
+Objective: Verify PSE-176 locally before publishing PR.
+Decisions made:
+- pnpm lint, typecheck, full test, and build passed; sandbox EPERM reruns used for Vitest/build where needed.
+- Keep unrelated untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi untouched.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI/review may request changes after PR opens.
+Next actions: Stage scoped files; commit; push; open ready PR.
+
+## 2026-05-14T07:18:38.2969019+10:00
+Objective: Commit PSE-176 scoped changes.
+Decisions made:
+- Created local commit for ADR, security/module docs, core prototype planner, tests, and session log.
+- Unrelated untracked files remain outside staging.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need push and PR creation.
+Next actions: Amend log into commit; push branch; open PR.
+
+## 2026-05-14T07:20:05.1713573+10:00
+Objective: Open PSE-176 PR.
+Decisions made:
+- Opened ready-for-review PR #165 for PSE-176 against main.
+- PR body links Linear issue and documents checks, scope, non-scope, and follow-up gates.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need CI status and review/mergeability confirmation.
+Next actions: Commit/push this log update; move Linear to PR Open; inspect PR checks/reviews.

@@ -100,6 +100,7 @@ renderer-only implementation.
 | Export | Own local export orchestration and portable archive outputs. | JSON exports, Markdown exports, CSV/TSV exports, manifests | Workspace, files, metadata, projects, contacts, tasks, notes | Backup, import later, maintenance | MVP |
 | Local Email Import | Own local EML/Maildir parsing, preview summaries, task creation, and original-email attachment preservation. | Imported email task payloads, original `.eml` attachments | Tasks, files/attachments, metadata, search, activity log, Electron main/preload IPC | Inbox, Quick Add/import workflows, search | V2 |
 | Printing | Own sanitized local print/PDF rendering for selected items and container/view projections. | Print HTML documents, PDF export summaries, print export activity | Workspace, items, projects, contacts, collections, dashboard, Electron printToPDF | Export, activity, files metadata | V1 |
+| Optional Workspace Encryption | Research and gated future implementation planning for opt-in local at-rest encryption of SQLite data, attachments, backups, exports, and derived caches. | Encryption gates, unlock contract, recovery plan, encrypted workspace migration plan | Workspace, Database, Files, Backup, Export, Search, Electron main/preload IPC | Future security hardening tickets | Future |
 
 ## Platform And Future Modules
 
@@ -994,3 +995,14 @@ Owns local .ics import into read-only calendar source/event records, calendar pr
 ### Optional IMAP Import
 
 Owns optional local IMAP account settings, connection-test/import orchestration, duplicate-prevention markers, and run history. Does not own hosted email capture, cloud sync, telemetry, or password storage in SQLite. Integrates with the existing local email-to-task importer so imported mailbox messages use task/search/activity flows already present in the app.
+
+### Optional Workspace Encryption
+
+Owns the research and future gated implementation plan for optional local
+workspace encryption. A production implementation must use a vetted
+SQLite-encryption adapter, keep all unlock/key material behind Electron
+main/preload IPC, encrypt attachments outside the database, and define
+backup/export/search/recovery behavior before any workspace migration. Does not
+own hosted recovery, cloud key escrow, telemetry, renderer key handling, or
+homegrown cryptography. See
+`docs/DECISIONS/ADR-0004-optional-workspace-encryption-spike.md`.
