@@ -17,7 +17,7 @@ As of the M6 documentation sync, the repository contains the local-only MVP
 foundation for workspace creation/opening, SQLite bootstrap and repositories,
 Inbox/project containers, tasks, lists, notes, links, file attachments,
 metadata, activity, search, saved views/collections, Today planning, dashboard
-widgets, project health, local reminder foundations, backup, export, import validation, smoke tests,
+widgets, project health, local reminder foundations, backup, export, import validation, local EML/Maildir email-to-task import, smoke tests,
 packaging verification, performance guardrails, app-wide error/toast states,
 and data-integrity/search audit guidance.
 
@@ -43,8 +43,10 @@ Known limitations for MVP release planning:
 - Search is local and service-backed, with structured query tokens for type, tag,
   category, due, status, file presence, and project scoping; ranking, diagnostics,
   and rebuild UX are intentionally basic.
-- Import validation exists for workspace JSON, and valid workspace JSON exports
-  can now be restored into a separate new workspace folder where feasible.
+- Import validation exists for workspace JSON, valid workspace JSON exports
+  can now be restored into a separate new workspace folder where feasible, and
+  local EML/Maildir messages can be imported as Inbox tasks with the original
+  email copied into attachments.
 - Backups and exports are manual local actions. Manual backup restore into a new
   workspace is available; automatic backup scheduling and release-grade
   integrity reporting remain future work.

@@ -541,7 +541,22 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       validateWorkspaceExportJson: (input) =>
         callApi(() => api.import.validateWorkspaceExportJson(input)),
       chooseAndValidateWorkspaceExportJson: () =>
-        callApi(() => api.import.chooseAndValidateWorkspaceExportJson())
+        callApi(() => api.import.chooseAndValidateWorkspaceExportJson()),
+      previewEmails: (input) =>
+        callApi(() =>
+          api.import.previewEmails?.(input) ??
+          unavailable("Email import preview API is not available.")
+        ),
+      importEmailsAsTasks: (input) =>
+        callApi(() =>
+          api.import.importEmailsAsTasks?.(input) ??
+          unavailable("Email import API is not available.")
+        ),
+      chooseAndImportEmailsAsTasks: (input) =>
+        callApi(() =>
+          api.import.chooseAndImportEmailsAsTasks?.(input) ??
+          unavailable("Email import chooser API is not available.")
+        )
     },
     export: {
       exportWorkspaceJson: (input) =>
@@ -1119,7 +1134,16 @@ export const desktopApiClient: LocalWorkOsApi = {
     validateWorkspaceExportJson: (input) =>
       getDesktopApiClient().import.validateWorkspaceExportJson(input),
     chooseAndValidateWorkspaceExportJson: () =>
-      getDesktopApiClient().import.chooseAndValidateWorkspaceExportJson()
+      getDesktopApiClient().import.chooseAndValidateWorkspaceExportJson(),
+    previewEmails: (input) =>
+      getDesktopApiClient().import.previewEmails?.(input) ??
+      unavailable("Email import preview API is not available."),
+    importEmailsAsTasks: (input) =>
+      getDesktopApiClient().import.importEmailsAsTasks?.(input) ??
+      unavailable("Email import API is not available."),
+    chooseAndImportEmailsAsTasks: (input) =>
+      getDesktopApiClient().import.chooseAndImportEmailsAsTasks?.(input) ??
+      unavailable("Email import chooser API is not available.")
   },
   export: {
     exportWorkspaceJson: (input) =>

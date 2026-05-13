@@ -309,6 +309,42 @@ export type ImportValidationSummary = {
   issues: ImportValidationIssueSummary[];
 };
 
+export type EmailImportIssueSummary = {
+  sourcePath: string;
+  code: "empty_message" | "parse_failed" | "task_create_failed" | "attachment_failed";
+  message: string;
+};
+
+export type EmailImportPreviewSummary = {
+  sourcePath: string;
+  fileName: string;
+  subject: string;
+  from: string | null;
+  to: string | null;
+  date: string | null;
+  taskTitle: string;
+  bodyPreview: string;
+  inlineTags: string[];
+  warning: string | null;
+};
+
+export type EmailImportedTaskSummary = {
+  itemId: string;
+  title: string;
+  sourcePath: string;
+  attachmentId: string | null;
+};
+
+export type EmailTaskImportSummary = {
+  workspaceId: string;
+  containerId: string;
+  importedAt: string;
+  importedCount: number;
+  skippedCount: number;
+  importedTasks: EmailImportedTaskSummary[];
+  issues: EmailImportIssueSummary[];
+};
+
 export type RunWorkspaceIntegrityCheckInput = {
   workspaceId?: string;
 };
@@ -407,6 +443,18 @@ export type RepairSavedViewQuerySummary = {
 export type ValidateWorkspaceExportJsonInput = {
   filePath: string;
 };
+
+export type ImportEmailsAsTasksInput = {
+  sourcePath: string;
+  workspaceId?: string;
+  containerId?: string;
+  extractTags?: boolean;
+};
+
+export type ChooseAndImportEmailsInput = Omit<
+  ImportEmailsAsTasksInput,
+  "sourcePath"
+>;
 
 export type CreateWorkspaceInput = {
   name: string;
@@ -3493,7 +3541,11 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     validateWorkspaceExportJson:
       "local-work-os:import:validate-workspace-export-json",
     chooseAndValidateWorkspaceExportJson:
-      "local-work-os:import:choose-and-validate-workspace-export-json"
+      "local-work-os:import:choose-and-validate-workspace-export-json",
+    previewEmails: "local-work-os:import:preview-emails",
+    importEmailsAsTasks: "local-work-os:import:emails-as-tasks",
+    chooseAndImportEmailsAsTasks:
+      "local-work-os:import:choose-and-import-emails-as-tasks"
   },
   export: {
     exportWorkspaceJson: "local-work-os:export:export-workspace-json",
@@ -4345,6 +4397,18 @@ export type LocalWorkOsIpcContracts = {
     input: undefined;
     result: ApiResult<ImportValidationSummary | null>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.import.previewEmails]: {
+    input: ImportEmailsAsTasksInput;
+    result: ApiResult<EmailImportPreviewSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.import.importEmailsAsTasks]: {
+    input: ImportEmailsAsTasksInput;
+    result: ApiResult<EmailTaskImportSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndImportEmailsAsTasks]: {
+    input: ChooseAndImportEmailsInput | undefined;
+    result: ApiResult<EmailTaskImportSummary | null>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.export.exportWorkspaceJson]: {
     input: ExportWorkspaceJsonInput | undefined;
     result: ApiResult<WorkspaceJsonExportSummary>;
@@ -5087,6 +5151,15 @@ export type LocalWorkOsApi = {
     chooseAndValidateWorkspaceExportJson: () => Promise<
       ApiResult<ImportValidationSummary | null>
     >;
+    previewEmails?: (
+      input: ImportEmailsAsTasksInput
+    ) => Promise<ApiResult<EmailImportPreviewSummary[]>>;
+    importEmailsAsTasks?: (
+      input: ImportEmailsAsTasksInput
+    ) => Promise<ApiResult<EmailTaskImportSummary>>;
+    chooseAndImportEmailsAsTasks?: (
+      input?: ChooseAndImportEmailsInput
+    ) => Promise<ApiResult<EmailTaskImportSummary | null>>;
   };
   export: {
     exportWorkspaceJson: (
@@ -5820,6 +5893,15 @@ export function createLocalWorkOsApi(
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndValidateWorkspaceExportJson,
           undefined
+        ),
+      previewEmails: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.import.previewEmails, input),
+      importEmailsAsTasks: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.import.importEmailsAsTasks, input),
+      chooseAndImportEmailsAsTasks: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndImportEmailsAsTasks,
+          input
         )
     },
     export: {

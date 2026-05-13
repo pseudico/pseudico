@@ -4556,3 +4556,90 @@ Next actions:
 - Review git diff/status.
 - Commit and push branch.
 - Open ready PR and move Linear to PR Open.
+
+## 2026-05-13 14:48:33 +10:00
+Objective: Merge PSE-166 and prepare next ticket.
+Decisions made:
+- PR #155 passed CI and review-thread check, then squash-merged.
+- Deleted remote/local feature branch and fast-forwarded local main.
+- Moved PSE-166 to Done and promoted PSE-167 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Local untracked files remain unrelated.
+Next actions:
+- Start PSE-167 in a future run.
+## 2026-05-13 15:01:42 +10:00
+Objective: Reconcile active Linear/GitHub work and start next ticket.
+Decisions made:
+- No PSE issues found in PR Open or In Progress.
+- Selected PSE-167 as the single Codex Ready issue.
+- Proceeding to implement EML/Maildir email import scope.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need inspect ticket docs/source before implementation.
+Next actions:
+- Move PSE-167 to In Progress.
+- Read linked docs and relevant source.
+- Create issue branch and implement.
+## 2026-05-13 15:36:35 +10:00
+Objective: Implement PSE-167 email import foundation.
+Decisions made:
+- Added EmailImportService for EML parsing, sanitized previews, task creation, and original attachment preservation.
+- Added Electron IPC path for local EML/Maildir scanning and Settings import action to Inbox.
+- Avoided schema changes by using task items plus existing attachment metadata.
+Files changed:
+- packages/features/src/import/EmailImportService.ts
+- apps/desktop/src/main/ipc/importHandlers.ts
+- apps/desktop/src/renderer/pages/SettingsPage.tsx
+Open questions / risks:
+- Need typecheck/test to catch API wiring issues.
+Next actions:
+- Run focused feature tests.
+- Fix compile failures.
+- Update docs if needed.
+## 2026-05-13 15:44:23 +10:00
+Objective: Verify PSE-167 implementation locally.
+Decisions made:
+- Full lint, typecheck, test, and build pass after sandbox EPERM reruns where needed.
+- Updated docs for local email import data model/module ownership.
+- Kept unrelated untracked .playwright-mcp and gh installer untouched.
+Files changed:
+- apps/desktop/src/preload/api.ts
+- packages/features/tests/emailImportService.test.ts
+- docs/MODULE_REGISTRY.md
+Open questions / risks:
+- CI still must confirm in GitHub.
+Next actions:
+- Review diff.
+- Commit and push PSE-167 branch.
+- Open ready PR and update Linear.
+## 2026-05-13 15:46:33 +10:00
+Objective: Resume PSE-167 publishing flow.
+Decisions made:
+- User confirmed GitHub/PR flow must continue after local verification.
+- Keep current staged PSE-167 implementation scope.
+- Proceeding to commit, push, and open ready PR.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Git push/gh may require network escalation.
+Next actions:
+- Inspect staged files.
+- Commit branch.
+- Push/open PR.
+## 2026-05-13 15:48:49 +10:00
+Objective: Publish PSE-167 PR.
+Decisions made:
+- Committed 784f46d and pushed codex/PSE-167-email-import.
+- Opened ready PR #156 against main.
+- Moving Linear issue to PR Open with PR link.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- CI/review may still block merge.
+Next actions:
+- Check PR CI.
+- Review diff/threads.
+- Merge only if green.

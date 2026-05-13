@@ -139,8 +139,8 @@ MVP object graph:
   search-index repositories.
 - Feature services for projects, contacts, Inbox, tasks, lists, notes, links, files,
   metadata, saved views/collections, Today planning, dashboards, reminders, project
-  health, templates, workflows, backup, export, import validation, diagnostics,
-  and search hydration/orchestration.
+  health, templates, workflows, backup, export, import validation, local
+  EML/Maildir email-to-task import, diagnostics, and search hydration/orchestration.
 - File version snapshots now live in `attachment_versions`, keyed to local
   attachments with monotonically increasing version numbers, workspace-relative
   version storage paths, checksums, byte sizes, optional notes, and activity-log
@@ -198,4 +198,13 @@ Comments are local-only annotations stored in a dedicated comments table. Each c
 ### Calendar feeds (PSE-141)
 
 Local ICS imports persist read-only calendar sources in calendar_sources and events in calendar_events. Events store source UID, title, optional description/location, start/end timestamps, all-day flag, raw parsed metadata, soft-delete timestamp, and remain workspace-local. Network calendar sources are disabled unless an explicit network-enabled import path is used.
+
+### Local email import (PSE-167)
+
+Local EML/Maildir imports do not add a dedicated email table. Each imported
+message becomes a task item in the chosen container, currently Inbox by default,
+with sanitized header/body content in the task body. The original email file is
+copied into workspace attachment storage and linked to the task through existing
+attachment rows, so backup/export/search/activity flows use the established item
+and file metadata model.
 

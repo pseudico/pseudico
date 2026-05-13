@@ -69,7 +69,7 @@ export function registerDesktopIpc(
   registerExportIpc(services.workspaceService);
   registerPrintIpc(services.workspaceService);
   registerAppearanceIpc(services.workspaceService);
-  registerImportIpc();
+  registerImportIpc(services.workspaceService);
   registerDatabaseIpc(services.workspaceService);
   registerInboxIpc(services.workspaceService);
   registerProjectIpc(services.workspaceService);
