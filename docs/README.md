@@ -41,6 +41,8 @@ docs and the linked Linear issue.
   credential approach, duplicate prevention, and current adapter limitation.
 - `NOTION_IMPORT.md` documents the local-only Notion Markdown/CSV export
   adapter foundation, warnings, and unsupported scope.
+- `TODOIST_IMPORT.md` documents the local-only Todoist project CSV/backup ZIP
+  adapter foundation, warnings, and unsupported scope.
 - `CSV_TSV_IMPORT.md` documents local CSV/TSV task, contact, and project
   import preview, mapping, conflict behavior, and activity logging.
 - `import-research/COMMON_APP_IMPORT_FORMATS.md` records researched local

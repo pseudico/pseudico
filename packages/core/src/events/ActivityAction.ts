@@ -111,6 +111,7 @@ export const ActivityAction = {
   csvImportCompleted: "csv_import_completed",
   markdownFolderImportCompleted: "markdown_folder_import_completed",
   notionImportCompleted: "notion_import_completed",
+  todoistImportCompleted: "todoist_import_completed",
   templateCreated: "template_created",
   templateUpdated: "template_updated",
   templateDuplicated: "template_duplicated",
