@@ -64,9 +64,10 @@ new work should account for this implemented baseline:
 - Large-workspace benchmark services now provide deterministic local fixture
   seeding, service-level budgets, and report generation for open/search,
   dashboard, Today, and export performance gates.
-- External import foundations now include a local-only Notion Markdown/CSV
-  adapter service for previewing pages, database CSV rows, assets, unsupported
-  files, and source-field warnings before importing through existing
+- External import foundations now include local-only Notion Markdown/CSV,
+  Todoist CSV/ZIP, Trello JSON, and Evernote ENEX/HTML adapter services for
+  previewing source records, attachments/resources, unsupported scope, and
+  source-report warnings before importing through existing
   project/note/task/file/tag/search/activity flows.
 
 When adding a future module slice, prefer extending the owning feature service
@@ -953,6 +954,15 @@ including importer order, tradeoffs, fixture requirements, and proposed follow-u
 tickets. Does not own app-specific production importers, cloud connectors,
 account login, telemetry, remote attachment fetching, or proprietary UI/assets.
 See `docs/import-research/COMMON_APP_IMPORT_FORMATS.md`.
+
+### Evernote Import
+
+Owns local ENEX and HTML notebook export preview/import, including note title,
+tags, created/updated timestamp preservation in import metadata, matched local
+resources as note attachments, and source-report warnings for unsupported rich
+formatting. Does not own Evernote account/API access, remote resource fetching,
+or exact rich-text parity. Integrates with Projects, Notes, Tags,
+Files/attachments, Search, and Activity Log through existing service flows.
 
 ### Printing
 

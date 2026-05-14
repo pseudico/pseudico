@@ -113,6 +113,7 @@ export const ActivityAction = {
   notionImportCompleted: "notion_import_completed",
   todoistImportCompleted: "todoist_import_completed",
   trelloImportCompleted: "trello_import_completed",
+  evernoteImportCompleted: "evernote_import_completed",
   templateCreated: "template_created",
   templateUpdated: "template_updated",
   templateDuplicated: "template_duplicated",
