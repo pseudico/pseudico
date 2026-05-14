@@ -45,6 +45,8 @@ docs and the linked Linear issue.
   adapter foundation, warnings, and unsupported scope.
 - `TRELLO_IMPORT.md` documents the local-only Trello board JSON adapter
   foundation, archive handling, raw attachment matching, and unsupported scope.
+- `EVERNOTE_IMPORT.md` documents the local-only Evernote ENEX/HTML adapter
+  foundation, resource matching, timestamp preservation, and unsupported scope.
 - `CSV_TSV_IMPORT.md` documents local CSV/TSV task, contact, and project
   import preview, mapping, conflict behavior, and activity logging.
 - `import-research/COMMON_APP_IMPORT_FORMATS.md` records researched local

@@ -20,6 +20,9 @@ export {
   TrelloImportService
 } from "./TrelloImportService";
 export {
+  EvernoteImportService
+} from "./EvernoteImportService";
+export {
   ImapImportService,
   IMAP_IMPORT_SETTINGS_KEY
 } from "./ImapImportService";
@@ -116,6 +119,18 @@ export type {
   TrelloImportValidationIssue,
   TrelloRawAttachmentMatch
 } from "./TrelloImportService";
+export type {
+  EvernoteImportCreatedTarget,
+  EvernoteImportEntryKind,
+  EvernoteImportExecuteInput,
+  EvernoteImportExecuteSummary,
+  EvernoteImportPreviewInput,
+  EvernoteImportPreviewRow,
+  EvernoteImportPreviewSummary,
+  EvernoteImportSourceEntry,
+  EvernoteImportSourceReport,
+  EvernoteImportValidationIssue
+} from "./EvernoteImportService";
 export type {
   ImportValidationCounts,
   ImportValidationIssue,
