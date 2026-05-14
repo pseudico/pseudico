@@ -3477,10 +3477,17 @@ export type UpdateLinkInput = {
   categoryId?: string | null;
   containerTabId?: string | null;
   description?: string | null;
+  faviconPath?: string | null;
   pinned?: boolean;
+  previewImagePath?: string | null;
   sortOrder?: number;
   title?: string | null;
   url?: string;
+};
+
+export type FetchLinkMetadataInput = {
+  itemId: string;
+  workspaceId?: string;
 };
 
 export type OpenLinkSummary = {
@@ -3806,6 +3813,7 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     createLink: "local-work-os:links:create-link",
     updateLink: "local-work-os:links:update-link",
     listByContainer: "local-work-os:links:list-by-container",
+    fetchMetadata: "local-work-os:links:fetch-metadata",
     openExternal: "local-work-os:links:open-external",
     openUrlExternal: "local-work-os:links:open-url-external"
   },
@@ -4324,6 +4332,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.links.listByContainer]: {
     input: string;
     result: ApiResult<LinkSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.links.fetchMetadata]: {
+    input: FetchLinkMetadataInput;
+    result: ApiResult<LinkSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.links.openExternal]: {
     input: string;
@@ -5252,6 +5264,9 @@ export type LocalWorkOsApi = {
     ) => Promise<ApiResult<LinkSummary[]>>;
     openExternal: (itemId: string) => Promise<ApiResult<OpenLinkSummary>>;
     openUrlExternal: (url: string) => Promise<ApiResult<OpenExternalUrlSummary>>;
+    fetchMetadata?: (
+      input: FetchLinkMetadataInput
+    ) => Promise<ApiResult<LinkSummary>>;
     createLink: (input: CreateLinkInput) => Promise<ApiResult<LinkSummary>>;
     updateLink: (input: UpdateLinkInput) => Promise<ApiResult<LinkSummary>>;
   };
@@ -6057,6 +6072,8 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.openExternal, itemId),
       openUrlExternal: (url) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.openUrlExternal, url),
+      fetchMetadata: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.fetchMetadata, input),
       createLink: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.createLink, input),
       updateLink: (input) =>

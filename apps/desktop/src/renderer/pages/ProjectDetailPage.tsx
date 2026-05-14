@@ -1639,6 +1639,38 @@ export function ProjectDetailPage({
     return true;
   }
 
+  async function fetchProjectLinkMetadata(
+    item: LinkCardViewModel
+  ): Promise<void> {
+    if (project === null) {
+      return;
+    }
+
+    setLinkBusyId(item.id);
+    setLinkError(null);
+
+    if (apiClient.links.fetchMetadata === undefined) {
+      setLinkBusyId(null);
+      setLinkError("Link metadata fetch API is not available.");
+      return;
+    }
+
+    const result = await apiClient.links.fetchMetadata({
+      workspaceId: project.workspaceId,
+      itemId: item.id
+    });
+
+    if (!result.ok) {
+      setLinkBusyId(null);
+      setLinkError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    setLinkBusyId(null);
+  }
+
 
   async function updateProjectLocation(
     item: LocationCardViewModel,
@@ -2847,6 +2879,7 @@ export function ProjectDetailPage({
             disabled={linkBusyId === item.id}
             error={linkBusyId === item.id ? linkError : null}
             item={item}
+            onFetchMetadata={fetchProjectLinkMetadata}
             onOpen={openProjectLink}
             onSave={updateProjectLink}
           />
@@ -3632,6 +3665,8 @@ function toProjectLinkViewModel(
     linkTitle: link.linkTitle,
     description: link.description,
     domain: link.domain,
+    faviconPath: link.faviconPath,
+    previewImagePath: link.previewImagePath,
     metadata:
       link.domain === null ? [] : [{ label: "Domain", value: link.domain }]
   };

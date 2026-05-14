@@ -6262,3 +6262,66 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: GitHub CI and review/mergeability still pending.
 Next actions: Amend and push log; inspect PR diff/review threads; check CI.
+## 2026-05-15T06:30:20.3805735+10:00
+Objective: Merge PSE-133 and prepare next Codex Ready issue.
+Decisions made:
+- CI passed for PR #186; squash-merged as fd927563a1d31fae7fa67fa3c05f882f049dc8ee.
+- Deleted merged feature branch and moved PSE-133 to Done.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-134 is only promoted, not implemented in this run.
+Next actions: Start PSE-134; keep only one Codex Ready; leave unrelated untracked files untouched.
+## 2026-05-15T07:09:12.1727478+10:00
+Objective: Verify whether PSE-134 was already completed.
+Decisions made:
+- Git/PR searches found no PSE-134 or LWO-M11-019 merged PR/commit.
+- Existing metadata work is manual link metadata/privacy settings, not opt-in web fetcher.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-134 may overlap with existing privacy/link primitives but remains unimplemented.
+Next actions: Keep PSE-134 Codex Ready unless user wants a different backlog ticket promoted.
+## 2026-05-15T07:11:36.2769267+10:00
+Objective: Count remaining and completed Linear tickets.
+Decisions made:
+- Active incomplete issues are PSE-84, PSE-85, PSE-134, PSE-135, and PSE-136.
+- Project total is 189 visible issues, with 184 Done and 5 incomplete.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Counts exclude archived/non-project issues.
+Next actions: Continue PSE-134 or revisit backlog ordering if desired.
+## 2026-05-15T07:13:58.1534878+10:00
+Objective: Reconcile active work and start PSE-134.
+Decisions made:
+- No PR Open or In Progress Linear issues found; PSE-134 is the sole Codex Ready issue.
+- Existing untracked files and prior session-log edits will be preserved.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need inspect PSE-134 scope and existing link/privacy modules.
+Next actions: Move PSE-134 In Progress; read docs/source; branch and implement.
+## 2026-05-15T07:28:28.6354274+10:00
+Objective: Implement and validate PSE-134.
+Decisions made:
+- Added guarded main-process link metadata fetch with timeout and URL safety checks.
+- Reused existing link rows as the local metadata cache and kept manual edits intact.
+Files changed:
+- packages/features/src/links/LinkMetadataService.ts
+Open questions / risks: CI/review still pending after PR creation.
+Next actions: Review diff; commit/push; open PR.
+## 2026-05-15T07:31:10.5882908+10:00
+Objective: Commit PSE-134 implementation.
+Decisions made:
+- Committed guarded opt-in link metadata fetch as ce64965c.
+- Verified lint, typecheck, tests, and build all pass locally.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PR, CI, and review status are still pending.
+Next actions: Amend log; push branch; open ready PR.
+## 2026-05-15T07:32:39.8653859+10:00
+Objective: Open PSE-134 PR and update Linear.
+Decisions made:
+- Opened ready PR #187 for PSE-134 against main.
+- Moved Linear PSE-134 to PR Open and linked/commented the PR.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub CI/review has not completed yet.
+Next actions: Push log update; inspect CI; merge only if clean.

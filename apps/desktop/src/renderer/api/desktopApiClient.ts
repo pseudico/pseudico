@@ -158,6 +158,10 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.links.listByContainer(containerId)),
       openExternal: (itemId) => callApi(() => api.links.openExternal(itemId)),
       openUrlExternal: (url) => callApi(() => api.links.openUrlExternal(url)),
+      fetchMetadata: (input) =>
+        api.links.fetchMetadata === undefined
+          ? unavailable("Link metadata fetch API is not available.")
+          : callApi(() => api.links.fetchMetadata!(input)),
       createLink: (input) => callApi(() => api.links.createLink(input)),
       updateLink: (input) => callApi(() => api.links.updateLink(input))
     },
@@ -837,6 +841,9 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().links.listByContainer(containerId),
     openExternal: (itemId) => getDesktopApiClient().links.openExternal(itemId),
     openUrlExternal: (url) => getDesktopApiClient().links.openUrlExternal(url),
+    fetchMetadata: (input) =>
+      getDesktopApiClient().links.fetchMetadata?.(input) ??
+      unavailable("Link metadata fetch API is not available."),
     createLink: (input) => getDesktopApiClient().links.createLink(input),
     updateLink: (input) => getDesktopApiClient().links.updateLink(input)
   },

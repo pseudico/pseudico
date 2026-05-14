@@ -57,6 +57,10 @@ Do not add these without explicit approval:
   Network settings. Link metadata fetch, web widgets, ICS URL import, IMAP
   import, and browser capture default to off and require explicit enablement
   before their service path can perform network-capable work.
+- Link metadata fetches run from Electron main only, apply HTTP(S)-only URL
+  validation, block localhost/private network and credentialed targets, enforce
+  a timeout, and cache fetched title/description/favicon/preview values on the
+  local link record.
 - Treat attachments, notes, project data, contacts, and imported files as local
   private user data.
 - Document any future network capability before implementation. Localhost-only
