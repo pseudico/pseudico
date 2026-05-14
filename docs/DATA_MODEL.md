@@ -202,8 +202,9 @@ Local ICS imports persist read-only calendar sources in calendar_sources and eve
 ### Local email import (PSE-167)
 
 Local EML/Maildir imports do not add a dedicated email table. Each imported
-message becomes a task item in the chosen container, currently Inbox by default,
-with sanitized header/body content in the task body. The original email file is
+message becomes a task item in the chosen container, currently Inbox by default
+or the active project when an `.eml` file is dropped on project content, with
+sanitized header/body content in the task body. The original email file is
 copied into workspace attachment storage and linked to the task through existing
 attachment rows, so backup/export/search/activity flows use the established item
 and file metadata model.

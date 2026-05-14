@@ -6401,3 +6401,64 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: PR/CI still pending.
 Next actions: Amend log into commit; push branch; open PR.
+
+## 2026-05-15T08:04:00
+Objective: Merge PSE-135 and prepare next M11 issue.
+Decisions made:
+- PR #188 merged with squash commit 934718129c2ace44c949165e545afa5a3581b317.
+- Deleted merged branch codex/PSE-135-sandboxed-web-widget-safety and pulled main.
+- Selected PSE-136 as next M11 issue to promote.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-136 may overlap existing email import foundations.
+Next actions: Move PSE-136 In Progress; branch; inspect ticket/source.
+
+## 2026-05-15T08:04:25
+Objective: Start PSE-136 implementation branch.
+Decisions made:
+- Moved PSE-136 from Codex Ready to In Progress.
+- Created branch codex/PSE-136-local-eml-email-object-support from updated main.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need reconcile ticket with existing email import features.
+Next actions: Read PSE-136 ticket; inspect email/import modules; plan smallest gap.
+
+## 2026-05-15T08:10:56
+Objective: Implement PSE-136 renderer email drop bridge.
+Decisions made:
+- Reused existing EmailImportService/task+attachment model rather than adding email_details schema.
+- Routed .eml/Maildir drops through preload drag/drop paths and importEmailsAsTasks IPC.
+Files changed:
+- apps/desktop/src/renderer/pages/InboxPage.tsx; apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/utils/emailDropImport.ts; apps/desktop/tests/renderer/emailDropImport.test.ts; docs/session_log.md
+Open questions / risks: Need typecheck/test to confirm optional import API typing.
+Next actions: Run targeted tests; fix compile/lint; then full checks.
+
+## 2026-05-15T08:14:33
+Objective: Verify PSE-136 locally.
+Decisions made:
+- Full lint/typecheck/test/build passed; test/build required EPERM sandbox reruns.
+- Added docs for Inbox/project EML drop behavior and renderer coverage map.
+Files changed:
+- apps/desktop/src/renderer/**; apps/desktop/tests/renderer/emailDropImport.test.ts; docs/DATA_MODEL.md; docs/MODULE_REGISTRY.md; docs/PRODUCT_SPEC.md; docs/TEST_COVERAGE_MAP.md; docs/session_log.md
+Open questions / risks: Need publish PR and await CI/review before merge.
+Next actions: Review diff; commit; push/open ready PR.
+
+## 2026-05-15T08:15:40
+Objective: Commit PSE-136 implementation.
+Decisions made:
+- Created commit 78b354a9 for EML drop import support.
+- Left unrelated .playwright-mcp/ and gh installer untracked.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PR/CI still pending.
+Next actions: Amend log; push branch; open PR.
+
+## 2026-05-15T08:18:06
+Objective: Publish PSE-136 PR.
+Decisions made:
+- Pushed codex/PSE-136-local-eml-email-object-support and opened ready PR #189.
+- Moved Linear PSE-136 to PR Open with PR link/comment.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local log entry is post-PR and not yet on branch.
+Next actions: Wait for CI; merge if green; then move Linear Done.
