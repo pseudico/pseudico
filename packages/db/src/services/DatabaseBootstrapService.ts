@@ -12,9 +12,11 @@ import {
   type IdFactory,
   type WorkspaceSeedResult
 } from "./WorkspaceSeedService";
+import { dirname, join } from "node:path";
 
 export type BootstrapWorkspaceDatabaseInput = {
   databasePath: string;
+  migrationBackupsDirectoryPath?: string;
   workspaceId: string;
   workspaceName: string;
 };
@@ -62,12 +64,20 @@ export class DatabaseBootstrapService {
       databasePath?: string;
     }
   ): DatabaseBootstrapResult {
+    const databasePath = input.databasePath ?? connection.databasePath;
     const migrationService = new MigrationService({
       connection,
       ...(this.migrations === undefined ? {} : { migrations: this.migrations }),
       ...(this.now === undefined ? {} : { now: this.now })
     });
-    const migrations = migrationService.runPendingMigrations();
+    const migrations = migrationService.runPendingMigrations({
+      backupBeforeMigration: {
+        backupsDirectoryPath:
+          input.migrationBackupsDirectoryPath ??
+          inferWorkspaceBackupsDirectoryPath(databasePath),
+        label: "migration"
+      }
+    });
     const seedService = new WorkspaceSeedService({
       connection,
       ...(this.now === undefined ? {} : { now: this.now }),
@@ -80,11 +90,15 @@ export class DatabaseBootstrapService {
     });
 
     return {
-      databasePath: input.databasePath ?? connection.databasePath,
+      databasePath,
       workspaceId: seed.workspace.record.id,
       schemaVersion: migrations.currentVersion,
       migrations,
       seed
     };
   }
+}
+
+function inferWorkspaceBackupsDirectoryPath(databasePath: string): string {
+  return join(dirname(dirname(databasePath)), "backups");
 }

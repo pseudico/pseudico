@@ -12,9 +12,12 @@ export {
 export {
   MigrationService,
   type AppliedMigration,
+  type MigrationBackupInput,
+  type MigrationBackupResult,
   type MigrationDefinition,
   type MigrationRunResult,
-  type MigrationStatus
+  type MigrationStatus,
+  type RunPendingMigrationsInput
 } from "./services/MigrationService";
 export {
   DatabaseHealthService,

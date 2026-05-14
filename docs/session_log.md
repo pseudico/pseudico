@@ -5332,3 +5332,53 @@ Files changed:
 - packages/features/src/maintenance/MaintenanceService.ts; apps/desktop/src/main/ipc/diagnosticsHandlers.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/SettingsPage.tsx; docs
 Open questions / risks: Need push/PR, CI, and merge confirmation.
 Next actions: Review diff; commit; push/open PR.
+## 2026-05-14T11:09:34.7907375+10:00
+Objective: Finish PSE-180 merge and next-ticket handoff.
+Decisions made:
+- PR #169 passed CI and was squash-merged at 56450d6931b80fe3b0dcb5e4ac00e4399c293c66.
+- Deleted remote/local feature branch and fast-forwarded local main.
+- Moved PSE-180 to Done and promoted PSE-181 as the sole next Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Untracked .playwright-mcp/ and gh installer remain unrelated.
+Next actions: Start PSE-181 next; keep all other issues out of Codex Ready.
+## 2026-05-14T11:13:46.5023392+10:00
+Objective: Reconcile active Linear/GitHub work for next Local Work OS ticket.
+Decisions made:
+- No Linear issues in PR Open or In Progress; no open GitHub PRs.
+- Found exactly one Codex Ready issue, PSE-181, for implementation.
+- Local main is checked out; unrelated untracked .playwright-mcp/ and gh installer will be left untouched.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need inspect PSE-181 docs/source to confirm migration test scope.
+Next actions: Move PSE-181 In Progress; branch; implement scoped tests.
+## 2026-05-14T11:20:33.8449002+10:00
+Objective: Plan and implement PSE-181 migration fixture coverage.
+Decisions made:
+- Use small generated SQLite fixtures instead of committed binary DB files.
+- Add backup-before-migration and future-schema refusal in MigrationService.
+- Document migration behavior in docs/MIGRATIONS.md.
+Files changed:
+- packages/db/src/services/MigrationService.ts; packages/db/tests; docs/MIGRATIONS.md
+Open questions / risks: Need run targeted DB tests to catch migration SQL compatibility issues.
+Next actions: Run db tests; fix failures; run full checks.
+## 2026-05-14T11:23:19.7957193+10:00
+Objective: Validate PSE-181 migration fixture implementation.
+Decisions made:
+- Fixed readonly SQLite connections to avoid WAL journal writes for backup inspection.
+- Targeted DB tests, lint, typecheck, full test, and full build all pass after EPERM reruns with approval.
+- Kept unrelated untracked .playwright-mcp/ and gh installer untouched.
+Files changed:
+- packages/db/src; packages/db/tests; docs/MIGRATIONS.md; docs/README.md
+Open questions / risks: Need review diff, commit, push, and open PR.
+Next actions: Stage scoped files; commit; push/open ready PR.
+## 2026-05-14T11:24:35.4621587+10:00
+Objective: Commit PSE-181 scoped implementation.
+Decisions made:
+- Staged only PSE-181 migration/docs/session-log files.
+- Created commit 7b7b01bd for migration fixture upgrade coverage.
+- Left unrelated untracked .playwright-mcp/ and gh installer unstaged.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need amend log entry, push branch, and open PR.
+Next actions: Amend commit; push; create ready PR.
