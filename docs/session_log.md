@@ -5837,3 +5837,33 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI still must verify after PR opens.
 Next actions: Commit and push; open ready PR; update Linear.
+
+## 2026-05-14 17:36:19 +10:00
+Objective: Merge PSE-189 and prepare next ticket.
+Decisions made:
+- Squash-merged PR #178 at cb4dd388e40f7bb82303dbbaa2cfdc26e355cf0e.
+- Promoted PSE-190 as the single next Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-190 scope must stay local ZIP/folder import only.
+Next actions: Move PSE-190 to In Progress; branch; implement importer.
+
+## 2026-05-14 17:43:27 +10:00
+Objective: Implement PSE-190 Notion import foundation.
+Decisions made:
+- Added local-only NotionImportService for scanned Markdown/CSV/assets entries.
+- Kept ZIP/folder filesystem selection outside renderer; service consumes safe scanned entries.
+Files changed:
+- docs/session_log.md
+Open questions / risks: ZIP extraction IPC remains a filesystem-bound follow-up if UI needs raw ZIP intake.
+Next actions: Run full checks; commit/push PR; monitor CI.
+
+## 2026-05-14 17:45:23 +10:00
+Objective: Verify PSE-190 Notion import implementation.
+Decisions made:
+- Added tests covering preview warnings, service-backed import, tags, search, attachments, and activity.
+- Standard checks passed; Vitest/build needed escalation after sandbox spawn EPERM.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI still must verify after PR opens.
+Next actions: Commit and push; open ready PR; update Linear.

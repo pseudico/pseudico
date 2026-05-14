@@ -110,6 +110,7 @@ export const ActivityAction = {
   imapImportFailed: "imap_import_failed",
   csvImportCompleted: "csv_import_completed",
   markdownFolderImportCompleted: "markdown_folder_import_completed",
+  notionImportCompleted: "notion_import_completed",
   templateCreated: "template_created",
   templateUpdated: "template_updated",
   templateDuplicated: "template_duplicated",

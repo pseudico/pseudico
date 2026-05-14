@@ -64,6 +64,10 @@ new work should account for this implemented baseline:
 - Large-workspace benchmark services now provide deterministic local fixture
   seeding, service-level budgets, and report generation for open/search,
   dashboard, Today, and export performance gates.
+- External import foundations now include a local-only Notion Markdown/CSV
+  adapter service for previewing pages, database CSV rows, assets, unsupported
+  files, and source-field warnings before importing through existing
+  project/note/task/file/tag/search/activity flows.
 
 When adding a future module slice, prefer extending the owning feature service
 and matching repository/preload/client boundary rather than creating a parallel
