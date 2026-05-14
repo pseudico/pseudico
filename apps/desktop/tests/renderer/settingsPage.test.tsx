@@ -24,6 +24,9 @@ describe("SettingsPage", () => {
     expect(html).toContain("Save appearance");
     expect(html).toContain("System");
     expect(html).toContain("Comfortable");
+    expect(html).toContain("Language &amp; locale");
+    expect(html).toContain("English (default)");
+    expect(html).toContain("Future localization preference");
     expect(html).toContain("Privacy &amp; Network");
     expect(html).toContain("No telemetry");
     expect(html).toContain("Save privacy settings");

@@ -274,3 +274,22 @@ export type {
 } from "./shortcuts/ShortcutRegistry";
 export { APP_SHORTCUT_IDS, defaultShortcutDescriptors } from "./shortcuts/defaultShortcuts";
 export type { AppShortcutId } from "./shortcuts/defaultShortcuts";
+export {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  createTranslator,
+  englishMessages,
+  formatLocalizedDateTime,
+  formatLocalizedNumber,
+  interpolateMessage,
+  t,
+  translate
+} from "./i18n";
+export type {
+  LocaleCode,
+  MessageCatalog,
+  TranslationKey,
+  TranslationValues,
+  Translator,
+  TranslatorOptions
+} from "./i18n";

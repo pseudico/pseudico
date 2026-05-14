@@ -16,6 +16,9 @@ import {
 import {
   createShortcutRegistry,
   defaultShortcutDescriptors,
+  formatLocalizedDateTime,
+  formatLocalizedNumber,
+  t,
   type RegisteredShortcut
 } from "@local-work-os/core";
 import { useEffect, useState, type FormEvent } from "react";
@@ -1231,7 +1234,7 @@ export function SettingsPage({
     <section className="settings-layout">
       <div className="page-heading">
         <p className="top-eyebrow">Settings</p>
-        <h2>Workspace settings</h2>
+        <h2>{t("settings.page.title")}</h2>
         <p>
           {currentWorkspace === null
             ? "Open a workspace to view local database details."
@@ -1313,6 +1316,34 @@ export function SettingsPage({
           Current: {appearance.settings.theme} theme, {appearance.settings.density} density,
           {appearance.settings.fontSize} font.
         </p>
+      </section>
+
+      <section className="backup-management-panel" aria-label={t("settings.locale.title")}>
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <h3>{t("settings.locale.title")}</h3>
+            <p className="muted-text">{t("settings.locale.description")}</p>
+          </div>
+          <Keyboard size={20} aria-hidden="true" />
+        </div>
+        <div className="backup-list" aria-label={t("settings.locale.placeholder")}>
+          <div className="backup-list-row">
+            <div>
+              <strong>{t("settings.locale.value")}</strong>
+              <span>{t("settings.locale.placeholder")}</span>
+            </div>
+            <div className="backup-list-meta">
+              <span>
+                {t("settings.locale.dateExampleLabel")}:{" "}
+                {formatLocalizedDateTime("2026-05-14T09:30:00.000Z")}
+              </span>
+              <span>
+                {t("settings.locale.numberExampleLabel")}:{" "}
+                {formatLocalizedNumber(12345.67)}
+              </span>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="backup-management-panel" aria-label="Privacy and network">

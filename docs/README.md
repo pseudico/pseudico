@@ -49,6 +49,8 @@ docs and the linked Linear issue.
 - `ATTACHMENT_MANIFEST_AUDIT.md` documents local attachment manifest audits and
   reversible orphan-file quarantine cleanup.
 - `ACCESSIBILITY.md` documents keyboard behavior and manual accessibility checks.
+- `LOCALIZATION.md` documents the English-only i18n scaffold and future locale
+  preference boundary.
 - `help/` contains local Markdown help center content mirrored in the app.
 - `DECISIONS/` stores accepted architecture decision records.
 

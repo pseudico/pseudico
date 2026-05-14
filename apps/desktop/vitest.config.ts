@@ -16,6 +16,10 @@ export default defineConfig({
         currentDir,
         "../../packages/features/src/quickStart/index.ts"
       ),
+      "@local-work-os/features/help": resolve(
+        currentDir,
+        "../../packages/features/src/help/index.ts"
+      ),
       "@local-work-os/features/workflows/schema": resolve(
         currentDir,
         "../../packages/features/src/workflows/WorkflowSchema.ts"

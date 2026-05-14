@@ -77,6 +77,6 @@ describe("desktop shell routes", () => {
     expect(html).toContain("Today");
     expect(html).toContain("Quick Start");
     expect(html).toContain("Commands");
-    expect(html).toContain("Ctrl/⌘ K");
+    expect(html).toContain("Ctrl/Cmd K");
   });
 });

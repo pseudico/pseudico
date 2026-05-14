@@ -1,3 +1,5 @@
+import { t } from "@local-work-os/core";
+
 export type AppRouteId =
   | "welcome"
   | "workspace"
@@ -32,153 +34,153 @@ export const appRoutes = [
   {
     id: "welcome",
     path: "/welcome",
-    label: "Welcome",
-    title: "Welcome",
-    summary: "Create or open a local workspace.",
+    label: t("nav.welcome.label"),
+    title: t("nav.welcome.title"),
+    summary: t("nav.welcome.summary"),
     nav: false
   },
   {
     id: "workspace",
     path: "/workspace",
-    label: "Workspace",
-    title: "Workspace Home",
-    summary: "Local workspace overview and health.",
+    label: t("nav.workspace.label"),
+    title: t("nav.workspace.title"),
+    summary: t("nav.workspace.summary"),
     nav: false
   },
   {
     id: "today",
     path: "/today",
-    label: "Today",
-    title: "Today",
-    summary: "Dated, planned, and overdue local work will appear here.",
+    label: t("nav.today.label"),
+    title: t("nav.today.title"),
+    summary: t("nav.today.summary"),
     nav: true
   },
   {
     id: "inbox",
     path: "/inbox",
-    label: "Inbox",
-    title: "Inbox",
-    summary: "Captured work waiting for triage will appear here.",
+    label: t("nav.inbox.label"),
+    title: t("nav.inbox.title"),
+    summary: t("nav.inbox.summary"),
     nav: true
   },
   {
     id: "projects",
     path: "/projects",
-    label: "Projects",
-    title: "Projects",
-    summary: "Project containers and mixed work feeds will appear here.",
+    label: t("nav.projects.label"),
+    title: t("nav.projects.title"),
+    summary: t("nav.projects.summary"),
     nav: true
   },
   {
     id: "projectTags",
     path: "/project-tags",
-    label: "Project Tags",
-    title: "Project Tag Browser",
-    summary: "Facet and drill-down browser for tagged project containers.",
+    label: t("nav.projectTags.label"),
+    title: t("nav.projectTags.title"),
+    summary: t("nav.projectTags.summary"),
     nav: true
   },
   {
     id: "contacts",
     path: "/contacts",
-    label: "Contacts",
-    title: "Contacts",
-    summary: "Contact and client containers will appear here.",
+    label: t("nav.contacts.label"),
+    title: t("nav.contacts.title"),
+    summary: t("nav.contacts.summary"),
     nav: true
   },
   {
     id: "contactLabels",
     path: "/contact-labels",
-    label: "Contact Labels",
-    title: "Contact Label Browser",
-    summary: "Facet and grouped browser for contact custom labels and CRM fields.",
+    label: t("nav.contactLabels.label"),
+    title: t("nav.contactLabels.title"),
+    summary: t("nav.contactLabels.summary"),
     nav: true
   },
   {
     id: "collections",
     path: "/collections",
-    label: "Collections",
-    title: "Collections",
-    summary: "Saved cross-workspace views will appear here.",
+    label: t("nav.collections.label"),
+    title: t("nav.collections.title"),
+    summary: t("nav.collections.summary"),
     nav: true
   },
   {
     id: "tagsCategories",
     path: "/tags-categories",
-    label: "Tags & Categories",
-    title: "Tags & Categories",
-    summary: "Local classification controls will appear here.",
+    label: t("nav.tagsCategories.label"),
+    title: t("nav.tagsCategories.title"),
+    summary: t("nav.tagsCategories.summary"),
     nav: true
   },
   {
     id: "templates",
     path: "/templates",
-    label: "Templates",
-    title: "Templates",
-    summary: "Local reusable project, contact, and list templates.",
+    label: t("nav.templates.label"),
+    title: t("nav.templates.title"),
+    summary: t("nav.templates.summary"),
     nav: true
   },
   {
     id: "search",
     path: "/search",
-    label: "Search",
-    title: "Search",
-    summary: "Local full-text search will appear here.",
+    label: t("nav.search.label"),
+    title: t("nav.search.title"),
+    summary: t("nav.search.summary"),
     nav: true
   },
   {
     id: "dashboard",
     path: "/dashboard",
-    label: "Dashboard",
-    title: "Dashboard",
-    summary: "Workspace status widgets will appear here.",
+    label: t("nav.dashboard.label"),
+    title: t("nav.dashboard.title"),
+    summary: t("nav.dashboard.summary"),
     nav: true
   },
   {
     id: "timeline",
     path: "/timeline",
-    label: "Timeline",
-    title: "Timeline",
-    summary: "Dated task workload grouped by project or category.",
+    label: t("nav.timeline.label"),
+    title: t("nav.timeline.title"),
+    summary: t("nav.timeline.summary"),
     nav: true
   },
   {
     id: "calendar",
     path: "/calendar",
-    label: "Calendar",
-    title: "Calendar",
-    summary: "Month view of local dated tasks and list items.",
+    label: t("nav.calendar.label"),
+    title: t("nav.calendar.title"),
+    summary: t("nav.calendar.summary"),
     nav: true
   },
   {
     id: "workflows",
     path: "/workflows",
-    label: "Workflows",
-    title: "Workflows",
-    summary: "Versioned local-only manual workflow definitions and validation.",
+    label: t("nav.workflows.label"),
+    title: t("nav.workflows.title"),
+    summary: t("nav.workflows.summary"),
     nav: true
   },
   {
     id: "help",
     path: "/help",
-    label: "Help",
-    title: "Help Center",
-    summary: "Local onboarding, command references, and sample workflows.",
+    label: t("nav.help.label"),
+    title: t("nav.help.title"),
+    summary: t("nav.help.summary"),
     nav: true
   },
   {
     id: "settings",
     path: "/settings",
-    label: "Settings",
-    title: "Settings",
-    summary: "Local workspace and app settings will appear here.",
+    label: t("nav.settings.label"),
+    title: t("nav.settings.title"),
+    summary: t("nav.settings.summary"),
     nav: true
   },
   {
     id: "trash",
     path: "/trash",
-    label: "Trash",
-    title: "Trash",
-    summary: "Restore soft-deleted local records or clear Trash after backup.",
+    label: t("nav.trash.label"),
+    title: t("nav.trash.title"),
+    summary: t("nav.trash.summary"),
     nav: true
   }
 ] as const satisfies readonly AppRoute[];
