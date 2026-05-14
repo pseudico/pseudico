@@ -34,6 +34,18 @@ Before tagging an MVP release candidate:
 - The MVP smoke suite covers the core local workflow path. It does not replace
   manual review of visible desktop flows before release.
 
+## Distribution, Licensing, Privacy, And Updates
+
+Distribution planning is tracked in `docs/DISTRIBUTION_LICENSING_PRIVACY.md`.
+Before public release, verify the platform signing/notarization gates,
+dependency license notices, local-only privacy notice, checksums, and manual
+update/backup instructions in that checklist.
+
+Auto-update, license activation, billing, hosted accounts, telemetry, and cloud
+services are not part of the current release path. Any future auto-update or
+commercial licensing work needs a separate scoped ticket and must preserve user
+access to local workspace data.
+
 ## Packaged Development Builds
 
 Use the development packaging target before release candidates:
