@@ -29,10 +29,13 @@ Manual verification for a temporary workspace:
 
 Known limitations to confirm during MVP QA:
 
-- Contact, timeline, calendar, template, workflow, reminder, browser-capture,
-  and file-version surfaces should not appear as completed MVP workflows.
-- Import validation may report whether a workspace JSON file is valid, but full
-  import/restore into a new workspace is still future work.
+- Advanced rich-text editing, custom dashboard editing, advanced saved-view
+  builder UX, browser capture production bridge, workflow scheduling,
+  external live calendar sync, and monthly/yearly recurrence should not appear
+  as completed release workflows.
+- Broader third-party import execution remains intentionally scoped; verify the
+  documented local import/restore paths rather than assuming cloud migration or
+  remote import support.
 - Packaged development builds should not contain user workspace databases,
   attachments, backups, exports, or logs inside the app bundle.
 
@@ -59,6 +62,8 @@ Known limitations to confirm during MVP QA:
    placeholder/future modules.
 5. Confirm `docs/RELEASE.md` lists the MVP release checklist and known
    limitations.
+6. Confirm `docs/FINAL_RELEASE_SYNC.md` links the current source-of-truth docs,
+   ticket cross-reference correction, and release verification gates.
 
 ## Packaged App Smoke Test
 

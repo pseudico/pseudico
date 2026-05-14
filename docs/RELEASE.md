@@ -10,6 +10,8 @@ Before tagging an MVP release candidate:
 - `pnpm package:smoke` passes against the unpacked app.
 - The MVP smoke suite in `apps/desktop/tests/smoke/mvp-flow.test.ts` passes.
 - Manual QA in `docs/QA_SCRIPTS.md` has been run on a temporary workspace.
+- The final release documentation sync in `docs/FINAL_RELEASE_SYNC.md` has been
+  reviewed against the linked Linear issue and PR.
 - Workspace data is created under the selected workspace folder, not inside the
   packaged app bundle.
 - Backup, workspace JSON export, project Markdown export, task CSV/TSV export,
@@ -24,13 +26,16 @@ Before tagging an MVP release candidate:
 - The packaged build is an unpacked development package. Installer targets,
   code signing, notarization, auto-update, and release-channel publishing are
   not implemented.
-- Contacts, timeline, calendar, templates, workflows, reminders, browser
-  capture, file versions, custom dashboard editing, advanced saved-view builder
-  UX, and full import/restore execution remain future work.
+- Advanced rich-text editing, custom dashboard editing, advanced saved-view
+  builder UX, browser capture production bridge, workflow scheduling, external
+  live calendar sync, monthly/yearly recurrence, and broader third-party import
+  execution remain future work.
 - Backup and export are manual local workflows; automatic backup scheduling and
-  restore UX are not part of the current MVP.
-- Search is local and integrated with MVP records, but advanced ranking,
-  diagnostics UI, and user-triggered full reindex controls remain future work.
+  retention foundations exist, but release owners should still verify backup
+  and restore behavior manually before important data changes.
+- Search is local and integrated with MVP/V1 records, including structured
+  tokens and diagnostics foundations, but advanced relevance tuning and
+  builder-style query UX remain future work.
 - The MVP smoke suite covers the core local workflow path. It does not replace
   manual review of visible desktop flows before release.
 

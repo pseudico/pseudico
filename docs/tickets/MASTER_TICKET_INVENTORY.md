@@ -9,7 +9,7 @@ status: generated aggregate reference for Codex / Linear setup
 
 This is the aggregate ticket inventory for the local-only full-scope build attempt.
 
-**Total planned tickets:** 183
+**Total planned tickets:** 184
 
 ## Count by phase
 
@@ -28,7 +28,7 @@ This is the aggregate ticket inventory for the local-only full-scope build attem
 | M11 | 20 | Advanced items, tasks, lists, notes, files, links |
 | M12 | 18 | Planning views, dashboard, search, saved views |
 | M13 | 16 | Local workflows, templates, capture, import/export/backup |
-| M14 | 14 | Security, performance, release, docs, QA |
+| M14 | 15 | Security, performance, release, docs, QA |
 
 ## Recommended Linear import waves
 
@@ -294,4 +294,5 @@ This is the aggregate ticket inventory for the local-only full-scope build attem
 | M14-011 | Internationalisation scaffold |
 | M14-012 | Regression coverage map |
 | M14-013 | Full parity QA pass |
-| M14-014 | Final documentation sync and release readiness |
+| M14-014 | Research distribution, licensing, privacy, and update path |
+| M14-015 | Final documentation sync and release readiness |

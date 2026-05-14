@@ -13,36 +13,42 @@ Pagico’s public material describes the core appeal as having tasks, notes, doc
 
 ## Current Implementation Snapshot
 
-As of the M6 documentation sync, the repository contains the local-only MVP
-foundation for workspace creation/opening, SQLite bootstrap and repositories,
-Inbox/project containers, tasks, lists, notes, links, file attachments,
-metadata, activity, search, saved views/collections, Today planning, dashboard
-widgets, project health, local reminder foundations, backup, export, import validation, local EML/Maildir email-to-task import, smoke tests,
-packaging verification, performance guardrails, app-wide error/toast states,
-and data-integrity/search audit guidance.
+As of the M14 final documentation sync, the repository contains the local-only
+MVP/V1 foundation for workspace creation/opening, SQLite bootstrap and
+repositories, Inbox/project/contact containers, tasks, lists, notes, links, file
+attachments and file versions, metadata, relationships, activity, search, saved
+views/collections, Today planning, dashboard widgets, project health, local
+reminders, recurrence, templates, local workflows, timeline/calendar
+projections, backup, export, import validation/execution paths, local
+EML/Maildir email-to-task import, demo workspace generation, local help, smoke
+tests, packaging verification, performance guardrails, app-wide error/toast
+states, and data-integrity/search audit guidance.
 
-The implemented slice remains an MVP foundation, not the full product described
-below. Contacts, timeline, calendar, templates, workflow automation, browser
-capture, backup restore, full import execution, rich notes,
-custom dashboard editing, and advanced saved-view builder UX remain future work
-unless a later Linear issue explicitly brings them into scope.
+The implemented slice remains a local MVP/V1 foundation, not the full product
+described below. Advanced rich-text editing, advanced saved-view builder UX,
+custom dashboard editing, browser capture production bridge, workflow
+scheduling, external live calendar sync, monthly/yearly recurrence, broader
+third-party import execution, and public distribution automation remain future
+work unless a later Linear issue explicitly brings them into scope.
 
 Known limitations for MVP release planning:
 
-- Contacts now have a repository/service foundation for local contact
-  containers and flexible profile fields; full renderer workflows remain
-  future work.
+- Contacts now have local service, repository, renderer, label browser,
+  summary, relationship, and interaction timeline foundations; deeper CRM-style
+  workflows remain future work.
 - Reminders now have task/list-item policy targets, default reminder
   preferences, local notification enablement, scheduler-facing events, and a
   shared picker foundation; deeper renderer preferences remain future work.
 - Appearance preferences now persist local theme, density, and font-size choices
   through app settings and apply renderer CSS variables to shell, card, and
   dashboard surfaces.
-- Timeline and calendar services are placeholders for future local dated-work
-  projections.
-- Search is local and service-backed, with structured query tokens for type, tag,
-  category, due, status, file presence, and project scoping; ranking, diagnostics,
-  and rebuild UX are intentionally basic.
+- Timeline and calendar now project local dated work into renderer surfaces;
+  richer drag/drop editing, external live calendar sync, and advanced planning
+  UX remain future work.
+- Search is local and service-backed, with structured query tokens for type,
+  tag, category, due, status, file presence, project scoping, diagnostics, and
+  rebuild orchestration; advanced relevance tuning and builder-style UX remain
+  intentionally limited.
 - Import validation exists for workspace JSON, valid workspace JSON exports
   can now be restored into a separate new workspace folder where feasible, and
   local EML/Maildir messages can be imported as Inbox tasks with the original

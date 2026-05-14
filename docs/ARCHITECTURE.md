@@ -66,9 +66,9 @@ The current implementation follows the planned split:
   dashboard, backup, export, import validation, file, appearance settings, and
   package-smoke flows.
 - The renderer calls those APIs through `desktopApiClient` and renders routed
-  React pages for Inbox, projects, project detail, Today, dashboard,
-  collections, search, tags/categories, settings, contacts placeholder, and
-  workspace health.
+  React pages for Inbox, projects, project detail, contacts, contact detail,
+  Today, dashboard, collections, search, tags/categories, timeline, calendar,
+  settings, local help, and workspace health.
 - `packages/db` owns schema, migrations, repositories, transaction helpers,
   database health, activity logging, and search-index persistence.
 - `packages/features` owns application services for user workflows such as
