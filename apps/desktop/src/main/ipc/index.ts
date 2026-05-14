@@ -43,6 +43,7 @@ import {
 } from "../services/mainProcessPaths";
 import { RecentWorkspacesService } from "../services/workspace/RecentWorkspacesService";
 import { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
+import { DemoWorkspaceGeneratorService } from "../services/workspace/DemoWorkspaceGeneratorService";
 
 export type DesktopIpcServices = {
   workspaceService: WorkspaceFileSystemService;
@@ -52,6 +53,7 @@ export function createDesktopIpcServices(): DesktopIpcServices {
   return {
     workspaceService: new WorkspaceFileSystemService({
       databaseBootstrapService: new DatabaseBootstrapService(),
+      demoWorkspaceGenerator: new DemoWorkspaceGeneratorService(),
       recentWorkspacesService: new RecentWorkspacesService(
         assertRuntimeDataPathOutsideAppBundle(
           app,

@@ -971,6 +971,16 @@ Integration points:
 - Electron main/preload IPC and Settings > Maintenance.
 - Activity Log for maintenance and search-rebuild events.
 
+### Demo Workspace
+
+Owns optional first-run sample workspace generation from the Welcome screen,
+including fictional local projects, contacts, tasks, notes, lists, link
+metadata, generated attachment content, tags, categories, relationships, saved
+views, and demo-generation activity. Does not own proprietary assets, cloud
+seed data, remote metadata fetches, telemetry, or renderer filesystem access.
+Integrates with workspace creation, Electron main-process attachment file
+creation, feature services, activity log, and search/saved-view projections.
+
 ## Cross-Cutting Rules
 
 - All modules preserve local-only behavior.

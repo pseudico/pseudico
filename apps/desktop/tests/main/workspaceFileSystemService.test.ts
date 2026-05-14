@@ -143,6 +143,34 @@ describe("WorkspaceFileSystemService", () => {
     ]);
   });
 
+  it("runs optional demo generation after creating a demo workspace", async () => {
+    const generatedRoots: string[] = [];
+    const service = new WorkspaceFileSystemService({
+      recentWorkspacesService: new RecentWorkspacesService(
+        join(tempRoot, "app-user-data", "recent-workspaces.json")
+      ),
+      demoWorkspaceGenerator: {
+        async generateDemoWorkspace(input) {
+          generatedRoots.push(input.workspace.rootPath);
+        }
+      },
+      now: () => now
+    });
+    const workspaceRootPath = join(tempRoot, "Demo");
+
+    const summary = await service.createDemoWorkspace({
+      name: "Demo Workspace",
+      rootPath: workspaceRootPath
+    });
+
+    expect(summary).toMatchObject({
+      name: "Demo Workspace",
+      rootPath: workspaceRootPath
+    });
+    expect(generatedRoots).toEqual([workspaceRootPath]);
+    await expectDirectory(join(workspaceRootPath, "attachments"));
+  });
+
   it("validates, repairs, and opens an existing workspace", async () => {
     const service = createService();
     const workspaceRootPath = join(tempRoot, "Existing");

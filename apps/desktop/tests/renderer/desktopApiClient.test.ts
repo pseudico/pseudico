@@ -63,6 +63,14 @@ function createMockApi(
           openedAt: "2026-04-30T00:00:00.000Z",
           schemaVersion: null
         }),
+      createDemoWorkspace: async () =>
+        apiOk({
+          id: "workspace_1",
+          name: "Demo Workspace",
+          rootPath: "C:\\work",
+          openedAt: "2026-04-30T00:00:00.000Z",
+          schemaVersion: null
+        }),
       openWorkspace: async () =>
         apiOk({
           id: "workspace_1",

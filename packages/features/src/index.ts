@@ -47,6 +47,7 @@ export const plannedFeatureAreas = [
   "undo",
   "trash",
   "quickStart",
+  "demoWorkspace",
   "activity",
   "diagnostics",
   "maintenance",
@@ -54,6 +55,11 @@ export const plannedFeatureAreas = [
 ] as const;
 
 export type { FeatureModuleContract, FeatureModulePriority } from "./featureModuleContract";
+export {
+  DemoWorkspaceService,
+  type DemoWorkspaceSeedInput,
+  type DemoWorkspaceSeedResult
+} from "./demo";
 export {
   APPEARANCE_DENSITIES,
   APPEARANCE_FONT_SIZES,

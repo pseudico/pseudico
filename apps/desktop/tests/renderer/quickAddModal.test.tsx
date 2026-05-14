@@ -249,6 +249,7 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
   return {
     workspace: {
       createWorkspace: async () => apiOk(workspace),
+      createDemoWorkspace: async () => apiOk(workspace),
       openWorkspace: async () => apiOk(workspace),
       validateWorkspace: async () =>
         apiOk({

@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(241);
+    expect(channels).toHaveLength(242);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -99,9 +99,20 @@ describe("typed preload API", () => {
     };
 
     const api = createLocalWorkOsApi(invoke);
+    await api.workspace.createDemoWorkspace({
+      name: "Demo Workspace",
+      rootPath: "C:\\demo"
+    });
     await api.workspace.getCurrentWorkspace();
 
     expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.workspace.createDemoWorkspace,
+        input: {
+          name: "Demo Workspace",
+          rootPath: "C:\\demo"
+        }
+      },
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.workspace.getCurrentWorkspace,
         input: undefined

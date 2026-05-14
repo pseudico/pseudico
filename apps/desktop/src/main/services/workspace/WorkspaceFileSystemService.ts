@@ -58,8 +58,15 @@ export type WorkspaceDatabaseBootstrapService = {
   ) => Promise<WorkspaceDatabaseBootstrapResult>;
 };
 
+export type DemoWorkspaceGenerator = {
+  generateDemoWorkspace: (input: {
+    workspace: WorkspaceSummary;
+  }) => Promise<unknown>;
+};
+
 export class WorkspaceFileSystemService {
   private readonly databaseBootstrapService: WorkspaceDatabaseBootstrapService | null;
+  private readonly demoWorkspaceGenerator: DemoWorkspaceGenerator | null;
   private readonly recentWorkspacesService: RecentWorkspacesService;
   private readonly now: () => Date;
   private currentWorkspace: WorkspaceSummary | null = null;
@@ -67,10 +74,12 @@ export class WorkspaceFileSystemService {
   constructor(input: {
     recentWorkspacesService: RecentWorkspacesService;
     databaseBootstrapService?: WorkspaceDatabaseBootstrapService | null;
+    demoWorkspaceGenerator?: DemoWorkspaceGenerator | null;
     now?: () => Date;
   }) {
     this.recentWorkspacesService = input.recentWorkspacesService;
     this.databaseBootstrapService = input.databaseBootstrapService ?? null;
+    this.demoWorkspaceGenerator = input.demoWorkspaceGenerator ?? null;
     this.now = input.now ?? (() => new Date());
   }
 
@@ -105,6 +114,22 @@ export class WorkspaceFileSystemService {
     );
     await this.rememberWorkspace(summary);
     this.currentWorkspace = summary;
+
+    return summary;
+  }
+
+  async createDemoWorkspace(
+    input: CreateWorkspaceServiceInput
+  ): Promise<WorkspaceSummary> {
+    if (this.demoWorkspaceGenerator === null) {
+      throw new WorkspaceFileSystemError(
+        "WORKSPACE_ERROR",
+        "Demo workspace generation is not available in this build."
+      );
+    }
+
+    const summary = await this.createWorkspace(input);
+    await this.demoWorkspaceGenerator.generateDemoWorkspace({ workspace: summary });
 
     return summary;
   }

@@ -64,6 +64,9 @@ export type WorkspaceIpcHandlers = {
   handleCreateWorkspace: (
     input: unknown
   ) => Promise<ApiResult<WorkspaceSummary>>;
+  handleCreateDemoWorkspace: (
+    input: unknown
+  ) => Promise<ApiResult<WorkspaceSummary>>;
   handleOpenWorkspace: (input: unknown) => Promise<ApiResult<WorkspaceSummary>>;
   handleValidateWorkspace: (
     input: unknown
@@ -86,6 +89,21 @@ export function createWorkspaceIpcHandlers(
 
       try {
         return apiOk(await workspaceService.createWorkspace(input));
+      } catch (error) {
+        return workspaceError(error);
+      }
+    },
+
+    async handleCreateDemoWorkspace(input) {
+      if (!validateCreateWorkspaceInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "createDemoWorkspace requires non-empty name and rootPath fields."
+        );
+      }
+
+      try {
+        return apiOk(await workspaceService.createDemoWorkspace(input));
       } catch (error) {
         return workspaceError(error);
       }

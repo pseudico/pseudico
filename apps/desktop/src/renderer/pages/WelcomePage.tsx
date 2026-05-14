@@ -1,4 +1,4 @@
-import { FolderOpen, HardDrive, History, ShieldAlert } from "lucide-react";
+import { FolderOpen, HardDrive, History, PlayCircle, ShieldAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { EmptyState, ErrorState, formatUserError } from "@local-work-os/ui";
@@ -61,20 +61,26 @@ export function WelcomePage({
   }, [apiClient]);
 
   async function runWorkspaceAction(
-    action: "create" | "open",
+    action: "create" | "demo" | "open",
     rootPath: string
   ): Promise<void> {
     setLoading(true);
     setError(null);
     setMessage(null);
 
+    const createInput = {
+      name:
+        action === "demo" && workspaceName.trim() === "Personal Work"
+          ? "Demo Workspace"
+          : workspaceName,
+      rootPath
+    };
     const result =
-      action === "create"
-        ? await apiClient.workspace.createWorkspace({
-            name: workspaceName,
-            rootPath
-          })
-        : await apiClient.workspace.openWorkspace({ rootPath });
+      action === "open"
+        ? await apiClient.workspace.openWorkspace({ rootPath })
+        : action === "demo"
+          ? await apiClient.workspace.createDemoWorkspace(createInput)
+          : await apiClient.workspace.createWorkspace(createInput);
 
     setLoading(false);
 
@@ -167,6 +173,17 @@ export function WelcomePage({
               >
                 <FolderOpen size={18} aria-hidden="true" />
                 Create workspace
+              </button>
+              <button
+                type="button"
+                className="secondary-button"
+                disabled={!createReady || loading}
+                onClick={() => {
+                  void runWorkspaceAction("demo", workspacePath.trim());
+                }}
+              >
+                <PlayCircle size={18} aria-hidden="true" />
+                Create demo workspace
               </button>
               <button
                 type="button"
