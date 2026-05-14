@@ -20,6 +20,7 @@ import { workflowMetadataTriggersSql } from "./0019_workflow_metadata_triggers";
 import { workflowRunRollbackSql } from "./0020_workflow_run_rollback";
 import { imapImportJobsSql } from "./0021_imap_import_jobs";
 import { locationDetailsSql } from "./0022_location_details";
+import { linkWidgetSettingsSql } from "./0023_link_widget_settings";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -154,5 +155,11 @@ export const migrations: MigrationDefinition[] = [
     name: "location_details",
     sql: locationDetailsSql,
     checksum: "pse-133-location-details-v1"
+  },
+  {
+    version: 23,
+    name: "link_widget_settings",
+    sql: linkWidgetSettingsSql,
+    checksum: "pse-135-link-widget-settings-v1"
   }
 ];

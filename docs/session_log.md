@@ -6325,3 +6325,79 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: GitHub CI/review has not completed yet.
 Next actions: Push log update; inspect CI; merge only if clean.
+## 2026-05-15T07:38:46.0218322+10:00
+Objective: Merge PSE-134 and promote next ticket.
+Decisions made:
+- PR #187 CI passed and was squash-merged as 17b3bd495b0f843157186d60ba4b0ab7fd33acae.
+- Deleted the merged branch, moved PSE-134 to Done, and promoted PSE-135 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-135 is promoted but not implemented in this run.
+Next actions: Leave exactly one Codex Ready; start PSE-135 next; keep unrelated untracked files untouched.
+
+## 2026-05-15T07:41:32
+Objective: Reconcile active Local Work OS tickets before selecting work.
+Decisions made:
+- Found no Linear issues in PR Open or In Progress.
+- Found one Codex Ready candidate pending GitHub sanity check.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Open PR status still being checked.
+Next actions: Inspect GitHub open PRs; start single Codex Ready issue if no blocker.
+
+## 2026-05-15T07:42:16
+Objective: Start PSE-135 implementation branch.
+Decisions made:
+- Moved PSE-135 from Codex Ready to In Progress.
+- Pulled main and created branch codex/PSE-135-sandboxed-web-widget-safety.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need identify exact web widget safety surface.
+Next actions: Read ticket docs; inspect link/widget source; plan tests.
+
+## 2026-05-15T07:45:10
+Objective: Plan PSE-135 web widget implementation.
+Decisions made:
+- Persist per-link widget opt-in, accepted warning timestamp, and height preference.
+- Use iframe sandbox (not Electron webview) plus existing global Privacy & Network webWidgets gate.
+- Keep direct external opens through existing validated IPC opener.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Some websites may block iframing via X-Frame-Options/CSP.
+Next actions: Add migration/types/service updates; add UI widget states/tests; update docs.
+
+## 2026-05-15T07:54:06
+Objective: Implement and typecheck PSE-135 link widget safety model.
+Decisions made:
+- Added schema v23 link widget settings and service/search/activity propagation.
+- Added sandboxed iframe UI gated by global webWidgets and per-link opt-in.
+- Added core URL validation blocking unsafe/private/credentialed targets.
+Files changed:
+- packages/core/src/entities/Link.ts
+- packages/db/src/migrations/0023_link_widget_settings.ts
+- packages/features/src/links/LinkService.ts
+Open questions / risks: Some websites may refuse iframe embedding.
+Next actions: Run full lint/test/build; open PR if checks pass.
+
+## 2026-05-15T07:57:17
+Objective: Verify PSE-135 implementation locally.
+Decisions made:
+- Reran test/build with escalation after sandbox EPERM from Vitest/Electron.
+- Updated schema-version expectations for migration 23.
+- All standard checks pass locally.
+Files changed:
+- apps/desktop/tests/main/ipc-handlers.test.ts
+- apps/desktop/tests/renderer/dashboardPage.test.tsx
+- apps/desktop/tests/smoke/mvp-flow.test.ts
+Open questions / risks: CI still needs to confirm in GitHub.
+Next actions: Review diff; commit/push; open PR and update Linear.
+
+## 2026-05-15T07:58:23
+Objective: Commit PSE-135 implementation.
+Decisions made:
+- Committed scoped link-widget implementation as 37ebdecc.
+- Left unrelated untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi untouched.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PR/CI still pending.
+Next actions: Amend log into commit; push branch; open PR.

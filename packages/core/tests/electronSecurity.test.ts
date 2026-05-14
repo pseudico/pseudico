@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   areSafeLocalFilePaths,
   isSafeLocalFilePath,
-  validateExternalOpenUrl
+  validateExternalOpenUrl,
+  validateLinkWidgetEmbedUrl
 } from "../src";
 
 describe("Electron security validators", () => {
@@ -50,6 +51,25 @@ describe("Electron security validators", () => {
       "C:\\safe\0evil"
     ]) {
       expect(isSafeLocalFilePath(unsafePath)).toBe(false);
+    }
+  });
+
+  it("allows only safe sandboxed web widget URLs", () => {
+    expect(validateLinkWidgetEmbedUrl("https://example.com/embed")).toMatchObject({
+      ok: true,
+      normalizedUrl: "https://example.com/embed"
+    });
+
+    for (const unsafeUrl of [
+      "javascript:alert(1)",
+      "data:text/html,<h1>bad</h1>",
+      "file:///C:/Users/Alice/secret.txt",
+      "https://user:pass@example.com/embed",
+      "http://localhost:3000",
+      "http://127.0.0.1:8080",
+      "http://192.168.1.2/widget"
+    ]) {
+      expect(validateLinkWidgetEmbedUrl(unsafeUrl).ok).toBe(false);
     }
   });
 });

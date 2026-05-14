@@ -1028,6 +1028,9 @@ function linkSummary(): LinkSummary {
     domain: "example.com",
     faviconPath: null,
     previewImagePath: null,
+    renderAsWidget: false,
+    widgetHeight: 360,
+    widgetWarningAcceptedAt: null,
     linkCreatedAt: "2026-04-30T00:00:00.000Z",
     linkUpdatedAt: "2026-04-30T00:00:00.000Z"
   };

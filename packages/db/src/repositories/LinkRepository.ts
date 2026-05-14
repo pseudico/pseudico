@@ -12,6 +12,9 @@ type LinkDetailsRow = {
   domain: string | null;
   favicon_path: string | null;
   preview_image_path: string | null;
+  render_as_widget: number;
+  widget_height: number;
+  widget_warning_accepted_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -42,6 +45,9 @@ type LinkWithItemRow = {
   link_domain: string | null;
   link_favicon_path: string | null;
   link_preview_image_path: string | null;
+  link_render_as_widget: number;
+  link_widget_height: number;
+  link_widget_warning_accepted_at: string | null;
   link_created_at: string;
   link_updated_at: string;
 };
@@ -62,6 +68,9 @@ export type CreateLinkDetailsInput = {
   domain?: string | null;
   faviconPath?: string | null;
   previewImagePath?: string | null;
+  renderAsWidget?: boolean;
+  widgetHeight?: number;
+  widgetWarningAcceptedAt?: string | null;
 };
 
 export type UpdateLinkDetailsPatch = {
@@ -73,6 +82,9 @@ export type UpdateLinkDetailsPatch = {
   domain?: string | null;
   faviconPath?: string | null;
   previewImagePath?: string | null;
+  renderAsWidget?: boolean;
+  widgetHeight?: number;
+  widgetWarningAcceptedAt?: string | null;
 };
 
 export type ListLinksFilter = {
@@ -107,6 +119,9 @@ const LINK_WITH_ITEM_SELECT = `
     l.domain as link_domain,
     l.favicon_path as link_favicon_path,
     l.preview_image_path as link_preview_image_path,
+    l.render_as_widget as link_render_as_widget,
+    l.widget_height as link_widget_height,
+    l.widget_warning_accepted_at as link_widget_warning_accepted_at,
     l.created_at as link_created_at,
     l.updated_at as link_updated_at
   from links l
@@ -211,9 +226,12 @@ export class LinkRepository {
           domain,
           favicon_path,
           preview_image_path,
+          render_as_widget,
+          widget_height,
+          widget_warning_accepted_at,
           created_at,
           updated_at
-        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
         input.itemId,
@@ -225,6 +243,9 @@ export class LinkRepository {
         input.domain ?? null,
         input.faviconPath ?? null,
         input.previewImagePath ?? null,
+        input.renderAsWidget === true ? 1 : 0,
+        input.widgetHeight ?? 360,
+        input.widgetWarningAcceptedAt ?? null,
         input.timestamp,
         input.timestamp
       );
@@ -277,6 +298,21 @@ export class LinkRepository {
       values.push(patch.previewImagePath);
     }
 
+    if (patch.renderAsWidget !== undefined) {
+      assignments.push("render_as_widget = ?");
+      values.push(patch.renderAsWidget ? 1 : 0);
+    }
+
+    if (patch.widgetHeight !== undefined) {
+      assignments.push("widget_height = ?");
+      values.push(patch.widgetHeight);
+    }
+
+    if (patch.widgetWarningAcceptedAt !== undefined) {
+      assignments.push("widget_warning_accepted_at = ?");
+      values.push(patch.widgetWarningAcceptedAt);
+    }
+
     assignments.push("updated_at = ?");
     values.push(patch.timestamp, itemId);
 
@@ -309,6 +345,9 @@ function toLinkRecord(row: LinkDetailsRow): LinkRecord {
     domain: row.domain,
     faviconPath: row.favicon_path,
     previewImagePath: row.preview_image_path,
+    renderAsWidget: row.render_as_widget === 1,
+    widgetHeight: row.widget_height,
+    widgetWarningAcceptedAt: row.widget_warning_accepted_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -344,6 +383,9 @@ function toLinkWithItemRecord(row: LinkWithItemRow): LinkWithItemRecord {
       domain: row.link_domain,
       faviconPath: row.link_favicon_path,
       previewImagePath: row.link_preview_image_path,
+      renderAsWidget: row.link_render_as_widget === 1,
+      widgetHeight: row.link_widget_height,
+      widgetWarningAcceptedAt: row.link_widget_warning_accepted_at,
       createdAt: row.link_created_at,
       updatedAt: row.link_updated_at
     }

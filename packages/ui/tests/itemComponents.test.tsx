@@ -47,6 +47,7 @@ import {
   TodayTaskCard,
   ToastViewport,
   UniversalItemCard,
+  WebWidget,
   groupContextActions,
   type UniversalItemViewModel
 } from "../src";
@@ -143,6 +144,66 @@ describe("Universal item UI", () => {
     expect(html).toContain("@Manual");
     expect(html).toContain("data-tag-source=\"inline\"");
     expect(html).toContain("data-tag-source=\"manual\"");
+  });
+
+  it("renders link widgets as disabled until the network gate is enabled", () => {
+    const disabledHtml = renderToStaticMarkup(
+      <LinkCardContent
+        item={{
+          id: "item_link_1",
+          type: "link",
+          title: "Supplier portal",
+          url: "https://example.com/portal",
+          normalizedUrl: "https://example.com/portal",
+          renderAsWidget: true,
+          widgetHeight: 240,
+          widgetWarningAcceptedAt: "2026-05-02T00:00:00.000Z"
+        }}
+        onOpen={() => undefined}
+        onSave={() => true}
+        onUpdateWidgetSettings={() => undefined}
+      />
+    );
+
+    expect(disabledHtml).toContain("Web widgets are disabled");
+    expect(disabledHtml).toContain("Show as card");
+    expect(disabledHtml).not.toContain("<iframe");
+
+    const enabledHtml = renderToStaticMarkup(
+      <LinkCardContent
+        item={{
+          id: "item_link_1",
+          type: "link",
+          title: "Supplier portal",
+          url: "https://example.com/portal",
+          normalizedUrl: "https://example.com/portal",
+          renderAsWidget: true,
+          widgetHeight: 240,
+          widgetWarningAcceptedAt: "2026-05-02T00:00:00.000Z"
+        }}
+        webWidgetsEnabled={true}
+        onOpen={() => undefined}
+        onSave={() => true}
+        onUpdateWidgetSettings={() => undefined}
+      />
+    );
+
+    expect(enabledHtml).toContain("<iframe");
+    expect(enabledHtml).toContain("sandbox=\"allow-scripts allow-popups allow-popups-to-escape-sandbox\"");
+    expect(enabledHtml).toContain("height=\"240\"");
+  });
+
+  it("blocks unsafe web widget URLs in component state", () => {
+    const html = renderToStaticMarkup(
+      <WebWidget
+        networkEnabled={true}
+        title="Local admin"
+        url="file:///C:/Users/Alice/secret.txt"
+      />
+    );
+
+    expect(html).toContain("Web widgets can only load HTTP or HTTPS URLs");
+    expect(html).not.toContain("<iframe");
   });
 
   it("renders task status, priority, and editable visual state controls", () => {

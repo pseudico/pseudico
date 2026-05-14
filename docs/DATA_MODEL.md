@@ -223,3 +223,12 @@ Local maintenance job history is stored in `app_settings` under `maintenance.job
 ## Location Objects
 
 Location items use `location_details` rows for address, latitude/longitude, and saved viewport zoom/center. They are indexed for local search and open external maps only through explicit user action.
+
+### Link web widget settings (PSE-135)
+
+Link items persist an explicit sandboxed-widget opt-in on the existing `links`
+row. `render_as_widget` controls card versus widget rendering,
+`widget_height` stores the local size preference, and
+`widget_warning_accepted_at` records when the user first accepted the per-link
+warning. Widget settings update through the link service, write activity, and
+refresh link search metadata; they do not add cloud sync or remote storage.

@@ -1,35 +1,76 @@
 import { DashboardWidget } from "../DashboardWidget";
+import { validateLinkWidgetEmbedUrl } from "@local-work-os/core";
 
 export type WebWidgetProps = {
+  height?: number;
   title?: string;
   url?: string | undefined;
   networkEnabled?: boolean;
+  onOpenExternal?: () => void;
 };
 
-export function WebWidget({ title = "Saved web link", url, networkEnabled = false }: WebWidgetProps): React.JSX.Element {
-  const safeUrl = parseSafeUrl(url);
-  const blockedReason = safeUrl === null
-    ? "Add an http(s) URL in widget settings before opening this link."
+export function WebWidget({
+  height = 360,
+  title = "Saved web link",
+  url,
+  networkEnabled = false,
+  onOpenExternal
+}: WebWidgetProps): React.JSX.Element {
+  const validation = validateLinkWidgetEmbedUrl(url);
+  const blockedReason = !validation.ok
+    ? validation.reason
     : networkEnabled
       ? null
-      : "Offline mode: external web content is not embedded. Open the link explicitly when you are ready.";
+      : "Web widgets are disabled in Privacy & Network settings. Enable them only when you are ready to load remote content.";
+  const safeUrl = validation.ok ? validation.normalizedUrl : null;
 
   return (
-    <DashboardWidget kind="web" title={title} description="Security-first web widget: no embedded remote content." emptyTitle="Web widget saved" emptyDescription={blockedReason ?? safeUrl ?? "Add a secure http(s) URL before opening this link."}>
+    <DashboardWidget
+      kind="web"
+      title={title}
+      description="Sandboxed web widget: remote content is isolated and cannot navigate the app shell."
+      emptyTitle="Web widget saved"
+      emptyDescription={blockedReason ?? safeUrl ?? "Add a secure HTTP(S) URL before opening this link."}
+    >
       <div className="web-widget-state">
-        {blockedReason === null ? <a className="secondary-button compact-button" href={safeUrl ?? undefined} target="_blank" rel="noreferrer">Open external link</a> : <p className="muted-text">{blockedReason}</p>}
+        {blockedReason === null && safeUrl !== null ? (
+          <>
+            <iframe
+              className="web-widget-frame"
+              height={height}
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+              src={safeUrl}
+              title={`${title} web widget`}
+            />
+            <p className="muted-text">
+              Some sites block embedded display. If the widget stays blank, open
+              it externally.
+            </p>
+          </>
+        ) : (
+          <p className="muted-text">{blockedReason}</p>
+        )}
+        {safeUrl === null ? null : onOpenExternal === undefined ? (
+          <a
+            className="secondary-button compact-button"
+            href={safeUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open external link
+          </a>
+        ) : (
+          <button
+            className="secondary-button compact-button"
+            type="button"
+            onClick={onOpenExternal}
+          >
+            Open external link
+          </button>
+        )}
       </div>
     </DashboardWidget>
   );
 }
-
-function parseSafeUrl(value: string | undefined): string | null {
-  if (value === undefined || value.trim().length === 0) return null;
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : null;
-  } catch {
-    return null;
-  }
-}
-
