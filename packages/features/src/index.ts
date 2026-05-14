@@ -663,6 +663,9 @@ export type {
   SaveImapImportSettingsInput
 } from "./import";
 export type {
+  AttachmentManifestAuditSummary,
+  AttachmentManifestChecksumMismatch,
+  AttachmentManifestSizeMismatch,
   MaintenanceBackupSummary,
   MaintenanceDatabaseAdapter,
   MaintenanceFileSystemAdapter,
@@ -672,6 +675,7 @@ export type {
   MaintenanceJobSummary,
   MaintenanceOperation,
   MaintenanceServiceIdFactory,
+  OrphanAttachmentCleanupSummary,
   OrphanAttachmentScanSummary,
   RunMaintenanceJobInput,
   SqliteIntegrityCheckSummary

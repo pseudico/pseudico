@@ -238,6 +238,7 @@ describe("diagnostics IPC handlers", () => {
         requireBackup: true,
         operations: [
           "sqlite_integrity_check",
+          "attachment_manifest_audit",
           "orphan_attachment_scan",
           "rebuild_search_index",
           "vacuum"
@@ -251,6 +252,13 @@ describe("diagnostics IPC handlers", () => {
           relativePath: expect.stringContaining("-maintenance")
         }),
         sqliteIntegrity: { ok: true },
+        attachmentManifestAudit: {
+          status: "needs_attention",
+          manifestRelativePath: expect.stringContaining(
+            "attachment-manifest-audit.json"
+          ),
+          orphanedRelativePaths: ["attachments/orphan.txt"]
+        },
         orphanAttachmentScan: {
           orphanedRelativePaths: ["attachments/orphan.txt"]
         },

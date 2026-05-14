@@ -1335,9 +1335,11 @@ function maintenanceJobSummary(): MaintenanceJobSummary {
     completedAt: "2026-05-01T00:00:01.000Z",
     backup: { id: "backup_1", relativePath: "backups/pre-maintenance" },
     sqliteIntegrity: { ok: true, messages: ["ok"] },
+    attachmentManifestAudit: null,
     searchReindex: null,
     vacuum: null,
     orphanAttachmentScan: null,
+    orphanAttachmentCleanup: null,
     entries: [],
     error: null
   };

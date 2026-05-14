@@ -5293,3 +5293,42 @@ Files changed:
 - apps/desktop/src/main/ipc/backupHandlers.ts; apps/desktop/src/main/ipc/registerBackupIpc.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/api/desktopApiClient.ts; apps/desktop/src/renderer/pages/WelcomePage.tsx; docs/DB_CORRUPTION_RECOVERY.md; docs/README.md; tests
 Open questions / risks: Need push/PR and CI confirmation.
 Next actions: Review diff; commit; push/open PR.
+## 2026-05-14T10:44:13.7448080+10:00
+Objective: Finish PSE-179 merge and next-ticket handoff.
+Decisions made:
+- PR #168 passed CI and was squash-merged at 499651f1c708863087c753bcd3290f071f036fa3.
+- Deleted remote/local feature branch and fast-forwarded local main.
+- Moved PSE-179 to Done and promoted PSE-180 as the sole next Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Untracked .playwright-mcp/ and gh_2.92.0_windows_amd64.msi remain unrelated.
+Next actions: Start PSE-180 in the next run; keep other planned issues out of Codex Ready.
+## 2026-05-14T10:52:07.1022812+10:00
+Objective: Reconcile active Linear/GitHub work and start PSE-180.
+Decisions made:
+- Found no PR Open or In Progress Linear issues and no open GitHub PRs.
+- Selected sole Codex Ready issue PSE-180 for implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need inspect ticket/docs to confirm cleanup scope.
+Next actions: Move PSE-180 In Progress; branch; read docs/source.
+## 2026-05-14T10:55:24.4457742+10:00
+Objective: Plan PSE-180 manifest/orphan cleanup implementation.
+Decisions made:
+- Use existing Maintenance service/UI to avoid new schema or renderer filesystem access.
+- Add audit/report operation plus explicit reversible orphan quarantine cleanup, not hard delete.
+- Keep missing/corrupt DB-referenced file repair in existing attachment replacement flow.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need preserve existing maintenance API compatibility.
+Next actions: Patch service/types/IPC/UI; add tests; update docs.
+## 2026-05-14T11:02:52.7529181+10:00
+Objective: Implement and validate PSE-180 manifest/orphan cleanup tools.
+Decisions made:
+- Added attachment manifest audit reports with missing/orphan/size/checksum mismatch summaries.
+- Added explicit orphan quarantine cleanup under logs/maintenance instead of hard delete.
+- Updated Settings Maintenance UI, IPC, docs, and tests; lint/typecheck/test/build pass.
+Files changed:
+- packages/features/src/maintenance/MaintenanceService.ts; apps/desktop/src/main/ipc/diagnosticsHandlers.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/pages/SettingsPage.tsx; docs
+Open questions / risks: Need push/PR, CI, and merge confirmation.
+Next actions: Review diff; commit; push/open PR.

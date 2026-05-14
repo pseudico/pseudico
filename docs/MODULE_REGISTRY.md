@@ -949,7 +949,7 @@ Integration points:
 
 Owns:
 
-- Local database maintenance job orchestration for SQLite integrity checks, VACUUM, search-index rebuilds, and orphan attachment scans.
+- Local database maintenance job orchestration for SQLite integrity checks, VACUUM, search-index rebuilds, attachment manifest audits, and orphan attachment scans/cleanup.
 - App-settings-backed maintenance job logs and user-visible progress summaries.
 - Backup preflight coordination before write maintenance.
 
@@ -957,7 +957,7 @@ Does not own:
 
 - Cloud diagnostics, telemetry, or remote repair services.
 - Direct renderer filesystem or SQLite access.
-- Automatic deletion of orphan attachment files without a future explicit repair ticket.
+- Hard deletion of orphan attachment files; cleanup quarantines them under local logs so the user can recover them.
 
 Implemented service methods:
 

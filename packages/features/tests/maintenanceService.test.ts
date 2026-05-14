@@ -21,6 +21,8 @@ let connection: DatabaseConnection;
 let idCounter = 0;
 let vacuumRuns = 0;
 let backupRuns = 0;
+const auditReports = new Map<string, unknown>();
+const movedFiles: Array<{ source: string; destination: string }> = [];
 
 describe("MaintenanceService", () => {
   beforeEach(async () => {
@@ -34,6 +36,8 @@ describe("MaintenanceService", () => {
     idCounter = 0;
     vacuumRuns = 0;
     backupRuns = 0;
+    auditReports.clear();
+    movedFiles.splice(0);
   });
 
   afterEach(async () => {
@@ -60,6 +64,7 @@ describe("MaintenanceService", () => {
       requireBackup: true,
       operations: [
         "sqlite_integrity_check",
+        "attachment_manifest_audit",
         "orphan_attachment_scan",
         "rebuild_search_index",
         "vacuum"
@@ -75,6 +80,17 @@ describe("MaintenanceService", () => {
         relativePath: "backups/pre-maintenance"
       },
       sqliteIntegrity: { ok: true, messages: ["ok"] },
+      attachmentManifestAudit: {
+        status: "needs_attention",
+        manifestRelativePath:
+          "logs/maintenance/maintenance_job_1/attachment-manifest-audit.json",
+        scannedFileCount: 2,
+        referencedFileCount: 1,
+        missingReferencedPaths: [],
+        orphanedRelativePaths: ["attachments/orphan.bin"],
+        sizeMismatches: [],
+        checksumMismatches: []
+      },
       orphanAttachmentScan: {
         scannedFileCount: 2,
         referencedFileCount: 1,
@@ -89,6 +105,11 @@ describe("MaintenanceService", () => {
     });
     expect(vacuumRuns).toBe(1);
     expect(backupRuns).toBe(1);
+    expect(
+      auditReports.has(
+        "logs/maintenance/maintenance_job_1/attachment-manifest-audit.json"
+      )
+    ).toBe(true);
     expect(
       new SearchIndexRepository(connection).getByTarget({
         workspaceId: "workspace_1",
@@ -114,6 +135,95 @@ describe("MaintenanceService", () => {
         expect.objectContaining({ action: "search_index_rebuilt" })
       ])
     );
+  });
+
+  it("quarantines orphan attachment files instead of deleting them", async () => {
+    seedAttachment();
+    idCounter = 0;
+
+    const job = await createService({
+      files: [
+        "attachments/2026/05/attachment_1/Brief.pdf",
+        "attachments/orphan.bin",
+        "attachments/nested/orphan.txt"
+      ]
+    }).runMaintenanceJob({
+      workspaceId: "workspace_1",
+      operations: [
+        "attachment_manifest_audit",
+        "orphan_attachment_scan",
+        "orphan_attachment_cleanup"
+      ]
+    });
+
+    expect(job).toMatchObject({
+      status: "completed",
+      attachmentManifestAudit: {
+        status: "needs_attention",
+        orphanedRelativePaths: [
+          "attachments/nested/orphan.txt",
+          "attachments/orphan.bin"
+        ]
+      },
+      orphanAttachmentCleanup: {
+        quarantinedFileCount: 2,
+        quarantineRootRelativePath:
+          "logs/maintenance/maintenance_job_1/orphan-attachments"
+      }
+    });
+    expect(movedFiles).toEqual([
+      {
+        source: "attachments/nested/orphan.txt",
+        destination:
+          "logs/maintenance/maintenance_job_1/orphan-attachments/nested/orphan.txt"
+      },
+      {
+        source: "attachments/orphan.bin",
+        destination:
+          "logs/maintenance/maintenance_job_1/orphan-attachments/orphan.bin"
+      }
+    ]);
+  });
+
+  it("reports missing referenced files and metadata mismatches in the manifest audit", async () => {
+    seedAttachment();
+    idCounter = 0;
+
+    const job = await createService({
+      files: ["attachments/2026/05/attachment_1/Brief.pdf"],
+      sizes: new Map([["attachments/2026/05/attachment_1/Brief.pdf", 99]]),
+      checksums: new Map([["attachments/2026/05/attachment_1/Brief.pdf", "b".repeat(64)]])
+    }).runMaintenanceJob({
+      workspaceId: "workspace_1",
+      operations: ["attachment_manifest_audit"]
+    });
+
+    expect(job.attachmentManifestAudit).toMatchObject({
+      status: "needs_attention",
+      sizeMismatches: [
+        {
+          storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
+          expectedSizeBytes: 42,
+          actualSizeBytes: 99
+        }
+      ],
+      checksumMismatches: [
+        {
+          storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
+          expectedChecksum: "a".repeat(64),
+          actualChecksum: "b".repeat(64)
+        }
+      ]
+    });
+
+    const missingJob = await createService({ files: [] }).runMaintenanceJob({
+      workspaceId: "workspace_1",
+      operations: ["attachment_manifest_audit"]
+    });
+
+    expect(missingJob.attachmentManifestAudit).toMatchObject({
+      missingReferencedPaths: ["attachments/2026/05/attachment_1/Brief.pdf"]
+    });
   });
 
   it("records failed jobs when backup preflight is required but unavailable", async () => {
@@ -181,7 +291,11 @@ function seedAttachment(): void {
   new SearchIndexService({ connection, idFactory, now }).rebuildWorkspaceIndex("workspace_1");
 }
 
-function createService(input: { files?: string[] } = {}): MaintenanceService {
+function createService(input: {
+  files?: string[];
+  sizes?: Map<string, number>;
+  checksums?: Map<string, string>;
+} = {}): MaintenanceService {
   return new MaintenanceService({
     connection,
     idFactory,
@@ -193,7 +307,22 @@ function createService(input: { files?: string[] } = {}): MaintenanceService {
       }
     },
     fileSystem: {
-      listWorkspaceFilesUnder: async () => input.files ?? []
+      listWorkspaceFilesUnder: async () => input.files ?? [],
+      workspacePathExists: async (workspaceRelativePath) =>
+        (input.files ?? []).includes(workspaceRelativePath),
+      workspaceFileSize: async (workspaceRelativePath) =>
+        input.sizes?.get(workspaceRelativePath) ?? 42,
+      workspaceFileChecksum: async (workspaceRelativePath) =>
+        input.checksums?.get(workspaceRelativePath) ?? "a".repeat(64),
+      writeWorkspaceJson: async (workspaceRelativePath, value) => {
+        auditReports.set(workspaceRelativePath, value);
+      },
+      moveWorkspaceFile: async (sourceRelativePath, destinationRelativePath) => {
+        movedFiles.push({
+          source: sourceRelativePath,
+          destination: destinationRelativePath
+        });
+      }
     },
     createBackup: async () => {
       backupRuns += 1;

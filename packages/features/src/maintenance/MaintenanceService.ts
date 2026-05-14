@@ -18,9 +18,11 @@ export const DEFAULT_MAINTENANCE_JOB_LIMIT = 10;
 
 export type MaintenanceOperation =
   | "sqlite_integrity_check"
+  | "attachment_manifest_audit"
   | "rebuild_search_index"
   | "vacuum"
-  | "orphan_attachment_scan";
+  | "orphan_attachment_scan"
+  | "orphan_attachment_cleanup";
 
 export type MaintenanceJobStatus = "completed" | "failed";
 export type MaintenanceJobStepStatus = "completed" | "failed";
@@ -50,6 +52,39 @@ export type OrphanAttachmentScanSummary = {
   orphanedRelativePaths: string[];
 };
 
+export type AttachmentManifestSizeMismatch = {
+  storagePath: string;
+  expectedSizeBytes: number;
+  actualSizeBytes: number;
+};
+
+export type AttachmentManifestChecksumMismatch = {
+  storagePath: string;
+  expectedChecksum: string;
+  actualChecksum: string;
+};
+
+export type AttachmentManifestAuditSummary = {
+  status: "healthy" | "needs_attention";
+  manifestRelativePath: string | null;
+  scannedFileCount: number;
+  referencedFileCount: number;
+  missingReferencedPaths: string[];
+  orphanedRelativePaths: string[];
+  unsafeReferencedPaths: string[];
+  sizeMismatches: AttachmentManifestSizeMismatch[];
+  checksumMismatches: AttachmentManifestChecksumMismatch[];
+};
+
+export type OrphanAttachmentCleanupSummary = {
+  quarantinedFileCount: number;
+  quarantineRootRelativePath: string;
+  quarantinedFiles: Array<{
+    sourceRelativePath: string;
+    quarantineRelativePath: string;
+  }>;
+};
+
 export type MaintenanceJobSummary = {
   id: string;
   workspaceId: string;
@@ -59,9 +94,11 @@ export type MaintenanceJobSummary = {
   completedAt: string;
   backup: MaintenanceBackupSummary | null;
   sqliteIntegrity: SqliteIntegrityCheckSummary | null;
+  attachmentManifestAudit: AttachmentManifestAuditSummary | null;
   searchReindex: RebuildWorkspaceIndexResult | null;
   vacuum: { completed: boolean } | null;
   orphanAttachmentScan: OrphanAttachmentScanSummary | null;
+  orphanAttachmentCleanup: OrphanAttachmentCleanupSummary | null;
   entries: MaintenanceJobLogEntry[];
   error: string | null;
 };
@@ -79,6 +116,11 @@ export type MaintenanceDatabaseAdapter = {
 
 export type MaintenanceFileSystemAdapter = {
   listWorkspaceFilesUnder: (workspaceRelativePath: string) => Promise<string[]>;
+  workspacePathExists?: (workspaceRelativePath: string) => Promise<boolean>;
+  workspaceFileSize?: (workspaceRelativePath: string) => Promise<number>;
+  workspaceFileChecksum?: (workspaceRelativePath: string) => Promise<string>;
+  writeWorkspaceJson?: (workspaceRelativePath: string, value: unknown) => Promise<void>;
+  moveWorkspaceFile?: (sourceRelativePath: string, destinationRelativePath: string) => Promise<void>;
 };
 
 export type MaintenanceServiceIdFactory = (prefix: string) => string;
@@ -147,9 +189,11 @@ export class MaintenanceService {
       completedAt: "",
       backup: null,
       sqliteIntegrity: null,
+      attachmentManifestAudit: null,
       searchReindex: null,
       vacuum: null,
       orphanAttachmentScan: null,
+      orphanAttachmentCleanup: null,
       entries: [],
       error: null
     };
@@ -195,6 +239,37 @@ export class MaintenanceService {
                 : `Found ${scan.orphanedRelativePaths.length} orphan attachment file(s).`,
             details: scan,
             value: scan
+          };
+        });
+      }
+
+      if (operations.includes("attachment_manifest_audit")) {
+        job.attachmentManifestAudit = await this.runStep(job, "attachment_manifest_audit", async () => {
+          const audit = await this.auditAttachmentManifest(input.workspaceId, job.id);
+          const issueCount = getAttachmentManifestIssueCount(audit);
+
+          return {
+            message:
+              issueCount === 0
+                ? "Attachment manifest matches the local filesystem."
+                : `Attachment manifest audit found ${issueCount} mismatch(es).`,
+            details: audit,
+            value: audit
+          };
+        });
+      }
+
+      if (operations.includes("orphan_attachment_cleanup")) {
+        job.orphanAttachmentCleanup = await this.runStep(job, "orphan_attachment_cleanup", async () => {
+          const cleanup = await this.cleanupOrphanAttachmentFiles(input.workspaceId, job.id);
+
+          return {
+            message:
+              cleanup.quarantinedFileCount === 0
+                ? "No orphan attachment files needed cleanup."
+                : `Quarantined ${cleanup.quarantinedFileCount} orphan attachment file(s).`,
+            details: cleanup,
+            value: cleanup
           };
         });
       }
@@ -331,6 +406,8 @@ export class MaintenanceService {
         status: job.status,
         operations: job.operations,
         backup: job.backup,
+        attachmentManifestAudit: job.attachmentManifestAudit,
+        orphanAttachmentCleanup: job.orphanAttachmentCleanup,
         error: job.error
       }),
       timestamp: job.completedAt || createIsoTimestamp(this.now())
@@ -354,6 +431,173 @@ export class MaintenanceService {
       valueJson: JSON.stringify({ version: 1, jobs }),
       timestamp
     });
+  }
+
+  private async auditAttachmentManifest(
+    workspaceId: string,
+    jobId: string
+  ): Promise<AttachmentManifestAuditSummary> {
+    const attachments = new AttachmentRepository(this.connection).listByWorkspace({
+      workspaceId
+    });
+    const referencedPaths = attachments.map((attachment) =>
+      normalizeRelativePath(attachment.storagePath)
+    );
+    const referenced = new Set(referencedPaths);
+    const unsafeReferencedPaths = referencedPaths.filter(
+      (path) => !isSafeAttachmentRelativePath(path)
+    );
+    const missingReferencedPaths: string[] = [];
+    const sizeMismatches: AttachmentManifestSizeMismatch[] = [];
+    const checksumMismatches: AttachmentManifestChecksumMismatch[] = [];
+    const files =
+      this.fileSystem === undefined
+        ? []
+        : (await this.fileSystem.listWorkspaceFilesUnder("attachments"))
+            .map(normalizeRelativePath)
+            .filter((path) => path.startsWith("attachments/"));
+
+    if (this.fileSystem !== undefined) {
+      for (const attachment of attachments) {
+        const storagePath = normalizeRelativePath(attachment.storagePath);
+
+        if (!isSafeAttachmentRelativePath(storagePath)) {
+          continue;
+        }
+
+        const exists = await this.workspacePathExists(storagePath);
+
+        if (!exists) {
+          missingReferencedPaths.push(storagePath);
+          continue;
+        }
+
+        if (this.fileSystem.workspaceFileSize !== undefined) {
+          const actualSizeBytes = await this.fileSystem.workspaceFileSize(storagePath);
+
+          if (actualSizeBytes !== attachment.sizeBytes) {
+            sizeMismatches.push({
+              storagePath,
+              expectedSizeBytes: attachment.sizeBytes,
+              actualSizeBytes
+            });
+          }
+        }
+
+        if (
+          this.fileSystem.workspaceFileChecksum !== undefined &&
+          attachment.checksum !== null &&
+          attachment.checksum.trim().length > 0
+        ) {
+          const actualChecksum = await this.fileSystem.workspaceFileChecksum(storagePath);
+
+          if (actualChecksum.toLowerCase() !== attachment.checksum.toLowerCase()) {
+            checksumMismatches.push({
+              storagePath,
+              expectedChecksum: attachment.checksum,
+              actualChecksum
+            });
+          }
+        }
+      }
+    }
+
+    const orphanedRelativePaths = files
+      .filter((path) => !referenced.has(path))
+      .sort();
+    const manifestRelativePath =
+      this.fileSystem?.writeWorkspaceJson === undefined
+        ? null
+        : `logs/maintenance/${jobId}/attachment-manifest-audit.json`;
+    const audit: AttachmentManifestAuditSummary = {
+      status: "healthy",
+      manifestRelativePath,
+      scannedFileCount: files.length,
+      referencedFileCount: referenced.size,
+      missingReferencedPaths: [...new Set(missingReferencedPaths)].sort(),
+      orphanedRelativePaths,
+      unsafeReferencedPaths: [...new Set(unsafeReferencedPaths)].sort(),
+      sizeMismatches: sizeMismatches.sort((left, right) =>
+        left.storagePath.localeCompare(right.storagePath)
+      ),
+      checksumMismatches: checksumMismatches.sort((left, right) =>
+        left.storagePath.localeCompare(right.storagePath)
+      )
+    };
+
+    audit.status = getAttachmentManifestIssueCount(audit) === 0
+      ? "healthy"
+      : "needs_attention";
+
+    if (manifestRelativePath !== null) {
+      await this.fileSystem!.writeWorkspaceJson!(manifestRelativePath, {
+        version: 1,
+        workspaceId,
+        generatedAt: createIsoTimestamp(this.now()),
+        audit,
+        attachments: attachments.map((attachment) => ({
+          id: attachment.id,
+          itemId: attachment.itemId,
+          originalName: attachment.originalName,
+          storedName: attachment.storedName,
+          mimeType: attachment.mimeType,
+          sizeBytes: attachment.sizeBytes,
+          checksum: attachment.checksum,
+          storagePath: attachment.storagePath,
+          description: attachment.description,
+          createdAt: attachment.createdAt,
+          updatedAt: attachment.updatedAt
+        }))
+      });
+    }
+
+    return audit;
+  }
+
+  private async workspacePathExists(workspaceRelativePath: string): Promise<boolean> {
+    if (this.fileSystem?.workspacePathExists !== undefined) {
+      return await this.fileSystem.workspacePathExists(workspaceRelativePath);
+    }
+
+    const files = await this.fileSystem!.listWorkspaceFilesUnder("attachments");
+    const normalized = normalizeRelativePath(workspaceRelativePath);
+
+    return files.map(normalizeRelativePath).includes(normalized);
+  }
+
+  private async cleanupOrphanAttachmentFiles(
+    workspaceId: string,
+    jobId: string
+  ): Promise<OrphanAttachmentCleanupSummary> {
+    if (this.fileSystem?.moveWorkspaceFile === undefined) {
+      throw new Error("Orphan attachment cleanup is not configured.");
+    }
+
+    const scan = await this.scanOrphanAttachmentFiles(workspaceId);
+    const quarantineRootRelativePath = `logs/maintenance/${jobId}/orphan-attachments`;
+    const quarantinedFiles: OrphanAttachmentCleanupSummary["quarantinedFiles"] = [];
+
+    for (const orphanedRelativePath of scan.orphanedRelativePaths) {
+      if (!isSafeAttachmentRelativePath(orphanedRelativePath)) {
+        continue;
+      }
+
+      const quarantineRelativePath = `${quarantineRootRelativePath}/${orphanedRelativePath.slice("attachments/".length)}`;
+      await this.fileSystem.moveWorkspaceFile(
+        orphanedRelativePath,
+        quarantineRelativePath
+      );
+      quarantinedFiles.push({
+        sourceRelativePath: orphanedRelativePath,
+        quarantineRelativePath
+      });
+    }
+
+    return {
+      quarantinedFileCount: quarantinedFiles.length,
+      quarantineRootRelativePath,
+      quarantinedFiles
+    };
   }
 }
 
@@ -393,6 +637,7 @@ function createSqliteMaintenanceAdapter(connection: DatabaseConnection): Mainten
 function normalizeOperations(operations: MaintenanceOperation[] | undefined): MaintenanceOperation[] {
   const selected = operations ?? [
     "sqlite_integrity_check",
+    "attachment_manifest_audit",
     "orphan_attachment_scan",
     "rebuild_search_index",
     "vacuum"
@@ -415,14 +660,37 @@ function normalizeOperations(operations: MaintenanceOperation[] | undefined): Ma
 function isMaintenanceOperation(value: string): value is MaintenanceOperation {
   return [
     "sqlite_integrity_check",
+    "attachment_manifest_audit",
     "rebuild_search_index",
     "vacuum",
-    "orphan_attachment_scan"
+    "orphan_attachment_scan",
+    "orphan_attachment_cleanup"
   ].includes(value);
 }
 
 function normalizeRelativePath(value: string): string {
   return value.replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+function isSafeAttachmentRelativePath(value: string): boolean {
+  const normalized = normalizeRelativePath(value);
+
+  return (
+    normalized.startsWith("attachments/") &&
+    !normalized.startsWith("/") &&
+    !/^[a-zA-Z]:/.test(normalized) &&
+    normalized.split("/").every((segment) => segment.length > 0 && segment !== "." && segment !== "..")
+  );
+}
+
+function getAttachmentManifestIssueCount(audit: AttachmentManifestAuditSummary): number {
+  return (
+    audit.missingReferencedPaths.length +
+    audit.orphanedRelativePaths.length +
+    audit.unsafeReferencedPaths.length +
+    audit.sizeMismatches.length +
+    audit.checksumMismatches.length
+  );
 }
 
 function normalizeLimit(limit: number): number {

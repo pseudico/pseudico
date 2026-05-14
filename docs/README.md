@@ -42,6 +42,8 @@ docs and the linked Linear issue.
   report artifacts.
 - `DB_CORRUPTION_RECOVERY.md` documents the local-only corrupt database
   detection and backup-restore recovery flow.
+- `ATTACHMENT_MANIFEST_AUDIT.md` documents local attachment manifest audits and
+  reversible orphan-file quarantine cleanup.
 - `ACCESSIBILITY.md` documents keyboard behavior and manual accessibility checks.
 - `DECISIONS/` stores accepted architecture decision records.
 

@@ -618,9 +618,11 @@ export type ChooseMarkdownFolderImportInput = {
 
 export type MaintenanceOperation =
   | "sqlite_integrity_check"
+  | "attachment_manifest_audit"
   | "rebuild_search_index"
   | "vacuum"
-  | "orphan_attachment_scan";
+  | "orphan_attachment_scan"
+  | "orphan_attachment_cleanup";
 
 export type RunMaintenanceJobInput = {
   workspaceId?: string;
@@ -646,6 +648,25 @@ export type MaintenanceJobSummary = {
   completedAt: string;
   backup: { id: string; relativePath: string } | null;
   sqliteIntegrity: { ok: boolean; messages: string[] } | null;
+  attachmentManifestAudit: {
+    status: "healthy" | "needs_attention";
+    manifestRelativePath: string | null;
+    scannedFileCount: number;
+    referencedFileCount: number;
+    missingReferencedPaths: string[];
+    orphanedRelativePaths: string[];
+    unsafeReferencedPaths: string[];
+    sizeMismatches: Array<{
+      storagePath: string;
+      expectedSizeBytes: number;
+      actualSizeBytes: number;
+    }>;
+    checksumMismatches: Array<{
+      storagePath: string;
+      expectedChecksum: string;
+      actualChecksum: string;
+    }>;
+  } | null;
   searchReindex: {
     indexedContainerCount: number;
     indexedItemCount: number;
@@ -657,6 +678,14 @@ export type MaintenanceJobSummary = {
     scannedFileCount: number;
     referencedFileCount: number;
     orphanedRelativePaths: string[];
+  } | null;
+  orphanAttachmentCleanup: {
+    quarantinedFileCount: number;
+    quarantineRootRelativePath: string;
+    quarantinedFiles: Array<{
+      sourceRelativePath: string;
+      quarantineRelativePath: string;
+    }>;
   } | null;
   entries: MaintenanceJobLogEntrySummary[];
   error: string | null;
