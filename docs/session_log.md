@@ -6062,3 +6062,50 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Need inspect PR diff, CI, and review threads before merge.
 Next actions: Check PR metadata/diff; wait for CI; merge if clean.
+## 2026-05-14T20:15:42.6714795+10:00
+Objective: Finish PSE-193 merge and next-ticket promotion.
+Decisions made:
+- PR #182 was green, had no review threads, and was squash-merged as b28b51cd.
+- PSE-193 moved to Done; PSE-194 promoted as the only Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Session log has a local post-merge entry not included in PR #182.
+Next actions: Start PSE-194 next; leave unrelated untracked files untouched.
+## 2026-05-14T20:19:06.6654412+10:00
+Objective: Reconcile Linear/GitHub active state for next Local Work OS ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found; one Codex Ready issue found (PSE-194).
+- No open GitHub PRs found for pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing untracked local files appear unrelated and will be left untouched.
+Next actions: Move PSE-194 to In Progress; read docs/source; implement scoped importer work.
+## 2026-05-14T20:19:50.3482812+10:00
+Objective: Start PSE-194 implementation.
+Decisions made:
+- Moved PSE-194 to In Progress.
+- Created branch codex/PSE-194-markdown-import-obsidian-metadata after git ref lock required escalation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need confirm current importer boundaries and test coverage.
+Next actions: Read linked docs; inspect markdown import code; plan targeted changes.
+## 2026-05-14T20:32:19.6975574+10:00
+Objective: Implement PSE-194 Obsidian metadata enrichment.
+Decisions made:
+- Added conservative frontmatter/tag/wiki-link/embed parsing to Markdown folder import.
+- Skips .canvas as unsupported warnings and resolves embeds only within selected local folder.
+Files changed:
+- packages/features/src/import/MarkdownFolderImportService.ts
+- apps/desktop/src/main/ipc/importHandlers.ts
+- docs/MARKDOWN_FOLDER_IMPORT.md
+Open questions / risks: Full YAML/plugin-specific Obsidian fidelity remains out of scope.
+Next actions: Run full lint/test/build; prepare PR; update Linear/GitHub.
+## 2026-05-14T20:34:26.2862041+10:00
+Objective: Verify PSE-194 locally.
+Decisions made:
+- Full lint, typecheck, test, and build pass.
+- Reran Vitest/build with escalation after sandbox EPERM on Vite/esbuild spawn.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI still required as merge proof after PR opens.
+Next actions: Review diff; commit/push branch; open PR and move Linear to PR Open.

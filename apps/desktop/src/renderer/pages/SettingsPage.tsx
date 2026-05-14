@@ -2296,9 +2296,14 @@ function MarkdownFolderImportSummaryPanel({
           <span>
             {preview.projectName}: {preview.markdownCount} note(s), {preview.fileCount} file(s), {preview.tabCount} tab(s)
           </span>
+          <span>
+            Obsidian metadata: {preview.frontmatterCount} frontmatter file(s), {preview.tagCount} tag(s),{" "}
+            {preview.wikilinkCount} wiki-link(s), {preview.resolvedAttachmentEmbedCount}/{preview.attachmentEmbedCount} embed(s) resolved
+          </span>
         </div>
         <div className="backup-list-meta">
           <span>{preview.headingCount} heading(s)</span>
+          <span>{preview.unsupportedCount} unsupported</span>
           <span>{preview.errorCount} errors</span>
           <span>{preview.warningCount} warnings</span>
         </div>

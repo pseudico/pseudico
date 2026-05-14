@@ -63,6 +63,7 @@ export type {
   MarkdownFolderImportPreviewRow,
   MarkdownFolderImportPreviewSummary,
   MarkdownFolderImportSourceEntry,
+  MarkdownFolderImportSourceReport,
   MarkdownFolderImportValidationIssue
 } from "./MarkdownFolderImportService";
 export type {

@@ -6,7 +6,9 @@ import {
   ItemRepository,
   MigrationService,
   NoteRepository,
+  RelationshipRepository,
   SearchIndexRepository,
+  TagRepository,
   WorkspaceRepository,
   createDatabaseConnection,
   type DatabaseConnection
@@ -152,6 +154,114 @@ describe("MarkdownFolderImportService", () => {
         expect.objectContaining({ code: "unsafe_path", severity: "error" })
       ])
     );
+  });
+
+  it("parses Obsidian frontmatter, tags, wiki-links, embeds, and canvas warnings", async () => {
+    const summary = await createService().executeImport({
+      workspaceId: "workspace_1",
+      rootName: "Vault",
+      entries: [
+        { relativePath: "Notes", kind: "directory" },
+        {
+          relativePath: "Notes/target.md",
+          kind: "markdown",
+          content: "# Target\nLinked note"
+        },
+        {
+          relativePath: "Notes/source.md",
+          kind: "markdown",
+          content: [
+            "---",
+            "title: Source Note",
+            "tags: [Research, #Client/Alpha]",
+            "---",
+            "Body with #follow-up, [[Target|the target]], and ![[assets/sketch.png]]."
+          ].join("\n")
+        },
+        {
+          relativePath: "Notes/assets/sketch.png",
+          kind: "file",
+          copiedFile: {
+            attachmentId: "attachment_sketch_file",
+            originalName: "sketch.png",
+            storedName: "sketch.png",
+            storagePath: "attachments/2026/05/attachment_sketch_file/sketch.png",
+            sizeBytes: 12,
+            checksum: "b".repeat(64),
+            mimeType: "image/png"
+          }
+        },
+        { relativePath: "Board.canvas", kind: "unsupported", content: "{}" }
+      ]
+    });
+
+    expect(summary).toMatchObject({
+      valid: true,
+      frontmatterCount: 1,
+      tagCount: 3,
+      wikilinkCount: 1,
+      attachmentEmbedCount: 1,
+      resolvedAttachmentEmbedCount: 1,
+      unsupportedCount: 1
+    });
+    expect(summary.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "unsupported_canvas_file",
+          severity: "warning",
+          relativePath: "Board.canvas"
+        })
+      ])
+    );
+
+    const project = new ContainerRepository(connection).listByWorkspace("workspace_1", { type: "project" })[0]!;
+    const notes = new NoteRepository(connection).listByContainer(project.id);
+    const sourceNote = notes.find((note) => note.item.title === "Source Note")!;
+    const targetNote = notes.find((note) => note.item.title === "Target")!;
+
+    expect(sourceNote.note.content).not.toContain("title: Source Note");
+    expect(sourceNote.note.content).toContain("Imported Obsidian tags: @research @client-alpha @follow-up");
+    expect(sourceNote.note.content).toContain("[[Target]]");
+
+    expect(
+      new TagRepository(connection)
+        .listTagsForTarget({
+          workspaceId: "workspace_1",
+          targetType: "item",
+          targetId: sourceNote.item.id
+        })
+        .map((tag) => tag.slug)
+        .sort()
+    ).toEqual(["client-alpha", "follow-up", "research"]);
+
+    expect(
+      new RelationshipRepository(connection)
+        .listByWorkspace("workspace_1")
+        .map((relationship) => ({
+          sourceId: relationship.sourceId,
+          targetId: relationship.targetId,
+          label: relationship.label
+        }))
+    ).toEqual(
+      expect.arrayContaining([
+        {
+          sourceId: sourceNote.item.id,
+          targetId: targetNote.item.id,
+          label: "Target"
+        }
+      ])
+    );
+
+    expect(
+      new AttachmentRepository(connection).listForItem({
+        workspaceId: "workspace_1",
+        itemId: sourceNote.item.id
+      })
+    ).toEqual([
+      expect.objectContaining({
+        originalName: "sketch.png"
+      })
+    ]);
   });
 });
 

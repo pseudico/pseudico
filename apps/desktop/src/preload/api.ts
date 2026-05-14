@@ -568,11 +568,22 @@ export type MarkdownFolderImportValidationIssueSummary = {
 };
 export type MarkdownFolderImportPreviewRowSummary = {
   relativePath: string;
-  kind: "directory" | "markdown" | "file" | "project" | "tab" | "heading";
+  kind: "directory" | "markdown" | "file" | "unsupported" | "project" | "tab" | "heading";
   action: "create" | "skip";
   title: string;
   targetTabName: string;
   issues: MarkdownFolderImportValidationIssueSummary[];
+};
+export type MarkdownFolderImportSourceReportSummary = {
+  frontmatter: Array<{ relativePath: string; keys: string[] }>;
+  tags: Array<{ relativePath: string; tags: string[] }>;
+  wikilinks: Array<{ relativePath: string; titles: string[] }>;
+  attachmentEmbeds: Array<{
+    relativePath: string;
+    rawTarget: string;
+    resolvedRelativePath: string | null;
+  }>;
+  unsupportedCanvasFiles: Array<{ relativePath: string }>;
 };
 export type MarkdownFolderImportPreviewSummary = {
   valid: boolean;
@@ -583,14 +594,21 @@ export type MarkdownFolderImportPreviewSummary = {
   directoryCount: number;
   markdownCount: number;
   fileCount: number;
+  unsupportedCount: number;
   tabCount: number;
   headingCount: number;
+  frontmatterCount: number;
+  tagCount: number;
+  wikilinkCount: number;
+  attachmentEmbedCount: number;
+  resolvedAttachmentEmbedCount: number;
   creatableCount: number;
   skippedCount: number;
   errorCount: number;
   warningCount: number;
   issues: MarkdownFolderImportValidationIssueSummary[];
   rows: MarkdownFolderImportPreviewRowSummary[];
+  sourceReport: MarkdownFolderImportSourceReportSummary;
 };
 export type MarkdownFolderImportCreatedTargetSummary = {
   targetType: "project" | "container_tab" | "item" | "attachment";

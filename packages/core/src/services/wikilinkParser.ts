@@ -11,8 +11,12 @@ export function parseWikilinks(content: string): ParsedWikilink[] {
   let match: RegExpExecArray | null;
 
   while ((match = pattern.exec(content)) !== null) {
+    if (match.index > 0 && content[match.index - 1] === "!") {
+      continue;
+    }
+
     const raw = match[0];
-    const title = (match[1] ?? "").trim().replace(/\s+/g, " ");
+    const title = normalizeWikilinkTarget(match[1] ?? "");
 
     if (title.length === 0) {
       continue;
@@ -47,4 +51,12 @@ export function parseUniqueWikilinkTitles(content: string): string[] {
 
 export function normalizeWikilinkTitle(title: string): string {
   return title.trim().replace(/\s+/g, " ").toLocaleLowerCase();
+}
+
+function normalizeWikilinkTarget(rawTarget: string): string {
+  return rawTarget
+    .split("|")[0]!
+    .split("#")[0]!
+    .trim()
+    .replace(/\s+/g, " ");
 }
