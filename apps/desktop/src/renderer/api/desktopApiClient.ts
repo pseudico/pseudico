@@ -530,6 +530,8 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       createManualBackup: (input) =>
         callApi(() => api.backup.createManualBackup(input)),
       listBackups: (input) => callApi(() => api.backup.listBackups(input)),
+      listBackupsForWorkspacePath: (input) =>
+        callApi(() => api.backup.listBackupsForWorkspacePath(input)),
       getAutomaticBackupSettings: (input) =>
         callApi(() => api.backup.getAutomaticBackupSettings(input)),
       updateAutomaticBackupSettings: (input) =>
@@ -540,6 +542,8 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
         callApi(() => api.backup.validateRestoreSource(input)),
       restoreBackupToNewWorkspace: (input) =>
         callApi(() => api.backup.restoreBackupToNewWorkspace(input)),
+      restoreBackupFromWorkspacePath: (input) =>
+        callApi(() => api.backup.restoreBackupFromWorkspacePath(input)),
       restoreExportToNewWorkspace: (input) =>
         callApi(() => api.backup.restoreExportToNewWorkspace(input))
     },
@@ -1191,6 +1195,8 @@ export const desktopApiClient: LocalWorkOsApi = {
     createManualBackup: (input) =>
       getDesktopApiClient().backup.createManualBackup(input),
     listBackups: (input) => getDesktopApiClient().backup.listBackups(input),
+    listBackupsForWorkspacePath: (input) =>
+      getDesktopApiClient().backup.listBackupsForWorkspacePath(input),
     getAutomaticBackupSettings: (input) =>
       getDesktopApiClient().backup.getAutomaticBackupSettings(input),
     updateAutomaticBackupSettings: (input) =>
@@ -1201,6 +1207,8 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().backup.validateRestoreSource(input),
     restoreBackupToNewWorkspace: (input) =>
       getDesktopApiClient().backup.restoreBackupToNewWorkspace(input),
+    restoreBackupFromWorkspacePath: (input) =>
+      getDesktopApiClient().backup.restoreBackupFromWorkspacePath(input),
     restoreExportToNewWorkspace: (input) =>
       getDesktopApiClient().backup.restoreExportToNewWorkspace(input)
   },

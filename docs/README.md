@@ -40,6 +40,8 @@ docs and the linked Linear issue.
 - `QA_SCRIPTS.md` lists manual and automated smoke checks for MVP workflows.
 - `PERFORMANCE.md` defines large-workspace benchmark fixtures, budgets, and
   report artifacts.
+- `DB_CORRUPTION_RECOVERY.md` documents the local-only corrupt database
+  detection and backup-restore recovery flow.
 - `ACCESSIBILITY.md` documents keyboard behavior and manual accessibility checks.
 - `DECISIONS/` stores accepted architecture decision records.
 

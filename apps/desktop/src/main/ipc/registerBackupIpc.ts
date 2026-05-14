@@ -17,6 +17,10 @@ export function registerBackupIpc(
     (_event, input) => handlers.handleListBackups(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackupsForWorkspacePath,
+    (_event, input) => handlers.handleListBackupsForWorkspacePath(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.backup.getAutomaticBackupSettings,
     (_event, input) => handlers.handleGetAutomaticBackupSettings(input)
   );
@@ -35,6 +39,10 @@ export function registerBackupIpc(
   registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreBackupToNewWorkspace,
     (_event, input) => handlers.handleRestoreBackupToNewWorkspace(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreBackupFromWorkspacePath,
+    (_event, input) => handlers.handleRestoreBackupFromWorkspacePath(input)
   );
   registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreExportToNewWorkspace,

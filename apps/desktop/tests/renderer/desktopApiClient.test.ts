@@ -713,6 +713,7 @@ function createMockApi(
     backup: {
       createManualBackup: async () => apiOk(backupSnapshotSummary()),
       listBackups: async () => apiOk([backupSnapshotSummary()]),
+      listBackupsForWorkspacePath: async () => apiOk([backupSnapshotSummary()]),
       getAutomaticBackupSettings: async () => apiOk(backupSchedulerSummary()),
       updateAutomaticBackupSettings: async () => apiOk(backupSchedulerSummary()),
       runAutomaticBackupCheck: async () => apiOk({
@@ -726,6 +727,7 @@ function createMockApi(
       }),
       validateRestoreSource: async () => apiOk(restoreValidationSummary()),
       restoreBackupToNewWorkspace: async () => apiOk(restoreWorkspaceSummary()),
+      restoreBackupFromWorkspacePath: async () => apiOk(restoreWorkspaceSummary()),
       restoreExportToNewWorkspace: async () => apiOk(restoreWorkspaceSummary())
     },
     import: {

@@ -260,6 +260,7 @@ describe("backup IPC handlers", () => {
     tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-restore-ipc-"));
     const sourceRoot = join(tempRoot, "source");
     const targetRoot = join(tempRoot, "restored");
+    const recoveryTargetRoot = join(tempRoot, "recovered");
     const databasePath = resolveWorkspaceDatabasePath(sourceRoot);
     await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
       databasePath,
@@ -375,5 +376,44 @@ describe("backup IPC handlers", () => {
     } finally {
       restoredConnection.close();
     }
+
+    await writeFile(resolveWorkspaceDatabasePath(sourceRoot), "not a sqlite database");
+
+    const recoveryHandlers = createBackupIpcHandlers({
+      getCurrentWorkspace: () => null,
+      openWorkspace: async ({ rootPath }) => {
+        openedPath = rootPath;
+
+        return {
+          id: "workspace_1",
+          name: "Personal",
+          rootPath,
+          openedAt: "2026-05-01T00:00:00.000Z",
+          schemaVersion: 8
+        };
+      }
+    });
+
+    await expect(
+      recoveryHandlers.handleListBackupsForWorkspacePath({ rootPath: sourceRoot })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [{ relativePath: created.data.relativePath }]
+    });
+
+    const recovered = await recoveryHandlers.handleRestoreBackupFromWorkspacePath({
+      sourceWorkspaceRootPath: sourceRoot,
+      backupRelativePath: created.data.relativePath,
+      targetRootPath: recoveryTargetRoot
+    });
+
+    expect(recovered).toMatchObject({
+      ok: true,
+      data: {
+        targetWorkspaceRootPath: recoveryTargetRoot,
+        copiedAttachmentCount: 1
+      }
+    });
+    expect(openedPath).toBe(recoveryTargetRoot);
   });
 });

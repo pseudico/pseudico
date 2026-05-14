@@ -252,6 +252,16 @@ export type RestoreBackupToNewWorkspaceInput = {
   targetRootPath: string;
 };
 
+export type ListBackupsForWorkspacePathInput = {
+  rootPath: string;
+};
+
+export type RestoreBackupFromWorkspacePathInput = {
+  sourceWorkspaceRootPath: string;
+  backupRelativePath: string;
+  targetRootPath: string;
+};
+
 export type RestoreExportToNewWorkspaceInput = {
   filePath: string;
   targetRootPath: string;
@@ -3864,6 +3874,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   backup: {
     createManualBackup: "local-work-os:backup:create-manual-backup",
     listBackups: "local-work-os:backup:list-backups",
+    listBackupsForWorkspacePath:
+      "local-work-os:backup:list-backups-for-workspace-path",
     getAutomaticBackupSettings:
       "local-work-os:backup:get-automatic-backup-settings",
     updateAutomaticBackupSettings:
@@ -3873,6 +3885,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     validateRestoreSource: "local-work-os:backup:validate-restore-source",
     restoreBackupToNewWorkspace:
       "local-work-os:backup:restore-backup-to-new-workspace",
+    restoreBackupFromWorkspacePath:
+      "local-work-os:backup:restore-backup-from-workspace-path",
     restoreExportToNewWorkspace:
       "local-work-os:backup:restore-export-to-new-workspace"
   },
@@ -4752,8 +4766,16 @@ export type LocalWorkOsIpcContracts = {
     input: ValidateRestoreSourceInput;
     result: ApiResult<RestoreValidationSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackupsForWorkspacePath]: {
+    input: ListBackupsForWorkspacePathInput;
+    result: ApiResult<BackupSnapshotSummary[]>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreBackupToNewWorkspace]: {
     input: RestoreBackupToNewWorkspaceInput;
+    result: ApiResult<RestoreWorkspaceSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreBackupFromWorkspacePath]: {
+    input: RestoreBackupFromWorkspacePathInput;
     result: ApiResult<RestoreWorkspaceSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreExportToNewWorkspace]: {
@@ -5549,6 +5571,9 @@ export type LocalWorkOsApi = {
     listBackups: (
       input?: ListBackupsInput
     ) => Promise<ApiResult<BackupSnapshotSummary[]>>;
+    listBackupsForWorkspacePath: (
+      input: ListBackupsForWorkspacePathInput
+    ) => Promise<ApiResult<BackupSnapshotSummary[]>>;
     getAutomaticBackupSettings: (
       input?: ListBackupsInput
     ) => Promise<ApiResult<BackupSchedulerSettingsSummary>>;
@@ -5563,6 +5588,9 @@ export type LocalWorkOsApi = {
     ) => Promise<ApiResult<RestoreValidationSummary>>;
     restoreBackupToNewWorkspace: (
       input: RestoreBackupToNewWorkspaceInput
+    ) => Promise<ApiResult<RestoreWorkspaceSummary>>;
+    restoreBackupFromWorkspacePath: (
+      input: RestoreBackupFromWorkspacePathInput
     ) => Promise<ApiResult<RestoreWorkspaceSummary>>;
     restoreExportToNewWorkspace: (
       input: RestoreExportToNewWorkspaceInput
@@ -6329,6 +6357,11 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.createManualBackup, input),
       listBackups: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackups, input),
+      listBackupsForWorkspacePath: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.backup.listBackupsForWorkspacePath,
+          input
+        ),
       getAutomaticBackupSettings: (input) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.backup.getAutomaticBackupSettings,
@@ -6346,6 +6379,11 @@ export function createLocalWorkOsApi(
       restoreBackupToNewWorkspace: (input) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreBackupToNewWorkspace,
+          input
+        ),
+      restoreBackupFromWorkspacePath: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreBackupFromWorkspacePath,
           input
         ),
       restoreExportToNewWorkspace: (input) =>

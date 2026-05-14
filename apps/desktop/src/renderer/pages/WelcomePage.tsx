@@ -1,8 +1,13 @@
-import { FolderOpen, HardDrive, History } from "lucide-react";
+import { FolderOpen, HardDrive, History, ShieldAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { EmptyState, ErrorState, formatUserError } from "@local-work-os/ui";
-import type { LocalWorkOsApi, RecentWorkspace } from "../../preload/api";
+import type {
+  BackupSnapshotSummary,
+  LocalWorkOsApi,
+  RecentWorkspace,
+  RestoreWorkspaceSummary
+} from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { showToast } from "../shell/toastStore";
 import {
@@ -29,6 +34,9 @@ export function WelcomePage({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(initialError);
+  const [recoverySourcePath, setRecoverySourcePath] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     let active = true;
@@ -73,6 +81,7 @@ export function WelcomePage({
     if (!result.ok) {
       const message = formatUserError(result.error);
       setError(message);
+      setRecoverySourcePath(action === "open" ? rootPath : null);
       showToast(message, {
         title: "Workspace unavailable",
         tone: "error"
@@ -81,6 +90,7 @@ export function WelcomePage({
     }
 
     workspaceStore.setCurrentWorkspace(result.data);
+    setRecoverySourcePath(null);
     const message = `${result.data.name} is open.`;
     setMessage(message);
     showToast(message, {
@@ -134,6 +144,20 @@ export function WelcomePage({
             {error === null ? null : <ErrorState error={error} title="Workspace action failed" />}
             {message === null ? null : (
               <p className="form-message form-message-ok">{message}</p>
+            )}
+            {recoverySourcePath === null ? null : (
+              <RecoveryDialog
+                apiClient={apiClient}
+                sourceRootPath={recoverySourcePath}
+                onRestored={(summary) => {
+                  setMessage(
+                    `Restored backup into ${summary.targetWorkspaceRootPath}.`
+                  );
+                  setRecoverySourcePath(null);
+                  void refreshRecentWorkspaces(apiClient, setRecentWorkspaces);
+                  navigate("/workspace");
+                }}
+              />
             )}
             <div className="welcome-actions">
               <button
@@ -229,4 +253,153 @@ export function WelcomePage({
       </section>
     </main>
   );
+}
+
+function RecoveryDialog({
+  apiClient,
+  onRestored,
+  sourceRootPath
+}: {
+  apiClient: LocalWorkOsApi;
+  onRestored: (summary: RestoreWorkspaceSummary) => void;
+  sourceRootPath: string;
+}): React.JSX.Element {
+  const [backups, setBackups] = useState<BackupSnapshotSummary[]>([]);
+  const [backupRelativePath, setBackupRelativePath] = useState("");
+  const [targetRootPath, setTargetRootPath] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadBackups(): Promise<void> {
+    setBusy(true);
+    setError(null);
+
+    const result = await apiClient.backup.listBackupsForWorkspacePath({
+      rootPath: sourceRootPath
+    });
+
+    setBusy(false);
+
+    if (!result.ok) {
+      setError(formatUserError(result.error));
+      return;
+    }
+
+    setBackups(result.data);
+    setBackupRelativePath(result.data[0]?.relativePath ?? "");
+  }
+
+  async function restoreBackup(): Promise<void> {
+    if (backupRelativePath.trim().length === 0) {
+      setError("Choose a backup snapshot before restoring.");
+      return;
+    }
+
+    if (targetRootPath.trim().length === 0) {
+      setError("Enter a separate target workspace folder.");
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+
+    const result = await apiClient.backup.restoreBackupFromWorkspacePath({
+      sourceWorkspaceRootPath: sourceRootPath,
+      backupRelativePath: backupRelativePath.trim(),
+      targetRootPath: targetRootPath.trim()
+    });
+
+    setBusy(false);
+
+    if (!result.ok) {
+      setError(formatUserError(result.error));
+      return;
+    }
+
+    const currentWorkspace = await apiClient.workspace.getCurrentWorkspace();
+
+    if (currentWorkspace.ok && currentWorkspace.data !== null) {
+      workspaceStore.setCurrentWorkspace(currentWorkspace.data);
+    }
+
+    showToast("Backup restored into a new workspace. The original database was left untouched.", {
+      title: "Recovery complete",
+      tone: "success"
+    });
+    onRestored(result.data);
+  }
+
+  const latestBackup = backups[0];
+
+  return (
+    <section className="error-state recovery-dialog" aria-label="Workspace recovery">
+      <div className="panel-heading">
+        <ShieldAlert size={18} aria-hidden="true" />
+        <h2>Recovery options</h2>
+      </div>
+      <p>
+        The workspace could not be opened. Local Work OS keeps the original
+        database untouched; restore a backup into a separate new workspace
+        folder instead.
+      </p>
+      <p className="muted-text">{sourceRootPath}</p>
+      <div className="welcome-actions">
+        <button
+          className="secondary-button"
+          disabled={busy}
+          type="button"
+          onClick={() => void loadBackups()}
+        >
+          {busy ? "Checking backups..." : "Find backups"}
+        </button>
+      </div>
+      {latestBackup === undefined ? null : (
+        <p className="form-message">
+          Latest backup: {latestBackup.relativePath}
+        </p>
+      )}
+      <label>
+        <span>Backup snapshot</span>
+        <select
+          disabled={busy || backups.length === 0}
+          value={backupRelativePath}
+          onChange={(event) => setBackupRelativePath(event.target.value)}
+        >
+          {backups.map((backup) => (
+            <option key={backup.relativePath} value={backup.relativePath}>
+              {backup.relativePath}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span>New workspace folder</span>
+        <input
+          placeholder="C:\\Users\\you\\Local Work OS Restored"
+          value={targetRootPath}
+          onChange={(event) => setTargetRootPath(event.target.value)}
+        />
+      </label>
+      {error === null ? null : <p className="form-message form-message-error">{error}</p>}
+      <button
+        className="primary-button"
+        disabled={busy || backupRelativePath.length === 0 || targetRootPath.length === 0}
+        type="button"
+        onClick={() => void restoreBackup()}
+      >
+        Restore backup into new workspace
+      </button>
+    </section>
+  );
+}
+
+async function refreshRecentWorkspaces(
+  apiClient: LocalWorkOsApi,
+  setRecentWorkspaces: (recent: RecentWorkspace[]) => void
+): Promise<void> {
+  const result = await apiClient.workspace.listRecentWorkspaces();
+
+  if (result.ok) {
+    setRecentWorkspaces(result.data);
+  }
 }
