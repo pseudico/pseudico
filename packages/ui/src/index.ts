@@ -354,6 +354,7 @@ export {
 } from "./components/FileCardContent";
 export {
   FileVersionHistory,
+  FileVersionPanel,
   type FileVersionHistoryProps,
   type FileVersionViewModel
 } from "./components/FileVersionHistory";

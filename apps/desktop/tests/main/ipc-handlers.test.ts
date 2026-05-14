@@ -562,6 +562,23 @@ describe("file IPC handlers", () => {
       }
     });
     await expect(
+      handlers.handleListFileVersions(attached.data.attachment.id)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: [
+        {
+          versionNumber: 2,
+          note: "Automatic safety snapshot before restoring version 1.",
+          sizeBytes: 22
+        },
+        {
+          id: snapshot.data.version.id,
+          versionNumber: 1,
+          sizeBytes: 17
+        }
+      ]
+    });
+    await expect(
       readFile(join(tempRoot, ...attached.data.attachment.storagePath.split("/")), "utf8")
     ).resolves.toBe("snapshot contents");
     await expect(

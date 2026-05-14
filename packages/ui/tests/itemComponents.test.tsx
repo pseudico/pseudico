@@ -15,6 +15,7 @@ import {
   FavoriteProjectsWidget,
   FileCardContent,
   FileMetadataEditor,
+  FileVersionPanel,
   formatUserError,
   ItemActionsMenu,
   ItemFeed,
@@ -1090,7 +1091,16 @@ describe("Universal item UI", () => {
         onOpen={() => undefined}
         onOpenVersion={() => undefined}
         onReveal={() => undefined}
+        onRestoreVersion={() => undefined}
         onSave={() => true}
+      />
+    );
+    const panelHtml = renderToStaticMarkup(
+      <FileVersionPanel
+        versions={fileItem.versions}
+        onCreateSnapshot={() => true}
+        onOpenVersion={() => undefined}
+        onRestoreVersion={() => undefined}
       />
     );
     const editorHtml = renderToStaticMarkup(
@@ -1112,6 +1122,12 @@ describe("Universal item UI", () => {
     expect(cardHtml).toContain("Edit");
     expect(cardHtml).toContain("Versions (1)");
     expect(cardHtml).toContain("Snapshot note");
+    expect(cardHtml).toContain("Checksum");
+    expect(cardHtml).toContain("abc123def456");
+    expect(cardHtml).toContain("Note:");
+    expect(cardHtml).toContain("Review copy");
+    expect(cardHtml).toContain("Restore");
+    expect(panelHtml).toContain("File version history");
     expect(editorHtml).toContain("File title");
     expect(editorHtml).toContain("Description");
     expect(editorHtml).toContain("Save file");
