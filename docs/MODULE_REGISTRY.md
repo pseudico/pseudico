@@ -36,9 +36,10 @@ new work should account for this implemented baseline:
 - Task quick snooze/reschedule actions now share a local menu across task cards,
   Today, search, collections, and dashboard task widgets, including later-today,
   tomorrow, next-week, custom date, and remove-due flows.
-- Future or placeholder-heavy flows: Timeline, Calendar, portable/broader Templates,
-  broader import execution beyond workspace JSON restore,
-  custom dashboard editing, advanced saved-view builder UX, and browser capture.
+- Future-heavy flows: advanced Timeline/Calendar drag/drop editing,
+  portable/broader Templates, broader third-party import execution beyond the
+  currently documented local paths, custom dashboard editing, advanced
+  saved-view builder UX, production browser capture, and workflow scheduling.
 - Workflows now have a local service foundation with persisted manual,
   item-created, file-imported, tag-added, tag-removed, and category-assigned
   definitions/runs, preview, and service-backed add-tag, set-category,
@@ -47,8 +48,9 @@ new work should account for this implemented baseline:
   diagnostics, and roll back undoable activity snapshots; scheduling remains
   future work.
 - Local reminders now have task/list-item targets, default preferences,
-  notification enablement, scheduler, IPC, and shared picker foundations;
-  deeper renderer workflows remain future work.
+  notification enablement, scheduler, IPC, shared picker foundations, and
+  renderer entry points; deeper reminder preference workflows remain future
+  work.
 - Cross-cutting services now include project health, recent activity,
   integrity diagnostics, bounded pagination, app-wide error boundaries/toasts,
   command palette navigation/actions, workspace-scoped recent navigation,

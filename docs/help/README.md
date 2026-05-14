@@ -7,3 +7,4 @@ This folder contains the local Markdown help content mirrored in the in-app Help
 - `projects-contacts.md` explains mixed-content containers.
 - `templates-workflows.md` explains reusable local templates and sample workflows.
 - `keyboard-commands.md` explains command palette and keyboard shortcuts.
+- `release-readiness.md` explains local release-candidate checks and data safety.

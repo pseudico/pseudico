@@ -26,6 +26,9 @@ docs and the linked Linear issue.
   remaining release-hardening gaps, and smoke-tag evidence.
 - `DISTRIBUTION_LICENSING_PRIVACY.md` records the distribution,
   licensing, privacy, signing, and update-path release checklist.
+- `FINAL_RELEASE_SYNC.md` records the M14 source-of-truth reconciliation,
+  current implementation summary, ticket cross-reference correction, and final
+  release verification gates.
 - `SECURITY.md` records local-only, Electron, filesystem, database, and privacy
   guardrails.
 - `SECURITY_AUDIT.md` records the current Electron IPC, external link, widget,
@@ -58,7 +61,8 @@ docs and the linked Linear issue.
 - `LOCALIZATION.md` documents the English-only i18n scaffold and future locale
   preference boundary.
 - `help/` contains local Markdown help center content mirrored in the app.
-- `DECISIONS/` stores accepted architecture decision records.
+- `DECISIONS/` stores accepted architecture decision records, including the
+  final documentation source-of-truth decision.
 
 ## Local-Only Rule
 
