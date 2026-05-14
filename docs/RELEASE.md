@@ -53,3 +53,29 @@ The current Windows development package intentionally disables executable
 signing with `signAndEditExecutable: false` in `apps/desktop/electron-builder.yml`.
 Code signing, notarization, installer targets, and certificate management remain
 release-hardening work for a future ticket.
+
+## Artifact Naming And Platform Scope
+
+Electron Builder is configured with this artifact name pattern for future
+installer/archive targets:
+
+```text
+Local Work OS-<version>-<os>-<arch>.<ext>
+```
+
+The current `dir` target still produces unpacked development folders such as
+`win-unpacked`, `mac/Local Work OS.app`, or `linux-unpacked` depending on the
+host OS. Cross-OS packaging is not guaranteed from a single workstation; run the
+package command on each target OS or in matching CI runners.
+
+The package smoke check now verifies that a packaged app can:
+
+- create/open a local workspace outside the app bundle,
+- persist project and task data,
+- copy an attachment into workspace-local storage,
+- resolve local open/reveal paths through main-process handlers, and
+- create a manual backup under the workspace `backups/` folder.
+
+Manual OS release QA should still install or launch the generated app on the
+target platform and repeat the workspace, attachment, backup, restart, and
+external-open checks from `docs/QA_SCRIPTS.md`.

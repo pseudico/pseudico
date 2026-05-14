@@ -1,6 +1,7 @@
 appId: com.pseudico.localworkos
 productName: Local Work OS
 copyright: Copyright 2026 Pseudico
+artifactName: ${productName}-${version}-${os}-${arch}.${ext}
 
 directories:
   output: dist-packaged
