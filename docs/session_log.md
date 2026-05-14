@@ -5475,3 +5475,14 @@ Files changed:
 - apps/desktop/src/renderer/pages/HelpPage.tsx
 Open questions / risks: Untracked pre-existing .playwright-mcp and gh installer remain untouched.
 Next actions: Commit; push branch; open PR.
+
+## 2026-05-14T12:14:59.9009928+10:00
+Objective: Fix PSE-183 CI type resolution failure.
+Decisions made:
+- CI could not resolve @local-work-os/features/help during desktop typecheck.
+- Added the help subpath to tsconfig workspace paths to match package/vitest exports.
+Files changed:
+- tsconfig.base.json
+- docs/session_log.md
+Open questions / risks: Need rerun local checks and push follow-up commit.
+Next actions: Typecheck/build; commit; push; recheck CI.
