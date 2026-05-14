@@ -46,7 +46,9 @@ export type UpdateLinkInput = {
   categoryId?: string | null;
   containerTabId?: string | null;
   description?: string | null;
+  faviconPath?: string | null;
   pinned?: boolean;
+  previewImagePath?: string | null;
   sortOrder?: number;
   title?: string | null;
   url?: string;
@@ -169,6 +171,16 @@ export class LinkService {
         const description = normalizeNullableString(input.description);
         itemPatch.body = description;
         linkPatch.description = description;
+      }
+
+      if (input.faviconPath !== undefined) {
+        linkPatch.faviconPath = normalizeNullableString(input.faviconPath);
+      }
+
+      if (input.previewImagePath !== undefined) {
+        linkPatch.previewImagePath = normalizeNullableString(
+          input.previewImagePath
+        );
       }
 
       if (input.categoryId !== undefined) {
@@ -349,6 +361,8 @@ export class LinkService {
       input.containerTabId === undefined &&
       input.sortOrder === undefined &&
       input.pinned === undefined
+      && input.faviconPath === undefined &&
+      input.previewImagePath === undefined
     ) {
       throw new Error("At least one link field must be provided.");
     }

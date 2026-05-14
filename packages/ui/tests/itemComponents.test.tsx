@@ -1166,11 +1166,14 @@ describe("Universal item UI", () => {
       url: "example.com/brief",
       normalizedUrl: "https://example.com/brief",
       description: "Supplier reference",
-      domain: "example.com"
+      domain: "example.com",
+      faviconPath: "https://example.com/favicon.ico",
+      previewImagePath: "https://example.com/images/card.png"
     };
     const cardHtml = renderToStaticMarkup(
       <LinkCardContent
         item={linkItem}
+        onFetchMetadata={() => undefined}
         onOpen={() => undefined}
         onSave={() => true}
       />
@@ -1189,7 +1192,11 @@ describe("Universal item UI", () => {
 
     expect(cardHtml).toContain("Supplier reference");
     expect(cardHtml).toContain("example.com");
+    expect(cardHtml).toContain("Preview image");
+    expect(cardHtml).toContain("https://example.com/favicon.ico");
+    expect(cardHtml).toContain("https://example.com/images/card.png");
     expect(cardHtml).toContain("https://example.com/brief");
+    expect(cardHtml).toContain("Fetch metadata");
     expect(cardHtml).toContain("Open");
     expect(cardHtml).toContain("Edit");
     expect(editorHtml).toContain("URL");

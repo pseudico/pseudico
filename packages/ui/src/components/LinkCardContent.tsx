@@ -1,4 +1,4 @@
-import { Edit3, ExternalLink } from "lucide-react";
+import { DownloadCloud, Edit3, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import {
   LinkEditor,
@@ -15,6 +15,8 @@ export type LinkCardViewModel = UniversalItemViewModel & {
   linkTitle?: string | null;
   description?: string | null;
   domain?: string | null;
+  faviconPath?: string | null;
+  previewImagePath?: string | null;
 };
 
 export type LinkCardContentProps = {
@@ -22,6 +24,7 @@ export type LinkCardContentProps = {
   error?: string | null;
   item: LinkCardViewModel;
   onOpen: (item: LinkCardViewModel) => void;
+  onFetchMetadata?: (item: LinkCardViewModel) => void;
   onSave: (
     item: LinkCardViewModel,
     values: LinkEditorValues
@@ -32,6 +35,7 @@ export function LinkCardContent({
   disabled = false,
   error = null,
   item,
+  onFetchMetadata,
   onOpen,
   onSave
 }: LinkCardContentProps): React.JSX.Element {
@@ -70,11 +74,27 @@ export function LinkCardContent({
       item.description.trim().length === 0 ? null : (
         <p>{item.description}</p>
       )}
+      {item.previewImagePath === null ||
+      item.previewImagePath === undefined ||
+      item.previewImagePath.trim().length === 0 ? null : (
+        <div className="link-card-preview" aria-label="Cached preview image">
+          <span className="link-card-preview-label">Preview image</span>
+          <code>{item.previewImagePath}</code>
+        </div>
+      )}
       <dl className="link-card-details">
         <div>
           <dt>Domain</dt>
           <dd>{item.domain ?? "Unknown"}</dd>
         </div>
+        {item.faviconPath === null ||
+        item.faviconPath === undefined ||
+        item.faviconPath.trim().length === 0 ? null : (
+          <div>
+            <dt>Favicon</dt>
+            <dd>{item.faviconPath}</dd>
+          </div>
+        )}
         <div>
           <dt>URL</dt>
           <dd>{item.normalizedUrl}</dd>
@@ -94,6 +114,18 @@ export function LinkCardContent({
           <ExternalLink size={16} aria-hidden="true" />
           Open
         </button>
+        {onFetchMetadata === undefined ? null : (
+          <button
+            className="secondary-button compact-button"
+            disabled={disabled}
+            title="Fetch link metadata"
+            type="button"
+            onClick={() => onFetchMetadata(item)}
+          >
+            <DownloadCloud size={16} aria-hidden="true" />
+            Fetch metadata
+          </button>
+        )}
         <button
           className="secondary-button compact-button"
           disabled={disabled}

@@ -1,4 +1,10 @@
-import { LinkService, TagService } from "@local-work-os/features";
+import {
+  LinkMetadataService,
+  LinkService,
+  PrivacySettingsService,
+  TagService,
+  type LinkMetadataFetcher
+} from "@local-work-os/features";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
@@ -11,6 +17,7 @@ import {
   apiOk,
   type ApiResult,
   type CreateLinkInput,
+  type FetchLinkMetadataInput,
   type ItemTagSummary,
   type LinkSummary,
   type OpenExternalUrlSummary,
@@ -31,6 +38,7 @@ type LinkIpcHandlers = {
   handleListLinksByContainer: (
     input: unknown
   ) => Promise<ApiResult<LinkSummary[]>>;
+  handleFetchLinkMetadata: (input: unknown) => Promise<ApiResult<LinkSummary>>;
   handleOpenLinkExternally: (
     input: unknown
   ) => Promise<ApiResult<OpenLinkSummary>>;
@@ -40,12 +48,20 @@ type LinkIpcHandlers = {
 };
 
 export type LinkIpcPlatform = {
+  fetch?: LinkMetadataFetcher;
   openExternal: (url: string) => Promise<void>;
 };
 
 export function createLinkIpcHandlers(
   workspaceService: CurrentWorkspaceService,
   platform: LinkIpcPlatform = {
+    fetch: async (url, init) => {
+      if (globalThis.fetch === undefined) {
+        throw new Error("Link metadata fetch is unavailable.");
+      }
+
+      return await globalThis.fetch(url, init);
+    },
     openExternal: async () => undefined
   }
 ): LinkIpcHandlers {
@@ -104,6 +120,36 @@ export function createLinkIpcHandlers(
       });
     },
 
+    async handleFetchLinkMetadata(input) {
+      if (!isFetchLinkMetadataInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "fetchLinkMetadata requires an itemId string."
+        );
+      }
+
+      return await withLinkService(workspaceService, async (context) => {
+        const workspaceId = resolveWorkspaceId(input.workspaceId, context.workspace);
+        const result = await new LinkMetadataService({
+          fetcher: platform.fetch ?? defaultLinkMetadataFetch,
+          linkService: context.linkService,
+          networkFeatureGuard: new PrivacySettingsService({
+            connection: context.connection
+          })
+        }).fetchAndApply({
+          itemId: input.itemId,
+          workspaceId
+        });
+
+        return apiOk(
+          toLinkSummary(
+            result.link,
+            hydrateSingleItemTags(context, result.link.item.id)
+          )
+        );
+      });
+    },
+
     async handleOpenLinkExternally(input) {
       if (!isNonEmptyString(input)) {
         return apiError(
@@ -153,6 +199,17 @@ export function createLinkIpcHandlers(
       });
     }
   };
+}
+
+async function defaultLinkMetadataFetch(
+  url: string,
+  init: Parameters<LinkMetadataFetcher>[1]
+): ReturnType<LinkMetadataFetcher> {
+  if (globalThis.fetch === undefined) {
+    throw new Error("Link metadata fetch is unavailable.");
+  }
+
+  return await globalThis.fetch(url, init);
 }
 
 async function withLinkService<T>(
@@ -293,6 +350,8 @@ function isUpdateLinkInput(input: unknown): input is UpdateLinkInput {
     isOptionalNullableString(input.description) &&
     isOptionalNullableString(input.categoryId) &&
     isOptionalNullableString(input.containerTabId) &&
+    isOptionalNullableString(input.faviconPath) &&
+    isOptionalNullableString(input.previewImagePath) &&
     isOptionalNumber(input.sortOrder) &&
     isOptionalBoolean(input.pinned) &&
     isOptionalActorType(input.actorType) &&
@@ -305,11 +364,23 @@ function hasLinkUpdateField(input: Record<string, unknown>): boolean {
     "categoryId",
     "containerTabId",
     "description",
+    "faviconPath",
     "pinned",
+    "previewImagePath",
     "sortOrder",
     "title",
     "url"
   ].some((field) => input[field] !== undefined);
+}
+
+function isFetchLinkMetadataInput(
+  input: unknown
+): input is FetchLinkMetadataInput {
+  return (
+    isRecord(input) &&
+    isNonEmptyString(input.itemId) &&
+    isOptionalString(input.workspaceId)
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

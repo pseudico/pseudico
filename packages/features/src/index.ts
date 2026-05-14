@@ -272,7 +272,13 @@ export {
   resolveQuickStartTargets,
   taskQuickStartActionProvider
 } from "./quickStart";
-export { LinkService, linksModuleContract } from "./links";
+export {
+  LinkMetadataService,
+  LinkService,
+  assertFetchableLinkMetadataUrl,
+  linksModuleContract,
+  parseLinkMetadataHtml
+} from "./links";
 export { LocationService, locationsModuleContract } from "./locations";
 export {
   BulkListInsertParser,
@@ -771,6 +777,13 @@ export type {
 } from "./items";
 export type {
   CreateLinkInput,
+  FetchAndApplyLinkMetadataInput,
+  FetchAndApplyLinkMetadataResult,
+  FetchedLinkMetadata,
+  LinkMetadataFetcher,
+  LinkMetadataFetchResponse,
+  LinkMetadataNetworkGuard,
+  LinkMetadataServiceOptions,
   LinkMutationResult,
   LinkServiceIdFactory,
   UpdateLinkInput

@@ -8,6 +8,7 @@ export function registerLinkIpc(
   workspaceService: WorkspaceFileSystemService
 ): void {
   const handlers = createLinkIpcHandlers(workspaceService, {
+    fetch: async (url, init) => await globalThis.fetch(url, init),
     openExternal: (url) => shell.openExternal(url)
   });
 
@@ -22,6 +23,10 @@ export function registerLinkIpc(
   registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.links.listByContainer,
     (_event, input) => handlers.handleListLinksByContainer(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.links.fetchMetadata,
+    (_event, input) => handlers.handleFetchLinkMetadata(input)
   );
   registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.links.openExternal,

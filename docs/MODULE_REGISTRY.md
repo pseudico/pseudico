@@ -551,12 +551,13 @@ Integration points:
 Owns:
 
 - Link item application operations.
-- URL normalization and locally stored link metadata contracts.
+- URL normalization, opt-in web metadata fetching, and locally stored link
+  metadata contracts.
 - Local browser-capture intake later.
 
 Does not own:
 
-- Hosted preview services.
+- Hosted preview services or automatic/background network fetching.
 - Browser extension implementation.
 - General notes/files search internals.
 
@@ -564,6 +565,7 @@ Expected service methods later:
 
 - `createLink`
 - `updateLinkMetadata`
+- `fetchLinkMetadata`
 - `normalizeUrl`
 - `listLinksForContainer`
 

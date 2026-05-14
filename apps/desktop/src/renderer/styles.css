@@ -917,6 +917,24 @@ a {
   margin: 0;
 }
 
+.link-card-preview {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid #ece8dc;
+  border-radius: 10px;
+  background: #fffaf0;
+  overflow-wrap: anywhere;
+}
+
+.link-card-preview-label {
+  color: #6d6a62;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .file-card-details div,
 .link-card-details div,
 .location-card-details div {
