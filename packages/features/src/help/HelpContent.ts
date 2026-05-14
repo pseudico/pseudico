@@ -1,0 +1,218 @@
+export type HelpArticleId =
+  | "getting-started"
+  | "capture-and-triage"
+  | "projects-contacts"
+  | "templates-workflows"
+  | "keyboard-commands";
+
+export type HelpArticle = {
+  id: HelpArticleId;
+  title: string;
+  summary: string;
+  category: "Start" | "Workflows" | "Reference";
+  body: string;
+  relatedRoutes: readonly string[];
+};
+
+export type OnboardingChecklistItem = {
+  id: string;
+  title: string;
+  description: string;
+  helpArticleId: HelpArticleId;
+};
+
+export const onboardingChecklist: readonly OnboardingChecklistItem[] = [
+  {
+    id: "open-workspace",
+    title: "Open or create a workspace",
+    description:
+      "Confirm the app is pointed at the local folder that owns your database, attachments, backups, and exports.",
+    helpArticleId: "getting-started"
+  },
+  {
+    id: "capture-first-task",
+    title: "Capture the first task",
+    description:
+      "Use Quick Start or the Inbox to create a task before deciding where it belongs.",
+    helpArticleId: "capture-and-triage"
+  },
+  {
+    id: "create-project",
+    title: "Create a project or contact",
+    description:
+      "Move work out of the Inbox into a project or contact container with notes, lists, links, and files beside it.",
+    helpArticleId: "projects-contacts"
+  },
+  {
+    id: "learn-shortcuts",
+    title: "Learn the command and keyboard guide",
+    description:
+      "Use command palette, Quick Start, search, markdown, and planning shortcuts without leaving the keyboard.",
+    helpArticleId: "keyboard-commands"
+  }
+];
+
+export const helpArticles: readonly HelpArticle[] = [
+  {
+    id: "getting-started",
+    title: "Getting started with a local workspace",
+    summary:
+      "Create or open the local folder that contains the SQLite database, attachments, backups, and exports.",
+    category: "Start",
+    relatedRoutes: ["/welcome", "/workspace", "/settings"],
+    body: `# Getting started with a local workspace
+
+Local Work OS is a local-only desktop app. Your workspace folder owns the app data, the SQLite database, attachment copies, backups, and export files.
+
+## First run checklist
+
+- Create or open a workspace from the Welcome screen.
+- Confirm the workspace home shows the expected local folder path.
+- Use the Inbox for quick capture before you know the right project or contact.
+- Keep backups local and verify exports before deleting anything important.
+
+## Local-only boundaries
+
+- No hosted account is required.
+- Cloud sync, telemetry, team workspaces, public sharing, and remote file storage are outside the current product scope.
+- Renderer screens should never ask you for arbitrary filesystem or database access; local file actions go through the desktop app boundary.`
+  },
+  {
+    id: "capture-and-triage",
+    title: "Capture and triage work",
+    summary:
+      "Use the Inbox and Quick Start to capture tasks, notes, lists, links, and files before organizing them.",
+    category: "Workflows",
+    relatedRoutes: ["/inbox", "/today", "/search"],
+    body: `# Capture and triage work
+
+The Inbox is the safe place for unprocessed work. Capture first, then move items into a project or contact once the context is clear.
+
+## Capture flow
+
+- Use Quick Start from the top bar for the fastest entry point.
+- Add small tasks directly in the Inbox.
+- Use lists when a captured idea already has multiple steps.
+- Search can find local tasks, notes, projects, and metadata after they are indexed.
+
+## Triage flow
+
+- Review the Inbox regularly.
+- Move project work to Projects and client/person work to Contacts.
+- Add tags or categories when they help future saved views.
+- Prefer archive or soft delete for user data that should leave active feeds.`
+  },
+  {
+    id: "projects-contacts",
+    title: "Projects, contacts, and mixed content",
+    summary:
+      "Understand containers as local workspaces for tasks, notes, lists, files, links, metadata, and relationships.",
+    category: "Workflows",
+    relatedRoutes: ["/projects", "/contacts", "/tags-categories", "/collections"],
+    body: `# Projects, contacts, and mixed content
+
+Projects and contacts are containers. A container can hold tasks, notes, lists, links, files, tabs, tags, categories, and relationships.
+
+## Project containers
+
+- Use projects for outcomes, deliverables, and ongoing bodies of work.
+- Keep related notes, links, files, lists, and tasks together.
+- Use project health and dashboard views for review.
+
+## Contact containers
+
+- Use contacts for clients, collaborators, vendors, or people-centered work.
+- Store tasks and notes beside interaction history and relationship context.
+- Use labels and fields to keep contact details structured.
+
+## Metadata
+
+- Tags and categories cut across containers.
+- Collections and saved views are projections over the local object graph.
+- Search and dashboards should reflect relevant content changes.`
+  },
+  {
+    id: "templates-workflows",
+    title: "Templates and sample workflows",
+    summary:
+      "Use local templates and manual workflows to repeat common project, contact, and list structures.",
+    category: "Workflows",
+    relatedRoutes: ["/templates", "/workflows", "/projects"],
+    body: `# Templates and sample workflows
+
+Templates and workflows help repeat local patterns without cloud services or hosted automation.
+
+## Sample workflow ideas
+
+- Project kickoff: create a project, add a checklist, add a planning note, and tag it with @kickoff.
+- Client follow-up: create a contact task, add a due date, and link it to the related project.
+- Weekly review: open Today, review overdue work, then check dashboard and timeline summaries.
+
+## Template guidance
+
+- Save reusable project, contact, or list structures as local templates.
+- Export template packs only to local files that you control.
+- Keep templates generic; do not embed secrets, credentials, or proprietary reference-product assets.`
+  },
+  {
+    id: "keyboard-commands",
+    title: "Keyboard and command guide",
+    summary:
+      "Use command palette, Quick Start, search, navigation, markdown, and planning shortcuts.",
+    category: "Reference",
+    relatedRoutes: ["/workspace", "/inbox", "/search", "/today"],
+    body: `# Keyboard and command guide
+
+The app is designed to be keyboard friendly. Some shortcuts depend on the active screen and whether a text field is focused.
+
+## Global commands
+
+- Ctrl/Cmd+K opens the command palette.
+- Quick Start opens from the top bar and creates context-aware tasks, notes, lists, links, files, projects, or contacts.
+- Search from the top bar navigates to local workspace search.
+- Recent navigation reopens recently viewed local targets.
+
+## Markdown editing
+
+- Ctrl/Cmd+Enter saves where the editor supports a save shortcut.
+- Ctrl/Cmd+B toggles bold.
+- Ctrl/Cmd+I toggles italic.
+- Ctrl/Cmd+K creates a link.
+- Ctrl/Cmd+E wraps inline code.
+
+## Planning surfaces
+
+- Use Today for current work.
+- Use Timeline and Calendar for dated work.
+- Use Dashboard for local status and review.`
+  }
+];
+
+export function listHelpArticles(): readonly HelpArticle[] {
+  return helpArticles;
+}
+
+export function getHelpArticle(id: HelpArticleId): HelpArticle {
+  return helpArticles.find((article) => article.id === id) ?? helpArticles[0]!;
+}
+
+export function getHelpArticlesForRoute(pathname: string): readonly HelpArticle[] {
+  const normalizedPath = normalizeHelpPath(pathname);
+  const matches = helpArticles.filter((article) =>
+    article.relatedRoutes.some(
+      (route) => normalizedPath === route || normalizedPath.startsWith(`${route}/`)
+    )
+  );
+
+  return matches.length === 0 ? [getHelpArticle("getting-started")] : matches;
+}
+
+function normalizeHelpPath(pathname: string): string {
+  const pathOnly = pathname.split("?")[0] ?? "";
+
+  if (pathOnly.length === 0) {
+    return "/";
+  }
+
+  return pathOnly === "/" ? pathOnly : pathOnly.replace(/\/+$/, "");
+}

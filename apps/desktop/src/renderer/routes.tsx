@@ -15,6 +15,7 @@ export type AppRouteId =
   | "timeline"
   | "calendar"
   | "workflows"
+  | "help"
   | "settings"
   | "trash";
 
@@ -154,6 +155,14 @@ export const appRoutes = [
     label: "Workflows",
     title: "Workflows",
     summary: "Versioned local-only manual workflow definitions and validation.",
+    nav: true
+  },
+  {
+    id: "help",
+    path: "/help",
+    label: "Help",
+    title: "Help Center",
+    summary: "Local onboarding, command references, and sample workflows.",
     nav: true
   },
   {

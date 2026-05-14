@@ -123,6 +123,7 @@ describe("feature module exports", () => {
       "privacy",
       "templates",
       "workflows",
+      "help",
       "undo",
       "trash",
       "quickStart",

@@ -9,6 +9,11 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./help": {
+      "types": "./dist/help/index.d.ts",
+      "import": "./dist/help/index.js",
+      "default": "./dist/help/index.js"
+    },
     "./quickStart": {
       "types": "./dist/quickStart/index.d.ts",
       "import": "./dist/quickStart/index.js",

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import { EmptyState, renderLoadableState } from "@local-work-os/ui";
+import { onboardingChecklist } from "@local-work-os/features/help";
+import { EmptyState, OnboardingChecklist, renderLoadableState } from "@local-work-os/ui";
 import { WorkspaceHealthPanel } from "./WorkspaceHealthPanel";
 import {
   refreshCurrentWorkspace,
@@ -35,14 +36,28 @@ export function WorkspaceHomePage(): React.JSX.Element {
       {currentWorkspace === null ? (
         <EmptyState
           action={
-            <Link to="/welcome" className="primary-button page-action-link">
-              Open workspace
-            </Link>
+            <div className="empty-state-action-row">
+              <Link to="/welcome" className="primary-button page-action-link">
+                Open workspace
+              </Link>
+              <Link to="/help" className="secondary-button page-action-link">
+                Read local help
+              </Link>
+            </div>
           }
           description="Create or open a local workspace before using projects, tasks, files, and search."
           title="No workspace open"
         />
       ) : null}
+
+      {currentWorkspace === null ? null : (
+        <div className="workspace-onboarding-panel">
+          <OnboardingChecklist items={onboardingChecklist} />
+          <Link to="/help" className="secondary-button page-action-link">
+            Open full help center
+          </Link>
+        </div>
+      )}
 
       <WorkspaceHealthPanel workspace={currentWorkspace} />
     </section>

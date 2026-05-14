@@ -11,6 +11,9 @@ const workspacePackageAliases = {
   "@local-work-os/features/quickStart": fileURLToPath(
     new URL("./packages/features/src/quickStart/index.ts", import.meta.url)
   ),
+  "@local-work-os/features/help": fileURLToPath(
+    new URL("./packages/features/src/help/index.ts", import.meta.url)
+  ),
   "@local-work-os/features/workflows/schema": fileURLToPath(
     new URL("./packages/features/src/workflows/WorkflowSchema.ts", import.meta.url)
   ),
