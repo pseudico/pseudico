@@ -155,6 +155,14 @@ export {
 } from "./LinkRepository";
 export type { LinkRecord } from "@local-work-os/core";
 export {
+  LocationRepository,
+  type CreateLocationDetailsInput,
+  type LocationWithItemRecord,
+  type ListLocationsFilter,
+  type UpdateLocationDetailsPatch
+} from "./LocationRepository";
+export type { LocationRecord } from "@local-work-os/core";
+export {
   SearchIndexRepository,
   type ListSearchIndexRecordsOptions,
   type RemoveWorkspaceSearchTargetsInput,

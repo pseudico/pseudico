@@ -17,6 +17,7 @@ export const plannedFeatureAreas = [
   "files",
   "import",
   "links",
+  "locations",
   "capture",
   "pipelines",
   "contextMenus",
@@ -272,6 +273,7 @@ export {
   taskQuickStartActionProvider
 } from "./quickStart";
 export { LinkService, linksModuleContract } from "./links";
+export { LocationService, locationsModuleContract } from "./locations";
 export {
   BulkListInsertParser,
   ListService,

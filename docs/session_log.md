@@ -6188,3 +6188,77 @@ Next actions: Reconcile next run; pull PSE-131 into In Progress; implement versi
 - Files changed: packages/features/src/files/AttachmentPreviewService.ts; apps/desktop/src/main/ipc/fileHandlers.ts; docs/session_log.md
 - Open questions / risks: interactive PNG/PDF manual QA remains recommended outside this headless run.
 - Next actions: commit; push; open PR.
+
+- Timestamp: 2026-05-14T21:35:54.6858534+10:00
+- Objective: Finish PSE-132 merge and prepare next ticket.
+- Decisions made: squash-merged PR #185 at d7db7237; moved PSE-132 Done; promoted PSE-133 to Codex Ready as next M11 item.
+- Files changed: docs/session_log.md
+- Open questions / risks: final session log entry is local-only until next commit; PSE-133 not started.
+- Next actions: reconcile next run; pull PSE-133 into In Progress; implement local location/map objects.
+- Timestamp: 2026-05-15T05:48:19.4923627+10:00
+- Objective: Start end-to-end Local Work OS ticket run.
+- Decisions made: read AGENTS/session context; using Linear as plan and GitHub as proof; reconciling active states before coding.
+- Files changed: docs/session_log.md
+- Open questions / risks: active PR/issue state unknown until Linear/GitHub checks complete.
+- Next actions: list Linear active issues; inspect any active PR; then continue or implement next issue.
+- Timestamp: 2026-05-15T05:49:26.3645733+10:00
+- Objective: Start PSE-133 implementation.
+- Decisions made: no PR Open/In Progress issues; PSE-133 was only Codex Ready issue and is now In Progress; branch created after git sandbox escalation.
+- Files changed: docs/session_log.md
+- Open questions / risks: exact local location/map scope needs source-code fit; earlier docs use M11-016 numbering while Linear imported LWO-M11-018.
+- Next actions: inspect item/schema/services; implement location object; add tests.
+
+- Timestamp: 2026-05-15T06:02:36.419967+10:00
+- Objective: Add PSE-133 location object implementation.
+- Decisions made: added location_details migration/repository/service; explicit OSM URL builder; Project detail create/edit/open card; address/coordinates indexed.
+- Files changed: packages/core/src/entities/Location.ts; packages/db/src/repositories/LocationRepository.ts; packages/features/src/locations/LocationService.ts; apps/desktop/src/main/ipc/locationHandlers.ts; apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; packages/ui/src/components/LocationCardContent.tsx; docs/session_log.md
+- Open questions / risks: external map manual QA is not interactive yet; no embedded live map/geocoding by design.
+- Next actions: run targeted tests; fix type/lint issues; then full checks.
+- Timestamp: 2026-05-15T06:06:45.6644727+10:00
+- Objective: Verify targeted PSE-133 tests.
+- Decisions made: core URL-builder and UI component tests pass; feature suite pass after fixing LocationService string and module export expectations; sandbox EPERM required escalated Vitest.
+- Files changed: packages/features/src/locations/LocationService.ts; packages/features/tests/moduleExports.test.ts; docs/session_log.md
+- Open questions / risks: full lint/typecheck/test/build still pending.
+- Next actions: run full checks; fix failures; prepare PR.
+- Timestamp: 2026-05-15T06:17:58.2477179+10:00
+- Objective: Complete full local verification for PSE-133.
+- Decisions made: lint/typecheck/test/build pass; tests updated for schema version 22 and IPC locations group; build needed escalated electron-vite after EPERM.
+- Files changed: packages/db/tests; apps/desktop/tests; docs/session_log.md
+- Open questions / risks: manual external-map QA remains noted; build artifacts/dist may be generated and should not be committed unless tracked.
+- Next actions: inspect diff/status; commit and push; open ready PR.
+## 2026-05-15T06:20:03.8054216+10:00
+Objective: Verify PSE-133 local location/map implementation.
+Decisions made:
+- Full Vitest suite now passes after schema-version test update.
+- Ready to stage, commit, push, and open a PR.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI still needs to run on GitHub after PR opens.
+Next actions: Stage scoped files; commit and push branch; open PR.
+## 2026-05-15T06:21:14.7907253+10:00
+Objective: Complete pre-PR verification for PSE-133.
+Decisions made:
+- Kept implementation scoped to local location/map objects and OSM external URLs.
+- All required local checks are passing.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Remote CI/review still pending after PR creation.
+Next actions: Stage scoped files; commit; push and create PR.
+## 2026-05-15T06:22:20.9712563+10:00
+Objective: Commit PSE-133 implementation.
+Decisions made:
+- Staged only scoped ticket files and left unrelated untracked artifacts untouched.
+- Created commit da6b83ae for local location/map object support.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PR creation and CI are pending.
+Next actions: Amend log into commit; push branch; open PR.
+## 2026-05-15T06:24:11.9034078+10:00
+Objective: Open PR and update Linear for PSE-133.
+Decisions made:
+- Opened ready PR #186 against main.
+- Moved Linear PSE-133 to PR Open and attached/commented the PR link.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub CI and review/mergeability still pending.
+Next actions: Amend and push log; inspect PR diff/review threads; check CI.

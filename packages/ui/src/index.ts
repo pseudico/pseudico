@@ -288,6 +288,11 @@ export {
   type SnoozePreset
 } from "./components/SnoozeMenu";
 export {
+  LocationEditor,
+  type LocationEditorProps,
+  type LocationEditorValues
+} from "./forms/LocationEditor";
+export {
   ReminderPicker,
   type ReminderPickerProps,
   type ReminderPickerValue
@@ -369,6 +374,11 @@ export {
   type LinkCardContentProps,
   type LinkCardViewModel
 } from "./components/LinkCardContent";
+export {
+  LocationCardContent,
+  type LocationCardContentProps,
+  type LocationCardViewModel
+} from "./components/LocationCardContent";
 export {
   MoveToContainerDialog,
   type MoveTargetContainer,

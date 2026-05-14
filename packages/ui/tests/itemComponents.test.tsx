@@ -23,6 +23,8 @@ import {
   ItemInspectorPanel,
   LinkCardContent,
   LinkEditor,
+  LocationCardContent,
+  LocationEditor,
   RelatedItemsPanel,
   ListCardContent,
   MetadataFilterPanel,
@@ -1194,4 +1196,48 @@ describe("Universal item UI", () => {
     expect(editorHtml).toContain("Title");
     expect(editorHtml).toContain("Save link");
   });
+
+  it("renders location cards and the location editor", () => {
+    const locationItem = {
+      id: "item_location_1",
+      type: "location" as const,
+      title: "Sydney Opera House",
+      address: "Bennelong Point, Sydney NSW",
+      latitude: -33.8568,
+      longitude: 151.2153,
+      viewportCenterLat: -33.8568,
+      viewportCenterLng: 151.2153,
+      viewportZoom: 15
+    };
+    const cardHtml = renderToStaticMarkup(
+      <LocationCardContent
+        item={locationItem}
+        onOpen={() => undefined}
+        onSave={() => true}
+      />
+    );
+    const editorHtml = renderToStaticMarkup(
+      <LocationEditor
+        initialValues={{
+          title: "Sydney Opera House",
+          address: "Bennelong Point, Sydney NSW",
+          latitude: "-33.8568",
+          longitude: "151.2153",
+          viewportZoom: "15"
+        }}
+        onCancel={() => undefined}
+        onSubmit={() => true}
+      />
+    );
+
+    expect(cardHtml).toContain("Local map placeholder");
+    expect(cardHtml).toContain("Bennelong Point");
+    expect(cardHtml).toContain("-33.8568, 151.2153");
+    expect(cardHtml).toContain("Open map");
+    expect(cardHtml).toContain("Edit");
+    expect(editorHtml).toContain("Address or place");
+    expect(editorHtml).toContain("Saved map viewport");
+    expect(editorHtml).toContain("Save location");
+  });
+
 });

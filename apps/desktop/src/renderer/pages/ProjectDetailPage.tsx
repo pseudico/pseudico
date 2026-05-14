@@ -3,6 +3,7 @@ import {
   Download,
   FolderKanban,
   Link2,
+  MapPin,
   Paperclip,
   Printer,
   RefreshCw,
@@ -28,6 +29,8 @@ import {
   ItemFeed,
   LinkCardContent,
   LinkEditor,
+  LocationCardContent,
+  LocationEditor,
   ListCardContent,
   MoveItemDialog,
   NoteCardContent,
@@ -51,6 +54,8 @@ import {
   type InspectorCategoryOption,
   type LinkCardViewModel,
   type LinkEditorValues,
+  type LocationCardViewModel,
+  type LocationEditorValues,
   type ListCardItemViewModel,
   type ListCardViewModel,
   type MoveTargetContainer,
@@ -87,6 +92,7 @@ import type {
   ContainerMediaSummary,
   ItemSummary,
   LinkSummary,
+  LocationSummary,
   ListItemSummary,
   ListSummary,
   LocalWorkOsApi,
@@ -132,6 +138,10 @@ type ProjectLinkViewModel = LinkCardViewModel & {
   categoryId?: string | null;
   containerTabId?: string | null;
 };
+type ProjectLocationViewModel = LocationCardViewModel & {
+  categoryId?: string | null;
+  containerTabId?: string | null;
+};
 type ProjectFileViewModel = FileCardViewModel & {
   categoryId?: string | null;
   containerTabId?: string | null;
@@ -141,6 +151,7 @@ type ProjectFeedViewModel =
   | ProjectListViewModel
   | ProjectNoteViewModel
   | ProjectLinkViewModel
+  | ProjectLocationViewModel
   | ProjectFileViewModel
   | UniversalItemViewModel;
 
@@ -239,15 +250,18 @@ export function ProjectDetailPage({
   const [savingList, setSavingList] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
   const [savingLink, setSavingLink] = useState(false);
+  const [savingLocation, setSavingLocation] = useState(false);
   const [savingFile, setSavingFile] = useState(false);
   const [taskBusyId, setTaskBusyId] = useState<string | null>(null);
   const [listBusyId, setListBusyId] = useState<string | null>(null);
   const [noteBusyId, setNoteBusyId] = useState<string | null>(null);
   const [linkBusyId, setLinkBusyId] = useState<string | null>(null);
+  const [locationBusyId, setLocationBusyId] = useState<string | null>(null);
   const [fileBusyId, setFileBusyId] = useState<string | null>(null);
   const [noteErrorItemId, setNoteErrorItemId] = useState<string | null>(null);
   const [noteEditorOpen, setNoteEditorOpen] = useState(false);
   const [linkEditorOpen, setLinkEditorOpen] = useState(false);
+  const [locationEditorOpen, setLocationEditorOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [itemError, setItemError] = useState<string | null>(null);
   const [moveError, setMoveError] = useState<string | null>(null);
@@ -256,6 +270,7 @@ export function ProjectDetailPage({
   const [listError, setListError] = useState<string | null>(null);
   const [noteError, setNoteError] = useState<string | null>(null);
   const [linkError, setLinkError] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [exportBusy, setExportBusy] = useState(false);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
@@ -349,6 +364,7 @@ export function ProjectDetailPage({
         listsResult,
         notesResult,
         linksResult,
+        locationsResult,
         filesResult,
         contactsResult,
         relatedContactsResult,
@@ -370,6 +386,7 @@ export function ProjectDetailPage({
         apiClient.lists.listByContainer(activeProjectId),
         apiClient.notes.listByContainer(activeProjectId),
         apiClient.links.listByContainer(activeProjectId),
+        apiClient.locations.listByContainer(activeProjectId),
         apiClient.files.listByContainer(activeProjectId),
         apiClient.contacts.list(),
         apiClient.relationships.listContactsForProject(activeProjectId),
@@ -448,6 +465,11 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!locationsResult.ok) {
+        setItemError(locationsResult.error.message);
+        return;
+      }
+
       if (!filesResult.ok) {
         setItemError(filesResult.error.message);
         return;
@@ -502,6 +524,7 @@ export function ProjectDetailPage({
         listsResult.data,
         notesResult.data,
         linksResult.data,
+        locationsResult.data,
         hydratedFiles.data,
         categoriesResult.data
       );
@@ -567,11 +590,12 @@ export function ProjectDetailPage({
     setItemsLoading(true);
     setItemError(null);
 
-    const [tasksResult, listsResult, notesResult, linksResult, filesResult] = await Promise.all([
+    const [tasksResult, listsResult, notesResult, linksResult, locationsResult, filesResult] = await Promise.all([
       apiClient.tasks.listByContainer(activeProjectId),
       apiClient.lists.listByContainer(activeProjectId),
       apiClient.notes.listByContainer(activeProjectId),
       apiClient.links.listByContainer(activeProjectId),
+      apiClient.locations.listByContainer(activeProjectId),
       apiClient.files.listByContainer(activeProjectId)
     ]);
 
@@ -597,6 +621,11 @@ export function ProjectDetailPage({
       return;
     }
 
+    if (!locationsResult.ok) {
+      setItemError(locationsResult.error.message);
+      return;
+    }
+
     if (!filesResult.ok) {
       setItemError(filesResult.error.message);
       return;
@@ -614,6 +643,7 @@ export function ProjectDetailPage({
       listsResult.data,
       notesResult.data,
       linksResult.data,
+      locationsResult.data,
       hydratedFiles.data,
       categories
     );
@@ -1160,6 +1190,43 @@ export function ProjectDetailPage({
     return true;
   }
 
+
+  async function createProjectLocation(
+    values: LocationEditorValues
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setSavingLocation(true);
+    setLocationError(null);
+
+    const result = await apiClient.locations.create({
+      workspaceId: project.workspaceId,
+      containerId: project.id,
+      containerTabId: activeTabId,
+      title: values.title.length === 0 ? null : values.title,
+      address: values.address.length === 0 ? null : values.address,
+      latitude: parseOptionalNumber(values.latitude),
+      longitude: parseOptionalNumber(values.longitude),
+      viewportCenterLat: parseOptionalNumber(values.viewportCenterLat),
+      viewportCenterLng: parseOptionalNumber(values.viewportCenterLng),
+      viewportZoom: parseOptionalNumber(values.viewportZoom)
+    });
+
+    if (!result.ok) {
+      setSavingLocation(false);
+      setLocationError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    setSavingLocation(false);
+    setLocationEditorOpen(false);
+    return true;
+  }
+
   async function attachProjectFile(): Promise<void> {
     if (project === null) {
       return;
@@ -1424,6 +1491,20 @@ export function ProjectDetailPage({
     }
   }
 
+
+  async function openProjectLocation(item: LocationCardViewModel): Promise<void> {
+    setLocationBusyId(item.id);
+    setLocationError(null);
+
+    const result = await apiClient.locations.openExternal(item.id);
+
+    setLocationBusyId(null);
+
+    if (!result.ok) {
+      setLocationError(result.error.message);
+    }
+  }
+
   async function openProjectInlineExternalLink(url: string): Promise<void> {
     setLinkError(null);
 
@@ -1555,6 +1636,41 @@ export function ProjectDetailPage({
     await refreshProjectContent(project.id);
     await refreshProjectActivity(project.id);
     setLinkBusyId(null);
+    return true;
+  }
+
+
+  async function updateProjectLocation(
+    item: LocationCardViewModel,
+    values: LocationEditorValues
+  ): Promise<boolean> {
+    if (project === null) {
+      return false;
+    }
+
+    setLocationBusyId(item.id);
+    setLocationError(null);
+
+    const result = await apiClient.locations.update({
+      itemId: item.id,
+      title: values.title.length === 0 ? null : values.title,
+      address: values.address.length === 0 ? null : values.address,
+      latitude: parseOptionalNumber(values.latitude),
+      longitude: parseOptionalNumber(values.longitude),
+      viewportCenterLat: parseOptionalNumber(values.viewportCenterLat),
+      viewportCenterLng: parseOptionalNumber(values.viewportCenterLng),
+      viewportZoom: parseOptionalNumber(values.viewportZoom)
+    });
+
+    if (!result.ok) {
+      setLocationBusyId(null);
+      setLocationError(result.error.message);
+      return false;
+    }
+
+    await refreshProjectContent(project.id);
+    await refreshProjectActivity(project.id);
+    setLocationBusyId(null);
     return true;
   }
 
@@ -2738,6 +2854,22 @@ export function ProjectDetailPage({
       );
     }
 
+
+    if (isLocationCardViewModel(item)) {
+      return (
+        <>
+          {categoryPicker}
+          <LocationCardContent
+            disabled={locationBusyId === item.id}
+            error={locationBusyId === item.id ? locationError : null}
+            item={item}
+            onOpen={openProjectLocation}
+            onSave={updateProjectLocation}
+          />
+        </>
+      );
+    }
+
     return (
       <>
         {categoryPicker}
@@ -3173,6 +3305,33 @@ export function ProjectDetailPage({
           </button>
         )}
 
+        {locationEditorOpen ? (
+          <LocationEditor
+            disabled={savingLocation || itemsLoading}
+            error={locationError}
+            resetOnSubmit
+            submitLabel="Add location"
+            onCancel={() => {
+              setLocationEditorOpen(false);
+              setLocationError(null);
+            }}
+            onSubmit={createProjectLocation}
+          />
+        ) : (
+          <button
+            className="secondary-button note-create-button"
+            disabled={itemsLoading}
+            type="button"
+            onClick={() => {
+              setLocationEditorOpen(true);
+              setLocationError(null);
+            }}
+          >
+            <MapPin size={17} aria-hidden="true" />
+            New location
+          </button>
+        )}
+
         <button
           className="secondary-button note-create-button"
           disabled={savingFile || itemsLoading}
@@ -3188,6 +3347,9 @@ export function ProjectDetailPage({
         )}
         {linkError === null || linkBusyId !== null || linkEditorOpen ? null : (
           <p className="form-message form-message-error">{linkError}</p>
+        )}
+        {locationError === null || locationBusyId !== null || locationEditorOpen ? null : (
+          <p className="form-message form-message-error">{locationError}</p>
         )}
 
         {viewMode === "list" ? (
@@ -3475,6 +3637,43 @@ function toProjectLinkViewModel(
   };
 }
 
+
+function toProjectLocationViewModel(
+  location: LocationSummary,
+  categories: readonly CategorySummary[]
+): ProjectLocationViewModel {
+  const coordinates =
+    location.latitude === null || location.longitude === null
+      ? null
+      : `${location.latitude}, ${location.longitude}`;
+
+  return {
+    id: location.id,
+    type: "location",
+    title: location.title,
+    body: location.body,
+    status: location.status,
+    categoryId: location.categoryId,
+    containerTabId: location.containerTabId,
+    categoryLabel: findCategoryName(location.categoryId, categories),
+    sortOrder: location.sortOrder,
+    createdAt: location.createdAt,
+    updatedLabel: location.updatedAt,
+    pinned: location.pinned,
+    tags: location.tags ?? [],
+    address: location.address,
+    latitude: location.latitude,
+    longitude: location.longitude,
+    viewportCenterLat: location.viewportCenterLat,
+    viewportCenterLng: location.viewportCenterLng,
+    viewportZoom: location.viewportZoom,
+    metadata: [
+      ...(coordinates === null ? [] : [{ label: "Coordinates", value: coordinates }]),
+      { label: "Zoom", value: location.viewportZoom.toString() }
+    ]
+  };
+}
+
 function toListCardItemViewModel(
   listItem: ListItemSummary
 ): ListCardItemViewModel {
@@ -3496,6 +3695,7 @@ function mergeProjectContent(
   lists: readonly ListSummary[],
   notes: readonly NoteSummary[],
   links: readonly LinkSummary[],
+  locations: readonly LocationSummary[],
   files: ReadonlyArray<FileItemSummary & { versions?: AttachmentVersionSummary[] }>,
   categories: readonly CategorySummary[] = []
 ): ProjectFeedViewModel[] {
@@ -3504,6 +3704,7 @@ function mergeProjectContent(
     ...lists.map((list) => toProjectListViewModel(list, categories)),
     ...notes.map((note) => toProjectNoteViewModel(note, categories)),
     ...links.map((link) => toProjectLinkViewModel(link, categories)),
+    ...locations.map((location) => toProjectLocationViewModel(location, categories)),
     ...files.map((file) => toProjectFileViewModel(file, categories))
   ].sort(compareFeedItems);
 }
@@ -3824,6 +4025,20 @@ function isCompletedFeedItem(item: UniversalItemViewModel): boolean {
   return item.status === "completed";
 }
 
+function parseOptionalNumber(value: string): number | null {
+  if (value.trim().length === 0) {
+    return null;
+  }
+
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed)) {
+    return Number.NaN;
+  }
+
+  return parsed;
+}
+
 function formatQuickAddType(
   type: ContainerPreferencesSummary["defaultQuickAddType"] | undefined
 ): string {
@@ -3905,6 +4120,12 @@ function isLinkCardViewModel(
   item: UniversalItemViewModel
 ): item is LinkCardViewModel {
   return item.type === "link" && "normalizedUrl" in item;
+}
+
+function isLocationCardViewModel(
+  item: UniversalItemViewModel
+): item is LocationCardViewModel {
+  return item.type === "location" && "viewportZoom" in item;
 }
 
 function getDisabledActionsForProjectItem(

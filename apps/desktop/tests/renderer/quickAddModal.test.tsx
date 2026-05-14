@@ -390,6 +390,18 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
       createLink: async () => apiOk(null as never),
       updateLink: async () => apiOk(null as never)
     },
+    locations: {
+      create: async () => apiOk(null as never),
+      update: async () => apiOk(null as never),
+      listByContainer: async () => apiOk([]),
+      openExternal: async () =>
+        apiOk({
+          itemId: "item_location_1",
+          mapUrl: "https://www.openstreetmap.org/search?query=Launch"
+        }),
+      createLocation: async () => apiOk(null as never),
+      updateLocation: async () => apiOk(null as never)
+    },
     projects: {
       create: async () => apiOk({ project: activeProject, defaultTabId: "tab_1" }),
       update: async () => apiOk(activeProject),
