@@ -44,6 +44,16 @@ pnpm --filter @local-work-os/db test
 pnpm --filter @local-work-os/desktop test
 ```
 
+Coverage-map tickets and release-hardening reviews should also validate the
+feature-to-test matrix:
+
+```bash
+pnpm coverage:map
+```
+
+Update `docs/TEST_COVERAGE_MAP.md` whenever a new feature family, smoke tag, or
+release-critical manual QA path is added.
+
 Large-workspace performance tickets should run the local benchmark harness after
 the standard checks:
 

@@ -5584,3 +5584,61 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI must confirm the same checks remotely.
 Next actions: Commit; push; open PR.
+## 2026-05-14T15:09:22+10:00
+Objective: Merge PSE-186 and prepare next ticket.
+Decisions made:
+- PR #174 passed CI and was squash-merged as afa888cde52c533aaeedf2f6726d0f66c1dcb81b.
+- Moved PSE-186 to Done and promoted PSE-185 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final session log entry remains local after merge.
+Next actions: Start PSE-185 next; keep only one Codex Ready issue.
+
+## 2026-05-14 15:11:47 +10:00
+Objective: Start end-to-end ticket workflow reconciliation.
+Decisions made:
+- Use Linear and GitHub structured workflows; no code changes yet.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Connector/API availability unknown.
+Next actions: Reconcile active Linear states; inspect any open PR; select issue.
+
+## 2026-05-14 15:13:02 +10:00
+Objective: Reconcile active work and start next ticket.
+Decisions made:
+- No PR Open/In Progress active work found; no open GitHub PRs found.
+- Selected PSE-185 and moved it to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need derive acceptance criteria from ticket pack.
+Next actions: Read docs/source ticket; branch; implement coverage map.
+
+## 2026-05-14 15:15:09 +10:00
+Objective: Plan PSE-185 implementation scope.
+Decisions made:
+- Implement docs/TEST_COVERAGE_MAP.md plus a lightweight validation smoke script/test.
+- Keep work docs/test-infra only; no domain/database/UI behavior changes.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Whether follow-up test tickets should be Linear issues or documented backlog seeds.
+Next actions: Add coverage map; add validator; run checks.
+
+## 2026-05-14 15:20:57 +10:00
+Objective: Finish PSE-185 implementation.
+Decisions made:
+- Added feature-to-test coverage map, smoke tags, follow-up test seeds, and validator.
+- Added Vitest smoke for the map and linked docs/README plus docs/TESTING.
+Files changed:
+- docs/TEST_COVERAGE_MAP.md; scripts/check-test-coverage-map.mjs; package.json; packages/core/tests/testCoverageMapDoc.test.ts; docs/README.md; docs/TESTING.md; docs/session_log.md
+Open questions / risks: Full workspace checks still pending.
+Next actions: Run lint; typecheck; test/build; open PR.
+
+## 2026-05-14 15:23:22 +10:00
+Objective: Verify PSE-185 before PR.
+Decisions made:
+- pnpm lint, typecheck, test, build, coverage:map, targeted map test, and diff check passed.
+- Test/build EPERM failures were sandbox-related and passed with escalation.
+Files changed:
+- docs/README.md; docs/TESTING.md; docs/TEST_COVERAGE_MAP.md; package.json; packages/core/tests/testCoverageMapDoc.test.ts; scripts/check-test-coverage-map.mjs; docs/session_log.md
+Open questions / risks: CI/review still pending after PR open.
+Next actions: Commit; push; open PR.
