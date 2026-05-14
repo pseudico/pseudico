@@ -16,6 +16,7 @@ export { dashboards } from "./dashboards";
 export { imapImportedMessages, imapImportJobs } from "./imapImport";
 export { items } from "./items";
 export { links } from "./links";
+export { locationDetails } from "./locationDetails";
 export { listDetails } from "./listDetails";
 export { listItems } from "./listItems";
 export { noteDetails } from "./noteDetails";

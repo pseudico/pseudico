@@ -93,7 +93,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version twenty-one", () => {
+  it("runs on an empty database and records schema version twenty-two", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -202,14 +202,19 @@ describe("schema migrations", () => {
           version: 21,
           name: "imap_import_jobs",
           checksum: "pse-168-imap-import-jobs-v1"
+        },
+        {
+          version: 22,
+          name: "location_details",
+          checksum: "pse-133-location-details-v1"
         }
       ],
-      currentVersion: 21
+      currentVersion: 22
     });
-    expect(service.getCurrentSchemaVersion()).toBe(21);
+    expect(service.getCurrentSchemaVersion()).toBe(22);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 21
+      currentVersion: 22
     });
   });
 

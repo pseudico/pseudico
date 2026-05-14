@@ -19,6 +19,7 @@ import { workflowFileImportedTriggerSql } from "./0018_workflow_file_imported_tr
 import { workflowMetadataTriggersSql } from "./0019_workflow_metadata_triggers";
 import { workflowRunRollbackSql } from "./0020_workflow_run_rollback";
 import { imapImportJobsSql } from "./0021_imap_import_jobs";
+import { locationDetailsSql } from "./0022_location_details";
 import type { MigrationDefinition } from "../services/MigrationService";
 
 export const migrations: MigrationDefinition[] = [
@@ -147,5 +148,11 @@ export const migrations: MigrationDefinition[] = [
     name: "imap_import_jobs",
     sql: imapImportJobsSql,
     checksum: "pse-168-imap-import-jobs-v1"
+  },
+  {
+    version: 22,
+    name: "location_details",
+    sql: locationDetailsSql,
+    checksum: "pse-133-location-details-v1"
   }
 ];

@@ -161,6 +161,15 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       createLink: (input) => callApi(() => api.links.createLink(input)),
       updateLink: (input) => callApi(() => api.links.updateLink(input))
     },
+    locations: {
+      create: (input) => callApi(() => api.locations.create(input)),
+      update: (input) => callApi(() => api.locations.update(input)),
+      listByContainer: (containerId) =>
+        callApi(() => api.locations.listByContainer(containerId)),
+      openExternal: (itemId) => callApi(() => api.locations.openExternal(itemId)),
+      createLocation: (input) => callApi(() => api.locations.createLocation(input)),
+      updateLocation: (input) => callApi(() => api.locations.updateLocation(input))
+    },
     projects: {
         create: (input) => callApi(() => api.projects.create(input)),
         update: (input) => callApi(() => api.projects.update(input)),
@@ -830,6 +839,15 @@ export const desktopApiClient: LocalWorkOsApi = {
     openUrlExternal: (url) => getDesktopApiClient().links.openUrlExternal(url),
     createLink: (input) => getDesktopApiClient().links.createLink(input),
     updateLink: (input) => getDesktopApiClient().links.updateLink(input)
+  },
+  locations: {
+    create: (input) => getDesktopApiClient().locations.create(input),
+    update: (input) => getDesktopApiClient().locations.update(input),
+    listByContainer: (containerId) =>
+      getDesktopApiClient().locations.listByContainer(containerId),
+    openExternal: (itemId) => getDesktopApiClient().locations.openExternal(itemId),
+    createLocation: (input) => getDesktopApiClient().locations.createLocation(input),
+    updateLocation: (input) => getDesktopApiClient().locations.updateLocation(input)
   },
   projects: {
       create: (input) => getDesktopApiClient().projects.create(input),

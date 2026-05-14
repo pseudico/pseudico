@@ -889,7 +889,9 @@ a {
 .file-card-content,
 .file-metadata-editor,
 .link-card-content,
-.link-editor {
+.link-editor,
+.location-card-content,
+.location-editor {
   display: grid;
   gap: 10px;
 }
@@ -908,14 +910,16 @@ a {
 }
 
 .file-card-details,
-.link-card-details {
+.link-card-details,
+.location-card-details {
   display: grid;
   gap: 6px;
   margin: 0;
 }
 
 .file-card-details div,
-.link-card-details div {
+.link-card-details div,
+.location-card-details div {
   display: grid;
   grid-template-columns: minmax(72px, 0.25fr) minmax(0, 1fr);
   gap: 8px;
@@ -924,23 +928,62 @@ a {
 .file-card-details dt,
 .file-card-details dd,
 .link-card-details dt,
-.link-card-details dd {
+.link-card-details dd,
+.location-card-details dt,
+.location-card-details dd {
   margin: 0;
   font-size: 13px;
   overflow-wrap: anywhere;
 }
 
 .file-card-details dt,
-.link-card-details dt {
+.link-card-details dt,
+.location-card-details dt {
   color: #6d6a62;
   font-weight: 750;
 }
 
 .file-card-actions,
-.link-card-actions {
+.link-card-actions,
+.location-card-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.location-editor-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.location-viewport-fieldset {
+  border: 1px solid #dedbd1;
+  border-radius: 12px;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+}
+
+.location-viewport-fieldset legend {
+  color: #6d6a62;
+  font-size: 13px;
+  font-weight: 750;
+  padding: 0 4px;
+}
+
+.location-map-placeholder {
+  align-items: center;
+  background: linear-gradient(135deg, #eef5f3, #f7efe0);
+  border: 1px dashed #9db8b2;
+  border-radius: 14px;
+  color: #245c55;
+  display: flex;
+  gap: 10px;
+  min-height: 88px;
+  justify-content: center;
+  font-weight: 750;
 }
 
 .file-preview-card {
@@ -5599,6 +5642,7 @@ body,
 .settings-panel,
 .file-card-content,
 .link-card-content,
+.location-card-content,
 .note-card-content,
 .list-card-content,
 .task-card-content,

@@ -3489,6 +3489,56 @@ export type OpenLinkSummary = {
   normalizedUrl: string;
 };
 
+export type LocationSummary = ItemSummary & {
+  type: "location";
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  viewportCenterLat: number | null;
+  viewportCenterLng: number | null;
+  viewportZoom: number;
+  locationCreatedAt: string;
+  locationUpdatedAt: string;
+};
+
+export type CreateLocationInput = {
+  workspaceId?: string;
+  containerId: string;
+  actorType?: "local_user" | "system" | "importer";
+  address?: string | null;
+  categoryId?: string | null;
+  containerTabId?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  sortOrder?: number;
+  pinned?: boolean;
+  title?: string | null;
+  viewportCenterLat?: number | null;
+  viewportCenterLng?: number | null;
+  viewportZoom?: number | null;
+};
+
+export type UpdateLocationInput = {
+  itemId: string;
+  actorType?: "local_user" | "system" | "importer";
+  address?: string | null;
+  categoryId?: string | null;
+  containerTabId?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  sortOrder?: number;
+  pinned?: boolean;
+  title?: string | null;
+  viewportCenterLat?: number | null;
+  viewportCenterLng?: number | null;
+  viewportZoom?: number | null;
+};
+
+export type OpenLocationMapSummary = {
+  itemId: string;
+  mapUrl: string;
+};
+
 export type OpenExternalUrlSummary = {
   url: string;
   normalizedUrl: string;
@@ -3758,6 +3808,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     listByContainer: "local-work-os:links:list-by-container",
     openExternal: "local-work-os:links:open-external",
     openUrlExternal: "local-work-os:links:open-url-external"
+  },
+  locations: {
+    createLocation: "local-work-os:locations:create-location",
+    updateLocation: "local-work-os:locations:update-location",
+    listByContainer: "local-work-os:locations:list-by-container",
+    openExternal: "local-work-os:locations:open-external"
   },
   projects: {
     createProject: "local-work-os:projects:create-project",
@@ -4276,6 +4332,22 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.links.openUrlExternal]: {
     input: string;
     result: ApiResult<OpenExternalUrlSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.locations.createLocation]: {
+    input: CreateLocationInput;
+    result: ApiResult<LocationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.locations.updateLocation]: {
+    input: UpdateLocationInput;
+    result: ApiResult<LocationSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.locations.listByContainer]: {
+    input: string;
+    result: ApiResult<LocationSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.locations.openExternal]: {
+    input: string;
+    result: ApiResult<OpenLocationMapSummary>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.projects.createProject]: {
     input: CreateProjectInput;
@@ -5183,6 +5255,16 @@ export type LocalWorkOsApi = {
     createLink: (input: CreateLinkInput) => Promise<ApiResult<LinkSummary>>;
     updateLink: (input: UpdateLinkInput) => Promise<ApiResult<LinkSummary>>;
   };
+  locations: {
+    create: (input: CreateLocationInput) => Promise<ApiResult<LocationSummary>>;
+    update: (input: UpdateLocationInput) => Promise<ApiResult<LocationSummary>>;
+    listByContainer: (
+      containerId: string
+    ) => Promise<ApiResult<LocationSummary[]>>;
+    openExternal: (itemId: string) => Promise<ApiResult<OpenLocationMapSummary>>;
+    createLocation: (input: CreateLocationInput) => Promise<ApiResult<LocationSummary>>;
+    updateLocation: (input: UpdateLocationInput) => Promise<ApiResult<LocationSummary>>;
+  };
   projects: {
     create: (
       input: CreateProjectInput
@@ -5979,6 +6061,20 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.createLink, input),
       updateLink: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.links.updateLink, input)
+    },
+    locations: {
+      create: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.locations.createLocation, input),
+      update: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.locations.updateLocation, input),
+      listByContainer: (containerId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.locations.listByContainer, containerId),
+      openExternal: (itemId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.locations.openExternal, itemId),
+      createLocation: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.locations.createLocation, input),
+      updateLocation: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.locations.updateLocation, input)
     },
     projects: {
       create: (input) =>

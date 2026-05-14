@@ -218,3 +218,8 @@ Optional IMAP import stores non-secret account settings in `app_settings`, run h
 ### Maintenance jobs (PSE-174)
 
 Local maintenance job history is stored in `app_settings` under `maintenance.jobs.v1` so integrity checks, search reindex runs, SQLite VACUUM runs, backup preflight IDs, attachment manifest audits, and orphan attachment scan/cleanup summaries survive app restart without a new schema table. Maintenance writes activity events for the job summary, and search rebuilds continue to write `search_index_rebuilt` activity records. Attachment manifest audits compare active attachment rows with workspace-relative `attachments/` files, write local audit JSON reports under `logs/maintenance/`, and orphan cleanup quarantines unreferenced files under `logs/maintenance/<job-id>/orphan-attachments/` instead of deleting them.
+
+
+## Location Objects
+
+Location items use `location_details` rows for address, latitude/longitude, and saved viewport zoom/center. They are indexed for local search and open external maps only through explicit user action.

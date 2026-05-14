@@ -122,6 +122,16 @@ export type { ContainerMediaRecord, ContainerMediaRole } from "./entities/Contai
 export { isSupportedLinkProtocol } from "./entities/Link";
 export type { LinkProtocol, LinkRecord } from "./entities/Link";
 export {
+  DEFAULT_LOCATION_VIEWPORT_ZOOM,
+  MAX_LOCATION_VIEWPORT_ZOOM,
+  MIN_LOCATION_VIEWPORT_ZOOM,
+  buildLocationMapUrl,
+  isValidLatitude,
+  isValidLongitude,
+  normalizeLocationViewportZoom
+} from "./entities/Location";
+export type { LocationMapViewport, LocationRecord } from "./entities/Location";
+export {
   CONTACT_FIELD_TYPES,
   CONTACT_STATUSES,
   isContactFieldType,
