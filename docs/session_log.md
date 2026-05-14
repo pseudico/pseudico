@@ -5642,3 +5642,76 @@ Files changed:
 - docs/README.md; docs/TESTING.md; docs/TEST_COVERAGE_MAP.md; package.json; packages/core/tests/testCoverageMapDoc.test.ts; scripts/check-test-coverage-map.mjs; docs/session_log.md
 Open questions / risks: CI/review still pending after PR open.
 Next actions: Commit; push; open PR.
+
+## 2026-05-14 15:30:20 +10:00
+Objective: Merge PSE-185 and prepare next ticket.
+Decisions made:
+- PR #175 passed CI and was squash-merged as 47a630b3a4e7b4d5bf6c30ea547b6e1b72fec64d.
+- Moved PSE-185 to Done and promoted PSE-187 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final session log entry remains local after merge.
+Next actions: Start PSE-187 next; keep only one Codex Ready issue.
+
+## 2026-05-14 16:28:39 +10:00
+Objective: Start end-to-end Local Work OS ticket run and reconcile active work.
+Decisions made:
+- Using Linear as source of plan and GitHub as proof.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Active PR/ticket state still being reconciled.
+Next actions: Query Linear states; inspect active PRs; select one ticket.
+
+## 2026-05-14 16:29:22 +10:00
+Objective: Reconcile active work and claim PSE-187.
+Decisions made:
+- No PR Open or In Progress issues found; one Codex Ready issue found.
+- Moving PSE-187 to In Progress for this run.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need determine concrete QA deliverable from ticket docs.
+Next actions: Read linked docs; inspect app/tests; implement scoped QA.
+
+## 2026-05-14 16:30:38 +10:00
+Objective: Start implementation branch for PSE-187.
+Decisions made:
+- Main is aligned with origin/main after escalated fetch.
+- Created branch codex/PSE-187-full-parity-qa-pass.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Ticket is QA/documentation-heavy; need scope to verifiable artifacts.
+Next actions: Read QA/security/coverage docs; inspect test scripts; add parity QA artifact/tests.
+
+## 2026-05-14 16:34:49 +10:00
+Objective: Add local parity QA artifact for PSE-187.
+Decisions made:
+- Added machine-checked parity QA report instead of new product surface.
+- Report reuses coverage-map feature keys and smoke tags to log release gaps.
+Files changed:
+- docs/LOCAL_PARITY_QA_REPORT.md
+- scripts/check-local-parity-qa.mjs
+- packages/core/tests/localParityQaReport.test.ts
+Open questions / risks: Full manual QA remains a release-candidate activity.
+Next actions: Run validators; run standard checks; open PR.
+
+## 2026-05-14 16:36:28 +10:00
+Objective: Validate parity QA report wiring.
+Decisions made:
+- Fixed script syntax and encoding so Node can run validator.
+- Kept gap registry aligned to existing coverage-map follow-up seeds.
+Files changed:
+- scripts/check-local-parity-qa.mjs
+- package.json
+- docs/TESTING.md
+Open questions / risks: Standard full checks still pending.
+Next actions: Run lint/typecheck/test/build; fix any failures; prepare PR.
+
+## 2026-05-14 16:40:31 +10:00
+Objective: Complete local verification for PSE-187.
+Decisions made:
+- Standard checks passed; test/build required escalation after sandbox EPERM.
+- Added qa:parity and coverage-map validation to verification set.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Manual QA and follow-up gap tickets still remain.
+Next actions: Review diff; commit and push; open PR.
