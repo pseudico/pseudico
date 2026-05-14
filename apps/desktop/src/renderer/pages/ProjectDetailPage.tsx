@@ -114,6 +114,11 @@ import {
 } from "../components/ContainerPreferencesPanel";
 import { ContainerTabsPanel } from "../components/ContainerTabsPanel";
 import { openQuickStartFromContainer } from "../components/QuickAddModal";
+import {
+  formatEmailDropImportMessage,
+  importEmailDropSources,
+  splitEmailDropSourcePaths
+} from "../utils/emailDropImport";
 
 type ProjectTaskViewModel = TaskCardViewModel & {
   categoryId?: string | null;
@@ -278,6 +283,7 @@ export function ProjectDetailPage({
   const [linkError, setLinkError] = useState<string | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [fileMessage, setFileMessage] = useState<string | null>(null);
   const [exportBusy, setExportBusy] = useState(false);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
   const [movingItem, setMovingItem] = useState<ProjectFeedViewModel | null>(null);
@@ -1247,6 +1253,7 @@ export function ProjectDetailPage({
 
     setSavingFile(true);
     setFileError(null);
+    setFileMessage(null);
 
     const result = await apiClient.files.chooseAndAttach({
       workspaceId: project.workspaceId,
@@ -2510,6 +2517,7 @@ export function ProjectDetailPage({
     event.preventDefault();
     setSavingFile(true);
     setFileError(null);
+    setFileMessage(null);
 
     if (apiClient.dragDrop === undefined) {
       setSavingFile(false);
@@ -2527,17 +2535,64 @@ export function ProjectDetailPage({
       return;
     }
 
-    const result = await apiClient.dragDrop.attachFilesToContainer({
-      containerId: project.id,
-      containerTabId: activeTabId,
-      sourcePaths
-    });
+    const { emailSourcePaths, attachmentSourcePaths } =
+      splitEmailDropSourcePaths(sourcePaths);
+    const errors: string[] = [];
+    let importedEmailCount = 0;
+    let skippedEmailCount = 0;
+    let emailIssueCount = 0;
+
+    if (emailSourcePaths.length > 0) {
+      const importEmailsAsTasks = apiClient.import.importEmailsAsTasks;
+
+      if (importEmailsAsTasks === undefined) {
+        errors.push("Email import is not available in this runtime.");
+      } else {
+        const summary = await importEmailDropSources(
+          emailSourcePaths,
+          async (sourcePath) =>
+            importEmailsAsTasks({
+              sourcePath,
+              workspaceId: project.workspaceId,
+              containerId: project.id,
+              extractTags: true
+            })
+        );
+
+        importedEmailCount = summary.importedCount;
+        skippedEmailCount = summary.skippedCount;
+        emailIssueCount = summary.issueCount;
+        errors.push(...summary.errors);
+      }
+    }
+
+    if (attachmentSourcePaths.length > 0) {
+      const result = await apiClient.dragDrop.attachFilesToContainer({
+        containerId: project.id,
+        containerTabId: activeTabId,
+        sourcePaths: attachmentSourcePaths
+      });
+
+      if (!result.ok) {
+        errors.push(result.error.message);
+      }
+    }
 
     setSavingFile(false);
 
-    if (!result.ok) {
-      setFileError(result.error.message);
+    if (errors.length > 0) {
+      setFileError(errors.join(" "));
       return;
+    }
+
+    if (importedEmailCount > 0 || skippedEmailCount > 0 || emailIssueCount > 0) {
+      setFileMessage(
+        formatEmailDropImportMessage({
+          importedCount: importedEmailCount,
+          skippedCount: skippedEmailCount,
+          issueCount: emailIssueCount
+        })
+      );
     }
 
     await refreshProjectContent(project.id);
@@ -3415,6 +3470,9 @@ export function ProjectDetailPage({
 
         {fileError === null || fileBusyId !== null ? null : (
           <p className="form-message form-message-error">{fileError}</p>
+        )}
+        {fileMessage === null || fileError !== null || fileBusyId !== null ? null : (
+          <p className="form-message form-message-ok">{fileMessage}</p>
         )}
         {linkError === null || linkBusyId !== null || linkEditorOpen ? null : (
           <p className="form-message form-message-error">{linkError}</p>

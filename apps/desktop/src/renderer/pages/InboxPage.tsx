@@ -37,6 +37,11 @@ import type {
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
+import {
+  formatEmailDropImportMessage,
+  importEmailDropSources,
+  splitEmailDropSourcePaths
+} from "../utils/emailDropImport";
 
 type FeedItemSummary = ItemSummary | TaskSummary;
 type FeedListSummary = ListSummary;
@@ -81,11 +86,16 @@ export function InboxPage({
   const [itemActionBusy, setItemActionBusy] = useState(false);
   const [savingTask, setSavingTask] = useState(false);
   const [savingList, setSavingList] = useState(false);
+  const [importingEmail, setImportingEmail] = useState(false);
   const [taskBusyId, setTaskBusyId] = useState<string | null>(null);
   const [listBusyId, setListBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [taskError, setTaskError] = useState<string | null>(null);
   const [listError, setListError] = useState<string | null>(null);
+  const [emailImportError, setEmailImportError] = useState<string | null>(null);
+  const [emailImportMessage, setEmailImportMessage] = useState<string | null>(
+    null
+  );
   const [moveError, setMoveError] = useState<string | null>(null);
   const [itemActionError, setItemActionError] = useState<string | null>(null);
   const [movingItem, setMovingItem] = useState<InboxFeedItemSummary | null>(
@@ -352,6 +362,83 @@ export function InboxPage({
 
     setInbox(result.data);
     return result.data;
+  }
+
+  async function importDroppedInboxEmails(
+    event: React.DragEvent<HTMLElement>
+  ): Promise<void> {
+    if (
+      currentWorkspace === null ||
+      !Array.from(event.dataTransfer.types).includes("Files")
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    setImportingEmail(true);
+    setEmailImportError(null);
+    setEmailImportMessage(null);
+
+    if (apiClient.dragDrop === undefined) {
+      setImportingEmail(false);
+      setEmailImportError("Drag/drop is not available in this runtime.");
+      return;
+    }
+
+    const sourcePaths = apiClient.dragDrop.getDroppedFilePaths(
+      Array.from(event.dataTransfer.files)
+    );
+
+    if (sourcePaths.length === 0) {
+      setImportingEmail(false);
+      setEmailImportError("Dropped files could not be read by the local file bridge.");
+      return;
+    }
+
+    const { emailSourcePaths } = splitEmailDropSourcePaths(sourcePaths);
+
+    if (emailSourcePaths.length === 0) {
+      setImportingEmail(false);
+      setEmailImportError("Drop .eml email files to import them into Inbox.");
+      return;
+    }
+
+    const activeInbox = await resolveInbox(currentWorkspace.id);
+
+    if (activeInbox === null) {
+      setImportingEmail(false);
+      return;
+    }
+
+    const importEmailsAsTasks = apiClient.import.importEmailsAsTasks;
+
+    if (importEmailsAsTasks === undefined) {
+      setImportingEmail(false);
+      setEmailImportError("Email import is not available in this runtime.");
+      return;
+    }
+
+    const summary = await importEmailDropSources(
+      emailSourcePaths,
+      async (sourcePath) =>
+        importEmailsAsTasks({
+          sourcePath,
+          workspaceId: currentWorkspace.id,
+          containerId: activeInbox.id,
+          extractTags: true
+        })
+    );
+
+    if (summary.importedCount > 0 || summary.skippedCount > 0 || summary.issueCount > 0) {
+      setEmailImportMessage(formatEmailDropImportMessage(summary));
+      await loadInbox(currentWorkspace.id);
+    }
+
+    setImportingEmail(false);
+
+    if (summary.errors.length > 0) {
+      setEmailImportError(summary.errors.join(" "));
+    }
   }
 
   async function moveItemToProject(projectId: string): Promise<void> {
@@ -836,11 +923,28 @@ export function InboxPage({
         onSubmit={createInboxList}
       />
 
-      <section className="inbox-content-section" aria-label="Inbox content">
+      <section
+        className="inbox-content-section"
+        aria-label="Inbox content"
+        onDragOver={(event) => {
+          if (Array.from(event.dataTransfer.types).includes("Files")) {
+            event.preventDefault();
+          }
+        }}
+        onDrop={(event) => {
+          void importDroppedInboxEmails(event);
+        }}
+      >
         <div className="panel-heading">
           <Inbox size={17} aria-hidden="true" />
           <h3>Triage queue</h3>
         </div>
+        {emailImportMessage === null ? null : (
+          <p className="form-message form-message-ok">{emailImportMessage}</p>
+        )}
+        {emailImportError === null ? null : (
+          <p className="form-message form-message-error">{emailImportError}</p>
+        )}
         <ItemFeed
           ariaLabel="Inbox items"
           emptyDescription="Captured work will appear here before it is moved into a project."
@@ -848,7 +952,7 @@ export function InboxPage({
           error={error}
           getDisabledActions={getDisabledActionsForInboxItem}
           items={items.map(toItemViewModel)}
-          loading={loading}
+          loading={loading || importingEmail}
           renderEmptyAction={() => (
             <Link
               to="/help?article=capture-and-triage&from=/inbox"

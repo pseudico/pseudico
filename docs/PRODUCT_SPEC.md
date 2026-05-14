@@ -53,8 +53,8 @@ Known limitations for MVP release planning:
   intentionally limited.
 - Import validation exists for workspace JSON, valid workspace JSON exports
   can now be restored into a separate new workspace folder where feasible, and
-  local EML/Maildir messages can be imported as Inbox tasks with the original
-  email copied into attachments.
+  local EML/Maildir messages can be imported as Inbox or project tasks with the
+  original email copied into attachments.
 - Backups and exports are local actions. Manual backup restore into a new
   workspace is available; automatic backup interval/app-close checks,
   scheduler settings/status, retention cleanup, and database checksums are

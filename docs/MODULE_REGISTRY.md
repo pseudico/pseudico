@@ -892,6 +892,8 @@ Owns:
 - Local EML file and Maildir folder scanning through Electron main-process IPC.
 - EML header/body parsing, sanitized preview text, and email-to-task task body shaping.
 - Original email preservation by copying `.eml`/Maildir message files into local attachments.
+- Renderer drop routing for `.eml` files so Inbox and project content can create
+  local email tasks without renderer filesystem access.
 
 Does not own:
 
