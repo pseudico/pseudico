@@ -1,4 +1,4 @@
-import { copyFile, readdir, stat } from "node:fs/promises";
+import { copyFile, readdir, rename, stat } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { createHash } from "node:crypto";
 
@@ -211,7 +211,44 @@ export function createDiagnosticsIpcHandlers(
               await listWorkspaceFilesUnder(
                 context.workspace.rootPath,
                 workspaceRelativePath
-              )
+              ),
+            workspacePathExists: async (workspaceRelativePath) =>
+              await localPathExists(
+                resolveInsideWorkspace(context.workspace.rootPath, workspaceRelativePath)
+              ),
+            workspaceFileSize: async (workspaceRelativePath) =>
+              (
+                await stat(
+                  resolveInsideWorkspace(context.workspace.rootPath, workspaceRelativePath)
+                )
+              ).size,
+            workspaceFileChecksum: async (workspaceRelativePath) =>
+              await calculateChecksum(
+                resolveInsideWorkspace(context.workspace.rootPath, workspaceRelativePath)
+              ),
+            writeWorkspaceJson: async (workspaceRelativePath, value) => {
+              await writeTextFileInsideWorkspace(
+                context.workspace.rootPath,
+                workspaceRelativePath,
+                `${JSON.stringify(value, null, 2)}\n`
+              );
+            },
+            moveWorkspaceFile: async (sourceRelativePath, destinationRelativePath) => {
+              const sourcePath = resolveInsideWorkspace(
+                context.workspace.rootPath,
+                sourceRelativePath
+              );
+              const destinationPath = resolveInsideWorkspace(
+                context.workspace.rootPath,
+                destinationRelativePath
+              );
+
+              await ensureDirectoryInsideWorkspace(
+                context.workspace.rootPath,
+                dirnameRelativePath(destinationRelativePath)
+              );
+              await rename(sourcePath, destinationPath);
+            }
           },
           createBackup: async () => {
             const backupRelativePath = createMaintenanceBackupRelativePath(new Date());
@@ -464,9 +501,11 @@ function isRunMaintenanceJobInput(
             typeof operation === "string" &&
             [
               "sqlite_integrity_check",
+              "attachment_manifest_audit",
               "rebuild_search_index",
               "vacuum",
-              "orphan_attachment_scan"
+              "orphan_attachment_scan",
+              "orphan_attachment_cleanup"
             ].includes(operation)
           ))))
   );

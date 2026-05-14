@@ -697,7 +697,7 @@ export function SettingsPage({
     setMaintenanceJobs(result.data);
   }
 
-  async function runMaintenanceJob(): Promise<void> {
+  async function runMaintenanceJob(cleanupOrphans = false): Promise<void> {
     if (currentWorkspace === null) {
       setUserError("Open a workspace before running maintenance.");
       return;
@@ -709,8 +709,13 @@ export function SettingsPage({
     const result = await apiClient.diagnostics.runMaintenanceJob({
       workspaceId: currentWorkspace.id,
       requireBackup: true,
-      operations: [
+      operations: cleanupOrphans ? [
+        "attachment_manifest_audit",
+        "orphan_attachment_scan",
+        "orphan_attachment_cleanup"
+      ] : [
         "sqlite_integrity_check",
+        "attachment_manifest_audit",
         "orphan_attachment_scan",
         "rebuild_search_index",
         "vacuum"
@@ -733,7 +738,9 @@ export function SettingsPage({
     }
     showToast(
       result.data.status === "completed"
-        ? "Maintenance completed after creating a local backup."
+        ? cleanupOrphans
+          ? "Orphan attachment cleanup completed after creating a local backup."
+          : "Maintenance completed after creating a local backup."
         : `Maintenance failed: ${result.data.error ?? "unknown error"}.`,
       {
         title: "Maintenance",
@@ -1435,8 +1442,10 @@ export function SettingsPage({
           <div className="panel-heading">
             <h3>Maintenance</h3>
             <p className="muted-text">
-              Run local SQLite integrity, orphan attachment scan, search reindex,
-              and VACUUM with a backup preflight before write maintenance.
+              Run local SQLite integrity, attachment manifest audit, orphan
+              attachment scan, search reindex, and VACUUM with a backup preflight
+              before write maintenance. Cleanup quarantines orphan files under
+              logs/maintenance instead of deleting them.
             </p>
           </div>
           <div className="top-actions">
@@ -1457,6 +1466,15 @@ export function SettingsPage({
             >
               <Wrench size={16} aria-hidden="true" />
               Run maintenance
+            </button>
+            <button
+              className="secondary-button compact-button"
+              disabled={maintenanceBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void runMaintenanceJob(true)}
+            >
+              <Archive size={16} aria-hidden="true" />
+              Quarantine orphans
             </button>
           </div>
         </div>
@@ -2060,12 +2078,30 @@ function MaintenanceJobsPanel({
                   : "Integrity issues"}
             </span>
             <span>
+              {job.attachmentManifestAudit === null
+                ? "Manifest audit not run"
+                : job.attachmentManifestAudit.status === "healthy"
+                  ? "Manifest healthy"
+                  : `${getAttachmentManifestIssueCount(job)} manifest issue(s)`}
+            </span>
+            <span>
               {job.orphanAttachmentScan === null
                 ? "Orphan scan not run"
                 : `${job.orphanAttachmentScan.orphanedRelativePaths.length} orphan file(s)`}
             </span>
+            <span>
+              {job.orphanAttachmentCleanup === null
+                ? "Cleanup not run"
+                : `${job.orphanAttachmentCleanup.quarantinedFileCount} quarantined`}
+            </span>
             <span>{job.vacuum?.completed ? "Vacuumed" : "Vacuum not run"}</span>
           </div>
+          {job.attachmentManifestAudit === null ? null : (
+            <span className="muted-text">
+              Manifest report:{" "}
+              {job.attachmentManifestAudit.manifestRelativePath ?? "not written"}
+            </span>
+          )}
           {job.entries.map((entry) => (
             <span key={`${job.id}:${entry.step}`} className="muted-text">
               {entry.status}: {entry.message}
@@ -2074,6 +2110,22 @@ function MaintenanceJobsPanel({
         </div>
       ))}
     </div>
+  );
+}
+
+function getAttachmentManifestIssueCount(job: MaintenanceJobSummary): number {
+  const audit = job.attachmentManifestAudit;
+
+  if (audit === null) {
+    return 0;
+  }
+
+  return (
+    audit.missingReferencedPaths.length +
+    audit.orphanedRelativePaths.length +
+    audit.unsafeReferencedPaths.length +
+    audit.sizeMismatches.length +
+    audit.checksumMismatches.length
   );
 }
 

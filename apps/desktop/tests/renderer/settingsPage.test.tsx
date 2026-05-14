@@ -32,6 +32,9 @@ describe("SettingsPage", () => {
     expect(html).toContain("Diagnostics");
     expect(html).toContain("Run audit");
     expect(html).toContain("No diagnostics run");
+    expect(html).toContain("Maintenance");
+    expect(html).toContain("attachment manifest audit");
+    expect(html).toContain("Quarantine orphans");
     expect(html).toContain("Backups");
     expect(html).toContain("Create backup");
     expect(html).toContain("Restore target folder");
