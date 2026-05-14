@@ -29,8 +29,9 @@ export function FileVersionHistory({
   onOpenVersion,
   onRestoreVersion
 }: FileVersionHistoryProps): React.JSX.Element {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(() => versions.length > 0);
   const [note, setNote] = useState("");
+  const [restoreConfirmId, setRestoreConfirmId] = useState<string | null>(null);
 
   async function handleCreateSnapshot(): Promise<void> {
     const saved = await onCreateSnapshot(note);
@@ -38,7 +39,27 @@ export function FileVersionHistory({
     if (saved) {
       setNote("");
       setExpanded(true);
+      setRestoreConfirmId(null);
     }
+  }
+
+  async function handleOpenVersion(
+    version: FileVersionViewModel
+  ): Promise<void> {
+    setRestoreConfirmId(null);
+    await onOpenVersion(version);
+  }
+
+  async function handleRestoreVersion(
+    version: FileVersionViewModel
+  ): Promise<void> {
+    if (restoreConfirmId !== version.id) {
+      setRestoreConfirmId(version.id);
+      return;
+    }
+
+    setRestoreConfirmId(null);
+    await onRestoreVersion?.(version);
   }
 
   return (
@@ -85,22 +106,36 @@ export function FileVersionHistory({
             <li className="file-version-row" key={version.id}>
               <div>
                 <strong>Version {version.versionNumber}</strong>
-                <span>{formatCreatedAt(version.createdAt)}</span>
+                <dl className="file-version-details">
+                  <div>
+                    <dt>Date</dt>
+                    <dd>{formatCreatedAt(version.createdAt)}</dd>
+                  </div>
+                  <div>
+                    <dt>Size</dt>
+                    <dd>{formatFileSize(version.sizeBytes)}</dd>
+                  </div>
+                  <div>
+                    <dt>Checksum</dt>
+                    <dd>
+                      <code title={version.checksum}>{version.checksum}</code>
+                    </dd>
+                  </div>
+                </dl>
                 {version.note === null ||
                 version.note === undefined ||
                 version.note.trim().length === 0 ? null : (
-                  <p>{version.note}</p>
+                  <p>
+                    <strong>Note:</strong> {version.note}
+                  </p>
                 )}
-                <small>
-                  {formatFileSize(version.sizeBytes)} · {version.checksum.slice(0, 12)}
-                </small>
               </div>
               <div className="file-card-actions">
                 <button
                   className="secondary-button compact-button"
                   disabled={disabled}
                   type="button"
-                  onClick={() => void onOpenVersion(version)}
+                  onClick={() => void handleOpenVersion(version)}
                 >
                   <ExternalLink size={16} aria-hidden="true" />
                   Open
@@ -110,12 +145,18 @@ export function FileVersionHistory({
                     className="secondary-button compact-button"
                     disabled={disabled}
                     type="button"
-                    onClick={() => void onRestoreVersion(version)}
+                    aria-describedby={`file-version-restore-${version.id}`}
+                    onClick={() => void handleRestoreVersion(version)}
                   >
                     <RotateCcw size={16} aria-hidden="true" />
-                    Restore
+                    {restoreConfirmId === version.id ? "Confirm restore" : "Restore"}
                   </button>
                 )}
+                {restoreConfirmId === version.id ? (
+                  <small id={`file-version-restore-${version.id}`}>
+                    Restoring first saves the current file as a safety snapshot.
+                  </small>
+                ) : null}
               </div>
             </li>
           ))}
@@ -124,6 +165,8 @@ export function FileVersionHistory({
     </section>
   );
 }
+
+export const FileVersionPanel = FileVersionHistory;
 
 function formatCreatedAt(value: string): string {
   const date = new Date(value);

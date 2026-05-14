@@ -6109,3 +6109,54 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI still required as merge proof after PR opens.
 Next actions: Review diff; commit/push branch; open PR and move Linear to PR Open.
+## 2026-05-14T20:44:01.0186293+10:00
+Objective: Complete PSE-194 merge and next-ticket promotion.
+Decisions made:
+- Squash-merged PR #183 after CI passed and no review threads were open.
+- Moved PSE-194 to Done and promoted PSE-131 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-131 scope still needs normal issue/doc review before implementation.
+Next actions: Reconcile next run; pull PSE-131 into In Progress; implement version history/rollback UI.
+
+- Timestamp: 2026-05-14T20:51:05.1638328+10:00
+- Objective: Start next Local Work OS ticket run and reconcile Linear/GitHub state.
+- Decisions made: use Linear/GitHub structured tools; inspect active work before new implementation.
+- Files changed: docs/session_log.md
+- Open questions / risks: active PR/issue state unknown until reconciliation completes.
+- Next actions: list Linear states; inspect active PRs; choose one ticket.
+
+- Timestamp: 2026-05-14T20:51:39.8044004+10:00
+- Objective: Complete reconciliation before starting new ticket.
+- Decisions made: no Linear PR Open/In Progress issues; one Codex Ready issue PSE-131; no open GitHub PRs from recent PR query.
+- Files changed: docs/session_log.md
+- Open questions / risks: remote main pull may require network/permissions.
+- Next actions: update PSE-131 to In Progress; read issue/docs; branch.
+
+- Timestamp: 2026-05-14T20:52:21.5700003+10:00
+- Objective: Start PSE-131 implementation.
+- Decisions made: pulled main with escalation after FETCH_HEAD permission; moved PSE-131 to In Progress.
+- Files changed: docs/session_log.md
+- Open questions / risks: acceptance criteria/source docs still to inspect.
+- Next actions: create feature branch; read ticket docs; plan files/tests.
+
+- Timestamp: 2026-05-14T21:00:40.9754745+10:00
+- Objective: Implement PSE-131 UI safety/detail improvements and rollback preservation coverage.
+- Decisions made: keep existing service/IPC architecture; add two-step restore confirmation; expose FileVersionPanel alias; test safety snapshot ordering.
+- Files changed: packages/ui/src/components/FileVersionHistory.tsx; packages/ui/src/index.ts; apps/desktop/src/renderer/styles.css; apps/desktop/tests/main/ipc-handlers.test.ts; packages/ui/tests/itemComponents.test.tsx; docs/session_log.md
+- Open questions / risks: targeted tests/typecheck may reveal formatting or SSR assumptions.
+- Next actions: run targeted tests; fix failures; run full checks.
+
+- Timestamp: 2026-05-14T21:04:26.7679863+10:00
+- Objective: Verify PSE-131 changes before PR.
+- Decisions made: full lint/typecheck/test/build pass; reran Vitest/build with escalation after EPERM spawn errors.
+- Files changed: apps/desktop/src/renderer/styles.css; apps/desktop/tests/main/ipc-handlers.test.ts; packages/ui/src/components/FileVersionHistory.tsx; packages/ui/src/index.ts; packages/ui/tests/itemComponents.test.tsx; docs/session_log.md
+- Open questions / risks: manual Electron/browser QA not launched in this environment.
+- Next actions: inspect diff; commit/push; open PR.
+
+- Timestamp: 2026-05-14T21:08:55.5524710+10:00
+- Objective: Open and verify PSE-131 PR.
+- Decisions made: PR #184 opened ready; Linear moved to PR Open; CI passed; no review threads; diff matches version-history/rollback UI scope.
+- Files changed: docs/session_log.md
+- Open questions / risks: merge/branch cleanup and next-ticket promotion remain.
+- Next actions: squash-merge PR #184; update Linear Done; choose next Codex Ready issue.
