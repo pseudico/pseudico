@@ -5867,3 +5867,73 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI still must verify after PR opens.
 Next actions: Commit and push; open ready PR; update Linear.
+
+## 2026-05-14 17:51:44 +10:00
+Objective: Finish PSE-190 merge and prepare next ticket.
+Decisions made:
+- Squash-merged PR #179 at e36b3277935e100772b0dd800d99b0bf73ad2a02.
+- Local main fast-forwarded and merged PSE-190 branch deleted locally/remotely.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final log entry is local-only after merge unless picked up next run.
+Next actions: Move PSE-190 to Done; promote next importer issue; report results.
+
+## 2026-05-14 17:52:37 +10:00
+Objective: Promote next issue after PSE-190.
+Decisions made:
+- Moved PSE-190 to Done and commented merge details.
+- Promoted PSE-191 as the single next Codex Ready importer issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Session log entry is local-only after merge.
+Next actions: Next run should reconcile PSE-191; leave unrelated untracked files untouched.
+
+## 2026-05-14T18:14:01.4209396+10:00
+Objective: Reconcile active Linear/GitHub work for next Local Work OS ticket.
+Decisions made:
+- Found no PR Open or In Progress Linear issues and no open GitHub PRs.
+- Selected existing Codex Ready issue PSE-191 as the next active ticket.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Untracked local files remain unrelated.
+Next actions: Move PSE-191 to In Progress; read scope/docs; implement.
+
+## 2026-05-14T18:16:30.5376115+10:00
+Objective: Start PSE-191 implementation.
+Decisions made:
+- Moved PSE-191 from Codex Ready to In Progress.
+- Confirmed main is up to date after escalated git pull for FETCH_HEAD permission.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Todoist ZIP fixture format must be inferred from local exports.
+Next actions: Create issue branch; inspect import services/tests; implement adapter.
+
+## 2026-05-14T18:26:41.6266022+10:00
+Objective: Implement PSE-191 Todoist importer foundation.
+Decisions made:
+- Added TodoistImportService for CSV/backup-entry preview and execution via existing services.
+- Preserved Todoist comments, subtasks/sections, due text, labels, and inert attachment URLs locally.
+Files changed:
+- packages/core/src/events/ActivityAction.ts; packages/features/src/import/TodoistImportService.ts; packages/features/src/import/index.ts; packages/features/src/index.ts; packages/features/tests/todoistImportService.test.ts; docs/TODOIST_IMPORT.md; docs/README.md; docs/import-research/COMMON_APP_IMPORT_FORMATS.md; docs/session_log.md
+Open questions / risks: Desktop raw ZIP scanning remains boundary work if not already provided by IPC.
+Next actions: Run full checks; fix failures; open PR.
+
+## 2026-05-14T18:30:41.1811289+10:00
+Objective: Verify PSE-191 implementation locally.
+Decisions made:
+- Ran lint, typecheck, full tests, and build successfully.
+- Reran test/build with escalation only for documented Vite/esbuild spawn EPERM sandbox failures.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI still needs to confirm on GitHub.
+Next actions: Stage scoped files; commit; push/open ready PR.
+
+## 2026-05-14T18:47:27.3220614+10:00
+Objective: Open and review PSE-191 PR.
+Decisions made:
+- Opened ready PR #180 and confirmed GitHub CI completed successfully.
+- Self-review found and fixed parent-resolution ordering before merge.
+Files changed:
+- packages/features/src/import/TodoistImportService.ts; docs/session_log.md
+Open questions / risks: Linear status update tool is timing out; retry before final.
+Next actions: Amend/push fix; merge PR if checks remain green; update Linear.

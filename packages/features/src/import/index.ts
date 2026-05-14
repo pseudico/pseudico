@@ -14,6 +14,9 @@ export {
   NotionImportService
 } from "./NotionImportService";
 export {
+  TodoistImportService
+} from "./TodoistImportService";
+export {
   ImapImportService,
   IMAP_IMPORT_SETTINGS_KEY
 } from "./ImapImportService";
@@ -83,6 +86,19 @@ export type {
   NotionImportSourceReport,
   NotionImportValidationIssue
 } from "./NotionImportService";
+export type {
+  TodoistImportCreatedTarget,
+  TodoistImportEntryKind,
+  TodoistImportExecuteInput,
+  TodoistImportExecuteSummary,
+  TodoistImportPreviewInput,
+  TodoistImportPreviewRow,
+  TodoistImportPreviewSummary,
+  TodoistImportSourceEntry,
+  TodoistImportSourceKind,
+  TodoistImportSourceReport,
+  TodoistImportValidationIssue
+} from "./TodoistImportService";
 export type {
   ImportValidationCounts,
   ImportValidationIssue,

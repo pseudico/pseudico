@@ -11,7 +11,7 @@ Local Work OS should prioritize importer adapters that consume files the user ha
 Recommended order:
 
 1. **Notion Markdown/CSV ZIP importer** - highest overlap with the PSE-170 Markdown folder importer and existing CSV parsing; strong notes/projects/databases coverage. Initial local service foundation now lives in `docs/NOTION_IMPORT.md`.
-2. **Todoist project CSV importer** - narrow, task-first, and close to the existing CSV task import surface.
+2. **Todoist project CSV importer** - narrow, task-first, and close to the existing CSV task import surface. Initial local service foundation now lives in `docs/TODOIST_IMPORT.md`.
 3. **Trello board JSON importer** - richer than Trello CSV and maps cleanly to project/list/card/checklist objects, but needs nested JSON fixtures.
 4. **Evernote ENEX/HTML notebook importer** - valuable for notes + attachments, but parser/resource handling is higher risk.
 5. **Obsidian vault enhancement** - treat as an enhancement to the Markdown folder importer, not a separate importer, unless frontmatter/wiki-link fidelity becomes a product goal.
