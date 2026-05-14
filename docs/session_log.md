@@ -5382,3 +5382,33 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Need amend log entry, push branch, and open PR.
 Next actions: Amend commit; push; create ready PR.
+## 2026-05-14T11:29:54.3105657+10:00
+Objective: Complete PSE-181 merge and promote next issue.
+Decisions made:
+- PR #170 passed CI and squash-merged at 107b034034a3225f039566f2c64a666529020306.
+- Deleted merged PSE-181 branch and fast-forwarded local main.
+- Moved PSE-181 to Done and promoted PSE-182 as next Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need start PSE-182 packaging scope on a new branch.
+Next actions: Move PSE-182 In Progress; branch; inspect packaging docs/source.
+## 2026-05-14T11:33:10.1839492+10:00
+Objective: Plan PSE-182 packaging hardening implementation.
+Decisions made:
+- Scope to existing unpacked electron-builder flow, not installers/signing/cross-build guarantees.
+- Extend package smoke to cover attachment copy, main-process open/reveal path resolution, and manual backup.
+- Add artifact naming docs/config and a package-smoke unit test.
+Files changed:
+- docs/session_log.md; apps/desktop/src/main/packageSmoke.ts; apps/desktop/electron-builder.yml; docs/RELEASE.md
+Open questions / risks: Need run desktop tests and package/package:smoke on Windows host.
+Next actions: Run targeted desktop tests; run full checks/package; fix failures.
+## 2026-05-14T11:40:30.1303267+10:00
+Objective: Validate PSE-182 packaging hardening.
+Decisions made:
+- Desktop tests, lint, typecheck, full test, build, package, and package:smoke pass.
+- Package smoke verified workspace data, attachment, open/reveal path, and backup remain outside app bundle.
+- Package command produced Windows unpacked development build; cross-OS packaging remains host/CI-specific.
+Files changed:
+- apps/desktop/electron-builder.yml; apps/desktop/src/main/packageSmoke.ts; apps/desktop/tests/main/packageSmoke.test.ts; docs/RELEASE.md
+Open questions / risks: Need commit, PR, CI, merge, then promote next issue.
+Next actions: Stage scoped files; commit/push PR; check CI/merge.
