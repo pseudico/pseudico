@@ -1239,6 +1239,37 @@ export type FileAttachmentSummary = {
   deletedAt: string | null;
 };
 
+export type AttachmentPreviewKind =
+  | "image"
+  | "pdf"
+  | "text"
+  | "document"
+  | "spreadsheet"
+  | "presentation"
+  | "archive"
+  | "audio"
+  | "video"
+  | "unknown";
+
+export type AttachmentPreviewSummary = {
+  attachmentId: string;
+  kind: AttachmentPreviewKind;
+  iconLabel: string;
+  extension: string | null;
+  mimeType: string | null;
+  sizeBytes: number;
+  sizeLabel: string;
+  updatedAt: string;
+  missing: boolean;
+  checksum: string | null;
+  checksumShort: string | null;
+  versionCount: number;
+  latestVersionNumber: number | null;
+  thumbnailStoragePath: string | null;
+  thumbnailExists: boolean;
+  previewDataUrl: string | null;
+};
+
 export type FileAttachmentResultSummary = {
   item: ItemSummary;
   attachment: FileAttachmentSummary;
@@ -1248,6 +1279,7 @@ export type FileItemSummary = ItemSummary & {
   type: "file";
   attachment: FileAttachmentSummary;
   missing: boolean;
+  preview?: AttachmentPreviewSummary;
 };
 
 export type AttachFileToContainerInput = {

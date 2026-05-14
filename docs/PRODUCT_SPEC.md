@@ -16,8 +16,9 @@ Pagico’s public material describes the core appeal as having tasks, notes, doc
 As of the M14 final documentation sync, the repository contains the local-only
 MVP/V1 foundation for workspace creation/opening, SQLite bootstrap and
 repositories, Inbox/project/contact containers, tasks, lists, notes, links, file
-attachments and file versions, metadata, relationships, activity, search, saved
-views/collections, Today planning, dashboard widgets, project health, local
+attachments, local attachment previews, and file versions, metadata,
+relationships, activity, search, saved views/collections, Today planning,
+dashboard widgets, project health, local
 reminders, recurrence, templates, local workflows, timeline/calendar
 projections, backup, export, import validation/execution paths, local
 EML/Maildir email-to-task import, a local Notion Markdown/CSV import adapter

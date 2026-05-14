@@ -3427,6 +3427,7 @@ function toProjectFileViewModel(
       description: file.attachment.description
     },
     missing: file.missing,
+    ...(file.preview === undefined ? {} : { preview: file.preview }),
     versions: (file.versions ?? []).map(toFileVersionViewModel)
   };
 }

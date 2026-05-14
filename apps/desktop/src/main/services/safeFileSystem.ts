@@ -40,6 +40,21 @@ export type CopiedWorkspaceFileVersion = {
   checksum: string;
 };
 
+export function createAttachmentPreviewCacheRelativePath(input: {
+  attachmentId: string;
+}): string {
+  if (!/^[A-Za-z0-9_-]+$/.test(input.attachmentId)) {
+    throw new WorkspaceFileSystemError(
+      "INVALID_PATH",
+      "Attachment preview cache id must be a safe path segment."
+    );
+  }
+
+  return validateWorkspaceRelativePath(
+    `.cache/attachment-previews/${input.attachmentId}/thumbnail.png`
+  );
+}
+
 function hasNullByte(value: string): boolean {
   return value.includes("\0");
 }

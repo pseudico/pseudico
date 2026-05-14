@@ -4,18 +4,25 @@ import {
   type AttachmentRecord,
   type AttachmentVersionRecord
 } from "@local-work-os/core";
+import { nativeImage } from "electron";
+import { readFile } from "node:fs/promises";
 import {
   createDatabaseConnection,
   resolveWorkspaceDatabasePath,
   type DatabaseConnection,
   type ItemRecord
 } from "@local-work-os/db";
-import { FileAttachmentService, FileVersionService } from "@local-work-os/features";
+import {
+  AttachmentPreviewService,
+  FileAttachmentService,
+  FileVersionService
+} from "@local-work-os/features";
 import {
   apiError,
   apiOk,
   type ApiResult,
   type AttachFileToContainerInput,
+  type AttachmentPreviewSummary,
   type AttachFileToItemInput,
   type ChooseAndAttachFileInput,
   type FileAttachmentResultSummary,
@@ -34,10 +41,12 @@ import {
 } from "../../preload/api";
 import {
   createAttachmentVersionSnapshot,
+  createAttachmentPreviewCacheRelativePath,
   copyFileIntoWorkspace,
   restoreAttachmentFileFromVersion,
   localPathExists,
   resolveInsideWorkspace,
+  writeBinaryFileInsideWorkspace,
   type CopiedWorkspaceFile
 } from "../services/safeFileSystem";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
@@ -211,19 +220,36 @@ export function createFileIpcHandlers(
         );
       }
 
-      return await withFileAttachmentService(
+      return await withFileServices(
         workspaceService,
         async (context) => {
           const entries = context.fileAttachmentService.listFileItemsByContainer({
             containerId: input
           });
           const files = await Promise.all(
-            entries.map(async ({ item, attachment }) => ({
-              ...toItemSummary(item),
-              type: "file" as const,
-              attachment: toFileAttachmentSummary(attachment),
-              missing: !(await attachmentExists(context.workspace, attachment))
-            }))
+            entries.map(async ({ item, attachment }) => {
+              const missing = !(await attachmentExists(
+                context.workspace,
+                attachment
+              ));
+              const versions =
+                context.fileVersionService.listFileVersions(attachment.id);
+
+              return {
+                ...toItemSummary(item),
+                type: "file" as const,
+                attachment: toFileAttachmentSummary(attachment),
+                missing,
+                preview: await createAttachmentPreviewSummary({
+                  workspace: context.workspace,
+                  attachment,
+                  missing,
+                  versionCount: versions.length,
+                  latestVersionNumber:
+                    versions.length > 0 ? versions[0]?.versionNumber ?? null : null
+                })
+              };
+            })
           );
 
           return apiOk(files);
@@ -637,6 +663,84 @@ function toFileAttachmentSummary(
     updatedAt: attachment.updatedAt,
     deletedAt: attachment.deletedAt
   };
+}
+
+async function createAttachmentPreviewSummary(input: {
+  workspace: WorkspaceSummary;
+  attachment: AttachmentRecord;
+  missing: boolean;
+  versionCount: number;
+  latestVersionNumber: number | null;
+}): Promise<AttachmentPreviewSummary> {
+  const thumbnail = await createAttachmentThumbnailPreview(input);
+
+  return new AttachmentPreviewService().buildPreview({
+    attachment: input.attachment,
+    missing: input.missing,
+    versionCount: input.versionCount,
+    latestVersionNumber: input.latestVersionNumber,
+    thumbnailStoragePath: thumbnail.storagePath,
+    thumbnailExists: thumbnail.exists,
+    previewDataUrl: thumbnail.dataUrl
+  });
+}
+
+async function createAttachmentThumbnailPreview(input: {
+  workspace: WorkspaceSummary;
+  attachment: AttachmentRecord;
+  missing: boolean;
+}): Promise<{
+  storagePath: string | null;
+  exists: boolean;
+  dataUrl: string | null;
+}> {
+  if (input.missing || !isImageAttachment(input.attachment)) {
+    return { storagePath: null, exists: false, dataUrl: null };
+  }
+
+  const sourcePath = resolveInsideWorkspace(
+    input.workspace.rootPath,
+    input.attachment.storagePath
+  );
+  const image = nativeImage.createFromPath(sourcePath);
+
+  if (image.isEmpty()) {
+    return { storagePath: null, exists: false, dataUrl: null };
+  }
+
+  const storagePath = createAttachmentPreviewCacheRelativePath({
+    attachmentId: input.attachment.id
+  });
+  const thumbnail = image.resize({ width: 256, height: 256 });
+  const bytes = thumbnail.toPNG();
+
+  await writeBinaryFileInsideWorkspace(
+    input.workspace.rootPath,
+    storagePath,
+    bytes
+  );
+
+  return {
+    storagePath,
+    exists: true,
+    dataUrl: await readImageDataUrl(
+      resolveInsideWorkspace(input.workspace.rootPath, storagePath),
+      "image/png"
+    )
+  };
+}
+
+async function readImageDataUrl(path: string, mimeType: string): Promise<string> {
+  const data = await readFile(path);
+  return `data:${mimeType};base64,${data.toString("base64")}`;
+}
+
+function isImageAttachment(attachment: AttachmentRecord): boolean {
+  if (attachment.mimeType?.toLowerCase().startsWith("image/") === true) {
+    return true;
+  }
+
+  return /\.(png|jpe?g|gif|webp|bmp)$/i.test(attachment.originalName);
 }
 
 function toAttachmentVersionSummary(

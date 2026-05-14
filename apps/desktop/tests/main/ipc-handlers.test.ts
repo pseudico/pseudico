@@ -443,6 +443,16 @@ describe("file IPC handlers", () => {
           attachment: {
             id: attached.data.attachment.id,
             description: "Launch brief"
+          },
+          preview: {
+            kind: "pdf",
+            iconLabel: "PDF",
+            sizeLabel: "14 B",
+            missing: false,
+            versionCount: 0,
+            latestVersionNumber: null,
+            thumbnailExists: false,
+            previewDataUrl: null
           }
         }
       ]

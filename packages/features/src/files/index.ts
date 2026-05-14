@@ -1,4 +1,9 @@
 export { FileAttachmentService, filesModuleContract } from "./FileAttachmentService";
+export { AttachmentPreviewService } from "./AttachmentPreviewService";
+export type {
+  AttachmentPreviewKind,
+  AttachmentPreviewSummary
+} from "./AttachmentPreviewService";
 export type {
   AttachFileToContainerInput,
   AttachFileToItemInput,
