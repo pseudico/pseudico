@@ -41,6 +41,13 @@ function createMockWorkspaceService(): WorkspaceFileSystemService {
       openedAt: "2026-04-30T00:00:00.000Z",
       schemaVersion: 1
     }),
+    createDemoWorkspace: async () => ({
+      id: "workspace_1",
+      name: "Demo Workspace",
+      rootPath: "C:\\work",
+      openedAt: "2026-04-30T00:00:00.000Z",
+      schemaVersion: 1
+    }),
     openWorkspace: async () => ({
       id: "workspace_1",
       name: "Personal",
@@ -102,6 +109,18 @@ describe("workspace IPC handlers", () => {
       ok: true,
       data: {
         id: "workspace_1"
+      }
+    });
+  });
+
+  it("validates create demo workspace input before service calls", async () => {
+    await expect(
+      handlers.handleCreateDemoWorkspace({ name: "Demo", rootPath: "" })
+    ).resolves.toEqual({
+      ok: false,
+      error: {
+        code: "INVALID_INPUT",
+        message: "createDemoWorkspace requires non-empty name and rootPath fields."
       }
     });
   });

@@ -5486,3 +5486,62 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Need rerun local checks and push follow-up commit.
 Next actions: Typecheck/build; commit; push; recheck CI.
+
+## 2026-05-14T12:20:33.0847635+10:00
+Objective: Complete PSE-183 merge and next-ticket promotion.
+Decisions made:
+- PR #172 passed CI on rerun #401 and was squash-merged at 7e4e957663d17e6f708073dc9f14babe3bcff2ba.
+- Deleted merged PSE-183 branch, pulled main, moved PSE-183 to Done.
+- Promoted PSE-184 as the sole Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final session log entry is local after merge; untracked .playwright-mcp and gh installer remain.
+Next actions: Start PSE-184 when requested; keep all other issues out of Codex Ready.
+## 2026-05-14T12:55:32.3250400+10:00
+Objective: Run next Local Work OS ticket end-to-end.
+Decisions made:
+- Use Linear/GitHub structured tools first; fall back to git/gh for local, CI, merge, and branch operations.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Active PR state, CI, review threads, and next Codex Ready issue unknown.
+Next actions: Reconcile Linear statuses; inspect any active PR; implement next ticket if unblocked.
+## 2026-05-14T12:56:00.6359187+10:00
+Objective: Reconcile active Linear/GitHub work.
+Decisions made:
+- No Linear issues in PR Open or In Progress; one issue in Codex Ready: PSE-184.
+- No open GitHub PRs found for pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need inspect PSE-184 details and repo docs before implementation.
+Next actions: Move PSE-184 to In Progress; create branch; implement scoped changes.
+## 2026-05-14T12:57:10.7913700+10:00
+Objective: Start PSE-184 implementation.
+Decisions made:
+- Moved PSE-184 to In Progress.
+- Pulled main and created branch codex/pse-184-demo-workspace-generator.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Demo generator acceptance criteria need source ticket details.
+Next actions: Read ticket pack/source; inspect existing workspace scripts/services; add tests.
+## 2026-05-14T13:10:44.9406418+10:00
+Objective: Implement PSE-184 demo workspace generator.
+Decisions made:
+- Added feature-layer DemoWorkspaceService plus main-process optional demo workspace creation.
+- Added Welcome action, IPC/preload routing, generated local attachment file, docs, and seed/IPC/UI tests.
+Files changed:
+- packages/features/src/demo/DemoWorkspaceService.ts
+- apps/desktop/src/main/services/workspace/WorkspaceFileSystemService.ts
+- apps/desktop/src/renderer/pages/WelcomePage.tsx
+- docs/DEMO_WORKSPACE.md
+Open questions / risks: Typecheck/test failures may reveal query or API mock gaps.
+Next actions: Run targeted tests; fix failures; run full checks.
+## 2026-05-14T13:17:00.6630800+10:00
+Objective: Verify PSE-184 locally.
+Decisions made:
+- Fixed seed attachment assertion and IPC channel test count.
+- Re-ran sandbox-blocked Vitest/build commands with escalation after EPERM.
+Files changed:
+- packages/features/tests/demoWorkspaceService.test.ts
+- apps/desktop/tests/preload/api.test.ts
+Open questions / risks: Need inspect diff before staging and PR.
+Next actions: Review git diff; commit/push; open ready PR.

@@ -40,6 +40,8 @@ docs and the linked Linear issue.
 - `QA_SCRIPTS.md` lists manual and automated smoke checks for MVP workflows.
 - `PERFORMANCE.md` defines large-workspace benchmark fixtures, budgets, and
   report artifacts.
+- `DEMO_WORKSPACE.md` documents the optional local demo workspace generator and
+  manual QA path.
 - `DB_CORRUPTION_RECOVERY.md` documents the local-only corrupt database
   detection and backup-restore recovery flow.
 - `MIGRATIONS.md` documents SQLite migration behavior, backup-before-migration,

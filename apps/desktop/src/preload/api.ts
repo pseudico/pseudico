@@ -3633,6 +3633,7 @@ export type UpdatePrivacyNetworkSettingsInput = {
 export const LOCAL_WORK_OS_IPC_CHANNELS = {
   workspace: {
     createWorkspace: "local-work-os:workspace:create-workspace",
+    createDemoWorkspace: "local-work-os:workspace:create-demo-workspace",
     openWorkspace: "local-work-os:workspace:open-workspace",
     validateWorkspace: "local-work-os:workspace:validate-workspace",
     getCurrentWorkspace: "local-work-os:workspace:get-current-workspace",
@@ -3987,6 +3988,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
 
 export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.workspace.createWorkspace]: {
+    input: CreateWorkspaceInput;
+    result: ApiResult<WorkspaceSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.workspace.createDemoWorkspace]: {
     input: CreateWorkspaceInput;
     result: ApiResult<WorkspaceSummary>;
   };
@@ -4971,6 +4976,9 @@ export type LocalWorkOsApi = {
     createWorkspace: (
       input: CreateWorkspaceInput
     ) => Promise<ApiResult<WorkspaceSummary>>;
+    createDemoWorkspace: (
+      input: CreateWorkspaceInput
+    ) => Promise<ApiResult<WorkspaceSummary>>;
     openWorkspace: (
       input: OpenWorkspaceInput
     ) => Promise<ApiResult<WorkspaceSummary>>;
@@ -5759,6 +5767,8 @@ export function createLocalWorkOsApi(
     workspace: {
       createWorkspace: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.workspace.createWorkspace, input),
+      createDemoWorkspace: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.workspace.createDemoWorkspace, input),
       openWorkspace: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.workspace.openWorkspace, input),
       validateWorkspace: (input) =>

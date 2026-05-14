@@ -13,6 +13,10 @@ export function registerWorkspaceIpc(
     (_event, input) => handlers.handleCreateWorkspace(input)
   );
   registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.workspace.createDemoWorkspace,
+    (_event, input) => handlers.handleCreateDemoWorkspace(input)
+  );
+  registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.workspace.openWorkspace,
     (_event, input) => handlers.handleOpenWorkspace(input)
   );

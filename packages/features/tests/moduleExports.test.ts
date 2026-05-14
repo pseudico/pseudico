@@ -127,6 +127,7 @@ describe("feature module exports", () => {
       "undo",
       "trash",
       "quickStart",
+      "demoWorkspace",
       "activity",
       "diagnostics",
       "maintenance",

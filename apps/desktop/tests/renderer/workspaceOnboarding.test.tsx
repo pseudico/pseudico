@@ -82,6 +82,7 @@ function createMockApi(
   return {
     workspace: {
       createWorkspace: async () => apiOk(workspace),
+      createDemoWorkspace: async () => apiOk(workspace),
       openWorkspace: async () => apiOk(workspace),
       validateWorkspace: async () =>
         apiOk({
@@ -1155,6 +1156,7 @@ describe("workspace onboarding renderer", () => {
     );
 
     expect(html).toContain("Create workspace");
+    expect(html).toContain("Create demo workspace");
     expect(html).toContain("Open workspace");
     expect(html).toContain("No recent workspaces yet");
   });
