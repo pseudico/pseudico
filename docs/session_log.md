@@ -5545,3 +5545,42 @@ Files changed:
 - apps/desktop/tests/preload/api.test.ts
 Open questions / risks: Need inspect diff before staging and PR.
 Next actions: Review git diff; commit/push; open ready PR.
+## 2026-05-14T13:26:39.4926477+10:00
+Objective: Merge PSE-184 and prepare next ticket.
+Decisions made:
+- PR #173 passed CI and was squash-merged as 45ed9529d58ea98e6f306b60ef916e7a75f81be9.
+- Moved PSE-184 to Done and promoted PSE-186 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final session log entry remains local on main after merge.
+Next actions: Start PSE-186 in the next run; leave unrelated untracked files untouched.
+## 2026-05-14T13:59:37+10:00
+Objective: Reconcile Linear/GitHub and start next Local Work OS ticket.
+Decisions made:
+- No PR Open or In Progress Linear issues found; selected only Codex Ready issue PSE-186.
+- No open GitHub PRs found for pseudico/pseudico.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing unrelated untracked files remain untouched.
+Next actions: Read docs; implement PSE-186; run checks.
+## 2026-05-14T14:59:25+10:00
+Objective: Implement PSE-186 i18n scaffold.
+Decisions made:
+- Added core-owned English messages, t() fallback, and Intl formatting helpers.
+- Limited UI refactor to app shell/navigation plus a read-only Settings locale placeholder.
+Files changed:
+- packages/core/src/i18n/*
+- apps/desktop/src/renderer/*
+- docs/LOCALIZATION.md
+Open questions / risks: Full string migration and persisted locale remain future work.
+Next actions: Run checks; open PR; update Linear.
+## 2026-05-14T15:02:42+10:00
+Objective: Verify PSE-186 implementation.
+Decisions made:
+- Fixed desktop Vitest alias for @local-work-os/features/help discovered by shell tests.
+- Reran sandbox-blocked Vitest/build commands with approved escalation due EPERM spawn failures.
+Files changed:
+- apps/desktop/vitest.config.ts
+- docs/session_log.md
+Open questions / risks: CI must confirm the same checks remotely.
+Next actions: Commit; push; open PR.

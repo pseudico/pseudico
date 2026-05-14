@@ -364,6 +364,35 @@ Integration points:
 - Activity Log for user-visible preference writes.
 - Main/preload IPC, `ThemeProvider`, app shell, cards, dashboard, and Settings.
 
+### Internationalization
+
+Owns:
+
+- Local translation message keys and English resources for shell/navigation
+  copy.
+- Locale-aware date/time and number formatting helpers.
+- A read-only Settings placeholder for future locale preference work.
+
+Does not own:
+
+- Hosted translation services, telemetry, cloud locale sync, or automatic
+  language downloads.
+- Persisted locale selection until a scoped follow-up ticket defines the
+  settings write flow.
+
+Implemented service methods:
+
+- `t`
+- `createTranslator`
+- `formatLocalizedDateTime`
+- `formatLocalizedNumber`
+
+Integration points:
+
+- App shell/sidebar/top-bar labels and route metadata.
+- Settings language/locale placeholder.
+- Future renderer string migrations through core-owned message keys.
+
 ### Content Tabs
 
 Owns:

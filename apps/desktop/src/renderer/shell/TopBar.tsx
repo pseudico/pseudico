@@ -1,4 +1,5 @@
 import { ArrowLeft, ArrowRight, Clock3, Command, Plus, Search } from "lucide-react";
+import { t } from "@local-work-os/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useId, useRef, useState } from "react";
 import type { QuickAddContext } from "../components/QuickAddModal";
@@ -53,31 +54,31 @@ export function TopBar({
   return (
     <header className="top-bar">
       <div>
-        <p className="top-eyebrow">Workspace shell</p>
+        <p className="top-eyebrow">{t("app.topBar.workspaceShell")}</p>
         <h1>{route.title}</h1>
       </div>
 
       <div className="top-actions">
-        <div className="navigation-controls" aria-label="Navigation history">
+        <div className="navigation-controls" aria-label={t("app.topBar.navigationHistory")}>
           <button
             type="button"
             className="icon-button compact-icon-button"
             disabled={!canGoBack}
-            aria-label="Go back"
+            aria-label={t("app.topBar.back")}
             onClick={onGoBack}
           >
             <ArrowLeft size={18} aria-hidden="true" />
-            <span>Back</span>
+            <span>{t("app.topBar.back")}</span>
           </button>
           <button
             type="button"
             className="icon-button compact-icon-button"
             disabled={!canGoForward}
-            aria-label="Go forward"
+            aria-label={t("app.topBar.forward")}
             onClick={onGoForward}
           >
             <ArrowRight size={18} aria-hidden="true" />
-            <span>Forward</span>
+            <span>{t("app.topBar.forward")}</span>
           </button>
         </div>
         <RecentNavigationMenu
@@ -88,20 +89,20 @@ export function TopBar({
         <button
           type="button"
           className="icon-button"
-          aria-label="Open command palette"
+          aria-label={t("app.topBar.openCommandPalette")}
           onClick={onOpenCommandPalette}
         >
           <Command size={18} aria-hidden="true" />
-          <span>Commands</span>
-          <kbd>Ctrl/⌘ K</kbd>
+          <span>{t("app.topBar.commands")}</span>
+          <kbd>{t("app.topBar.commandShortcut")}</kbd>
         </button>
         <form className="search-control" role="search" onSubmit={submitSearch}>
           <label>
             <Search size={16} aria-hidden="true" />
-            <span className="sr-only">Search</span>
+            <span className="sr-only">{t("app.topBar.search")}</span>
             <input
               type="search"
-              placeholder="Search local workspace"
+              placeholder={t("app.topBar.searchPlaceholder")}
               value={searchQuery}
               disabled={currentWorkspace === null}
               onChange={(event) => setSearchQuery(event.target.value)}
@@ -112,11 +113,11 @@ export function TopBar({
           type="button"
           className="icon-button"
           disabled={currentWorkspace === null}
-          aria-label="Quick Start"
+          aria-label={t("app.topBar.quickStart")}
           onClick={() => onQuickAdd(getQuickAddContext(location.pathname))}
         >
           <Plus size={18} aria-hidden="true" />
-          <span>Quick Start</span>
+          <span>{t("app.topBar.quickStart")}</span>
         </button>
       </div>
     </header>
@@ -172,13 +173,13 @@ export function RecentNavigationMenu({
         onClick={() => setOpen((current) => !current)}
       >
         <Clock3 size={18} aria-hidden="true" />
-        <span>Recent</span>
+        <span>{t("app.topBar.recent")}</span>
       </button>
       {!open ? null : (
-        <div className="recent-navigation-popover" id={menuId} ref={popoverRef} role="menu" aria-label="Recently opened">
-          <p className="top-eyebrow">Recently opened</p>
+        <div className="recent-navigation-popover" id={menuId} ref={popoverRef} role="menu" aria-label={t("app.topBar.recentlyOpened")}>
+          <p className="top-eyebrow">{t("app.topBar.recentlyOpened")}</p>
           {!hasRecentTargets ? (
-            <p className="empty-inline">Open a view, project, contact, or item.</p>
+            <p className="empty-inline">{t("app.topBar.recentEmpty")}</p>
           ) : (
             recentTargets.map((target) => (
               <button

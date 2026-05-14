@@ -16,6 +16,7 @@ import {
   Trash2,
   Workflow
 } from "lucide-react";
+import { t } from "@local-work-os/core";
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import type { LocalWorkOsApi, PinnedFavoriteTargetSummary } from "../../preload/api";
@@ -88,14 +89,14 @@ export function Sidebar({
   }, [apiClient, currentWorkspace, initialPinnedFavorites]);
 
   return (
-    <aside className="sidebar" aria-label="Primary navigation">
-      <NavLink to="/workspace" className="brand-link" aria-label="Workspace home">
+    <aside className="sidebar" aria-label={t("app.shell.primaryNavigation")}>
+      <NavLink to="/workspace" className="brand-link" aria-label={t("nav.workspace.title")}>
         <span className="brand-mark" aria-hidden="true">
           L
         </span>
         <span>
-          <span className="brand-title">Local Work OS</span>
-          <span className="brand-subtitle">Local only</span>
+          <span className="brand-title">{t("app.brand.title")}</span>
+          <span className="brand-subtitle">{t("app.brand.subtitle")}</span>
         </span>
       </NavLink>
 
@@ -133,8 +134,8 @@ function PinnedFavoritesNav({
   }
 
   return (
-    <nav className="nav-list pinned-favorites-nav" aria-label="Pinned and favorites">
-      <p className="nav-section-label">Pinned & favorites</p>
+    <nav className="nav-list pinned-favorites-nav" aria-label={t("sidebar.pinnedFavorites")}>
+      <p className="nav-section-label">{t("sidebar.pinnedFavorites")}</p>
       {favorites.map((favorite) => (
         <NavLink
           key={`${favorite.targetType}:${favorite.targetId}`}

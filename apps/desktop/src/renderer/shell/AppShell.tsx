@@ -1,4 +1,5 @@
 import { AppTabStrip } from "@local-work-os/ui";
+import { t } from "@local-work-os/core";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { CommandPaletteHost } from "../components/CommandPaletteHost";
@@ -74,7 +75,7 @@ export function AppShell(): React.JSX.Element {
 
   return (
     <div className="app-shell">
-      <a className="skip-link" href="#main-content">Skip to workspace content</a>
+      <a className="skip-link" href="#main-content">{t("app.shell.skipToContent")}</a>
       <Sidebar />
       <div className="app-frame">
         <TopBar
@@ -94,7 +95,7 @@ export function AppShell(): React.JSX.Element {
           onMoveTab={appTabs.moveTab}
           onSelectTab={appTabs.selectTab}
         />
-        <main className="main-content" id="main-content" tabIndex={-1} aria-label="Workspace content">
+        <main className="main-content" id="main-content" tabIndex={-1} aria-label={t("app.shell.mainContent")}>
           <Outlet />
         </main>
       </div>
