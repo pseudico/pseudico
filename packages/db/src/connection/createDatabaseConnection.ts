@@ -42,7 +42,9 @@ export async function createDatabaseConnection(
   });
 
   sqlite.pragma("foreign_keys = ON");
-  sqlite.pragma("journal_mode = WAL");
+  if (input.readonly !== true) {
+    sqlite.pragma("journal_mode = WAL");
+  }
 
   return {
     databasePath,
