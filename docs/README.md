@@ -22,6 +22,8 @@ docs and the linked Linear issue.
   database work, Electron IPC, renderer work, and release checks.
 - `TEST_COVERAGE_MAP.md` maps feature families to unit, integration,
   component, smoke/E2E, and manual QA expectations.
+- `LOCAL_PARITY_QA_REPORT.md` records the M14 local parity QA pass,
+  remaining release-hardening gaps, and smoke-tag evidence.
 - `SECURITY.md` records local-only, Electron, filesystem, database, and privacy
   guardrails.
 - `SECURITY_AUDIT.md` records the current Electron IPC, external link, widget,
