@@ -523,7 +523,7 @@ async function withMarkdownFolderImportContext<T>(
 
 type ScannedMarkdownFolderEntry = {
   relativePath: string;
-  kind: "directory" | "markdown" | "file";
+  kind: "directory" | "markdown" | "file" | "unsupported";
   content?: string;
   sizeBytes?: number;
   mimeType?: string | null;
@@ -567,6 +567,16 @@ async function scanMarkdownFolder(
       }
 
       const extension = extname(dirent.name).toLowerCase();
+      if (extension === ".canvas") {
+        entries.push({
+          relativePath,
+          kind: "unsupported",
+          sizeBytes: (await stat(entryPath)).size,
+          mimeType: "application/json"
+        });
+        continue;
+      }
+
       if (extension === ".md" || extension === ".markdown") {
         entries.push({
           relativePath,

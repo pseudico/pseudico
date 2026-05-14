@@ -657,6 +657,7 @@ export type {
   MarkdownFolderImportPreviewRow,
   MarkdownFolderImportPreviewSummary,
   MarkdownFolderImportSourceEntry,
+  MarkdownFolderImportSourceReport,
   MarkdownFolderImportValidationIssue,
   NotionImportCreatedTarget,
   NotionImportEntryKind,

@@ -41,6 +41,23 @@ describe("wikilink parser", () => {
     ]);
   });
 
+  it("normalizes Obsidian aliases/headings and skips attachment embeds", () => {
+    expect(parseWikilinks("See [[Client A|the client]], [[Roadmap#M13]], and ![[wireframe.png]].")).toEqual([
+      {
+        raw: "[[Client A|the client]]",
+        title: "Client A",
+        start: 4,
+        end: 27
+      },
+      {
+        raw: "[[Roadmap#M13]]",
+        title: "Roadmap",
+        start: 29,
+        end: 44
+      }
+    ]);
+  });
+
   it("normalizes title whitespace and case", () => {
     expect(normalizeWikilinkTitle("  CLIENT   A  ")).toBe("client a");
   });
