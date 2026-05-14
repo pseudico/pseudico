@@ -5715,3 +5715,85 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Manual QA and follow-up gap tickets still remain.
 Next actions: Review diff; commit and push; open PR.
+
+## 2026-05-14 16:43:59 +10:00
+Objective: Open PR for PSE-187 and update Linear.
+Decisions made:
+- Opened ready PR #176 from codex/PSE-187-full-parity-qa-pass.
+- Moved PSE-187 to PR Open with the PR link.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI/review status still pending.
+Next actions: Inspect CI/reviews; merge if green; promote next ticket.
+
+## 2026-05-14 16:47:07 +10:00
+Objective: Verify PR #176 before merge.
+Decisions made:
+- GitHub Actions check passed for lint/typecheck/test/build.
+- No review threads were reported by GitHub connector.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need final PR metadata review before merge.
+Next actions: Confirm changed files; squash merge; sync main.
+
+## 2026-05-14 16:48:52 +10:00
+Objective: Finish merge cleanup for PSE-187.
+Decisions made:
+- Squash-merged PR #176 at 1ad9e028720c5ba79ceddb87a538a6ae62479112.
+- Pulled main locally and deleted the merged feature branch.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need select exactly one next Codex Ready ticket.
+Next actions: Move PSE-187 Done; promote next issue; start it unless blocked.
+
+## 2026-05-14 16:49:20 +10:00
+Objective: Promote next M14 issue after PSE-187.
+Decisions made:
+- Selected PSE-188 as next logical M14-014 issue.
+- Promoted only PSE-188 to Codex Ready before claiming it.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-188 is a docs/research spike, not runtime work.
+Next actions: Move PSE-188 In Progress; read issue; implement checklist.
+
+## 2026-05-14 16:49:50 +10:00
+Objective: Claim PSE-188 and inspect source ticket.
+Decisions made:
+- Moved PSE-188 from Codex Ready to In Progress.
+- Starting branch codex/PSE-188-distribution-privacy-checklist.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need define checklist artifact from sparse imported issue.
+Next actions: Read source ticket/docs; add checklist doc; validate.
+
+## 2026-05-14 16:52:32 +10:00
+Objective: Implement PSE-188 research deliverable.
+Decisions made:
+- Added distribution/licensing/privacy/update checklist as docs-only proposal.
+- Linked checklist from README, RELEASE, and SECURITY docs.
+Files changed:
+- docs/DISTRIBUTION_LICENSING_PRIVACY.md
+- docs/README.md
+- docs/RELEASE.md
+Open questions / risks: Owner must choose license/signing providers before public release.
+Next actions: Run standard checks; commit and open PR; monitor CI.
+
+## 2026-05-14 16:54:35 +10:00
+Objective: Verify PSE-188 docs-only change.
+Decisions made:
+- Standard checks passed; test/build needed escalation after sandbox EPERM.
+- No runtime, schema, or dependency changes were introduced.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI still must verify after PR.
+Next actions: Commit and push; open PR; monitor CI.
+
+## 2026-05-14 16:57:30 +10:00
+Objective: Open PR for PSE-188 and update Linear.
+Decisions made:
+- Opened ready PR #177 for distribution/privacy checklist.
+- Moved PSE-188 to PR Open with the PR link.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI/review status still pending.
+Next actions: Amend log into PR; inspect CI/reviews; merge if green.

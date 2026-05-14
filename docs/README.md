@@ -24,6 +24,8 @@ docs and the linked Linear issue.
   component, smoke/E2E, and manual QA expectations.
 - `LOCAL_PARITY_QA_REPORT.md` records the M14 local parity QA pass,
   remaining release-hardening gaps, and smoke-tag evidence.
+- `DISTRIBUTION_LICENSING_PRIVACY.md` records the distribution,
+  licensing, privacy, signing, and update-path release checklist.
 - `SECURITY.md` records local-only, Electron, filesystem, database, and privacy
   guardrails.
 - `SECURITY_AUDIT.md` records the current Electron IPC, external link, widget,

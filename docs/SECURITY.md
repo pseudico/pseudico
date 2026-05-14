@@ -90,3 +90,11 @@ behavior before migrating existing workspaces.
 ## Local maintenance tools
 
 Maintenance actions stay local to the open workspace. Renderer controls call typed preload IPC only; Electron main opens the SQLite connection, creates the preflight backup under `backups/`, scans only workspace-relative `attachments/` files, and runs SQLite maintenance commands without exposing arbitrary SQL or filesystem access to the renderer. Orphan scans report paths but do not delete files in this slice.
+
+## Distribution Privacy Review
+
+Release distribution must follow `docs/DISTRIBUTION_LICENSING_PRIVACY.md` before
+public artifacts are shipped. Signing, notarization, checksums, dependency
+license notices, privacy wording, and update behavior are release gates, not
+runtime shortcuts. Do not add telemetry, license activation, hosted accounts,
+auto-update feeds, or remote diagnostics without a separate approved ticket.
