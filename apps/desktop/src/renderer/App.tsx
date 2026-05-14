@@ -8,6 +8,7 @@ import { ContactsPage } from "./pages/ContactsPage";
 import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { ContactLabelBrowserPage } from "./pages/ContactLabelBrowserPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { HelpPage } from "./pages/HelpPage";
 import { InboxPage } from "./pages/InboxPage";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { ProjectTagBrowserPage } from "./pages/ProjectTagBrowserPage";
@@ -47,6 +48,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/timeline" element={<TimelinePage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/workflows" element={<WorkflowsPage />} />
+        <Route path="/help" element={<HelpPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/trash" element={<TrashPage />} />
       </Route>

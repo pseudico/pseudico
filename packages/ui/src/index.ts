@@ -505,6 +505,18 @@ export {
   type EmptyStateProps
 } from "./components/EmptyState";
 export {
+  HelpArticleView,
+  HelpNavigation,
+  HelpShortcutList,
+  OnboardingChecklist,
+  type HelpArticleViewModel,
+  type HelpArticleViewProps,
+  type HelpNavigationProps,
+  type HelpShortcutListProps,
+  type OnboardingChecklistEntry,
+  type OnboardingChecklistProps
+} from "./components/HelpCenter";
+export {
   ErrorState,
   formatUserError,
   type ErrorStateProps,

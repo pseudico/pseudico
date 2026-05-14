@@ -43,6 +43,7 @@ export const plannedFeatureAreas = [
   "privacy",
   "templates",
   "workflows",
+  "help",
   "undo",
   "trash",
   "quickStart",
@@ -368,6 +369,18 @@ export {
   validateContainerTemplateJson,
   validateTemplateJson
 } from "./templates";
+export {
+  getHelpArticle,
+  getHelpArticlesForRoute,
+  helpArticles,
+  listHelpArticles,
+  onboardingChecklist
+} from "./help";
+export type {
+  HelpArticle,
+  HelpArticleId,
+  OnboardingChecklistItem
+} from "./help";
 export {
   WORKFLOW_ACTION_REGISTRY,
   WORKFLOW_DEFINITION_KIND,

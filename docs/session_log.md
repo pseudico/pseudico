@@ -5412,3 +5412,66 @@ Files changed:
 - apps/desktop/electron-builder.yml; apps/desktop/src/main/packageSmoke.ts; apps/desktop/tests/main/packageSmoke.test.ts; docs/RELEASE.md
 Open questions / risks: Need commit, PR, CI, merge, then promote next issue.
 Next actions: Stage scoped files; commit/push PR; check CI/merge.
+## 2026-05-14T11:46:01.7159766+10:00
+Objective: Finish PSE-182 merge and next-ticket handoff.
+Decisions made:
+- PR #171 passed CI and was squash-merged at 549e74d20785cdaba44bd856c16090343f9465bd.
+- Deleted remote/local PSE-182 branch and fast-forwarded local main.
+- Moved PSE-182 to Done and promoted PSE-183 as the sole next Codex Ready issue.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Final session log entry is local after merge; unrelated untracked files remain.
+Next actions: Start PSE-183 next; keep all other issues out of Codex Ready.
+
+## 2026-05-14T11:57:26.5626912+10:00
+Objective: Run next Local Work OS ticket end-to-end.
+Decisions made:
+- Reconcile Linear/GitHub before implementation; preserve unrelated local files.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Active PR or CI may block merge.
+Next actions: Reconcile active Linear states; inspect PRs; implement next ticket.
+
+## 2026-05-14T11:58:50.0369516+10:00
+Objective: Reconcile active work and start PSE-183.
+Decisions made:
+- No PR Open or In Progress issues; selected sole Codex Ready issue PSE-183.
+- Moved PSE-183 to In Progress and created branch codex/PSE-183-local-help-center-command-docs.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need locate source ticket acceptance criteria.
+Next actions: Read docs/source ticket; implement; run checks.
+
+## 2026-05-14T12:00:53.5394552+10:00
+Objective: Plan PSE-183 help center implementation.
+Decisions made:
+- Implement static local help content in features plus docs/help Markdown copies.
+- Add renderer Help page, sidebar route, onboarding card, and contextual empty-state help links.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Linear title says command docs while source ticket says onboarding; include keyboard/commands guide to cover both.
+Next actions: Patch features/UI/renderer/docs; add tests; run checks.
+
+## 2026-05-14T12:04:18.7866817+10:00
+Objective: Implement PSE-183 local help center.
+Decisions made:
+- Added feature-owned help/onboarding content and UI help components with safe Markdown preview.
+- Wired Help route/sidebar, workspace onboarding, and Inbox contextual empty-state help link.
+Files changed:
+- packages/features/src/help/HelpContent.ts
+- packages/ui/src/components/HelpCenter.tsx
+- apps/desktop/src/renderer/pages/HelpPage.tsx
+Open questions / risks: Need typecheck/lint to catch renderer import and JSX issues.
+Next actions: Run targeted tests; fix failures; run full checks.
+
+## 2026-05-14T12:10:39.4609860+10:00
+Objective: Verify PSE-183 help center changes.
+Decisions made:
+- Fixed renderer build by importing feature help through a subpath that avoids DB exports.
+- Verified built Help page through local static server; favicon 404 only.
+Files changed:
+- packages/features/package.json
+- vitest.config.ts
+- apps/desktop/src/renderer/pages/HelpPage.tsx
+Open questions / risks: Untracked pre-existing .playwright-mcp and gh installer remain untouched.
+Next actions: Commit; push branch; open PR.

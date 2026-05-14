@@ -1,5 +1,6 @@
 import { Inbox, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import type { ParsedDateRange } from "@local-work-os/core";
 import {
   ConfirmDialog,
@@ -848,6 +849,14 @@ export function InboxPage({
           getDisabledActions={getDisabledActionsForInboxItem}
           items={items.map(toItemViewModel)}
           loading={loading}
+          renderEmptyAction={() => (
+            <Link
+              to="/help?article=capture-and-triage&from=/inbox"
+              className="secondary-button page-action-link"
+            >
+              Learn capture and triage
+            </Link>
+          )}
           renderContent={renderItemContent}
           onAction={handleItemAction}
         />
