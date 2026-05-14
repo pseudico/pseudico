@@ -8,6 +8,10 @@ import {
   FileVersionHistory,
   type FileVersionViewModel
 } from "./FileVersionHistory";
+import {
+  FilePreviewCard,
+  type FilePreviewViewModel
+} from "./FilePreviewCard";
 import type { UniversalItemViewModel } from "./ItemCard";
 
 export type FileAttachmentViewModel = {
@@ -28,6 +32,7 @@ export type FileCardViewModel = UniversalItemViewModel & {
   categoryId?: string | null;
   attachment: FileAttachmentViewModel;
   missing: boolean;
+  preview?: FilePreviewViewModel;
   versions?: FileVersionViewModel[];
 };
 
@@ -107,6 +112,9 @@ export function FileCardContent({
       item.attachment.description === undefined ||
       item.attachment.description.trim().length === 0 ? null : (
         <p>{item.attachment.description}</p>
+      )}
+      {item.preview === undefined ? null : (
+        <FilePreviewCard name={item.attachment.originalName} preview={item.preview} />
       )}
       <dl className="file-card-details">
         <div>

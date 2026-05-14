@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   calculateChecksum,
+  createAttachmentPreviewCacheRelativePath,
   createAttachmentVersionSnapshot,
   copyFileIntoWorkspace,
   restoreAttachmentFileFromVersion,
@@ -33,6 +34,12 @@ describe("safe file system attachment helpers", () => {
     expect(() =>
       resolveInsideWorkspace(join(tempRoot, "workspace"), "attachments/../../x")
     ).toThrow("Workspace-relative path must stay inside the workspace.");
+    expect(
+      createAttachmentPreviewCacheRelativePath({ attachmentId: "attachment_1" })
+    ).toBe(".cache/attachment-previews/attachment_1/thumbnail.png");
+    expect(() =>
+      createAttachmentPreviewCacheRelativePath({ attachmentId: "../bad" })
+    ).toThrow("Attachment preview cache id must be a safe path segment.");
   });
 
   it("copies files into attachment storage with checksum and size metadata", async () => {

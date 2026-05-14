@@ -217,7 +217,12 @@ export {
   PrintService,
   printingModuleContract
 } from "./printing";
-export { FileAttachmentService, FileVersionService, filesModuleContract } from "./files";
+export {
+  AttachmentPreviewService,
+  FileAttachmentService,
+  FileVersionService,
+  filesModuleContract
+} from "./files";
 export {
   CsvImportService,
   EmailImportService,
@@ -625,6 +630,8 @@ export type {
 export type {
   AttachFileToContainerInput,
   AttachFileToItemInput,
+  AttachmentPreviewKind,
+  AttachmentPreviewSummary,
   CopiedAttachmentFileInput,
   CopiedAttachmentVersionFileInput,
   CreateFileSnapshotInput,

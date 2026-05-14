@@ -353,6 +353,12 @@ export {
   type FileCardViewModel
 } from "./components/FileCardContent";
 export {
+  FilePreviewCard,
+  type FilePreviewCardProps,
+  type FilePreviewKind,
+  type FilePreviewViewModel
+} from "./components/FilePreviewCard";
+export {
   FileVersionHistory,
   FileVersionPanel,
   type FileVersionHistoryProps,

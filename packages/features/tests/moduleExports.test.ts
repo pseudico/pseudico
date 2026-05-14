@@ -4,6 +4,7 @@ import {
   backupModuleContract,
   appearanceModuleContract,
   AppearanceSettingsService,
+  AttachmentPreviewService,
   BackupService,
   BulkActionService,
   bulkActionsModuleContract,
@@ -299,6 +300,10 @@ describe("feature module exports", () => {
 
   it("exports the recurrence service implementation", () => {
     expect(RecurrenceService).toBeDefined();
+  });
+
+  it("exports the attachment preview service implementation", () => {
+    expect(AttachmentPreviewService).toBeDefined();
   });
 
   it("exports the list template service implementation", () => {

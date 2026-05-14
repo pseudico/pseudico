@@ -6160,3 +6160,31 @@ Next actions: Reconcile next run; pull PSE-131 into In Progress; implement versi
 - Files changed: docs/session_log.md
 - Open questions / risks: merge/branch cleanup and next-ticket promotion remain.
 - Next actions: squash-merge PR #184; update Linear Done; choose next Codex Ready issue.
+
+- Timestamp: 2026-05-14T21:14:21.8395039+10:00
+- Objective: Merge PSE-131 and start next ticket PSE-132.
+- Decisions made: squash-merged PR #184 at 74769664; moved PSE-131 Done; promoted PSE-132 then moved it In Progress per run instructions.
+- Files changed: docs/session_log.md
+- Open questions / risks: PSE-132 scope/source docs still to inspect before coding.
+- Next actions: branch for PSE-132; read ticket/docs; implement previews/icons.
+
+- Timestamp: 2026-05-14T21:21:04.5954966+10:00
+- Objective: Implement PSE-132 attachment preview foundation.
+- Decisions made: add pure AttachmentPreviewService; cache image thumbnails under workspace .cache; keep renderer on typed preview summaries only.
+- Files changed: packages/features/src/files/AttachmentPreviewService.ts; packages/features/src/files/index.ts; packages/features/src/index.ts; apps/desktop/src/main/ipc/fileHandlers.ts; apps/desktop/src/main/services/safeFileSystem.ts; apps/desktop/src/preload/api.ts; packages/ui/src/components/FilePreviewCard.tsx; packages/ui/src/components/FileCardContent.tsx; packages/ui/src/index.ts; apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/styles.css; tests; docs/PRODUCT_SPEC.md; docs/session_log.md
+- Open questions / risks: native image thumbnails may be unavailable for unsupported images; fallback icons cover non-image/PDF/manual QA.
+- Next actions: run targeted tests; fix type/lint issues; run full checks.
+
+- Timestamp: 2026-05-14T21:24:46.9996347+10:00
+- Objective: Verify PSE-132 attachment previews before PR.
+- Decisions made: targeted feature/UI/desktop tests passed; full lint/typecheck/test/build passed with escalated test/build where sandbox EPERM recurred.
+- Files changed: docs/session_log.md
+- Open questions / risks: manual image/PDF QA not launched interactively; tests cover preview metadata/cache path/fallback card state.
+- Next actions: review diff; commit/push; open PR.
+
+- Timestamp: 2026-05-14T21:27:08.4106733+10:00
+- Objective: Complete PSE-132 verification after image-extension thumbnail support.
+- Decisions made: image preview classification accepts common image extensions even without MIME; full lint/typecheck/test/build pass after fix.
+- Files changed: packages/features/src/files/AttachmentPreviewService.ts; apps/desktop/src/main/ipc/fileHandlers.ts; docs/session_log.md
+- Open questions / risks: interactive PNG/PDF manual QA remains recommended outside this headless run.
+- Next actions: commit; push; open PR.

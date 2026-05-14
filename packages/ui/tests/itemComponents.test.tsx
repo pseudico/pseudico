@@ -15,6 +15,7 @@ import {
   FavoriteProjectsWidget,
   FileCardContent,
   FileMetadataEditor,
+  FilePreviewCard,
   FileVersionPanel,
   formatUserError,
   ItemActionsMenu,
@@ -1070,6 +1071,20 @@ describe("Universal item UI", () => {
         description: "Launch brief"
       },
       missing: true,
+      preview: {
+        kind: "pdf" as const,
+        iconLabel: "PDF",
+        extension: "pdf",
+        sizeLabel: "2.0 KB",
+        updatedAt: "2026-05-01T00:00:00.000Z",
+        missing: true,
+        checksumShort: "abc123",
+        versionCount: 1,
+        latestVersionNumber: 1,
+        thumbnailStoragePath: null,
+        thumbnailExists: false,
+        previewDataUrl: null
+      },
       versions: [
         {
           id: "version_1",
@@ -1103,6 +1118,9 @@ describe("Universal item UI", () => {
         onRestoreVersion={() => undefined}
       />
     );
+    const previewHtml = renderToStaticMarkup(
+      <FilePreviewCard name="Brief.pdf" preview={fileItem.preview} />
+    );
     const editorHtml = renderToStaticMarkup(
       <FileMetadataEditor
         initialValues={{
@@ -1120,6 +1138,9 @@ describe("Universal item UI", () => {
     expect(cardHtml).toContain("Open");
     expect(cardHtml).toContain("Reveal");
     expect(cardHtml).toContain("Edit");
+    expect(cardHtml).toContain("Preview for Brief.pdf");
+    expect(cardHtml).toContain("PDF .PDF");
+    expect(cardHtml).toContain("Missing from workspace storage");
     expect(cardHtml).toContain("Versions (1)");
     expect(cardHtml).toContain("Snapshot note");
     expect(cardHtml).toContain("Checksum");
@@ -1128,6 +1149,8 @@ describe("Universal item UI", () => {
     expect(cardHtml).toContain("Review copy");
     expect(cardHtml).toContain("Restore");
     expect(panelHtml).toContain("File version history");
+    expect(previewHtml).toContain("Versions");
+    expect(previewHtml).toContain("1 snapshot");
     expect(editorHtml).toContain("File title");
     expect(editorHtml).toContain("Description");
     expect(editorHtml).toContain("Save file");
