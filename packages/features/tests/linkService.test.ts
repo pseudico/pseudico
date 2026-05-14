@@ -81,7 +81,10 @@ describe("LinkService", () => {
       url: "example.com/brief",
       normalizedUrl: "https://example.com/brief",
       domain: "example.com",
-      description: "Supplier reference"
+      description: "Supplier reference",
+      renderAsWidget: false,
+      widgetHeight: 360,
+      widgetWarningAcceptedAt: null
     });
     expect(
       new LinkRepository(connection).getByItemId("item_1")
@@ -108,7 +111,9 @@ describe("LinkService", () => {
     expect(JSON.parse(result.searchRecord.metadataJson)).toMatchObject({
       type: "link",
       normalizedUrl: "https://example.com/brief",
-      domain: "example.com"
+      domain: "example.com",
+      renderAsWidget: false,
+      widgetHeight: 360
     });
   });
 
@@ -152,6 +157,48 @@ describe("LinkService", () => {
       title: "Final brief",
       body: expect.stringContaining("docs.example.com")
     });
+  });
+
+  it("persists widget opt-in, warning acknowledgement, and size preference", async () => {
+    const service = createService();
+    const created = await service.createLink({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      url: "https://example.com/widget",
+      title: "Widget link"
+    });
+
+    const enabled = await service.updateLink({
+      itemId: created.item.id,
+      renderAsWidget: true,
+      widgetHeight: 520
+    });
+
+    expect(enabled.link).toMatchObject({
+      renderAsWidget: true,
+      widgetHeight: 520,
+      widgetWarningAcceptedAt: "2026-05-02T01:02:03.000Z"
+    });
+    expect(
+      new LinkRepository(connection).getByItemId(created.item.id)
+    ).toMatchObject({
+      link: {
+        renderAsWidget: true,
+        widgetHeight: 520,
+        widgetWarningAcceptedAt: "2026-05-02T01:02:03.000Z"
+      }
+    });
+    expect(JSON.parse(enabled.searchRecord.metadataJson)).toMatchObject({
+      renderAsWidget: true,
+      widgetHeight: 520
+    });
+
+    await expect(
+      service.updateLink({
+        itemId: created.item.id,
+        widgetHeight: 120
+      })
+    ).rejects.toThrow("widgetHeight must be between");
   });
 });
 

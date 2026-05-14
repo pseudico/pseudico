@@ -61,6 +61,11 @@ Do not add these without explicit approval:
   validation, block localhost/private network and credentialed targets, enforce
   a timeout, and cache fetched title/description/favicon/preview values on the
   local link record.
+- Link web widgets are disabled globally by default and require per-link
+  opt-in before rendering. The renderer uses sandboxed iframes rather than
+  Electron webviews, blocks non-HTTP(S), credentialed, localhost, and private
+  network targets, avoids app-shell navigation permissions, and continues to
+  route explicit external opens through the validated main-process opener.
 - Treat attachments, notes, project data, contacts, and imported files as local
   private user data.
 - Document any future network capability before implementation. Localhost-only

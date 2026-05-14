@@ -1,4 +1,4 @@
-import { index, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { items } from "./items";
 import { workspaces } from "./workspaces";
 
@@ -18,6 +18,11 @@ export const links = sqliteTable(
     domain: text("domain"),
     faviconPath: text("favicon_path"),
     previewImagePath: text("preview_image_path"),
+    renderAsWidget: integer("render_as_widget", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    widgetHeight: integer("widget_height").notNull().default(360),
+    widgetWarningAcceptedAt: text("widget_warning_accepted_at"),
     createdAt: text("created_at").notNull(),
     updatedAt: text("updated_at").notNull()
   },

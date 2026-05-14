@@ -210,7 +210,7 @@ describe("database IPC handlers", () => {
       ok: true,
       data: {
         connected: true,
-          schemaVersion: 22,
+          schemaVersion: 23,
         workspaceExists: true,
         inboxExists: true,
         defaultDashboardExists: true,
@@ -261,7 +261,7 @@ describe("navigation IPC handlers", () => {
         name: "Personal",
         rootPath: tempRoot!,
         openedAt: "2026-05-09T04:00:00.000Z",
-        schemaVersion: 22
+        schemaVersion: 23
       })
     });
 
@@ -1952,21 +1952,28 @@ describe("Link IPC handlers", () => {
         title: "Launch brief",
         normalizedUrl: "https://example.com/brief",
         domain: "example.com",
-        description: "Supplier reference"
+        description: "Supplier reference",
+        renderAsWidget: false,
+        widgetHeight: 360
       }
     });
     await expect(
       handlers.handleUpdateLink({
         itemId: created.data.id,
         url: "docs.example.com/final",
-        title: "Final brief"
+        title: "Final brief",
+        renderAsWidget: true,
+        widgetHeight: 520
       })
     ).resolves.toMatchObject({
       ok: true,
       data: {
         id: created.data.id,
         title: "Final brief",
-        normalizedUrl: "https://docs.example.com/final"
+        normalizedUrl: "https://docs.example.com/final",
+        renderAsWidget: true,
+        widgetHeight: 520,
+        widgetWarningAcceptedAt: expect.any(String)
       }
     });
     await expect(

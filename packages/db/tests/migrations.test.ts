@@ -93,7 +93,7 @@ describe("schema migrations", () => {
     await rm(tempRoot, { force: true, recursive: true });
   });
 
-  it("runs on an empty database and records schema version twenty-two", () => {
+  it("runs on an empty database and records schema version twenty-three", () => {
     const service = new MigrationService({ connection: connection! });
 
     expect(service.runPendingMigrations()).toMatchObject({
@@ -207,14 +207,19 @@ describe("schema migrations", () => {
           version: 22,
           name: "location_details",
           checksum: "pse-133-location-details-v1"
+        },
+        {
+          version: 23,
+          name: "link_widget_settings",
+          checksum: "pse-135-link-widget-settings-v1"
         }
       ],
-      currentVersion: 22
+      currentVersion: 23
     });
-    expect(service.getCurrentSchemaVersion()).toBe(22);
+    expect(service.getCurrentSchemaVersion()).toBe(23);
     expect(service.runPendingMigrations()).toEqual({
       appliedMigrations: [],
-      currentVersion: 22
+      currentVersion: 23
     });
   });
 

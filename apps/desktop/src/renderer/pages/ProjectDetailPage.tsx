@@ -54,6 +54,7 @@ import {
   type InspectorCategoryOption,
   type LinkCardViewModel,
   type LinkEditorValues,
+  type LinkWidgetSettingsPatch,
   type LocationCardViewModel,
   type LocationEditorValues,
   type ListCardItemViewModel,
@@ -172,6 +173,7 @@ type ProjectDetailPageProps = {
   initialAvailableContacts?: ContactSummary[];
   initialRelatedContacts?: RelatedContactSummary[];
   initialPreferences?: ContainerPreferencesSummary | null;
+  initialWebWidgetsEnabled?: boolean;
 };
 
 const emptyProjectItems: UniversalItemViewModel[] = [];
@@ -188,7 +190,8 @@ export function ProjectDetailPage({
   initialProjectHealth = null,
   initialAvailableContacts = [],
   initialRelatedContacts = [],
-  initialPreferences = null
+  initialPreferences = null,
+  initialWebWidgetsEnabled = false
 }: ProjectDetailPageProps): React.JSX.Element {
   const { projectId } = useParams();
   const navigate = useNavigate();
@@ -215,6 +218,9 @@ export function ProjectDetailPage({
   );
   const [containerPreferences, setContainerPreferences] =
     useState<ContainerPreferencesSummary | null>(initialPreferences);
+  const [webWidgetsEnabled, setWebWidgetsEnabled] = useState(
+    initialWebWidgetsEnabled
+  );
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [viewModeSaving, setViewModeSaving] = useState(false);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
@@ -368,7 +374,8 @@ export function ProjectDetailPage({
         filesResult,
         contactsResult,
         relatedContactsResult,
-        preferencesResult
+        preferencesResult,
+        privacyResult
       ] = await Promise.all([
         apiClient.projects.get(activeProjectId),
         apiClient.projects.list(),
@@ -390,7 +397,8 @@ export function ProjectDetailPage({
         apiClient.files.listByContainer(activeProjectId),
         apiClient.contacts.list(),
         apiClient.relationships.listContactsForProject(activeProjectId),
-        apiClient.containers.getPreferences(activeProjectId)
+        apiClient.containers.getPreferences(activeProjectId),
+        apiClient.privacy?.getSettings()
       ]);
 
       if (!active) {
@@ -504,6 +512,11 @@ export function ProjectDetailPage({
       setTabSummaries(tabSummariesResult.data);
       setTabTemplates(tabTemplatesResult.data);
       setContainerPreferences(preferencesResult.data);
+      setWebWidgetsEnabled(
+        privacyResult !== undefined && privacyResult.ok
+          ? privacyResult.data.webWidgetsEnabled
+          : false
+      );
       setActiveTabId((current) =>
         selectAvailableTabId(
           tabsResult.data,
@@ -1637,6 +1650,29 @@ export function ProjectDetailPage({
     await refreshProjectActivity(project.id);
     setLinkBusyId(null);
     return true;
+  }
+
+  async function updateProjectLinkWidgetSettings(
+    item: LinkCardViewModel,
+    settings: LinkWidgetSettingsPatch
+  ): Promise<void> {
+    setLinkBusyId(item.id);
+    setLinkError(null);
+
+    const result = await apiClient.links.update({
+      itemId: item.id,
+      ...settings
+    });
+
+    setLinkBusyId(null);
+
+    if (!result.ok) {
+      setLinkError(result.error.message);
+      return;
+    }
+
+    await refreshProjectContent(result.data.containerId);
+    await refreshProjectActivity(result.data.containerId);
   }
 
   async function fetchProjectLinkMetadata(
@@ -2879,9 +2915,11 @@ export function ProjectDetailPage({
             disabled={linkBusyId === item.id}
             error={linkBusyId === item.id ? linkError : null}
             item={item}
+            webWidgetsEnabled={webWidgetsEnabled}
             onFetchMetadata={fetchProjectLinkMetadata}
             onOpen={openProjectLink}
             onSave={updateProjectLink}
+            onUpdateWidgetSettings={updateProjectLinkWidgetSettings}
           />
         </>
       );
@@ -3667,6 +3705,9 @@ function toProjectLinkViewModel(
     domain: link.domain,
     faviconPath: link.faviconPath,
     previewImagePath: link.previewImagePath,
+    renderAsWidget: link.renderAsWidget,
+    widgetHeight: link.widgetHeight,
+    widgetWarningAcceptedAt: link.widgetWarningAcceptedAt,
     metadata:
       link.domain === null ? [] : [{ label: "Domain", value: link.domain }]
   };

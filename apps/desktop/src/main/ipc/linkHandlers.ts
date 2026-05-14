@@ -311,6 +311,9 @@ function toLinkSummary(
     domain: link.domain,
     faviconPath: link.faviconPath,
     previewImagePath: link.previewImagePath,
+    renderAsWidget: link.renderAsWidget,
+    widgetHeight: link.widgetHeight,
+    widgetWarningAcceptedAt: link.widgetWarningAcceptedAt,
     linkCreatedAt: link.createdAt,
     linkUpdatedAt: link.updatedAt
   };
@@ -354,6 +357,8 @@ function isUpdateLinkInput(input: unknown): input is UpdateLinkInput {
     isOptionalNullableString(input.previewImagePath) &&
     isOptionalNumber(input.sortOrder) &&
     isOptionalBoolean(input.pinned) &&
+    isOptionalBoolean(input.renderAsWidget) &&
+    isOptionalNumber(input.widgetHeight) &&
     isOptionalActorType(input.actorType) &&
     hasLinkUpdateField(input)
   );
@@ -367,9 +372,11 @@ function hasLinkUpdateField(input: Record<string, unknown>): boolean {
     "faviconPath",
     "pinned",
     "previewImagePath",
+    "renderAsWidget",
     "sortOrder",
     "title",
-    "url"
+    "url",
+    "widgetHeight"
   ].some((field) => input[field] !== undefined);
 }
 

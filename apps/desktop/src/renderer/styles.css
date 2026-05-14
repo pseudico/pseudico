@@ -969,6 +969,29 @@ a {
   gap: 8px;
 }
 
+.link-widget-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #ece8dc;
+  border-radius: 12px;
+  background: #fbfaf6;
+}
+
+.link-widget-controls label {
+  display: grid;
+  gap: 4px;
+  color: #6d6a62;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.link-widget-controls select {
+  min-width: 140px;
+}
+
 .location-editor-grid {
   display: grid;
   gap: 10px;
@@ -6497,6 +6520,14 @@ body,
 .pomodoro-widget {
   display: grid;
   gap: 0.5rem;
+}
+
+.web-widget-frame {
+  width: 100%;
+  min-height: 180px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
 }
 
 .mini-timeline-list {

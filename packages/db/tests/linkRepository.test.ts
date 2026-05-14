@@ -47,6 +47,9 @@ describe("LinkRepository", () => {
       title: "Launch brief",
       description: "Supplier reference",
       domain: "example.com",
+      renderAsWidget: true,
+      widgetHeight: 520,
+      widgetWarningAcceptedAt: TEST_TIMESTAMP,
       timestamp: TEST_TIMESTAMP
     });
     const updated = repository.updateDetails(linkItem.id, {
@@ -55,6 +58,8 @@ describe("LinkRepository", () => {
       title: "Final brief",
       description: "Final supplier reference",
       domain: "docs.example.com",
+      renderAsWidget: false,
+      widgetHeight: 240,
       timestamp: TEST_TIMESTAMP_LATER
     });
 
@@ -68,6 +73,9 @@ describe("LinkRepository", () => {
       normalizedUrl: "https://docs.example.com/final",
       title: "Final brief",
       description: "Final supplier reference",
+      renderAsWidget: false,
+      widgetHeight: 240,
+      widgetWarningAcceptedAt: TEST_TIMESTAMP,
       updatedAt: TEST_TIMESTAMP_LATER
     });
     expect(repository.getByItemId(linkItem.id)).toMatchObject({

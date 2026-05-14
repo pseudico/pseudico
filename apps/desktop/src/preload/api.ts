@@ -3454,6 +3454,9 @@ export type LinkSummary = ItemSummary & {
   domain: string | null;
   faviconPath: string | null;
   previewImagePath: string | null;
+  renderAsWidget: boolean;
+  widgetHeight: number;
+  widgetWarningAcceptedAt: string | null;
   linkCreatedAt: string;
   linkUpdatedAt: string;
 };
@@ -3480,9 +3483,11 @@ export type UpdateLinkInput = {
   faviconPath?: string | null;
   pinned?: boolean;
   previewImagePath?: string | null;
+  renderAsWidget?: boolean;
   sortOrder?: number;
   title?: string | null;
   url?: string;
+  widgetHeight?: number;
 };
 
 export type FetchLinkMetadataInput = {

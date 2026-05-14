@@ -1,9 +1,11 @@
 import type { FeatureModuleContract } from "../featureModuleContract";
 import {
   ActivityAction,
+  DEFAULT_LINK_WIDGET_HEIGHT,
   createIsoTimestamp,
   createLocalId,
   isSupportedLinkProtocol,
+  normalizeLinkWidgetHeight,
   type ActivityActorType,
   type LinkRecord
 } from "@local-work-os/core";
@@ -38,6 +40,7 @@ export type CreateLinkInput = {
   sortOrder?: number;
   pinned?: boolean;
   title?: string | null;
+  widgetHeight?: number;
 };
 
 export type UpdateLinkInput = {
@@ -49,9 +52,11 @@ export type UpdateLinkInput = {
   faviconPath?: string | null;
   pinned?: boolean;
   previewImagePath?: string | null;
+  renderAsWidget?: boolean;
   sortOrder?: number;
   title?: string | null;
   url?: string;
+  widgetHeight?: number;
 };
 
 export type LinkMutationResult = LinkWithItemRecord & {
@@ -119,6 +124,10 @@ export class LinkService {
         title,
         description,
         domain,
+        widgetHeight:
+          input.widgetHeight === undefined
+            ? DEFAULT_LINK_WIDGET_HEIGHT
+            : normalizeLinkWidgetHeight(input.widgetHeight),
         timestamp
       });
 
@@ -181,6 +190,18 @@ export class LinkService {
         linkPatch.previewImagePath = normalizeNullableString(
           input.previewImagePath
         );
+      }
+
+      if (input.renderAsWidget !== undefined) {
+        linkPatch.renderAsWidget = input.renderAsWidget;
+
+        if (input.renderAsWidget && before.link.widgetWarningAcceptedAt === null) {
+          linkPatch.widgetWarningAcceptedAt = timestamp;
+        }
+      }
+
+      if (input.widgetHeight !== undefined) {
+        linkPatch.widgetHeight = normalizeLinkWidgetHeight(input.widgetHeight);
       }
 
       if (input.categoryId !== undefined) {
@@ -340,6 +361,10 @@ export class LinkService {
     if (input.title !== undefined && input.title !== null) {
       validateNonEmptyString(input.title, "title");
     }
+
+    if (input.widgetHeight !== undefined) {
+      normalizeLinkWidgetHeight(input.widgetHeight);
+    }
   }
 
   private validateUpdateInput(input: UpdateLinkInput): void {
@@ -362,9 +387,15 @@ export class LinkService {
       input.sortOrder === undefined &&
       input.pinned === undefined
       && input.faviconPath === undefined &&
-      input.previewImagePath === undefined
+      input.previewImagePath === undefined &&
+      input.renderAsWidget === undefined &&
+      input.widgetHeight === undefined
     ) {
       throw new Error("At least one link field must be provided.");
+    }
+
+    if (input.widgetHeight !== undefined) {
+      normalizeLinkWidgetHeight(input.widgetHeight);
     }
   }
 }

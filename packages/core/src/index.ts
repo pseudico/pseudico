@@ -119,8 +119,19 @@ export type {
 } from "./entities/Attachment";
 export { CONTAINER_MEDIA_ROLES, isContainerMediaRole } from "./entities/ContainerMedia";
 export type { ContainerMediaRecord, ContainerMediaRole } from "./entities/ContainerMedia";
-export { isSupportedLinkProtocol } from "./entities/Link";
-export type { LinkProtocol, LinkRecord } from "./entities/Link";
+export {
+  DEFAULT_LINK_WIDGET_HEIGHT,
+  MAX_LINK_WIDGET_HEIGHT,
+  MIN_LINK_WIDGET_HEIGHT,
+  isSupportedLinkProtocol,
+  normalizeLinkWidgetHeight,
+  validateLinkWidgetEmbedUrl
+} from "./entities/Link";
+export type {
+  LinkProtocol,
+  LinkRecord,
+  LinkWidgetUrlValidationResult
+} from "./entities/Link";
 export {
   DEFAULT_LOCATION_VIEWPORT_ZOOM,
   MAX_LOCATION_VIEWPORT_ZOOM,

@@ -372,7 +372,8 @@ export {
 export {
   LinkCardContent,
   type LinkCardContentProps,
-  type LinkCardViewModel
+  type LinkCardViewModel,
+  type LinkWidgetSettingsPatch
 } from "./components/LinkCardContent";
 export {
   LocationCardContent,

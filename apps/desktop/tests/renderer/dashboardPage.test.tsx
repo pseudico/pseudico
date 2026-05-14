@@ -29,7 +29,7 @@ describe("Dashboard renderer page", () => {
     expect(html).toContain("Mini Calendar");
     expect(html).toContain("Mini Timeline");
     expect(html).toContain("Pomodoro");
-    expect(html).toContain("Offline mode");
+    expect(html).toContain("Web widgets are disabled");
     expect(html).toContain("Make today count.");
   });
 });

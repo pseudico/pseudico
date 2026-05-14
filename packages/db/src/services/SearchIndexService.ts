@@ -318,6 +318,9 @@ export class SearchIndexService {
         domain: link.domain,
         faviconPath: link.faviconPath,
         previewImagePath: link.previewImagePath,
+        renderAsWidget: link.renderAsWidget,
+        widgetHeight: link.widgetHeight,
+        widgetWarningAcceptedAt: link.widgetWarningAcceptedAt,
         ...tagProjection.metadata,
         ...input.metadata
       }),

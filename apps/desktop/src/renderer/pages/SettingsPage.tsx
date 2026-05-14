@@ -2578,7 +2578,7 @@ const privacyNetworkOptions: Array<{
   {
     field: "webWidgetsEnabled",
     label: "Web widgets",
-    description: "Allow saved dashboard web links to be opened from widget cards."
+    description: "Allow opted-in link widgets to load sandboxed remote HTTP(S) pages."
   },
   {
     field: "icsUrlImportEnabled",
