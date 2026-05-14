@@ -51,6 +51,8 @@ docs and the linked Linear issue.
   vault metadata enrichment boundary.
 - `CSV_TSV_IMPORT.md` documents local CSV/TSV task, contact, and project
   import preview, mapping, conflict behavior, and activity logging.
+- `MARKDOWN_NOTE_IMPORT.md` documents standalone local Markdown file-to-note
+  import preview/execution, validation, activity logging, and search behavior.
 - `import-research/COMMON_APP_IMPORT_FORMATS.md` records researched local
   export formats, importer tradeoffs, fixture needs, and follow-up importer
   recommendations.

@@ -3,9 +3,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   AttachmentRepository,
+  ActivityLogRepository,
   ContainerRepository,
   DatabaseBootstrapService,
   NoteRepository,
+  SearchIndexRepository,
   createDatabaseConnection,
   resolveWorkspaceDatabasePath
 } from "@local-work-os/db";
@@ -128,6 +130,87 @@ describe("import IPC handlers", () => {
       )).toMatchObject({ originalName: "source.pdf" });
     } finally {
       connection.close();
+    }
+  });
+
+  it("previews and imports selected Markdown files as notes through main-process IPC", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-markdown-note-import-ipc-"));
+    const workspaceRoot = join(tempRoot, "workspace");
+    const sourceRoot = join(tempRoot, "selected-notes");
+    await mkdir(sourceRoot, { recursive: true });
+    const markdownPath = join(sourceRoot, "brief.md");
+    await writeFile(markdownPath, "---\ntitle: Selected Brief\ntags: [imported]\n---\n# Fallback\nLocal file body", "utf8");
+
+    const databasePath = resolveWorkspaceDatabasePath(workspaceRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: workspaceRoot,
+        databasePath,
+        schemaVersion: 1,
+        openedAt: "2026-05-13T00:00:00.000Z"
+      })
+    };
+    const handlers = createImportIpcHandlers(workspaceService);
+    const connection = await createDatabaseConnection({ databasePath, fileMustExist: true });
+    const inbox = new ContainerRepository(connection).listByWorkspace("workspace_1", { type: "inbox" })[0]!;
+    connection.close();
+
+    const preview = await handlers.handlePreviewMarkdownNoteImport({
+      workspaceId: "workspace_1",
+      containerId: inbox.id,
+      filePaths: [markdownPath]
+    });
+
+    expect(preview).toMatchObject({
+      ok: true,
+      data: {
+        valid: true,
+        creatableCount: 1,
+        rows: [expect.objectContaining({ title: "Selected Brief" })]
+      }
+    });
+
+    const imported = await handlers.handleImportMarkdownNotes({
+      workspaceId: "workspace_1",
+      containerId: inbox.id,
+      filePaths: [markdownPath]
+    });
+
+    expect(imported).toMatchObject({
+      ok: true,
+      data: {
+        valid: true,
+        importedCount: 1,
+        created: [expect.objectContaining({ title: "Selected Brief" })]
+      }
+    });
+
+    const verification = await createDatabaseConnection({ databasePath, fileMustExist: true });
+    try {
+      const itemId = imported.ok ? imported.data.created[0]!.id : "";
+      expect(new NoteRepository(verification).getByItemId(itemId)).toMatchObject({
+        item: { title: "Selected Brief", containerId: inbox.id },
+        note: { content: expect.stringContaining("Local file body") }
+      });
+      expect(new SearchIndexRepository(verification).getByTarget({
+        workspaceId: "workspace_1",
+        targetType: "item",
+        targetId: itemId
+      })).toMatchObject({ title: "Selected Brief" });
+      expect(new ActivityLogRepository(verification).listForTarget("workspace", "workspace_1")).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ action: "markdown_note_import_completed", actorType: "importer" })
+        ])
+      );
+    } finally {
+      verification.close();
     }
   });
 

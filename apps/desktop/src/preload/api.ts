@@ -632,6 +632,53 @@ export type ChooseMarkdownFolderImportInput = {
   projectName?: string;
 };
 
+export type MarkdownNoteImportValidationIssueSummary = {
+  severity: "error" | "warning";
+  code: string;
+  relativePath: string | null;
+  message: string;
+};
+export type MarkdownNoteImportPreviewRowSummary = {
+  relativePath: string;
+  action: "create" | "skip";
+  title: string;
+  containerId: string;
+  containerTabId: string | null;
+  tags: string[];
+  wikilinks: string[];
+  issues: MarkdownNoteImportValidationIssueSummary[];
+};
+export type MarkdownNoteImportCreatedTargetSummary = {
+  targetType: "item";
+  id: string;
+  title: string;
+  relativePath: string;
+};
+export type MarkdownNoteImportPreviewSummary = {
+  valid: boolean;
+  workspaceId: string;
+  rowCount: number;
+  markdownCount: number;
+  creatableCount: number;
+  skippedCount: number;
+  errorCount: number;
+  warningCount: number;
+  issues: MarkdownNoteImportValidationIssueSummary[];
+  rows: MarkdownNoteImportPreviewRowSummary[];
+};
+export type MarkdownNoteImportExecuteSummary = MarkdownNoteImportPreviewSummary & {
+  importedAt: string;
+  importedCount: number;
+  created: MarkdownNoteImportCreatedTargetSummary[];
+};
+export type MarkdownNoteImportPreviewFileInput = {
+  workspaceId?: string;
+  containerId: string;
+  containerTabId?: string | null;
+  filePaths: string[];
+};
+export type MarkdownNoteImportExecuteFileInput = MarkdownNoteImportPreviewFileInput;
+
 
 
 export type MaintenanceOperation =
@@ -4057,7 +4104,10 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     chooseAndPreviewMarkdownFolderImport:
       "local-work-os:import:choose-and-preview-markdown-folder",
     chooseAndImportMarkdownFolder:
-      "local-work-os:import:choose-and-import-markdown-folder"
+      "local-work-os:import:choose-and-import-markdown-folder",
+    previewMarkdownNoteImport:
+      "local-work-os:import:preview-markdown-notes",
+    importMarkdownNotes: "local-work-os:import:markdown-notes"
   },
   export: {
     exportWorkspaceJson: "local-work-os:export:export-workspace-json",
@@ -4999,6 +5049,14 @@ export type LocalWorkOsIpcContracts = {
     input: ChooseMarkdownFolderImportInput | undefined;
     result: ApiResult<MarkdownFolderImportExecuteSummary | null>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.import.previewMarkdownNoteImport]: {
+    input: MarkdownNoteImportPreviewFileInput;
+    result: ApiResult<MarkdownNoteImportPreviewSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.import.importMarkdownNotes]: {
+    input: MarkdownNoteImportExecuteFileInput;
+    result: ApiResult<MarkdownNoteImportExecuteSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.export.exportWorkspaceJson]: {
     input: ExportWorkspaceJsonInput | undefined;
     result: ApiResult<WorkspaceJsonExportSummary>;
@@ -5819,6 +5877,12 @@ export type LocalWorkOsApi = {
     chooseAndImportMarkdownFolder?: (
       input?: ChooseMarkdownFolderImportInput
     ) => Promise<ApiResult<MarkdownFolderImportExecuteSummary | null>>;
+    previewMarkdownNoteImport?: (
+      input: MarkdownNoteImportPreviewFileInput
+    ) => Promise<ApiResult<MarkdownNoteImportPreviewSummary>>;
+    importMarkdownNotes?: (
+      input: MarkdownNoteImportExecuteFileInput
+    ) => Promise<ApiResult<MarkdownNoteImportExecuteSummary>>;
   };
   export: {
     exportWorkspaceJson: (
@@ -6645,7 +6709,14 @@ export function createLocalWorkOsApi(
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndImportMarkdownFolder,
           input
-        )
+        ),
+      previewMarkdownNoteImport: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.import.previewMarkdownNoteImport,
+          input
+        ),
+      importMarkdownNotes: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.import.importMarkdownNotes, input)
     },
     export: {
       exportWorkspaceJson: (input) =>

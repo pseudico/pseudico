@@ -25,3 +25,11 @@ The preview reports row-level errors and warnings before writes. The desktop set
 ## Execution
 
 Execution reuses the existing task, contact, project, category, and tag services. Those services write activity events and search-index updates for created domain records. The import service also logs a workspace-level `csv_import_completed` event for the completed local import job.
+
+## Task-only importer facade
+
+`CsvTaskImporter` provides the narrow M8 task-import API (`previewTaskCsvImport`
+and `applyTaskCsvImport`) on top of the shared CSV import service. It fixes the
+target type to `task`, keeps CSV/TSV parsing local to provided file contents,
+and still routes all writes through `TaskService`, project/container creation,
+tag/category services, activity logging, and search-index updates.

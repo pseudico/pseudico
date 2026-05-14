@@ -5,6 +5,7 @@ import {
   CsvImportService,
   EmailImportService,
   MarkdownFolderImportService,
+  MarkdownNoteImporter,
   InboxService,
   ImportValidationService
 } from "@local-work-os/features";
@@ -31,6 +32,10 @@ import {
   type MarkdownFolderImportExecuteSummary,
   type MarkdownFolderImportPreviewFolderInput,
   type MarkdownFolderImportPreviewSummary,
+  type MarkdownNoteImportExecuteFileInput,
+  type MarkdownNoteImportExecuteSummary,
+  type MarkdownNoteImportPreviewFileInput,
+  type MarkdownNoteImportPreviewSummary,
   type ValidateWorkspaceExportJsonInput
 } from "../../preload/api";
 import {
@@ -78,6 +83,12 @@ export type ImportIpcHandlers = {
   handleChooseAndImportMarkdownFolder: (
     input: unknown
   ) => Promise<ApiResult<MarkdownFolderImportExecuteSummary | null>>;
+  handlePreviewMarkdownNoteImport: (
+    input: unknown
+  ) => Promise<ApiResult<MarkdownNoteImportPreviewSummary>>;
+  handleImportMarkdownNotes: (
+    input: unknown
+  ) => Promise<ApiResult<MarkdownNoteImportExecuteSummary>>;
 };
 
 export type ImportIpcPlatform = {
@@ -348,6 +359,57 @@ export function createImportIpcHandlers(
         return apiOk(null);
       }
       return await this.handleImportMarkdownFolder({ ...(input ?? {}), folderPath });
+    },
+
+    async handlePreviewMarkdownNoteImport(input) {
+      if (!isMarkdownNoteImportPreviewFileInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "previewMarkdownNoteImport requires containerId and Markdown filePaths."
+        );
+      }
+
+      return await withMarkdownNoteImportContext(
+        workspaceService,
+        input,
+        async (context) => {
+          const files = await loadMarkdownNoteFiles(input.filePaths);
+          const summary = context.markdownNoteImporter.previewMarkdownImport({
+            workspaceId: context.workspace.id,
+            containerId: input.containerId,
+            files,
+            ...(input.containerTabId === undefined ? {} : { containerTabId: input.containerTabId })
+          });
+
+          return apiOk(summary);
+        }
+      );
+    },
+
+    async handleImportMarkdownNotes(input) {
+      if (!isMarkdownNoteImportExecuteFileInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "importMarkdownNotes requires containerId and Markdown filePaths."
+        );
+      }
+
+      return await withMarkdownNoteImportContext(
+        workspaceService,
+        input,
+        async (context) => {
+          const files = await loadMarkdownNoteFiles(input.filePaths);
+          const summary = await context.markdownNoteImporter.applyMarkdownImport({
+            workspaceId: context.workspace.id,
+            containerId: input.containerId,
+            files,
+            actorType: "importer",
+            ...(input.containerTabId === undefined ? {} : { containerTabId: input.containerTabId })
+          });
+
+          return apiOk(summary);
+        }
+      );
     }
   };
 }
@@ -521,6 +583,49 @@ async function withMarkdownFolderImportContext<T>(
   }
 }
 
+async function withMarkdownNoteImportContext<T>(
+  workspaceService: CurrentWorkspaceService,
+  input: MarkdownNoteImportPreviewFileInput,
+  operation: (context: {
+    connection: DatabaseConnection;
+    markdownNoteImporter: MarkdownNoteImporter;
+    workspace: NonNullable<ReturnType<CurrentWorkspaceService["getCurrentWorkspace"]>>;
+  }) => Promise<ApiResult<T>>
+): Promise<ApiResult<T>> {
+  const workspace = workspaceService.getCurrentWorkspace();
+
+  if (workspace === null) {
+    return apiError("WORKSPACE_ERROR", "No workspace is open.");
+  }
+
+  if (input.workspaceId !== undefined && input.workspaceId !== workspace.id) {
+    return apiError(
+      "WORKSPACE_ERROR",
+      "Markdown note import workspaceId must match the current workspace."
+    );
+  }
+
+  const connection = await createDatabaseConnection({
+    databasePath: resolveWorkspaceDatabasePath(workspace.rootPath),
+    fileMustExist: true
+  });
+
+  try {
+    return await operation({
+      connection,
+      markdownNoteImporter: new MarkdownNoteImporter({ connection }),
+      workspace
+    });
+  } catch (error) {
+    return apiError(
+      "WORKSPACE_ERROR",
+      error instanceof Error ? error.message : "Markdown note import failed."
+    );
+  } finally {
+    connection.close();
+  }
+}
+
 type ScannedMarkdownFolderEntry = {
   relativePath: string;
   kind: "directory" | "markdown" | "file" | "unsupported";
@@ -662,6 +767,39 @@ async function readDelimitedImportFile(filePathInput: string): Promise<string> {
   }
 
   return await readFile(filePath, "utf8");
+}
+
+async function loadMarkdownNoteFiles(filePathInputs: string[]): Promise<Array<{
+  relativePath: string;
+  content: string;
+}>> {
+  if (filePathInputs.length === 0 || filePathInputs.length > 100) {
+    throw new Error("Markdown note import requires between 1 and 100 files.");
+  }
+
+  const files: Array<{ relativePath: string; content: string }> = [];
+  for (const filePathInput of filePathInputs) {
+    const filePath = normalizeLocalPath(filePathInput);
+    const extension = extname(filePath).toLowerCase();
+    if (extension !== ".md" && extension !== ".markdown") {
+      throw new Error("Markdown note import requires .md or .markdown files.");
+    }
+
+    const fileStats = await stat(filePath);
+    if (!fileStats.isFile()) {
+      throw new Error("Markdown note import paths must be files.");
+    }
+    if (fileStats.size > 2 * 1024 * 1024) {
+      throw new Error("Markdown note import files are limited to 2MB each.");
+    }
+
+    files.push({
+      relativePath: basename(filePath),
+      content: await readFile(filePath, "utf8")
+    });
+  }
+
+  return files;
 }
 
 function inferDelimitedFormat(filePath: string): "csv" | "tsv" | undefined {
@@ -879,6 +1017,28 @@ function isCsvImportExecuteFileInput(
   input: unknown
 ): input is CsvImportExecuteFileInput {
   return isCsvImportPreviewFileInput(input);
+}
+
+function isMarkdownNoteImportPreviewFileInput(
+  input: unknown
+): input is MarkdownNoteImportPreviewFileInput {
+  return (
+    isRecord(input) &&
+    (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)) &&
+    isNonEmptyString(input.containerId) &&
+    (input.containerTabId === undefined ||
+      input.containerTabId === null ||
+      isNonEmptyString(input.containerTabId)) &&
+    Array.isArray(input.filePaths) &&
+    input.filePaths.length > 0 &&
+    input.filePaths.every((filePath) => isNonEmptyString(filePath))
+  );
+}
+
+function isMarkdownNoteImportExecuteFileInput(
+  input: unknown
+): input is MarkdownNoteImportExecuteFileInput {
+  return isMarkdownNoteImportPreviewFileInput(input);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
