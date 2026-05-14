@@ -5937,3 +5937,73 @@ Files changed:
 - packages/features/src/import/TodoistImportService.ts; docs/session_log.md
 Open questions / risks: Linear status update tool is timing out; retry before final.
 Next actions: Amend/push fix; merge PR if checks remain green; update Linear.
+
+## 2026-05-14T19:00:43.1326455+10:00
+Objective: Merge PSE-191 and prepare next ticket.
+Decisions made:
+- Squash-merged PR #180 after local checks and CI success; pulled main; deleted feature branch.
+- Tried to move PSE-191 Done and promote PSE-192, but Linear connector returned deserialize errors.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Linear status/promotion may need manual retry due connector failure.
+Next actions: Retry Linear status updates; keep PSE-192 as next intended Codex Ready issue.
+
+## 2026-05-14T19:08:36.2629212+10:00
+Objective: Resolve post-merge Linear state for PSE-191.
+Decisions made:
+- Retried structured Linear reads/writes and browser fallback; connector still deserialize-fails and browser is logged out.
+- Could not safely mutate Linear without valid Linear tool/web auth.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-191/PSE-192 Linear states remain unverified until connector/auth is restored.
+Next actions: Re-auth/reconnect Linear; move PSE-191 Done; promote PSE-192 Codex Ready.
+
+## 2026-05-14T19:11:24.7118943+10:00
+Objective: Explain Linear login options for completing state reconciliation.
+Decisions made:
+- Clarified Codex in-app browser does not share the user's Chrome login session.
+- Offered in-app Linear login, Chrome plugin, or Linear API token options.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need user-assisted Linear authentication before status updates can complete.
+Next actions: User chooses auth path; retry PSE-191 Done and PSE-192 Codex Ready updates.
+
+## 2026-05-14T19:15:56.6180578+10:00
+Objective: Finish Linear reconciliation after Chrome/connector auth recovery.
+Decisions made:
+- Confirmed PSE-191 is Done with PR #180 attached and merge details commented.
+- Promoted exactly one next issue, PSE-192, to Codex Ready; PR Open/In Progress are empty.
+Files changed:
+- docs/session_log.md
+Open questions / risks: session_log has local uncommitted entries from workflow bookkeeping.
+Next actions: Start PSE-192 when requested; leave other importer tickets in Backlog.
+
+## 2026-05-14T19:17:30.3618413+10:00
+Objective: Reconcile active Linear/GitHub work for next Local Work OS ticket.
+Decisions made:
+- No open GitHub PRs or Linear PR Open/In Progress issues found.
+- Selected single Codex Ready issue PSE-192 for implementation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need full acceptance criteria and code context.
+Next actions: Move PSE-192 In Progress; read docs/source; implement scoped importer.
+
+## 2026-05-14T19:31:41.8898387+10:00
+Objective: Implement PSE-192 Trello board JSON importer foundation.
+Decisions made:
+- Added local-only Trello adapter mapping board/list/card/checklist/comment/tag/due data via existing services.
+- Raw attachments match only provided local copied files; remote URLs remain inert metadata.
+Files changed:
+- packages/features/src/import/TrelloImportService.ts; packages/features/tests/trelloImportService.test.ts; docs/TRELLO_IMPORT.md
+Open questions / risks: Need typecheck to catch API mismatches and verify archive semantics.
+Next actions: Export service types; run targeted tests; fix failures.
+
+## 2026-05-14T19:37:41.7768473+10:00
+Objective: Verify PSE-192 implementation before PR.
+Decisions made:
+- Full lint/typecheck/test/build are required; test/build needed escalation after sandbox EPERM.
+- Targeted Trello tests pass along with full suite.
+Files changed:
+- packages/features/tests/trelloImportService.test.ts; docs/session_log.md
+Open questions / risks: Need final diff review and PR publication.
+Next actions: Review diff; commit/push branch; open ready PR.

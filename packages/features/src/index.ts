@@ -225,6 +225,7 @@ export {
   MarkdownFolderImportService,
   NotionImportService,
   TodoistImportService,
+  TrelloImportService,
   IMAP_IMPORT_SETTINGS_KEY,
   ImportValidationService,
   importModuleContract,

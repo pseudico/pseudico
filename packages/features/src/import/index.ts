@@ -17,6 +17,9 @@ export {
   TodoistImportService
 } from "./TodoistImportService";
 export {
+  TrelloImportService
+} from "./TrelloImportService";
+export {
   ImapImportService,
   IMAP_IMPORT_SETTINGS_KEY
 } from "./ImapImportService";
@@ -99,6 +102,20 @@ export type {
   TodoistImportSourceReport,
   TodoistImportValidationIssue
 } from "./TodoistImportService";
+export type {
+  TrelloArchiveHandling,
+  TrelloImportCreatedTarget,
+  TrelloImportEntryKind,
+  TrelloImportExecuteInput,
+  TrelloImportExecuteSummary,
+  TrelloImportPreviewInput,
+  TrelloImportPreviewRow,
+  TrelloImportPreviewSummary,
+  TrelloImportSourceEntry,
+  TrelloImportSourceReport,
+  TrelloImportValidationIssue,
+  TrelloRawAttachmentMatch
+} from "./TrelloImportService";
 export type {
   ImportValidationCounts,
   ImportValidationIssue,
