@@ -5244,3 +5244,52 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: GitHub/Linear connector and gh auth still need recovery for PR/Linear updates.
 Next actions: Review diff; commit scoped files; push/open PR if credentials work.
+
+## 2026-05-14T08:49:00.9082330+10:00
+Objective: Finish PSE-178 merge and next-ticket handoff.
+Decisions made:
+- PR #167 passed CI, had no reviews/comments, and was squash-merged at 301a9705934c62c3d68984de6d31bb54f1c7c46a.
+- Deleted merged branch and pulled main locally; GitHub proof comment added because Linear connector remained unavailable.
+- Inferred next dependency-order issue is PSE-179 / LWO-M14-005 DB corruption detection and restore flow.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Linear status updates Done/Codex Ready could not be applied due connector connection refused.
+Next actions: Move PSE-178 Done in Linear; promote PSE-179 only; start PSE-179 after Linear recovers.
+## 2026-05-14T08:56:21.9439827+10:00
+Objective: Run next Local Work OS ticket end-to-end.
+Decisions made:
+- Started reconciliation-first workflow for PSE Linear/GitHub.
+- Loaded AGENTS and Linear/GitHub workflow guidance.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need determine active PR/issue state and connector availability.
+Next actions: List active Linear issues; inspect any PR Open item; continue into next ticket if clear.
+## 2026-05-14T08:58:06.5580669+10:00
+Objective: Reconcile active Local Work OS work before starting PSE-179.
+Decisions made:
+- Confirmed PR #167 for PSE-178 was already merged at 301a9705934c62c3d68984de6d31bb54f1c7c46a.
+- Updated PSE-178 to Done; promoted PSE-179 then pulled it into In Progress.
+- Pulled main; reran with escalation after .git/FETCH_HEAD permission denial.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local untracked .playwright-mcp/ and gh installer remain unrelated.
+Next actions: Read PSE-179 docs; branch; implement scoped runbook/tooling.
+## 2026-05-14T10:24:47.4877469+10:00
+Objective: Resume PSE-179 after slow documentation lookup.
+Decisions made:
+- Branch codex/PSE-179-db-corruption-restore-runbook was created.
+- Broad docs read was too slow; switching to targeted file discovery/search.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Source ticket markdown path may differ from Linear import path.
+Next actions: Locate PSE-179 ticket docs; inspect backup/maintenance code; implement narrowly.
+## 2026-05-14T10:37:24.3606532+10:00
+Objective: Implement and validate PSE-179 recovery flow.
+Decisions made:
+- Added unopened-workspace backup listing/restore IPC plus Welcome recovery panel.
+- Restore copies backup DB/attachments into a new folder and leaves corrupt source untouched.
+- Added recovery runbook and tests; full lint/typecheck/test/build pass.
+Files changed:
+- apps/desktop/src/main/ipc/backupHandlers.ts; apps/desktop/src/main/ipc/registerBackupIpc.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/api/desktopApiClient.ts; apps/desktop/src/renderer/pages/WelcomePage.tsx; docs/DB_CORRUPTION_RECOVERY.md; docs/README.md; tests
+Open questions / risks: Need push/PR and CI confirmation.
+Next actions: Review diff; commit; push/open PR.
