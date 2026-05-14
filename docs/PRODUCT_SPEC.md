@@ -20,9 +20,10 @@ attachments and file versions, metadata, relationships, activity, search, saved
 views/collections, Today planning, dashboard widgets, project health, local
 reminders, recurrence, templates, local workflows, timeline/calendar
 projections, backup, export, import validation/execution paths, local
-EML/Maildir email-to-task import, demo workspace generation, local help, smoke
-tests, packaging verification, performance guardrails, app-wide error/toast
-states, and data-integrity/search audit guidance.
+EML/Maildir email-to-task import, a local Notion Markdown/CSV import adapter
+foundation, demo workspace generation, local help, smoke tests, packaging
+verification, performance guardrails, app-wide error/toast states, and
+data-integrity/search audit guidance.
 
 The implemented slice remains a local MVP/V1 foundation, not the full product
 described below. Advanced rich-text editing, advanced saved-view builder UX,

@@ -11,6 +11,9 @@ export {
   MarkdownFolderImportService
 } from "./MarkdownFolderImportService";
 export {
+  NotionImportService
+} from "./NotionImportService";
+export {
   ImapImportService,
   IMAP_IMPORT_SETTINGS_KEY
 } from "./ImapImportService";
@@ -68,6 +71,18 @@ export type {
   CsvImportTargetType,
   CsvImportValidationIssue
 } from "./CsvImportService";
+export type {
+  NotionImportCreatedTarget,
+  NotionImportEntryKind,
+  NotionImportExecuteInput,
+  NotionImportExecuteSummary,
+  NotionImportPreviewInput,
+  NotionImportPreviewRow,
+  NotionImportPreviewSummary,
+  NotionImportSourceEntry,
+  NotionImportSourceReport,
+  NotionImportValidationIssue
+} from "./NotionImportService";
 export type {
   ImportValidationCounts,
   ImportValidationIssue,
