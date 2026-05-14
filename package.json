@@ -16,7 +16,8 @@
     "build": "pnpm -r --workspace-concurrency=1 build",
     "benchmark:large": "pnpm build && node scripts/run-large-workspace-benchmark.mjs",
     "package": "pnpm --filter @local-work-os/desktop package",
-    "package:smoke": "pnpm --filter @local-work-os/desktop package:smoke"
+    "package:smoke": "pnpm --filter @local-work-os/desktop package:smoke",
+    "coverage:map": "node scripts/check-test-coverage-map.mjs"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["better-sqlite3", "electron", "esbuild"]

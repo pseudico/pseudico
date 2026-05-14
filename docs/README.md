@@ -20,6 +20,8 @@ docs and the linked Linear issue.
   activity, search, and attachment model direction.
 - `TESTING.md` defines expected verification for documentation, domain logic,
   database work, Electron IPC, renderer work, and release checks.
+- `TEST_COVERAGE_MAP.md` maps feature families to unit, integration,
+  component, smoke/E2E, and manual QA expectations.
 - `SECURITY.md` records local-only, Electron, filesystem, database, and privacy
   guardrails.
 - `SECURITY_AUDIT.md` records the current Electron IPC, external link, widget,
