@@ -78,5 +78,13 @@ export function registerImportIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.import.chooseAndImportMarkdownFolder,
     (_event, input) => handlers.handleChooseAndImportMarkdownFolder(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.import.previewMarkdownNoteImport,
+    (_event, input) => handlers.handlePreviewMarkdownNoteImport(input)
+  );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.import.importMarkdownNotes,
+    (_event, input) => handlers.handleImportMarkdownNotes(input)
+  );
 }
 

@@ -611,6 +611,16 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
           callApi(() =>
             api.import.chooseAndImportMarkdownFolder?.(input) ??
             unavailable("Markdown folder import chooser API is not available.")
+          ),
+        previewMarkdownNoteImport: (input) =>
+          callApi(() =>
+            api.import.previewMarkdownNoteImport?.(input) ??
+            unavailable("Markdown note import preview API is not available.")
+          ),
+        importMarkdownNotes: (input) =>
+          callApi(() =>
+            api.import.importMarkdownNotes?.(input) ??
+            unavailable("Markdown note import API is not available.")
           )
       },
     export: {
@@ -1272,7 +1282,13 @@ export const desktopApiClient: LocalWorkOsApi = {
         unavailable("Markdown folder import chooser API is not available."),
       chooseAndImportMarkdownFolder: (input) =>
         getDesktopApiClient().import.chooseAndImportMarkdownFolder?.(input) ??
-        unavailable("Markdown folder import chooser API is not available.")
+        unavailable("Markdown folder import chooser API is not available."),
+      previewMarkdownNoteImport: (input) =>
+        getDesktopApiClient().import.previewMarkdownNoteImport?.(input) ??
+        unavailable("Markdown note import preview API is not available."),
+      importMarkdownNotes: (input) =>
+        getDesktopApiClient().import.importMarkdownNotes?.(input) ??
+        unavailable("Markdown note import API is not available.")
     },
   export: {
     exportWorkspaceJson: (input) =>

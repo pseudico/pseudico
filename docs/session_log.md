@@ -6462,3 +6462,62 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Local log entry is post-PR and not yet on branch.
 Next actions: Wait for CI; merge if green; then move Linear Done.
+
+## 2026-05-15T08:25:54
+Objective: Complete PSE-136 merge and next-ticket promotion.
+Decisions made:
+- PR #189 merged with squash commit 230eb2d18ad87d5e55304c916b43a6dd79d2087f.
+- Deleted merged PSE-136 branches and pulled main locally.
+- Moved PSE-136 to Done and promoted PSE-85 to Codex Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Post-merge log entry remains local-only until next branch.
+Next actions: Next run should reconcile PSE-85 scope against existing import modules.
+- Timestamp: 2026-05-15T09:39:30.4565610+10:00
+- Objective: Start end-to-end Local Work OS ticket run with Linear/GitHub reconciliation.
+- Decisions made: Read AGENTS/docs; using Linear as plan and GitHub as proof.
+- Files changed: docs/session_log.md
+- Open questions / risks: Active PR/issue state unknown until connector reconciliation completes.
+- Next actions: Inspect active PRs; choose one Codex Ready issue; implement and verify.
+- Timestamp: 2026-05-15T09:39:59.3832122+10:00
+- Objective: Selected PSE-85 as the single Codex Ready ticket and moved it to In Progress.
+- Decisions made: No PR Open/In Progress issues found; scoped work to CSV task import and Markdown note import.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need inspect existing importer/domain patterns and ticket acceptance details.
+- Next actions: Read ticket docs; create PSE-85 branch; implement import adapters with tests.
+- Timestamp: 2026-05-15T09:40:52.8552993+10:00
+- Objective: Began PSE-85 implementation planning on branch codex/PSE-85-csv-md-import.
+- Decisions made: Branch created from up-to-date main; plan posted to Linear.
+- Files changed: docs/session_log.md
+- Open questions / risks: Existing import infrastructure may already cover part of PSE-85.
+- Next actions: Inspect import source/tests; patch minimal gaps; run checks.
+- Timestamp: 2026-05-15T09:45:47.9928424+10:00
+- Objective: Added PSE-85 task CSV and Markdown note importer foundations.
+- Decisions made: Wrapped existing CSV service for task-only API; added standalone Markdown-note importer using NoteService.
+- Files changed: packages/core/src/events/ActivityAction.ts; packages/features/src/import/*; packages/features/src/index.ts; packages/features/tests/importFoundations.test.ts; docs/session_log.md
+- Open questions / risks: Need targeted tests/typecheck to catch exact optional property issues.
+- Next actions: Run targeted tests; update docs; run full checks.
+- Timestamp: 2026-05-15T09:48:17.4955535+10:00
+- Objective: Documented PSE-85 import behavior and coverage.
+- Decisions made: Added standalone Markdown note import doc; noted task-only CSV facade and coverage map.
+- Files changed: docs/README.md; docs/CSV_TSV_IMPORT.md; docs/MARKDOWN_NOTE_IMPORT.md; docs/TEST_COVERAGE_MAP.md; docs/session_log.md
+- Open questions / risks: Need full lint/test/build validation and Git diff review.
+- Next actions: Run lint/test/build; fix failures; open PR.
+- Timestamp: 2026-05-15T09:51:20.3354870+10:00
+- Objective: Completed local validation for PSE-85.
+- Decisions made: Lint/typecheck/test/build all pass; test/build needed escalation after sandbox EPERM spawns.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need review diff and publish PR.
+- Next actions: Inspect git diff; commit/push branch; open ready PR.
+- Timestamp: 2026-05-15T09:56:48.8548434+10:00
+- Objective: Completed final PSE-85 validation after IPC additions.
+- Decisions made: Added Markdown note IPC/preload channels and tests; all required local checks pass.
+- Files changed: apps/desktop/src/main/ipc/importHandlers.ts; apps/desktop/src/main/ipc/registerImportIpc.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/api/desktopApiClient.ts; apps/desktop/tests/main/importHandlers.test.ts; apps/desktop/tests/preload/api.test.ts; docs/session_log.md
+- Open questions / risks: Need publish PR and wait on GitHub CI.
+- Next actions: Stage intended files; commit/push; open ready PR.
+- Timestamp: 2026-05-15T09:59:00.3328334+10:00
+- Objective: Opened PR #190 and moved PSE-85 to PR Open.
+- Decisions made: PR opened ready for review; Linear updated with PR link and local check summary.
+- Files changed: docs/session_log.md
+- Open questions / risks: GitHub CI result pending; gh auth is invalid so use connector/web/git where possible.
+- Next actions: Check PR status; merge if clean/green; promote next issue.
