@@ -1666,10 +1666,35 @@ export type SearchWorkspaceInput = {
   workspaceId?: string;
   query: string;
   kinds?: SearchResultKind[];
+  filters?: SearchFilterInput;
   limit?: number;
   offset?: number;
   includeArchived?: boolean;
   includeDeleted?: boolean;
+};
+
+export type SearchDueFilterInput =
+  | { operator: "before"; value: string }
+  | { operator: "after"; value: string }
+  | { operator: "on"; value: string }
+  | { operator: "between"; from: string; to: string };
+
+export type SearchFilterInput = {
+  kinds?: SearchResultKind[];
+  tags?: string[];
+  category?: string;
+  status?: string;
+  due?: SearchDueFilterInput;
+  includeArchived?: boolean;
+  includeDeleted?: boolean;
+};
+
+export type RecentSearchSummary = {
+  id: string;
+  workspaceId: string;
+  query: string;
+  filters: SearchFilterInput;
+  searchedAt: string;
 };
 
 export type SaveSearchInput = {
@@ -3952,7 +3977,8 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
   },
   search: {
     searchWorkspace: "local-work-os:search:search-workspace",
-    saveSearch: "local-work-os:search:save-search"
+    saveSearch: "local-work-os:search:save-search",
+    listRecentSearches: "local-work-os:search:list-recent-searches"
   },
   collections: {
     listCollections: "local-work-os:collections:list-collections",
@@ -4639,6 +4665,10 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.search.saveSearch]: {
     input: SaveSearchInput;
     result: ApiResult<{ savedViewId: string; name: string }>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.search.listRecentSearches]: {
+    input: string | undefined;
+    result: ApiResult<RecentSearchSummary[]>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.collections.listCollections]: {
     input: string | undefined;
@@ -5586,6 +5616,9 @@ export type LocalWorkOsApi = {
     saveSearch: (
       input: SaveSearchInput
     ) => Promise<ApiResult<{ savedViewId: string; name: string }>>;
+    listRecentSearches: (
+      workspaceId?: string
+    ) => Promise<ApiResult<RecentSearchSummary[]>>;
   };
   collections: {
     listCollections: (
@@ -6384,7 +6417,9 @@ export function createLocalWorkOsApi(
       searchWorkspace: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.search.searchWorkspace, input),
       saveSearch: (input) =>
-        invoke(LOCAL_WORK_OS_IPC_CHANNELS.search.saveSearch, input)
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.search.saveSearch, input),
+      listRecentSearches: (workspaceId) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.search.listRecentSearches, workspaceId)
     },
     collections: {
       listCollections: (workspaceId) =>

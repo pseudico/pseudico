@@ -752,6 +752,42 @@ export function SettingsPage({
     );
   }
 
+  async function rebuildSearchIndex(): Promise<void> {
+    if (currentWorkspace === null) {
+      setUserError("Open a workspace before rebuilding search.");
+      return;
+    }
+
+    setMaintenanceBusy(true);
+    setError(null);
+
+    const result = await apiClient.diagnostics.runMaintenanceJob({
+      workspaceId: currentWorkspace.id,
+      operations: ["rebuild_search_index"]
+    });
+
+    setMaintenanceBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Search rebuild failed");
+      return;
+    }
+
+    setMaintenanceJobs((current) => [
+      result.data,
+      ...current.filter((job) => job.id !== result.data.id)
+    ]);
+    showToast(
+      result.data.status === "completed"
+        ? `Search index rebuilt: ${result.data.searchReindex?.indexedItemCount ?? 0} item(s), ${result.data.searchReindex?.indexedAttachmentCount ?? 0} attachment(s).`
+        : `Search rebuild failed: ${result.data.error ?? "unknown error"}.`,
+      {
+        title: "Search maintenance",
+        tone: result.data.status === "completed" ? "success" : "error"
+      }
+    );
+  }
+
 
   async function exportWorkspaceJson(): Promise<void> {
     if (currentWorkspace === null) {
@@ -1442,6 +1478,15 @@ export function SettingsPage({
             >
               <RefreshCw size={16} aria-hidden="true" />
               Run audit
+            </button>
+            <button
+              className="secondary-button compact-button"
+              disabled={maintenanceBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void rebuildSearchIndex()}
+            >
+              <RefreshCw size={16} aria-hidden="true" />
+              Rebuild search index
             </button>
           </div>
         </div>

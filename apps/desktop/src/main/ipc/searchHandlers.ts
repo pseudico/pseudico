@@ -8,6 +8,8 @@ import {
   apiError,
   apiOk,
   type ApiResult,
+  type RecentSearchSummary,
+  type SearchFilterInput,
   type SearchResultKind,
   type SearchResultSummary,
   type SearchWorkspaceInput,
@@ -27,6 +29,9 @@ type SearchIpcHandlers = {
   handleSaveSearch: (
     input: unknown
   ) => Promise<ApiResult<{ savedViewId: string; name: string }>>;
+  handleListRecentSearches: (
+    workspaceId: unknown
+  ) => Promise<ApiResult<RecentSearchSummary[]>>;
 };
 
 export function createSearchIpcHandlers(
@@ -37,7 +42,7 @@ export function createSearchIpcHandlers(
       if (!isSearchWorkspaceInput(input)) {
         return apiError(
           "INVALID_INPUT",
-          "searchWorkspace requires a query string and optional kinds, limit, offset, includeArchived, and includeDeleted fields."
+          "searchWorkspace requires a query string or search filters and optional kinds, limit, offset, includeArchived, and includeDeleted fields."
         );
       }
 
@@ -47,6 +52,7 @@ export function createSearchIpcHandlers(
           workspaceId,
           query: input.query,
           ...(input.kinds === undefined ? {} : { kinds: input.kinds }),
+          ...(input.filters === undefined ? {} : { filters: input.filters }),
           ...(input.limit === undefined ? {} : { limit: input.limit }),
           ...(input.offset === undefined ? {} : { offset: input.offset }),
           ...(input.includeArchived === undefined
@@ -57,7 +63,23 @@ export function createSearchIpcHandlers(
             : { includeDeleted: input.includeDeleted })
         };
 
-        return apiOk(context.searchService.search(queryInput).map(toSearchResultSummary));
+        const results = context.searchService.search(queryInput).map(toSearchResultSummary);
+        context.searchService.recordRecentSearch({
+          workspaceId,
+          query: input.query,
+          filters: {
+            ...(input.filters ?? {}),
+            ...(input.kinds === undefined ? {} : { kinds: input.kinds }),
+            ...(input.includeArchived === undefined
+              ? {}
+              : { includeArchived: input.includeArchived }),
+            ...(input.includeDeleted === undefined
+              ? {}
+              : { includeDeleted: input.includeDeleted })
+          }
+        });
+
+        return apiOk(results);
       });
     },
 
@@ -79,6 +101,24 @@ export function createSearchIpcHandlers(
         });
 
         return apiOk({ savedViewId: result.savedView.id, name: result.savedView.name });
+      });
+    },
+
+    async handleListRecentSearches(workspaceId) {
+      if (workspaceId !== undefined && !isNonEmptyString(workspaceId)) {
+        return apiError(
+          "INVALID_INPUT",
+          "listRecentSearches requires an optional workspaceId."
+        );
+      }
+
+      return await withSearchService(workspaceService, async (context) => {
+        const resolvedWorkspaceId = resolveWorkspaceId(
+          workspaceId,
+          context.workspace
+        );
+
+        return apiOk(context.searchService.listRecentSearches(resolvedWorkspaceId));
       });
     }
   };
@@ -174,13 +214,70 @@ function isSaveSearchInput(input: unknown): input is { workspaceId?: string; que
 function isSearchWorkspaceInput(input: unknown): input is SearchWorkspaceInput {
   return (
     isRecord(input) &&
-    isNonEmptyString(input.query) &&
+    typeof input.query === "string" &&
+    (input.query.trim().length > 0 || hasSearchFilters(input.filters)) &&
     isOptionalString(input.workspaceId) &&
     isOptionalSearchResultKindArray(input.kinds) &&
+    isOptionalSearchFilters(input.filters) &&
     isOptionalPositiveInteger(input.limit) &&
     isOptionalNonNegativeInteger(input.offset) &&
     isOptionalBoolean(input.includeArchived) &&
     isOptionalBoolean(input.includeDeleted)
+  );
+}
+
+function hasSearchFilters(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    (Array.isArray(value.kinds) && value.kinds.length > 0) ||
+    (Array.isArray(value.tags) && value.tags.length > 0) ||
+    isNonEmptyString(value.category) ||
+    isNonEmptyString(value.status) ||
+    value.due !== undefined ||
+    value.includeArchived === true ||
+    value.includeDeleted === true
+  );
+}
+
+function isOptionalSearchFilters(value: unknown): value is SearchFilterInput | undefined {
+  if (value === undefined) {
+    return true;
+  }
+
+  return (
+    isRecord(value) &&
+    isOptionalSearchResultKindArray(value.kinds) &&
+    (value.tags === undefined ||
+      (Array.isArray(value.tags) && value.tags.every((tag) => typeof tag === "string"))) &&
+    isOptionalString(value.category) &&
+    isOptionalString(value.status) &&
+    isOptionalSearchDueFilter(value.due) &&
+    isOptionalBoolean(value.includeArchived) &&
+    isOptionalBoolean(value.includeDeleted)
+  );
+}
+
+function isOptionalSearchDueFilter(value: unknown): boolean {
+  if (value === undefined) {
+    return true;
+  }
+
+  if (!isRecord(value) || typeof value.operator !== "string") {
+    return false;
+  }
+
+  if (value.operator === "between") {
+    return typeof value.from === "string" && typeof value.to === "string";
+  }
+
+  return (
+    (value.operator === "before" ||
+      value.operator === "after" ||
+      value.operator === "on") &&
+    typeof value.value === "string"
   );
 }
 

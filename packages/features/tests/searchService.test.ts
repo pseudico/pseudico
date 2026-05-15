@@ -394,6 +394,150 @@ describe("SearchService", () => {
     ]);
   });
 
+  it("applies explicit type, tag, category, due date, and status filters", () => {
+    const project = new ContainerRepository(connection).create({
+      id: "container_filters",
+      workspaceId: "workspace_1",
+      type: "project",
+      name: "Filtered Project",
+      slug: "filtered-project",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const itemRepository = new ItemRepository(connection);
+    const matchingTask = itemRepository.create({
+      id: "item_matching_task",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      type: "task",
+      title: "Call supplier",
+      body: "Discuss launch details",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const wrongTagTask = itemRepository.create({
+      id: "item_wrong_tag",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      type: "task",
+      title: "Call contractor",
+      body: "Discuss launch details",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const service = createService();
+
+    service.upsertItem(matchingTask, {
+      tags: ["ops"],
+      category: "Work",
+      metadata: {
+        taskStatus: "waiting",
+        dueAt: "2026-05-05T00:00:00.000Z"
+      }
+    });
+    service.upsertItem(wrongTagTask, {
+      tags: ["personal"],
+      category: "Work",
+      metadata: {
+        taskStatus: "waiting",
+        dueAt: "2026-05-05T00:00:00.000Z"
+      }
+    });
+
+    expect(
+      service.search({
+        workspaceId: "workspace_1",
+        query: "",
+        filters: {
+          kinds: ["task"],
+          tags: ["ops"],
+          category: "Work",
+          status: "waiting",
+          due: {
+            operator: "between",
+            from: "2026-05-01",
+            to: "2026-05-10"
+          }
+        }
+      })
+    ).toMatchObject([
+      {
+        targetId: "item_matching_task",
+        kind: "task",
+        tags: ["ops"],
+        category: "Work",
+        taskStatus: "waiting",
+        dueAt: "2026-05-05T00:00:00.000Z"
+      }
+    ]);
+  });
+
+  it("persists recent searches locally without a schema change", () => {
+    const service = createService();
+
+    expect(service.listRecentSearches("workspace_1")).toEqual([]);
+
+    service.recordRecentSearch({
+      workspaceId: "workspace_1",
+      query: "supplier",
+      filters: {
+        kinds: ["task"],
+        tags: ["ops"],
+        includeArchived: true
+      }
+    });
+    service.recordRecentSearch({
+      workspaceId: "workspace_1",
+      query: "supplier",
+      filters: {
+        kinds: ["task"],
+        tags: ["ops"],
+        includeArchived: true
+      }
+    });
+
+    expect(service.listRecentSearches("workspace_1")).toMatchObject([
+      {
+        workspaceId: "workspace_1",
+        query: "supplier",
+        filters: {
+          kinds: ["task"],
+          tags: ["ops"],
+          includeArchived: true
+        }
+      }
+    ]);
+  });
+
+  it("exposes feature-level search-index rebuild for maintenance actions", () => {
+    const project = new ContainerRepository(connection).create({
+      id: "container_rebuild",
+      workspaceId: "workspace_1",
+      type: "project",
+      name: "Rebuild Project",
+      slug: "rebuild-project",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    new ItemRepository(connection).create({
+      id: "item_rebuild",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      type: "note",
+      title: "Rebuild note",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const service = createService();
+
+    expect(service.rebuildWorkspaceIndex("workspace_1")).toMatchObject({
+      indexedContainerCount: 1,
+      indexedItemCount: 1
+    });
+    expect(
+      service.search({
+        workspaceId: "workspace_1",
+        query: "rebuild",
+        filters: { kinds: ["note"] }
+      })
+    ).toHaveLength(1);
+  });
+
 });
 
 function createService(): SearchService {

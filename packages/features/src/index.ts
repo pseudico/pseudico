@@ -1028,6 +1028,9 @@ export type {
 } from "./savedViews";
 export type {
   SearchInput,
+  SearchFilterInput,
+  SearchDueFilterInput,
+  RecentSearchEntry,
   SearchResult,
   SearchResultKind,
   SearchResultTargetType,

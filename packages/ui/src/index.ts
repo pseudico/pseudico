@@ -189,6 +189,12 @@ export {
   type SearchResultCardViewModel
 } from "./components/SearchResultCard";
 export {
+  SearchFilters,
+  type SearchFilterKindOption,
+  type SearchFiltersProps,
+  type SearchFiltersValue
+} from "./components/SearchFilters";
+export {
   focusFirstFocusableElement,
   getFocusableElements,
   getFocusTrapKeyCommand,

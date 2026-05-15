@@ -6521,3 +6521,39 @@ Next actions: Next run should reconcile PSE-85 scope against existing import mod
 - Files changed: docs/session_log.md
 - Open questions / risks: GitHub CI result pending; gh auth is invalid so use connector/web/git where possible.
 - Next actions: Check PR status; merge if clean/green; promote next issue.
+- Timestamp: 2026-05-15T10:06:13.5854451+10:00
+- Objective: Completed PSE-85 merge and promoted next ticket.
+- Decisions made: PR #190 squash-merged at e33fc0f; PSE-85 moved Done; PSE-84 promoted to Codex Ready.
+- Files changed: docs/session_log.md
+- Open questions / risks: Latest post-merge log entry is local-only; unrelated untracked files remain.
+- Next actions: Next run should reconcile PSE-84; leave other issues outside Codex Ready; keep CI/review gates.
+## 2026-05-15 10:20:48 +10:00
+- Objective: Reconcile active workflow and select next Local Work OS ticket.
+- Decisions made: No PR Open/In Progress issues; selected PSE-84 and moved it to In Progress.
+- Files changed: docs/session_log.md
+- Open questions / risks: Existing untracked local files remain untouched.
+- Next actions: Read ticket docs; branch; implement scoped search maintenance/filter work.
+## 2026-05-15 10:24:28 +10:00
+- Objective: Plan PSE-84 implementation scope.
+- Decisions made: Use existing search/rebuild services; add typed filters, recent-search persistence, SearchFilters UI, and targeted tests.
+- Files changed: docs/session_log.md
+- Open questions / risks: Recent-search writes use app_settings like recent navigation and avoid schema changes.
+- Next actions: Patch feature/API/UI layers; run targeted tests; run full checks.
+## 2026-05-15 10:33:28 +10:00
+- Objective: Implement PSE-84 search filters, rebuild entry, and recent searches.
+- Decisions made: Kept recent searches in app_settings; reused maintenance job API for explicit search rebuild; added SearchFilters UI.
+- Files changed: apps/desktop/src; packages/features/src/search; packages/ui/src; docs/DATA_MODEL.md; tests
+- Open questions / risks: Full lint/test/build still pending.
+- Next actions: Run full checks; fix failures; open PR.
+## 2026-05-15 10:36:33 +10:00
+- Objective: Verify PSE-84 implementation locally.
+- Decisions made: Fixed IPC channel count; reran sandbox-blocked test/build commands with escalation as required.
+- Files changed: apps/desktop/tests/preload/api.test.ts; docs/session_log.md
+- Open questions / risks: CI still needs GitHub confirmation after PR opens.
+- Next actions: Re-run final checks after last patch; commit; push and open PR.
+## 2026-05-15 10:38:34 +10:00
+- Objective: Complete final local verification for PSE-84.
+- Decisions made: All required checks passed; diff whitespace check passed with line-ending warnings only.
+- Files changed: docs/session_log.md
+- Open questions / risks: GitHub CI/review remains final merge gate.
+- Next actions: Stage/commit; push branch; open ready PR.
