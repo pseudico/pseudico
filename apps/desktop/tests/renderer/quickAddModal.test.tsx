@@ -604,7 +604,8 @@ function createMockApi(taskCreateCalls: unknown[] = []): LocalWorkOsApi {
     },
     search: {
       searchWorkspace: async () => apiOk([]),
-      saveSearch: async () => apiOk({ savedViewId: "saved_search_1", name: "Saved search" })
+      saveSearch: async () => apiOk({ savedViewId: "saved_search_1", name: "Saved search" }),
+      listRecentSearches: async () => apiOk([])
     },
     collections: {
       listCollections: async () => apiOk([]),

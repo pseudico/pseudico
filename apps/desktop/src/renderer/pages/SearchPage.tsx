@@ -1,17 +1,21 @@
-import { ListFilter, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   EmptyState,
   ErrorState,
   LoadMoreList,
+  SearchFilters,
   SearchResultCard,
   renderLoadableState,
+  type SearchFiltersValue,
   type SearchResultCardViewModel,
   type SnoozePreset
 } from "@local-work-os/ui";
 import type {
   LocalWorkOsApi,
+  RecentSearchSummary,
+  SearchFilterInput,
   SearchResultKind,
   SearchWorkspaceInput,
   SearchResultSummary
@@ -36,6 +40,15 @@ const searchKindOptions = [
 ] as const satisfies readonly { label: string; value: SearchResultKind }[];
 
 const SEARCH_PAGE_SIZE = 30;
+const emptySearchFilters: SearchFiltersValue<SearchResultKind> = {
+  kinds: [],
+  tags: "",
+  category: "",
+  status: "",
+  dueFrom: "",
+  dueTo: "",
+  includeArchived: false
+};
 
 export function SearchPage({
   apiClient = desktopApiClient,
@@ -47,11 +60,15 @@ export function SearchPage({
   const [searchParams, setSearchParams] = useSearchParams();
   const { currentWorkspace } = useWorkspaceStore();
   const queryFromRoute = searchParams.get("q") ?? "";
-  const kindsFromRoute = searchParams.getAll("type") as SearchResultKind[];
   const [draftQuery, setDraftQuery] = useState(initialQuery ?? queryFromRoute);
-  const [selectedKinds, setSelectedKinds] =
-    useState<SearchResultKind[]>(initialKinds);
+  const [filterDraft, setFilterDraft] = useState<SearchFiltersValue<SearchResultKind>>(
+    () => ({
+      ...parseSearchFiltersFromParams(searchParams),
+      kinds: initialKinds.length > 0 ? initialKinds : parseSearchFiltersFromParams(searchParams).kinds
+    })
+  );
   const [results, setResults] = useState<SearchResultSummary[]>(initialResults);
+  const [recentSearches, setRecentSearches] = useState<RecentSearchSummary[]>([]);
   const [hasMoreResults, setHasMoreResults] = useState(
     initialResults.length >= SEARCH_PAGE_SIZE
   );
@@ -61,6 +78,13 @@ export function SearchPage({
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [activeResultIndex, setActiveResultIndex] = useState(0);
   const activeQuery = initialQuery ?? queryFromRoute;
+  const activeFilters = useMemo(
+    () =>
+      initialQuery === undefined
+        ? parseSearchFiltersFromParams(searchParams)
+        : { ...emptySearchFilters, kinds: initialKinds },
+    [initialKinds, initialQuery, searchParams]
+  );
   const parsedQuery = useMemo(
     () => ({ chips: parseStructuredSearchChips(draftQuery) }),
     [draftQuery]
@@ -84,12 +108,27 @@ export function SearchPage({
     }
 
     setDraftQuery(queryFromRoute);
-    setSelectedKinds(
-      kindsFromRoute.filter((kind): kind is SearchResultKind =>
-        searchKindOptions.some((option) => option.value === kind)
-      )
-    );
+    setFilterDraft(parseSearchFiltersFromParams(searchParams));
   }, [initialQuery, queryFromRoute, searchParams]);
+
+  useEffect(() => {
+    if (currentWorkspace === null) {
+      setRecentSearches([]);
+      return;
+    }
+
+    let active = true;
+    void apiClient.search.listRecentSearches(currentWorkspace.id).then((result) => {
+      if (!active || !result.ok) {
+        return;
+      }
+      setRecentSearches(result.data);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [apiClient, currentWorkspace]);
 
   useEffect(() => {
     if (currentWorkspace === null || initialResults.length > 0) {
@@ -97,8 +136,9 @@ export function SearchPage({
     }
 
     const trimmedQuery = activeQuery.trim();
+    const filterInput = toSearchFilterInput(activeFilters);
 
-    if (trimmedQuery.length === 0) {
+    if (trimmedQuery.length === 0 && filterInput === undefined) {
       setResults([]);
       setError(null);
       return;
@@ -118,8 +158,8 @@ export function SearchPage({
         offset: 0
       };
 
-      if (selectedKinds.length > 0) {
-        input.kinds = selectedKinds;
+      if (filterInput !== undefined) {
+        input.filters = filterInput;
       }
 
       const result = await apiClient.search.searchWorkspace(input);
@@ -136,6 +176,7 @@ export function SearchPage({
       }
 
       setResults(result.data);
+      await refreshRecentSearches();
       setActiveResultIndex(0);
       setHasMoreResults(result.data.length === SEARCH_PAGE_SIZE);
     }
@@ -145,7 +186,7 @@ export function SearchPage({
     return () => {
       active = false;
     };
-  }, [apiClient, activeQuery, currentWorkspace, initialResults.length, selectedKinds]);
+  }, [apiClient, activeFilters, activeQuery, currentWorkspace, initialResults.length]);
 
   function submitSearch(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -156,9 +197,7 @@ export function SearchPage({
       params.set("q", trimmedQuery);
     }
 
-    for (const kind of selectedKinds) {
-      params.append("type", kind);
-    }
+    appendSearchFiltersToParams(params, filterDraft);
 
     setSavedMessage(null);
     setSearchParams(params);
@@ -192,8 +231,9 @@ export function SearchPage({
     }
 
     const trimmedQuery = activeQuery.trim();
+    const filterInput = toSearchFilterInput(activeFilters);
 
-    if (trimmedQuery.length === 0) {
+    if (trimmedQuery.length === 0 && filterInput === undefined) {
       setResults([]);
       return;
     }
@@ -208,8 +248,8 @@ export function SearchPage({
       offset: 0
     };
 
-    if (selectedKinds.length > 0) {
-      input.kinds = selectedKinds;
+    if (filterInput !== undefined) {
+      input.filters = filterInput;
     }
 
     const result = await apiClient.search.searchWorkspace(input);
@@ -222,6 +262,7 @@ export function SearchPage({
     }
 
     setResults(result.data);
+    await refreshRecentSearches();
     setActiveResultIndex(0);
     setHasMoreResults(result.data.length === input.limit);
   }
@@ -277,8 +318,9 @@ export function SearchPage({
     }
 
     const trimmedQuery = activeQuery.trim();
+    const filterInput = toSearchFilterInput(activeFilters);
 
-    if (trimmedQuery.length === 0) {
+    if (trimmedQuery.length === 0 && filterInput === undefined) {
       return;
     }
 
@@ -292,8 +334,8 @@ export function SearchPage({
       offset: results.length
     };
 
-    if (selectedKinds.length > 0) {
-      input.kinds = selectedKinds;
+    if (filterInput !== undefined) {
+      input.filters = filterInput;
     }
 
     const result = await apiClient.search.searchWorkspace(input);
@@ -309,19 +351,54 @@ export function SearchPage({
     setHasMoreResults(result.data.length === SEARCH_PAGE_SIZE);
   }
 
-  function toggleKind(kind: SearchResultKind): void {
-    const next = selectedKinds.includes(kind)
-      ? selectedKinds.filter((value) => value !== kind)
-      : [...selectedKinds, kind];
+  function applyFilters(): void {
     const params = new URLSearchParams(searchParams);
-
     params.delete("type");
+    params.delete("tag");
+    params.delete("category");
+    params.delete("status");
+    params.delete("dueFrom");
+    params.delete("dueTo");
+    params.delete("archived");
+    appendSearchFiltersToParams(params, filterDraft);
+    setSavedMessage(null);
+    setSearchParams(params);
+  }
 
-    for (const value of next) {
-      params.append("type", value);
+  function resetFilters(): void {
+    const params = new URLSearchParams(searchParams);
+    params.delete("type");
+    params.delete("tag");
+    params.delete("category");
+    params.delete("status");
+    params.delete("dueFrom");
+    params.delete("dueTo");
+    params.delete("archived");
+    setFilterDraft(emptySearchFilters);
+    setSavedMessage(null);
+    setSearchParams(params);
+  }
+
+  async function refreshRecentSearches(): Promise<void> {
+    if (currentWorkspace === null) {
+      return;
     }
 
-    setSelectedKinds(next);
+    const result = await apiClient.search.listRecentSearches(currentWorkspace.id);
+
+    if (result.ok) {
+      setRecentSearches(result.data);
+    }
+  }
+
+  function useRecentSearch(entry: RecentSearchSummary): void {
+    const params = new URLSearchParams();
+    if (entry.query.length > 0) {
+      params.set("q", entry.query);
+    }
+    appendSearchFiltersToParams(params, toSearchFiltersValue(entry.filters));
+    setDraftQuery(entry.query);
+    setFilterDraft(toSearchFiltersValue(entry.filters));
     setSavedMessage(null);
     setSearchParams(params);
   }
@@ -426,24 +503,33 @@ export function SearchPage({
       )}
 
       <div className="search-layout">
-        <aside className="search-filter-panel" aria-label="Search filters">
-          <div className="panel-heading">
-            <ListFilter size={17} aria-hidden="true" />
-            <h3>Type</h3>
-          </div>
-          <div className="search-filter-list">
-            {searchKindOptions.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className="metadata-chip"
-                aria-pressed={selectedKinds.includes(option.value)}
-                onClick={() => toggleKind(option.value)}
-              >
-                <span>{option.label}</span>
-              </button>
-            ))}
-          </div>
+        <aside>
+          <SearchFilters
+            kindOptions={searchKindOptions}
+            value={filterDraft}
+            onApply={applyFilters}
+            onChange={setFilterDraft}
+            onReset={resetFilters}
+          />
+          {recentSearches.length === 0 ? null : (
+            <div className="search-filter-panel" aria-label="Recent searches">
+              <div className="panel-heading">
+                <h3>Recent</h3>
+              </div>
+              <div className="search-filter-list">
+                {recentSearches.map((entry) => (
+                  <button
+                    key={entry.id}
+                    type="button"
+                    className="metadata-chip"
+                    onClick={() => useRecentSearch(entry)}
+                  >
+                    {formatRecentSearch(entry)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </aside>
 
         <section className="search-results-panel" aria-busy={loading} onKeyDown={handleResultsKeyDown}>
@@ -470,10 +556,10 @@ export function SearchPage({
             </div>
           )}
 
-          {activeQuery.trim().length === 0 ? (
+          {activeQuery.trim().length === 0 && toSearchFilterInput(activeFilters) === undefined ? (
             <SearchEmptyState
               title="Search the workspace"
-              description="Enter a query to find active indexed content."
+              description="Enter a query or choose filters to find active indexed content."
             />
           ) : loading ? (
             renderLoadableState({
@@ -638,6 +724,144 @@ function getStructuredSearchSuggestions(query: string): Array<{ token: string; d
     .filter((token) => active.length > 0 && token.toLowerCase().startsWith(active))
     .slice(0, 8)
     .map((token) => ({ token, description: "Structured search token" }));
+}
+
+function parseSearchFiltersFromParams(
+  params: URLSearchParams
+): SearchFiltersValue<SearchResultKind> {
+  return {
+    kinds: params
+      .getAll("type")
+      .filter((kind): kind is SearchResultKind =>
+        searchKindOptions.some((option) => option.value === kind)
+      ),
+    tags: params.getAll("tag").join(", "),
+    category: params.get("category") ?? "",
+    status: params.get("status") ?? "",
+    dueFrom: params.get("dueFrom") ?? "",
+    dueTo: params.get("dueTo") ?? "",
+    includeArchived: params.get("archived") === "1"
+  };
+}
+
+function appendSearchFiltersToParams(
+  params: URLSearchParams,
+  filters: SearchFiltersValue<SearchResultKind>
+): void {
+  for (const kind of filters.kinds) {
+    params.append("type", kind);
+  }
+
+  for (const tag of splitTagFilter(filters.tags)) {
+    params.append("tag", tag);
+  }
+
+  if (filters.category.trim().length > 0) {
+    params.set("category", filters.category.trim());
+  }
+
+  if (filters.status.trim().length > 0) {
+    params.set("status", filters.status.trim());
+  }
+
+  if (filters.dueFrom.trim().length > 0) {
+    params.set("dueFrom", filters.dueFrom.trim());
+  }
+
+  if (filters.dueTo.trim().length > 0) {
+    params.set("dueTo", filters.dueTo.trim());
+  }
+
+  if (filters.includeArchived) {
+    params.set("archived", "1");
+  }
+}
+
+function toSearchFilterInput(
+  filters: SearchFiltersValue<SearchResultKind>
+): SearchFilterInput | undefined {
+  const input: SearchFilterInput = {};
+  const tags = splitTagFilter(filters.tags);
+
+  if (filters.kinds.length > 0) {
+    input.kinds = filters.kinds;
+  }
+
+  if (tags.length > 0) {
+    input.tags = tags;
+  }
+
+  if (filters.category.trim().length > 0) {
+    input.category = filters.category.trim();
+  }
+
+  if (filters.status.trim().length > 0) {
+    input.status = filters.status.trim();
+  }
+
+  if (filters.dueFrom.trim().length > 0 && filters.dueTo.trim().length > 0) {
+    input.due = {
+      operator: "between",
+      from: filters.dueFrom.trim(),
+      to: filters.dueTo.trim()
+    };
+  } else if (filters.dueFrom.trim().length > 0) {
+    input.due = { operator: "after", value: filters.dueFrom.trim() };
+  } else if (filters.dueTo.trim().length > 0) {
+    input.due = { operator: "before", value: filters.dueTo.trim() };
+  }
+
+  if (filters.includeArchived) {
+    input.includeArchived = true;
+  }
+
+  return Object.keys(input).length === 0 ? undefined : input;
+}
+
+function toSearchFiltersValue(
+  filters: SearchFilterInput
+): SearchFiltersValue<SearchResultKind> {
+  const value = {
+    ...emptySearchFilters,
+    kinds: filters.kinds ?? [],
+    tags: filters.tags?.join(", ") ?? "",
+    category: filters.category ?? "",
+    status: filters.status ?? "",
+    includeArchived: filters.includeArchived === true
+  };
+
+  if (filters.due !== undefined) {
+    if (filters.due.operator === "between") {
+      value.dueFrom = filters.due.from.slice(0, 10);
+      value.dueTo = filters.due.to.slice(0, 10);
+    } else if (filters.due.operator === "after") {
+      value.dueFrom = filters.due.value.slice(0, 10);
+    } else {
+      value.dueTo = filters.due.value.slice(0, 10);
+    }
+  }
+
+  return value;
+}
+
+function splitTagFilter(value: string): string[] {
+  return value
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
+function formatRecentSearch(entry: RecentSearchSummary): string {
+  const filters = toSearchFiltersValue(entry.filters);
+  const filterParts = [
+    ...filters.kinds,
+    ...splitTagFilter(filters.tags).map((tag) => `#${tag}`),
+    filters.category.length > 0 ? filters.category : null,
+    filters.status.length > 0 ? filters.status : null
+  ].filter((value): value is string => value !== null);
+  const query = entry.query.length === 0 ? "(filters only)" : entry.query;
+
+  return filterParts.length === 0 ? query : `${query} · ${filterParts.join(", ")}`;
 }
 
 

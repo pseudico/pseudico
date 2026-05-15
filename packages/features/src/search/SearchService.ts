@@ -1,5 +1,7 @@
 import type { FeatureModuleContract } from "../featureModuleContract";
+import { createLocalId } from "@local-work-os/core";
 import {
+  AppSettingsRepository,
   SearchIndexService,
   type DatabaseConnection,
   type RebuildWorkspaceIndexResult,
@@ -38,14 +40,42 @@ import {
   type StructuredSearchSuggestion
 } from "./StructuredSearchQuery";
 
+export const RECENT_SEARCHES_SETTING_KEY = "search.recent.v1";
+export const DEFAULT_RECENT_SEARCH_LIMIT = 8;
+
 export type SearchInput = {
   workspaceId: string;
   query: string;
   kinds?: SearchResultKind[];
+  filters?: SearchFilterInput;
   limit?: number;
   offset?: number;
   includeArchived?: boolean;
   includeDeleted?: boolean;
+};
+
+export type SearchFilterInput = {
+  kinds?: SearchResultKind[];
+  tags?: string[];
+  category?: string;
+  status?: string;
+  due?: SearchDueFilterInput;
+  includeArchived?: boolean;
+  includeDeleted?: boolean;
+};
+
+export type SearchDueFilterInput =
+  | { operator: "before"; value: string }
+  | { operator: "after"; value: string }
+  | { operator: "on"; value: string }
+  | { operator: "between"; from: string; to: string };
+
+export type RecentSearchEntry = {
+  id: string;
+  workspaceId: string;
+  query: string;
+  filters: SearchFilterInput;
+  searchedAt: string;
 };
 
 export type SaveStructuredSearchInput = {
@@ -177,16 +207,22 @@ export class SearchService {
   }
 
   private searchWithoutDiagnostics(input: SearchInput): SearchResult[] {
-    const parsed = this.parseStructuredQuery(input.query);
+    const parsed = mergeParsedWithInputFilters(
+      this.parseStructuredQuery(input.query),
+      input.filters
+    );
     const searchWorkspaceInput: SearchWorkspaceInput = {
       workspaceId: input.workspaceId,
       query: parsed.textQuery.length > 0 ? parsed.textQuery : input.query,
       targetTypes: ["container", "item", "list_item", "attachment"]
     };
 
-    if (input.includeDeleted !== undefined || input.includeArchived === true) {
+    const includeArchived = input.filters?.includeArchived ?? input.includeArchived;
+    const includeDeleted = input.filters?.includeDeleted ?? input.includeDeleted;
+
+    if (includeDeleted !== undefined || includeArchived === true) {
       searchWorkspaceInput.includeDeleted =
-        input.includeDeleted === true || input.includeArchived === true;
+        includeDeleted === true || includeArchived === true;
     }
 
     const resultLimit = input.limit ?? 25;
@@ -197,16 +233,16 @@ export class SearchService {
       ? this.searchIndexService.searchWorkspace(searchWorkspaceInput)
       : new SearchIndexRepository(this.connection).listByWorkspace(input.workspaceId, {
           targetTypes: ["container", "item", "list_item", "attachment"]
-        }).slice(0, searchWorkspaceInput.limit);
+        });
 
     const hydrateOptions: HydrateSearchResultsOptions = {};
 
-    if (input.includeArchived !== undefined) {
-      hydrateOptions.includeArchived = input.includeArchived;
+    if (includeArchived !== undefined) {
+      hydrateOptions.includeArchived = includeArchived;
     }
 
-    if (input.includeDeleted !== undefined) {
-      hydrateOptions.includeDeleted = input.includeDeleted;
+    if (includeDeleted !== undefined) {
+      hydrateOptions.includeDeleted = includeDeleted;
     }
 
     const structuredKinds = parsed.filters.kinds;
@@ -262,6 +298,69 @@ export class SearchService {
   getSearchIndexHealth(workspaceId: string): SearchIndexHealthReport {
     return this.searchIndexOrchestrator.getSearchIndexHealth(workspaceId);
   }
+
+  listRecentSearches(workspaceId: string, limit = DEFAULT_RECENT_SEARCH_LIMIT): RecentSearchEntry[] {
+    return readRecentSearches(
+      new AppSettingsRepository(this.connection).findByKey({
+        workspaceId,
+        settingKey: RECENT_SEARCHES_SETTING_KEY
+      }),
+      workspaceId
+    ).slice(0, normalizeRecentSearchLimit(limit));
+  }
+
+  recordRecentSearch(input: {
+    workspaceId: string;
+    query: string;
+    filters?: SearchFilterInput;
+    limit?: number;
+  }): RecentSearchEntry[] {
+    const query = input.query.trim();
+    const filters = normalizeSearchFilterInput(input.filters);
+
+    if (query.length === 0 && isEmptySearchFilters(filters)) {
+      return this.listRecentSearches(input.workspaceId, input.limit);
+    }
+
+    const limit = normalizeRecentSearchLimit(input.limit);
+    const repository = new AppSettingsRepository(this.connection);
+    const existing = readRecentSearches(
+      repository.findByKey({
+        workspaceId: input.workspaceId,
+        settingKey: RECENT_SEARCHES_SETTING_KEY
+      }),
+      input.workspaceId
+    );
+    const searchedAt = this.now().toISOString();
+    const nextEntry: RecentSearchEntry = {
+      id: this.createId("recent_search"),
+      workspaceId: input.workspaceId,
+      query,
+      filters,
+      searchedAt
+    };
+    const nextEntries = [
+      nextEntry,
+      ...existing.filter((entry) => getRecentSearchKey(entry) !== getRecentSearchKey(nextEntry))
+    ].slice(0, limit);
+
+    repository.upsert({
+      id: this.createId("app_setting"),
+      workspaceId: input.workspaceId,
+      settingKey: RECENT_SEARCHES_SETTING_KEY,
+      valueJson: JSON.stringify({
+        version: 1,
+        entries: nextEntries
+      }),
+      timestamp: searchedAt
+    });
+
+    return nextEntries;
+  }
+
+  private createId(prefix: string): string {
+    return this.idFactory?.(prefix) ?? createLocalId(prefix);
+  }
 }
 
 function mergeKinds(
@@ -272,6 +371,191 @@ function mergeKinds(
   if (right === undefined) return [...left];
   const rightSet = new Set(right);
   return left.filter((kind) => rightSet.has(kind));
+}
+
+function mergeParsedWithInputFilters(
+  parsed: StructuredSearchParseResult,
+  filters: SearchFilterInput | undefined
+): StructuredSearchParseResult {
+  const normalized = normalizeSearchFilterInput(filters);
+
+  if (isEmptySearchFilters(normalized)) {
+    return parsed;
+  }
+
+  const mergedFilters: StructuredSearchParseResult["filters"] = {
+    tags: [...new Set([...parsed.filters.tags, ...(normalized.tags ?? [])])],
+    hasFile: parsed.filters.hasFile
+  };
+  const kinds = mergeKinds(parsed.filters.kinds, normalized.kinds);
+  const category = normalized.category ?? parsed.filters.category;
+  const due = normalized.due ?? parsed.filters.due;
+  const status = normalized.status ?? parsed.filters.status;
+  const inProject = parsed.filters.inProject;
+
+  if (kinds !== undefined) {
+    mergedFilters.kinds = kinds;
+  }
+
+  if (category !== undefined) {
+    mergedFilters.category = category;
+  }
+
+  if (due !== undefined) {
+    mergedFilters.due = due;
+  }
+
+  if (status !== undefined) {
+    mergedFilters.status = status;
+  }
+
+  if (inProject !== undefined) {
+    mergedFilters.inProject = inProject;
+  }
+
+  return {
+    ...parsed,
+    filters: mergedFilters
+  };
+}
+
+function normalizeSearchFilterInput(
+  filters: SearchFilterInput | undefined
+): SearchFilterInput {
+  if (filters === undefined) {
+    return {};
+  }
+
+  const normalized: SearchFilterInput = {};
+  const tags = filters.tags
+    ?.map((tag) => normalizeTagFilter(tag))
+    .filter((tag) => tag.length > 0);
+
+  if (filters.kinds !== undefined && filters.kinds.length > 0) {
+    normalized.kinds = [...new Set(filters.kinds)];
+  }
+
+  if (tags !== undefined && tags.length > 0) {
+    normalized.tags = [...new Set(tags)];
+  }
+
+  if (filters.category !== undefined && filters.category.trim().length > 0) {
+    normalized.category = filters.category.trim();
+  }
+
+  if (filters.status !== undefined && filters.status.trim().length > 0) {
+    normalized.status = filters.status.trim().toLowerCase();
+  }
+
+  if (filters.due !== undefined) {
+    const due = normalizeDueFilter(filters.due);
+    if (due !== null) {
+      normalized.due = due;
+    }
+  }
+
+  if (filters.includeArchived !== undefined) {
+    normalized.includeArchived = filters.includeArchived;
+  }
+
+  if (filters.includeDeleted !== undefined) {
+    normalized.includeDeleted = filters.includeDeleted;
+  }
+
+  return normalized;
+}
+
+function normalizeDueFilter(filter: SearchDueFilterInput): SearchDueFilterInput | null {
+  if (filter.operator === "between") {
+    const from = normalizeDateFilterValue(filter.from);
+    const to = normalizeDateFilterValue(filter.to);
+    return from === null || to === null ? null : { operator: "between", from, to };
+  }
+
+  const value = normalizeDateFilterValue(filter.value);
+  return value === null ? null : { operator: filter.operator, value };
+}
+
+function normalizeDateFilterValue(value: string): string | null {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    return null;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return `${trimmed}T00:00:00.000Z`;
+  }
+
+  if (!Number.isNaN(Date.parse(trimmed))) {
+    return new Date(trimmed).toISOString();
+  }
+
+  return null;
+}
+
+function normalizeTagFilter(tag: string): string {
+  return tag.trim().toLowerCase().replace(/^@/, "").replace(/\s+/g, "-");
+}
+
+function isEmptySearchFilters(filters: SearchFilterInput): boolean {
+  return (
+    filters.kinds === undefined &&
+    filters.tags === undefined &&
+    filters.category === undefined &&
+    filters.status === undefined &&
+    filters.due === undefined &&
+    filters.includeArchived === undefined &&
+    filters.includeDeleted === undefined
+  );
+}
+
+function normalizeRecentSearchLimit(limit: number | undefined): number {
+  if (limit === undefined || !Number.isFinite(limit) || limit <= 0) {
+    return DEFAULT_RECENT_SEARCH_LIMIT;
+  }
+
+  return Math.min(Math.floor(limit), 20);
+}
+
+function readRecentSearches(
+  setting: { valueJson: string } | null,
+  workspaceId: string
+): RecentSearchEntry[] {
+  if (setting === null) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(setting.valueJson);
+    if (!isRecord(parsed) || parsed.version !== 1 || !Array.isArray(parsed.entries)) {
+      return [];
+    }
+
+    return parsed.entries.filter((entry): entry is RecentSearchEntry =>
+      isRecentSearchEntry(entry, workspaceId)
+    );
+  } catch {
+    return [];
+  }
+}
+
+function isRecentSearchEntry(value: unknown, workspaceId: string): value is RecentSearchEntry {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    value.workspaceId === workspaceId &&
+    typeof value.query === "string" &&
+    isRecord(value.filters) &&
+    typeof value.searchedAt === "string"
+  );
+}
+
+function getRecentSearchKey(entry: Pick<RecentSearchEntry, "query" | "filters">): string {
+  return `${entry.query.toLocaleLowerCase()}:${JSON.stringify(entry.filters)}`;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function createSavedSearchName(query: string): string {

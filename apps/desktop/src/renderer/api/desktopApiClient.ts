@@ -364,7 +364,9 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       searchWorkspace: (input) =>
         callApi(() => api.search.searchWorkspace(input)),
       saveSearch: (input) =>
-        callApi(() => api.search.saveSearch(input))
+        callApi(() => api.search.saveSearch(input)),
+      listRecentSearches: (workspaceId) =>
+        callApi(() => api.search.listRecentSearches(workspaceId))
     },
     collections: {
       listCollections: (workspaceId) =>
@@ -1047,7 +1049,9 @@ export const desktopApiClient: LocalWorkOsApi = {
     searchWorkspace: (input) =>
       getDesktopApiClient().search.searchWorkspace(input),
     saveSearch: (input) =>
-      getDesktopApiClient().search.saveSearch(input)
+      getDesktopApiClient().search.saveSearch(input),
+    listRecentSearches: (workspaceId) =>
+      getDesktopApiClient().search.listRecentSearches(workspaceId)
   },
   collections: {
     listCollections: (workspaceId) =>

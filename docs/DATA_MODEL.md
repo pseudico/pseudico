@@ -156,6 +156,9 @@ that are user-searchable and excludes derived export/search artifacts from the
 portable workspace export. Archived project/contact containers are projected as
 hidden from default search results while remaining available to explicit
 archived searches and restore flows.
+Recent search history is workspace-scoped local metadata stored in
+`app_settings` under `search.recent.v1`; it records query/filter summaries only
+and does not add a schema table or cloud search dependency.
 
 The contact foundation now stores contact containers plus flexible profile
 fields behind repository and service APIs. The reminder foundation now stores

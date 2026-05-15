@@ -16,4 +16,8 @@ export function registerSearchIpc(
     LOCAL_WORK_OS_IPC_CHANNELS.search.saveSearch,
     (_event, input) => handlers.handleSaveSearch(input)
   );
+  registerTypedIpcHandler(
+    LOCAL_WORK_OS_IPC_CHANNELS.search.listRecentSearches,
+    (_event, input) => handlers.handleListRecentSearches(input)
+  );
 }
