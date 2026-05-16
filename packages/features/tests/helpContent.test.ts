@@ -11,8 +11,10 @@ describe("help content", () => {
     expect(helpArticles.length).toBeGreaterThanOrEqual(5);
     expect(helpArticles.map((article) => article.id)).toContain("keyboard-commands");
     expect(helpArticles.map((article) => article.id)).toContain("release-readiness");
+    expect(helpArticles.map((article) => article.id)).toContain("operator-runbook");
     expect(getHelpArticle("getting-started").body).toContain("# Getting started");
     expect(getHelpArticle("keyboard-commands").body).toContain("Ctrl/Cmd+K");
+    expect(getHelpArticle("operator-runbook").body).toContain("Restore into a fresh workspace");
     expect(getHelpArticle("release-readiness").body).toContain("local-only");
   });
 
@@ -23,6 +25,9 @@ describe("help content", () => {
     );
     expect(getHelpArticlesForRoute("/settings").map((article) => article.id)).toContain(
       "release-readiness"
+    );
+    expect(getHelpArticlesForRoute("/settings").map((article) => article.id)).toContain(
+      "operator-runbook"
     );
     expect(getHelpArticlesForRoute("/unknown")[0]?.id).toBe("getting-started");
   });

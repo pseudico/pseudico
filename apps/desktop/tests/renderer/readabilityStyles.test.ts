@@ -1,0 +1,39 @@
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+
+const testDirectory = dirname(fileURLToPath(import.meta.url));
+const styles = readFileSync(
+  resolve(testDirectory, "../../src/renderer/styles.css"),
+  "utf8"
+);
+
+describe("primary-operator readability styles", () => {
+  it("raises default font and hit-target sizing without changing appearance classes", () => {
+    expect(styles).toContain("--operator-control-min-height: 46px");
+    expect(styles).toContain("font-size: calc(17px * var(--appearance-font-scale))");
+    expect(styles).toContain(".appearance-root.density-compact");
+    expect(styles).toContain("--operator-control-min-height: 40px");
+    expect(styles).toContain(".appearance-root.font-large");
+    expect(styles).toContain("--operator-control-min-height: 50px");
+  });
+
+  it("targets the required primary work surfaces for readable cards and inputs", () => {
+    expect(styles).toContain(".search-control");
+    expect(styles).toContain(".quick-add-form input");
+    expect(styles).toContain(".universal-item-card");
+    expect(styles).toContain(".search-result-card");
+    expect(styles).toContain(".today-task-card");
+    expect(styles).toContain(".dashboard-widget-row");
+    expect(styles).toContain(".daily-planner-lane-input input");
+    expect(styles).toContain(".appearance-settings-form select");
+    expect(styles).toContain(".backup-list-row");
+  });
+
+  it("keeps long operator titles wrapping on core headings", () => {
+    expect(styles).toContain(".project-detail-header h2");
+    expect(styles).toContain(".today-page-heading h2");
+    expect(styles).toContain("overflow-wrap: anywhere");
+  });
+});

@@ -6,6 +6,7 @@ import {
   ContainerTabRepository,
   DashboardRepository,
   SavedViewRepository,
+  SearchIndexRepository,
   WorkspaceRepository,
   type ActivityLogRecord,
   type AppSettingRecord,
@@ -103,6 +104,7 @@ export class WorkspaceSeedService {
   private readonly idFactory: IdFactory;
   private readonly now: () => Date;
   private readonly savedViewRepository: SavedViewRepository;
+  private readonly searchIndexRepository: SearchIndexRepository;
   private readonly workspaceRepository: WorkspaceRepository;
 
   constructor(input: {
@@ -119,6 +121,7 @@ export class WorkspaceSeedService {
     this.containerTabRepository = new ContainerTabRepository(input.connection);
     this.dashboardRepository = new DashboardRepository(input.connection);
     this.savedViewRepository = new SavedViewRepository(input.connection);
+    this.searchIndexRepository = new SearchIndexRepository(input.connection);
     this.workspaceRepository = new WorkspaceRepository(input.connection);
   }
 
@@ -128,6 +131,7 @@ export class WorkspaceSeedService {
       (): WorkspaceSeedResult => {
         const workspace = this.ensureWorkspace(input, timestamp);
         const systemInbox = this.ensureSystemInbox(workspace.record.id, timestamp);
+        this.ensureSystemInboxSearchIndex(systemInbox.record, timestamp);
         const systemInboxDefaultTab = this.ensureSystemInboxDefaultTab(
           workspace.record.id,
           systemInbox.record.id,
@@ -241,6 +245,31 @@ export class WorkspaceSeedService {
       }),
       created: true
     };
+  }
+
+  private ensureSystemInboxSearchIndex(
+    systemInbox: ContainerRecord,
+    timestamp: string
+  ): void {
+    this.searchIndexRepository.upsert({
+      id: this.idFactory("search"),
+      workspaceId: systemInbox.workspaceId,
+      targetType: "container",
+      targetId: systemInbox.id,
+      title: systemInbox.name,
+      body: systemInbox.description ?? "",
+      metadataJson: JSON.stringify({
+        type: systemInbox.type,
+        slug: systemInbox.slug,
+        status: systemInbox.status,
+        isFavorite: systemInbox.isFavorite,
+        isSystem: systemInbox.isSystem,
+        archivedAt: systemInbox.archivedAt,
+        deletedAt: systemInbox.deletedAt
+      }),
+      isDeleted: systemInbox.deletedAt !== null || systemInbox.archivedAt !== null,
+      timestamp
+    });
   }
 
   private ensureDefaultDashboard(
@@ -412,6 +441,7 @@ export class WorkspaceSeedService {
         action: "workspace_created",
         targetType: "workspace",
         targetId: workspace.id,
+        summary: `Created workspace "${workspace.name}".`,
         beforeJson: null,
         afterJson: JSON.stringify({
           id: workspace.id,

@@ -52,3 +52,11 @@ Run these checks against a development build or packaged smoke build:
 - Any new IPC endpoint must validate unknown input at the main/preload boundary
   before database or filesystem service access.
 - Any new external opener must use the shared external URL validator.
+
+## PSE-201 update
+
+The operator-readiness local-only security review is tracked in
+`docs/LOCAL_ONLY_SECURITY_REVIEW.md`. Current regression coverage includes
+network-off operator smoke evidence, optional network-default tests, a static
+network sink allowlist, external URL credential rejection, and an explicit
+BrowserWindow security-preferences test.

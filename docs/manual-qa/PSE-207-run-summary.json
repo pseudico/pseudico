@@ -1,0 +1,471 @@
+{
+  "runId": "PSE-207-2026-05-16T01-24-38-683Z",
+  "startedAt": "2026-05-16T01:24:38.684Z",
+  "exePath": "C:\\Users\\AlastairLacey\\Pseudico\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+  "sourceWorkspacePath": "C:/tmp/PSE-207-2026-05-16T01-24-38-683Z-source-workspace",
+  "backupTargetWorkspacePath": "C:/tmp/PSE-207-2026-05-16T01-24-38-683Z-backup-restore-workspace",
+  "exportTargetWorkspacePath": "C:/tmp/PSE-207-2026-05-16T01-24-38-683Z-export-restore-workspace",
+  "sourceAttachmentPath": "C:/tmp/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt",
+  "screenshotRelDir": "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z",
+  "screenshots": [
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/01-welcome.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/02-source-workspace-created.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/03-project-contact-created.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/04-category-created.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/05-content-created.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/06-relationship-linked.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/07-attachment-attached.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/07b-collection-created.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/08-dashboard-before-backup.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/09-backup-created.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/10-export-created.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/11-invalid-restore-target-error.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/12-backup-restored.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/13-backup-restore-project.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/14-backup-restore-search.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/15-backup-restore-dashboard.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/22-reopen-welcome.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/23-backup-restore-after-restart-project.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/24-backup-restore-after-restart-search.png",
+    "docs/manual-qa/screenshots/PSE-207-2026-05-16T01-24-38-683Z/25-backup-restore-after-restart-dashboard.png"
+  ],
+  "steps": [
+    {
+      "step": "Create disposable source workspace through packaged UI",
+      "result": "Pass",
+      "notes": "C:/tmp/PSE-207-2026-05-16T01-24-38-683Z-source-workspace"
+    },
+    {
+      "step": "Create representative contact and project through Quick Start UI",
+      "result": "Pass",
+      "notes": "Riley PSE-207 Recovery Contact; PSE-207 Recovery Project"
+    },
+    {
+      "step": "Create category through Settings UI",
+      "result": "Pass",
+      "notes": "PSE-207 Recovery QA"
+    },
+    {
+      "step": "Create note, task, list, and external link through Quick Start UI",
+      "result": "Pass",
+      "notes": "Project feed shows created records"
+    },
+    {
+      "step": "Create project-contact relationship",
+      "result": "Pass",
+      "notes": "Linked through project UI"
+    },
+    {
+      "step": "Attach local file and verify workspace-relative source storage",
+      "result": "Pass",
+      "notes": "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+    },
+    {
+      "step": "Create/open collection through Collections UI",
+      "result": "Pass",
+      "notes": "PSE-207 Recovery Collection"
+    },
+    {
+      "step": "Verify source data before backup",
+      "result": "Pass",
+      "notes": "Search, relationship, collection, attachment, and activity checked via packaged APIs"
+    },
+    {
+      "step": "Create manual backup through Settings UI",
+      "result": "Pass",
+      "notes": "backups/2026-05-16T01-25-26-659Z"
+    },
+    {
+      "step": "Create workspace JSON export through Settings UI",
+      "result": "Pass",
+      "notes": "exports/2026-05-16T01-25-27-615Z-workspace-export.json"
+    },
+    {
+      "step": "Try safe invalid restore branch through UI",
+      "result": "Pass",
+      "notes": "Active workspace restore target rejected with clear error."
+    },
+    {
+      "step": "Restore manual backup to clean target workspace through Settings UI",
+      "result": "Pass",
+      "notes": "C:/tmp/PSE-207-2026-05-16T01-24-38-683Z-backup-restore-workspace"
+    },
+    {
+      "step": "Verify backup-restore restored records/search/attachment/activity",
+      "result": "Pass",
+      "notes": "C:/tmp/PSE-207-2026-05-16T01-24-38-683Z-backup-restore-workspace; attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+    },
+    {
+      "step": "Verify backup-restore-after-restart restored records/search/attachment/activity",
+      "result": "Pass",
+      "notes": "C:/tmp/PSE-207-2026-05-16T01-24-38-683Z-backup-restore-workspace; attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+    },
+    {
+      "step": "Close/reopen packaged app and verify restored backup target persists",
+      "result": "Pass",
+      "notes": "C:/tmp/PSE-207-2026-05-16T01-24-38-683Z-backup-restore-workspace"
+    }
+  ],
+  "issues": [
+    {
+      "severity": "P3",
+      "title": "Workspace JSON export restore not rerun through UI",
+      "detail": "JSON export was created through Settings UI; this PSE-207 run focuses on manual backup restore because runner navigation back to Settings after restore was unreliable."
+    }
+  ],
+  "names": {
+    "workspace": "PSE-207 Source Workspace 2026-05-16",
+    "project": "PSE-207 Recovery Project",
+    "contact": "Riley PSE-207 Recovery Contact",
+    "category": "PSE-207 Recovery QA",
+    "note": "PSE-207 restore verification note",
+    "noteBody": "PSE-207-restore-token proves search survived backup and export restore.",
+    "task": "PSE-207 verify restored package task",
+    "list": "PSE-207 recovery checklist",
+    "linkTitle": "PSE-207 recovery reference link",
+    "linkUrl": "https://example.com/pse-207-recovery-reference",
+    "collection": "PSE-207 Recovery Collection",
+    "tag": "pse-207-recovery"
+  },
+  "ids": {
+    "workspaceId": "workspace_mp7nynu9_26ycs9cv5aw",
+    "projectId": "container_mp7nyso5_1kyo9gq35au",
+    "contactId": "container_mp7nypwt_0ajvm8qpoh8",
+    "noteId": null,
+    "taskId": null,
+    "listId": null,
+    "linkId": null,
+    "categoryId": "category_mp7nyvat_1ftx3uph1hn"
+  },
+  "sourceAttachmentChecksum": "fd8412b1c3d0bf7c9caa68ccac1b9b302a0c90603fdfcccf96a595f98c35f0f3",
+  "sourceAttachmentSizeBytes": 68,
+  "sourceAttachmentResult": {
+    "item": {
+      "id": "item_mp7nziwi_1ocg1wedco6",
+      "workspaceId": "workspace_mp7nynu9_26ycs9cv5aw",
+      "containerId": "container_mp7nyso5_1kyo9gq35au",
+      "containerTabId": null,
+      "type": "file",
+      "title": "PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt",
+      "body": "PSE-207 packaged restore attachment evidence.",
+      "categoryId": null,
+      "status": "active",
+      "sortOrder": 5120,
+      "pinned": false,
+      "createdAt": "2026-05-16T01:25:20.369Z",
+      "updatedAt": "2026-05-16T01:25:20.369Z",
+      "completedAt": null,
+      "archivedAt": null,
+      "deletedAt": null
+    },
+    "attachment": {
+      "id": "attachment_mp7nzivv_1539fbdwzt3",
+      "workspaceId": "workspace_mp7nynu9_26ycs9cv5aw",
+      "itemId": "item_mp7nziwi_1ocg1wedco6",
+      "originalName": "PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt",
+      "storedName": "PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt",
+      "mimeType": null,
+      "sizeBytes": 68,
+      "checksum": "fd8412b1c3d0bf7c9caa68ccac1b9b302a0c90603fdfcccf96a595f98c35f0f3",
+      "storagePath": "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt",
+      "description": "PSE-207 packaged restore attachment evidence.",
+      "createdAt": "2026-05-16T01:25:20.369Z",
+      "updatedAt": "2026-05-16T01:25:20.369Z",
+      "deletedAt": null
+    }
+  },
+  "sourceAttachmentVerify": {
+    "ok": true,
+    "data": {
+      "attachmentId": "attachment_mp7nzivv_1539fbdwzt3",
+      "itemId": "item_mp7nziwi_1ocg1wedco6",
+      "exists": true,
+      "storagePath": "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+    }
+  },
+  "sourcePreBackupSummary": {
+    "label": "source-pre-backup",
+    "workspaceId": "workspace_mp7nynu9_26ycs9cv5aw",
+    "workspaceName": "PSE-207 Source Workspace 2026-05-16",
+    "workspaceRootPath": "C:\\tmp\\PSE-207-2026-05-16T01-24-38-683Z-source-workspace",
+    "projectFound": true,
+    "contactFound": true,
+    "projectId": "container_mp7nyso5_1kyo9gq35au",
+    "contactId": "container_mp7nypwt_0ajvm8qpoh8",
+    "searchTitles": [
+      "PSE-207 restore verification note"
+    ],
+    "collectionNames": [
+      "PSE-207 Recovery Collection"
+    ],
+    "relationshipCount": 1,
+    "relationshipNames": [
+      null
+    ],
+    "attachmentCount": 1,
+    "attachmentStoragePaths": [
+      "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+    ],
+    "attachmentVerify": {
+      "ok": true,
+      "data": {
+        "attachmentId": "attachment_mp7nzivv_1539fbdwzt3",
+        "itemId": "item_mp7nziwi_1ocg1wedco6",
+        "exists": true,
+        "storagePath": "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+      }
+    },
+    "revealResult": {
+      "ok": true,
+      "data": {
+        "attachmentId": "attachment_mp7nzivv_1539fbdwzt3",
+        "itemId": "item_mp7nziwi_1ocg1wedco6",
+        "exists": true,
+        "storagePath": "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+      }
+    },
+    "recentActivity": [
+      {
+        "action": "saved_view_created",
+        "targetType": "saved_view",
+        "description": "Created saved view \"PSE-207 Recovery Collection\"."
+      },
+      {
+        "action": "file_attached",
+        "targetType": "attachment",
+        "description": "Attached file \"PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt\"."
+      },
+      {
+        "action": "relationship_created",
+        "targetType": "relationship",
+        "description": "Created related relationship."
+      },
+      {
+        "action": "link_created",
+        "targetType": "item",
+        "description": "Created link \"PSE-207 recovery reference link\"."
+      },
+      {
+        "action": "list_created",
+        "targetType": "item",
+        "description": "Created list \"PSE-207 recovery checklist\"."
+      },
+      {
+        "action": "task_created",
+        "targetType": "item",
+        "description": "Created task \"PSE-207 verify restored package task today\"."
+      },
+      {
+        "action": "export_created",
+        "targetType": "export",
+        "description": "Created task CSV export exports/2026-05-16T01-24-54-962Z-tasks.csv."
+      },
+      {
+        "action": "note_created",
+        "targetType": "item",
+        "description": "Created note \"PSE-207 restore verification note\"."
+      }
+    ]
+  },
+  "backup": {
+    "id": "backup_mp7nznrd_2fxq0jvy888",
+    "workspaceId": "workspace_mp7nynu9_26ycs9cv5aw",
+    "createdAt": "2026-05-16T01:25:26.659Z",
+    "relativePath": "backups/2026-05-16T01-25-26-659Z",
+    "databaseRelativePath": "backups/2026-05-16T01-25-26-659Z/local-work-os.sqlite",
+    "manifestRelativePath": "backups/2026-05-16T01-25-26-659Z/attachment-manifest.json",
+    "attachmentCount": 1,
+    "totalAttachmentBytes": 68,
+    "databaseSizeBytes": 688128,
+    "kind": "manual"
+  },
+  "backupAbsolutePath": "C:/tmp/PSE-207-2026-05-16T01-24-38-683Z-source-workspace/backups/2026-05-16T01-25-26-659Z",
+  "uiExportMessage": "exports/2026-05-16T01-25-27-615Z-workspace-export.json",
+  "exportSummary": {
+    "ok": true,
+    "data": {
+      "id": "export_mp7nzovy_17ek9e6dwq9",
+      "workspaceId": "workspace_mp7nynu9_26ycs9cv5aw",
+      "createdAt": "2026-05-16T01:25:28.125Z",
+      "relativePath": "exports/2026-05-16T01-25-28-125Z-workspace-export.json",
+      "sizeBytes": 15809,
+      "schemaVersion": 1,
+      "itemCount": 5,
+      "attachmentCount": 1,
+      "totalAttachmentBytes": 68
+    }
+  },
+  "exportRelativePath": "exports/2026-05-16T01-25-28-125Z-workspace-export.json",
+  "exportAbsolutePath": "C:/tmp/PSE-207-2026-05-16T01-24-38-683Z-source-workspace/exports/2026-05-16T01-25-28-125Z-workspace-export.json",
+  "failureBranch": "Active workspace restore target rejected with clear error.",
+  "backup_restoreSummary": {
+    "label": "backup-restore",
+    "workspaceId": "workspace_mp7nynu9_26ycs9cv5aw",
+    "workspaceName": "PSE-207 Source Workspace 2026-05-16",
+    "workspaceRootPath": "C:\\tmp\\PSE-207-2026-05-16T01-24-38-683Z-backup-restore-workspace",
+    "projectFound": true,
+    "contactFound": true,
+    "projectId": "container_mp7nyso5_1kyo9gq35au",
+    "contactId": "container_mp7nypwt_0ajvm8qpoh8",
+    "searchTitles": [
+      "PSE-207 restore verification note"
+    ],
+    "collectionNames": [
+      "PSE-207 Recovery Collection"
+    ],
+    "relationshipCount": 1,
+    "relationshipNames": [
+      null
+    ],
+    "attachmentCount": 1,
+    "attachmentStoragePaths": [
+      "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+    ],
+    "attachmentVerify": {
+      "ok": true,
+      "data": {
+        "attachmentId": "attachment_mp7nzivv_1539fbdwzt3",
+        "itemId": "item_mp7nziwi_1ocg1wedco6",
+        "exists": true,
+        "storagePath": "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+      }
+    },
+    "revealResult": {
+      "ok": true,
+      "data": {
+        "attachmentId": "attachment_mp7nzivv_1539fbdwzt3",
+        "itemId": "item_mp7nziwi_1ocg1wedco6",
+        "exists": true,
+        "storagePath": "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+      }
+    },
+    "recentActivity": [
+      {
+        "action": "backup_restored",
+        "targetType": "backup",
+        "description": "Restored backup into C:\\tmp\\PSE-207-2026-05-16T01-24-38-683Z-backup-restore-workspace."
+      },
+      {
+        "action": "saved_view_created",
+        "targetType": "saved_view",
+        "description": "Created saved view \"PSE-207 Recovery Collection\"."
+      },
+      {
+        "action": "file_attached",
+        "targetType": "attachment",
+        "description": "Attached file \"PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt\"."
+      },
+      {
+        "action": "relationship_created",
+        "targetType": "relationship",
+        "description": "Created related relationship."
+      },
+      {
+        "action": "link_created",
+        "targetType": "item",
+        "description": "Created link \"PSE-207 recovery reference link\"."
+      },
+      {
+        "action": "list_created",
+        "targetType": "item",
+        "description": "Created list \"PSE-207 recovery checklist\"."
+      },
+      {
+        "action": "task_created",
+        "targetType": "item",
+        "description": "Created task \"PSE-207 verify restored package task today\"."
+      },
+      {
+        "action": "export_created",
+        "targetType": "export",
+        "description": "Created task CSV export exports/2026-05-16T01-24-54-962Z-tasks.csv."
+      }
+    ]
+  },
+  "backup_restore_after_restartSummary": {
+    "label": "backup-restore-after-restart",
+    "workspaceId": "workspace_mp7nynu9_26ycs9cv5aw",
+    "workspaceName": "PSE-207 Source Workspace 2026-05-16",
+    "workspaceRootPath": "C:\\tmp\\PSE-207-2026-05-16T01-24-38-683Z-backup-restore-workspace",
+    "projectFound": true,
+    "contactFound": true,
+    "projectId": "container_mp7nyso5_1kyo9gq35au",
+    "contactId": "container_mp7nypwt_0ajvm8qpoh8",
+    "searchTitles": [
+      "PSE-207 restore verification note"
+    ],
+    "collectionNames": [
+      "PSE-207 Recovery Collection"
+    ],
+    "relationshipCount": 1,
+    "relationshipNames": [
+      null
+    ],
+    "attachmentCount": 1,
+    "attachmentStoragePaths": [
+      "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+    ],
+    "attachmentVerify": {
+      "ok": true,
+      "data": {
+        "attachmentId": "attachment_mp7nzivv_1539fbdwzt3",
+        "itemId": "item_mp7nziwi_1ocg1wedco6",
+        "exists": true,
+        "storagePath": "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+      }
+    },
+    "revealResult": {
+      "ok": true,
+      "data": {
+        "attachmentId": "attachment_mp7nzivv_1539fbdwzt3",
+        "itemId": "item_mp7nziwi_1ocg1wedco6",
+        "exists": true,
+        "storagePath": "attachments/2026/05/attachment_mp7nzivv_1539fbdwzt3/PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt"
+      }
+    },
+    "recentActivity": [
+      {
+        "action": "backup_restored",
+        "targetType": "backup",
+        "description": "Restored backup into C:\\tmp\\PSE-207-2026-05-16T01-24-38-683Z-backup-restore-workspace."
+      },
+      {
+        "action": "saved_view_created",
+        "targetType": "saved_view",
+        "description": "Created saved view \"PSE-207 Recovery Collection\"."
+      },
+      {
+        "action": "file_attached",
+        "targetType": "attachment",
+        "description": "Attached file \"PSE-207-2026-05-16T01-24-38-683Z-source-attachment.txt\"."
+      },
+      {
+        "action": "relationship_created",
+        "targetType": "relationship",
+        "description": "Created related relationship."
+      },
+      {
+        "action": "link_created",
+        "targetType": "item",
+        "description": "Created link \"PSE-207 recovery reference link\"."
+      },
+      {
+        "action": "list_created",
+        "targetType": "item",
+        "description": "Created list \"PSE-207 recovery checklist\"."
+      },
+      {
+        "action": "task_created",
+        "targetType": "item",
+        "description": "Created task \"PSE-207 verify restored package task today\"."
+      },
+      {
+        "action": "export_created",
+        "targetType": "export",
+        "description": "Created task CSV export exports/2026-05-16T01-24-54-962Z-tasks.csv."
+      }
+    ]
+  },
+  "ok": true,
+  "finishedAt": "2026-05-16T01:25:53.806Z"
+}

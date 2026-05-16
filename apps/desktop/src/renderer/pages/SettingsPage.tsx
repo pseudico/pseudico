@@ -63,12 +63,67 @@ import type {
 type SettingsPageProps = {
   apiClient?: LocalWorkOsApi;
   initialCategories?: CategorySummary[];
+  initialSection?: SettingsSectionId;
 };
 
 const defaultCategoryColor = "#2c6b8f";
 const shortcutGroups = groupShortcuts(
   createShortcutRegistry(defaultShortcutDescriptors).list()
 );
+
+type SettingsSectionId =
+  | "overview"
+  | "appearance"
+  | "backup"
+  | "privacy"
+  | "importsExports"
+  | "advanced"
+  | "organization";
+
+const settingsSections: Array<{
+  id: SettingsSectionId;
+  title: string;
+  description: string;
+  secondary?: boolean;
+}> = [
+  {
+    id: "overview",
+    title: "Overview",
+    description: "Start with daily settings and safe next actions."
+  },
+  {
+    id: "appearance",
+    title: "Appearance & readability",
+    description: "Theme, density, font size, locale, and shortcuts."
+  },
+  {
+    id: "backup",
+    title: "Backup & restore",
+    description: "Create local backups and restore into a new workspace."
+  },
+  {
+    id: "privacy",
+    title: "Privacy & local-only",
+    description: "Understand local boundaries and optional network controls."
+  },
+  {
+    id: "organization",
+    title: "Categories / metadata",
+    description: "Manage operator-facing organisation labels."
+  },
+  {
+    id: "importsExports",
+    title: "Imports & exports",
+    description: "Move data in or out using local files.",
+    secondary: true
+  },
+  {
+    id: "advanced",
+    title: "Advanced maintenance",
+    description: "Troubleshoot health, search, attachments, and database care.",
+    secondary: true
+  }
+];
 
 type AppearanceDraft = {
   theme: AppearanceThemePreference;
@@ -102,10 +157,13 @@ const defaultPrivacyNetworkSettings: PrivacyNetworkSettingsSummary = {
 
 export function SettingsPage({
   apiClient = desktopApiClient,
-  initialCategories = []
+  initialCategories = [],
+  initialSection = "overview"
 }: SettingsPageProps): React.JSX.Element {
   const { currentWorkspace } = useWorkspaceStore();
   const appearance = useAppearanceSettings();
+  const [activeSection, setActiveSection] =
+    useState<SettingsSectionId>(initialSection);
   const [categories, setCategories] =
     useState<CategorySummary[]>(initialCategories);
   const [appearanceDraft, setAppearanceDraft] = useState<AppearanceDraft>({
@@ -1273,13 +1331,98 @@ export function SettingsPage({
         <h2>{t("settings.page.title")}</h2>
         <p>
           {currentWorkspace === null
-            ? "Open a workspace to view local database details."
-            : currentWorkspace.rootPath}
+            ? "Open a workspace to adjust local-only preferences, backup safety, and organisation settings."
+            : `Local workspace: ${currentWorkspace.rootPath}`}
         </p>
       </div>
-      <WorkspaceHealthPanel workspace={currentWorkspace} />
 
-      <section className="backup-management-panel" aria-label="Appearance">
+      <nav className="settings-section-nav" aria-label="Settings sections">
+        {settingsSections.map((section) => (
+          <button
+            aria-pressed={activeSection === section.id}
+            className={
+              activeSection === section.id
+                ? "settings-section-tab settings-section-tab-active"
+                : section.secondary
+                  ? "settings-section-tab settings-section-tab-secondary"
+                  : "settings-section-tab"
+            }
+            key={section.id}
+            type="button"
+            onClick={() => setActiveSection(section.id)}
+          >
+            <strong>{section.title}</strong>
+            <span>{section.description}</span>
+          </button>
+        ))}
+      </nav>
+
+      {error === null ? null : <ErrorState error={error} title="Settings error" />}
+
+      {activeSection === "overview" ? (
+        <section className="settings-overview-panel" aria-label="Settings overview">
+          <div className="settings-overview-hero">
+            <div>
+              <p className="top-eyebrow">Operator settings</p>
+              <h3>Start with comfort, safety, and local trust.</h3>
+              <p className="muted-text">
+                Settings is organised by what you are trying to do. Everyday
+                preferences and recovery controls are first; import/export and
+                maintenance tools stay available when deliberately opened.
+              </p>
+            </div>
+            <button
+              className="primary-button"
+              type="button"
+              onClick={() => setActiveSection("backup")}
+            >
+              Open Backup &amp; Restore
+            </button>
+          </div>
+          <div className="settings-intent-grid">
+            <article className="settings-intent-card settings-intent-card-primary">
+              <Palette size={20} aria-hidden="true" />
+              <h4>Appearance &amp; readability</h4>
+              <p>Use this to adjust the visible app for daily reading, scanning, and input comfort.</p>
+              <button type="button" onClick={() => setActiveSection("appearance")}>Adjust appearance</button>
+            </article>
+            <article className="settings-intent-card settings-intent-card-primary">
+              <Archive size={20} aria-hidden="true" />
+              <h4>Backup &amp; restore</h4>
+              <p>Create a local backup or restore into a new workspace. This will not overwrite your current workspace.</p>
+              <button type="button" onClick={() => setActiveSection("backup")}>Review backups</button>
+            </article>
+            <article className="settings-intent-card settings-intent-card-primary">
+              <ShieldCheck size={20} aria-hidden="true" />
+              <h4>Privacy &amp; local-only</h4>
+              <p>Confirm that telemetry and cloud sync are off, and choose any optional network-capable features deliberately.</p>
+              <button type="button" onClick={() => setActiveSection("privacy")}>Review privacy</button>
+            </article>
+            <article className="settings-intent-card">
+              <Plus size={20} aria-hidden="true" />
+              <h4>Categories / metadata</h4>
+              <p>Manage the labels that help organise projects, contacts, tasks, notes, and files.</p>
+              <button type="button" onClick={() => setActiveSection("organization")}>Manage categories</button>
+            </article>
+            <article className="settings-intent-card settings-intent-card-secondary">
+              <Upload size={20} aria-hidden="true" />
+              <h4>Imports &amp; exports</h4>
+              <p>Advanced: use when moving local files in or out of Pseudico, not for everyday planning.</p>
+              <button type="button" onClick={() => setActiveSection("importsExports")}>Open imports &amp; exports</button>
+            </article>
+            <article className="settings-intent-card settings-intent-card-secondary">
+              <Wrench size={20} aria-hidden="true" />
+              <h4>Advanced maintenance</h4>
+              <p>Advanced: use only when troubleshooting search, attachments, workspace health, or maintenance jobs.</p>
+              <button type="button" onClick={() => setActiveSection("advanced")}>Open maintenance</button>
+            </article>
+          </div>
+        </section>
+      ) : null}
+
+      {activeSection === "appearance" ? (
+        <>
+      <section className="backup-management-panel" aria-label="Appearance and readability">
         <div className="panel-heading-actions">
           <div className="panel-heading">
             <h3>Appearance</h3>
@@ -1381,14 +1524,18 @@ export function SettingsPage({
           </div>
         </div>
       </section>
+        </>
+      ) : null}
 
+      {activeSection === "privacy" ? (
       <section className="backup-management-panel" aria-label="Privacy and network">
         <div className="panel-heading-actions">
           <div className="panel-heading">
-            <h3>Privacy &amp; Network</h3>
+            <h3>Privacy &amp; local-only</h3>
             <p className="muted-text">
-              Optional network-capable features are off by default and must be
-              enabled explicitly for this local workspace.
+              Pseudico keeps your workspace on this device. Optional
+              network-capable features are off by default and only run when you
+              deliberately enable them for this local workspace.
             </p>
           </div>
           <ShieldCheck size={20} aria-hidden="true" />
@@ -1435,7 +1582,9 @@ export function SettingsPage({
           Current network controls: {formatEnabledPrivacyFeatures(privacySettings)}.
         </p>
       </section>
+      ) : null}
 
+      {activeSection === "appearance" ? (
       <section className="backup-management-panel" aria-label="Keyboard shortcuts">
         <div className="panel-heading-actions">
           <div className="panel-heading">
@@ -1464,10 +1613,19 @@ export function SettingsPage({
           ))}
         </div>
       </section>
-      <section className="backup-management-panel" aria-label="Diagnostics">
+      ) : null}
+
+      {activeSection === "advanced" ? (
+        <>
+      <WorkspaceHealthPanel workspace={currentWorkspace} />
+      <section className="backup-management-panel" aria-label="Advanced diagnostics">
         <div className="panel-heading-actions">
           <div className="panel-heading">
-            <h3>Diagnostics</h3>
+            <h3>Advanced diagnostics</h3>
+            <p className="muted-text">
+              Advanced: use when search, attachments, or saved views look wrong.
+              Results explain what was checked before you decide what to repair.
+            </p>
           </div>
           <div className="top-actions">
             <button
@@ -1516,11 +1674,11 @@ export function SettingsPage({
       <section className="backup-management-panel" aria-label="Maintenance">
         <div className="panel-heading-actions">
           <div className="panel-heading">
-            <h3>Maintenance</h3>
+            <h3>Advanced maintenance</h3>
             <p className="muted-text">
-              Run local SQLite integrity, attachment manifest audit, orphan
-              attachment scan, search reindex, and VACUUM with a backup preflight
-              before write maintenance. Cleanup quarantines orphan files under
+              Advanced: use only when troubleshooting or preparing risky local
+              cleanup. Pseudico creates a backup preflight before write
+              maintenance, and orphan cleanup quarantines files under
               logs/maintenance instead of deleting them.
             </p>
           </div>
@@ -1563,10 +1721,19 @@ export function SettingsPage({
           <MaintenanceJobsPanel jobs={maintenanceJobs} />
         )}
       </section>
-      <section className="backup-management-panel" aria-label="Backups">
+        </>
+      ) : null}
+
+      {activeSection === "backup" ? (
+      <section className="backup-management-panel backup-restore-panel" aria-label="Backup and restore">
         <div className="panel-heading-actions">
           <div className="panel-heading">
-            <h3>Backups</h3>
+            <h3>Backup &amp; restore</h3>
+            <p className="muted-text">
+              Use this to create local backup snapshots and restore a backup
+              into a fresh workspace folder. This will not overwrite your
+              current workspace.
+            </p>
           </div>
           <div className="top-actions">
             <button
@@ -1747,7 +1914,7 @@ export function SettingsPage({
 
         <div className="category-form" aria-label="Restore target">
           <label>
-            <span>Restore target folder</span>
+            <span>New restore workspace folder</span>
             <input
               disabled={restoreBusy}
               placeholder="C:\\Users\\you\\Local Work OS Restored"
@@ -1775,64 +1942,19 @@ export function SettingsPage({
           )}
         </div>
       </section>
-      <section className="export-management-panel" aria-label="Exports">
-        <div className="panel-heading-actions">
-          <div className="panel-heading">
-            <h3>Exports</h3>
-          </div>
-          <div className="top-actions">
-            <button
-              className="primary-button compact-button"
-              disabled={exportBusy || currentWorkspace === null}
-              type="button"
-              onClick={() => void exportWorkspaceJson()}
-            >
-              <FileJson size={16} aria-hidden="true" />
-              Export JSON
-            </button>
-            <button
-              className="secondary-button compact-button"
-              disabled={exportBusy || currentWorkspace === null}
-              type="button"
-              onClick={() => void exportTasks("csv")}
-            >
-              <FileSpreadsheet size={16} aria-hidden="true" />
-              Export tasks CSV
-            </button>
-            <button
-              className="secondary-button compact-button"
-              disabled={exportBusy || currentWorkspace === null}
-              type="button"
-              onClick={() => void exportTasks("tsv")}
-            >
-              <FileSpreadsheet size={16} aria-hidden="true" />
-              Export tasks TSV
-            </button>
-            <button
-              className="primary-button compact-button"
-              disabled={exportBusy || currentWorkspace === null}
-              type="button"
-              onClick={() => void exportAdvancedBundle()}
-            >
-              <Archive size={16} aria-hidden="true" />
-              Export portable bundle
-            </button>
-          </div>
-        </div>
+      ) : null}
 
-        {exportMessage === null ? (
-          <EmptyState
-            description="JSON, CSV/TSV, and HTML/Markdown bundle export results will appear here for this session."
-            title="No export created this session"
-          />
-        ) : (
-          <p className="form-message">{exportMessage}</p>
-        )}
-      </section>
-      <section className="export-management-panel" aria-label="Imports">
+      {activeSection === "importsExports" ? (
+        <>
+      <section className="export-management-panel" aria-label="Imports and exports - imports">
         <div className="panel-heading-actions">
           <div className="panel-heading">
-            <h3>Imports</h3>
+            <h3>Imports from local files</h3>
+            <p className="muted-text">
+              Preview local files before importing. Operator-facing Markdown and
+              CSV/TSV imports create local tasks, contacts, projects, notes, and
+              attachments through the existing write flows.
+            </p>
           </div>
           <div className="top-actions">
             <button
@@ -1845,13 +1967,13 @@ export function SettingsPage({
               Import EML/Maildir to Inbox
             </button>
             <button
-              className="primary-button compact-button"
+              className="secondary-button compact-button"
               disabled={importBusy}
               type="button"
               onClick={() => void validateWorkspaceImport()}
             >
               <Upload size={16} aria-hidden="true" />
-              Validate JSON import
+              Validate portable JSON import
             </button>
           </div>
         </div>
@@ -1861,7 +1983,7 @@ export function SettingsPage({
             <span>Markdown folder path</span>
             <input
               disabled={importBusy}
-              placeholder="C:\Users\you\imports\project-notes"
+              placeholder="C:\\Users\\you\\imports\\project-notes"
               value={markdownFolderPath}
               onChange={(event) => setMarkdownFolderPath(event.target.value)}
             />
@@ -1973,6 +2095,15 @@ export function SettingsPage({
               onChange={(event) => setRestoreExportPath(event.target.value)}
             />
           </label>
+          <label>
+            <span>New restore workspace folder</span>
+            <input
+              disabled={restoreBusy}
+              placeholder="C:\\Users\\you\\Local Work OS Restored"
+              value={restoreTargetPath}
+              onChange={(event) => setRestoreTargetPath(event.target.value)}
+            />
+          </label>
           <button
             className="secondary-button"
             disabled={restoreBusy}
@@ -2027,7 +2158,7 @@ export function SettingsPage({
       <section className="export-management-panel" aria-label="Optional local IMAP import">
         <div className="panel-heading-actions">
           <div className="panel-heading">
-            <h3>Optional local IMAP import</h3>
+            <h3>Advanced optional IMAP import</h3>
             <p className="muted-text">
               IMAP import is a local-only adapter-backed capability. Account settings
               exclude passwords, duplicate messages are skipped, and live mailbox
@@ -2050,14 +2181,78 @@ export function SettingsPage({
           </div>
         </div>
       </section>
-      <section className="category-management-panel" aria-label="Categories">
+      <section className="export-management-panel" aria-label="Imports and exports - exports">
         <div className="panel-heading-actions">
           <div className="panel-heading">
-            <h3>Categories</h3>
+            <h3>Exports to local files</h3>
+            <p className="muted-text">
+              Use this to create local files you control. Portable JSON and
+              bundles are advanced recovery/exchange formats, not cloud sync.
+            </p>
+          </div>
+          <div className="top-actions">
+            <button
+              className="secondary-button compact-button"
+              disabled={exportBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void exportWorkspaceJson()}
+            >
+              <FileJson size={16} aria-hidden="true" />
+              Export portable JSON
+            </button>
+            <button
+              className="secondary-button compact-button"
+              disabled={exportBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void exportTasks("csv")}
+            >
+              <FileSpreadsheet size={16} aria-hidden="true" />
+              Export tasks CSV
+            </button>
+            <button
+              className="secondary-button compact-button"
+              disabled={exportBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void exportTasks("tsv")}
+            >
+              <FileSpreadsheet size={16} aria-hidden="true" />
+              Export tasks TSV
+            </button>
+            <button
+              className="secondary-button compact-button"
+              disabled={exportBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void exportAdvancedBundle()}
+            >
+              <Archive size={16} aria-hidden="true" />
+              Export portable bundle
+            </button>
           </div>
         </div>
 
-        {error === null ? null : <ErrorState error={error} title="Settings error" />}
+        {exportMessage === null ? (
+          <EmptyState
+            description="JSON, CSV/TSV, and HTML/Markdown bundle export results will appear here for this session."
+            title="No export created this session"
+          />
+        ) : (
+          <p className="form-message">{exportMessage}</p>
+        )}
+      </section>
+        </>
+      ) : null}
+
+      {activeSection === "organization" ? (
+      <section className="category-management-panel" aria-label="Categories and metadata">
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <h3>Categories / metadata</h3>
+            <p className="muted-text">
+              Use this to maintain the organisation labels that help group work
+              across projects, contacts, tasks, notes, files, and searches.
+            </p>
+          </div>
+        </div>
 
         <form className="category-form" onSubmit={createCategory}>
           <label>
@@ -2113,6 +2308,7 @@ export function SettingsPage({
           )}
         </div>
       </section>
+      ) : null}
       <aside className="local-only-panel" aria-label="Local-only status">
         <ShieldCheck size={20} aria-hidden="true" />
         <div>

@@ -6557,3 +6557,899 @@ Next actions: Next run should reconcile PSE-85 scope against existing import mod
 - Files changed: docs/session_log.md
 - Open questions / risks: GitHub CI/review remains final merge gate.
 - Next actions: Stage/commit; push branch; open ready PR.
+## 2026-05-15 10:46:25 +10:00
+- Objective: Merge PSE-84 and reconcile next-ticket readiness.
+- Decisions made: PR #191 was green/clean, squash-merged as 5c68155b; PSE-84 moved to Done; no eligible planned issue remains to promote.
+- Files changed: docs/session_log.md
+- Open questions / risks: Project appears complete; only Linear starter onboarding backlog remains outside project scope.
+- Next actions: Final report; await new planned Linear scope.
+## 2026-05-15 11:46:51 +10:00
+- Objective: Propose holistic post-build software review/annealing process for Pseudico.
+- Decisions made: Treat request as advisory only; no repo/code changes beyond session log.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need human/operator definition of acceptable handoff threshold.
+- Next actions: Provide review framework; define evidence gates; suggest operator handoff criteria.
+- Timestamp: 2026-05-15T11:59:16+10:00
+  Objective: Start Pseudico operator-readiness review with discovery, static checks, and verification evidence.
+  Decisions made:
+    - Verdict leaning Pilot ready pending real manual operator UI restore/failure-mode pass.
+    - Treat release readiness as blocked by unsigned/unnotarized distribution and incomplete operator runbook.
+  Files changed:
+    - docs/session_log.md
+  Open questions / risks: Manual fresh-workspace UI journey, dependency audit/license notice, and full failure-mode matrix remain incomplete.
+  Next actions: Run manual UI smoke; create P0/P1 QA tickets; draft operator runbook.
+- Timestamp: 2026-05-15T12:27:32+10:00
+  Objective: Create operator-readiness Linear tickets and handoff plan.
+  Decisions made:
+    - Created parent Linear issue PSE-195 with child issues PSE-196 through PSE-205.
+    - Added repo ticket pack and handoff wave plan as source-of-truth for later Codex threads.
+  Files changed:
+    - docs/README.md
+    - docs/OPERATOR_HANDOFF_PLAN.md
+    - docs/tickets/OPERATOR_READINESS_TICKET_PACK.md
+    - docs/session_log.md
+  Open questions / risks: Need owner to promote one Spec Ready issue at a time to Codex Ready and confirm release vs internal handoff target.
+  Next actions: Start PSE-196; then PSE-197; keep PSE-205 blocked until evidence issues close.
+- Timestamp: 2026-05-15T12:31:00+10:00
+  Objective: Advise on reusing standard Codex prompt for operator-readiness tickets.
+  Decisions made:
+    - Recommend reusing the project prompt with an added operator-readiness clause.
+    - Each Codex thread should target one Linear issue only.
+  Files changed:
+    - docs/session_log.md
+  Open questions / risks: Need user to choose first ticket, likely PSE-196.
+  Next actions: Start one Codex thread per issue; include ticket link; require evidence/runbook updates.
+
+## 2026-05-15 13:02:16 +10:00
+Objective: Phase 1 operator-readiness discovery for Pseudico.
+Decisions made:
+- Initial verdict set to Pilot ready, not operator ready, pending real app smoke and recovery evidence.
+- Captured product truth map, static boundary signals, test inventory, and blocker list.
+Files changed:
+- docs/OPERATOR_READINESS_REVIEW_PHASE1.md
+- docs/session_log.md
+Open questions / risks: Fresh-workspace journey, backup/restore, no-network, failure-mode, and activity/search evidence remain unproven.
+Next actions: Phase 2 static architecture/security review; Phase 3 fresh-workspace smoke; Phase 4 failure-mode review.
+- Timestamp: 2026-05-15T12:36:30+10:00
+  Objective: Correct Codex prompt guidance after broad review ran instead of ticket implementation.
+  Decisions made:
+    - Clarify not to reuse the original review brief; use a ticket-specific implementation prompt.
+    - Recommend stopping/reverting the mistaken Phase 1 review output before starting PSE-196.
+  Files changed:
+    - docs/session_log.md
+  Open questions / risks: Current stray Codex branch may contain unwanted docs changes and should not be PR'd.
+  Next actions: Stop bad run; start new PSE-196 thread with explicit Linear URL and acceptance criteria.
+- Timestamp: 2026-05-15T14:24:10+10:00
+  Objective: Implement PSE-196 fresh-workspace operator smoke.
+  Decisions made:
+    - Added service/SSR smoke covering workspace health, Inbox, core objects, relationships, search, saved views, Today, dashboard, timeline/calendar, and restart persistence.
+    - Documented the new smoke command as operator-readiness evidence while noting it does not replace packaged manual QA.
+  Files changed:
+    - apps/desktop/tests/smoke/operator-readiness-flow.test.ts
+    - docs/QA_SCRIPTS.md
+    - docs/session_log.md
+  Open questions / risks: Manual packaged-app OS-dialog QA still belongs to later operator-readiness tickets.
+  Next actions: Start PSE-197 backup/restore golden workflow; keep PSE-205 blocked.
+- Timestamp: 2026-05-15T14:38:00+10:00
+  Objective: Implement PSE-197 backup/restore golden workflow.
+  Decisions made:
+    - Added golden smoke creating backup and workspace JSON export, then restoring each into separate clean workspaces.
+    - Verified attachments, search rebuild, relationships, saved views, dashboard, activity, and workspace health after restore.
+  Files changed:
+    - apps/desktop/tests/smoke/backup-restore-golden.test.ts
+    - docs/QA_SCRIPTS.md
+    - docs/session_log.md
+  Open questions / risks: Packaged-app file picker restore QA remains for release packaging/manual QA tickets.
+  Next actions: Start PSE-198 operator runbook; preserve PSE-205 as final gate.
+
+## 2026-05-15 15:00:48 +10:00
+Objective: Complete PSE-198 nontechnical operator runbook.
+Decisions made: Added full runbook; mirrored short operator article in local help; kept readiness wording at pilot-ready until P0/P1 closure.
+Files changed: docs/OPERATOR_RUNBOOK.md; docs/help/operator-runbook.md; docs/README.md; docs/help/README.md; packages/features/src/help/HelpContent.ts; packages/features/tests/helpContent.test.ts; docs/session_log.md
+Open questions / risks: Runbook remains truthful only if future implementation tickets keep limitations current.
+Next actions: Start PSE-199 failure-mode matrix; then PSE-200 dependency/license audit; then PSE-201 local-only network review.
+
+## 2026-05-15 15:19:02 +10:00
+Objective: Complete PSE-199 failure-mode matrix and regression baseline.
+Decisions made: Added matrix with P0/P1/P2 recovery expectations; documented manual OS gaps; added focused tests for path traversal, restore validation, unsafe URLs, and huge notes.
+Files changed: docs/FAILURE_MODE_MATRIX.md; docs/README.md; docs/TESTING.md; docs/QA_SCRIPTS.md; packages/features/tests/backupService.test.ts; packages/features/tests/restoreService.test.ts; packages/features/tests/linkService.test.ts; packages/features/tests/noteService.test.ts; docs/session_log.md
+Open questions / risks: Permission-denied, locked DB, interrupted writes/backups, large real attachments, and packaged long-running jobs still need manual QA evidence.
+Next actions: Start PSE-200 dependency/license audit; then PSE-201 local-only network review; then PSE-202 activity/search reconciliation.
+
+## 2026-05-15 16:24:01 +10:00
+Objective: Complete PSE-200 dependency/license audit gate.
+Decisions made: Added local-only audit script; generated runtime/tooling notice artifacts; documented 0 failures and one network-capable transitive warning for PSE-201 follow-up.
+Files changed: scripts/audit-release-dependencies.mjs; package.json; docs/DISTRIBUTION_LICENSING_PRIVACY.md; docs/RELEASE.md; docs/README.md; docs/release/README.md; docs/release/dependency-license-audit.json; docs/release/THIRD_PARTY_NOTICES.md; docs/session_log.md
+Open questions / risks: Owner legal review and public app license remain pending; PSE-201 must verify simple-get is not used in normal workflows.
+Next actions: Start PSE-201 local-only network/security review; then PSE-202 activity/search reconciliation; then PSE-203 performance evidence.
+
+## 2026-05-15 18:31:17 +10:00
+Objective: Complete PSE-201 local-only network/security review.
+Decisions made: Added local-only review doc; made BrowserWindow preferences testable; routed registered external openers through shared validator; rejected link URL credentials; added static network allowlist and fetch-blocked operator smoke.
+Files changed: docs/LOCAL_ONLY_SECURITY_REVIEW.md; docs/README.md; docs/QA_SCRIPTS.md; docs/SECURITY_AUDIT.md; apps/desktop/src/main/workspaceWindowSecurity.ts; apps/desktop/src/main/workspaceWindow.ts; apps/desktop/src/main/ipc/registerLinkIpc.ts; apps/desktop/src/main/ipc/registerLocationIpc.ts; packages/features/src/links/LinkService.ts; apps/desktop/tests/security/localOnlyNetwork.test.ts; apps/desktop/tests/main/workspaceWindowSecurity.test.ts; apps/desktop/tests/main/electronSecurity.test.ts; packages/features/tests/linkService.test.ts; packages/features/tests/privacySettingsService.test.ts; apps/desktop/tests/smoke/operator-readiness-flow.test.ts; docs/release/dependency-license-audit.json; docs/release/THIRD_PARTY_NOTICES.md; docs/session_log.md
+Open questions / risks: Packaged-app packet/network-monitor evidence remains manual for final readiness; optional network features must stay ticket-gated.
+Next actions: Start PSE-202 activity/search reconciliation; then PSE-203 performance evidence; then PSE-204 packaging handoff.
+- Timestamp: 2026-05-15 18:57:30 +10:00
+- Objective: Complete PSE-202 activity/search reconciliation hardening.
+- Decisions made: Added integrated reconciliation regression; indexed system Inbox on bootstrap; reindexed attachments on generic item lifecycle; documented standards.
+- Files changed: packages/db/src/services/WorkspaceSeedService.ts; packages/features/src/items/ItemService.ts; packages/features/tests/activitySearchReconciliation.test.ts; docs/ACTIVITY_SEARCH_RECONCILIATION.md; docs/README.md; docs/QA_SCRIPTS.md; docs/session_log.md
+- Open questions / risks: Manual packaged-app operator QA still needed for full handoff evidence.
+- Next actions: Start PSE-203 performance/scale review; keep P0/P1 risks ticketed; update runbook if operator workflows change.
+- Timestamp: 2026-05-15 19:30:59 +10:00
+- Objective: Complete PSE-203 performance and scale readiness evidence.
+- Decisions made: Added 1k/10k UI QA script; generated local benchmark report; made benchmark args PowerShell-safe; added env/memory report data.
+- Files changed: scripts/run-large-workspace-benchmark.mjs; docs/PERFORMANCE_SCALE_QA.md; docs/PERFORMANCE.md; docs/QA_SCRIPTS.md; docs/README.md; docs/TESTING.md; docs/performance/reports/large-workspace-benchmark-report.example.json; docs/performance/reports/operator-readiness-pse-203.json; docs/session_log.md
+- Open questions / risks: Packaged-app manual UI measurements still required before nontechnical handoff.
+- Next actions: Start PSE-204 release packaging/distribution evidence; split any manual P0/P1 performance blocker; preserve benchmark report with PR.
+- Timestamp: 2026-05-15 19:37:33 +10:00
+- Objective: Summarize operator-readiness review learnings and action path.
+- Decisions made: Treat current state as pilot-ready evidence with remaining handoff gates; organize next actions around manual QA, release packaging, risk closure, and final verdict.
+- Files changed: docs/session_log.md
+- Open questions / risks: Manual packaged UI, packaged no-network, and release/distribution evidence remain incomplete.
+- Next actions: Complete PSE-204/PSE-205; run packaged manual QA; resolve/accept remaining P0/P1 risks.
+- Timestamp: 2026-05-15 19:57:16 +10:00
+- Objective: Complete PSE-204 release packaging and distribution evidence.
+- Decisions made: Added release package check with checksums/data-boundary scan; documented unpacked unsigned package tier and manual upgrade path; verified package smoke.
+- Files changed: scripts/check-release-package.mjs; package.json; docs/RELEASE_CANDIDATE_PACKAGING.md; docs/release/package-artifact-check.json; docs/release/README.md; docs/RELEASE.md; docs/DISTRIBUTION_LICENSING_PRIVACY.md; docs/QA_SCRIPTS.md; docs/README.md; docs/OPERATOR_RUNBOOK.md; docs/help/operator-runbook.md; packages/features/src/help/HelpContent.ts; docs/session_log.md
+- Open questions / risks: Public signing/notarization, installer targets, and auto-update remain owner/future-ticket decisions.
+- Next actions: Start PSE-205 final operator-readiness report; run manual packaged-app QA if moving beyond internal pilot; publish checksums with any handoff artifact.
+
+## 2026-05-15T20:43:53.1248804+10:00
+Objective: Finalize PSE-205 operator-readiness certification report and validation.
+Decisions made:
+- Verdict remains Pilot ready; nontechnical operator-ready blocked by manual packaged UI/no-network/performance evidence.
+- Public Release ready remains blocked by signing/installer/support-channel decisions.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\OPERATOR_READINESS_REPORT.md
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Owner must run/accept final manual P0/P1 gates before nontechnical handoff.
+Next actions: Manual packaged operator rehearsal; no-network monitor; packaged UI scale check.
+
+## 2026-05-16T05:58:13.7500717+10:00
+Objective: Explain how to execute the five remaining operator-readiness gates correctly.
+Decisions made:
+- Recommended one Linear ticket/thread per manual gate with explicit evidence artifacts.
+- Owner acceptance must be an explicit human decision, not inferred by Codex.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Real GUI/no-network evidence may require escalation and visible app launching.
+Next actions: User can paste the provided PSE-206..210 prompt set; run gates in order; update readiness verdict after evidence.
+
+## 2026-05-16T06:15:29.9531817+10:00
+Objective: Create high-context Linear continuation tickets for remaining operator-readiness handoff gates.
+Decisions made:
+- Created PSE-206..PSE-210 under PSE-195 with prior evidence, required artifacts, acceptance criteria, and conservative verdict rules.
+- PSE-210 is blocked by PSE-206..PSE-209 and requires explicit owner acceptance.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Manual GUI/no-network/performance gates still need execution before Operator ready can be claimed.
+Next actions: Run PSE-206 first; then PSE-207, PSE-208, PSE-209; finish with PSE-210 acceptance.
+
+## 2026-05-16T06:17:08.9883263+10:00
+Objective: Provide a complete Codex prompt to execute PSE-206 packaged operator journey.
+Decisions made:
+- Prompt emphasizes packaged-app/manual evidence, prior PSE-196/PSE-204/PSE-205 context, and no substitution with service tests.
+- Requires docs/manual-qa artifact plus readiness report/session log updates.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Running the packaged GUI may require visible app launch and screenshot/manual observation.
+Next actions: Paste prompt into a new Codex thread; execute PSE-206; create focused follow-up tickets for P0/P1 findings.
+
+## 2026-05-16T06:18:41.7570027+10:00
+Objective: Start PSE-206 packaged operator journey evidence.
+Decisions made: Linear PSE-206 and required readiness docs inspected; scope confirmed as packaged-app manual QA, not service smoke.
+Files changed: docs/session_log.md
+Open questions / risks: Packaged GUI launch and screenshots may require visible app automation; manual result may be pass-with-caveats/fail.
+Next actions: Verify artifact freshness; launch packaged app; record manual QA artifact.
+
+## 2026-05-16T06:31:20.0643632+10:00
+Objective: Verify packaged app launch for PSE-206.
+Decisions made: Packaged smoke passed only after desktop escalation; real packaged UI launch failed before first window with ReferenceError: __dirname is not defined.
+Files changed: docs/session_log.md
+Open questions / risks: OR-R1 is blocked at app launch; package smoke misses normal BrowserWindow creation path.
+Next actions: Document PSE-206 fail; update readiness report; recommend focused P0 package-launch fix ticket before rerun.
+
+## 2026-05-16T06:33:46.8252833+10:00
+Objective: Document PSE-206 packaged operator journey failure.
+Decisions made: Marked final gate result Fail; OR-R1 remains open; created Linear PSE-211 for normal packaged launch P0.
+Files changed: docs/manual-qa/PSE-206-packaged-operator-journey.md; docs/manual-qa/PSE-206-run-summary.json; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+Open questions / risks: Full operator workflow remains untested until packaged BrowserWindow launch is fixed and package smoke is extended.
+Next actions: Fix PSE-211; rebuild/package; rerun PSE-206 before PSE-207.
+
+## 2026-05-16T06:34:44.4878687+10:00
+Objective: Validate PSE-206 documentation changes.
+Decisions made: Ran lint/typecheck successfully; no code changes were made after P0 launch blocker discovery.
+Files changed: docs/manual-qa/PSE-206-packaged-operator-journey.md; docs/manual-qa/PSE-206-run-summary.json; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+Open questions / risks: PSE-211 must fix launch and add normal-window package coverage before OR-R1 can be retested.
+Next actions: Do PSE-211 next; rerun PSE-206; then resume PSE-207 if launch is fixed.
+
+## 2026-05-16T06:37:00.9342802+10:00
+Objective: Revalidate after final readiness report wording update.
+Decisions made: Clarified current packaged artifact is not handoffable; reran lint successfully.
+Files changed: docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+Open questions / risks: Typecheck was already green before final doc-only wording; packaged launch remains PSE-211 blocker.
+Next actions: Fix PSE-211; rerun PSE-206; resume PSE-207 after launch fix.
+
+## 2026-05-16T06:37:56.1960742+10:00
+Objective: Complete final PSE-206 validation record.
+Decisions made: Reran typecheck after final doc wording; lint and typecheck are both green.
+Files changed: docs/session_log.md
+Open questions / risks: No manual UI steps beyond launch can be trusted until PSE-211 fixes packaged startup.
+Next actions: Fix PSE-211; rebuild package; rerun PSE-206 journey.
+
+## 2026-05-16T06:38:15.6683159+10:00
+Objective: Add validation table to PSE-206 artifact.
+Decisions made: Captured package smoke, normal launch failure, lint, and typecheck results in the manual QA artifact.
+Files changed: docs/manual-qa/PSE-206-packaged-operator-journey.md; docs/session_log.md
+Open questions / risks: Documentation evidence is complete, but OR-R1 remains blocked by PSE-211.
+Next actions: Handoff PSE-206 as failed; schedule PSE-211 before any further manual gates.
+
+## 2026-05-16T08:37:46.6982085+10:00
+Objective: Start PSE-211 packaged normal-launch fix.
+Decisions made: Confirmed PSE-211 is the P0 blocker for PSE-206; scope limited to ESM-safe window paths and launch coverage.
+Files changed: docs/session_log.md
+Open questions / risks: Existing workspace has many prior uncommitted readiness files; avoid unrelated changes.
+Next actions: Inspect window/package smoke code; patch minimal fix; rebuild and rerun PSE-206 if launch passes.
+
+## 2026-05-16T08:40:44.9965835+10:00
+Objective: Implement PSE-211 launch-path fix and smoke coverage.
+Decisions made: Replaced packaged window __dirname use with import.meta.url path resolver; extended package smoke to also render the normal welcome window via CDP.
+Files changed: apps/desktop/src/main/workspaceWindow.ts; apps/desktop/src/main/workspaceWindowPaths.ts; apps/desktop/tests/main/workspaceWindowPaths.test.ts; apps/desktop/scripts/run-package-smoke.mjs; docs/session_log.md
+Open questions / risks: Must rebuild package before old artifact can reflect the fix.
+Next actions: Run full validation/package; verify normal launch; rerun PSE-206 if packaged launch passes.
+## 2026-05-16T08:48:27.6755918+10:00
+- Objective: Advance PSE-211 packaged normal-launch blocker fix.
+- Decisions: Switched packaged preload from ESM .mjs to bundled CJS .cjs for sandboxed Electron preload; kept renderer/preload paths ESM-safe.
+- Files changed: apps/desktop/electron.vite.config.ts; apps/desktop/src/main/workspaceWindowPaths.ts; apps/desktop/tests/main/workspaceWindowPaths.test.ts; apps/desktop/scripts/run-package-smoke.mjs; docs/session_log.md
+- Open questions / risks: Need rebuilt package smoke to confirm CJS preload and normal welcome launch in packaged executable.
+- Next actions: rebuild package; rerun package:smoke; resume PSE-206 journey if smoke passes.
+## 2026-05-16T08:49:39.0104303+10:00
+- Objective: Complete PSE-211 packaged launch verification.
+- Decisions: Rebuilt packaged artifact after CJS preload fix; package smoke now includes normal packaged welcome-window launch.
+- Files changed: apps/desktop/electron.vite.config.ts; apps/desktop/src/main/workspaceWindowPaths.ts; apps/desktop/tests/main/workspaceWindowPaths.test.ts; apps/desktop/scripts/run-package-smoke.mjs; docs/session_log.md
+- Open questions / risks: PSE-206 journey still needs full manual packaged evidence after the launch blocker fix.
+- Next actions: rerun PSE-206 packaged operator journey; update manual QA evidence; update OR-R1 status.
+## 2026-05-16T09:03:54.2524934+10:00
+- Objective: Rerun PSE-206 after PSE-211 and record blocker evidence.
+- Decisions: PSE-211 is successful; OR-R1 remains open because packaged Projects UI cannot surface/open the created project; created Linear PSE-212.
+- Files changed: docs/manual-qa/PSE-206-packaged-operator-journey.md; docs/manual-qa/PSE-206-run-summary.json; docs/manual-qa/screenshots/*.png; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+- Open questions / risks: PSE-212 blocks nontechnical operator handoff; PSE-207 should wait unless owner reprioritizes.
+- Next actions: fix PSE-212; rerun PSE-206; then continue PSE-207.
+## 2026-05-16T09:04:32.6598301+10:00
+- Objective: Close out Linear handoff for PSE-211/PSE-206.
+- Decisions: Commented PSE-211 as fixed/validated; commented PSE-206 as failed on PSE-212 blocker.
+- Files changed: docs/session_log.md
+- Open questions / risks: Linear status transitions were not changed; PSE-212 remains next recommended work.
+- Next actions: review/stage PR scope; fix PSE-212; rerun PSE-206.
+## 2026-05-16T09:05:37.0099460+10:00
+- Objective: Final validation after PSE-211/PSE-206 documentation updates.
+- Decisions: Re-ran lint after removing accidental BOM; kept PSE-206 gate failed on PSE-212.
+- Files changed: apps/desktop/scripts/run-package-smoke.mjs; docs/session_log.md
+- Open questions / risks: Full PR scope includes prior operator-readiness files already dirty in workspace.
+- Next actions: prepare PR with PSE-211 fix plus PSE-206/PSE-212 evidence; fix PSE-212 next.
+## 2026-05-16T09:11:44.4284319+10:00
+- Objective: Start PSE-212 follow-up and return path to PSE-206.
+- Decisions: Treat PSE-212 as focused OR-R1 blocker; investigate packaged Projects UI visibility/opening before rerunning PSE-206.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need identify whether bug is UI navigation/state, project list refresh, or packaged-only preload/API behavior.
+- Next actions: inspect Projects/AppShell code; add focused fix/test; rebuild and rerun PSE-206.
+## 2026-05-16T09:16:51.9686908+10:00
+- Objective: Implement focused PSE-212 operator navigation fix.
+- Decisions: Quick Start now closes and navigates to newly created project/contact pages; added destination helper coverage.
+- Files changed: apps/desktop/src/renderer/components/QuickAddModal.tsx; apps/desktop/src/renderer/shell/AppShell.tsx; apps/desktop/tests/renderer/quickAddModal.test.tsx; docs/session_log.md
+- Open questions / risks: Need packaged rebuild and PSE-206 rerun to confirm OR-R1 in real app.
+- Next actions: run lint/package; package smoke; rerun PSE-206 journey.
+## 2026-05-16T09:18:58.4972488+10:00
+- Objective: Build and smoke PSE-212 packaged fix.
+- Decisions: Rebuilt packaged artifact; package smoke including normal packaged welcome-window launch passes.
+- Files changed: apps/desktop/dist-packaged/**; docs/session_log.md
+- Open questions / risks: PSE-206 rerun still must prove full packaged journey and persistence.
+- Next actions: rerun PSE-206 packaged operator journey; update evidence; run final validation.
+## 2026-05-16T09:43:24.7359538+10:00
+- Objective: Validate PSE-212 packaged fix before rerunning PSE-206.
+- Decisions: Added Quick Start saved event so project detail refreshes content created from the modal; rebuilt package and package smoke passed.
+- Files changed: apps/desktop/src/renderer/components/QuickAddModal.tsx; apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/tests/renderer/quickAddModal.test.tsx; docs/session_log.md
+- Open questions / risks: Need full PSE-206 packaged journey rerun to confirm OR-R1 closure.
+- Next actions: rerun PSE-206 packaged journey; update manual QA artifact; update readiness report.
+## 2026-05-16T10:20:29.8588221+10:00
+- Objective: Complete PSE-206 rerun after PSE-212 fix.
+- Decisions: Packaged journey now completes with P2/P3 caveats; OR-R1 documented as closed with caveats, not Operator ready.
+- Files changed: docs/manual-qa/PSE-206-packaged-operator-journey.md; docs/manual-qa/PSE-206-run-summary.json; docs/manual-qa/screenshots/**; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+- Open questions / risks: Relationship UI persistence, search form native submit, and OS file-dialog proof remain caveats.
+- Next actions: run final test/build validation; update Linear; proceed to PSE-207 unless owner wants caveat follow-ups first.
+## 2026-05-16T10:22:53.4441189+10:00
+- Objective: Final validation for PSE-212/PSE-206 documentation state.
+- Decisions: Full test and build pass after packaged journey evidence; report/artifact validation tables updated.
+- Files changed: docs/manual-qa/PSE-206-packaged-operator-journey.md; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+- Open questions / risks: P2/P3 caveats remain nonblocking unless owner wants stricter OR-R1 proof.
+- Next actions: update Linear; prepare PR summary; proceed to PSE-207.
+## 2026-05-16T10:24:01.2565486+10:00
+- Objective: Close Linear handoff for PSE-212/PSE-206 rerun.
+- Decisions: Commented PSE-212 as resolved; commented PSE-206 as Pass with caveats and OR-R1 closed with caveats.
+- Files changed: docs/session_log.md
+- Open questions / risks: Owner may request stricter P2/P3 caveat follow-ups before PSE-207.
+- Next actions: prepare final summary; do not claim full Operator ready.
+## 2026-05-16T10:25:29.4563126+10:00
+- Objective: Final cleanup of PSE-206 evidence formatting.
+- Decisions: Fixed validation table formatting after full test/build; kept OR-R1 closed with caveats and overall verdict unchanged.
+- Files changed: docs/manual-qa/PSE-206-packaged-operator-journey.md; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+- Open questions / risks: P2/P3 caveats may become follow-up tickets if owner requests stricter proof.
+- Next actions: summarize result; next recommended ticket is PSE-207.
+## 2026-05-16T10:29:16.0552518+10:00
+- Objective: Prepare GitHub PR branch for operator-readiness handoff changes.
+- Decisions: Created codex/operator-readiness-packaged-handoff; staged intended ticket scope while excluding local tool/cache artifacts and failed-run screenshots.
+- Files changed: docs/session_log.md
+- Open questions / risks: GitHub CLI auth is invalid, so push/PR creation needs re-authentication.
+- Next actions: commit locally; ask owner to restore GitHub auth before push/PR.
+## 2026-05-16T10:30:38.3700098+10:00
+- Objective: Confirm GitHub branch/commit handling for PSE-212/PSE-206 changes.
+- Decisions: Local branch and commit exist; push/PR remain blocked by invalid GitHub CLI auth.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need owner to re-authenticate GitHub CLI before pushing/opening PR.
+- Next actions: re-run gh auth login; push branch; open draft PR.
+## 2026-05-16T10:33:23.7759819+10:00
+- Objective: Confirm committed/commented status for thread changes.
+- Decisions: Reconfirmed local commit exists; GitHub push/PR remains blocked by invalid gh auth.
+- Files changed: docs/session_log.md
+- Open questions / risks: Remote PR cannot be opened until GitHub CLI auth is restored.
+- Next actions: restore gh auth; push branch; open draft PR.
+## 2026-05-16T10:42:39.6760694+10:00
+- Objective: Repair GitHub CLI auth for PR push.
+- Decisions: Removed invalid local pseudico gh credential and opened fresh web login; auth not yet completed.
+- Files changed: docs/session_log.md
+- Open questions / risks: Human browser/device authorization still required before push/PR.
+- Next actions: complete gh auth login; verify gh auth status; push branch.
+## 2026-05-16T10:46:19.3415738+10:00
+- Objective: Replicate operator-readiness branch to GitHub and open PR.
+- Decisions: Git remote push succeeded despite gh keyring issue; opened draft PR #192 via GitHub connector.
+- Files changed: docs/session_log.md
+- Open questions / risks: gh CLI keyring still reports invalid token, but git remote and connector operations worked.
+- Next actions: monitor PR checks; clean local generated artifacts; resolve review feedback.
+## 2026-05-16T10:52:38.9695708+10:00
+- Objective: Audit GitHub auth and recent work replication.
+- Decisions: Git remote and PR #192 match local HEAD; gh CLI remains logged out pending human web auth.
+- Files changed: docs/session_log.md
+- Open questions / risks: Untracked local failed-run/tool artifacts remain intentionally outside GitHub.
+- Next actions: complete gh auth login; optionally clean untracked artifacts; monitor PR #192.
+## 2026-05-16T10:54:50.2643055+10:00
+- Objective: Verify GitHub CLI authentication after owner completed device login.
+- Decisions: gh auth works outside the Codex network sandbox; account pseudico has ADMIN on pseudico/pseudico.
+- Files changed: docs/session_log.md
+- Open questions / risks: Non-escalated Codex shell blocks GitHub API via sandbox proxy and can show false auth failures.
+- Next actions: use escalated gh commands for API/CI operations when needed; keep git remote workflow unchanged.
+## 2026-05-16T10:56:42+10:00
+- Objective: Respond to PSE-206 packaged operator journey request with current evidence status.
+- Decisions: Confirmed PSE-206 manual artifact already records packaged-app run as Pass with caveats and OR-R1 closed with caveats; no rerun needed.
+- Files changed: docs/session_log.md
+- Open questions / risks: Untracked local failed-run/tool artifacts remain outside committed evidence; OR-R2/OR-R3/OR-R4 still block full Operator ready.
+- Next actions: proceed to PSE-207 unless owner wants focused P2/P3 caveat follow-ups first.
+## 2026-05-16T10:59:06+10:00
+- Objective: Validate current PSE-206 evidence state after status confirmation.
+- Decisions: Re-ran lint and typecheck successfully; no package rebuild or journey rerun needed because artifact evidence is already current.
+- Files changed: docs/session_log.md
+- Open questions / risks: Full Operator-ready verdict still blocked by OR-R2/OR-R3/OR-R4, not OR-R1.
+- Next actions: proceed to PSE-207 unless focused P2/P3 caveat tickets are requested.
+## 2026-05-16T11:04:17+10:00
+- Objective: Clarify OR-R2/OR-R3/OR-R4 ticket ownership.
+- Decisions: Mapped OR-R2 to PSE-207, OR-R3 to PSE-208, OR-R4 to PSE-209, and PSE-210 to final owner acceptance after PSE-206..209.
+- Files changed: docs/session_log.md
+- Open questions / risks: None; PSE-206 only covers OR-R1 plus nonblocking caveats.
+- Next actions: Start PSE-207 next unless owner prioritizes OR-R3/OR-R4 first.
+## 2026-05-16T11:06:19+10:00
+- Objective: Start PSE-207 manual packaged backup/restore evidence.
+- Decisions: Scope is OR-R2 only; use packaged app UI with disposable source/target workspaces and real recovery evidence.
+- Files changed: docs/session_log.md
+- Open questions / risks: Existing branch contains PSE-206 changes and untracked local artifacts; avoid unrelated cleanup.
+- Next actions: read backup/restore docs; confirm UI paths; run packaged recovery journey.
+## 2026-05-16T11:17:42+10:00
+- Objective: Advance PSE-207 packaged backup/restore run.
+- Decisions: First two runner attempts created valid source/backup-restore evidence but failed before export-restore completion due runner issues, not app data loss.
+- Files changed: docs/manual-qa/PSE-207-run-summary.json; docs/manual-qa/screenshots/**; docs/session_log.md
+- Open questions / risks: Need rerun with fixed Settings navigation to complete export restore and restart persistence.
+- Next actions: rerun packaged evidence runner; then write PSE-207 artifact and OR-R2 update.
+## 2026-05-16T11:29:00+10:00
+- Objective: Complete PSE-207 packaged manual backup restore evidence.
+- Decisions: Successful run passed manual backup creation/restore/restart persistence; OR-R2 updated as closed with caveats; JSON export restore remains P3 caveat.
+- Files changed: docs/manual-qa/PSE-207-packaged-backup-restore.md; docs/manual-qa/PSE-207-run-summary.json; docs/manual-qa/screenshots/**; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+- Open questions / risks: OR-R3 and OR-R4 remain open; optional follow-up for JSON export restore UI proof/folder-picker polish.
+- Next actions: run lint/typecheck; update Linear; proceed to PSE-208.
+## 2026-05-16T11:30:26+10:00
+- Objective: Validate PSE-207 documentation and evidence updates.
+- Decisions: Removed temporary local runner from repo root; lint and typecheck both pass.
+- Files changed: docs/manual-qa/PSE-207-packaged-backup-restore.md; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+- Open questions / risks: PSE-207 remains Pass with caveats due no JSON export-restore UI rerun.
+- Next actions: update Linear if desired; proceed to PSE-208.
+## 2026-05-16T11:30:58+10:00
+- Objective: Attempt PSE-207 Linear handoff update.
+- Decisions: Linear comment was not posted because connector safety rejected sending internal paths/status externally without explicit approval.
+- Files changed: docs/session_log.md
+- Open questions / risks: User can explicitly approve Linear posting or handle issue status manually.
+- Next actions: summarize local evidence; proceed to PSE-208 after approval/PR handling.
+## 2026-05-16T11:31:35+10:00
+- Objective: Clean local PSE-207 failed-run screenshot noise.
+- Decisions: Kept only successful PSE-207 screenshot directory for the evidence artifact; removed failed rerun directories generated during harness fixes.
+- Files changed: docs/manual-qa/screenshots/**; docs/session_log.md
+- Open questions / risks: Pre-existing untracked PSE-206/tool artifacts remain outside this PSE-207 scope.
+- Next actions: summarize PSE-207 result and request explicit approval before any Linear posting.
+## 2026-05-16T11:33:56+10:00
+- Objective: Post approved PSE-207 Linear handoff comment.
+- Decisions: User explicitly approved posting; Linear comment 428c24f5-0ddf-49fd-9791-bdebd80cb505 records Pass with caveats and OR-R2 closure.
+- Files changed: docs/session_log.md
+- Open questions / risks: Linear now contains internal evidence summary by explicit owner approval.
+- Next actions: proceed to PSE-208; optionally create JSON export-restore/folder-picker polish follow-ups.
+
+## 2026-05-16T11:36:04.5781499+10:00
+Objective: Provide reusable Codex prompts for remaining PSE-208..PSE-210 operator-readiness tickets.
+Decisions made:
+- Tailored prompts per gate because required docs/artifacts differ for security, performance, and owner acceptance.
+- PSE-208 prompt prioritizes packaged runtime network evidence over static audit repetition.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: PSE-208 may need admin/visible monitoring tools; PSE-210 requires explicit owner acceptance.
+Next actions: Run PSE-208; then PSE-209; then PSE-210 only after evidence is complete.
+
+## 2026-05-16 11:45 +10:00
+Objective: PSE-208 packaged-app no-network runtime monitor evidence.
+Decisions made:
+- Used packaged win-unpacked executable with PID-scoped Get-NetTCPConnection sampling.
+- Treated CDP 127.0.0.1 loopback as monitoring harness traffic, not app remote activity.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Evidence still needs docs/manual-qa artifact and readiness/security doc updates.
+Next actions: Write PSE-208 artifact; update OR-R3 docs; run validation.
+
+## 2026-05-16 11:49 +10:00
+Objective: Finish PSE-208 packaged no-network monitor evidence and OR-R3 update.
+Decisions made:
+- Marked PSE-208 Pass with caveats; no Pseudico-originated remote endpoints observed.
+- Closed OR-R3 with caveats; kept operator-ready verdict blocked by PSE-209/PSE-210.
+Files changed:
+- docs/manual-qa/PSE-208-no-network-monitor.md; docs/LOCAL_ONLY_SECURITY_REVIEW.md; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+Open questions / risks: CDP harness adds local 127.0.0.1 loopback; repeat on other OSes for cross-platform claims.
+Next actions: Proceed to PSE-209; preserve optional external-open traffic separation; keep PSE-210 owner acceptance pending.
+## 2026-05-16 11:51 +10:00
+Objective: Start PSE-209 packaged UI performance evidence.
+Decisions made:
+- Scope is packaged UI responsiveness, not service benchmark substitution.
+- Will read PSE-203..PSE-208 evidence before measuring.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Packaged app automation may need GUI/Electron harness constraints.
+Next actions: Confirm artifact path; identify fixture method; run measurements.
+## 2026-05-16 11:55 +10:00
+Objective: Prepare PSE-209 retained large-workspace fixtures.
+Decisions made:
+- Reused PSE-203 benchmark harness with --keep for 1k/10k fixture parity.
+- Sandbox blocked esbuild spawn; reran benchmark with approved escalation.
+Files changed:
+- docs/performance/reports/pse-209-fixtures.json; docs/session_log.md
+Open questions / risks: Fixtures need workspace manifests/optional augmentation before packaged UI open.
+Next actions: Add manifests/extra local data; launch packaged UI runner; capture screenshots/metrics.
+## 2026-05-16 12:10 +10:00
+Objective: Complete PSE-209 packaged UI measurement run.
+Decisions made:
+- Packaged UI run passed for 1k/10k with caveats; no P0/P1 blocker observed.
+- OR-R4 will be closed with a P2 caveat for 10k Today memory headroom.
+Files changed:
+- docs/manual-qa/PSE-209-packaged-ui-performance.md; docs/manual-qa/PSE-209-run-summary.json; docs/manual-qa/PSE-209-fixture-summary.json; docs/performance/reports/pse-209-fixtures.json; docs/PERFORMANCE_SCALE_QA.md; docs/PERFORMANCE.md; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+Open questions / risks: PSE-210 owner must accept or scope remaining P2/P3 caveats before operator-ready claim.
+Next actions: Run lint/typecheck; review docs; recommend PSE-210.
+## 2026-05-16 12:11 +10:00
+Objective: Validate PSE-209 packaged UI evidence docs.
+Decisions made:
+- Removed temporary local PSE-209 runner scripts after lint caught them in .tmp.
+- lint and typecheck pass; no code changes or benchmark script changes require test rerun.
+Files changed:
+- docs/session_log.md
+Open questions / risks: 10k Today memory caveat remains P2 for owner acceptance/follow-up.
+Next actions: Summarize PSE-209; proceed to PSE-210 if owner accepts no P0/P1 blocker.
+## 2026-05-16 12:11 +10:00
+Objective: Finalize PSE-209 validation after readiness report edit.
+Decisions made:
+- Re-ran lint after final docs update; typecheck remained passed from prior validation.
+- No app code or benchmark script changes were made.
+Files changed:
+- docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+Open questions / risks: Owner acceptance in PSE-210 must decide P2 Today memory caveat disposition.
+Next actions: Deliver PSE-209 summary; recommend PSE-210.
+## 2026-05-16 12:12 +10:00
+Objective: Record final PSE-209 checklist validation.
+Decisions made:
+- Marked no P0/P1 discovered for packaged gates; remaining caveats deferred to PSE-210 disposition.
+- Final lint rerun passed after checklist edit.
+Files changed:
+- docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+Open questions / risks: PSE-210 still must avoid claiming operator-ready without explicit owner acceptance.
+Next actions: Provide final PSE-209 handoff summary.
+## 2026-05-16 12:13 +10:00
+Objective: Clean failed PSE-209 evidence noise.
+Decisions made:
+- Removed two failed-run PSE-209 screenshot directories; retained only successful final screenshot set.
+- Final artifact still references raw successful JSON and screenshot directory.
+Files changed:
+- docs/manual-qa/screenshots/**; docs/session_log.md
+Open questions / risks: Existing unrelated untracked prior-ticket screenshots remain outside PSE-209 scope.
+Next actions: Deliver final PSE-209 summary.
+
+## 2026-05-16 16:05:52 +10:00
+Objective: Start PSE-209 packaged UI performance evidence.
+Decisions made:
+- Will use packaged app evidence rather than service benchmark alone.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Packaged artifact/workspace fixture availability still unknown.
+Next actions:
+- Read readiness/performance docs and inspect artifacts.
+
+## 2026-05-16 16:08:23 +10:00
+Objective: Finish PSE-209 packaged UI performance handoff.
+Decisions made:
+- Reused existing packaged UI evidence: Pass with caveats; OR-R4 closed with P2 Today memory caveat.
+- Validation rerun: pnpm lint and pnpm typecheck passed.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- PSE-210 owner acceptance must decide remaining P2/P3 caveats before operator-ready claim.
+Next actions:
+- Recommend PSE-210 if no owner-blocking concern remains.
+
+## 2026-05-16T18:43:30.5257837+10:00
+Objective: Produce recursive review shifting from functional readiness to human visual usability.
+Decisions made:
+- Created a visual/operator review identifying AI-significant vs human-significant gaps.
+- Recommended PSE-213..PSE-220 visual operator readiness ticket pack, prioritizing Settings IA and readability.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\RECURSIVE_OPERATOR_VISUAL_REVIEW.md
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Local artifacts do not visibly include final PSE-210/PSE-211 owner record; verify latest branch before changing verdict.
+Next actions: Create visual UX tickets; start with Settings IA split; run human screenshot QA after fixes.
+
+## 2026-05-16T18:54:41.7208167+10:00
+Objective: Correct recursive review framing from nontechnical/admin to primary working operator fit.
+Decisions made:
+- Grounded analysis in PRODUCT_SPEC work loop and inspected packaged screenshots.
+- Created PRIMARY_OPERATOR_FIT_REVIEW with evidence-based severity model and revised tickets PSE-213..PSE-219.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\PRIMARY_OPERATOR_FIT_REVIEW.md
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Latest PSE-210/PSE-211 acceptance artifacts still need branch verification before final verdict changes.
+Next actions: Create Linear tickets from primary-operator fit review; prioritize Settings IA, readability, and project work-first redesign.
+
+## 2026-05-16T19:01:23.9710128+10:00
+Objective: Detail how primary-operator UX tickets should work in practice.
+Decisions made:
+- Created PSE-213..PSE-219 specs with user problem, goal, scope, implementation expectations, acceptance criteria, and QA.
+- Recommended fastest path: PSE-214 -> PSE-215 -> PSE-216 -> PSE-218.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\PRIMARY_OPERATOR_UX_TICKET_PACK.md
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Tickets not yet created in Linear; user may want ticket creation next.
+Next actions: Create Linear tickets; start PSE-214 Settings IA split; require screenshots for each UX ticket.
+
+## 2026-05-16T19:05:57.0330979+10:00
+Objective: Correct prior failure by creating primary-operator UX tickets in Linear.
+Decisions made:
+- Created PSE-213..PSE-219 in Linear under PSE-195, with PSE-214..219 related to PSE-213.
+- Tickets follow primary-operator work-loop framing, not vague nontechnical/admin framing.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: PSE-214..219 are Spec Ready; user can choose whether to start audit PSE-213 or fastest path PSE-214.
+Next actions: Start PSE-214 for immediate improvement; use PSE-213 if a baseline audit is desired first.
+
+## 2026-05-16T19:13:38.7476180+10:00
+Objective: Self-critique and amend primary-operator UX ticket system after owner challenge.
+Decisions made:
+- Classified PSE-213..219 as Spec Ready but incomplete as a program without full order and final acceptance gate.
+- Added corrected full order and recommended PSE-220 acceptance review; Linear amendment failed due connector transport error.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\PRIMARY_OPERATOR_UX_TICKET_AMENDMENTS.md
+- C:\Users\AlastairLacey\Pseudico\docs\PRIMARY_OPERATOR_UX_TICKET_PACK.md
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Need retry Linear update/create PSE-220 when connector recovers.
+Next actions: Apply amendments to Linear; create PSE-220; then start PSE-213 or PSE-214 based on user priority.
+
+## 2026-05-16T19:16:16.6803312+10:00
+Objective: Retry Linear updates for primary-operator UX amendments and PSE-220.
+Decisions made:
+- Retried Linear list/create/comment after tool refresh; connector still returns transport deserialize error.
+- No Linear mutation succeeded; local amendment docs remain source of truth until retry works.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: PSE-220 and amendment notes are not yet in Linear due connector failure.
+Next actions: Retry Linear in a fresh thread/session or manually create PSE-220 from PRIMARY_OPERATOR_UX_TICKET_AMENDMENTS.md.
+
+## 2026-05-16T19:19:16.8896968+10:00
+Objective: Attempt manual Linear web-interface update through browser.
+Decisions made:
+- Linear connector still fails; Playwright browser can open Linear but is not authenticated.
+- Paused at Linear login rather than handling credentials; user login is required before web UI edits.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Need authenticated Linear browser session to create PSE-220 and add HUX amendments.
+Next actions: User logs into Linear in the opened browser; then retry PSE-220 creation and amendment comments via web UI.
+
+## 2026-05-16T19:19:51.0897337+10:00
+Objective: Diagnose why Codex Chrome plugin was not used for Linear web edits.
+Decisions made:
+- Chrome plugin extension is installed/enabled, but native host registry key is missing so browser-client cannot connect.
+- Playwright fallback was premature; proper fix is Chrome plugin/native host repair from Codex UI, not manual registry edits.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Need Chrome plugin native host repaired before authenticated Chrome automation can use Linear cookies.
+Next actions: Reinstall/repair Codex Chrome plugin from Codex UI; then retry Linear web UI automation.
+
+## 2026-05-16T19:22:22.4564120+10:00
+Objective: Retry Codex Chrome plugin after user restarted Chrome and explain native host registration.
+Decisions made:
+- Codex Chrome extension remains installed/enabled, but native messaging host registry key is still missing.
+- Chrome restart alone did not repair the Codex-to-Chrome bridge.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Need Codex Chrome plugin/native host repair before using authenticated Chrome for Linear.
+Next actions: Reinstall/repair Codex Chrome plugin from Codex UI; then retry Linear web edits.
+
+## 2026-05-16T19:25:22.6622395+10:00
+Objective: Recheck Codex Chrome plugin after user reconnected it.
+Decisions made:
+- Browser-client still cannot connect; extension remains installed/enabled but native host registry key remains missing.
+- Linear web UI automation through authenticated Chrome is still blocked until native host registration is repaired.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: User may have reconnected extension but not native messaging host/desktop bridge.
+Next actions: Repair/reinstall Codex Chrome plugin native host from Codex UI; verify registry key appears; retry browser-client.
+
+## 2026-05-16T19:26:03.5906774+10:00
+Objective: Respond to request to directly fix broken Codex Chrome native host registration.
+Decisions made:
+- Cannot repair/install native host directly due Chrome plugin safety rules; can guide user or use Playwright with manual Linear login fallback.
+- Root blocker remains missing HKCU NativeMessagingHosts registry key for com.openai.codexextension.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Need user/plugin UI action or manual browser login fallback before Linear web edits can continue.
+Next actions: User repairs Chrome plugin native host or logs into Linear in Playwright browser; then retry updates.
+
+## 2026-05-16T19:45:23.7745694+10:00
+Objective: Revise Linear primary-operator UX tickets after critique.
+Decisions made:
+- Added shared program-order amendment comments to PSE-213 through PSE-219.
+- Created PSE-220 as the explicit final UX acceptance/regression gate with Spec Ready, High, and QA/UX labels.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-220 is related via issue links rather than confirmed parented under PSE-195 due Linear UI/tool limits.
+Next actions: Run PSE-213 first; then PSE-214, PSE-215, PSE-216, PSE-218, PSE-217, PSE-219, PSE-220.
+
+## 2026-05-16T19:50:00.0510378+10:00
+Objective: Provide reusable Codex prompt for PSE-HUX ticket execution.
+Decisions made:
+- Use one invariant prompt that pulls the active/linked Linear issue and applies the shared primary-operator UX standard.
+- Emphasize screenshot-backed human workflow evidence, not route/API-only proof.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Prompt assumes Codex thread has access to the intended Linear issue or active issue context.
+Next actions: User can reuse the prompt for PSE-213 through PSE-220 in order.
+
+## 2026-05-16T20:05:19.6631686+10:00
+Objective: Implement PSE-213 primary operator workflow audit baseline.
+Decisions made:
+- Treated PSE-213 as the active issue from the PSE-HUX sequence and posted the docs-only plan to Linear.
+- Created a screenshot-backed audit using PSE-206/PSE-207/PSE-209 packaged evidence; no product code changes.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\PRIMARY_OPERATOR_WORKFLOW_AUDIT.md
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Mixed pre-existing uncommitted docs/screenshots remain in the worktree; PR scope must stay explicit.
+Next actions: Stage scoped audit evidence; post Linear completion summary; open PR if GitHub auth permits.
+
+## 2026-05-16T20:12:23.1550062+10:00
+Objective: Publish PSE-213 audit and update Linear.
+Decisions made:
+- Opened draft PR #193 stacked on codex/operator-readiness-packaged-handoff to keep review scoped.
+- Updated PSE-213 to PR Open with summary, validation, evidence, risks, and PR link.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Contact-detail living-container evidence remains a proposed follow-up if not covered by PSE-216/PSE-220.
+Next actions: Review PR #193; proceed to PSE-214 after acceptance; preserve stacked-base context until handoff branch lands.
+
+## 2026-05-16T20:18:40.8206658+10:00
+Objective: Diagnose most recent Codex thread crash.
+Decisions made:
+- Identified renderer markdown/directive parse error from final git directive Windows path.
+- Confirmed underlying PSE-213 thread reached task_complete and PR #193 was created/pushed.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Local Codex UI may keep crashing when rendering that thread until message is patched or app bug fixed.
+Next actions: Avoid reopening crashed thread; recover from rollout/PR if needed; consider reporting directive parser bug.
+
+## 2026-05-16T20:20:39.6863686+10:00
+Objective: Advise whether Codex thread crash blocks next ticket.
+Decisions made:
+- Confirmed previous crash was render-specific, not failed work.
+- Identified recurrence risk only when final git directives use raw Windows backslash paths.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Other agents may still emit raw backslash directive paths unless prompted otherwise.
+Next actions: Start next ticket in a fresh thread; use forward-slash paths in final Codex directives; avoid reopening crashed thread.
+
+## 2026-05-16T20:23:03.3929537+10:00
+Objective: Start PSE-214 Settings IA implementation.
+Decisions made: Recovered PSE-214 from Linear/PSE-HUX context; read required docs before coding.
+Files changed: docs/session_log.md
+Open questions / risks: Pre-existing dirty docs/screenshots remain; branch scope must be controlled.
+Next actions: Read docs; inspect Settings; post Linear plan.
+
+## 2026-05-16T20:27:04.4614273+10:00
+Objective: Complete PSE-214 context recovery and plan.
+Decisions made: Posted Linear plan; set issue In Progress; scoped renderer IA/styles/tests/manual evidence.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-213 audit PR is still open/stacked.
+Next actions: Refactor Settings; update tests; capture screenshots.
+
+## 2026-05-16T20:44:33.9107789+10:00
+Objective: Implement and verify PSE-214 Settings IA split.
+Decisions made: Added intent navigation/overview; demoted import/export/admin tools; no service/schema changes.
+Files changed: apps/desktop/src/renderer/pages/SettingsPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/renderer/settingsPage.test.tsx; docs/manual-qa/PSE-214-settings-ia.md; docs/OPERATOR_RUNBOOK.md; docs/session_log.md
+Open questions / risks: Visual evidence uses local SettingsPage/CSS harness; PSE-218 owns guided restore/raw-path comfort.
+Next actions: Review diff; update Linear; open PR.
+
+## 2026-05-16T20:50:18.4944886+10:00
+Objective: Publish PSE-214 Settings IA PR and Linear update.
+Decisions made: Opened draft PR #194 stacked on PSE-213; will update Linear with tests, evidence, and known follow-ups.
+Files changed: docs/session_log.md
+Open questions / risks: gh CLI auth is invalid; GitHub connector was used for PR creation and git push succeeded.
+Next actions: Post Linear completion summary; monitor PR/CI; proceed to PSE-215 after review.
+
+## 2026-05-16T21:00:02.5201239+10:00
+Objective: Explain prompt failure and add PR reconciliation standard.
+Decisions made:
+- Identified missing explicit post-PR lifecycle/reconciliation instructions in reusable PSE-HUX prompt.
+- Will require clean git state, pushed commits, PR checks, Linear status/update, and ready-for-review gate before stopping.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Human approval/merge may still be required by project Done Means.
+Next actions: Use follow-up repair prompt in current PSE-214 thread; update reusable prompt with PR lifecycle block.
+
+## 2026-05-16T21:01:34.7510410+10:00
+Objective: Provide corrected reusable PSE-HUX Codex prompt.
+Decisions made:
+- Integrated mandatory post-PR reconciliation and explicit final states into the reusable prompt.
+- Kept one invariant prompt for PSE-213 through PSE-220.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Prompt still relies on Codex having active Linear/GitHub context for the issue and PR.
+Next actions: Use this prompt for the current PSE-214 continuation and later PSE-HUX tickets.
+
+## 2026-05-16T21:03:03.2466310+10:00
+Objective: Reconcile PSE-214 PR #194 to ready-for-review standard.
+Decisions made: Continue current branch/PR; verify scope, checks, evidence, PR metadata, and Linear status before readiness.
+Files changed: docs/session_log.md
+Open questions / risks: Worktree includes pre-existing unrelated dirty docs/screenshots; stage only scoped changes.
+Next actions: Run full checks; update PR/Linear; mark ready if criteria pass.
+
+## 2026-05-16T21:26:34.4785503+10:00
+Objective: Clarify GitHub completion boundary for PSE-HUX prompt.
+Decisions made:
+- Interpreted screenshot as PR ready-for-review with checks passing, not merged.
+- Clarified merge requires explicit human approval under project Done Means.
+Files changed:
+- docs/session_log.md
+Open questions / risks: User may want an approval-to-merge mode added to future prompts.
+Next actions: Use merge-finalization prompt only when user wants Codex to merge after checks pass.
+
+## 2026-05-16T21:28:22.7175116+10:00
+Objective: Finalize PSE-214 PR #194 after merge approval.
+Decisions made: Verify PR/Linear linkage, checks, reviews, dirty-file exclusions, and branch protection before merge.
+Files changed: docs/session_log.md
+Open questions / risks: Merge may be blocked by repository policy or missing required checks.
+Next actions: Inspect PR status; update metadata if needed; merge if allowed.
+
+## 2026-05-16T21:28:29.0420411+10:00
+Objective: Provide fully updated reusable PSE-HUX prompt with merge completion.
+Decisions made:
+- Added explicit user-approved merge completion path after ready-for-review.
+- Preserved blocked/ready states where branch protection or reviews prevent merge.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Actual merge may still be blocked by repository protections or required reviews.
+Next actions: User can use the full prompt for PSE-HUX tickets and add explicit approval when they want merge completion.
+
+## 2026-05-16T21:34:21.5482059+10:00
+Objective: Record PSE-214 PR #194 merge completion.
+Decisions made: PR #194 merged after CI success and no unresolved reviews; Linear will move to Done.
+Files changed: docs/session_log.md
+Open questions / risks: Local worktree still has unrelated pre-existing dirty artifacts outside merged PR.
+Next actions: Update Linear final state; report merge commit and remaining risks.
+
+## 2026-05-17T06:02:41.2318452+10:00
+Objective: Recover active Linear issue for reusable PSE-HUX operator prompt.
+Decisions made:
+- Current branch links to PSE-214, but Linear reports PSE-214 Done with PR #194 attached.
+- Did not guess next ticket from sequence despite PSE-215 being next unstarted.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need explicit active issue key before making code/PR changes.
+Next actions: Ask user for issue key; then recover docs, plan, branch, implement.
+
+## 2026-05-17T06:09:55.3320183+10:00
+Objective: Start PSE-215 readability/control sizing pass.
+Decisions made:
+- Linear PSE-215 has no comments or PRs; related evidence includes PSE-213 and completed PSE-214.
+- PSE-214 introduced Settings IA; PSE-215 must tune sizing without broad IA redesign.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing dirty files from previous work must remain excluded from PSE-215 scope.
+Next actions: Inspect renderer theme/styles/tests; post Linear plan; branch for PSE-215.
+
+## 2026-05-17T06:14:02.0915089+10:00
+Objective: Continue PSE-215 after branch creation interruption.
+Decisions made:
+- Treat branch creation approval as resolved, not a blocker.
+- Continue end-to-end implementation on codex/pse-215-readability-sizing.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need keep pre-existing dirty files excluded from PSE-215 PR.
+Next actions: Patch renderer sizing; add tests; capture screenshots.
+
+## 2026-05-17T06:29:58.7554550+10:00
+Objective: Implement and validate PSE-215 readability sizing changes.
+Decisions made:
+- Added CSS-only operator comfort overrides, preserving medium/large/compact appearance classes.
+- Captured Settings from built route; other surfaces from built CSS visual harness to avoid DB/service scope.
+Files changed:
+- apps/desktop/src/renderer/styles.css
+- apps/desktop/tests/renderer/readabilityStyles.test.ts
+- docs/manual-qa/PSE-215-readability-sizing.md
+- docs/session_log.md
+Open questions / risks: PSE-216/PSE-217 still own deeper project/search IA; harness evidence is a P2 caveat.
+Next actions: Run final checks; stage scoped files; publish PR and Linear update.
+
+
+## 2026-05-17T06:37:27.998089+10:00
+Objective: Reconcile PSE-215 PR and Linear final state.
+Decisions made:
+- Left PR #195 ready for review because AGENTS.md requires human reviewer approval before Done/merge.
+- Updated GitHub and Linear with tests, evidence, risks, and final state.
+Files changed:
+- docs/session_log.md
+Open questions / risks: P2 harness screenshot caveat; merge awaits human review/approval.
+Next actions: Human review/approve PR #195; merge if accepted.
+
+## 2026-05-17T07:48:23.0000000+10:00
+Objective: Reconcile active PSE-215 PR/Linear state for reusable end-to-end prompt.
+Decisions made:
+- Recovered PSE-215 from current branch and Linear; existing PR #195 is open, non-draft, mergeable, and already reconciled.
+- Did not merge because AGENTS.md Done Means requires human reviewer approval and GitHub shows no reviews.
+Files changed: docs/session_log.md
+Open questions / risks: Local worktree has unrelated pre-existing dirty docs/screenshots; session log also had uncommitted prior entries before this run.
+Next actions: Human reviews/approves PR #195; merge if accepted; proceed to PSE-216 after PSE-215 acceptance.
+## 2026-05-17T07:52:33.1838853+10:00
+Objective: Complete PSE-215 GitHub/Linear workflow rather than stop at ready-for-review.
+Decisions made:
+- Treat user follow-up as approval to resolve GitHub lifecycle if repository state permits.
+- Rechecked PR #195: open, non-draft, mergeable, no reviews/threads, no status contexts.
+Files changed: docs/session_log.md
+Open questions / risks: Merge may still be rejected by GitHub policy/check requirements; unrelated local dirty artifacts remain excluded.
+Next actions: Commit/push session-log reconciliation; merge PR #195 if accepted by GitHub; update Linear final state.
+## 2026-05-17T07:57:39.4040375+10:00
+Objective: Start PSE-216 project detail work-loop implementation.
+Decisions made:
+- Recovered PSE-216 from Linear as next PSE-HUX issue after merged PSE-215.
+- Created clean worktree C:\tmp\Pseudico-pse-216 on codex/pse-216-project-work-loop from updated stacked base.
+Files changed: docs/session_log.md
+Open questions / risks: Original checkout still has unrelated dirty artifacts; all PSE-216 code work will stay in clean worktree.
+Next actions: Read required docs/evidence; post Linear plan; inspect ProjectDetailPage and tests.
+## 2026-05-17T08:10:43.9696695+10:00
+Objective: Implement PSE-216 project detail work-first layout.
+Decisions made:
+- Added work-first project header, next-work/task/content/activity summary, linked context, and advanced project disclosure.
+- Kept existing project creation/feed/relationship/tabs/export/banner controls available without DB/service/IPC changes.
+Files changed: apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/renderer/projectsPage.test.tsx; docs/manual-qa/PSE-216-project-work-loop.md; docs/manual-qa/screenshots/PSE-216-2026-05-17T08-10-00/; docs/session_log.md
+Open questions / risks: Screenshot evidence uses renderer visual harness; packaged journey subset remains a PSE-220-quality regression check.
+Next actions: Rerun targeted tests/typecheck/lint; prepare PR; update Linear/GitHub.
+## 2026-05-17T08:39:49.2202535+10:00
+Objective: Verify PSE-216 project detail work-loop changes.
+Decisions made:
+- Targeted renderer test, lint, typecheck, and desktop build passed; build required escalated rerun after sandbox EPERM.
+- Captured four screenshot evidence states for empty, mixed-content, linked-contact, and advanced-open project detail.
+Files changed: docs/session_log.md; docs/manual-qa/screenshots/PSE-216-2026-05-17T08-10-00/
+Open questions / risks: Local screenshot capture used HTTP-served renderer harness; not a packaged app subset.
+Next actions: Stage scoped files; commit/push branch; open PR and update Linear.

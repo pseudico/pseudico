@@ -8,10 +8,16 @@ Before tagging an MVP release candidate:
   and in CI.
 - `pnpm package` creates the unpacked desktop app for the target platform.
 - `pnpm package:smoke` passes against the unpacked app.
+- `pnpm release:package-check` passes and writes
+  `docs/release/package-artifact-check.json`.
+- `pnpm audit:dependencies` passes and generated dependency/license notices
+  are reviewed.
 - The MVP smoke suite in `apps/desktop/tests/smoke/mvp-flow.test.ts` passes.
 - Manual QA in `docs/QA_SCRIPTS.md` has been run on a temporary workspace.
 - The final release documentation sync in `docs/FINAL_RELEASE_SYNC.md` has been
   reviewed against the linked Linear issue and PR.
+- `docs/OPERATOR_READINESS_REPORT.md` has been reviewed and its verdict matches
+  the intended handoff tier.
 - Workspace data is created under the selected workspace folder, not inside the
   packaged app bundle.
 - Backup, workspace JSON export, project Markdown export, task CSV/TSV export,
@@ -42,9 +48,20 @@ Before tagging an MVP release candidate:
 ## Distribution, Licensing, Privacy, And Updates
 
 Distribution planning is tracked in `docs/DISTRIBUTION_LICENSING_PRIVACY.md`.
+Operator handoff packaging evidence is tracked in
+`docs/RELEASE_CANDIDATE_PACKAGING.md`.
 Before public release, verify the platform signing/notarization gates,
 dependency license notices, local-only privacy notice, checksums, and manual
 update/backup instructions in that checklist.
+
+The repeatable dependency/license/privacy gate is:
+
+```bash
+pnpm audit:dependencies
+```
+
+It writes `docs/release/dependency-license-audit.json` and
+`docs/release/THIRD_PARTY_NOTICES.md` for release-owner review.
 
 Auto-update, license activation, billing, hosted accounts, telemetry, and cloud
 services are not part of the current release path. Any future auto-update or
@@ -58,6 +75,7 @@ Use the development packaging target before release candidates:
 ```bash
 pnpm package
 pnpm package:smoke
+pnpm release:package-check
 ```
 
 `pnpm package` creates an unpacked app under `apps/desktop/dist-packaged/`.
@@ -65,6 +83,11 @@ pnpm package:smoke
 mode that creates a temporary workspace, writes SQLite data through services,
 reopens the database, and verifies workspace data paths are outside the app
 bundle.
+
+`pnpm release:package-check` verifies the unpacked artifact exists, records
+SHA-256 checksums for the packaged executable and `app.asar`, checks that
+Electron Builder remains a non-publishing `dir` package, records signing/update
+status, and scans the packaged app folder for workspace database/manifest files.
 
 The current Windows development package intentionally disables executable
 signing with `signAndEditExecutable: false` in `apps/desktop/electron-builder.yml`.

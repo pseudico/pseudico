@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { AppSettingRecord } from "@local-work-os/db";
 import {
   DEFAULT_PRIVACY_NETWORK_SETTINGS,
+  NETWORK_FEATURE_IDS,
   PRIVACY_NETWORK_SETTINGS_KEY,
   PRIVACY_TELEMETRY_NOTICE,
   PrivacySettingsService,
@@ -23,6 +24,12 @@ describe("PrivacySettingsService", () => {
       telemetryNotice: PRIVACY_TELEMETRY_NOTICE,
       ...DEFAULT_PRIVACY_NETWORK_SETTINGS
     });
+    for (const featureId of NETWORK_FEATURE_IDS) {
+      expect(service.isFeatureEnabled("workspace_1", featureId)).toBe(false);
+      expect(() => service.assertFeatureAllowed("workspace_1", featureId)).toThrow(
+        networkFeatureDisabledMessage(featureId)
+      );
+    }
   });
 
   it("persists explicit optional network feature preferences", async () => {

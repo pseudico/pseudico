@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-15T09:53:48.871Z",
+  "localOnly": true,
+  "platform": {
+    "os": "win32",
+    "release": "10.0.26200",
+    "arch": "x64"
+  },
+  "package": {
+    "productName": "Local Work OS",
+    "packageKind": "unpacked-dir",
+    "unpackedRoot": "C:\\Users\\AlastairLacey\\Pseudico\\apps\\desktop\\dist-packaged\\win-unpacked",
+    "resourcesRoot": "C:\\Users\\AlastairLacey\\Pseudico\\apps\\desktop\\dist-packaged\\win-unpacked\\resources",
+    "signingStatus": "unsigned Windows development package; signAndEditExecutable is false",
+    "installerStatus": "not produced by current dir target",
+    "autoUpdateStatus": "disabled; electron-builder publish is null and no update feed is configured",
+    "dataBoundary": "workspace data must live under the selected workspace folder or app userData, not inside dist-packaged resources"
+  },
+  "artifacts": [
+    {
+      "kind": "executable",
+      "path": "C:\\Users\\AlastairLacey\\Pseudico\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+      "sizeBytes": 222973952,
+      "sha256": "bab300903d6cb1f0b9ad1a388a197881dabd693204ab40a5bfa17bd8ef0d0040"
+    },
+    {
+      "kind": "app.asar",
+      "path": "C:\\Users\\AlastairLacey\\Pseudico\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
+      "sizeBytes": 54927352,
+      "sha256": "3d99b664e0f4cd4ce391f0d09f7bf9a77e10052dfcc2637cba6527230fb15cbf"
+    }
+  ],
+  "checks": [
+    {
+      "name": "unpacked app directory exists",
+      "passed": true,
+      "details": {
+        "path": "C:\\Users\\AlastairLacey\\Pseudico\\apps\\desktop\\dist-packaged\\win-unpacked"
+      }
+    },
+    {
+      "name": "packaged resources directory exists",
+      "passed": true,
+      "details": {
+        "path": "C:\\Users\\AlastairLacey\\Pseudico\\apps\\desktop\\dist-packaged\\win-unpacked\\resources"
+      }
+    },
+    {
+      "name": "packaged executable exists",
+      "passed": true,
+      "details": {
+        "path": "C:\\Users\\AlastairLacey\\Pseudico\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe"
+      }
+    },
+    {
+      "name": "packaged app.asar exists",
+      "passed": true,
+      "details": {
+        "path": "C:\\Users\\AlastairLacey\\Pseudico\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar"
+      }
+    },
+    {
+      "name": "no workspace data inside package",
+      "passed": true,
+      "details": {
+        "forbiddenWorkspaceArtifacts": []
+      }
+    },
+    {
+      "name": "unpacked dir target configured",
+      "passed": true,
+      "details": {
+        "expected": "electron-builder dir target"
+      }
+    },
+    {
+      "name": "publish disabled",
+      "passed": true,
+      "details": {
+        "expected": "publish: null"
+      }
+    },
+    {
+      "name": "asar enabled",
+      "passed": true,
+      "details": {
+        "expected": "asar: true"
+      }
+    }
+  ],
+  "passed": true,
+  "nextRequiredManualEvidence": [
+    "Run pnpm package:smoke on the target OS.",
+    "Launch the packaged app manually and create/open a temporary workspace.",
+    "Back up before upgrade and verify data remains under the workspace folder.",
+    "Publish SHA-256 checksums next to any artifact handed to an operator.",
+    "Resolve owner decisions for public signing/notarization before public release."
+  ]
+}

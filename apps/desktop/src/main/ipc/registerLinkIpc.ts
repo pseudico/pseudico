@@ -1,5 +1,6 @@
 import { shell } from "electron";
 import { LOCAL_WORK_OS_IPC_CHANNELS } from "../../preload/api";
+import { openAllowedExternalUrl } from "../electronSecurity";
 import type { WorkspaceFileSystemService } from "../services/workspace/WorkspaceFileSystemService";
 import { createLinkIpcHandlers } from "./linkHandlers";
 import { registerTypedIpcHandler } from "./registerTypedIpcHandler";
@@ -9,7 +10,15 @@ export function registerLinkIpc(
 ): void {
   const handlers = createLinkIpcHandlers(workspaceService, {
     fetch: async (url, init) => await globalThis.fetch(url, init),
-    openExternal: (url) => shell.openExternal(url)
+    openExternal: async (url) => {
+      const opened = await openAllowedExternalUrl(url, (safeUrl) =>
+        shell.openExternal(safeUrl)
+      );
+
+      if (!opened) {
+        throw new Error("External URL was blocked by security policy.");
+      }
+    }
   });
 
   registerTypedIpcHandler(

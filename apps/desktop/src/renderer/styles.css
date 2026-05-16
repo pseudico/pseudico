@@ -2080,6 +2080,109 @@ a {
   gap: 22px;
 }
 
+.settings-section-nav {
+  display: grid;
+  max-width: 1100px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.settings-section-tab {
+  display: grid;
+  gap: 4px;
+  min-height: 76px;
+  padding: 12px;
+  border: 1px solid var(--app-border, #dedbd1);
+  border-radius: 12px;
+  background: var(--app-surface-strong, #ffffff);
+  color: var(--app-text, #262624);
+  text-align: left;
+  box-shadow: 0 8px 20px rgba(38, 38, 36, 0.05);
+  cursor: pointer;
+}
+
+.settings-section-tab span {
+  color: var(--app-text-muted, #625f58);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.settings-section-tab-active {
+  border-color: var(--app-accent, #245c55);
+  background: var(--app-accent-soft, #e8f1ed);
+}
+
+.settings-section-tab-secondary {
+  opacity: 0.82;
+}
+
+.settings-overview-panel {
+  display: grid;
+  max-width: 1100px;
+  gap: 18px;
+}
+
+.settings-overview-hero,
+.settings-intent-card {
+  border: 1px solid var(--app-border, #dedbd1);
+  border-radius: 14px;
+  background: var(--app-surface-strong, #ffffff);
+  box-shadow: 0 12px 28px rgba(38, 38, 36, 0.06);
+}
+
+.settings-overview-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px;
+}
+
+.settings-overview-hero h3,
+.settings-intent-card h4 {
+  margin: 0;
+}
+
+.settings-overview-hero p,
+.settings-intent-card p {
+  margin: 6px 0 0;
+}
+
+.settings-intent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.settings-intent-card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 16px;
+}
+
+.settings-intent-card button {
+  justify-self: start;
+  padding: 8px 10px;
+  border: 1px solid var(--app-border-strong, #c8c0b0);
+  border-radius: 8px;
+  background: var(--app-surface, #fbfaf7);
+  color: var(--app-text, #262624);
+  font-weight: 700;
+}
+
+.settings-intent-card-primary {
+  border-color: color-mix(in srgb, var(--app-accent, #245c55) 38%, var(--app-border, #dedbd1));
+}
+
+.settings-intent-card-secondary {
+  background: var(--app-surface, #fbfaf7);
+}
+
+.backup-restore-panel {
+  border-color: color-mix(in srgb, var(--app-accent, #245c55) 38%, var(--app-border, #dedbd1));
+}
+
 .inbox-page,
 .metadata-page,
 .search-page,
@@ -3081,6 +3184,22 @@ a {
   max-width: 900px;
 }
 
+.project-detail-header-work-first {
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  max-width: 1180px;
+  padding: 20px;
+  border: 1px solid var(--app-border, #ded8cb);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fffdf7 0%, #f7f3e9 100%);
+  box-shadow: 0 16px 34px rgb(78 66 40 / 8%);
+}
+
+.project-detail-title-block {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
 .project-detail-color {
   width: 18px;
   height: 76px;
@@ -3098,6 +3217,121 @@ a {
   margin: 0;
   color: #514e49;
   line-height: 1.55;
+}
+
+.project-status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.project-status-strip span {
+  min-height: 30px;
+  padding: 6px 10px;
+  border: 1px solid #e7e1d3;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #514e49;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.project-primary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 10px;
+}
+
+.project-primary-actions a.secondary-button {
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.project-work-loop-summary {
+  display: grid;
+  max-width: 1180px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.project-work-card,
+.project-linked-context,
+.project-advanced-details {
+  border: 1px solid var(--app-border, #ded8cb);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgb(38 38 36 / 5%);
+}
+
+.project-work-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px;
+}
+
+.project-work-card-primary {
+  border-color: color-mix(in srgb, var(--app-accent, #245c55) 34%, var(--app-border, #dedbd1));
+  background: #fbfaf7;
+}
+
+.project-work-card h3,
+.project-work-card p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.project-work-card h3 {
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+
+.project-work-card p:last-child {
+  color: #514e49;
+  line-height: 1.5;
+}
+
+.project-linked-context,
+.project-advanced-details {
+  display: grid;
+  gap: 14px;
+  max-width: 1180px;
+  padding: 16px;
+}
+
+.project-linked-context > .panel-heading-actions {
+  align-items: start;
+}
+
+.project-advanced-details summary {
+  min-height: var(--operator-control-min-height, 44px);
+  cursor: pointer;
+  color: var(--app-text, #262624);
+  font-weight: 800;
+}
+
+.project-advanced-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.project-advanced-panel {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #ece8dc;
+  border-radius: 14px;
+  background: #fbfaf7;
+}
+
+.project-advanced-panel h3 {
+  margin: 0;
+  font-size: 1rem;
 }
 
 .project-meta-grid {
@@ -4632,7 +4866,9 @@ a {
   .page-grid,
   .health-grid,
   .project-color-options,
+  .project-detail-header-work-first,
   .project-meta-grid,
+  .project-work-loop-summary,
     .project-health-metrics,
     .project-health-detail-grid,
     .item-inspector-metadata,
@@ -4678,6 +4914,10 @@ a {
   .search-control {
     width: 100%;
     min-width: min(100%, 220px);
+  }
+
+  .project-primary-actions {
+    justify-content: start;
   }
 
   .welcome-copy h1 {
@@ -5679,6 +5919,10 @@ body,
 .timeline-item-card,
 .quick-start-action-card,
 .backup-management-panel,
+.export-management-panel,
+.category-management-panel,
+.settings-overview-hero,
+.settings-intent-card,
 .workspace-card,
 .settings-panel,
 .file-card-content,
@@ -5755,6 +5999,9 @@ body,
 
 .appearance-root.density-compact .dashboard-widget,
 .appearance-root.density-compact .backup-management-panel,
+.appearance-root.density-compact .export-management-panel,
+.appearance-root.density-compact .category-management-panel,
+.appearance-root.density-compact .settings-intent-card,
 .appearance-root.density-compact .universal-item-card,
 .appearance-root.density-compact .today-task-card,
 .appearance-root.density-compact .search-result-card {
@@ -5810,6 +6057,11 @@ body,
 @media (max-width: 900px) {
   .container-preferences-form {
     grid-template-columns: 1fr;
+  }
+
+  .settings-overview-hero {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .appearance-settings-form {
@@ -6969,5 +7221,409 @@ body,
   .onboarding-checklist button {
     grid-column: 2;
     justify-self: start;
+  }
+}
+
+/* PSE-215: primary-operator readability and control comfort.
+   These overrides keep the existing information architecture intact while
+   biasing default density toward daily reading, scanning, and data entry. */
+:root,
+.appearance-root {
+  --operator-control-min-height: 46px;
+  --operator-compact-control-min-height: 40px;
+  --operator-card-padding: 18px;
+  --operator-card-gap: 14px;
+  --operator-card-radius: 12px;
+  --operator-readable-line-height: 1.58;
+  font-size: calc(17px * var(--appearance-font-scale));
+  line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+  line-height: 1.35;
+}
+
+.top-bar h1,
+.page-heading h2,
+.project-detail-header h2,
+.today-page-heading h2,
+.quick-add-dialog-header h2 {
+  overflow-wrap: anywhere;
+}
+
+.nav-item,
+.segmented-button,
+.icon-button,
+.primary-button,
+.secondary-button,
+.settings-intent-card button,
+.item-action-button,
+.collection-list-item,
+.recent-workspace-button,
+.help-navigation-item,
+.help-context-list button,
+.onboarding-checklist button {
+  min-height: var(--operator-control-min-height);
+}
+
+.compact-button,
+.app-tab-reorder button,
+.app-tab-close,
+.toast-dismiss,
+.reorder-controls .icon-button,
+.item-actions-trigger {
+  min-height: var(--operator-compact-control-min-height);
+}
+
+.primary-button,
+.secondary-button,
+.icon-button {
+  padding: 11px 16px;
+}
+
+.search-control {
+  width: min(34vw, 390px);
+  min-height: 48px;
+  padding: 10px 13px;
+  border-radius: 12px;
+}
+
+.search-control input {
+  font-size: 1rem;
+}
+
+.command-palette-search input,
+.workspace-form input,
+.project-form input,
+.project-form textarea,
+.move-to-container-form select,
+.quick-add-form input,
+.quick-add-form select,
+.task-quick-add input,
+.create-list-form input,
+.note-editor input,
+.note-editor textarea,
+.checklist-inline-add input,
+.checklist-bulk-add textarea,
+.contact-field-row input,
+.contact-field-row select,
+.inspector-field input,
+.inspector-field select,
+.relationship-link-controls select,
+.category-picker select,
+.category-form input,
+.category-form textarea,
+.task-card-select-field select,
+.task-card-due-field input,
+.pipeline-stage-add input,
+.pipeline-card-add input,
+.pipeline-card-move select,
+.collection-task-form select,
+.dashboard-editor-add-row select,
+.dashboard-editor-add-row input,
+.today-preferences-controls input,
+.today-preferences-controls select,
+.daily-planner-lane-input input,
+.snooze-menu-custom input,
+.reminder-picker-field input,
+.reminder-picker-field select,
+.container-preferences-form select,
+.calendar-filter-bar input,
+.project-board-toolbar select,
+.kanban-card-move select,
+.container-tab-create-form input,
+.container-tab-rename-form input,
+.appearance-settings-form select {
+  min-height: var(--operator-control-min-height);
+  padding: 11px 13px;
+  font-size: 1rem;
+}
+
+.quick-add-dialog {
+  width: min(760px, 100%);
+  padding: 22px;
+  border-radius: 14px;
+}
+
+.quick-add-form {
+  grid-template-columns: minmax(240px, 1fr) minmax(150px, 190px) minmax(200px, 240px) auto;
+  gap: 12px;
+}
+
+.quick-start-action-grid {
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.quick-start-action-card {
+  min-height: 92px;
+  gap: 0.8rem;
+  padding: 1rem;
+}
+
+.quick-start-action-card small {
+  line-height: 1.45;
+}
+
+.project-content-section > .note-editor,
+.contact-fields-editor,
+.dashboard-widget,
+.today-lane,
+.today-task-card,
+.search-filter-panel,
+.search-results-panel,
+.search-result-card,
+.metadata-target-card,
+.project-health-card,
+.universal-item-card,
+.backup-list-row,
+.category-list-row,
+.dashboard-widget-row,
+.grouped-result-item,
+.settings-section-tab,
+.settings-overview-hero,
+.settings-intent-card,
+.backup-management-panel,
+.export-management-panel,
+.category-management-panel {
+  border-radius: var(--operator-card-radius);
+}
+
+.dashboard-widget,
+.today-lane,
+.search-filter-panel,
+.search-results-panel,
+.project-health-card,
+.backup-management-panel,
+.export-management-panel,
+.category-management-panel {
+  padding: var(--operator-card-padding);
+}
+
+.universal-item-card,
+.search-result-card,
+.today-task-card,
+.metadata-target-card,
+.dashboard-widget-row,
+.backup-list-row,
+.category-list-row,
+.grouped-result-item {
+  gap: var(--operator-card-gap);
+  padding: var(--operator-card-padding);
+}
+
+.universal-item-card-main h4,
+.search-result-card-title strong,
+.today-task-title-button,
+.dashboard-widget-row-main strong,
+.metadata-target-main strong,
+.grouped-result-title strong {
+  font-size: 1.06rem;
+  line-height: 1.35;
+}
+
+.universal-item-card-main p,
+.search-result-card-body,
+.today-task-card-main p,
+.dashboard-widget > p,
+.dashboard-widget-row-main > span,
+.metadata-target-main p,
+.note-markdown-preview p,
+.file-card-details,
+.link-card-details,
+.location-card-details,
+.grouped-result-meta,
+.project-detail-header p:last-child,
+.today-page-heading p:last-child,
+.daily-planner-editor-heading p:last-child,
+.planning-summary-heading p:last-child {
+  line-height: var(--operator-readable-line-height);
+}
+
+.universal-item-card-main,
+.search-result-card-main,
+.today-task-card-main,
+.dashboard-widget-row-main,
+.metadata-target-main,
+.grouped-result-main {
+  gap: 8px;
+}
+
+.item-type-badge,
+.task-details-row span,
+.task-status-pill,
+.task-priority-pill,
+.tag-badge,
+.category-badge,
+.metadata-target-metadata > span:first-child,
+.today-task-card-meta span,
+.dashboard-widget-header > span,
+.today-lane-header > span {
+  min-height: 28px;
+  font-size: 0.82rem;
+}
+
+.universal-item-metadata div {
+  min-height: 32px;
+}
+
+.universal-item-metadata dt,
+.universal-item-metadata dd,
+.task-details-row,
+.today-task-card-meta,
+.dashboard-widget-row-meta,
+.search-result-card-meta,
+.backup-list-meta {
+  font-size: 0.86rem;
+}
+
+.selection-checkbox input,
+.project-checkbox input,
+.quick-add-form .inline-checkbox input,
+.settings-checkbox-label input,
+.checklist-item input {
+  min-width: 18px;
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+}
+
+.search-page-form {
+  max-width: 900px;
+}
+
+.search-page-input {
+  min-height: 52px;
+  padding: 11px 14px;
+  border-radius: 12px;
+}
+
+.search-page-input input {
+  font-size: 1.06rem;
+}
+
+.search-result-card {
+  min-height: 116px;
+  border-radius: 14px;
+}
+
+.today-lane-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.daily-planner-editor-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.daily-planner-editor,
+.planning-summary-panel,
+.today-preferences-panel {
+  padding: 18px;
+}
+
+.today-task-title-button {
+  min-height: 40px;
+}
+
+.today-task-card-actions {
+  row-gap: 10px;
+}
+
+.dashboard-widget-grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.dashboard-widget-span-2 {
+  grid-column: 1 / -1;
+}
+
+.dashboard-widget-row {
+  min-height: 74px;
+}
+
+.settings-section-tab {
+  min-height: 90px;
+  padding: 15px;
+}
+
+.settings-section-tab span,
+.settings-intent-card p,
+.settings-overview-hero p {
+  font-size: 0.9rem;
+  line-height: var(--operator-readable-line-height);
+}
+
+.settings-intent-card button {
+  padding: 10px 14px;
+}
+
+.appearance-settings-form {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.backup-list-row > div:first-child,
+.category-list-row,
+.collection-detail-heading,
+.grouped-result-item {
+  align-items: start;
+}
+
+.project-list-row,
+.collection-list-item,
+.metadata-chip,
+.metadata-category-option {
+  min-height: 46px;
+}
+
+.project-list-row {
+  min-height: 82px;
+  padding: 16px 18px;
+}
+
+.project-list-main strong,
+.project-list-main span,
+.contact-field-row label,
+.category-form label,
+.task-card-select-field,
+.task-card-due-field,
+.daily-planner-lane-input,
+.today-preferences-controls label,
+.today-preferences-toggles label,
+.dashboard-editor-add-row label,
+.appearance-settings-form label {
+  line-height: 1.4;
+}
+
+.appearance-root.density-compact {
+  --operator-control-min-height: 40px;
+  --operator-compact-control-min-height: 34px;
+  --operator-card-padding: 14px;
+  --operator-card-gap: 10px;
+  font-size: calc(16px * var(--appearance-font-scale));
+}
+
+.appearance-root.density-compact .primary-button,
+.appearance-root.density-compact .secondary-button,
+.appearance-root.density-compact .icon-button {
+  padding: 8px 12px;
+}
+
+.appearance-root.font-large {
+  --operator-control-min-height: 50px;
+  --operator-compact-control-min-height: 44px;
+  --operator-card-padding: 20px;
+}
+
+@media (max-width: 960px) {
+  .quick-add-form,
+  .today-task-card-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-widget-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-05-16T01:57:21.739Z",
+  "sourceReport": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\performance\\reports\\pse-209-fixtures.json",
+  "outRoot": "C:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z",
+  "summaries": [
+    {
+      "itemCount": 1000,
+      "workspaceRoot": "C:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-1000",
+      "databasePath": "C:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-1000\\data\\local-work-os.sqlite",
+      "counts": {
+        "workspaces": 1,
+        "projects": 100,
+        "contacts": 250,
+        "categories": 60,
+        "tags": 60,
+        "items": 1020,
+        "tasks": 800,
+        "notes": 100,
+        "lists": 100,
+        "listRows": 300,
+        "attachments": 20,
+        "searchRecords": 1270,
+        "activityEvents": 1270
+      },
+      "migrationRowsAfterMarkInitial": 1
+    },
+    {
+      "itemCount": 10000,
+      "workspaceRoot": "C:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-10000",
+      "databasePath": "C:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-10000\\data\\local-work-os.sqlite",
+      "counts": {
+        "workspaces": 1,
+        "projects": 100,
+        "contacts": 250,
+        "categories": 60,
+        "tags": 60,
+        "items": 10020,
+        "tasks": 8000,
+        "notes": 1000,
+        "lists": 1000,
+        "listRows": 3000,
+        "attachments": 20,
+        "searchRecords": 10270,
+        "activityEvents": 10270
+      },
+      "migrationRowsAfterMarkInitial": 1
+    }
+  ],
+  "migrationMarkInitialAt": "2026-05-16T02:05:03.126Z"
+}

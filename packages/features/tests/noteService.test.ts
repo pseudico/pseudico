@@ -151,6 +151,29 @@ describe("NoteService", () => {
     ).toEqual(expect.arrayContaining(["note_created", "note_updated"]));
   });
 
+  it("handles a huge note with bounded preview and searchable full content", async () => {
+    const content = `${"Operator recovery paragraph. ".repeat(5000)}unique-failure-token`;
+
+    const result = await createService().createNote({
+      workspaceId: "workspace_1",
+      containerId: "container_project_1",
+      title: "Large recovery note",
+      content
+    });
+
+    expect(result.note.content).toHaveLength(content.length);
+    expect(result.note.preview).toMatch(/^Operator recovery paragraph/);
+    expect(result.note.preview?.length).toBeLessThanOrEqual(160);
+    expect(result.searchRecord.body).toContain("unique-failure-token");
+    expect(
+      new SearchIndexRepository(connection).getByTarget({
+        workspaceId: "workspace_1",
+        targetType: "item",
+        targetId: result.item.id
+      })?.body
+    ).toContain("unique-failure-token");
+  });
+
   it("guards note updates with the expected note version", async () => {
     const service = createService();
     const created = await service.createNote({

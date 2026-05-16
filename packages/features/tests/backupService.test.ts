@@ -170,6 +170,34 @@ describe("BackupService", () => {
       })
     ).toMatchObject([{ id: "backup_new" }, { id: "backup_old" }]);
   });
+
+  it("rejects backup paths that leave the local workspace backup folder", async () => {
+    const validInput = {
+      workspaceId: "workspace_1",
+      workspaceName: "Personal Work",
+      databaseRelativePath: "data/local-work-os.sqlite",
+      backupRelativePath: "backups/2026-05-01T00-00-00-000Z",
+      backupDatabaseRelativePath:
+        "backups/2026-05-01T00-00-00-000Z/local-work-os.sqlite",
+      manifestRelativePath:
+        "backups/2026-05-01T00-00-00-000Z/attachment-manifest.json"
+    };
+
+    await expect(
+      createService().createManualBackup({
+        ...validInput,
+        backupRelativePath: "../outside"
+      })
+    ).rejects.toThrow("backupRelativePath must be workspace-relative.");
+    await expect(
+      createService().createManualBackup({
+        ...validInput,
+        manifestRelativePath: "exports/attachment-manifest.json"
+      })
+    ).rejects.toThrow("manifestRelativePath must stay inside workspace backups.");
+    expect(copiedDatabases).toHaveLength(0);
+    expect(manifests.size).toBe(0);
+  });
 });
 
 function createService(): BackupService {

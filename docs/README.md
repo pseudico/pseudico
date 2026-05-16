@@ -26,6 +26,11 @@ docs and the linked Linear issue.
   remaining release-hardening gaps, and smoke-tag evidence.
 - `DISTRIBUTION_LICENSING_PRIVACY.md` records the distribution,
   licensing, privacy, signing, and update-path release checklist.
+- `RELEASE_CANDIDATE_PACKAGING.md` records the current package artifact type,
+  data-boundary guarantee, manual update instructions, and signing/checksum
+  status for operator handoff.
+- `release/` contains generated dependency/license audit evidence and third-party
+  notice inventory for release-candidate review.
 - `FINAL_RELEASE_SYNC.md` records the M14 source-of-truth reconciliation,
   current implementation summary, ticket cross-reference correction, and final
   release verification gates.
@@ -33,6 +38,12 @@ docs and the linked Linear issue.
   guardrails.
 - `SECURITY_AUDIT.md` records the current Electron IPC, external link, widget,
   and drag/drop hardening posture plus manual QA checks.
+- `LOCAL_ONLY_SECURITY_REVIEW.md` records operator-readiness evidence for
+  network-off defaults, external URL safety, renderer boundaries, and Electron
+  hardening.
+- `ACTIVITY_SEARCH_RECONCILIATION.md` records operator-readiness evidence that
+  writes produce activity-log entries, search projections, and repairable search
+  health diagnostics.
 - `TEMPLATE_FILE_FORMAT.md` defines the versioned `.lwo-template` JSON
   envelope for portable local templates.
 - `BROWSER_CAPTURE.md` explains the disabled-by-default local browser capture
@@ -59,8 +70,16 @@ docs and the linked Linear issue.
 - `ROADMAP.md` summarizes the staged implementation path.
 - `MODULE_REGISTRY.md` names planned product modules and their responsibilities.
 - `QA_SCRIPTS.md` lists manual and automated smoke checks for MVP workflows.
+- `FAILURE_MODE_MATRIX.md` defines expected operator-facing recovery behavior and evidence for local-only failure cases.
+- `OPERATOR_HANDOFF_PLAN.md` defines the Linear hardening waves required for nontechnical operator handoff.
+- `OPERATOR_READINESS_REPORT.md` is the final go/no-go certification report
+  with verdict, evidence pack, risk register, and handoff checklist.
+- `OPERATOR_RUNBOOK.md` is the nontechnical operator manual for daily use, backup/restore, recovery, troubleshooting, and known limitations.
+- `tickets/OPERATOR_READINESS_TICKET_PACK.md` contains import-ready Linear tickets for closing operator-readiness gaps.
 - `PERFORMANCE.md` defines large-workspace benchmark fixtures, budgets, and
   report artifacts.
+- `PERFORMANCE_SCALE_QA.md` defines the 1k/10k packaged UI performance QA
+  script, 100k full-gate guidance, and scale blocker policy.
 - `DEMO_WORKSPACE.md` documents the optional local demo workspace generator and
   manual QA path.
 - `DB_CORRUPTION_RECOVERY.md` documents the local-only corrupt database

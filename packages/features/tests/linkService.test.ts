@@ -58,6 +58,35 @@ describe("LinkService", () => {
     expect(() => service.normaliseUrl("file:///C:/secret.txt")).toThrow(
       "url must use HTTP or HTTPS."
     );
+    expect(() => service.normaliseUrl("https://user:pass@example.com")).toThrow(
+      "url must not include credentials."
+    );
+  });
+
+  it("rejects malformed and unsafe URLs before creating local link records", async () => {
+    const service = createService();
+
+    expect(() => service.normaliseUrl("javascript:alert(1)")).toThrow(
+      "url must use HTTP or HTTPS."
+    );
+    expect(() => service.normaliseUrl("https://exa mple.com")).toThrow(
+      "url must be a valid HTTP or HTTPS URL."
+    );
+    await expect(
+      service.createLink({
+        workspaceId: "workspace_1",
+        containerId: "container_project_1",
+        url: "data:text/html,hello"
+      })
+    ).rejects.toThrow("url must use HTTP or HTTPS.");
+    await expect(
+      service.createLink({
+        workspaceId: "workspace_1",
+        containerId: "container_project_1",
+        url: "https://user:pass@example.com"
+      })
+    ).rejects.toThrow("url must not include credentials.");
+    expect(new LinkRepository(connection).listByContainer("container_project_1")).toHaveLength(0);
   });
 
   it("creates a link item, details row, activity, and search record", async () => {

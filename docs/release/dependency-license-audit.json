@@ -1,0 +1,878 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-15T09:54:15.328Z",
+  "localOnlyGuardrails": {
+    "telemetry": "forbidden by default",
+    "cloudSync": "forbidden",
+    "hostedAccounts": "forbidden",
+    "billingOrLicenseActivation": "forbidden",
+    "autoUpdate": "deferred; no update feed may be added by this gate"
+  },
+  "summary": {
+    "workspacePackageCount": 7,
+    "runtimeDependencyCount": 47,
+    "releaseToolingDependencyCount": 14,
+    "failureCount": 0,
+    "warningCount": 1
+  },
+  "failures": [],
+  "warnings": [
+    "runtime dependency simple-get@4.0.1 is network-capable or commonly used for network I/O; confirm it is not used for normal local-only workflows."
+  ],
+  "runtimeDependencies": [
+    {
+      "name": "base64-js",
+      "version": "1.5.1",
+      "license": "MIT",
+      "description": "Base64 encoding/decoding in pure JS",
+      "homepage": "https://github.com/beatgammit/base64-js",
+      "repository": "git://github.com/beatgammit/base64-js.git",
+      "packagePath": "node_modules/.pnpm/base64-js@1.5.1/node_modules/base64-js",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "better-sqlite3",
+      "version": "12.9.0",
+      "license": "MIT",
+      "description": "The fastest and simplest library for SQLite in Node.js.",
+      "homepage": "http://github.com/WiseLibs/better-sqlite3",
+      "repository": "git://github.com/WiseLibs/better-sqlite3.git",
+      "packagePath": "node_modules/.pnpm/better-sqlite3@12.9.0/node_modules/better-sqlite3",
+      "dependencies": {
+        "bindings": "^1.5.0",
+        "prebuild-install": "^7.1.1"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "bindings",
+      "version": "1.5.0",
+      "license": "MIT",
+      "description": "Helper module for loading your native module's .node file",
+      "homepage": "https://github.com/TooTallNate/node-bindings",
+      "repository": "git://github.com/TooTallNate/node-bindings.git",
+      "packagePath": "node_modules/.pnpm/bindings@1.5.0/node_modules/bindings",
+      "dependencies": {
+        "file-uri-to-path": "1.0.0"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "bl",
+      "version": "4.1.0",
+      "license": "MIT",
+      "description": "Buffer List: collect buffers and access with a standard readable Buffer interface, streamable too!",
+      "homepage": "https://github.com/rvagg/bl",
+      "repository": "https://github.com/rvagg/bl.git",
+      "packagePath": "node_modules/.pnpm/bl@4.1.0/node_modules/bl",
+      "dependencies": {
+        "buffer": "^5.5.0",
+        "inherits": "^2.0.4",
+        "readable-stream": "^3.4.0"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "buffer",
+      "version": "5.7.1",
+      "license": "MIT",
+      "description": "Node.js Buffer API, for the browser",
+      "homepage": "https://github.com/feross/buffer",
+      "repository": "git://github.com/feross/buffer.git",
+      "packagePath": "node_modules/.pnpm/buffer@5.7.1/node_modules/buffer",
+      "dependencies": {
+        "base64-js": "^1.3.1",
+        "ieee754": "^1.1.13"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "chownr",
+      "version": "1.1.4",
+      "license": "ISC",
+      "description": "like `chown -R`",
+      "homepage": null,
+      "repository": "git://github.com/isaacs/chownr.git",
+      "packagePath": "node_modules/.pnpm/chownr@1.1.4/node_modules/chownr",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "cookie",
+      "version": "1.1.1",
+      "license": "MIT",
+      "description": "HTTP server cookie parsing and serialization",
+      "homepage": null,
+      "repository": "jshttp/cookie",
+      "packagePath": "node_modules/.pnpm/cookie@1.1.1/node_modules/cookie",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "decompress-response",
+      "version": "6.0.0",
+      "license": "MIT",
+      "description": "Decompress a HTTP response if needed",
+      "homepage": null,
+      "repository": "sindresorhus/decompress-response",
+      "packagePath": "node_modules/.pnpm/decompress-response@6.0.0/node_modules/decompress-response",
+      "dependencies": {
+        "mimic-response": "^3.1.0"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "deep-extend",
+      "version": "0.6.0",
+      "license": "MIT",
+      "description": "Recursive object extending",
+      "homepage": "https://github.com/unclechu/node-deep-extend",
+      "repository": "git://github.com/unclechu/node-deep-extend.git",
+      "packagePath": "node_modules/.pnpm/deep-extend@0.6.0/node_modules/deep-extend",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "detect-libc",
+      "version": "2.1.2",
+      "license": "Apache-2.0",
+      "description": "Node.js module to detect the C standard library (libc) implementation family and version",
+      "homepage": null,
+      "repository": "git://github.com/lovell/detect-libc.git",
+      "packagePath": "node_modules/.pnpm/detect-libc@2.1.2/node_modules/detect-libc",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "drizzle-orm",
+      "version": "0.45.2",
+      "license": "Apache-2.0",
+      "description": "Drizzle ORM package for SQL databases",
+      "homepage": "https://orm.drizzle.team",
+      "repository": "git+https://github.com/drizzle-team/drizzle-orm.git",
+      "packagePath": "node_modules/.pnpm/drizzle-orm@0.45.2_@types+b_8dd68c43a48e52f3b7a95cb2fea47623/node_modules/drizzle-orm",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "end-of-stream",
+      "version": "1.4.5",
+      "license": "MIT",
+      "description": "Call a callback when a readable/writable/duplex stream has completed or failed.",
+      "homepage": "https://github.com/mafintosh/end-of-stream",
+      "repository": "git://github.com/mafintosh/end-of-stream.git",
+      "packagePath": "node_modules/.pnpm/end-of-stream@1.4.5/node_modules/end-of-stream",
+      "dependencies": {
+        "once": "^1.4.0"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "expand-template",
+      "version": "2.0.3",
+      "license": "(MIT OR WTFPL)",
+      "description": "Expand placeholders in a template string",
+      "homepage": "https://github.com/ralphtheninja/expand-template",
+      "repository": "https://github.com/ralphtheninja/expand-template.git",
+      "packagePath": "node_modules/.pnpm/expand-template@2.0.3/node_modules/expand-template",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "file-uri-to-path",
+      "version": "1.0.0",
+      "license": "MIT",
+      "description": "Convert a file: URI to a file path",
+      "homepage": "https://github.com/TooTallNate/file-uri-to-path",
+      "repository": "git://github.com/TooTallNate/file-uri-to-path.git",
+      "packagePath": "node_modules/.pnpm/file-uri-to-path@1.0.0/node_modules/file-uri-to-path",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "fs-constants",
+      "version": "1.0.0",
+      "license": "MIT",
+      "description": "Require constants across node and the browser",
+      "homepage": "https://github.com/mafintosh/fs-constants",
+      "repository": "https://github.com/mafintosh/fs-constants.git",
+      "packagePath": "node_modules/.pnpm/fs-constants@1.0.0/node_modules/fs-constants",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "github-from-package",
+      "version": "0.0.0",
+      "license": "MIT",
+      "description": "return the github url from a package.json file",
+      "homepage": "https://github.com/substack/github-from-package",
+      "repository": "git://github.com/substack/github-from-package.git",
+      "packagePath": "node_modules/.pnpm/github-from-package@0.0.0/node_modules/github-from-package",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "ieee754",
+      "version": "1.2.1",
+      "license": "BSD-3-Clause",
+      "description": "Read/write IEEE754 floating point numbers from/to a Buffer or array-like object",
+      "homepage": null,
+      "repository": "git://github.com/feross/ieee754.git",
+      "packagePath": "node_modules/.pnpm/ieee754@1.2.1/node_modules/ieee754",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "inherits",
+      "version": "2.0.4",
+      "license": "ISC",
+      "description": "Browser-friendly inheritance fully compatible with standard node.js inherits()",
+      "homepage": null,
+      "repository": "git://github.com/isaacs/inherits",
+      "packagePath": "node_modules/.pnpm/inherits@2.0.4/node_modules/inherits",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "ini",
+      "version": "1.3.8",
+      "license": "ISC",
+      "description": "An ini encoder/decoder for node",
+      "homepage": null,
+      "repository": "git://github.com/isaacs/ini.git",
+      "packagePath": "node_modules/.pnpm/ini@1.3.8/node_modules/ini",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "lucide-react",
+      "version": "1.14.0",
+      "license": "ISC",
+      "description": "A Lucide icon library package for React applications.",
+      "homepage": "https://lucide.dev",
+      "repository": "https://github.com/lucide-icons/lucide.git",
+      "packagePath": "node_modules/.pnpm/lucide-react@1.14.0_react@19.2.5/node_modules/lucide-react",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "mimic-response",
+      "version": "3.1.0",
+      "license": "MIT",
+      "description": "Mimic a Node.js HTTP response stream",
+      "homepage": null,
+      "repository": "sindresorhus/mimic-response",
+      "packagePath": "node_modules/.pnpm/mimic-response@3.1.0/node_modules/mimic-response",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "minimist",
+      "version": "1.2.8",
+      "license": "MIT",
+      "description": "parse argument options",
+      "homepage": "https://github.com/minimistjs/minimist",
+      "repository": "git://github.com/minimistjs/minimist.git",
+      "packagePath": "node_modules/.pnpm/minimist@1.2.8/node_modules/minimist",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "mkdirp-classic",
+      "version": "0.5.3",
+      "license": "MIT",
+      "description": "Mirror of mkdirp 0.5.2",
+      "homepage": "https://github.com/mafintosh/mkdirp-classic",
+      "repository": "https://github.com/mafintosh/mkdirp-classic.git",
+      "packagePath": "node_modules/.pnpm/mkdirp-classic@0.5.3/node_modules/mkdirp-classic",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "napi-build-utils",
+      "version": "2.0.0",
+      "license": "MIT",
+      "description": "A set of utilities to assist developers of tools that build N-API native add-ons",
+      "homepage": "https://github.com/inspiredware/napi-build-utils#readme",
+      "repository": "git+https://github.com/inspiredware/napi-build-utils.git",
+      "packagePath": "node_modules/.pnpm/napi-build-utils@2.0.0/node_modules/napi-build-utils",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "node-abi",
+      "version": "3.89.0",
+      "license": "MIT",
+      "description": "Get the Node ABI for a given target and runtime, and vice versa.",
+      "homepage": "https://github.com/electron/node-abi#readme",
+      "repository": "git+https://github.com/electron/node-abi.git",
+      "packagePath": "node_modules/.pnpm/node-abi@3.89.0/node_modules/node-abi",
+      "dependencies": {
+        "semver": "^7.3.5"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "once",
+      "version": "1.4.0",
+      "license": "ISC",
+      "description": "Run a function exactly one time",
+      "homepage": null,
+      "repository": "git://github.com/isaacs/once",
+      "packagePath": "node_modules/.pnpm/once@1.4.0/node_modules/once",
+      "dependencies": {
+        "wrappy": "1"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "prebuild-install",
+      "version": "7.1.3",
+      "license": "MIT",
+      "description": "A command line tool to easily install prebuilt binaries for multiple version of node/iojs on a specific platform",
+      "homepage": "https://github.com/prebuild/prebuild-install",
+      "repository": "https://github.com/prebuild/prebuild-install.git",
+      "packagePath": "node_modules/.pnpm/prebuild-install@7.1.3/node_modules/prebuild-install",
+      "dependencies": {
+        "detect-libc": "^2.0.0",
+        "expand-template": "^2.0.3",
+        "github-from-package": "0.0.0",
+        "minimist": "^1.2.3",
+        "mkdirp-classic": "^0.5.3",
+        "napi-build-utils": "^2.0.0",
+        "node-abi": "^3.3.0",
+        "pump": "^3.0.0",
+        "rc": "^1.2.7",
+        "simple-get": "^4.0.0",
+        "tar-fs": "^2.0.0",
+        "tunnel-agent": "^0.6.0"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "pump",
+      "version": "3.0.4",
+      "license": "MIT",
+      "description": "pipe streams together and close all of them if one of them closes",
+      "homepage": null,
+      "repository": "git://github.com/mafintosh/pump.git",
+      "packagePath": "node_modules/.pnpm/pump@3.0.4/node_modules/pump",
+      "dependencies": {
+        "end-of-stream": "^1.1.0",
+        "once": "^1.3.1"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "rc",
+      "version": "1.2.8",
+      "license": "(BSD-2-Clause OR MIT OR Apache-2.0)",
+      "description": "hardwired configuration loader",
+      "homepage": null,
+      "repository": "https://github.com/dominictarr/rc.git",
+      "packagePath": "node_modules/.pnpm/rc@1.2.8/node_modules/rc",
+      "dependencies": {
+        "deep-extend": "^0.6.0",
+        "ini": "~1.3.0",
+        "minimist": "^1.2.0",
+        "strip-json-comments": "~2.0.1"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "react-dom",
+      "version": "19.2.5",
+      "license": "MIT",
+      "description": "React package for working with the DOM.",
+      "homepage": "https://react.dev/",
+      "repository": "https://github.com/facebook/react.git",
+      "packagePath": "node_modules/.pnpm/react-dom@19.2.5_react@19.2.5/node_modules/react-dom",
+      "dependencies": {
+        "scheduler": "^0.27.0"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "react-router-dom",
+      "version": "7.14.2",
+      "license": "MIT",
+      "description": "Declarative routing for React web applications",
+      "homepage": null,
+      "repository": "https://github.com/remix-run/react-router",
+      "packagePath": "node_modules/.pnpm/react-router-dom@7.14.2_rea_3a39fd11aef0f6e32580592015a3c0d0/node_modules/react-router-dom",
+      "dependencies": {
+        "react-router": "7.14.2"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "react-router",
+      "version": "7.14.2",
+      "license": "MIT",
+      "description": "Declarative routing for React",
+      "homepage": null,
+      "repository": "https://github.com/remix-run/react-router",
+      "packagePath": "node_modules/.pnpm/react-router@7.14.2_react-d_088082665a5435ee2a141e8990ee7201/node_modules/react-router",
+      "dependencies": {
+        "cookie": "^1.0.1",
+        "set-cookie-parser": "^2.6.0"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "react",
+      "version": "19.2.5",
+      "license": "MIT",
+      "description": "React is a JavaScript library for building user interfaces.",
+      "homepage": "https://react.dev/",
+      "repository": "https://github.com/facebook/react.git",
+      "packagePath": "node_modules/.pnpm/react@19.2.5/node_modules/react",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "readable-stream",
+      "version": "3.6.2",
+      "license": "MIT",
+      "description": "Streams3, a user-land copy of the stream library from Node.js",
+      "homepage": null,
+      "repository": "git://github.com/nodejs/readable-stream",
+      "packagePath": "node_modules/.pnpm/readable-stream@3.6.2/node_modules/readable-stream",
+      "dependencies": {
+        "inherits": "^2.0.3",
+        "string_decoder": "^1.1.1",
+        "util-deprecate": "^1.0.1"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "safe-buffer",
+      "version": "5.2.1",
+      "license": "MIT",
+      "description": "Safer Node.js Buffer API",
+      "homepage": "https://github.com/feross/safe-buffer",
+      "repository": "git://github.com/feross/safe-buffer.git",
+      "packagePath": "node_modules/.pnpm/safe-buffer@5.2.1/node_modules/safe-buffer",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "scheduler",
+      "version": "0.27.0",
+      "license": "MIT",
+      "description": "Cooperative scheduler for the browser environment.",
+      "homepage": "https://react.dev/",
+      "repository": "https://github.com/facebook/react.git",
+      "packagePath": "node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "semver",
+      "version": "7.7.4",
+      "license": "ISC",
+      "description": "The semantic version parser used by npm.",
+      "homepage": null,
+      "repository": "git+https://github.com/npm/node-semver.git",
+      "packagePath": "node_modules/.pnpm/semver@7.7.4/node_modules/semver",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "set-cookie-parser",
+      "version": "2.7.2",
+      "license": "MIT",
+      "description": "Parses set-cookie headers into objects",
+      "homepage": "https://github.com/nfriedly/set-cookie-parser",
+      "repository": "nfriedly/set-cookie-parser",
+      "packagePath": "node_modules/.pnpm/set-cookie-parser@2.7.2/node_modules/set-cookie-parser",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "simple-concat",
+      "version": "1.0.1",
+      "license": "MIT",
+      "description": "Super-minimalist version of `concat-stream`. Less than 15 lines!",
+      "homepage": "https://github.com/feross/simple-concat",
+      "repository": "git://github.com/feross/simple-concat.git",
+      "packagePath": "node_modules/.pnpm/simple-concat@1.0.1/node_modules/simple-concat",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "simple-get",
+      "version": "4.0.1",
+      "license": "MIT",
+      "description": "Simplest way to make http get requests. Supports HTTPS, redirects, gzip/deflate, streams in < 100 lines.",
+      "homepage": "https://github.com/feross/simple-get",
+      "repository": "git://github.com/feross/simple-get.git",
+      "packagePath": "node_modules/.pnpm/simple-get@4.0.1/node_modules/simple-get",
+      "dependencies": {
+        "decompress-response": "^6.0.0",
+        "once": "^1.3.1",
+        "simple-concat": "^1.0.0"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "string_decoder",
+      "version": "1.3.0",
+      "license": "MIT",
+      "description": "The string_decoder module from Node core",
+      "homepage": "https://github.com/nodejs/string_decoder",
+      "repository": "git://github.com/nodejs/string_decoder.git",
+      "packagePath": "node_modules/.pnpm/string_decoder@1.3.0/node_modules/string_decoder",
+      "dependencies": {
+        "safe-buffer": "~5.2.0"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "strip-json-comments",
+      "version": "2.0.1",
+      "license": "MIT",
+      "description": "Strip comments from JSON. Lets you use comments in your JSON files!",
+      "homepage": null,
+      "repository": "sindresorhus/strip-json-comments",
+      "packagePath": "node_modules/.pnpm/strip-json-comments@2.0.1/node_modules/strip-json-comments",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "tar-fs",
+      "version": "2.1.4",
+      "license": "MIT",
+      "description": "filesystem bindings for tar-stream",
+      "homepage": "https://github.com/mafintosh/tar-fs",
+      "repository": "https://github.com/mafintosh/tar-fs.git",
+      "packagePath": "node_modules/.pnpm/tar-fs@2.1.4/node_modules/tar-fs",
+      "dependencies": {
+        "chownr": "^1.1.1",
+        "mkdirp-classic": "^0.5.2",
+        "pump": "^3.0.0",
+        "tar-stream": "^2.1.4"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "tar-stream",
+      "version": "2.2.0",
+      "license": "MIT",
+      "description": "tar-stream is a streaming tar parser and generator and nothing else. It is streams2 and operates purely using streams which means you can easily extract/parse tarballs without ever hitting the file system.",
+      "homepage": "https://github.com/mafintosh/tar-stream",
+      "repository": "git+https://github.com/mafintosh/tar-stream.git",
+      "packagePath": "node_modules/.pnpm/tar-stream@2.2.0/node_modules/tar-stream",
+      "dependencies": {
+        "bl": "^4.0.3",
+        "end-of-stream": "^1.4.1",
+        "fs-constants": "^1.0.0",
+        "inherits": "^2.0.3",
+        "readable-stream": "^3.1.1"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "tunnel-agent",
+      "version": "0.6.0",
+      "license": "Apache-2.0",
+      "description": "HTTP proxy tunneling agent. Formerly part of mikeal/request, now a standalone module.",
+      "homepage": null,
+      "repository": "https://github.com/mikeal/tunnel-agent",
+      "packagePath": "node_modules/.pnpm/tunnel-agent@0.6.0/node_modules/tunnel-agent",
+      "dependencies": {
+        "safe-buffer": "^5.0.1"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "util-deprecate",
+      "version": "1.0.2",
+      "license": "MIT",
+      "description": "The Node.js `util.deprecate()` function with browser support",
+      "homepage": "https://github.com/TooTallNate/util-deprecate",
+      "repository": "git://github.com/TooTallNate/util-deprecate.git",
+      "packagePath": "node_modules/.pnpm/util-deprecate@1.0.2/node_modules/util-deprecate",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "wrappy",
+      "version": "1.0.2",
+      "license": "ISC",
+      "description": "Callback wrapping utility",
+      "homepage": "https://github.com/npm/wrappy",
+      "repository": "https://github.com/npm/wrappy",
+      "packagePath": "node_modules/.pnpm/wrappy@1.0.2/node_modules/wrappy",
+      "dependencies": {},
+      "optionalDependencies": {}
+    }
+  ],
+  "releaseToolingDependencies": [
+    {
+      "name": "@electron/rebuild",
+      "version": "4.0.4",
+      "license": "MIT",
+      "description": "Electron supporting package to rebuild native node modules against the currently installed electron",
+      "homepage": "https://github.com/electron/rebuild",
+      "repository": "git+https://github.com/electron/rebuild.git",
+      "packagePath": "node_modules/.pnpm/@electron+rebuild@4.0.4/node_modules/@electron/rebuild",
+      "dependencies": {
+        "@malept/cross-spawn-promise": "^2.0.0",
+        "debug": "^4.1.1",
+        "node-abi": "^4.2.0",
+        "node-api-version": "^0.2.1",
+        "node-gyp": "^12.2.0",
+        "read-binary-file-arch": "^1.0.6"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "@eslint/js",
+      "version": "9.39.4",
+      "license": "MIT",
+      "description": "ESLint JavaScript language implementation",
+      "homepage": "https://eslint.org",
+      "repository": "https://github.com/eslint/eslint.git",
+      "packagePath": "node_modules/.pnpm/@eslint+js@9.39.4/node_modules/@eslint/js",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "@types/node",
+      "version": "25.6.0",
+      "license": "MIT",
+      "description": "TypeScript definitions for node",
+      "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node",
+      "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+      "packagePath": "node_modules/.pnpm/@types+node@25.6.0/node_modules/@types/node",
+      "dependencies": {
+        "undici-types": "~7.19.0"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "@types/react-dom",
+      "version": "19.2.3",
+      "license": "MIT",
+      "description": "TypeScript definitions for react-dom",
+      "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react-dom",
+      "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+      "packagePath": "node_modules/.pnpm/@types+react-dom@19.2.3_@types+react@19.2.14/node_modules/@types/react-dom",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "@types/react",
+      "version": "19.2.14",
+      "license": "MIT",
+      "description": "TypeScript definitions for react",
+      "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react",
+      "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+      "packagePath": "node_modules/.pnpm/@types+react@19.2.14/node_modules/@types/react",
+      "dependencies": {
+        "csstype": "^3.2.2"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "version": "5.2.0",
+      "license": "MIT",
+      "description": "The default Vite plugin for React projects",
+      "homepage": "https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#readme",
+      "repository": "git+https://github.com/vitejs/vite-plugin-react.git",
+      "packagePath": "node_modules/.pnpm/@vitejs+plugin-react@5.2.0__f2198ba7ed62ae4d64455395610f2056/node_modules/@vitejs/plugin-react",
+      "dependencies": {
+        "@babel/core": "^7.29.0",
+        "@babel/plugin-transform-react-jsx-self": "^7.27.1",
+        "@babel/plugin-transform-react-jsx-source": "^7.27.1",
+        "@rolldown/pluginutils": "1.0.0-rc.3",
+        "@types/babel__core": "^7.20.5",
+        "react-refresh": "^0.18.0"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "electron-builder",
+      "version": "26.8.1",
+      "license": "MIT",
+      "description": "A complete solution to package and build a ready for distribution Electron app for MacOS, Windows and Linux with “auto update” support out of the box",
+      "homepage": "https://github.com/electron-userland/electron-builder",
+      "repository": "git+https://github.com/electron-userland/electron-builder.git",
+      "packagePath": "node_modules/.pnpm/electron-builder@26.8.1_ele_65d556870c52a7e0ac4da9b01c567e7d/node_modules/electron-builder",
+      "dependencies": {
+        "chalk": "^4.1.2",
+        "ci-info": "^4.2.0",
+        "fs-extra": "^10.1.0",
+        "lazy-val": "^1.0.5",
+        "simple-update-notifier": "2.0.0",
+        "yargs": "^17.6.2",
+        "app-builder-lib": "26.8.1",
+        "builder-util": "26.8.1",
+        "dmg-builder": "26.8.1",
+        "builder-util-runtime": "9.5.1"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "electron-vite",
+      "version": "5.0.0",
+      "license": "MIT",
+      "description": "Electron build tooling based on Vite",
+      "homepage": "https://electron-vite.org",
+      "repository": "git+https://github.com/alex8088/electron-vite.git",
+      "packagePath": "node_modules/.pnpm/electron-vite@5.0.0_vite@7._e5a3fce1f2267625d69c1c49fc9376ae/node_modules/electron-vite",
+      "dependencies": {
+        "@babel/core": "^7.28.4",
+        "@babel/plugin-transform-arrow-functions": "^7.27.1",
+        "cac": "^6.7.14",
+        "esbuild": "^0.25.11",
+        "magic-string": "^0.30.19",
+        "picocolors": "^1.1.1"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "electron",
+      "version": "41.3.0",
+      "license": "MIT",
+      "description": "Build cross platform desktop apps with JavaScript, HTML, and CSS",
+      "homepage": null,
+      "repository": "https://github.com/electron/electron",
+      "packagePath": "node_modules/.pnpm/electron@41.3.0/node_modules/electron",
+      "dependencies": {
+        "@electron/get": "^2.0.0",
+        "@types/node": "^24.9.0",
+        "extract-zip": "^2.0.1"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "eslint",
+      "version": "9.39.4",
+      "license": "MIT",
+      "description": "An AST-based pattern checker for JavaScript.",
+      "homepage": "https://eslint.org",
+      "repository": "eslint/eslint",
+      "packagePath": "node_modules/.pnpm/eslint@9.39.4_jiti@2.6.1/node_modules/eslint",
+      "dependencies": {
+        "@eslint-community/eslint-utils": "^4.8.0",
+        "@eslint-community/regexpp": "^4.12.1",
+        "@eslint/config-array": "^0.21.2",
+        "@eslint/config-helpers": "^0.4.2",
+        "@eslint/core": "^0.17.0",
+        "@eslint/eslintrc": "^3.3.5",
+        "@eslint/js": "9.39.4",
+        "@eslint/plugin-kit": "^0.4.1",
+        "@humanfs/node": "^0.16.6",
+        "@humanwhocodes/module-importer": "^1.0.1",
+        "@humanwhocodes/retry": "^0.4.2",
+        "@types/estree": "^1.0.6",
+        "ajv": "^6.14.0",
+        "chalk": "^4.0.0",
+        "cross-spawn": "^7.0.6",
+        "debug": "^4.3.2",
+        "escape-string-regexp": "^4.0.0",
+        "eslint-scope": "^8.4.0",
+        "eslint-visitor-keys": "^4.2.1",
+        "espree": "^10.4.0",
+        "esquery": "^1.5.0",
+        "esutils": "^2.0.2",
+        "fast-deep-equal": "^3.1.3",
+        "file-entry-cache": "^8.0.0",
+        "find-up": "^5.0.0",
+        "glob-parent": "^6.0.2",
+        "ignore": "^5.2.0",
+        "imurmurhash": "^0.1.4",
+        "is-glob": "^4.0.0",
+        "json-stable-stringify-without-jsonify": "^1.0.1",
+        "lodash.merge": "^4.6.2",
+        "minimatch": "^3.1.5",
+        "natural-compare": "^1.4.0",
+        "optionator": "^0.9.3"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "typescript-eslint",
+      "version": "8.59.1",
+      "license": "MIT",
+      "description": "Tooling which enables you to use TypeScript with ESLint",
+      "homepage": "https://typescript-eslint.io/packages/typescript-eslint",
+      "repository": "https://github.com/typescript-eslint/typescript-eslint.git",
+      "packagePath": "node_modules/.pnpm/typescript-eslint@8.59.1_es_8194358596dcaeedd3dd0a2b5df4a43c/node_modules/typescript-eslint",
+      "dependencies": {
+        "@typescript-eslint/eslint-plugin": "8.59.1",
+        "@typescript-eslint/parser": "8.59.1",
+        "@typescript-eslint/typescript-estree": "8.59.1",
+        "@typescript-eslint/utils": "8.59.1"
+      },
+      "optionalDependencies": {}
+    },
+    {
+      "name": "typescript",
+      "version": "5.9.3",
+      "license": "Apache-2.0",
+      "description": "TypeScript is a language for application scale JavaScript development",
+      "homepage": "https://www.typescriptlang.org/",
+      "repository": "https://github.com/microsoft/TypeScript.git",
+      "packagePath": "node_modules/.pnpm/typescript@5.9.3/node_modules/typescript",
+      "dependencies": {},
+      "optionalDependencies": {}
+    },
+    {
+      "name": "vite",
+      "version": "7.3.2",
+      "license": "MIT",
+      "description": "Native-ESM powered web dev build tool",
+      "homepage": "https://vite.dev",
+      "repository": "git+https://github.com/vitejs/vite.git",
+      "packagePath": "node_modules/.pnpm/vite@7.3.2_@types+node@25.6_1960b2e2ba6792b70753ebe020afa044/node_modules/vite",
+      "dependencies": {
+        "esbuild": "^0.27.0",
+        "fdir": "^6.5.0",
+        "picomatch": "^4.0.3",
+        "postcss": "^8.5.6",
+        "rollup": "^4.43.0",
+        "tinyglobby": "^0.2.15"
+      },
+      "optionalDependencies": {
+        "fsevents": "~2.3.3"
+      }
+    },
+    {
+      "name": "vitest",
+      "version": "4.1.5",
+      "license": "MIT",
+      "description": "Next generation testing framework powered by Vite",
+      "homepage": "https://vitest.dev",
+      "repository": "git+https://github.com/vitest-dev/vitest.git",
+      "packagePath": "node_modules/.pnpm/vitest@4.1.5_@types+node@25_d33994f98c87edd69e979c9ce61bdb3a/node_modules/vitest",
+      "dependencies": {
+        "es-module-lexer": "^2.0.0",
+        "expect-type": "^1.3.0",
+        "magic-string": "^0.30.21",
+        "obug": "^2.1.1",
+        "pathe": "^2.0.3",
+        "picomatch": "^4.0.3",
+        "std-env": "^4.0.0-rc.1",
+        "tinybench": "^2.9.0",
+        "tinyexec": "^1.0.2",
+        "tinyglobby": "^0.2.15",
+        "tinyrainbow": "^3.1.0",
+        "vite": "^6.0.0 || ^7.0.0 || ^8.0.0",
+        "why-is-node-running": "^2.3.0",
+        "@vitest/expect": "4.1.5",
+        "@vitest/mocker": "4.1.5",
+        "@vitest/pretty-format": "4.1.5",
+        "@vitest/snapshot": "4.1.5",
+        "@vitest/spy": "4.1.5",
+        "@vitest/runner": "4.1.5",
+        "@vitest/utils": "4.1.5"
+      },
+      "optionalDependencies": {}
+    }
+  ]
+}

@@ -1517,6 +1517,11 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Status");
     expect(html).toContain("Category");
     expect(html).toContain("Tags");
+    expect(html).toContain("Next work");
+    expect(html).toContain("Task load");
+    expect(html).toContain("Content here");
+    expect(html).toContain("Linked context");
+    expect(html).toContain("Advanced project options");
     expect(html).toContain("Content feed");
     expect(html).toContain("Recent activity");
     expect(html).toContain("Related contacts");

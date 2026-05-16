@@ -83,6 +83,7 @@ import {
 } from "@local-work-os/ui";
 import type {
   ActivitySummary,
+  ApiResult,
   AttachmentVersionSummary,
   CategorySummary,
   ContainerTabContentSummary,
@@ -113,7 +114,12 @@ import {
   type ContainerPreferencesDraft
 } from "../components/ContainerPreferencesPanel";
 import { ContainerTabsPanel } from "../components/ContainerTabsPanel";
-import { openQuickStartFromContainer } from "../components/QuickAddModal";
+import {
+  QUICK_START_SAVED_EVENT,
+  getQuickStartSavedContainerId,
+  openQuickStartFromContainer,
+  type QuickStartSavedEventDetail
+} from "../components/QuickAddModal";
 import {
   formatEmailDropImportMessage,
   importEmailDropSources,
@@ -183,6 +189,46 @@ type ProjectDetailPageProps = {
 
 const emptyProjectItems: UniversalItemViewModel[] = [];
 const PROJECT_FEED_PAGE_SIZE = 50;
+const PROJECT_CREATE_VISIBILITY_RETRY_COUNT = 5;
+const PROJECT_CREATE_VISIBILITY_RETRY_MS = 150;
+
+async function getProjectWithRetry(
+  apiClient: LocalWorkOsApi,
+  projectId: string
+): Promise<ApiResult<ProjectSummary | null>> {
+  for (let attempt = 0; attempt <= PROJECT_CREATE_VISIBILITY_RETRY_COUNT; attempt += 1) {
+    const result = await apiClient.projects.get(projectId);
+
+    if (!result.ok || result.data !== null || attempt === PROJECT_CREATE_VISIBILITY_RETRY_COUNT) {
+      return result;
+    }
+
+    await delay(PROJECT_CREATE_VISIBILITY_RETRY_MS);
+  }
+
+  return await apiClient.projects.get(projectId);
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function getFallbackContainerPreferences(
+  project: ProjectSummary
+): ContainerPreferencesSummary {
+  return {
+    workspaceId: project.workspaceId,
+    containerId: project.id,
+    updatedAt: null,
+    defaultView: "feed",
+    defaultTabId: null,
+    showCompleted: true,
+    grouping: "none",
+    defaultQuickAddType: "task",
+    summaryFirst: false,
+    compactMode: false
+  };
+}
 
 export function ProjectDetailPage({
   apiClient = desktopApiClient,
@@ -383,7 +429,7 @@ export function ProjectDetailPage({
         preferencesResult,
         privacyResult
       ] = await Promise.all([
-        apiClient.projects.get(activeProjectId),
+        getProjectWithRetry(apiClient, activeProjectId),
         apiClient.projects.list(),
         apiClient.categories.list(),
         apiClient.activity.listForTarget({
@@ -499,9 +545,17 @@ export function ProjectDetailPage({
         return;
       }
 
-      if (!preferencesResult.ok) {
-        setItemError(preferencesResult.error.message);
+      if (projectResult.data === null) {
+        setProject(null);
         return;
+      }
+
+      const preferences = preferencesResult.ok
+        ? preferencesResult.data
+        : getFallbackContainerPreferences(projectResult.data);
+
+      if (!preferencesResult.ok) {
+        setPreferencesError(preferencesResult.error.message);
       }
 
       setProject(projectResult.data);
@@ -517,7 +571,7 @@ export function ProjectDetailPage({
       setManagedTabs(managedTabsResult.data);
       setTabSummaries(tabSummariesResult.data);
       setTabTemplates(tabTemplatesResult.data);
-      setContainerPreferences(preferencesResult.data);
+      setContainerPreferences(preferences);
       setWebWidgetsEnabled(
         privacyResult !== undefined && privacyResult.ok
           ? privacyResult.data.webWidgetsEnabled
@@ -526,8 +580,8 @@ export function ProjectDetailPage({
       setActiveTabId((current) =>
         selectAvailableTabId(
           tabsResult.data,
-          preferencesResult.data.defaultView === "tab"
-            ? preferencesResult.data.defaultTabId
+          preferences.defaultView === "tab"
+            ? preferences.defaultTabId
             : current
         )
       );
@@ -558,6 +612,26 @@ export function ProjectDetailPage({
       active = false;
     };
   }, [apiClient, projectId]);
+
+  useEffect(() => {
+    if (loading || project !== null || projectId === undefined) {
+      return;
+    }
+
+    let active = true;
+
+    void apiClient.projects.get(projectId).then((result) => {
+      if (!active || !result.ok || result.data === null) {
+        return;
+      }
+
+      setProject(result.data);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [apiClient, loading, project, projectId]);
 
   useEffect(() => {
     if (projectId === undefined || apiClient.containerMedia === undefined) {
@@ -734,6 +808,45 @@ export function ProjectDetailPage({
 
     setProjectHealth(toProjectHealthViewModel(result.data));
   }
+
+  useEffect(() => {
+    if (project === null) {
+      return;
+    }
+
+    let active = true;
+    const activeProjectId = project.id;
+
+    function handleQuickStartSaved(event: Event): void {
+      const detail = (event as CustomEvent<QuickStartSavedEventDetail>).detail;
+      if (detail === undefined) {
+        return;
+      }
+
+      const containerId = getQuickStartSavedContainerId(detail.result);
+      if (containerId !== activeProjectId) {
+        return;
+      }
+
+      void (async () => {
+        await refreshProjectContent(activeProjectId);
+        if (!active) {
+          return;
+        }
+        await refreshProjectActivity(activeProjectId);
+        if (detail.kind === "task") {
+          await refreshProjectHealth(activeProjectId);
+        }
+      })();
+    }
+
+    window.addEventListener(QUICK_START_SAVED_EVENT, handleQuickStartSaved);
+
+    return () => {
+      active = false;
+      window.removeEventListener(QUICK_START_SAVED_EVENT, handleQuickStartSaved);
+    };
+  }, [project?.id]);
 
   async function refreshProjectTabs(activeProjectId: string): Promise<void> {
     setTabError(null);
@@ -3142,6 +3255,10 @@ export function ProjectDetailPage({
     projects,
     items
   });
+  const nextProjectTask =
+    projectHealth?.nextTask ?? projectHealth?.nextDueTask ?? null;
+  const latestProjectActivity = projectActivity[0] ?? null;
+  const contentTypeSummary = summarizeProjectContent(tabItems);
 
   return (
     <section
@@ -3156,55 +3273,34 @@ export function ProjectDetailPage({
         Back to projects
       </Link>
 
-      <header className="project-detail-header">
-        <ContainerMediaPreview
-          busy={projectMediaBusy}
-          error={projectMediaError}
-          media={projectMedia}
-          title={project.name}
-          variant="banner"
-          onRemove={() => void removeProjectBanner()}
-          onSet={() => void setProjectBanner()}
-        />
+      <header className="project-detail-header project-detail-header-work-first">
         <span
           className="project-detail-color"
           style={{ backgroundColor: project.color ?? "#245c55" }}
           aria-hidden="true"
         />
-        <div>
+        <div className="project-detail-title-block">
           <p className="top-eyebrow">Project</p>
           <h2>{project.name}</h2>
           <p>{project.description ?? "No description added yet."}</p>
+          <div className="project-status-strip" aria-label="Project status summary">
+            <span>Status: {project.status}</span>
+            <span>Category: {projectCategory === null ? "None" : projectCategory.name}</span>
+            <span>{relatedContactViewModels.length} linked contact{relatedContactViewModels.length === 1 ? "" : "s"}</span>
+          </div>
         </div>
-        <div className="button-row">
+        <div className="project-primary-actions" aria-label="Project primary actions">
           <button
-            className="secondary-button compact-button"
-            disabled={exportBusy}
+            className="primary-button"
+            disabled={itemsLoading}
             type="button"
-            onClick={() => void printProjectPdf()}
+            onClick={openProjectDefaultQuickAdd}
           >
-            <Printer size={16} aria-hidden="true" />
-            Print / PDF
+            Add work
           </button>
-          <button
-            className="secondary-button compact-button"
-            disabled={exportBusy}
-            type="button"
-            onClick={() => void exportProjectMarkdown()}
-          >
-            <Download size={16} aria-hidden="true" />
-            Export Markdown
-          </button>
-          <button
-            className="secondary-button compact-button"
-            type="button"
-            onClick={() => {
-              setPreferencesOpen(true);
-              setPreferencesError(null);
-            }}
-          >
-            Display settings
-          </button>
+          <a className="secondary-button" href="#project-content-feed">
+            Review content
+          </a>
         </div>
       </header>
 
@@ -3222,103 +3318,65 @@ export function ProjectDetailPage({
         <p className="form-message">{exportMessage}</p>
       )}
 
-      <dl className="project-meta-grid">
-        <div>
-          <dt>Status</dt>
-          <dd>{project.status}</dd>
-        </div>
-        <div>
-          <dt>Category</dt>
-          <dd>
-            <CategoryBadge category={projectCategory} />
-          </dd>
-        </div>
-        <div>
-          <dt>Tags</dt>
-          <dd>
-            <Tag size={15} aria-hidden="true" />
-            Placeholder
-          </dd>
-        </div>
-      </dl>
+      <section className="project-work-loop-summary" aria-label="Project work summary">
+        <article className="project-work-card project-work-card-primary">
+          <p className="top-eyebrow">Next work</p>
+          {nextProjectTask === null ? (
+            <>
+              <h3>No open next task</h3>
+              <p>Capture the next action for this project so it can appear in Today and dashboard planning.</p>
+            </>
+          ) : (
+            <>
+              <h3>{nextProjectTask.title}</h3>
+              <p>{formatDateLabel(nextProjectTask.dueAt) ?? "No due date"} · {nextProjectTask.taskStatus}</p>
+            </>
+          )}
+        </article>
+        <article className="project-work-card">
+          <p className="top-eyebrow">Task load</p>
+          <h3>{projectHealth?.openTaskCount ?? 0} open</h3>
+          <p>{projectHealth?.overdueTaskCount ?? 0} overdue · {projectHealth?.upcomingTaskCount ?? 0} upcoming · {projectHealth?.waitingTaskCount ?? 0} waiting</p>
+        </article>
+        <article className="project-work-card">
+          <p className="top-eyebrow">Content here</p>
+          <h3>{tabItems.length} item{tabItems.length === 1 ? "" : "s"}</h3>
+          <p>{contentTypeSummary}</p>
+        </article>
+        <article className="project-work-card">
+          <p className="top-eyebrow">Latest activity</p>
+          <h3>{latestProjectActivity?.actionLabel ?? latestProjectActivity?.action ?? "No activity yet"}</h3>
+          <p>{latestProjectActivity?.description ?? latestProjectActivity?.summary ?? "Project activity will appear after work is added or changed."}</p>
+        </article>
+      </section>
 
-      <RelatedContactsPanel
-        availableContacts={availableContacts}
-        busy={relationshipBusy}
-        error={relationshipError}
-        relatedContacts={relatedContactViewModels}
-        selectedContactId={selectedContactId}
-        onLinkContact={() => void linkSelectedContact()}
-        onSelectedContactChange={setSelectedContactId}
-        onUnlinkContact={(relationshipId) => void unlinkRelatedContact(relationshipId)}
-      />
+      <section className="project-linked-context" aria-label="Project linked context">
+        <div className="panel-heading-actions">
+          <div className="panel-heading">
+            <FolderKanban size={17} aria-hidden="true" />
+            <h3>Linked context</h3>
+          </div>
+          <p className="muted-text">Contacts and related work connected to this project.</p>
+        </div>
+        <RelatedContactsPanel
+          availableContacts={availableContacts}
+          busy={relationshipBusy}
+          error={relationshipError}
+          relatedContacts={relatedContactViewModels}
+          selectedContactId={selectedContactId}
+          onLinkContact={() => void linkSelectedContact()}
+          onSelectedContactChange={setSelectedContactId}
+          onUnlinkContact={(relationshipId) => void unlinkRelatedContact(relationshipId)}
+        />
+      </section>
 
       {showSummaryFirst ? tabSummaryCards : null}
 
-      <RelatedContentGraphPanel
-        availableTargets={relationshipGraphTargets}
-        busy={relationshipBusy}
-        error={relationshipError}
-        graph={relationshipGraph as RelatedContentGraphViewModel | null}
-        relationFilter={relationshipGraphFilter}
-        selectedRelationType={selectedGraphRelationType}
-        selectedTargetKey={selectedGraphTargetKey}
-        onCreateRelationship={() => void linkSelectedGraphTarget()}
-        onOpenTarget={openRelationshipTarget}
-        onRelationFilterChange={(relationType) =>
-          setRelationshipGraphFilter(relationType)
-        }
-        onRemoveRelationship={(relationshipId) =>
-          void removeGraphRelationship(relationshipId)
-        }
-        onSelectedRelationTypeChange={setSelectedGraphRelationType}
-        onSelectedTargetChange={setSelectedGraphTargetKey}
-      />
-
-      <RecentActivityList
-        activity={projectActivity}
-        emptyMessage="No project activity recorded yet."
-      />
-
-      <ContainerTabsPanel
-        activeTabId={activeTabId}
-        busy={tabBusy}
-        error={tabError}
-        managedTabs={managedTabs}
-        tabs={tabs}
-        templates={tabTemplates}
-        onArchiveTab={(tabId) => void mutateProjectTab(tabId, "archive")}
-        onCreateTab={createProjectTab}
-        onCreateTabFromTemplate={(templateId) => void createProjectTabFromTemplate(templateId)}
-        onDeleteTab={(tabId) => void deleteProjectTab(tabId)}
-        onDuplicateTab={(tabId) => void mutateProjectTab(tabId, "duplicate")}
-        onHideTab={(tabId) => void mutateProjectTab(tabId, "hide")}
-        onRenameTab={renameProjectTab}
-        onReorderTabs={(tabIds) => void reorderProjectTabs(tabIds)}
-        onSelectTab={(tabId) => {
-          setActiveTabId(tabId);
-          setVisibleItemCount(PROJECT_FEED_PAGE_SIZE);
-        }}
-        onShowTab={(tabId) => void mutateProjectTab(tabId, "show")}
-      />
-
       {showSummaryFirst ? null : tabSummaryCards}
-
-      {projectHealth === null ? null : (
-        <ProjectHealthCard health={projectHealth} />
-      )}
-
-      <div className="category-inline-picker">
-        <CategoryPicker
-          categories={categories}
-          label="Project category"
-          value={project.categoryId}
-          onChange={(categoryId) => void assignProjectCategory(categoryId)}
-        />
-      </div>
 
       <section
         className="project-content-section"
+        id="project-content-feed"
         aria-label="Project content"
         onDragOver={(event) => {
           if (Array.from(event.dataTransfer.types).includes("Files")) {
@@ -3521,6 +3579,133 @@ export function ProjectDetailPage({
           </button>
         ) : null}
       </section>
+
+      <details className="project-advanced-details">
+        <summary>Advanced project options</summary>
+        <div className="project-advanced-grid">
+          <section className="project-advanced-panel" aria-label="Project display and export">
+            <h3>Display, banner, and export</h3>
+            <ContainerMediaPreview
+              busy={projectMediaBusy}
+              error={projectMediaError}
+              media={projectMedia}
+              title={project.name}
+              variant="banner"
+              onRemove={() => void removeProjectBanner()}
+              onSet={() => void setProjectBanner()}
+            />
+            <div className="button-row">
+              <button
+                className="secondary-button compact-button"
+                disabled={exportBusy}
+                type="button"
+                onClick={() => void printProjectPdf()}
+              >
+                <Printer size={16} aria-hidden="true" />
+                Print / PDF
+              </button>
+              <button
+                className="secondary-button compact-button"
+                disabled={exportBusy}
+                type="button"
+                onClick={() => void exportProjectMarkdown()}
+              >
+                <Download size={16} aria-hidden="true" />
+                Export Markdown
+              </button>
+              <button
+                className="secondary-button compact-button"
+                type="button"
+                onClick={() => {
+                  setPreferencesOpen(true);
+                  setPreferencesError(null);
+                }}
+              >
+                Display settings
+              </button>
+            </div>
+            <dl className="project-meta-grid">
+              <div>
+                <dt>Status</dt>
+                <dd>{project.status}</dd>
+              </div>
+              <div>
+                <dt>Category</dt>
+                <dd>
+                  <CategoryBadge category={projectCategory} />
+                </dd>
+              </div>
+              <div>
+                <dt>Tags</dt>
+                <dd>
+                  <Tag size={15} aria-hidden="true" />
+                  Placeholder
+                </dd>
+              </div>
+            </dl>
+            <div className="category-inline-picker">
+              <CategoryPicker
+                categories={categories}
+                label="Project category"
+                value={project.categoryId}
+                onChange={(categoryId) => void assignProjectCategory(categoryId)}
+              />
+            </div>
+          </section>
+
+          <section className="project-advanced-panel" aria-label="Project tabs and relationships">
+            <h3>Tabs, graph, and activity</h3>
+            <ContainerTabsPanel
+              activeTabId={activeTabId}
+              busy={tabBusy}
+              error={tabError}
+              managedTabs={managedTabs}
+              tabs={tabs}
+              templates={tabTemplates}
+              onArchiveTab={(tabId) => void mutateProjectTab(tabId, "archive")}
+              onCreateTab={createProjectTab}
+              onCreateTabFromTemplate={(templateId) => void createProjectTabFromTemplate(templateId)}
+              onDeleteTab={(tabId) => void deleteProjectTab(tabId)}
+              onDuplicateTab={(tabId) => void mutateProjectTab(tabId, "duplicate")}
+              onHideTab={(tabId) => void mutateProjectTab(tabId, "hide")}
+              onRenameTab={renameProjectTab}
+              onReorderTabs={(tabIds) => void reorderProjectTabs(tabIds)}
+              onSelectTab={(tabId) => {
+                setActiveTabId(tabId);
+                setVisibleItemCount(PROJECT_FEED_PAGE_SIZE);
+              }}
+              onShowTab={(tabId) => void mutateProjectTab(tabId, "show")}
+            />
+            <RelatedContentGraphPanel
+              availableTargets={relationshipGraphTargets}
+              busy={relationshipBusy}
+              error={relationshipError}
+              graph={relationshipGraph as RelatedContentGraphViewModel | null}
+              relationFilter={relationshipGraphFilter}
+              selectedRelationType={selectedGraphRelationType}
+              selectedTargetKey={selectedGraphTargetKey}
+              onCreateRelationship={() => void linkSelectedGraphTarget()}
+              onOpenTarget={openRelationshipTarget}
+              onRelationFilterChange={(relationType) =>
+                setRelationshipGraphFilter(relationType)
+              }
+              onRemoveRelationship={(relationshipId) =>
+                void removeGraphRelationship(relationshipId)
+              }
+              onSelectedRelationTypeChange={setSelectedGraphRelationType}
+              onSelectedTargetChange={setSelectedGraphTargetKey}
+            />
+            <RecentActivityList
+              activity={projectActivity}
+              emptyMessage="No project activity recorded yet."
+            />
+          </section>
+
+          {projectHealth === null ? null : (
+            <ProjectHealthCard health={projectHealth} />
+          )}
+        </div>
+      </details>
 
       {itemActionError === null ? null : (
         <p className="form-message form-message-error">{itemActionError}</p>
@@ -4280,6 +4465,44 @@ function formatDateLabel(value: string | null | undefined): string | null {
   }
 
   return value.slice(0, 10);
+}
+
+function summarizeProjectContent(
+  items: readonly ProjectFeedViewModel[]
+): string {
+  if (items.length === 0) {
+    return "No notes, tasks, lists, files, or links yet.";
+  }
+
+  const labels: Record<ProjectFeedViewModel["type"], string> = {
+    file: "file",
+    link: "link",
+    list: "list",
+    location: "location",
+    note: "note",
+    task: "task"
+  };
+  const counts: Record<ProjectFeedViewModel["type"], number> = {
+    file: 0,
+    link: 0,
+    list: 0,
+    location: 0,
+    note: 0,
+    task: 0
+  };
+
+  for (const item of items) {
+    counts[item.type] = (counts[item.type] ?? 0) + 1;
+  }
+
+  return (Object.keys(labels) as Array<ProjectFeedViewModel["type"]>)
+    .filter((type) => (counts[type] ?? 0) > 0)
+    .map((type) => {
+      const count = counts[type] ?? 0;
+      const label = labels[type] ?? type;
+      return `${count} ${label}${count === 1 ? "" : "s"}`;
+    })
+    .join(" · ");
 }
 
 

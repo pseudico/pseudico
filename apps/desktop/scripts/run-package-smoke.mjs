@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import http from "node:http";
 import { access, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -10,6 +11,66 @@ const executablePath = getPackagedExecutablePath();
 const packagedAppPath = join(getPackagedResourcesPath(), "app.asar");
 const resultDir = await mkdtemp(join(tmpdir(), "local-work-os-package-smoke-"));
 const resultPath = join(resultDir, "result.json");
+
+class CdpClient {
+  constructor(webSocket) {
+    this.webSocket = webSocket;
+    this.nextId = 1;
+    this.pending = new Map();
+  }
+
+  static connect(url) {
+    return new Promise((resolveConnect, rejectConnect) => {
+      const webSocket = new globalThis.WebSocket(url);
+      const client = new CdpClient(webSocket);
+
+      webSocket.addEventListener("open", () => resolveConnect(client));
+      webSocket.addEventListener("error", () =>
+        rejectConnect(new Error("Could not connect to packaged app DevTools target."))
+      );
+      webSocket.addEventListener("message", (event) => {
+        const message = JSON.parse(event.data);
+
+        if (!message.id || !client.pending.has(message.id)) {
+          return;
+        }
+
+        const callbacks = client.pending.get(message.id);
+        client.pending.delete(message.id);
+
+        if (message.error !== undefined) {
+          callbacks.reject(new Error(message.error.message));
+          return;
+        }
+
+        callbacks.resolve(message.result ?? {});
+      });
+    });
+  }
+
+  send(method, params = {}) {
+    const id = this.nextId;
+    this.nextId += 1;
+
+    return new Promise((resolveSend, rejectSend) => {
+      this.pending.set(id, { resolve: resolveSend, reject: rejectSend });
+      this.webSocket.send(JSON.stringify({ id, method, params }));
+    });
+  }
+
+  async evaluate(expression) {
+    const result = await this.send("Runtime.evaluate", {
+      expression,
+      returnByValue: true
+    });
+
+    return result.result?.value;
+  }
+
+  close() {
+    this.webSocket.close();
+  }
+}
 
 await access(executablePath);
 
@@ -40,9 +101,118 @@ try {
     });
   }
 
-  console.log(await readFile(resultPath, "utf8"));
+  await runNormalLaunchSmoke({
+    command: executablePath,
+    label: "packaged executable normal launch",
+    timeoutMs: 30_000
+  });
+
+  const packageSmokeResult = JSON.parse(await readFile(resultPath, "utf8"));
+  console.log(JSON.stringify({
+    ...packageSmokeResult,
+    normalLaunchSmoke: { ok: true, target: "welcome window" }
+  }, null, 2));
 } finally {
   await rm(resultDir, { force: true, recursive: true });
+}
+
+function runNormalLaunchSmoke(input) {
+  return new Promise((resolveRun, rejectRun) => {
+    const port = 9349;
+    const child = spawn(input.command, [`--remote-debugging-port=${port}`], {
+      cwd: appRoot,
+      env: {
+        ...process.env,
+        ELECTRON_ENABLE_LOGGING: "1"
+      },
+      stdio: "inherit",
+      windowsHide: true
+    });
+
+    const timeout = setTimeout(() => {
+      child.kill();
+      rejectRun(new Error(`${input.label} timed out after ${input.timeoutMs}ms.`));
+    }, input.timeoutMs);
+
+    child.on("error", (error) => {
+      clearTimeout(timeout);
+      rejectRun(error);
+    });
+
+    waitForNormalLaunch(port, input.timeoutMs - 1_000)
+      .then(async () => {
+        clearTimeout(timeout);
+        child.kill();
+        resolveRun();
+      })
+      .catch((error) => {
+        clearTimeout(timeout);
+        child.kill();
+        rejectRun(error);
+      });
+  });
+}
+
+async function waitForNormalLaunch(port, timeoutMs) {
+  const startedAt = Date.now();
+  let lastError = null;
+
+  while (Date.now() - startedAt < timeoutMs) {
+    try {
+      const targets = await httpJson(`http://127.0.0.1:${port}/json/list`);
+      const page = targets.find(
+        (target) => target.type === "page" && target.webSocketDebuggerUrl
+      );
+
+      if (page !== undefined) {
+        const client = await CdpClient.connect(page.webSocketDebuggerUrl);
+        await client.send("Runtime.enable");
+        const rendered = await client.evaluate(
+          "document.body?.innerText.includes('Local Work OS') === true"
+        );
+        client.close();
+
+        if (rendered === true) {
+          return;
+        }
+      }
+    } catch (error) {
+      lastError = error;
+    }
+
+    await delay(250);
+  }
+
+  throw new Error(
+    `Packaged normal launch did not render the welcome window. ${
+      lastError instanceof Error ? lastError.message : ""
+    }`
+  );
+}
+
+function httpJson(url) {
+  return new Promise((resolveRequest, rejectRequest) => {
+    http
+      .get(url, (response) => {
+        let body = "";
+        response.setEncoding("utf8");
+        response.on("data", (chunk) => {
+          body += chunk;
+        });
+        response.on("end", () => {
+          try {
+            resolveRequest(JSON.parse(body));
+          } catch (error) {
+            rejectRequest(error);
+          }
+        });
+      })
+      .on("error", rejectRequest);
+  });
+}
+
+function delay(ms) {
+  return new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
 }
 
 function runSmokeTarget(input) {
