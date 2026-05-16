@@ -7250,6 +7250,26 @@ Files changed:
 Open questions / risks: Contact-detail living-container evidence remains a proposed follow-up if not covered by PSE-216/PSE-220.
 Next actions: Review PR #193; proceed to PSE-214 after acceptance; preserve stacked-base context until handoff branch lands.
 
+## 2026-05-16T20:18:40.8206658+10:00
+Objective: Diagnose most recent Codex thread crash.
+Decisions made:
+- Identified renderer markdown/directive parse error from final git directive Windows path.
+- Confirmed underlying PSE-213 thread reached task_complete and PR #193 was created/pushed.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Local Codex UI may keep crashing when rendering that thread until message is patched or app bug fixed.
+Next actions: Avoid reopening crashed thread; recover from rollout/PR if needed; consider reporting directive parser bug.
+
+## 2026-05-16T20:20:39.6863686+10:00
+Objective: Advise whether Codex thread crash blocks next ticket.
+Decisions made:
+- Confirmed previous crash was render-specific, not failed work.
+- Identified recurrence risk only when final git directives use raw Windows backslash paths.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Other agents may still emit raw backslash directive paths unless prompted otherwise.
+Next actions: Start next ticket in a fresh thread; use forward-slash paths in final Codex directives; avoid reopening crashed thread.
+
 ## 2026-05-16T20:23:03.3929537+10:00
 Objective: Start PSE-214 Settings IA implementation.
 Decisions made: Recovered PSE-214 from Linear/PSE-HUX context; read required docs before coding.
@@ -7278,6 +7298,26 @@ Files changed: docs/session_log.md
 Open questions / risks: gh CLI auth is invalid; GitHub connector was used for PR creation and git push succeeded.
 Next actions: Post Linear completion summary; monitor PR/CI; proceed to PSE-215 after review.
 
+## 2026-05-16T21:00:02.5201239+10:00
+Objective: Explain prompt failure and add PR reconciliation standard.
+Decisions made:
+- Identified missing explicit post-PR lifecycle/reconciliation instructions in reusable PSE-HUX prompt.
+- Will require clean git state, pushed commits, PR checks, Linear status/update, and ready-for-review gate before stopping.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Human approval/merge may still be required by project Done Means.
+Next actions: Use follow-up repair prompt in current PSE-214 thread; update reusable prompt with PR lifecycle block.
+
+## 2026-05-16T21:01:34.7510410+10:00
+Objective: Provide corrected reusable PSE-HUX Codex prompt.
+Decisions made:
+- Integrated mandatory post-PR reconciliation and explicit final states into the reusable prompt.
+- Kept one invariant prompt for PSE-213 through PSE-220.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Prompt still relies on Codex having active Linear/GitHub context for the issue and PR.
+Next actions: Use this prompt for the current PSE-214 continuation and later PSE-HUX tickets.
+
 ## 2026-05-16T21:03:03.2466310+10:00
 Objective: Reconcile PSE-214 PR #194 to ready-for-review standard.
 Decisions made: Continue current branch/PR; verify scope, checks, evidence, PR metadata, and Linear status before readiness.
@@ -7285,9 +7325,107 @@ Files changed: docs/session_log.md
 Open questions / risks: Worktree includes pre-existing unrelated dirty docs/screenshots; stage only scoped changes.
 Next actions: Run full checks; update PR/Linear; mark ready if criteria pass.
 
+## 2026-05-16T21:26:34.4785503+10:00
+Objective: Clarify GitHub completion boundary for PSE-HUX prompt.
+Decisions made:
+- Interpreted screenshot as PR ready-for-review with checks passing, not merged.
+- Clarified merge requires explicit human approval under project Done Means.
+Files changed:
+- docs/session_log.md
+Open questions / risks: User may want an approval-to-merge mode added to future prompts.
+Next actions: Use merge-finalization prompt only when user wants Codex to merge after checks pass.
+
 ## 2026-05-16T21:28:22.7175116+10:00
 Objective: Finalize PSE-214 PR #194 after merge approval.
 Decisions made: Verify PR/Linear linkage, checks, reviews, dirty-file exclusions, and branch protection before merge.
 Files changed: docs/session_log.md
 Open questions / risks: Merge may be blocked by repository policy or missing required checks.
 Next actions: Inspect PR status; update metadata if needed; merge if allowed.
+
+## 2026-05-16T21:28:29.0420411+10:00
+Objective: Provide fully updated reusable PSE-HUX prompt with merge completion.
+Decisions made:
+- Added explicit user-approved merge completion path after ready-for-review.
+- Preserved blocked/ready states where branch protection or reviews prevent merge.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Actual merge may still be blocked by repository protections or required reviews.
+Next actions: User can use the full prompt for PSE-HUX tickets and add explicit approval when they want merge completion.
+
+## 2026-05-16T21:34:21.5482059+10:00
+Objective: Record PSE-214 PR #194 merge completion.
+Decisions made: PR #194 merged after CI success and no unresolved reviews; Linear will move to Done.
+Files changed: docs/session_log.md
+Open questions / risks: Local worktree still has unrelated pre-existing dirty artifacts outside merged PR.
+Next actions: Update Linear final state; report merge commit and remaining risks.
+
+## 2026-05-17T06:02:41.2318452+10:00
+Objective: Recover active Linear issue for reusable PSE-HUX operator prompt.
+Decisions made:
+- Current branch links to PSE-214, but Linear reports PSE-214 Done with PR #194 attached.
+- Did not guess next ticket from sequence despite PSE-215 being next unstarted.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need explicit active issue key before making code/PR changes.
+Next actions: Ask user for issue key; then recover docs, plan, branch, implement.
+
+## 2026-05-17T06:09:55.3320183+10:00
+Objective: Start PSE-215 readability/control sizing pass.
+Decisions made:
+- Linear PSE-215 has no comments or PRs; related evidence includes PSE-213 and completed PSE-214.
+- PSE-214 introduced Settings IA; PSE-215 must tune sizing without broad IA redesign.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing dirty files from previous work must remain excluded from PSE-215 scope.
+Next actions: Inspect renderer theme/styles/tests; post Linear plan; branch for PSE-215.
+
+## 2026-05-17T06:14:02.0915089+10:00
+Objective: Continue PSE-215 after branch creation interruption.
+Decisions made:
+- Treat branch creation approval as resolved, not a blocker.
+- Continue end-to-end implementation on codex/pse-215-readability-sizing.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need keep pre-existing dirty files excluded from PSE-215 PR.
+Next actions: Patch renderer sizing; add tests; capture screenshots.
+
+## 2026-05-17T06:29:58.7554550+10:00
+Objective: Implement and validate PSE-215 readability sizing changes.
+Decisions made:
+- Added CSS-only operator comfort overrides, preserving medium/large/compact appearance classes.
+- Captured Settings from built route; other surfaces from built CSS visual harness to avoid DB/service scope.
+Files changed:
+- apps/desktop/src/renderer/styles.css
+- apps/desktop/tests/renderer/readabilityStyles.test.ts
+- docs/manual-qa/PSE-215-readability-sizing.md
+- docs/session_log.md
+Open questions / risks: PSE-216/PSE-217 still own deeper project/search IA; harness evidence is a P2 caveat.
+Next actions: Run final checks; stage scoped files; publish PR and Linear update.
+
+
+## 2026-05-17T06:37:27.998089+10:00
+Objective: Reconcile PSE-215 PR and Linear final state.
+Decisions made:
+- Left PR #195 ready for review because AGENTS.md requires human reviewer approval before Done/merge.
+- Updated GitHub and Linear with tests, evidence, risks, and final state.
+Files changed:
+- docs/session_log.md
+Open questions / risks: P2 harness screenshot caveat; merge awaits human review/approval.
+Next actions: Human review/approve PR #195; merge if accepted.
+
+## 2026-05-17T07:48:23.0000000+10:00
+Objective: Reconcile active PSE-215 PR/Linear state for reusable end-to-end prompt.
+Decisions made:
+- Recovered PSE-215 from current branch and Linear; existing PR #195 is open, non-draft, mergeable, and already reconciled.
+- Did not merge because AGENTS.md Done Means requires human reviewer approval and GitHub shows no reviews.
+Files changed: docs/session_log.md
+Open questions / risks: Local worktree has unrelated pre-existing dirty docs/screenshots; session log also had uncommitted prior entries before this run.
+Next actions: Human reviews/approves PR #195; merge if accepted; proceed to PSE-216 after PSE-215 acceptance.
+## 2026-05-17T07:52:33.1838853+10:00
+Objective: Complete PSE-215 GitHub/Linear workflow rather than stop at ready-for-review.
+Decisions made:
+- Treat user follow-up as approval to resolve GitHub lifecycle if repository state permits.
+- Rechecked PR #195: open, non-draft, mergeable, no reviews/threads, no status contexts.
+Files changed: docs/session_log.md
+Open questions / risks: Merge may still be rejected by GitHub policy/check requirements; unrelated local dirty artifacts remain excluded.
+Next actions: Commit/push session-log reconciliation; merge PR #195 if accepted by GitHub; update Linear final state.
