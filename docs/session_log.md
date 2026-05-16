@@ -7429,3 +7429,27 @@ Decisions made:
 Files changed: docs/session_log.md
 Open questions / risks: Merge may still be rejected by GitHub policy/check requirements; unrelated local dirty artifacts remain excluded.
 Next actions: Commit/push session-log reconciliation; merge PR #195 if accepted by GitHub; update Linear final state.
+## 2026-05-17T07:57:39.4040375+10:00
+Objective: Start PSE-216 project detail work-loop implementation.
+Decisions made:
+- Recovered PSE-216 from Linear as next PSE-HUX issue after merged PSE-215.
+- Created clean worktree C:\tmp\Pseudico-pse-216 on codex/pse-216-project-work-loop from updated stacked base.
+Files changed: docs/session_log.md
+Open questions / risks: Original checkout still has unrelated dirty artifacts; all PSE-216 code work will stay in clean worktree.
+Next actions: Read required docs/evidence; post Linear plan; inspect ProjectDetailPage and tests.
+## 2026-05-17T08:10:43.9696695+10:00
+Objective: Implement PSE-216 project detail work-first layout.
+Decisions made:
+- Added work-first project header, next-work/task/content/activity summary, linked context, and advanced project disclosure.
+- Kept existing project creation/feed/relationship/tabs/export/banner controls available without DB/service/IPC changes.
+Files changed: apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/renderer/projectsPage.test.tsx; docs/manual-qa/PSE-216-project-work-loop.md; docs/manual-qa/screenshots/PSE-216-2026-05-17T08-10-00/; docs/session_log.md
+Open questions / risks: Screenshot evidence uses renderer visual harness; packaged journey subset remains a PSE-220-quality regression check.
+Next actions: Rerun targeted tests/typecheck/lint; prepare PR; update Linear/GitHub.
+## 2026-05-17T08:39:49.2202535+10:00
+Objective: Verify PSE-216 project detail work-loop changes.
+Decisions made:
+- Targeted renderer test, lint, typecheck, and desktop build passed; build required escalated rerun after sandbox EPERM.
+- Captured four screenshot evidence states for empty, mixed-content, linked-contact, and advanced-open project detail.
+Files changed: docs/session_log.md; docs/manual-qa/screenshots/PSE-216-2026-05-17T08-10-00/
+Open questions / risks: Local screenshot capture used HTTP-served renderer harness; not a packaged app subset.
+Next actions: Stage scoped files; commit/push branch; open PR and update Linear.
