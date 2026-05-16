@@ -7249,3 +7249,24 @@ Files changed:
 - C:\Users\AlastairLacey\Pseudico\docs\session_log.md
 Open questions / risks: Contact-detail living-container evidence remains a proposed follow-up if not covered by PSE-216/PSE-220.
 Next actions: Review PR #193; proceed to PSE-214 after acceptance; preserve stacked-base context until handoff branch lands.
+
+## 2026-05-16T20:23:03.3929537+10:00
+Objective: Start PSE-214 Settings IA implementation.
+Decisions made: Recovered PSE-214 from Linear/PSE-HUX context; read required docs before coding.
+Files changed: docs/session_log.md
+Open questions / risks: Pre-existing dirty docs/screenshots remain; branch scope must be controlled.
+Next actions: Read docs; inspect Settings; post Linear plan.
+
+## 2026-05-16T20:27:04.4614273+10:00
+Objective: Complete PSE-214 context recovery and plan.
+Decisions made: Posted Linear plan; set issue In Progress; scoped renderer IA/styles/tests/manual evidence.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-213 audit PR is still open/stacked.
+Next actions: Refactor Settings; update tests; capture screenshots.
+
+## 2026-05-16T20:44:33.9107789+10:00
+Objective: Implement and verify PSE-214 Settings IA split.
+Decisions made: Added intent navigation/overview; demoted import/export/admin tools; no service/schema changes.
+Files changed: apps/desktop/src/renderer/pages/SettingsPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/renderer/settingsPage.test.tsx; docs/manual-qa/PSE-214-settings-ia.md; docs/OPERATOR_RUNBOOK.md; docs/session_log.md
+Open questions / risks: Visual evidence uses local SettingsPage/CSS harness; PSE-218 owns guided restore/raw-path comfort.
+Next actions: Review diff; update Linear; open PR.
