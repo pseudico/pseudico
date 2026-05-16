@@ -7239,3 +7239,13 @@ Files changed:
 - C:\Users\AlastairLacey\Pseudico\docs\session_log.md
 Open questions / risks: Mixed pre-existing uncommitted docs/screenshots remain in the worktree; PR scope must stay explicit.
 Next actions: Stage scoped audit evidence; post Linear completion summary; open PR if GitHub auth permits.
+
+## 2026-05-16T20:12:23.1550062+10:00
+Objective: Publish PSE-213 audit and update Linear.
+Decisions made:
+- Opened draft PR #193 stacked on codex/operator-readiness-packaged-handoff to keep review scoped.
+- Updated PSE-213 to PR Open with summary, validation, evidence, risks, and PR link.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Contact-detail living-container evidence remains a proposed follow-up if not covered by PSE-216/PSE-220.
+Next actions: Review PR #193; proceed to PSE-214 after acceptance; preserve stacked-base context until handoff branch lands.
