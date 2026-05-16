@@ -7291,3 +7291,36 @@ Decisions made: Verify PR/Linear linkage, checks, reviews, dirty-file exclusions
 Files changed: docs/session_log.md
 Open questions / risks: Merge may be blocked by repository policy or missing required checks.
 Next actions: Inspect PR status; update metadata if needed; merge if allowed.
+
+## 2026-05-17T06:09:55.3320183+10:00
+Objective: Start PSE-215 readability/control sizing pass.
+Decisions made:
+- Linear PSE-215 has no comments or PRs; related evidence includes PSE-213 and completed PSE-214.
+- PSE-214 introduced Settings IA; PSE-215 must tune sizing without broad IA redesign.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing dirty files from previous work must remain excluded from PSE-215 scope.
+Next actions: Inspect renderer theme/styles/tests; post Linear plan; branch for PSE-215.
+
+## 2026-05-17T06:14:02.0915089+10:00
+Objective: Continue PSE-215 after branch creation interruption.
+Decisions made:
+- Treat branch creation approval as resolved, not a blocker.
+- Continue end-to-end implementation on codex/pse-215-readability-sizing.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need keep pre-existing dirty files excluded from PSE-215 PR.
+Next actions: Patch renderer sizing; add tests; capture screenshots.
+
+## 2026-05-17T06:29:58.7554550+10:00
+Objective: Implement and validate PSE-215 readability sizing changes.
+Decisions made:
+- Added CSS-only operator comfort overrides, preserving medium/large/compact appearance classes.
+- Captured Settings from built route; other surfaces from built CSS visual harness to avoid DB/service scope.
+Files changed:
+- apps/desktop/src/renderer/styles.css
+- apps/desktop/tests/renderer/readabilityStyles.test.ts
+- docs/manual-qa/PSE-215-readability-sizing.md
+- docs/session_log.md
+Open questions / risks: PSE-216/PSE-217 still own deeper project/search IA; harness evidence is a P2 caveat.
+Next actions: Run final checks; stage scoped files; publish PR and Linear update.
