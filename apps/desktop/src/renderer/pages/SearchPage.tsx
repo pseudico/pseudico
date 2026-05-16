@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   EmptyState,
   ErrorState,
-  LoadMoreList,
   SearchFilters,
   SearchResultCard,
   renderLoadableState,
@@ -31,11 +30,14 @@ type SearchPageProps = {
 };
 
 const searchKindOptions = [
+  { label: "Inbox", value: "inbox" },
   { label: "Projects", value: "project" },
+  { label: "Contacts", value: "contact" },
   { label: "Tasks", value: "task" },
   { label: "Lists", value: "list" },
   { label: "Notes", value: "note" },
   { label: "Files", value: "file" },
+  { label: "Links", value: "link" },
   { label: "Checklist rows", value: "list_item" }
 ] as const satisfies readonly { label: string; value: SearchResultKind }[];
 
@@ -50,6 +52,13 @@ const emptySearchFilters: SearchFiltersValue<SearchResultKind> = {
   includeArchived: false
 };
 
+type SearchResultGroup = {
+  key: SearchResultKind | string;
+  label: string;
+  description: string;
+  results: SearchResultCardViewModel[];
+};
+
 export function SearchPage({
   apiClient = desktopApiClient,
   initialQuery,
@@ -59,13 +68,18 @@ export function SearchPage({
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { currentWorkspace } = useWorkspaceStore();
+  const searchParamsKey = searchParams.toString();
   const queryFromRoute = searchParams.get("q") ?? "";
   const [draftQuery, setDraftQuery] = useState(initialQuery ?? queryFromRoute);
   const [filterDraft, setFilterDraft] = useState<SearchFiltersValue<SearchResultKind>>(
-    () => ({
-      ...parseSearchFiltersFromParams(searchParams),
-      kinds: initialKinds.length > 0 ? initialKinds : parseSearchFiltersFromParams(searchParams).kinds
-    })
+    () => {
+      const routeFilters = parseSearchFiltersFromParams(searchParams);
+
+      return {
+        ...routeFilters,
+        kinds: initialKinds.length > 0 ? initialKinds : routeFilters.kinds
+      };
+    }
   );
   const [results, setResults] = useState<SearchResultSummary[]>(initialResults);
   const [recentSearches, setRecentSearches] = useState<RecentSearchSummary[]>([]);
@@ -73,6 +87,7 @@ export function SearchPage({
     initialResults.length >= SEARCH_PAGE_SIZE
   );
   const [loading, setLoading] = useState(false);
+  const [settledSearchKey, setSettledSearchKey] = useState<string | null>(null);
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
@@ -81,9 +96,9 @@ export function SearchPage({
   const activeFilters = useMemo(
     () =>
       initialQuery === undefined
-        ? parseSearchFiltersFromParams(searchParams)
+        ? parseSearchFiltersFromParams(new URLSearchParams(searchParamsKey))
         : { ...emptySearchFilters, kinds: initialKinds },
-    [initialKinds, initialQuery, searchParams]
+    [initialKinds, initialQuery, searchParamsKey]
   );
   const parsedQuery = useMemo(
     () => ({ chips: parseStructuredSearchChips(draftQuery) }),
@@ -98,9 +113,22 @@ export function SearchPage({
     [draftQuery]
   );
   const visibleResults = useMemo(
-    () => results.map(toSearchResultCardViewModel),
-    [results]
+    () => results.map((result) => toSearchResultCardViewModel(result, activeQuery)),
+    [activeQuery, results]
   );
+  const visibleResultGroups = useMemo(
+    () => groupSearchResults(visibleResults),
+    [visibleResults]
+  );
+  const activeFilterSummary = useMemo(
+    () => summarizeActiveFilters(activeFilters),
+    [activeFilters]
+  );
+  const activeSearchStateKey = useMemo(
+    () => buildSearchStateKey(activeQuery, activeFilters),
+    [activeFilters, activeQuery]
+  );
+  const searchPending = loading && settledSearchKey !== activeSearchStateKey;
 
   useEffect(() => {
     if (initialQuery !== undefined) {
@@ -108,8 +136,8 @@ export function SearchPage({
     }
 
     setDraftQuery(queryFromRoute);
-    setFilterDraft(parseSearchFiltersFromParams(searchParams));
-  }, [initialQuery, queryFromRoute, searchParams]);
+    setFilterDraft(parseSearchFiltersFromParams(new URLSearchParams(searchParamsKey)));
+  }, [initialQuery, queryFromRoute, searchParamsKey]);
 
   useEffect(() => {
     if (currentWorkspace === null) {
@@ -141,11 +169,15 @@ export function SearchPage({
     if (trimmedQuery.length === 0 && filterInput === undefined) {
       setResults([]);
       setError(null);
+      setHasMoreResults(false);
+      setLoading(false);
+      setSettledSearchKey(activeSearchStateKey);
       return;
     }
 
     let active = true;
     const workspaceId = currentWorkspace.id;
+    const searchStateKey = activeSearchStateKey;
 
     async function runSearch(): Promise<void> {
       setLoading(true);
@@ -169,6 +201,7 @@ export function SearchPage({
       }
 
       setLoading(false);
+      setSettledSearchKey(searchStateKey);
 
       if (!result.ok) {
         setError(result.error.message);
@@ -186,7 +219,7 @@ export function SearchPage({
     return () => {
       active = false;
     };
-  }, [apiClient, activeFilters, activeQuery, currentWorkspace, initialResults.length]);
+  }, [activeSearchStateKey, apiClient, activeFilters, activeQuery, currentWorkspace, initialResults.length]);
 
   function submitSearch(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -556,46 +589,125 @@ export function SearchPage({
             </div>
           )}
 
+          <SearchTrustSummary
+            activeQuery={activeQuery}
+            filterSummary={activeFilterSummary}
+            groupCount={visibleResultGroups.length}
+            includeArchived={activeFilters.includeArchived}
+            loading={searchPending}
+            resultCount={results.length}
+          />
+
           {activeQuery.trim().length === 0 && toSearchFilterInput(activeFilters) === undefined ? (
             <SearchEmptyState
-              title="Search the workspace"
-              description="Enter a query or choose filters to find active indexed content."
+              title="Type a title, note phrase, contact, tag, or file name"
+              description="Search uses the local workspace index. Try a project title, a phrase from a note, a contact name, or a type filter such as type:note."
             />
-          ) : loading ? (
+          ) : searchPending && results.length === 0 ? (
             renderLoadableState({
-              loading,
-              loadingLabel: "Searching local index..."
+              loading: searchPending,
+              loadingLabel: `Searching local index${activeQuery.trim().length === 0 ? "" : ` for "${activeQuery.trim()}"`}...`
             })
           ) : results.length === 0 ? (
             <SearchEmptyState
-              title="No results"
-              description="Archived and deleted records are excluded by default."
+              title={`No visible matches${activeQuery.trim().length === 0 ? "" : ` for "${activeQuery.trim()}"`}`}
+              description="Check spelling, remove a filter, try a shorter phrase, or include archived records if the work may have been archived. Deleted records stay hidden."
             />
           ) : (
-            <LoadMoreList
-              ariaLabel="Search results"
-              getKey={(result) => result.id}
-              hasMore={hasMoreResults}
-              items={visibleResults}
-              loading={loading || busyTaskId !== null}
-              renderItem={(result) => (
-                <SearchResultCard
-                  result={{
-                    ...result,
-                    disabled: result.disabled === true || busyTaskId === result.targetId
-                  }}
-                  selected={visibleResults[activeResultIndex]?.id === result.id}
-                  onOpen={openResult}
-                  onRescheduleTask={rescheduleTask}
-                  onSnoozeTask={snoozeTask}
-                />
-              )}
-              onLoadMore={() => void loadMoreResults()}
-            />
+            <div
+              className="search-result-groups"
+              aria-label="Search results grouped by type"
+              aria-busy={searchPending || busyTaskId !== null}
+            >
+              {visibleResultGroups.map((group) => (
+                <section
+                  className="search-result-group"
+                  key={group.key}
+                  aria-labelledby={`search-result-group-${group.key}`}
+                >
+                  <div className="search-result-group-heading">
+                    <div>
+                      <h4 id={`search-result-group-${group.key}`}>{group.label}</h4>
+                      <p>{group.description}</p>
+                    </div>
+                    <span>{group.results.length} result{group.results.length === 1 ? "" : "s"}</span>
+                  </div>
+                  <div className="load-more-list" aria-label={`${group.label} search results`}>
+                    {group.results.map((result) => (
+                      <div className="load-more-list-item" key={result.id}>
+                        <SearchResultCard
+                          result={{
+                            ...result,
+                            disabled: result.disabled === true || busyTaskId === result.targetId
+                          }}
+                          selected={visibleResults[activeResultIndex]?.id === result.id}
+                          onOpen={openResult}
+                          onRescheduleTask={rescheduleTask}
+                          onSnoozeTask={snoozeTask}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))}
+              {hasMoreResults ? (
+                <button
+                  className="secondary-button load-more-button"
+                  disabled={searchPending || busyTaskId !== null}
+                  type="button"
+                  onClick={() => void loadMoreResults()}
+                >
+                  {searchPending ? "Loading..." : "Load more local results"}
+                </button>
+              ) : null}
+            </div>
           )}
         </section>
       </div>
     </section>
+  );
+}
+
+function SearchTrustSummary({
+  activeQuery,
+  filterSummary,
+  groupCount,
+  includeArchived,
+  loading,
+  resultCount
+}: {
+  activeQuery: string;
+  filterSummary: string[];
+  groupCount: number;
+  includeArchived: boolean;
+  loading: boolean;
+  resultCount: number;
+}): React.JSX.Element {
+  const trimmedQuery = activeQuery.trim();
+
+  return (
+    <div className="search-trust-summary" aria-label="Search scope and confidence">
+      <article>
+        <span>Query</span>
+        <strong>{trimmedQuery.length === 0 ? "Filters only or not started" : `"${trimmedQuery}"`}</strong>
+        <small>Route, field, and results stay in sync after Enter or Search.</small>
+      </article>
+      <article>
+        <span>Scope</span>
+        <strong>{includeArchived ? "Active + archived" : "Active local records"}</strong>
+        <small>No cloud index or remote search is used.</small>
+      </article>
+      <article>
+        <span>Visible result shape</span>
+        <strong>{loading && resultCount === 0 ? "Searching..." : `${resultCount} result${resultCount === 1 ? "" : "s"} in ${groupCount} group${groupCount === 1 ? "" : "s"}`}</strong>
+        <small>Cards show type, title, snippet, context, status/date, tags, and highlights when available.</small>
+      </article>
+      <article>
+        <span>Filters</span>
+        <strong>{filterSummary.length === 0 ? "None" : filterSummary.join(" · ")}</strong>
+        <small>Filters narrow the local index without hiding the query state.</small>
+      </article>
+    </div>
   );
 }
 
@@ -612,8 +724,10 @@ function SearchEmptyState({
 }
 
 function toSearchResultCardViewModel(
-  result: SearchResultSummary
+  result: SearchResultSummary,
+  query: string
 ): SearchResultCardViewModel {
+  const queryTerms = getSearchPlainTerms(query);
   const viewModel: SearchResultCardViewModel = {
     id: result.id,
     targetId: result.targetId,
@@ -643,13 +757,136 @@ function toSearchResultCardViewModel(
 
   if (result.titleHighlights !== undefined) {
     viewModel.titleHighlights = result.titleHighlights;
+  } else {
+    const titleHighlights = highlightText(result.title, queryTerms);
+    if (titleHighlights !== undefined) {
+      viewModel.titleHighlights = titleHighlights;
+    }
   }
 
   if (result.excerpt?.segments !== undefined) {
     viewModel.excerptSegments = result.excerpt.segments;
+  } else if (viewModel.body !== undefined && viewModel.body !== null) {
+    const excerptSegments = highlightText(viewModel.body, queryTerms);
+    if (excerptSegments !== undefined) {
+      viewModel.excerptSegments = excerptSegments;
+    }
   }
 
   return viewModel;
+}
+
+function groupSearchResults(
+  results: SearchResultCardViewModel[]
+): SearchResultGroup[] {
+  const groups = new Map<string, SearchResultGroup>();
+
+  for (const result of results) {
+    const key = result.kind;
+    const existing = groups.get(key);
+
+    if (existing !== undefined) {
+      existing.results.push(result);
+      continue;
+    }
+
+    groups.set(key, {
+      key,
+      label: getSearchResultGroupLabel(result.kind),
+      description: getSearchResultGroupDescription(result.kind),
+      results: [result]
+    });
+  }
+
+  return Array.from(groups.values());
+}
+
+function getSearchResultGroupLabel(kind: string): string {
+  if (kind === "list_item") return "Checklist rows";
+  if (kind === "inbox") return "Inbox";
+  if (kind === "project") return "Projects";
+  if (kind === "contact") return "Contacts";
+  if (kind === "task") return "Tasks";
+  if (kind === "list") return "Lists";
+  if (kind === "note") return "Notes";
+  if (kind === "file") return "Files";
+  if (kind === "link") return "Links";
+  if (kind === "heading") return "Headings";
+  if (kind === "location") return "Locations";
+  if (kind === "comment") return "Comments";
+  return "Other results";
+}
+
+function getSearchResultGroupDescription(kind: string): string {
+  if (kind === "project") return "Project containers where the match belongs.";
+  if (kind === "contact") return "Contact containers and client context matches.";
+  if (kind === "task") return "Actionable work with status, dates, project/contact context, and tags.";
+  if (kind === "note") return "Note titles and body snippets from the local index.";
+  if (kind === "file") return "File items and attachment metadata stored in this workspace.";
+  if (kind === "link") return "Saved links with title, URL context, and containing project/contact.";
+  if (kind === "list_item") return "Checklist rows shown beside their parent list and container.";
+  if (kind === "list") return "Lists and checklist containers matching the query.";
+  return "Local indexed records matching the current query and filters.";
+}
+
+function summarizeActiveFilters(
+  filters: SearchFiltersValue<SearchResultKind>
+): string[] {
+  const summary = [
+    ...filters.kinds.map(getSearchResultGroupLabel),
+    ...splitTagFilter(filters.tags).map((tag) => `#${tag}`),
+    filters.category.trim().length > 0 ? `Category ${filters.category.trim()}` : null,
+    filters.status.trim().length > 0 ? `Status ${filters.status.trim()}` : null,
+    filters.dueFrom.trim().length > 0 ? `From ${filters.dueFrom.trim()}` : null,
+    filters.dueTo.trim().length > 0 ? `To ${filters.dueTo.trim()}` : null,
+    filters.includeArchived ? "Includes archived" : null
+  ];
+
+  return summary.filter((value): value is string => value !== null);
+}
+
+function buildSearchStateKey(
+  query: string,
+  filters: SearchFiltersValue<SearchResultKind>
+): string {
+  const filterInput = toSearchFilterInput(filters);
+
+  return JSON.stringify({
+    filters: filterInput ?? null,
+    query: query.trim()
+  });
+}
+
+function getSearchPlainTerms(query: string): string[] {
+  return (query.match(/"[^"]+"|'[^']+'|\S+/g) ?? [])
+    .map((word) => word.replace(/^['"]|['"]$/g, "").trim())
+    .filter((word) => word.length >= 2 && !word.includes(":"))
+    .slice(0, 8);
+}
+
+function highlightText(
+  text: string,
+  queryTerms: readonly string[]
+): SearchResultCardViewModel["titleHighlights"] {
+  if (queryTerms.length === 0) {
+    return undefined;
+  }
+
+  const pattern = new RegExp(`(${queryTerms.map(escapeRegExp).join("|")})`, "gi");
+  const segments = text.split(pattern).filter((part) => part.length > 0);
+
+  if (segments.length <= 1) {
+    return undefined;
+  }
+
+  return segments.map((segment) => ({
+    text: segment,
+    match: queryTerms.some((term) => segment.toLowerCase() === term.toLowerCase())
+  }));
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function buildContextLabel(result: SearchResultSummary): string | null {

@@ -1631,6 +1631,37 @@ describe("Projects renderer pages", () => {
 
   it("renders global search results with type filters and source context", () => {
     workspaceStore.setCurrentWorkspace(workspace);
+    const noteSearchResult: SearchResultSummary = {
+      ...searchResult,
+      id: "search_note_1",
+      targetId: "item_note_1",
+      kind: "note",
+      title: "Launch decision note",
+      body: "PSE-217-query appears in the operator note body.",
+      status: "active"
+    };
+    const contactSearchResult: SearchResultSummary = {
+      ...searchResult,
+      id: "search_contact_1",
+      targetType: "container",
+      targetId: "contact_1",
+      kind: "contact",
+      title: "Alex Launch Contact",
+      body: "Client stakeholder for launch work.",
+      status: "active",
+      containerId: null,
+      containerTitle: null,
+      destinationPath: "/contacts/contact_1"
+    };
+    const linkSearchResult: SearchResultSummary = {
+      ...searchResult,
+      id: "search_link_1",
+      targetId: "item_link_1",
+      kind: "link",
+      title: "Launch reference link",
+      body: "https://example.com/pse-217-reference",
+      status: "active"
+    };
 
     const html = renderToString(
       <MemoryRouter initialEntries={["/search?q=type:task tag:finance launch"]}>
@@ -1638,7 +1669,7 @@ describe("Projects renderer pages", () => {
           apiClient={createMockApi([project])}
           initialQuery="type:task tag:finance launch"
           initialKinds={["task"]}
-          initialResults={[searchResult]}
+          initialResults={[searchResult, noteSearchResult, contactSearchResult, linkSearchResult]}
         />
       </MemoryRouter>
     );
@@ -1648,11 +1679,23 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Tasks");
     expect(html).toContain("Files");
     expect(html).toContain("Save search");
+    expect(html).toContain("Search scope and confidence");
+    expect(html).toContain("Active local records");
+    expect(html).toContain("Visible result shape");
+    expect(html).toContain("Search results grouped by type");
     expect(html).toContain("Type<!-- -->: <!-- -->task");
     expect(html).toContain("Tag<!-- -->: <!-- -->finance");
+    expect(html).toContain("Tasks");
+    expect(html).toContain("Notes");
+    expect(html).toContain("Contacts");
+    expect(html).toContain("Links");
     expect(html).toContain("Book launch venue");
     expect(html).toContain("Confirm the room hold before Friday.");
+    expect(html).toContain("PSE-217-query appears in the operator note body.");
+    expect(html).toContain("Alex Launch Contact");
+    expect(html).toContain("Launch reference link");
     expect(html).toContain("Launch Plan");
+    expect(html).toContain("search-highlight");
     expect(html).toContain("data-tag-source=\"manual\"");
   });
 

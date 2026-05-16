@@ -7453,3 +7453,47 @@ Decisions made:
 Files changed: docs/session_log.md; docs/manual-qa/screenshots/PSE-216-2026-05-17T08-10-00/
 Open questions / risks: Local screenshot capture used HTTP-served renderer harness; not a packaged app subset.
 Next actions: Stage scoped files; commit/push branch; open PR and update Linear.
+
+## 2026-05-17T09:18:00+10:00
+Objective: Implement PSE-217 search trust UI core changes.
+Decisions made:
+- Added local scope/query/result confidence summary, type-grouped result sections, contact/link filters, fallback match highlights, and a clickable top-bar Search submit.
+- Kept changes renderer-only; no search engine, schema, service, DB, IPC, or filesystem behavior changed.
+Files changed:
+- apps/desktop/src/renderer/pages/SearchPage.tsx
+- apps/desktop/src/renderer/shell/TopBar.tsx
+- apps/desktop/src/renderer/styles.css
+- apps/desktop/tests/renderer/projectsPage.test.tsx
+- docs/session_log.md
+Open questions / risks: Need screenshot evidence and broader verification before PR.
+Next actions: Capture visual evidence; run lint/typecheck/build; commit/push/PR.
+
+## 2026-05-17T09:24:00+10:00
+Objective: Verify PSE-217 search trust implementation and visual evidence.
+Decisions made:
+- Captured Search UI screenshots for note-body token, project title, contact result, and empty state.
+- Verification passed: targeted renderer test, lint, typecheck, full test suite, build, and diff whitespace check.
+Files changed:
+- docs/manual-qa/PSE-217-search-visual-trust.md
+- docs/manual-qa/screenshots/PSE-217-2026-05-17T09-20-00/
+- docs/session_log.md
+Open questions / risks: Screenshot evidence uses renderer visual harness; PSE-220 should include final packaged regression.
+Next actions: Stage/commit/push; open PR; reconcile Linear/GitHub and merge if allowed.
+
+## 2026-05-17T09:45+10
+Objective: Complete packaged Search UI evidence for PSE-217.
+Decisions made:
+- Used packaged Electron/CDP evidence with newly created local note/task/link/file records.
+- Fixed route-param churn, stale loading display, and Enter-key top-bar search route reliability.
+Files changed: apps/desktop/src/renderer/pages/SearchPage.tsx; apps/desktop/src/renderer/shell/TopBar.tsx; docs/manual-qa/PSE-217-search-visual-trust.md; docs/manual-qa/PSE-217-packaged-search-summary.json
+Open questions / risks: P3 duplicate file result rows when item and attachment metadata both match.
+Next actions: run full checks; commit/push; open PR and reconcile Linear/GitHub.
+
+## 2026-05-17T09:47+10
+Objective: Finish PSE-217 local verification before publishing.
+Decisions made:
+- Full lint/typecheck/test/build passed after packaged evidence fixes.
+- Kept final packaged screenshot run only; removed failed intermediate generated screenshots.
+Files changed: apps/desktop/src/renderer/pages/SearchPage.tsx; apps/desktop/src/renderer/shell/TopBar.tsx; docs/manual-qa/PSE-217-search-visual-trust.md
+Open questions / risks: P3 duplicate file result rows documented for later relevance/deduplication.
+Next actions: stage/commit/push; create PR; update Linear and merge if allowed.
