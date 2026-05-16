@@ -7324,3 +7324,14 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: PSE-216/PSE-217 still own deeper project/search IA; harness evidence is a P2 caveat.
 Next actions: Run final checks; stage scoped files; publish PR and Linear update.
+
+
+## 2026-05-17T06:37:27.998089+10:00
+Objective: Reconcile PSE-215 PR and Linear final state.
+Decisions made:
+- Left PR #195 ready for review because AGENTS.md requires human reviewer approval before Done/merge.
+- Updated GitHub and Linear with tests, evidence, risks, and final state.
+Files changed:
+- docs/session_log.md
+Open questions / risks: P2 harness screenshot caveat; merge awaits human review/approval.
+Next actions: Human review/approve PR #195; merge if accepted.
