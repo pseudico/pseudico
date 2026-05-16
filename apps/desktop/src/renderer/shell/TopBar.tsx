@@ -41,14 +41,28 @@ export function TopBar({
     setSearchQuery(new URLSearchParams(location.search).get("q") ?? "");
   }, [location.pathname, location.search]);
 
-  function submitSearch(event: React.FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
-
+  function navigateToSearch(): void {
     const trimmedQuery = searchQuery.trim();
     const suffix =
       trimmedQuery.length === 0 ? "" : `?q=${encodeURIComponent(trimmedQuery)}`;
 
     navigate(`/search${suffix}`);
+  }
+
+  function submitSearch(event: React.FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    navigateToSearch();
+  }
+
+  function handleSearchKeyDown(
+    event: React.KeyboardEvent<HTMLInputElement>
+  ): void {
+    if (event.key !== "Enter" || event.nativeEvent.isComposing) {
+      return;
+    }
+
+    event.preventDefault();
+    navigateToSearch();
   }
 
   return (
@@ -106,8 +120,16 @@ export function TopBar({
               value={searchQuery}
               disabled={currentWorkspace === null}
               onChange={(event) => setSearchQuery(event.target.value)}
+              onKeyDown={handleSearchKeyDown}
             />
           </label>
+          <button
+            type="submit"
+            className="top-search-submit"
+            disabled={currentWorkspace === null}
+          >
+            Search
+          </button>
         </form>
         <button
           type="button"
