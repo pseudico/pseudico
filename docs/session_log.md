@@ -6911,3 +6911,9 @@ Next actions: Run full validation/package; verify normal launch; rerun PSE-206 i
 - Files changed: docs/session_log.md
 - Open questions / risks: Untracked local failed-run/tool artifacts remain intentionally outside GitHub.
 - Next actions: complete gh auth login; optionally clean untracked artifacts; monitor PR #192.
+## 2026-05-16T10:54:50.2643055+10:00
+- Objective: Verify GitHub CLI authentication after owner completed device login.
+- Decisions: gh auth works outside the Codex network sandbox; account pseudico has ADMIN on pseudico/pseudico.
+- Files changed: docs/session_log.md
+- Open questions / risks: Non-escalated Codex shell blocks GitHub API via sandbox proxy and can show false auth failures.
+- Next actions: use escalated gh commands for API/CI operations when needed; keep git remote workflow unchanged.
