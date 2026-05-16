@@ -1,0 +1,404 @@
+{
+  "runId": "2026-05-16T02-05-13-399Z",
+  "dateTime": {
+    "startedAt": "2026-05-16T02:05:13.399Z",
+    "completedAt": "2026-05-16T02:05:37.786Z"
+  },
+  "appArtifact": {
+    "path": "C:\\Users\\AlastairLacey\\Pseudico\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+    "exists": true,
+    "sizeBytes": 222973952,
+    "lastModified": "2026-05-15T23:48:18.425Z"
+  },
+  "fixtureSummaryPath": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\PSE-209-fixture-summary.json",
+  "screenshotsDir": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z",
+  "measurements": [
+    {
+      "size": "app",
+      "action": "startup_to_welcome",
+      "elapsedMs": 448.52,
+      "method": "spawn packaged exe to CDP page ready and welcome text visible",
+      "pass": true
+    },
+    {
+      "size": 1000,
+      "action": "workspace_open_from_welcome",
+      "elapsedMs": 166.22,
+      "method": "welcome path field + Open workspace click to /workspace showing fixture path",
+      "pass": true
+    },
+    {
+      "size": 1000,
+      "action": "search_fixture_first_results",
+      "elapsedMs": 12.67,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\01-1000-search-fixture.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nSearch\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\n\nFIND\n\nSearch\n\nSearch projects, tasks, lists, notes, files, tags, and categories from the local workspace index.\n\nSearch query\nSearch\nSave search\nText: fixture\nFilters\nProjects\nTasks\nLists\nNotes\nFiles\nChecklist rows\nTags\nCategory\nStatus\nDue fromDue to\nInclude archived results\nApply filters\nReset\nRecent\nfixture\n\nRESULTS\n\nfixture\n30 results\nText: fixture\nSearching local index...\nWorkspace ready\nPSE-209 P",
+      "method": "hash route /search?q=fixture to first rendered result/empty state",
+      "pass": true
+    },
+    {
+      "size": 1000,
+      "action": "dashboard_load",
+      "elapsedMs": 102.27,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\01-1000-dashboard.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nDashboard\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\n\nOVERVIEW\n\nDashboard\n\nWorkspace widgets for due work, overdue recovery, upcoming tasks, favorite projects, project health, and recent activity.\n\nEdit layout\nPrint / PDF\nRefresh\nToday\n10\n\nOpen tasks due in the current local day.\n\nChecklist row 1 for Performance fixture item 11\n2026-05-16T01:55:15.228Z\nopen\nLater today\nTomorrow\nNext week\nApply\nRemove due\nChecklist row 1 for Performance fixture item 22",
+      "method": "hash route /dashboard until widget text visible",
+      "pass": true
+    },
+    {
+      "size": 1000,
+      "action": "today_load",
+      "elapsedMs": 8.87,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\01-1000-today.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nToday\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\n\nPLANNING\n\nToday\n\nDue, overdue, and tomorrow-preview tasks from the current local workspace.\n\nRefresh\n\nRAPID DAY PLANNER\n\nKeyboard planner\n\nType tasks directly into Today or Tomorrow. Enter saves and plans the task; Arrow Up/Down switches lanes; Escape clears the current draft.\n\nSaving to Inbox\nToday task\nTomorrow task\n\nLOCAL REVIEW\n\nDaily and weekly summary\n\nCounts are calculated locally from daily pla",
+      "method": "hash route /today until lane/planner text visible",
+      "pass": true
+    },
+    {
+      "size": 1000,
+      "action": "timeline_load",
+      "elapsedMs": 22.11,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\01-1000-timeline.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nTimeline\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\n\nPLANNING\n\nTimeline\n\nDated task workload with range bars, zoom controls, and grouping by project, contact, or category for the current local workspace.\n\nRefresh\nStart\nEnd\nZoom\nWeek\nMonth\nQuarter\nGroup by\nProject\nContact\nCategory\nShow completed\nTags\nCategories\nProjects\nContacts\nStatus\nopen\nwaiting\ndone\nsomeday\ndeferred\ncancelled\nHide completed\nSaved view name\nSave filter as view\n\nNo advanced filters a",
+      "method": "hash route /timeline until title/filter text visible",
+      "pass": true
+    },
+    {
+      "size": 1000,
+      "action": "calendar_load",
+      "elapsedMs": 9.86,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\01-1000-calendar.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nCalendar\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\n\nPLANNING\n\nCalendar\n\nMonth view of local dated tasks and list items.\n\nImport ICS\nRefresh\nPrevious\nMonth\nFocus date\nMonth\nWeek\nDay\nNext\nShow completed\nSUN\nMON\nTUE\nWED\nTHU\nFRI\nSAT\n1\n\nNo dated work\n\n2\n\nNo dated work\n\n3\n\nNo dated work\n\n4\n\nNo dated work\n\n5\n\nNo dated work\n\n6\nChecklist row 1 for Performance fixture item 1\nList item · Performance Project 1\nChecklist row 1 for Performance fixture item 211\nLis",
+      "method": "hash route /calendar until title/month text visible",
+      "pass": true
+    },
+    {
+      "size": 1000,
+      "action": "project_feed_open_and_scroll",
+      "elapsedMs": 156.8,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\01-1000-project-feed.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nProjects\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\nProject\nRecently opened project\nBack to projects\nBANNER\nSet banner\n\nPROJECT\n\nPerformance Project 1\n\nNo description added yet.\n\nPrint / PDF\nExport MarkdownDisplay settings\nSTATUS\nActive\nCATEGORY\nNo Category\nTAGS\nPlaceholder\nRelated contacts\nCONTACT\nSelect a contact\nPSE-209 Contact 1\nPSE-209 Contact 2\nPSE-209 Contact 3\nPSE-209 Contact 4\nPSE-209 Contact 5\nPSE-209 Contact 6\nPSE-209 Contact 7\nPSE-209 Cont",
+      "scroll": {
+        "frameCount": 36,
+        "maxFrameMs": 14,
+        "avgFrameMs": 6.92,
+        "scrollY": 10804.8,
+        "scrollHeight": 11765,
+        "viewportHeight": 960
+      },
+      "method": "open large project detail then RAF scroll 36 frames",
+      "pass": true
+    },
+    {
+      "size": 1000,
+      "action": "contact_detail_load",
+      "elapsedMs": 93.44,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\01-1000-contact-detail.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nContacts\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\nProject\nRecently opened project\nContact\nRecently opened contact\nBack to contacts\nContact not found\n\nThe contact may have been archived, deleted, or moved.\n\nWorkspace ready\nPSE-209 Packaged UI 1000 is open.",
+      "method": "open seeded contact detail route",
+      "pass": true
+    },
+    {
+      "size": 1000,
+      "action": "settings_create_backup",
+      "elapsedMs": 165.72,
+      "busySeen": true,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\01-1000-backup-created.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nSettings\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\nProject\nRecently opened project\nContact\nRecently opened contact\n\nSETTINGS\n\nWorkspace settings\n\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-1000\n\nWorkspace health\nRefresh\nWorkspace\nPSE-209 Packaged UI 1000\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-1000\nDatabase\nConnected\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01",
+      "method": "Settings UI Create backup button to completion message/list row",
+      "pass": true
+    },
+    {
+      "size": 1000,
+      "action": "settings_export_json",
+      "elapsedMs": 171.85,
+      "busySeen": true,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\01-1000-export-json.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nSettings\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\nProject\nRecently opened project\nContact\nRecently opened contact\n\nSETTINGS\n\nWorkspace settings\n\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-1000\n\nWorkspace health\nRefresh\nWorkspace\nPSE-209 Packaged UI 1000\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-1000\nDatabase\nConnected\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01",
+      "method": "Settings UI Export JSON button to completion message",
+      "pass": true
+    },
+    {
+      "size": 1000,
+      "action": "settings_rebuild_search_index",
+      "elapsedMs": 254.37,
+      "busySeen": true,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\01-1000-search-rebuild.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nSettings\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\nProject\nRecently opened project\nContact\nRecently opened contact\n\nSETTINGS\n\nWorkspace settings\n\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-1000\n\nWorkspace health\nRefresh\nWorkspace\nPSE-209 Packaged UI 1000\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-1000\nDatabase\nConnected\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01",
+      "method": "Settings UI Rebuild search index button to maintenance completion/log",
+      "pass": true
+    },
+    {
+      "size": 10000,
+      "action": "workspace_open_from_welcome",
+      "elapsedMs": 247.99,
+      "method": "welcome path field + Open workspace click to /workspace showing fixture path",
+      "pass": true
+    },
+    {
+      "size": 10000,
+      "action": "search_fixture_first_results",
+      "elapsedMs": 5.4,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\02-10000-search-fixture.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nSearch\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\n\nFIND\n\nSearch\n\nSearch projects, tasks, lists, notes, files, tags, and categories from the local workspace index.\n\nSearch query\nSearch\nSave search\nText: fixture\nFilters\nProjects\nTasks\nLists\nNotes\nFiles\nChecklist rows\nTags\nCategory\nStatus\nDue fromDue to\nInclude archived results\nApply filters\nReset\nRecent\nfixture\n\nRESULTS\n\nfixture\n30 results\nText: fixture\nSearching local index...\nWorkspace ready\nPSE-209 P",
+      "method": "hash route /search?q=fixture to first rendered result/empty state",
+      "pass": true
+    },
+    {
+      "size": 10000,
+      "action": "dashboard_load",
+      "elapsedMs": 191.97,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\02-10000-dashboard.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nDashboard\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\n\nOVERVIEW\n\nDashboard\n\nWorkspace widgets for due work, overdue recovery, upcoming tasks, favorite projects, project health, and recent activity.\n\nEdit layout\nPrint / PDF\nRefresh\nToday\n10\n\nOpen tasks due in the current local day.\n\nChecklist row 1 for Performance fixture item 1061\n2026-05-16T01:55:15.288Z\nopen\nLater today\nTomorrow\nNext week\nApply\nRemove due\nChecklist row 1 for Performance fixture item ",
+      "method": "hash route /dashboard until widget text visible",
+      "pass": true
+    },
+    {
+      "size": 10000,
+      "action": "today_load",
+      "elapsedMs": 6.51,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\02-10000-today.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nToday\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\n\nPLANNING\n\nToday\n\nDue, overdue, and tomorrow-preview tasks from the current local workspace.\n\nRefresh\n\nRAPID DAY PLANNER\n\nKeyboard planner\n\nType tasks directly into Today or Tomorrow. Enter saves and plans the task; Arrow Up/Down switches lanes; Escape clears the current draft.\n\nSaving to Inbox\nToday task\nTomorrow task\n\nLOCAL REVIEW\n\nDaily and weekly summary\n\nCounts are calculated locally from daily pla",
+      "method": "hash route /today until lane/planner text visible",
+      "pass": true
+    },
+    {
+      "size": 10000,
+      "action": "timeline_load",
+      "elapsedMs": 191.41,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\02-10000-timeline.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nToday\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\n\nPLANNING\n\nToday\n\nDue, overdue, and tomorrow-preview tasks from the current local workspace.\n\nRefresh\n\nRAPID DAY PLANNER\n\nKeyboard planner\n\nType tasks directly into Today or Tomorrow. Enter saves and plans the task; Arrow Up/Down switches lanes; Escape clears the current draft.\n\nSaving to Inbox\nToday task\nTomorrow task\n\nLOCAL REVIEW\n\nDaily and weekly summary\n\nCounts are calculated locally from daily pla",
+      "method": "hash route /timeline until title/filter text visible",
+      "pass": true
+    },
+    {
+      "size": 10000,
+      "action": "calendar_load",
+      "elapsedMs": 465.49,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\02-10000-calendar.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nTimeline\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\n\nPLANNING\n\nTimeline\n\nDated task workload with range bars, zoom controls, and grouping by project, contact, or category for the current local workspace.\n\nRefresh\nStart\nEnd\nZoom\nWeek\nMonth\nQuarter\nGroup by\nProject\nContact\nCategory\nShow completed\nTags\nCategories\nProjects\nContacts\nStatus\nopen\nwaiting\ndone\nsomeday\ndeferred\ncancelled\nHide completed\nSaved view name\nSave filter as view\n\nNo advanced filters a",
+      "method": "hash route /calendar until title/month text visible",
+      "pass": true
+    },
+    {
+      "size": 10000,
+      "action": "project_feed_open_and_scroll",
+      "elapsedMs": 514.73,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\02-10000-project-feed.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nProjects\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\n\nLoading project...\n\nBackup complete\nBackup created at backups/2026-05-16T02-05-19-472Z.\nExport complete\nWorkspace JSON export created at exports/2026-05-16T02-05-20-133Z-workspace-export.json.\nSearch maintenance\nSearch index rebuilt: 1020 item(s), 20 attachment(s).\nWorkspace ready\nPSE-209 Packaged UI 10000 is open.",
+      "scroll": {
+        "frameCount": 36,
+        "maxFrameMs": 12.41,
+        "avgFrameMs": 7.07,
+        "scrollY": 23414.4,
+        "scrollHeight": 44633,
+        "viewportHeight": 960
+      },
+      "method": "open large project detail then RAF scroll 36 frames",
+      "pass": true
+    },
+    {
+      "size": 10000,
+      "action": "contact_detail_load",
+      "elapsedMs": 26.08,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\02-10000-contact-detail.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nContacts\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\nProject\nRecently opened project\nContact\nRecently opened contact\nBack to contacts\nContact not found\n\nThe contact may have been archived, deleted, or moved.\n\nExport complete\nWorkspace JSON export created at exports/2026-05-16T02-05-20-133Z-workspace-export.json.\nSearch maintenance\nSearch index rebuilt: 1020 item(s), 20 attachment(s).\nWorkspace ready\nPSE-209 Packaged UI 10000 is open.",
+      "method": "open seeded contact detail route",
+      "pass": true
+    },
+    {
+      "size": 10000,
+      "action": "settings_create_backup",
+      "elapsedMs": 170.05,
+      "busySeen": true,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\02-10000-backup-created.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nSettings\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\nProject\nRecently opened project\nContact\nRecently opened contact\n\nSETTINGS\n\nWorkspace settings\n\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-10000\n\nWorkspace health\nRefresh\nWorkspace\nPSE-209 Packaged UI 10000\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-10000\nDatabase\nConnected\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16",
+      "method": "Settings UI Create backup button to completion message/list row",
+      "pass": true
+    },
+    {
+      "size": 10000,
+      "action": "settings_export_json",
+      "elapsedMs": 67.46,
+      "busySeen": true,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\02-10000-export-json.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nSettings\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\nProject\nRecently opened project\nContact\nRecently opened contact\n\nSETTINGS\n\nWorkspace settings\n\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-10000\n\nWorkspace health\nRefresh\nWorkspace\nPSE-209 Packaged UI 10000\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-10000\nDatabase\nConnected\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16",
+      "method": "Settings UI Export JSON button to completion message",
+      "pass": true
+    },
+    {
+      "size": 10000,
+      "action": "settings_rebuild_search_index",
+      "elapsedMs": 1797.14,
+      "busySeen": true,
+      "screenshot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\PSE-209-2026-05-16T02-05-13-399Z\\02-10000-search-rebuild.png",
+      "bodySample": "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags & Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED & FAVORITES\n\nInbox\nPSE-209 Contact 1\nPSE-209 Contact 101\nPSE-209 Contact 126\nPSE-209 Contact 151\nPSE-209 Contact 176\nPSE-209 Contact 201\nPSE-209 Contact 226\nPSE-209 Contact 26\nPSE-209 Contact 51\nPSE-209 Contact 76\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nSettings\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nQuick Start\nSearch\nLocal full-text search will appear here.\nProject\nRecently opened project\nContact\nRecently opened contact\n\nSETTINGS\n\nWorkspace settings\n\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-10000\n\nWorkspace health\nRefresh\nWorkspace\nPSE-209 Packaged UI 10000\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16T01-57-21-630Z\\workspace-10000\nDatabase\nConnected\nC:\\Users\\AlastairLacey\\Pseudico\\.tmp\\PSE-209-2026-05-16",
+      "method": "Settings UI Rebuild search index button to maintenance completion/log",
+      "pass": true
+    }
+  ],
+  "memorySnapshots": [
+    {
+      "label": "before_launch",
+      "at": "2026-05-16T02:05:13.655Z",
+      "count": 0,
+      "workingSetMb": 0,
+      "privateMb": 0,
+      "ids": ""
+    },
+    {
+      "label": "after_startup",
+      "at": "2026-05-16T02:05:14.366Z",
+      "count": 4,
+      "workingSetMb": 405.68,
+      "privateMb": 274.12,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_open_1000",
+      "at": "2026-05-16T02:05:14.955Z",
+      "count": 4,
+      "workingSetMb": 442.14,
+      "privateMb": 306.45,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_search_1000",
+      "at": "2026-05-16T02:05:15.684Z",
+      "count": 4,
+      "workingSetMb": 508.55,
+      "privateMb": 365.49,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_dashboard_1000",
+      "at": "2026-05-16T02:05:16.284Z",
+      "count": 4,
+      "workingSetMb": 530.7,
+      "privateMb": 380.54,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_today_1000",
+      "at": "2026-05-16T02:05:17.413Z",
+      "count": 4,
+      "workingSetMb": 729.26,
+      "privateMb": 579.86,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_project_scroll_1000",
+      "at": "2026-05-16T02:05:18.963Z",
+      "count": 4,
+      "workingSetMb": 886,
+      "privateMb": 734.89,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_backup_1000",
+      "at": "2026-05-16T02:05:20.125Z",
+      "count": 4,
+      "workingSetMb": 854.79,
+      "privateMb": 703.16,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_export_1000",
+      "at": "2026-05-16T02:05:20.779Z",
+      "count": 4,
+      "workingSetMb": 860.01,
+      "privateMb": 708.25,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_rebuild_1000",
+      "at": "2026-05-16T02:05:21.515Z",
+      "count": 4,
+      "workingSetMb": 864.05,
+      "privateMb": 713.15,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_open_10000",
+      "at": "2026-05-16T02:05:22.002Z",
+      "count": 4,
+      "workingSetMb": 872,
+      "privateMb": 718.75,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_search_10000",
+      "at": "2026-05-16T02:05:22.688Z",
+      "count": 4,
+      "workingSetMb": 874.88,
+      "privateMb": 721.3,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_dashboard_10000",
+      "at": "2026-05-16T02:05:23.368Z",
+      "count": 4,
+      "workingSetMb": 877.83,
+      "privateMb": 724.21,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_today_10000",
+      "at": "2026-05-16T02:05:29.578Z",
+      "count": 4,
+      "workingSetMb": 2285.14,
+      "privateMb": 2138.59,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_project_scroll_10000",
+      "at": "2026-05-16T02:05:33.876Z",
+      "count": 4,
+      "workingSetMb": 2287.11,
+      "privateMb": 2136.43,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_backup_10000",
+      "at": "2026-05-16T02:05:34.946Z",
+      "count": 4,
+      "workingSetMb": 2279.22,
+      "privateMb": 2128.01,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_export_10000",
+      "at": "2026-05-16T02:05:35.489Z",
+      "count": 4,
+      "workingSetMb": 2306.84,
+      "privateMb": 2157.12,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_rebuild_10000",
+      "at": "2026-05-16T02:05:37.786Z",
+      "count": 4,
+      "workingSetMb": 2314.27,
+      "privateMb": 2187.47,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "before_shutdown",
+      "at": "2026-05-16T02:05:38.029Z",
+      "count": 4,
+      "workingSetMb": 2314.27,
+      "privateMb": 2187.47,
+      "ids": "4936,5496,18916,38048"
+    },
+    {
+      "label": "after_shutdown_attempt",
+      "at": "2026-05-16T02:05:39.802Z",
+      "count": 0,
+      "workingSetMb": 0,
+      "privateMb": 0,
+      "ids": ""
+    }
+  ],
+  "errors": [],
+  "rootPid": 18916
+}

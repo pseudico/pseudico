@@ -6917,3 +6917,325 @@ Next actions: Run full validation/package; verify normal launch; rerun PSE-206 i
 - Files changed: docs/session_log.md
 - Open questions / risks: Non-escalated Codex shell blocks GitHub API via sandbox proxy and can show false auth failures.
 - Next actions: use escalated gh commands for API/CI operations when needed; keep git remote workflow unchanged.
+## 2026-05-16T10:56:42+10:00
+- Objective: Respond to PSE-206 packaged operator journey request with current evidence status.
+- Decisions: Confirmed PSE-206 manual artifact already records packaged-app run as Pass with caveats and OR-R1 closed with caveats; no rerun needed.
+- Files changed: docs/session_log.md
+- Open questions / risks: Untracked local failed-run/tool artifacts remain outside committed evidence; OR-R2/OR-R3/OR-R4 still block full Operator ready.
+- Next actions: proceed to PSE-207 unless owner wants focused P2/P3 caveat follow-ups first.
+## 2026-05-16T10:59:06+10:00
+- Objective: Validate current PSE-206 evidence state after status confirmation.
+- Decisions: Re-ran lint and typecheck successfully; no package rebuild or journey rerun needed because artifact evidence is already current.
+- Files changed: docs/session_log.md
+- Open questions / risks: Full Operator-ready verdict still blocked by OR-R2/OR-R3/OR-R4, not OR-R1.
+- Next actions: proceed to PSE-207 unless focused P2/P3 caveat tickets are requested.
+## 2026-05-16T11:04:17+10:00
+- Objective: Clarify OR-R2/OR-R3/OR-R4 ticket ownership.
+- Decisions: Mapped OR-R2 to PSE-207, OR-R3 to PSE-208, OR-R4 to PSE-209, and PSE-210 to final owner acceptance after PSE-206..209.
+- Files changed: docs/session_log.md
+- Open questions / risks: None; PSE-206 only covers OR-R1 plus nonblocking caveats.
+- Next actions: Start PSE-207 next unless owner prioritizes OR-R3/OR-R4 first.
+## 2026-05-16T11:06:19+10:00
+- Objective: Start PSE-207 manual packaged backup/restore evidence.
+- Decisions: Scope is OR-R2 only; use packaged app UI with disposable source/target workspaces and real recovery evidence.
+- Files changed: docs/session_log.md
+- Open questions / risks: Existing branch contains PSE-206 changes and untracked local artifacts; avoid unrelated cleanup.
+- Next actions: read backup/restore docs; confirm UI paths; run packaged recovery journey.
+## 2026-05-16T11:17:42+10:00
+- Objective: Advance PSE-207 packaged backup/restore run.
+- Decisions: First two runner attempts created valid source/backup-restore evidence but failed before export-restore completion due runner issues, not app data loss.
+- Files changed: docs/manual-qa/PSE-207-run-summary.json; docs/manual-qa/screenshots/**; docs/session_log.md
+- Open questions / risks: Need rerun with fixed Settings navigation to complete export restore and restart persistence.
+- Next actions: rerun packaged evidence runner; then write PSE-207 artifact and OR-R2 update.
+## 2026-05-16T11:29:00+10:00
+- Objective: Complete PSE-207 packaged manual backup restore evidence.
+- Decisions: Successful run passed manual backup creation/restore/restart persistence; OR-R2 updated as closed with caveats; JSON export restore remains P3 caveat.
+- Files changed: docs/manual-qa/PSE-207-packaged-backup-restore.md; docs/manual-qa/PSE-207-run-summary.json; docs/manual-qa/screenshots/**; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+- Open questions / risks: OR-R3 and OR-R4 remain open; optional follow-up for JSON export restore UI proof/folder-picker polish.
+- Next actions: run lint/typecheck; update Linear; proceed to PSE-208.
+## 2026-05-16T11:30:26+10:00
+- Objective: Validate PSE-207 documentation and evidence updates.
+- Decisions: Removed temporary local runner from repo root; lint and typecheck both pass.
+- Files changed: docs/manual-qa/PSE-207-packaged-backup-restore.md; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+- Open questions / risks: PSE-207 remains Pass with caveats due no JSON export-restore UI rerun.
+- Next actions: update Linear if desired; proceed to PSE-208.
+## 2026-05-16T11:30:58+10:00
+- Objective: Attempt PSE-207 Linear handoff update.
+- Decisions: Linear comment was not posted because connector safety rejected sending internal paths/status externally without explicit approval.
+- Files changed: docs/session_log.md
+- Open questions / risks: User can explicitly approve Linear posting or handle issue status manually.
+- Next actions: summarize local evidence; proceed to PSE-208 after approval/PR handling.
+## 2026-05-16T11:31:35+10:00
+- Objective: Clean local PSE-207 failed-run screenshot noise.
+- Decisions: Kept only successful PSE-207 screenshot directory for the evidence artifact; removed failed rerun directories generated during harness fixes.
+- Files changed: docs/manual-qa/screenshots/**; docs/session_log.md
+- Open questions / risks: Pre-existing untracked PSE-206/tool artifacts remain outside this PSE-207 scope.
+- Next actions: summarize PSE-207 result and request explicit approval before any Linear posting.
+## 2026-05-16T11:33:56+10:00
+- Objective: Post approved PSE-207 Linear handoff comment.
+- Decisions: User explicitly approved posting; Linear comment 428c24f5-0ddf-49fd-9791-bdebd80cb505 records Pass with caveats and OR-R2 closure.
+- Files changed: docs/session_log.md
+- Open questions / risks: Linear now contains internal evidence summary by explicit owner approval.
+- Next actions: proceed to PSE-208; optionally create JSON export-restore/folder-picker polish follow-ups.
+
+## 2026-05-16T11:36:04.5781499+10:00
+Objective: Provide reusable Codex prompts for remaining PSE-208..PSE-210 operator-readiness tickets.
+Decisions made:
+- Tailored prompts per gate because required docs/artifacts differ for security, performance, and owner acceptance.
+- PSE-208 prompt prioritizes packaged runtime network evidence over static audit repetition.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: PSE-208 may need admin/visible monitoring tools; PSE-210 requires explicit owner acceptance.
+Next actions: Run PSE-208; then PSE-209; then PSE-210 only after evidence is complete.
+
+## 2026-05-16 11:45 +10:00
+Objective: PSE-208 packaged-app no-network runtime monitor evidence.
+Decisions made:
+- Used packaged win-unpacked executable with PID-scoped Get-NetTCPConnection sampling.
+- Treated CDP 127.0.0.1 loopback as monitoring harness traffic, not app remote activity.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Evidence still needs docs/manual-qa artifact and readiness/security doc updates.
+Next actions: Write PSE-208 artifact; update OR-R3 docs; run validation.
+
+## 2026-05-16 11:49 +10:00
+Objective: Finish PSE-208 packaged no-network monitor evidence and OR-R3 update.
+Decisions made:
+- Marked PSE-208 Pass with caveats; no Pseudico-originated remote endpoints observed.
+- Closed OR-R3 with caveats; kept operator-ready verdict blocked by PSE-209/PSE-210.
+Files changed:
+- docs/manual-qa/PSE-208-no-network-monitor.md; docs/LOCAL_ONLY_SECURITY_REVIEW.md; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+Open questions / risks: CDP harness adds local 127.0.0.1 loopback; repeat on other OSes for cross-platform claims.
+Next actions: Proceed to PSE-209; preserve optional external-open traffic separation; keep PSE-210 owner acceptance pending.
+## 2026-05-16 11:51 +10:00
+Objective: Start PSE-209 packaged UI performance evidence.
+Decisions made:
+- Scope is packaged UI responsiveness, not service benchmark substitution.
+- Will read PSE-203..PSE-208 evidence before measuring.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Packaged app automation may need GUI/Electron harness constraints.
+Next actions: Confirm artifact path; identify fixture method; run measurements.
+## 2026-05-16 11:55 +10:00
+Objective: Prepare PSE-209 retained large-workspace fixtures.
+Decisions made:
+- Reused PSE-203 benchmark harness with --keep for 1k/10k fixture parity.
+- Sandbox blocked esbuild spawn; reran benchmark with approved escalation.
+Files changed:
+- docs/performance/reports/pse-209-fixtures.json; docs/session_log.md
+Open questions / risks: Fixtures need workspace manifests/optional augmentation before packaged UI open.
+Next actions: Add manifests/extra local data; launch packaged UI runner; capture screenshots/metrics.
+## 2026-05-16 12:10 +10:00
+Objective: Complete PSE-209 packaged UI measurement run.
+Decisions made:
+- Packaged UI run passed for 1k/10k with caveats; no P0/P1 blocker observed.
+- OR-R4 will be closed with a P2 caveat for 10k Today memory headroom.
+Files changed:
+- docs/manual-qa/PSE-209-packaged-ui-performance.md; docs/manual-qa/PSE-209-run-summary.json; docs/manual-qa/PSE-209-fixture-summary.json; docs/performance/reports/pse-209-fixtures.json; docs/PERFORMANCE_SCALE_QA.md; docs/PERFORMANCE.md; docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+Open questions / risks: PSE-210 owner must accept or scope remaining P2/P3 caveats before operator-ready claim.
+Next actions: Run lint/typecheck; review docs; recommend PSE-210.
+## 2026-05-16 12:11 +10:00
+Objective: Validate PSE-209 packaged UI evidence docs.
+Decisions made:
+- Removed temporary local PSE-209 runner scripts after lint caught them in .tmp.
+- lint and typecheck pass; no code changes or benchmark script changes require test rerun.
+Files changed:
+- docs/session_log.md
+Open questions / risks: 10k Today memory caveat remains P2 for owner acceptance/follow-up.
+Next actions: Summarize PSE-209; proceed to PSE-210 if owner accepts no P0/P1 blocker.
+## 2026-05-16 12:11 +10:00
+Objective: Finalize PSE-209 validation after readiness report edit.
+Decisions made:
+- Re-ran lint after final docs update; typecheck remained passed from prior validation.
+- No app code or benchmark script changes were made.
+Files changed:
+- docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+Open questions / risks: Owner acceptance in PSE-210 must decide P2 Today memory caveat disposition.
+Next actions: Deliver PSE-209 summary; recommend PSE-210.
+## 2026-05-16 12:12 +10:00
+Objective: Record final PSE-209 checklist validation.
+Decisions made:
+- Marked no P0/P1 discovered for packaged gates; remaining caveats deferred to PSE-210 disposition.
+- Final lint rerun passed after checklist edit.
+Files changed:
+- docs/OPERATOR_READINESS_REPORT.md; docs/session_log.md
+Open questions / risks: PSE-210 still must avoid claiming operator-ready without explicit owner acceptance.
+Next actions: Provide final PSE-209 handoff summary.
+## 2026-05-16 12:13 +10:00
+Objective: Clean failed PSE-209 evidence noise.
+Decisions made:
+- Removed two failed-run PSE-209 screenshot directories; retained only successful final screenshot set.
+- Final artifact still references raw successful JSON and screenshot directory.
+Files changed:
+- docs/manual-qa/screenshots/**; docs/session_log.md
+Open questions / risks: Existing unrelated untracked prior-ticket screenshots remain outside PSE-209 scope.
+Next actions: Deliver final PSE-209 summary.
+
+## 2026-05-16 16:05:52 +10:00
+Objective: Start PSE-209 packaged UI performance evidence.
+Decisions made:
+- Will use packaged app evidence rather than service benchmark alone.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Packaged artifact/workspace fixture availability still unknown.
+Next actions:
+- Read readiness/performance docs and inspect artifacts.
+
+## 2026-05-16 16:08:23 +10:00
+Objective: Finish PSE-209 packaged UI performance handoff.
+Decisions made:
+- Reused existing packaged UI evidence: Pass with caveats; OR-R4 closed with P2 Today memory caveat.
+- Validation rerun: pnpm lint and pnpm typecheck passed.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- PSE-210 owner acceptance must decide remaining P2/P3 caveats before operator-ready claim.
+Next actions:
+- Recommend PSE-210 if no owner-blocking concern remains.
+
+## 2026-05-16T18:43:30.5257837+10:00
+Objective: Produce recursive review shifting from functional readiness to human visual usability.
+Decisions made:
+- Created a visual/operator review identifying AI-significant vs human-significant gaps.
+- Recommended PSE-213..PSE-220 visual operator readiness ticket pack, prioritizing Settings IA and readability.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\RECURSIVE_OPERATOR_VISUAL_REVIEW.md
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Local artifacts do not visibly include final PSE-210/PSE-211 owner record; verify latest branch before changing verdict.
+Next actions: Create visual UX tickets; start with Settings IA split; run human screenshot QA after fixes.
+
+## 2026-05-16T18:54:41.7208167+10:00
+Objective: Correct recursive review framing from nontechnical/admin to primary working operator fit.
+Decisions made:
+- Grounded analysis in PRODUCT_SPEC work loop and inspected packaged screenshots.
+- Created PRIMARY_OPERATOR_FIT_REVIEW with evidence-based severity model and revised tickets PSE-213..PSE-219.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\PRIMARY_OPERATOR_FIT_REVIEW.md
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Latest PSE-210/PSE-211 acceptance artifacts still need branch verification before final verdict changes.
+Next actions: Create Linear tickets from primary-operator fit review; prioritize Settings IA, readability, and project work-first redesign.
+
+## 2026-05-16T19:01:23.9710128+10:00
+Objective: Detail how primary-operator UX tickets should work in practice.
+Decisions made:
+- Created PSE-213..PSE-219 specs with user problem, goal, scope, implementation expectations, acceptance criteria, and QA.
+- Recommended fastest path: PSE-214 -> PSE-215 -> PSE-216 -> PSE-218.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\PRIMARY_OPERATOR_UX_TICKET_PACK.md
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Tickets not yet created in Linear; user may want ticket creation next.
+Next actions: Create Linear tickets; start PSE-214 Settings IA split; require screenshots for each UX ticket.
+
+## 2026-05-16T19:05:57.0330979+10:00
+Objective: Correct prior failure by creating primary-operator UX tickets in Linear.
+Decisions made:
+- Created PSE-213..PSE-219 in Linear under PSE-195, with PSE-214..219 related to PSE-213.
+- Tickets follow primary-operator work-loop framing, not vague nontechnical/admin framing.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: PSE-214..219 are Spec Ready; user can choose whether to start audit PSE-213 or fastest path PSE-214.
+Next actions: Start PSE-214 for immediate improvement; use PSE-213 if a baseline audit is desired first.
+
+## 2026-05-16T19:13:38.7476180+10:00
+Objective: Self-critique and amend primary-operator UX ticket system after owner challenge.
+Decisions made:
+- Classified PSE-213..219 as Spec Ready but incomplete as a program without full order and final acceptance gate.
+- Added corrected full order and recommended PSE-220 acceptance review; Linear amendment failed due connector transport error.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\PRIMARY_OPERATOR_UX_TICKET_AMENDMENTS.md
+- C:\Users\AlastairLacey\Pseudico\docs\PRIMARY_OPERATOR_UX_TICKET_PACK.md
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Need retry Linear update/create PSE-220 when connector recovers.
+Next actions: Apply amendments to Linear; create PSE-220; then start PSE-213 or PSE-214 based on user priority.
+
+## 2026-05-16T19:16:16.6803312+10:00
+Objective: Retry Linear updates for primary-operator UX amendments and PSE-220.
+Decisions made:
+- Retried Linear list/create/comment after tool refresh; connector still returns transport deserialize error.
+- No Linear mutation succeeded; local amendment docs remain source of truth until retry works.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: PSE-220 and amendment notes are not yet in Linear due connector failure.
+Next actions: Retry Linear in a fresh thread/session or manually create PSE-220 from PRIMARY_OPERATOR_UX_TICKET_AMENDMENTS.md.
+
+## 2026-05-16T19:19:16.8896968+10:00
+Objective: Attempt manual Linear web-interface update through browser.
+Decisions made:
+- Linear connector still fails; Playwright browser can open Linear but is not authenticated.
+- Paused at Linear login rather than handling credentials; user login is required before web UI edits.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Need authenticated Linear browser session to create PSE-220 and add HUX amendments.
+Next actions: User logs into Linear in the opened browser; then retry PSE-220 creation and amendment comments via web UI.
+
+## 2026-05-16T19:19:51.0897337+10:00
+Objective: Diagnose why Codex Chrome plugin was not used for Linear web edits.
+Decisions made:
+- Chrome plugin extension is installed/enabled, but native host registry key is missing so browser-client cannot connect.
+- Playwright fallback was premature; proper fix is Chrome plugin/native host repair from Codex UI, not manual registry edits.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Need Chrome plugin native host repaired before authenticated Chrome automation can use Linear cookies.
+Next actions: Reinstall/repair Codex Chrome plugin from Codex UI; then retry Linear web UI automation.
+
+## 2026-05-16T19:22:22.4564120+10:00
+Objective: Retry Codex Chrome plugin after user restarted Chrome and explain native host registration.
+Decisions made:
+- Codex Chrome extension remains installed/enabled, but native messaging host registry key is still missing.
+- Chrome restart alone did not repair the Codex-to-Chrome bridge.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Need Codex Chrome plugin/native host repair before using authenticated Chrome for Linear.
+Next actions: Reinstall/repair Codex Chrome plugin from Codex UI; then retry Linear web edits.
+
+## 2026-05-16T19:25:22.6622395+10:00
+Objective: Recheck Codex Chrome plugin after user reconnected it.
+Decisions made:
+- Browser-client still cannot connect; extension remains installed/enabled but native host registry key remains missing.
+- Linear web UI automation through authenticated Chrome is still blocked until native host registration is repaired.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: User may have reconnected extension but not native messaging host/desktop bridge.
+Next actions: Repair/reinstall Codex Chrome plugin native host from Codex UI; verify registry key appears; retry browser-client.
+
+## 2026-05-16T19:26:03.5906774+10:00
+Objective: Respond to request to directly fix broken Codex Chrome native host registration.
+Decisions made:
+- Cannot repair/install native host directly due Chrome plugin safety rules; can guide user or use Playwright with manual Linear login fallback.
+- Root blocker remains missing HKCU NativeMessagingHosts registry key for com.openai.codexextension.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Need user/plugin UI action or manual browser login fallback before Linear web edits can continue.
+Next actions: User repairs Chrome plugin native host or logs into Linear in Playwright browser; then retry updates.
+
+## 2026-05-16T19:45:23.7745694+10:00
+Objective: Revise Linear primary-operator UX tickets after critique.
+Decisions made:
+- Added shared program-order amendment comments to PSE-213 through PSE-219.
+- Created PSE-220 as the explicit final UX acceptance/regression gate with Spec Ready, High, and QA/UX labels.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-220 is related via issue links rather than confirmed parented under PSE-195 due Linear UI/tool limits.
+Next actions: Run PSE-213 first; then PSE-214, PSE-215, PSE-216, PSE-218, PSE-217, PSE-219, PSE-220.
+
+## 2026-05-16T19:50:00.0510378+10:00
+Objective: Provide reusable Codex prompt for PSE-HUX ticket execution.
+Decisions made:
+- Use one invariant prompt that pulls the active/linked Linear issue and applies the shared primary-operator UX standard.
+- Emphasize screenshot-backed human workflow evidence, not route/API-only proof.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Prompt assumes Codex thread has access to the intended Linear issue or active issue context.
+Next actions: User can reuse the prompt for PSE-213 through PSE-220 in order.
+
+## 2026-05-16T20:05:19.6631686+10:00
+Objective: Implement PSE-213 primary operator workflow audit baseline.
+Decisions made:
+- Treated PSE-213 as the active issue from the PSE-HUX sequence and posted the docs-only plan to Linear.
+- Created a screenshot-backed audit using PSE-206/PSE-207/PSE-209 packaged evidence; no product code changes.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\PRIMARY_OPERATOR_WORKFLOW_AUDIT.md
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Mixed pre-existing uncommitted docs/screenshots remain in the worktree; PR scope must stay explicit.
+Next actions: Stage scoped audit evidence; post Linear completion summary; open PR if GitHub auth permits.
