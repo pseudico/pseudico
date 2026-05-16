@@ -7270,3 +7270,10 @@ Decisions made: Added intent navigation/overview; demoted import/export/admin to
 Files changed: apps/desktop/src/renderer/pages/SettingsPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/renderer/settingsPage.test.tsx; docs/manual-qa/PSE-214-settings-ia.md; docs/OPERATOR_RUNBOOK.md; docs/session_log.md
 Open questions / risks: Visual evidence uses local SettingsPage/CSS harness; PSE-218 owns guided restore/raw-path comfort.
 Next actions: Review diff; update Linear; open PR.
+
+## 2026-05-16T20:50:18.4944886+10:00
+Objective: Publish PSE-214 Settings IA PR and Linear update.
+Decisions made: Opened draft PR #194 stacked on PSE-213; will update Linear with tests, evidence, and known follow-ups.
+Files changed: docs/session_log.md
+Open questions / risks: gh CLI auth is invalid; GitHub connector was used for PR creation and git push succeeded.
+Next actions: Post Linear completion summary; monitor PR/CI; proceed to PSE-215 after review.
