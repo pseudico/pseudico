@@ -111,6 +111,7 @@ export function AppShell(): React.JSX.Element {
         open={quickAddOpen}
         workspace={currentWorkspace}
         onClose={() => setQuickAddOpen(false)}
+        onNavigateToCreatedTarget={(path) => navigate(path)}
       />
     </div>
   );

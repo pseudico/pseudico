@@ -142,6 +142,38 @@ describe("RestoreService", () => {
     expect(result.valid).toBe(false);
     expect(result.issues).toMatchObject([{ code: "unsafe_attachment_path" }]);
   });
+
+  it("reports recoverable restore validation issues before changing a target workspace", () => {
+    const result = createService().validateRestoreSource({
+      sourceType: "backup",
+      sourcePath: "backups/broken",
+      databaseSizeBytes: 99,
+      manifest: {
+        ...createBackupManifest(),
+        kind: "automatic",
+        database: {
+          ...createBackupManifest().database,
+          backupRelativePath: "../local-work-os.sqlite"
+        },
+        attachmentCount: 2
+      }
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.targetPolicy).toMatchObject({
+      mode: "new_workspace_only",
+      canApplyToActiveWorkspace: false
+    });
+    expect(result.targetPolicy.message).toContain("never overwrites");
+    expect(result.issues.map((issue) => issue.code)).toEqual(
+      expect.arrayContaining([
+        "unsupported_backup_kind",
+        "database_size_mismatch",
+        "unsafe_database_path",
+        "attachment_count_mismatch"
+      ])
+    );
+  });
 });
 
 function createService(): RestoreService {

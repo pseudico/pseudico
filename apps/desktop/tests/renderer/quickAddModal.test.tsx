@@ -6,6 +6,7 @@ import {
   type CategorySummary,
   type ContactSummary,
   type DatabaseHealthStatus,
+  type FileAttachmentSummary,
   type InboxSummary,
   type IpcModuleStatus,
   type ItemSummary,
@@ -22,6 +23,8 @@ import {
 } from "../../src/preload/api";
 import {
   createQuickTask,
+  getQuickStartCreatedDestination,
+  getQuickStartSavedContainerId,
   QuickAddModal,
   resolveDefaultCaptureContainer,
   resolveDefaultCaptureContainerFromTargets
@@ -242,6 +245,42 @@ describe("QuickAddModal", () => {
     expect(html).toContain("aria-modal=\"true\"");
     expect(html).toContain("Use Tab and Shift+Tab to move through Quick Start fields");
     expect(html).toContain("Open or create a local workspace");
+  });
+
+  it("resolves created project and contact destinations for operator handoff", () => {
+    expect(getQuickStartCreatedDestination("project", activeProject)).toBe(
+      "/projects/container_project_1"
+    );
+    expect(getQuickStartCreatedDestination("contact", activeContact)).toBe(
+      "/contacts/container_contact_1"
+    );
+    expect(
+      getQuickStartCreatedDestination("project", {
+        ...activeProject,
+        id: "container_project/with special"
+      })
+    ).toBe("/projects/container_project%2Fwith%20special");
+    expect(
+      getQuickStartCreatedDestination("project", { project: activeProject })
+    ).toBe("/projects/container_project_1");
+    expect(
+      getQuickStartCreatedDestination("contact", { contact: activeContact })
+    ).toBe("/contacts/container_contact_1");
+    expect(
+      getQuickStartCreatedDestination("task", taskSummary("Follow up", activeProject.id))
+    ).toBeNull();
+  });
+
+  it("resolves saved content container ids for project detail refresh", () => {
+    expect(getQuickStartSavedContainerId(taskSummary("Follow up", activeProject.id))).toBe(
+      activeProject.id
+    );
+    expect(getQuickStartSavedContainerId(noteSummary())).toBe(activeProject.id);
+    expect(getQuickStartSavedContainerId({ item: itemSummary(), attachment: attachmentSummary() })).toBe(
+      activeProject.id
+    );
+    expect(getQuickStartSavedContainerId(activeProject)).toBeNull();
+    expect(getQuickStartSavedContainerId(null)).toBeNull();
   });
 });
 
@@ -949,6 +988,24 @@ function itemSummary(): ItemSummary {
     updatedAt: "2026-05-01T00:00:00.000Z",
     completedAt: null,
     archivedAt: null,
+    deletedAt: null
+  };
+}
+
+function attachmentSummary(): FileAttachmentSummary {
+  return {
+    id: "attachment_1",
+    workspaceId: workspace.id,
+    itemId: "item_1",
+    originalName: "Brief.pdf",
+    storedName: "Brief.pdf",
+    mimeType: null,
+    sizeBytes: 12,
+    checksum: "abc123",
+    storagePath: "attachments/2026/05/attachment_1/Brief.pdf",
+    description: null,
+    createdAt: "2026-05-01T00:00:00.000Z",
+    updatedAt: "2026-05-01T00:00:00.000Z",
     deletedAt: null
   };
 }

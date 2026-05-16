@@ -34,12 +34,21 @@ export default defineConfig({
     }
   },
   preload: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [externalizeDepsPlugin({ exclude: ["@local-work-os/core"] })],
+    resolve: {
+      alias: {
+        "@local-work-os/core": resolve(currentDir, "../../packages/core/src/index.ts")
+      }
+    },
     build: {
       outDir: "dist/preload",
       rollupOptions: {
         input: {
           index: resolve(currentDir, "src/preload/index.ts")
+        },
+        output: {
+          entryFileNames: "[name].cjs",
+          format: "cjs"
         }
       }
     }

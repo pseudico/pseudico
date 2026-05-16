@@ -8,3 +8,4 @@ This folder contains the local Markdown help content mirrored in the in-app Help
 - `templates-workflows.md` explains reusable local templates and sample workflows.
 - `keyboard-commands.md` explains command palette and keyboard shortcuts.
 - `release-readiness.md` explains local release-candidate checks and data safety.
+- `operator-runbook.md` explains nontechnical operator handoff, daily use, backup/restore, and recovery basics.

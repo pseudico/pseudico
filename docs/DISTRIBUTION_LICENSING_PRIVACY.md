@@ -1,7 +1,7 @@
 # Distribution, Licensing, Privacy, and Update Checklist
 
-Status: PSE-188 research recommendation  
-Last reviewed: 2026-05-14  
+Status: PSE-188 research recommendation
+Last reviewed: 2026-05-14
 Scope: local-only desktop distribution planning; no billing or update code
 
 ## Purpose
@@ -55,6 +55,39 @@ part of distribution readiness.
 | Third-party notices | Generate and review dependency license notices before release. | Include Electron/React/Vite/TypeScript/runtime notices and keep proprietary assets out of the app bundle. |
 | Asset rights | Use only original, permissively licensed, or project-owned assets. | Do not copy proprietary branding, screenshots, icons, wording, or UI layouts from reference products. |
 
+## Dependency and license audit gate
+
+Run the local dependency/license/privacy audit before a release candidate:
+
+```bash
+pnpm audit:dependencies
+```
+
+The command writes:
+
+- `docs/release/dependency-license-audit.json` — machine-readable dependency
+  inventory, failures, and warnings.
+- `docs/release/THIRD_PARTY_NOTICES.md` — human-readable package notice
+  inventory for runtime and release-tooling dependencies.
+
+The audit fails on review-blocking license families and packages that match the
+telemetry/cloud/auto-update/licensing denylist. It warns on packages that are
+network-capable or missing license metadata so the release owner can document a
+decision. The audit is local-only: it reads package metadata from the checked-out
+workspace and installed dependencies and does not call remote registries.
+
+Current PSE-200 baseline evidence:
+
+- Runtime dependencies reviewed by the generated audit: 47.
+- Release-tooling dependencies reviewed by the generated audit: 14.
+- Review-blocking failures: 0.
+- Warnings: 1 — `simple-get@4.0.1`, a transitive dependency of native package
+  install tooling, is network-capable by package purpose and must remain unused
+  by normal local-only app workflows. PSE-201 owns end-to-end network behavior
+  verification.
+- No telemetry SDK, hosted account, billing/license activation, cloud sync,
+  remote storage, or auto-update dependency is approved by this evidence.
+
 ## Privacy checklist
 
 | Area | Requirement | Release gate |
@@ -91,7 +124,9 @@ are stable.
 Before a public release candidate, verify:
 
 - [ ] `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm package`,
-      and `pnpm package:smoke` pass on the release machine/CI.
+      `pnpm package:smoke`, and `pnpm release:package-check` pass on the
+      release machine/CI.
+- [ ] `pnpm audit:dependencies` passes and generated notices are reviewed.
 - [ ] macOS artifacts are signed and notarized, if macOS is in scope.
 - [ ] Windows artifacts are signed, if Windows is in scope.
 - [ ] Linux artifacts include checksums and package notes, if Linux is in scope.
@@ -100,6 +135,8 @@ Before a public release candidate, verify:
 - [ ] Workspace data, attachments, backups, exports, and logs are created
       outside the app bundle.
 - [ ] Manual update and backup-before-upgrade instructions are documented.
+- [ ] `docs/release/package-artifact-check.json` contains current artifact
+      checksums and no package data-boundary failures.
 - [ ] No telemetry, hosted account, cloud sync, or remote storage dependency is
       introduced.
 

@@ -281,6 +281,10 @@ export class LinkService {
       throw new Error("url must use HTTP or HTTPS.");
     }
 
+    if (parsed.username.length > 0 || parsed.password.length > 0) {
+      throw new Error("url must not include credentials.");
+    }
+
     parsed.protocol = parsed.protocol.toLowerCase();
     parsed.hostname = parsed.hostname.toLowerCase();
 

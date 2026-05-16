@@ -83,6 +83,7 @@ import {
 } from "@local-work-os/ui";
 import type {
   ActivitySummary,
+  ApiResult,
   AttachmentVersionSummary,
   CategorySummary,
   ContainerTabContentSummary,
@@ -113,7 +114,12 @@ import {
   type ContainerPreferencesDraft
 } from "../components/ContainerPreferencesPanel";
 import { ContainerTabsPanel } from "../components/ContainerTabsPanel";
-import { openQuickStartFromContainer } from "../components/QuickAddModal";
+import {
+  QUICK_START_SAVED_EVENT,
+  getQuickStartSavedContainerId,
+  openQuickStartFromContainer,
+  type QuickStartSavedEventDetail
+} from "../components/QuickAddModal";
 import {
   formatEmailDropImportMessage,
   importEmailDropSources,
@@ -183,6 +189,46 @@ type ProjectDetailPageProps = {
 
 const emptyProjectItems: UniversalItemViewModel[] = [];
 const PROJECT_FEED_PAGE_SIZE = 50;
+const PROJECT_CREATE_VISIBILITY_RETRY_COUNT = 5;
+const PROJECT_CREATE_VISIBILITY_RETRY_MS = 150;
+
+async function getProjectWithRetry(
+  apiClient: LocalWorkOsApi,
+  projectId: string
+): Promise<ApiResult<ProjectSummary | null>> {
+  for (let attempt = 0; attempt <= PROJECT_CREATE_VISIBILITY_RETRY_COUNT; attempt += 1) {
+    const result = await apiClient.projects.get(projectId);
+
+    if (!result.ok || result.data !== null || attempt === PROJECT_CREATE_VISIBILITY_RETRY_COUNT) {
+      return result;
+    }
+
+    await delay(PROJECT_CREATE_VISIBILITY_RETRY_MS);
+  }
+
+  return await apiClient.projects.get(projectId);
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function getFallbackContainerPreferences(
+  project: ProjectSummary
+): ContainerPreferencesSummary {
+  return {
+    workspaceId: project.workspaceId,
+    containerId: project.id,
+    updatedAt: null,
+    defaultView: "feed",
+    defaultTabId: null,
+    showCompleted: true,
+    grouping: "none",
+    defaultQuickAddType: "task",
+    summaryFirst: false,
+    compactMode: false
+  };
+}
 
 export function ProjectDetailPage({
   apiClient = desktopApiClient,
@@ -383,7 +429,7 @@ export function ProjectDetailPage({
         preferencesResult,
         privacyResult
       ] = await Promise.all([
-        apiClient.projects.get(activeProjectId),
+        getProjectWithRetry(apiClient, activeProjectId),
         apiClient.projects.list(),
         apiClient.categories.list(),
         apiClient.activity.listForTarget({
@@ -499,9 +545,17 @@ export function ProjectDetailPage({
         return;
       }
 
-      if (!preferencesResult.ok) {
-        setItemError(preferencesResult.error.message);
+      if (projectResult.data === null) {
+        setProject(null);
         return;
+      }
+
+      const preferences = preferencesResult.ok
+        ? preferencesResult.data
+        : getFallbackContainerPreferences(projectResult.data);
+
+      if (!preferencesResult.ok) {
+        setPreferencesError(preferencesResult.error.message);
       }
 
       setProject(projectResult.data);
@@ -517,7 +571,7 @@ export function ProjectDetailPage({
       setManagedTabs(managedTabsResult.data);
       setTabSummaries(tabSummariesResult.data);
       setTabTemplates(tabTemplatesResult.data);
-      setContainerPreferences(preferencesResult.data);
+      setContainerPreferences(preferences);
       setWebWidgetsEnabled(
         privacyResult !== undefined && privacyResult.ok
           ? privacyResult.data.webWidgetsEnabled
@@ -526,8 +580,8 @@ export function ProjectDetailPage({
       setActiveTabId((current) =>
         selectAvailableTabId(
           tabsResult.data,
-          preferencesResult.data.defaultView === "tab"
-            ? preferencesResult.data.defaultTabId
+          preferences.defaultView === "tab"
+            ? preferences.defaultTabId
             : current
         )
       );
@@ -558,6 +612,26 @@ export function ProjectDetailPage({
       active = false;
     };
   }, [apiClient, projectId]);
+
+  useEffect(() => {
+    if (loading || project !== null || projectId === undefined) {
+      return;
+    }
+
+    let active = true;
+
+    void apiClient.projects.get(projectId).then((result) => {
+      if (!active || !result.ok || result.data === null) {
+        return;
+      }
+
+      setProject(result.data);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [apiClient, loading, project, projectId]);
 
   useEffect(() => {
     if (projectId === undefined || apiClient.containerMedia === undefined) {
@@ -734,6 +808,45 @@ export function ProjectDetailPage({
 
     setProjectHealth(toProjectHealthViewModel(result.data));
   }
+
+  useEffect(() => {
+    if (project === null) {
+      return;
+    }
+
+    let active = true;
+    const activeProjectId = project.id;
+
+    function handleQuickStartSaved(event: Event): void {
+      const detail = (event as CustomEvent<QuickStartSavedEventDetail>).detail;
+      if (detail === undefined) {
+        return;
+      }
+
+      const containerId = getQuickStartSavedContainerId(detail.result);
+      if (containerId !== activeProjectId) {
+        return;
+      }
+
+      void (async () => {
+        await refreshProjectContent(activeProjectId);
+        if (!active) {
+          return;
+        }
+        await refreshProjectActivity(activeProjectId);
+        if (detail.kind === "task") {
+          await refreshProjectHealth(activeProjectId);
+        }
+      })();
+    }
+
+    window.addEventListener(QUICK_START_SAVED_EVENT, handleQuickStartSaved);
+
+    return () => {
+      active = false;
+      window.removeEventListener(QUICK_START_SAVED_EVENT, handleQuickStartSaved);
+    };
+  }, [project?.id]);
 
   async function refreshProjectTabs(activeProjectId: string): Promise<void> {
     setTabError(null);

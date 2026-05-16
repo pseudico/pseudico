@@ -10,6 +10,7 @@ import {
 import {
   ActivityLogRepository,
   ActivityLogService,
+  AttachmentRepository,
   ItemRepository,
   SearchIndexService,
   SortOrderService,
@@ -87,6 +88,7 @@ export class ItemService {
         timestamp
       });
       const searchRecord = this.upsertSearchRecord(item, timestamp);
+      this.upsertAttachmentSearchRecordsForItem(item, timestamp);
 
       this.logItemEvent({
         item,
@@ -152,6 +154,7 @@ export class ItemService {
 
       const item = itemRepository.update(input.itemId, patch);
       const searchRecord = this.upsertSearchRecord(item, timestamp);
+      this.upsertAttachmentSearchRecordsForItem(item, timestamp);
 
       this.logItemEvent({
         item,
@@ -187,6 +190,7 @@ export class ItemService {
         timestamp
       });
       const searchRecord = this.upsertSearchRecord(item, timestamp);
+      this.upsertAttachmentSearchRecordsForItem(item, timestamp);
 
       this.logItemEvent({
         item,
@@ -213,6 +217,7 @@ export class ItemService {
       const before = this.requireItem(itemId);
       const item = new ItemRepository(this.connection).archive(itemId, timestamp);
       const searchRecord = this.upsertSearchRecord(item, timestamp);
+      this.upsertAttachmentSearchRecordsForItem(item, timestamp);
 
       this.logItemEvent({
         item,
@@ -242,6 +247,7 @@ export class ItemService {
         timestamp
       );
       const searchRecord = this.upsertSearchRecord(item, timestamp);
+      this.upsertAttachmentSearchRecordsForItem(item, timestamp);
 
       this.logItemEvent({
         item,
@@ -313,6 +319,31 @@ export class ItemService {
       idFactory: this.idFactory,
       now: this.now
     }).upsertItem(item, { timestamp });
+  }
+
+  private upsertAttachmentSearchRecordsForItem(
+    item: ItemRecord,
+    timestamp: string
+  ): SearchIndexRecord[] {
+    const attachments = new AttachmentRepository(this.connection).listForItem({
+      workspaceId: item.workspaceId,
+      itemId: item.id,
+      includeDeleted: true
+    });
+
+    if (attachments.length === 0) {
+      return [];
+    }
+
+    const search = new SearchIndexService({
+      connection: this.connection,
+      idFactory: this.idFactory,
+      now: this.now
+    });
+
+    return attachments.map((attachment) =>
+      search.upsertAttachment(attachment, { timestamp }, item)
+    );
   }
 
   private logItemEvent(input: {

@@ -20,8 +20,17 @@ describe("main-process Electron security helpers", () => {
     await expect(
       openAllowedExternalUrl("javascript:alert(1)", openExternal)
     ).resolves.toBe(false);
+    await expect(
+      openAllowedExternalUrl("https://user:pass@example.com", openExternal)
+    ).resolves.toBe(false);
+    await expect(
+      openAllowedExternalUrl("mailto:operator@example.com", openExternal)
+    ).resolves.toBe(true);
 
-    expect(openedUrls).toEqual(["https://example.com/docs"]);
+    expect(openedUrls).toEqual([
+      "https://example.com/docs",
+      "mailto:operator@example.com"
+    ]);
   });
 
   it("trusts only the renderer origin or packaged renderer file", () => {

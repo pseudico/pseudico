@@ -56,12 +56,15 @@ Update `docs/TEST_COVERAGE_MAP.md` whenever a new feature family, smoke tag, or
 release-critical manual QA path is added. Update
 `docs/LOCAL_PARITY_QA_REPORT.md` whenever a release-hardening QA pass changes
 feature status, gap severity, or follow-up scope.
+Operator-readiness failure testing is tracked in
+`docs/FAILURE_MODE_MATRIX.md`; update that matrix when adding or changing
+recoverable local-only failure behavior.
 
 Large-workspace performance tickets should run the local benchmark harness after
 the standard checks:
 
 ```bash
-pnpm benchmark:large -- --sizes 1000,10000 --out docs/performance/reports/latest.json
+pnpm benchmark:large -- --sizes=1000,10000 --out=docs/performance/reports/latest.json
 ```
 
 Use the full `1000,10000,100000` size set for release-gate or hardware-baseline
@@ -116,6 +119,9 @@ an ad hoc browser dependency inside feature tickets.
 Manual QA is required when a change affects desktop launch, workspace folder
 selection, filesystem behavior, packaging, or visible user workflows. Document
 the manual steps and outcome in the PR template.
+Use `docs/FAILURE_MODE_MATRIX.md` for failure-mode manual QA cases such as
+permission-denied folders, database locks/corruption, interrupted writes or
+backups, large attachments, and long-running maintenance jobs.
 
 ## Current Baseline
 

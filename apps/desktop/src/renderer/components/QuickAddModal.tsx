@@ -32,6 +32,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 export const QUICK_TASK_CREATED_EVENT = "local-work-os:quick-task-created";
 export const QUICK_START_OPEN_EVENT = "local-work-os:open-quick-start";
+export const QUICK_START_SAVED_EVENT = "local-work-os:quick-start-saved";
 
 export type QuickAddContext = QuickStartContext & {
   projectId?: string | null;
@@ -124,12 +125,23 @@ export type QuickStartMutationSummary =
   | ContactSummary
   | null;
 
+export type QuickStartSavedResult =
+  | QuickStartMutationSummary
+  | { project: ProjectSummary }
+  | { contact: ContactSummary };
+
+export type QuickStartSavedEventDetail = {
+  kind: QuickStartFormValues["kind"];
+  result: QuickStartSavedResult;
+};
+
 export type QuickAddModalProps = {
   apiClient?: LocalWorkOsApi;
   context?: QuickAddContext;
   open: boolean;
   workspace: WorkspaceSummary | null;
   onClose: () => void;
+  onNavigateToCreatedTarget?: (path: string) => void;
 };
 
 export function QuickAddModal({
@@ -137,7 +149,8 @@ export function QuickAddModal({
   context,
   open,
   workspace,
-  onClose
+  onClose,
+  onNavigateToCreatedTarget
 }: QuickAddModalProps): React.JSX.Element | null {
   const [targets, setTargets] = useState<QuickAddTargetOption[]>([]);
   const [selectedTargetId, setSelectedTargetId] = useState("");
@@ -256,7 +269,15 @@ export function QuickAddModal({
       notifyQuickTaskCreated(result.data as TaskSummary);
     }
 
+    notifyQuickStartSaved(values.kind, result.data);
+
     setSuccess(getSuccessMessage(values.kind, result.data));
+    const destination = getQuickStartCreatedDestination(values.kind, result.data);
+
+    if (destination !== null) {
+      onNavigateToCreatedTarget?.(destination);
+    }
+
     return true;
   }
 
@@ -928,7 +949,7 @@ function getSubmitLabel(kind: QuickStartActionKind): string {
 
 function getSuccessMessage(
   kind: QuickStartActionKind,
-  result: QuickStartMutationSummary
+  result: QuickStartSavedResult
 ): string {
   if (kind === "file" && result === null) {
     return "No file selected.";
@@ -936,6 +957,14 @@ function getSuccessMessage(
 
   if (result === null) {
     return "Saved.";
+  }
+
+  if ("project" in result) {
+    return `Saved "${result.project.name}".`;
+  }
+
+  if ("contact" in result) {
+    return `Saved "${result.contact.name}".`;
   }
 
   const title =
@@ -977,4 +1006,60 @@ function mapContactCreateResult(
   }
 
   return apiOk(result.data.contact);
+}
+
+function notifyQuickStartSaved(
+  kind: QuickStartFormValues["kind"],
+  result: QuickStartSavedResult
+): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent<QuickStartSavedEventDetail>(QUICK_START_SAVED_EVENT, {
+      detail: { kind, result }
+    })
+  );
+}
+
+export function getQuickStartCreatedDestination(
+  kind: QuickStartFormValues["kind"],
+  result: QuickStartSavedResult
+): string | null {
+  if (result === null) {
+    return null;
+  }
+
+  if (kind === "project") {
+    const project = "project" in result ? result.project : (result as ProjectSummary);
+
+    return `/projects/${encodeURIComponent(project.id)}`;
+  }
+
+  if (kind === "contact") {
+    const contact = "contact" in result ? result.contact : (result as ContactSummary);
+
+    return `/contacts/${encodeURIComponent(contact.id)}`;
+  }
+
+  return null;
+}
+
+export function getQuickStartSavedContainerId(
+  result: QuickStartSavedResult
+): string | null {
+  if (result === null) {
+    return null;
+  }
+
+  if ("item" in result) {
+    return result.item.containerId;
+  }
+
+  if ("containerId" in result) {
+    return result.containerId;
+  }
+
+  return null;
 }

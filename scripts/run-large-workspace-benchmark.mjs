@@ -1,6 +1,6 @@
 import { createRequire } from "node:module";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { arch, cpus, platform, release, tmpdir, totalmem } from "node:os";
 import { dirname, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 
@@ -15,6 +15,13 @@ const BUDGETS = {
   10000: { open: 500, search: 350, dashboard: 750, today: 900, export: 6_000 },
   100000: { open: 1_500, search: 1_000, dashboard: 2_000, today: 3_000, export: 45_000 }
 };
+const BUDGET_NOTES = {
+  open: "Open summary should use bounded startup counts, not unbounded feed reads.",
+  search: "Search budget covers indexed query hydration for the first 25 results.",
+  dashboard: "Dashboard budget covers default local widgets with bounded pages.",
+  today: "Today budget covers due, backlog, tomorrow, and summary projections.",
+  export: "Export budget covers in-memory workspace JSON assembly only."
+};
 
 const options = parseArgs(process.argv.slice(2));
 const report = {
@@ -22,6 +29,7 @@ const report = {
   generatedAt: new Date().toISOString(),
   localOnly: true,
   command: "pnpm benchmark:large",
+  environment: getEnvironmentSummary(),
   sizes: [],
   notes: [
     "Benchmarks run against generated local SQLite workspaces in a temporary folder.",
@@ -44,6 +52,7 @@ async function runSize(itemCount) {
   );
   const databasePath = resolve(workspaceRoot, "data", "local-work-os.sqlite");
   await mkdir(dirname(databasePath), { recursive: true });
+  const memoryBefore = getMemorySnapshot();
 
   const db = new Database(databasePath);
   db.pragma("foreign_keys = ON");
@@ -67,7 +76,11 @@ async function runSize(itemCount) {
       workspaceRoot: options.keep ? workspaceRoot : null,
       seedElapsedMs,
       seed,
-      benchmark
+      benchmark,
+      memory: {
+        before: memoryBefore,
+        after: getMemorySnapshot()
+      }
     };
   } finally {
     db.close();
@@ -298,7 +311,8 @@ function measure(operation, itemCount, callback) {
     elapsedMs,
     maxMs,
     passedBudget: elapsedMs <= maxMs,
-    rowCount
+    rowCount,
+    notes: BUDGET_NOTES[operation]
   };
 }
 
@@ -449,6 +463,8 @@ function parseArgs(args) {
       }
       parsed.sizes = parseSizes(value);
       index += 1;
+    } else if (arg.startsWith("--sizes=")) {
+      parsed.sizes = parseSizes(arg.slice("--sizes=".length));
     } else if (arg === "--out") {
       const value = args[index + 1];
       if (value === undefined) {
@@ -456,6 +472,8 @@ function parseArgs(args) {
       }
       parsed.out = resolve(value);
       index += 1;
+    } else if (arg.startsWith("--out=")) {
+      parsed.out = resolve(arg.slice("--out=".length));
     } else if (arg === "--keep") {
       parsed.keep = true;
     } else if (arg === "--help" || arg === "-h") {
@@ -469,7 +487,11 @@ function parseArgs(args) {
 }
 
 function parseSizes(value) {
-  const sizes = value.split(",").map((part) => Number(part.trim()));
+  const sizes = value
+    .split(/[,\s]+/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => Number(part));
 
   if (
     sizes.length === 0 ||
@@ -487,6 +509,32 @@ function safeTimestamp(date) {
 
 function roundElapsed(elapsedMs) {
   return Math.round(elapsedMs * 100) / 100;
+}
+
+function getEnvironmentSummary() {
+  return {
+    platform: platform(),
+    release: release(),
+    arch: arch(),
+    node: process.version,
+    cpuCount: cpus().length,
+    totalMemoryMb: bytesToMegabytes(totalmem())
+  };
+}
+
+function getMemorySnapshot() {
+  const memory = process.memoryUsage();
+
+  return {
+    rssMb: bytesToMegabytes(memory.rss),
+    heapUsedMb: bytesToMegabytes(memory.heapUsed),
+    heapTotalMb: bytesToMegabytes(memory.heapTotal),
+    externalMb: bytesToMegabytes(memory.external)
+  };
+}
+
+function bytesToMegabytes(bytes) {
+  return Math.round((bytes / 1024 / 1024) * 100) / 100;
 }
 
 function printHelpAndExit() {

@@ -1,0 +1,334 @@
+{
+  "runId": "PSE-206-2026-05-16T00-14-23-908Z",
+  "startedAt": "2026-05-16T00:14:23.908Z",
+  "exePath": "C:\\Users\\AlastairLacey\\Pseudico\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+  "workspacePath": "C:/tmp/PSE-206-2026-05-16T00-14-23-908Z-workspace",
+  "sourceAttachmentPath": "C:/tmp/PSE-206-2026-05-16T00-14-23-908Z-source-attachment.txt",
+  "screenshots": [
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/01-welcome.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/02-workspace-created.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/03-contact-created.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/04-project-created.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/05-category-created-settings.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/06-project-content-created.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/07-relationships-linked.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/08-file-attached.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/09-tag-category-inspector.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/11-collection-opened.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/12-today-planning.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/13-dashboard.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/14-timeline.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/15-calendar.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/10-search-results-saved.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/16-reopen-welcome.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/17-persistence-project.png",
+    "docs/manual-qa/screenshots/PSE-206-2026-05-16T00-14-23-908Z/18-persistence-search.png"
+  ],
+  "steps": [
+    {
+      "step": "Create fresh workspace via packaged UI",
+      "result": "Pass",
+      "notes": "C:/tmp/PSE-206-2026-05-16T00-14-23-908Z-workspace"
+    },
+    {
+      "step": "Add contact via Quick Start UI",
+      "result": "Pass",
+      "notes": "Avery PSE-206 Operator"
+    },
+    {
+      "step": "Add project via Quick Start UI",
+      "result": "Pass",
+      "notes": "PSE-206 Launch Project"
+    },
+    {
+      "step": "Add category via Settings UI",
+      "result": "Pass",
+      "notes": "PSE-206 Operator QA"
+    },
+    {
+      "step": "Add note via Quick Start UI",
+      "result": "Pass",
+      "notes": "PSE-206 operator-ready note"
+    },
+    {
+      "step": "Add task via Quick Start UI",
+      "result": "Pass",
+      "notes": "PSE-206 verify packaged journey task"
+    },
+    {
+      "step": "Add list/checklist shell via Quick Start UI",
+      "result": "Pass",
+      "notes": "PSE-206 operator checklist"
+    },
+    {
+      "step": "Add external link via Quick Start UI",
+      "result": "Pass",
+      "notes": "https://example.com/pse-206-operator-reference"
+    },
+    {
+      "step": "Relate contact to project via project UI",
+      "result": "Pass",
+      "notes": "Avery PSE-206 Operator linked"
+    },
+    {
+      "step": "Relate project to note via related-content UI",
+      "result": "Pass",
+      "notes": "PSE-206 operator-ready note"
+    },
+    {
+      "step": "Attach local file and verify workspace-relative storage",
+      "result": "Pass",
+      "notes": "attachments/2026/05/attachment_mp7lhcix_1430guemjk3/PSE-206-2026-05-16T00-14-23-908Z-source-attachment.txt"
+    },
+    {
+      "step": "Add tag/category using item UI",
+      "result": "Pass",
+      "notes": "PSE-206 Operator QA"
+    },
+    {
+      "step": "Create/open collection via Collections UI",
+      "result": "Pass",
+      "notes": "PSE-206 Operator Smoke Collection"
+    },
+    {
+      "step": "Use Today planning UI",
+      "result": "Pass",
+      "notes": "Today shows planned task: PSE-206 verify packaged journey task"
+    },
+    {
+      "step": "Open Dashboard surface",
+      "result": "Pass",
+      "notes": "Dashboard"
+    },
+    {
+      "step": "Open Timeline surface",
+      "result": "Pass",
+      "notes": "Timeline"
+    },
+    {
+      "step": "Open Calendar surface",
+      "result": "Pass",
+      "notes": "Calendar"
+    },
+    {
+      "step": "Search for run-created content",
+      "result": "Pass",
+      "notes": "PSE-206-query returned created note via packaged search API after query entry"
+    },
+    {
+      "step": "Reopen packaged app and open same workspace via UI",
+      "result": "Pass",
+      "notes": "C:/tmp/PSE-206-2026-05-16T00-14-23-908Z-workspace"
+    },
+    {
+      "step": "Confirm state/search persists after app restart",
+      "result": "Pass",
+      "notes": "PSE-206 Launch Project, PSE-206 operator-ready note"
+    }
+  ],
+  "ids": {
+    "workspaceId": "workspace_mp7lgblx_0pgi99r5rxp",
+    "projectId": "container_mp7lgg9q_0xql0cgf4sz",
+    "contactId": "container_mp7lgdki_23zsv0ekm1r",
+    "categoryId": "category_mp7lgiqs_0v0y5wdjac8",
+    "noteId": "item_mp7lgl2y_0v9s371yays",
+    "taskId": "item_mp7lgo9o_12bunxgq8f3",
+    "listId": "item_mp7lgr8w_032hkiaeobv",
+    "linkId": "item_mp7lgumn_26emxqqmsgj"
+  },
+  "issues": [
+    {
+      "severity": "P2",
+      "title": "Attachment UI required fallback in automated harness",
+      "detail": "Attach file button was present, but OS dialog automation did not return a file in this run; fallback used packaged IPC against the same workspace/source file."
+    },
+    {
+      "severity": "P3",
+      "title": "Item tag affordance not visible in packaged journey",
+      "detail": "The item view exposed category controls but no visible Add tag affordance; category was used for the tag/category step."
+    },
+    {
+      "severity": "P3",
+      "title": "Search form automation did not rely on native submit",
+      "detail": "The packaged search page accepted the query text; the evidence runner verified search results through the packaged search API because synthetic form submit did not update the hash route."
+    }
+  ],
+  "names": {
+    "workspace": "PSE-206 Workspace 2026-05-16",
+    "contact": "Avery PSE-206 Operator",
+    "project": "PSE-206 Launch Project",
+    "category": "PSE-206 Operator QA",
+    "note": "PSE-206 operator-ready note",
+    "task": "PSE-206 verify packaged journey task",
+    "list": "PSE-206 operator checklist",
+    "linkTitle": "PSE-206 operator reference link",
+    "linkUrl": "https://example.com/pse-206-operator-reference",
+    "tag": "operator-smoke-pse-206",
+    "collection": "PSE-206 Operator Smoke Collection",
+    "todayTask": "PSE-206 Today planning task"
+  },
+  "afterProjectCreate": "{\"hash\":\"#/projects/container_mp7lgg9q_0xql0cgf4sz\",\"text\":\"Skip to workspace content\\nL\\nLocal Work OS\\nLocal only\\nToday\\nInbox\\nProjects\\nProject Tags\\nContacts\\nContact Labels\\nCollections\\nTags & Categories\\nTemplates\\nSearch\\nDashboard\\nTimeline\\nCalendar\\nWorkflows\\nHelp\\nSettings\\nTrash\\n\\nPINNED & FAVORITES\\n\\nInbox\\nSomeday / Waiting Review\\n\\nWORKSPACE SHELL\\n\\nProjects\\nBack\\nForward\\nRecent\\nCommands\\nCtrl/Cmd K\\nSearch\\nQuick Start\\nContact\\nRecently opened contact\\nProject\\nRecently opened project\\nBack to projects\\nBANNER\\nSet banner\\n\\nPROJECT\\n\\nPSE-206 Launch Project\\n\\nPackaged oper\"}",
+  "routeProjectGetAfterCreate": {
+    "ok": true,
+    "data": {
+      "id": "container_mp7lgg9q_0xql0cgf4sz",
+      "workspaceId": "workspace_mp7lgblx_0pgi99r5rxp",
+      "type": "project",
+      "name": "PSE-206 Launch Project",
+      "slug": "pse-206-launch-project",
+      "description": "Packaged operator journey project.",
+      "status": "active",
+      "categoryId": null,
+      "color": null,
+      "isFavorite": false,
+      "sortOrder": 0,
+      "createdAt": "2026-05-16T00:14:31.262Z",
+      "updatedAt": "2026-05-16T00:14:31.262Z",
+      "archivedAt": null,
+      "deletedAt": null
+    }
+  },
+  "routeProjectListAfterCreate": {
+    "ok": true,
+    "data": [
+      {
+        "id": "container_mp7lgg9q_0xql0cgf4sz",
+        "workspaceId": "workspace_mp7lgblx_0pgi99r5rxp",
+        "type": "project",
+        "name": "PSE-206 Launch Project",
+        "slug": "pse-206-launch-project",
+        "description": "Packaged operator journey project.",
+        "status": "active",
+        "categoryId": null,
+        "color": null,
+        "isFavorite": false,
+        "sortOrder": 0,
+        "createdAt": "2026-05-16T00:14:31.262Z",
+        "updatedAt": "2026-05-16T00:14:31.262Z",
+        "archivedAt": null,
+        "deletedAt": null
+      }
+    ]
+  },
+  "attachment": {
+    "item": {
+      "id": "item_mp7lhcj6_0y6zg202vw4",
+      "workspaceId": "workspace_mp7lgblx_0pgi99r5rxp",
+      "containerId": "container_mp7lgg9q_0xql0cgf4sz",
+      "containerTabId": null,
+      "type": "file",
+      "title": "PSE-206-2026-05-16T00-14-23-908Z-source-attachment.txt",
+      "body": "PSE-206 operator journey evidence attachment.",
+      "categoryId": null,
+      "status": "active",
+      "sortOrder": 5120,
+      "pinned": false,
+      "createdAt": "2026-05-16T00:15:13.074Z",
+      "updatedAt": "2026-05-16T00:15:13.074Z",
+      "completedAt": null,
+      "archivedAt": null,
+      "deletedAt": null
+    },
+    "attachment": {
+      "id": "attachment_mp7lhcix_1430guemjk3",
+      "workspaceId": "workspace_mp7lgblx_0pgi99r5rxp",
+      "itemId": "item_mp7lhcj6_0y6zg202vw4",
+      "originalName": "PSE-206-2026-05-16T00-14-23-908Z-source-attachment.txt",
+      "storedName": "PSE-206-2026-05-16T00-14-23-908Z-source-attachment.txt",
+      "mimeType": null,
+      "sizeBytes": 70,
+      "checksum": "32c48d9ab91e7a2bb1ae38c308f4b266b3a146d065e0afe9dcdbefe3812749b8",
+      "storagePath": "attachments/2026/05/attachment_mp7lhcix_1430guemjk3/PSE-206-2026-05-16T00-14-23-908Z-source-attachment.txt",
+      "description": "PSE-206 operator journey evidence attachment.",
+      "createdAt": "2026-05-16T00:15:13.074Z",
+      "updatedAt": "2026-05-16T00:15:13.074Z",
+      "deletedAt": null
+    }
+  },
+  "attachmentVerify": {
+    "ok": true,
+    "data": {
+      "attachmentId": "attachment_mp7lhcix_1430guemjk3",
+      "itemId": "item_mp7lhcj6_0y6zg202vw4",
+      "exists": true,
+      "storagePath": "attachments/2026/05/attachment_mp7lhcix_1430guemjk3/PSE-206-2026-05-16T00-14-23-908Z-source-attachment.txt"
+    }
+  },
+  "attachmentAbsolutePath": "C:\\tmp\\PSE-206-2026-05-16T00-14-23-908Z-workspace\\attachments\\2026\\05\\attachment_mp7lhcix_1430guemjk3\\PSE-206-2026-05-16T00-14-23-908Z-source-attachment.txt",
+  "uiSearchApiCheck": {
+    "ok": true,
+    "data": [
+      {
+        "id": "search_mp7lgl2z_0xz00u1eksi",
+        "workspaceId": "workspace_mp7lgblx_0pgi99r5rxp",
+        "targetType": "item",
+        "targetId": "item_mp7lgl2y_0v9s371yays",
+        "kind": "note",
+        "title": "PSE-206 operator-ready note",
+        "body": "This note contains operator-ready search token PSE-206-query and packaged persistence evidence.",
+        "status": "active",
+        "tags": [],
+        "category": "PSE-206 Operator QA",
+        "updatedAt": "2026-05-16T00:15:14.936Z",
+        "archivedAt": null,
+        "deletedAt": null,
+        "containerId": "container_mp7lgg9q_0xql0cgf4sz",
+        "containerTitle": "PSE-206 Launch Project",
+        "parentItemId": null,
+        "parentItemTitle": null,
+        "destinationPath": "/projects/container_mp7lgg9q_0xql0cgf4sz",
+        "dueAt": null,
+        "taskStatus": null,
+        "score": 12,
+        "titleHighlights": [
+          {
+            "text": "PSE-206 operator-ready note",
+            "match": false
+          }
+        ],
+        "excerpt": {
+          "text": "This note contains operator-ready search token PSE-206-query and packaged persistence evidence.",
+          "segments": [
+            {
+              "text": "This note contains operator-ready search token ",
+              "match": false
+            },
+            {
+              "text": "PSE-206-query",
+              "match": true
+            },
+            {
+              "text": " and packaged persistence evidence.",
+              "match": false
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "firstSessionChecks": {
+    "searchTitles": [
+      "PSE-206 operator-ready note"
+    ],
+    "relatedCount": 0,
+    "collections": [
+      "PSE-206 Operator Smoke Collection"
+    ]
+  },
+  "persistenceChecks": {
+    "projectFound": true,
+    "contactFound": true,
+    "searchTitles": [
+      "PSE-206 operator-ready note"
+    ],
+    "collections": [
+      "PSE-206 Operator Smoke Collection"
+    ],
+    "attachmentCount": 1,
+    "attachmentStoragePaths": [
+      "attachments/2026/05/attachment_mp7lhcix_1430guemjk3/PSE-206-2026-05-16T00-14-23-908Z-source-attachment.txt"
+    ]
+  },
+  "ok": true,
+  "finishedAt": "2026-05-16T00:15:40.765Z"
+}

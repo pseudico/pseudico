@@ -1,17 +1,18 @@
-import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { BrowserWindow, shell } from "electron";
 import {
   isTrustedRendererNavigationUrl,
   openAllowedExternalUrl
 } from "./electronSecurity";
+import { createWorkspaceWindowWebPreferences } from "./workspaceWindowSecurity";
+import { resolveWorkspaceWindowAssetPaths } from "./workspaceWindowPaths";
 
 const rendererDevUrl =
   process.env.ELECTRON_RENDERER_URL ?? process.env.VITE_DEV_SERVER_URL;
 
 export function createWorkspaceWindow(): BrowserWindow {
-  const packagedRendererPath = join(__dirname, "../renderer/index.html");
-  const packagedRendererUrl = pathToFileURL(packagedRendererPath).toString();
+  const paths = resolveWorkspaceWindowAssetPaths();
+  const packagedRendererUrl = pathToFileURL(paths.rendererIndexPath).toString();
   const workspaceWindow = new BrowserWindow({
     width: 1280,
     height: 820,
@@ -19,15 +20,10 @@ export function createWorkspaceWindow(): BrowserWindow {
     minHeight: 640,
     title: "Local Work OS",
     backgroundColor: "#f6f5f0",
-    webPreferences: {
-      preload: join(__dirname, "../preload/index.mjs"),
-      allowRunningInsecureContent: false,
-      contextIsolation: true,
-      devTools: !appIsPackaged(),
-      nodeIntegration: false,
-      sandbox: true,
-      webSecurity: true
-    }
+    webPreferences: createWorkspaceWindowWebPreferences({
+      preloadPath: paths.preloadPath,
+      devTools: !appIsPackaged()
+    })
   });
 
   workspaceWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -56,7 +52,7 @@ export function createWorkspaceWindow(): BrowserWindow {
   if (rendererDevUrl) {
     void workspaceWindow.loadURL(rendererDevUrl);
   } else {
-    void workspaceWindow.loadFile(packagedRendererPath);
+    void workspaceWindow.loadFile(paths.rendererIndexPath);
   }
 
   return workspaceWindow;

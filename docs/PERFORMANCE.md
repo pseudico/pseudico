@@ -24,23 +24,39 @@ The budgets focus on service-level operations:
 - **Export**: in-memory workspace JSON assembly; file writes are outside this
   benchmark.
 
+## Operator-readiness QA
+
+`PERFORMANCE_SCALE_QA.md` contains the release-candidate manual UI script for
+1k/10k workspaces, the 100k full-gate guidance, loading/progress expectations,
+and the P0/P1 blocker policy for scale issues.
+
 ## Running the benchmark
 
 Build packages first, then run the local-only benchmark script:
 
 ```bash
-pnpm benchmark:large -- --sizes 1000,10000 --out docs/performance/reports/latest.json
+pnpm benchmark:large -- --sizes=1000,10000 --out=docs/performance/reports/latest.json
 ```
 
 The full release-gate run is:
 
 ```bash
-pnpm benchmark:large -- --sizes 1000,10000,100000 --out docs/performance/reports/full.json
+pnpm benchmark:large -- --sizes=1000,10000,100000 --out=docs/performance/reports/full.json
 ```
 
 Generated workspaces are created in the OS temporary directory and deleted after
 each size finishes. Add `--keep` to keep the generated local workspace folders
 for manual inspection.
+
+For PSE-203 operator-readiness evidence, save the 1k/10k report as:
+
+```bash
+pnpm benchmark:large -- --sizes=1000,10000 --out=docs/performance/reports/operator-readiness-pse-203.json
+```
+
+The report records local environment details, seed timing, operation timing,
+budget status, row counts, and process memory snapshots. These are local QA
+artifacts only; do not add telemetry or remote reporting.
 
 ## Fixture shape
 

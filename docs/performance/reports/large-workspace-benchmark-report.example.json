@@ -1,8 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-14T00:00:00.000Z",
+  "generatedAt": "2026-05-15T00:00:00.000Z",
   "localOnly": true,
-  "command": "pnpm benchmark:large -- --sizes 1000 --out docs/performance/reports/latest.json",
+  "command": "pnpm benchmark:large -- --sizes=1000 --out=docs/performance/reports/latest.json",
+  "environment": {
+    "platform": "win32",
+    "release": "example",
+    "arch": "x64",
+    "node": "v22.x.x",
+    "cpuCount": 8,
+    "totalMemoryMb": 16384
+  },
   "sizes": [
     {
       "itemCount": 1000,
@@ -22,7 +30,7 @@
       "benchmark": {
         "workspaceId": "benchmark_workspace_1000",
         "itemCount": 1000,
-        "generatedAt": "2026-05-14T00:00:00.000Z",
+        "generatedAt": "2026-05-15T00:00:00.000Z",
         "passed": true,
         "operations": [
           {
@@ -42,6 +50,20 @@
             "notes": "Search budget covers indexed query hydration for the first 25 results."
           }
         ]
+      },
+      "memory": {
+        "before": {
+          "rssMb": 80,
+          "heapUsedMb": 15,
+          "heapTotalMb": 25,
+          "externalMb": 2
+        },
+        "after": {
+          "rssMb": 120,
+          "heapUsedMb": 35,
+          "heapTotalMb": 50,
+          "externalMb": 3
+        }
       }
     }
   ],
