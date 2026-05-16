@@ -7249,3 +7249,45 @@ Files changed:
 - C:\Users\AlastairLacey\Pseudico\docs\session_log.md
 Open questions / risks: Contact-detail living-container evidence remains a proposed follow-up if not covered by PSE-216/PSE-220.
 Next actions: Review PR #193; proceed to PSE-214 after acceptance; preserve stacked-base context until handoff branch lands.
+
+## 2026-05-16T20:23:03.3929537+10:00
+Objective: Start PSE-214 Settings IA implementation.
+Decisions made: Recovered PSE-214 from Linear/PSE-HUX context; read required docs before coding.
+Files changed: docs/session_log.md
+Open questions / risks: Pre-existing dirty docs/screenshots remain; branch scope must be controlled.
+Next actions: Read docs; inspect Settings; post Linear plan.
+
+## 2026-05-16T20:27:04.4614273+10:00
+Objective: Complete PSE-214 context recovery and plan.
+Decisions made: Posted Linear plan; set issue In Progress; scoped renderer IA/styles/tests/manual evidence.
+Files changed: docs/session_log.md
+Open questions / risks: PSE-213 audit PR is still open/stacked.
+Next actions: Refactor Settings; update tests; capture screenshots.
+
+## 2026-05-16T20:44:33.9107789+10:00
+Objective: Implement and verify PSE-214 Settings IA split.
+Decisions made: Added intent navigation/overview; demoted import/export/admin tools; no service/schema changes.
+Files changed: apps/desktop/src/renderer/pages/SettingsPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/renderer/settingsPage.test.tsx; docs/manual-qa/PSE-214-settings-ia.md; docs/OPERATOR_RUNBOOK.md; docs/session_log.md
+Open questions / risks: Visual evidence uses local SettingsPage/CSS harness; PSE-218 owns guided restore/raw-path comfort.
+Next actions: Review diff; update Linear; open PR.
+
+## 2026-05-16T20:50:18.4944886+10:00
+Objective: Publish PSE-214 Settings IA PR and Linear update.
+Decisions made: Opened draft PR #194 stacked on PSE-213; will update Linear with tests, evidence, and known follow-ups.
+Files changed: docs/session_log.md
+Open questions / risks: gh CLI auth is invalid; GitHub connector was used for PR creation and git push succeeded.
+Next actions: Post Linear completion summary; monitor PR/CI; proceed to PSE-215 after review.
+
+## 2026-05-16T21:03:03.2466310+10:00
+Objective: Reconcile PSE-214 PR #194 to ready-for-review standard.
+Decisions made: Continue current branch/PR; verify scope, checks, evidence, PR metadata, and Linear status before readiness.
+Files changed: docs/session_log.md
+Open questions / risks: Worktree includes pre-existing unrelated dirty docs/screenshots; stage only scoped changes.
+Next actions: Run full checks; update PR/Linear; mark ready if criteria pass.
+
+## 2026-05-16T21:28:22.7175116+10:00
+Objective: Finalize PSE-214 PR #194 after merge approval.
+Decisions made: Verify PR/Linear linkage, checks, reviews, dirty-file exclusions, and branch protection before merge.
+Files changed: docs/session_log.md
+Open questions / risks: Merge may be blocked by repository policy or missing required checks.
+Next actions: Inspect PR status; update metadata if needed; merge if allowed.

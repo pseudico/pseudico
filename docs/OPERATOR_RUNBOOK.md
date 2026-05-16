@@ -88,6 +88,18 @@ If any step fails, stop and use the troubleshooting section before entering impo
 
 ## 6. Backups, exports, imports, and restore
 
+In **Settings**, start from the intent sections instead of scanning every tool:
+
+- **Appearance & readability** changes theme, density, font size, locale, and
+  shortcut help.
+- **Backup & restore** is the normal place to create backups and restore a
+  backup into a fresh workspace folder.
+- **Privacy & local-only** confirms telemetry/cloud sync are off and keeps
+  optional network-capable features explicit.
+- **Imports & exports** is for deliberate local file movement.
+- **Advanced maintenance** is for troubleshooting, repair, and cleanup only.
+- **Categories / metadata** manages organisation labels.
+
 ### When to back up
 
 Create a manual backup:

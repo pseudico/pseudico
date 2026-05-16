@@ -2080,6 +2080,109 @@ a {
   gap: 22px;
 }
 
+.settings-section-nav {
+  display: grid;
+  max-width: 1100px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.settings-section-tab {
+  display: grid;
+  gap: 4px;
+  min-height: 76px;
+  padding: 12px;
+  border: 1px solid var(--app-border, #dedbd1);
+  border-radius: 12px;
+  background: var(--app-surface-strong, #ffffff);
+  color: var(--app-text, #262624);
+  text-align: left;
+  box-shadow: 0 8px 20px rgba(38, 38, 36, 0.05);
+  cursor: pointer;
+}
+
+.settings-section-tab span {
+  color: var(--app-text-muted, #625f58);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.settings-section-tab-active {
+  border-color: var(--app-accent, #245c55);
+  background: var(--app-accent-soft, #e8f1ed);
+}
+
+.settings-section-tab-secondary {
+  opacity: 0.82;
+}
+
+.settings-overview-panel {
+  display: grid;
+  max-width: 1100px;
+  gap: 18px;
+}
+
+.settings-overview-hero,
+.settings-intent-card {
+  border: 1px solid var(--app-border, #dedbd1);
+  border-radius: 14px;
+  background: var(--app-surface-strong, #ffffff);
+  box-shadow: 0 12px 28px rgba(38, 38, 36, 0.06);
+}
+
+.settings-overview-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px;
+}
+
+.settings-overview-hero h3,
+.settings-intent-card h4 {
+  margin: 0;
+}
+
+.settings-overview-hero p,
+.settings-intent-card p {
+  margin: 6px 0 0;
+}
+
+.settings-intent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.settings-intent-card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 16px;
+}
+
+.settings-intent-card button {
+  justify-self: start;
+  padding: 8px 10px;
+  border: 1px solid var(--app-border-strong, #c8c0b0);
+  border-radius: 8px;
+  background: var(--app-surface, #fbfaf7);
+  color: var(--app-text, #262624);
+  font-weight: 700;
+}
+
+.settings-intent-card-primary {
+  border-color: color-mix(in srgb, var(--app-accent, #245c55) 38%, var(--app-border, #dedbd1));
+}
+
+.settings-intent-card-secondary {
+  background: var(--app-surface, #fbfaf7);
+}
+
+.backup-restore-panel {
+  border-color: color-mix(in srgb, var(--app-accent, #245c55) 38%, var(--app-border, #dedbd1));
+}
+
 .inbox-page,
 .metadata-page,
 .search-page,
@@ -5679,6 +5782,10 @@ body,
 .timeline-item-card,
 .quick-start-action-card,
 .backup-management-panel,
+.export-management-panel,
+.category-management-panel,
+.settings-overview-hero,
+.settings-intent-card,
 .workspace-card,
 .settings-panel,
 .file-card-content,
@@ -5755,6 +5862,9 @@ body,
 
 .appearance-root.density-compact .dashboard-widget,
 .appearance-root.density-compact .backup-management-panel,
+.appearance-root.density-compact .export-management-panel,
+.appearance-root.density-compact .category-management-panel,
+.appearance-root.density-compact .settings-intent-card,
 .appearance-root.density-compact .universal-item-card,
 .appearance-root.density-compact .today-task-card,
 .appearance-root.density-compact .search-result-card {
@@ -5810,6 +5920,11 @@ body,
 @media (max-width: 900px) {
   .container-preferences-form {
     grid-template-columns: 1fr;
+  }
+
+  .settings-overview-hero {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .appearance-settings-form {
