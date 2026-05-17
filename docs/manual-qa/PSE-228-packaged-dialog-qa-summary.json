@@ -1,0 +1,175 @@
+﻿{
+    "generatedAt":  "2026-05-17T22:32:31.918Z",
+    "issue":  "PSE-228",
+    "packagePath":  "C:\\tmp\\Pseudico-pse-228\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+    "commitSha":  "b2bee031700465a4adb9adb296319be15be6412c",
+    "branch":  "codex/pse-228-os-dialog-qa",
+    "os":  "win32",
+    "workspaceRoot":  "C:\\tmp\\PSE-228-dialog-qa-fixtures\\Dialog QA Workspace",
+    "restoreTargetRoot":  "C:\\tmp\\PSE-228-dialog-qa-fixtures\\Dialog QA Restored Workspace",
+    "fixtureRoot":  "C:\\tmp\\PSE-228-dialog-qa-fixtures",
+    "screenshots":  [
+                        {
+                            "file":  "docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/01-packaged-welcome.png",
+                            "path":  "C:\\tmp\\Pseudico-pse-228\\docs\\manual-qa\\screenshots\\PSE-228-2026-05-18T08-15-00\\01-packaged-welcome.png",
+                            "description":  "Packaged app welcome before workspace creation."
+                        },
+                        {
+                            "file":  "docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/02-workspace-created.png",
+                            "path":  "C:\\tmp\\Pseudico-pse-228\\docs\\manual-qa\\screenshots\\PSE-228-2026-05-18T08-15-00\\02-workspace-created.png",
+                            "description":  "Workspace Home after creating disposable local workspace."
+                        },
+                        {
+                            "file":  "docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/03-workspace-reopened.png",
+                            "path":  "C:\\tmp\\Pseudico-pse-228\\docs\\manual-qa\\screenshots\\PSE-228-2026-05-18T08-15-00\\03-workspace-reopened.png",
+                            "description":  "Workspace Home after reopening the same local workspace."
+                        },
+                        {
+                            "file":  "docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/04-project-before-file-picker.png",
+                            "path":  "C:\\tmp\\Pseudico-pse-228\\docs\\manual-qa\\screenshots\\PSE-228-2026-05-18T08-15-00\\04-project-before-file-picker.png",
+                            "description":  "Project detail before attaching a file."
+                        },
+                        {
+                            "file":  "docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/05-project-file-attached.png",
+                            "path":  "C:\\tmp\\Pseudico-pse-228\\docs\\manual-qa\\screenshots\\PSE-228-2026-05-18T08-15-00\\05-project-file-attached.png",
+                            "description":  "Project detail after native file picker attachment."
+                        },
+                        {
+                            "file":  "docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/06-inbox-email-imported.png",
+                            "path":  "C:\\tmp\\Pseudico-pse-228\\docs\\manual-qa\\screenshots\\PSE-228-2026-05-18T08-15-00\\06-inbox-email-imported.png",
+                            "description":  "Inbox after direct packaged email import by local path; native Windows email picker remains Not reviewed."
+                        },
+                        {
+                            "file":  "docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/07-projects-markdown-folder-imported.png",
+                            "path":  "C:\\tmp\\Pseudico-pse-228\\docs\\manual-qa\\screenshots\\PSE-228-2026-05-18T08-15-00\\07-projects-markdown-folder-imported.png",
+                            "description":  "Projects page after Markdown folder native picker/import."
+                        },
+                        {
+                            "file":  "docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/08-settings-export-backup-state.png",
+                            "path":  "C:\\tmp\\Pseudico-pse-228\\docs\\manual-qa\\screenshots\\PSE-228-2026-05-18T08-15-00\\08-settings-export-backup-state.png",
+                            "description":  "Settings after export and manual backup state exists."
+                        },
+                        {
+                            "file":  "docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/09-restored-workspace-open.png",
+                            "path":  "C:\\tmp\\Pseudico-pse-228\\docs\\manual-qa\\screenshots\\PSE-228-2026-05-18T08-15-00\\09-restored-workspace-open.png",
+                            "description":  "Workspace Home after restoring backup to selected target folder."
+                        }
+                    ],
+    "dialogs":  [
+                    {
+                        "flow":  "attach file cancel",
+                        "status":  "pass",
+                        "result":  {
+                                       "ok":  true,
+                                       "data":  null
+                                   }
+                    },
+                    {
+                        "flow":  "attach file select",
+                        "status":  "pass",
+                        "selectedPath":  "C:\\tmp\\PSE-228-dialog-qa-fixtures\\source-files\\operator-attachment.txt",
+                        "attachmentId":  "attachment_mpacp5ky_2d8m6qxtfc0"
+                    },
+                    {
+                        "flow":  "markdown folder preview select",
+                        "status":  "pass",
+                        "selectedPath":  "C:\\tmp\\PSE-228-dialog-qa-fixtures\\markdown-vault",
+                        "rowCount":  3,
+                        "unsupportedCount":  1
+                    },
+                    {
+                        "flow":  "restore target folder cancel",
+                        "status":  "pass",
+                        "result":  {
+                                       "ok":  true,
+                                       "data":  null
+                                   }
+                    },
+                    {
+                        "flow":  "restore target folder select",
+                        "status":  "pass",
+                        "selectedPath":  "C:\\tmp\\PSE-228-dialog-qa-fixtures\\Dialog QA Restored Workspace"
+                    }
+                ],
+    "notReviewed":  [
+                        {
+                            "flow":  "workspace create/open native folder picker",
+                            "reason":  "Current packaged Welcome UI uses typed local folder path and recent-workspace buttons; no OS-native folder picker is implemented for this flow."
+                        },
+                        {
+                            "flow":  "email import native file/folder picker",
+                            "reason":  "The packaged Windows dialog opened as a Select Folder dialog for the mixed openFile/openDirectory configuration; automated keyboard selection did not complete reliably. Direct packaged email import by local path passed, but this native picker remains Not reviewed for human handoff."
+                        },
+                        {
+                            "flow":  "CSV/TSV import native picker",
+                            "reason":  "Current packaged Settings CSV/TSV importer uses a typed local file path; no OS-native CSV picker is implemented."
+                        },
+                        {
+                            "flow":  "export destination native picker",
+                            "reason":  "Current packaged export actions write to workspace-relative exports/ paths; no OS-native save/folder picker is implemented."
+                        },
+                        {
+                            "flow":  "backup create/list native picker",
+                            "reason":  "Manual backups write to workspace-relative backups/ paths; only restore target folder selection uses a native picker."
+                        },
+                        {
+                            "flow":  "workspace JSON restore source picker",
+                            "reason":  "Not exercised end-to-end in this pass; restore-from-backup target picker was exercised. Workspace JSON export selection remains a separate recovery picker surface."
+                        }
+                    ],
+    "operations":  {
+                       "workspaceCreate":  {
+                                               "status":  "pass",
+                                               "rootPath":  "C:\\tmp\\PSE-228-dialog-qa-fixtures\\Dialog QA Workspace",
+                                               "note":  "Workspace create uses typed local folder path in current UI; no OS-native folder picker is present."
+                                           },
+                       "openMissingWorkspace":  {
+                                                    "status":  "pass",
+                                                    "error":  {
+                                                                  "code":  "WORKSPACE_ERROR",
+                                                                  "message":  "Workspace folder does not exist."
+                                                              }
+                                                },
+                       "workspaceOpen":  {
+                                             "status":  "pass",
+                                             "rootPath":  "C:\\tmp\\PSE-228-dialog-qa-fixtures\\Dialog QA Workspace",
+                                             "note":  "Open workspace uses typed local folder path/recent workspace button in current UI; no OS-native folder picker is present."
+                                         },
+                       "emailImportDirectPath":  {
+                                                     "status":  "pass",
+                                                     "sourcePath":  "C:\\tmp\\PSE-228-dialog-qa-fixtures\\source-files\\dialog-email.eml",
+                                                     "importedCount":  1,
+                                                     "note":  "Direct packaged IPC import passed. The Windows OS-native mixed file/folder email picker was opened during QA but the keyboard driver could not complete selection reliably, so native email picker coverage is marked Not reviewed rather than implied."
+                                                 },
+                       "markdownFolderImport":  {
+                                                    "status":  "pass",
+                                                    "importedCount":  2
+                                                },
+                       "export":  {
+                                      "status":  "pass",
+                                      "workspaceJson":  "exports/2026-05-17T22-32-50-258Z-workspace-export.json",
+                                      "tasksCsv":  "exports/2026-05-17T22-32-50-269Z-tasks.csv",
+                                      "note":  "Current export UI writes to workspace-relative exports folder; no OS-native save/folder picker is present."
+                                  },
+                       "backup":  {
+                                      "status":  "pass",
+                                      "backupRelativePath":  "backups/2026-05-17T22-32-50-281Z",
+                                      "backupCount":  1,
+                                      "note":  "Manual backup create/list has no OS-native picker; it writes inside the workspace backups folder."
+                                  },
+                       "restore":  {
+                                       "status":  "pass",
+                                       "targetWorkspaceRootPath":  "C:\\tmp\\PSE-228-dialog-qa-fixtures\\Dialog QA Restored Workspace",
+                                       "copiedAttachmentCount":  2,
+                                       "missingAttachmentCount":  0
+                                   },
+                       "missingAttachmentPath":  {
+                                                     "status":  "pass",
+                                                     "error":  {
+                                                                   "code":  "WORKSPACE_ERROR",
+                                                                   "message":  "ENOENT: no such file or directory, stat \u0027C:\\tmp\\PSE-228-dialog-qa-fixtures\\source-files\\missing.txt\u0027"
+                                                               }
+                                                 }
+                   },
+    "passed":  true
+}

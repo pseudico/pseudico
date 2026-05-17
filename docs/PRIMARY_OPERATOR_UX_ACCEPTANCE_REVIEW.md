@@ -37,7 +37,7 @@ Final actual Electron UI screenshots are under:
 | Dashboard | `05-dashboard.png` | Can an operator review workload and act from cards? | Pass. |
 | Search | `06-search-results.png` | Are query, scope, grouping, and result context trustworthy? | Pass; duplicate file-result edge remains P3 from PSE-217. |
 | Settings overview | `07-settings-overview.png` | Are settings organised by operator intent and are admin tools secondary? | Pass. |
-| Backup / guided restore | `08-backup-restore.png` | Is restore guided, safe, and visibly non-destructive? | Pass; native OS folder picker still needs human OS-level confirmation (P2). |
+| Backup / guided restore | `08-backup-restore.png` | Is restore guided, safe, and visibly non-destructive? | Pass; PSE-228 later proved packaged restore target folder picker cancel/select behavior. |
 
 Machine-readable evidence summary: `docs/manual-qa/PSE-220-final-acceptance-summary.json`.
 
@@ -95,17 +95,16 @@ Machine-readable evidence summary: `docs/manual-qa/PSE-220-final-acceptance-summ
 | P0 | None remaining after this review. | No action. |
 | P1 | None remaining after the tab-strip, container IPC, and contact header fixes in this PR. | Verify in CI/manual evidence. |
 | P3 | PSE-220 originally found a packaging/tooling blocker (`.tsbuildinfo` copied through pnpm links). | Resolved by PSE-221; keep package evidence in `docs/manual-qa/PSE-221-packaged-release-qa.md` and do not treat the PSE-220 package failure as current. |
-| P2 | OS-native restore folder picker cannot be fully exercised through CDP screenshots. | Human packaged-app QA should confirm native dialog path selection. |
+| P2 | OS-native dialog coverage was incomplete during PSE-220. | PSE-228 later proved file attach, Markdown folder, and restore target pickers; email native picker and non-dialog flows remain caveated there. |
 | P2 | This is a pilot-readiness UX gate, not full accessibility/performance/public-release certification. | Separate release gate. |
 | P3 | Search can still show duplicate file rows when both item and attachment metadata match. | Search relevance polish follow-up. |
 | P3 | Welcome recent-workspaces can accumulate noisy test/worktree entries. | Welcome recents cleanup/curation follow-up. |
 
 ## Recommended follow-up tickets
 
-1. **Restore picker / OS-native dialog packaged QA:** human packaged-app confirmation of native restore folder chooser plus file/import/export/backup dialogs (tracked by PSE-228).
-2. **Package metadata/release caveat polish:** keep unsigned/unpacked/internal-pilot-only status explicit (tracked by PSE-227).
-3. **Search result dedupe polish:** collapse duplicate file rows when item and attachment metadata match the same local object.
-4. **Welcome recent workspace curation:** hide missing/test workspaces or add cleanup affordance.
+1. **PSE-229 email import native picker follow-up:** decide whether to split or polish Windows email file/folder selection before claiming native email picker coverage.
+2. **Search result dedupe polish:** collapse duplicate file rows when item and attachment metadata match the same local object.
+3. **Welcome recent workspace curation:** hide missing/test workspaces or add cleanup affordance.
 
 ## Final acceptance checklist
 

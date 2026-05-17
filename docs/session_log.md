@@ -7945,3 +7945,43 @@ Files changed:
 - apps/desktop/package.json; scripts/check-release-package.mjs; docs/RELEASE_CANDIDATE_PACKAGING.md; docs/manual-qa/PSE-227-package-metadata-release-caveats.md; docs/release/package-artifact-check.json; docs/session_log.md
 Open questions / risks: P3 tooling advisories remain; public release still needs owner signing/installer/update decisions.
 Next actions: review diff; commit; open/merge PR.
+
+## 2026-05-18 08:08:48 +10:00
+Objective: Begin PSE-228 packaged OS-native dialog QA from latest merged main.
+Decisions made:
+- PSE-226 and PSE-227 are merged; use fresh worktree C:\tmp\Pseudico-pse-228.
+- Scope is evidence/docs only unless QA reveals a significant product blocker.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Real OS dialogs may need manual/visible packaged-app handling; mark unexercised dialogs Not reviewed rather than implying pass.
+Next actions: Read dialog/import/export/backup docs; post plan to Linear; package and run QA.
+
+## 2026-05-18 08:40 +10:00
+Objective: Complete PSE-228 packaged OS-native dialog QA evidence and docs.
+Decisions made:
+- Proved native attach, Markdown folder, and restore target pickers; marked typed-path/workspace-relative flows and email native picker caveat explicitly.
+- Kept scope evidence/docs-only because no P0/P1 product blocker appeared.
+Files changed:
+- docs/manual-qa/PSE-228-packaged-os-dialog-qa.md; docs/manual-qa/PSE-228-packaged-dialog-qa-summary.json; docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/*; docs/OPERATOR_READINESS_REPORT.md; docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md; docs/RELEASE_CANDIDATE_PACKAGING.md; docs/OPERATOR_RUNBOOK.md; docs/session_log.md
+Open questions / risks: P2 email native picker remains Not reviewed; non-dialog flows should not be claimed as native picker coverage.
+Next actions: Run docs/package checks; commit/push; open and merge PR if clean.
+
+## 2026-05-18 08:37 +10:00
+Objective: Validate PSE-228 evidence/docs before PR.
+Decisions made:
+- Lint, typecheck, test, package, package smoke, release package check, and packaged dialog QA passed.
+- Initial sandboxed test hit Vitest spawn EPERM; rerun outside sandbox passed 230 files / 888 tests.
+Files changed:
+- docs/release/package-artifact-check.json; docs/session_log.md
+Open questions / risks: P2 email native picker remains a follow-up/caveat, not a merge blocker.
+Next actions: Review diff; commit/push; open/merge PR.
+
+## 2026-05-18 08:38 +10:00
+Objective: File PSE-228 follow-up for unproven email native picker coverage.
+Decisions made:
+- Created PSE-229 for Windows email import native picker coverage rather than expanding PSE-228 scope.
+- Treated it as P2/non-blocking because direct packaged `.eml` import passed and no data-safety failure appeared.
+Files changed:
+- docs/manual-qa/PSE-228-packaged-os-dialog-qa.md; docs/OPERATOR_READINESS_REPORT.md; docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md; docs/session_log.md
+Open questions / risks: PSE-229 should be closed or explicitly deferred before claiming native email picker coverage.
+Next actions: Final diff review; commit and PR.

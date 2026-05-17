@@ -24,6 +24,18 @@ Latest reconciled package metadata and release-caveat evidence is PSE-227:
 - Desktop package metadata now includes a package description and author, so the
   Electron Builder missing description/author warnings are resolved.
 
+Latest packaged dialog/operator evidence is PSE-228:
+
+- `docs/manual-qa/PSE-228-packaged-os-dialog-qa.md` records packaged Windows
+  OS-native picker coverage for file attach cancel/select, Markdown folder
+  preview/import, and backup restore target cancel/select.
+- The same evidence explicitly marks typed-path and workspace-relative flows
+  that do not currently use native dialogs: workspace create/open, CSV/TSV
+  import, export destination, and backup create/list.
+- The Windows email import native picker remains **Not reviewed** in PSE-228
+  because the mixed file/folder dialog could not be reliably completed in the
+  manual automation pass; direct packaged `.eml` import by local path passed.
+
 Prior package-hardening evidence is PSE-221:
 
 - `docs/manual-qa/PSE-221-packaged-release-qa.md` records `pnpm package`,
