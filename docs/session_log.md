@@ -7799,3 +7799,10 @@ Open questions / risks:
 - Need commit, push, PR, and Linear update.
 Next actions:
 - Restage session log, commit, push, open PR.
+
+## 2026-05-17T19:41:29.9578096+10:00
+- Objective: Finalize PSE-223 packaged importer QA handoff after PR creation.
+- Decisions made: PR #204 is ready for review; keep OS-native dialog QA and package metadata caveats in PSE-228/PSE-227.
+- Files changed: docs/session_log.md
+- Open questions / risks: P2 OS-native dialogs not covered here; P3 Windows temp cleanup can be busy after smoke.
+- Next actions: update Linear; await PR review/CI; merge when approved.
