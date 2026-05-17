@@ -195,6 +195,11 @@ a {
   font-size: 22px;
 }
 
+.top-bar-title {
+  flex: 0 0 clamp(180px, 22vw, 300px);
+  min-width: 180px;
+}
+
 .top-eyebrow {
   margin: 0 0 4px;
   color: #6d6a62;
@@ -206,8 +211,12 @@ a {
 
 .top-actions {
   display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
+  min-width: 0;
 }
 
 .navigation-controls {
@@ -1693,11 +1702,13 @@ a {
 
 .toast-viewport {
   position: fixed;
-  right: 20px;
+  left: 20px;
   bottom: 20px;
   z-index: 20;
   display: grid;
-  width: min(360px, calc(100vw - 40px));
+  width: min(320px, calc(100vw - 40px));
+  max-height: min(42vh, 360px);
+  overflow: hidden;
   gap: 10px;
 }
 
@@ -1712,6 +1723,62 @@ a {
   background: #ffffff;
   box-shadow: 0 16px 34px rgba(38, 38, 36, 0.14);
   color: #262624;
+}
+
+.settings-activity-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #d8d0c1;
+  border-radius: 18px;
+  background: #fffaf0;
+}
+
+.settings-activity-summary h3 {
+  margin: 0 0 6px;
+}
+
+.settings-activity-list {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-activity-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #d5d0c3;
+  border-left-width: 4px;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.settings-activity-item div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.settings-activity-item span {
+  overflow-wrap: anywhere;
+  color: #514e49;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.settings-activity-success {
+  border-left-color: #6f9d7f;
+}
+
+.settings-activity-error {
+  border-left-color: #bd6f4b;
+}
+
+.settings-activity-info {
+  border-left-color: #7b8fbc;
 }
 
 .toast-success {

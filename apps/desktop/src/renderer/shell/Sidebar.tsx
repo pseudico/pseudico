@@ -18,10 +18,10 @@ import {
 } from "lucide-react";
 import { t } from "@local-work-os/core";
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import type { LocalWorkOsApi, PinnedFavoriteTargetSummary } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
-import { navRoutes, type AppRouteId } from "../routes";
+import { getActiveNavRouteId, navRoutes, type AppRouteId } from "../routes";
 import { useWorkspaceStore } from "../state/workspaceStore";
 
 const routeIcons: Partial<Record<AppRouteId, LucideIcon>> = {
@@ -52,6 +52,8 @@ export function Sidebar({
   initialPinnedFavorites
 }: SidebarProps = {}): React.JSX.Element {
   const { currentWorkspace } = useWorkspaceStore();
+  const location = useLocation();
+  const activeRouteId = getActiveNavRouteId(location.pathname);
   const [pinnedFavorites, setPinnedFavorites] = useState<
     PinnedFavoriteTargetSummary[]
   >(initialPinnedFavorites ?? []);
@@ -103,14 +105,14 @@ export function Sidebar({
       <nav className="nav-list">
         {navRoutes.map((route) => {
           const Icon = routeIcons[route.id] ?? LayoutDashboard;
+          const isActive = activeRouteId === route.id;
 
           return (
             <NavLink
               key={route.id}
               to={route.path}
-              className={({ isActive }) =>
-                isActive ? "nav-item nav-item-active" : "nav-item"
-              }
+              aria-current={isActive ? "page" : undefined}
+              className={isActive ? "nav-item nav-item-active" : "nav-item"}
             >
               <Icon size={18} aria-hidden="true" />
               <span>{route.label}</span>

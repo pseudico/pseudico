@@ -63,7 +63,10 @@ import type {
 type SettingsPageProps = {
   apiClient?: LocalWorkOsApi;
   initialBackups?: BackupSnapshotSummary[];
+  initialBackupMessage?: string | null;
   initialCategories?: CategorySummary[];
+  initialExportMessage?: string | null;
+  initialMaintenanceJobs?: MaintenanceJobSummary[];
   initialRestoreSummary?: RestoreWorkspaceSummary | null;
   initialRestoreTargetPath?: string;
   initialSelectedRestoreBackupId?: string | null;
@@ -162,7 +165,10 @@ const defaultPrivacyNetworkSettings: PrivacyNetworkSettingsSummary = {
 export function SettingsPage({
   apiClient = desktopApiClient,
   initialBackups = [],
+  initialBackupMessage = null,
   initialCategories = [],
+  initialExportMessage = null,
+  initialMaintenanceJobs = [],
   initialRestoreSummary = null,
   initialRestoreTargetPath = "",
   initialSelectedRestoreBackupId = null,
@@ -202,8 +208,12 @@ export function SettingsPage({
   const [backupSchedulerStatus, setBackupSchedulerStatus] =
     useState<BackupSchedulerStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [backupMessage, setBackupMessage] = useState<string | null>(null);
-  const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const [backupMessage, setBackupMessage] = useState<string | null>(
+    initialBackupMessage
+  );
+  const [exportMessage, setExportMessage] = useState<string | null>(
+    initialExportMessage
+  );
   const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
   const [restoreTargetPath, setRestoreTargetPath] = useState(
     initialRestoreTargetPath
@@ -215,7 +225,25 @@ export function SettingsPage({
     useState<RestoreWorkspaceSummary | null>(initialRestoreSummary);
   const [diagnosticsBusy, setDiagnosticsBusy] = useState(false);
   const [maintenanceBusy, setMaintenanceBusy] = useState(false);
-  const [maintenanceJobs, setMaintenanceJobs] = useState<MaintenanceJobSummary[]>([]);
+  const [maintenanceJobs, setMaintenanceJobs] =
+    useState<MaintenanceJobSummary[]>(initialMaintenanceJobs);
+  const [settingsActivity, setSettingsActivity] = useState<
+    SettingsActivityItem[]
+  >(() => {
+    const initialActivity = getRecentSettingsActivity({
+      backupMessage: initialBackupMessage,
+      exportMessage: initialExportMessage,
+      maintenanceJobs: initialMaintenanceJobs,
+      restoreMessage:
+        initialRestoreSummary === null
+          ? null
+          : `Backup restored into ${initialRestoreSummary.targetWorkspaceRootPath}.`
+    });
+
+    return initialActivity.length === 0
+      ? persistedSettingsActivity
+      : initialActivity;
+  });
   const [repairingAttachmentId, setRepairingAttachmentId] = useState<string | null>(null);
   const [diagnosticsReport, setDiagnosticsReport] =
     useState<WorkspaceIntegritySummary | null>(null);
@@ -245,6 +273,17 @@ export function SettingsPage({
     showToast(message, {
       title,
       tone: "error"
+    });
+  }
+
+  function recordSettingsActivity(item: SettingsActivityItem): void {
+    setSettingsActivity((current) => {
+      const next = [
+        item,
+        ...current.filter((activity) => activity.id !== item.id)
+      ].slice(0, 4);
+      persistedSettingsActivity = next;
+      return next;
     });
   }
 
@@ -557,6 +596,13 @@ export function SettingsPage({
     );
     const message = `Backup created at ${result.data.relativePath}.`;
     setBackupMessage(message);
+    recordSettingsActivity({
+      id: "backup",
+      label: "Backup",
+      message,
+      section: "backup",
+      tone: "success"
+    });
     showToast(message, {
       title: "Backup complete",
       tone: "success"
@@ -848,6 +894,13 @@ export function SettingsPage({
       result.data,
       ...current.filter((job) => job.id !== result.data.id)
     ]);
+    recordSettingsActivity({
+      id: `maintenance-${result.data.id}`,
+      label: "Search rebuild",
+      message: formatMaintenanceActivityMessage(result.data),
+      section: "advanced",
+      tone: result.data.status === "completed" ? "success" : "error"
+    });
     showToast(
       result.data.status === "completed"
         ? `Search index rebuilt: ${result.data.searchReindex?.indexedItemCount ?? 0} item(s), ${result.data.searchReindex?.indexedAttachmentCount ?? 0} attachment(s).`
@@ -883,6 +936,13 @@ export function SettingsPage({
 
     const message = `Workspace JSON export created at ${result.data.relativePath}.`;
     setExportMessage(message);
+    recordSettingsActivity({
+      id: "export",
+      label: "Export",
+      message,
+      section: "importsExports",
+      tone: "success"
+    });
     showToast(message, {
       title: "Export complete",
       tone: "success"
@@ -913,6 +973,13 @@ export function SettingsPage({
 
     const message = `Task ${format.toUpperCase()} export created at ${result.data.relativePath}.`;
     setExportMessage(message);
+    recordSettingsActivity({
+      id: "export",
+      label: "Export",
+      message,
+      section: "importsExports",
+      tone: "success"
+    });
     showToast(message, {
       title: "Export complete",
       tone: "success"
@@ -951,6 +1018,13 @@ export function SettingsPage({
 
     const message = `Portable export bundle created at ${result.data.relativePath} with ${result.data.fileCount} file(s).`;
     setExportMessage(message);
+    recordSettingsActivity({
+      id: "export",
+      label: "Export",
+      message,
+      section: "importsExports",
+      tone: "success"
+    });
     showToast(message, {
       title: "Export complete",
       tone: "success"
@@ -1331,6 +1405,13 @@ export function SettingsPage({
     setRestoreSummary(result.data);
     const message = `Backup restored into ${result.data.targetWorkspaceRootPath}.`;
     setRestoreMessage(message);
+    recordSettingsActivity({
+      id: "restore",
+      label: "Restore",
+      message,
+      section: "backup",
+      tone: "success"
+    });
     showToast(message, {
       title: "Restore complete",
       tone: "success"
@@ -1422,6 +1503,13 @@ export function SettingsPage({
     setRestoreSummary(result.data);
     const message = `Workspace export restored into ${result.data.targetWorkspaceRootPath}.`;
     setRestoreMessage(message);
+    recordSettingsActivity({
+      id: "restore",
+      label: "Restore",
+      message,
+      section: "backup",
+      tone: "success"
+    });
     showToast(message, {
       title: "Restore complete",
       tone: "success"
@@ -1433,7 +1521,6 @@ export function SettingsPage({
     selectedRestoreBackupId === null
       ? null
       : backups.find((backup) => backup.id === selectedRestoreBackupId) ?? null;
-
   return (
     <section className="settings-layout">
       <div className="page-heading">
@@ -1468,6 +1555,13 @@ export function SettingsPage({
       </nav>
 
       {error === null ? null : <ErrorState error={error} title="Settings error" />}
+
+      {settingsActivity.length === 0 ? null : (
+        <SettingsActivitySummary
+          items={settingsActivity}
+          onOpenSection={setActiveSection}
+        />
+      )}
 
       {activeSection === "overview" ? (
         <section className="settings-overview-panel" aria-label="Settings overview">
@@ -2499,6 +2593,129 @@ export function SettingsPage({
       </aside>
     </section>
   );
+}
+
+type SettingsActivityItem = {
+  id: string;
+  label: string;
+  message: string;
+  section: SettingsSectionId;
+  tone: "success" | "error" | "info";
+};
+
+let persistedSettingsActivity: SettingsActivityItem[] = [];
+
+function SettingsActivitySummary({
+  items,
+  onOpenSection
+}: {
+  items: SettingsActivityItem[];
+  onOpenSection: (section: SettingsSectionId) => void;
+}): React.JSX.Element {
+  return (
+    <section className="settings-activity-summary" aria-label="Recent Settings activity">
+      <div>
+        <p className="top-eyebrow">Recent Settings activity</p>
+        <h3>What just happened stays visible here.</h3>
+        <p className="muted-text">
+          Backup, export, restore, and search maintenance results remain
+          findable after their toast disappears.
+        </p>
+      </div>
+      <div className="settings-activity-list">
+        {items.map((item) => (
+          <article
+            className={`settings-activity-item settings-activity-${item.tone}`}
+            key={item.id}
+          >
+            <div>
+              <strong>{item.label}</strong>
+              <span>{item.message}</span>
+            </div>
+            <button
+              className="secondary-button compact-button"
+              type="button"
+              onClick={() => onOpenSection(item.section)}
+            >
+              Review
+            </button>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function getRecentSettingsActivity({
+  backupMessage,
+  exportMessage,
+  maintenanceJobs,
+  restoreMessage
+}: {
+  backupMessage: string | null;
+  exportMessage: string | null;
+  maintenanceJobs: MaintenanceJobSummary[];
+  restoreMessage: string | null;
+}): SettingsActivityItem[] {
+  const items: SettingsActivityItem[] = [];
+
+  if (backupMessage !== null) {
+    items.push({
+      id: "backup",
+      label: "Backup",
+      message: backupMessage,
+      section: "backup",
+      tone: "success"
+    });
+  }
+
+  if (restoreMessage !== null) {
+    items.push({
+      id: "restore",
+      label: "Restore",
+      message: restoreMessage,
+      section: "backup",
+      tone: "success"
+    });
+  }
+
+  if (exportMessage !== null) {
+    items.push({
+      id: "export",
+      label: "Export",
+      message: exportMessage,
+      section: "importsExports",
+      tone: "success"
+    });
+  }
+
+  const latestSearchMaintenance = maintenanceJobs.find((job) =>
+    job.operations.includes("rebuild_search_index")
+  );
+
+  if (latestSearchMaintenance !== undefined) {
+    items.push({
+      id: `maintenance-${latestSearchMaintenance.id}`,
+      label: "Search rebuild",
+      message: formatMaintenanceActivityMessage(latestSearchMaintenance),
+      section: "advanced",
+      tone: latestSearchMaintenance.status === "completed" ? "success" : "error"
+    });
+  }
+
+  return items.slice(0, 4);
+}
+
+function formatMaintenanceActivityMessage(job: MaintenanceJobSummary): string {
+  if (job.status === "failed") {
+    return `Search maintenance failed: ${job.error ?? "unknown error"}.`;
+  }
+
+  if (job.searchReindex === null) {
+    return `Maintenance completed at ${formatDiagnosticDate(job.completedAt)}.`;
+  }
+
+  return `Search index rebuilt at ${formatDiagnosticDate(job.completedAt)}: ${job.searchReindex.indexedItemCount} item(s), ${job.searchReindex.indexedAttachmentCount} attachment(s).`;
 }
 
 function MaintenanceJobsPanel({

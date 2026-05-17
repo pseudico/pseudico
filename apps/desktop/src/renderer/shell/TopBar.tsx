@@ -67,7 +67,7 @@ export function TopBar({
 
   return (
     <header className="top-bar">
-      <div>
+      <div className="top-bar-title">
         <p className="top-eyebrow">{t("app.topBar.workspaceShell")}</p>
         <h1>{route.title}</h1>
       </div>

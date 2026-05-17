@@ -2,7 +2,11 @@ import { renderToString } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import { AppRoutes } from "../../src/renderer/App";
-import { appRoutes, navRoutes } from "../../src/renderer/routes";
+import {
+  appRoutes,
+  getActiveNavRouteId,
+  navRoutes
+} from "../../src/renderer/routes";
 
 const expectedRoutePaths = [
   "/welcome",
@@ -50,6 +54,28 @@ describe("desktop shell routes", () => {
       "Help",
       "Settings",
       "Trash"
+    ]);
+  });
+
+  it("maps visible routes to the correct active sidebar item", () => {
+    expect(
+      [
+        "/today",
+        "/dashboard",
+        "/project-tags",
+        "/search?q=launch",
+        "/settings",
+        "/projects",
+        "/projects/project_1"
+      ].map((path) => getActiveNavRouteId(path.split("?")[0]!))
+    ).toEqual([
+      "today",
+      "dashboard",
+      "projectTags",
+      "search",
+      "settings",
+      "projects",
+      "projects"
     ]);
   });
 
