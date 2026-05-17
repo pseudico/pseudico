@@ -33,9 +33,10 @@ Before tagging an MVP release candidate:
   code signing, notarization, auto-update, and release-channel publishing are
   not implemented.
 - Advanced rich-text editing, custom dashboard editing, advanced saved-view
-  builder UX, browser capture production bridge, workflow scheduling, external
-  live calendar sync, monthly/yearly recurrence, and broader third-party import
-  execution remain future work.
+  builder UX, browser capture production bridge, workflow scheduling, the
+  primary-operator workflow create/edit/run/history UI, external live calendar
+  sync, monthly/yearly recurrence, and broader third-party import execution
+  remain future work.
 - Backup and export are manual local workflows; automatic backup scheduling and
   retention foundations exist, but release owners should still verify backup
   and restore behavior manually before important data changes.

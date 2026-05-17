@@ -39,14 +39,17 @@ new work should account for this implemented baseline:
 - Future-heavy flows: advanced Timeline/Calendar drag/drop editing,
   portable/broader Templates, broader third-party import execution beyond the
   currently documented local paths, custom dashboard editing, advanced
-  saved-view builder UX, production browser capture, and workflow scheduling.
+  saved-view builder UX, production browser capture, workflow scheduling, and
+  primary-operator workflow create/edit/run/history UX.
 - Workflows now have a local service foundation with persisted manual,
   item-created, file-imported, tag-added, tag-removed, and category-assigned
   definitions/runs, preview, and service-backed add-tag, set-category,
   move-item, and create-task actions. Workflow actions can interpolate local
   trigger/upstream variables, skip conditional steps, expose run-history
-  diagnostics, and roll back undoable activity snapshots; scheduling remains
-  future work.
+  diagnostics, and roll back undoable activity snapshots. For internal pilot
+  handoff this remains **scaffold-only** in the renderer: the Workflows surface
+  is a Workflow Lab/reference view, not an operator-ready builder/runner/history
+  loop; scheduling remains future work.
 - Local reminders now have task/list-item targets, default preferences,
   notification enablement, scheduler, IPC, shared picker foundations, and
   renderer entry points; deeper reminder preference workflows remain future
@@ -120,7 +123,7 @@ renderer-only implementation.
 | Database | Own SQLite setup, Drizzle schema, migrations, repositories, transaction helpers, and database health checks. | Schema, migrations, repositories, transactions | Core types | All data-backed modules | MVP |
 | Activity Log | Record meaningful data-changing operations in the same write flow as domain mutations. | Activity events, audit metadata | Database, domain services | Search, dashboard, maintenance | MVP |
 | Templates | Define reusable local project, contact, tab, list, note, and workflow templates; currently implements local list templates first. | Template definitions, template instances | Projects, contacts, lists, notes, metadata | Workflows, import/export | V2 |
-| Workflows | Provide safe local manual and scheduled workflow actions after core operations are stable. | Workflow definitions, runs, action history, variable interpolation, conditional steps | Templates, activity log, all mutable modules | Automation views, maintenance | V2 |
+| Workflows | Provide safe local workflow services after core operations are stable; current pilot status is scaffold-only in the renderer. | Workflow definitions, runs, action history, variable interpolation, conditional steps | Templates, activity log, all mutable modules | Workflow Lab reference view now; operator builder/runner/history later | V2 |
 
 ## Module Boundaries
 

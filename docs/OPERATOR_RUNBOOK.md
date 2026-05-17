@@ -6,7 +6,7 @@ Readiness assumption: Pseudico is **pilot ready, not yet release ready** until t
 
 ## 1. What Pseudico is for
 
-Pseudico is a local-only desktop work OS for keeping projects, contacts, Inbox items, tasks, notes, lists, files, links, tags, categories, relationships, search, saved views, collections, dashboards, Today planning, timeline/calendar views, templates, workflows, backups, exports, imports, and maintenance tools in one local workspace.
+Pseudico is a local-only desktop work OS for keeping projects, contacts, Inbox items, tasks, notes, lists, files, links, tags, categories, relationships, search, saved views, collections, dashboards, Today planning, timeline/calendar views, templates, workflow scaffolding, backups, exports, imports, and maintenance tools in one local workspace.
 
 Use it for:
 
@@ -217,6 +217,15 @@ Use maintenance tools only when you understand the expected result.
 | Import validation | Before importing JSON, CSV/TSV, Markdown, ENEX, or app exports. | Preview and validate before executing; service-only third-party foundations are not pilot UI importers. |
 | Corruption recovery | Database is locked, unavailable, or corrupt. | Stop writing, copy the workspace folder, restore from backup into a new folder. |
 
+### Workflow Lab boundary
+
+The Workflow Lab is not pilot-supported daily automation. It is a local-only
+scaffold/reference surface for maintainers to inspect supported triggers,
+actions, validation errors, preview semantics, and run-history guardrails.
+Primary operators should not rely on it to create, edit, run, schedule, or audit
+workflows during the internal pilot. Use Today, tasks, lists, templates, and
+manual review instead.
+
 ## 9. Privacy and network expectations
 
 Pseudico's product promise is local-only.
@@ -277,7 +286,10 @@ Current limitations to explain honestly:
 - Public distribution, installer signing, update path, and support packaging are still release-hardening concerns.
 - Advanced rich-text editing remains future work; Markdown-first editing is the current model.
 - Advanced saved-view builder UX and custom dashboard editing remain future work.
-- Browser capture production bridge and broader local automation scheduling remain future work unless explicitly ticketed.
+- Browser capture production bridge, workflow scheduling, and the primary-operator workflow create/edit/run/history loop remain future work unless explicitly ticketed.
+- Workflow services have tests for local validation, activity/search behavior,
+  and loop guards, but the packaged Workflows surface is scaffold-only for the
+  internal pilot.
 - External live calendar sync is excluded.
 - Monthly/yearly recurrence, richer drag/drop calendar editing, and advanced planning UX remain future work.
 - Broader third-party import execution remains staged behind service-level validation and fixture coverage unless a packaged operator UI is explicitly added and reviewed.

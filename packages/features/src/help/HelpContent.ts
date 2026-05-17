@@ -135,16 +135,28 @@ Projects and contacts are containers. A container can hold tasks, notes, lists, 
   },
   {
     id: "templates-workflows",
-    title: "Templates and sample workflows",
+    title: "Templates and Workflow Lab",
     summary:
-      "Use local templates and manual workflows to repeat common project, contact, and list structures.",
+      "Use local templates now and understand that Workflow Lab is scaffold-only for the internal pilot.",
     category: "Workflows",
     relatedRoutes: ["/templates", "/workflows", "/projects"],
-    body: `# Templates and sample workflows
+    body: `# Templates and Workflow Lab
 
-Templates and workflows help repeat local patterns without cloud services or hosted automation.
+Templates help repeat local project/contact/list patterns without cloud services
+or hosted automation.
+
+## Pilot workflow status
+
+Workflow automation is **future/scaffold-only** for the internal pilot. The
+Workflow Lab can show maintainers which local triggers/actions are validated and
+which non-local actions are rejected, but it is not a primary-operator
+create/edit/run/history loop yet.
+
+Use Today, tasks, lists, templates, and manual review for real pilot work.
 
 ## Sample workflow ideas
+
+These are future ideas, not pilot-supported automation:
 
 - Project kickoff: create a project, add a checklist, add a planning note, and tag it with @kickoff.
 - Client follow-up: create a contact task, add a due date, and link it to the related project.

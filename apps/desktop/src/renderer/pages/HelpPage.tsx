@@ -43,8 +43,9 @@ export function HelpPage(): React.JSX.Element {
           <p className="top-eyebrow">Local help</p>
           <h2>Help center and onboarding</h2>
           <p>
-            Local Markdown guides, command references, onboarding steps, and sample
-            workflows. No network connection or hosted account required.
+            Local Markdown guides, command references, onboarding steps, sample
+            work routines, and the Workflow Lab boundary. No network connection
+            or hosted account required.
           </p>
         </div>
         <Link to="/workspace" className="secondary-button">

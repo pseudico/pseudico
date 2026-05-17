@@ -19,7 +19,7 @@ repositories, Inbox/project/contact containers, tasks, lists, notes, links, file
 attachments, local attachment previews, file versions, local location/map objects, metadata,
 relationships, activity, search, saved views/collections, Today planning,
 dashboard widgets, project health, local
-reminders, recurrence, templates, local workflows, timeline/calendar
+reminders, recurrence, templates, local workflow service scaffolding, timeline/calendar
 projections, backup, export, import validation/execution paths, local
 EML/Maildir email-to-task import, a local Notion Markdown/CSV import adapter
 foundation, demo workspace generation, local help, smoke tests, packaging
@@ -28,10 +28,11 @@ data-integrity/search audit guidance.
 
 The implemented slice remains a local MVP/V1 foundation, not the full product
 described below. Advanced rich-text editing, advanced saved-view builder UX,
-custom dashboard editing, browser capture production bridge, workflow
-scheduling, external live calendar sync, monthly/yearly recurrence, broader
-third-party import execution, and public distribution automation remain future
-work unless a later Linear issue explicitly brings them into scope.
+custom dashboard editing, browser capture production bridge, primary-operator
+workflow create/edit/run/history UX, workflow scheduling, external live calendar
+sync, monthly/yearly recurrence, broader third-party import execution, and
+public distribution automation remain future work unless a later Linear issue
+explicitly brings them into scope.
 
 Known limitations for MVP release planning:
 
@@ -59,6 +60,10 @@ Known limitations for MVP release planning:
   workspace is available; automatic backup interval/app-close checks,
   scheduler settings/status, retention cleanup, and database checksums are
   implemented. Release-grade integrity reporting remains future work.
+- Workflows are **scaffold-only for the internal pilot**. The repository has
+  local service, validation, preview, run-history, activity/search, and loop
+  guard coverage for maintainers, but the packaged app does not yet provide a
+  primary-operator create/edit/run/history workflow loop.
 - Packaged builds are development verification builds without installer,
   signing, notarization, or auto-update support.
 
@@ -1841,6 +1846,11 @@ Relationships placeholders
 ---
 
 ## 26. Local automation/workflows specification
+
+Pilot status: this section describes the local service direction and
+implemented maintainer-facing foundation. For the internal pilot, workflows are
+not operator-ready product functionality; the packaged app exposes a Workflow
+Lab/reference surface only, not a complete create/edit/preview/run/history UI.
 
 ### 26.1 Workflow purpose
 

@@ -7813,3 +7813,50 @@ Next actions:
 - Files changed: apps/desktop/src/main/packageSmoke.ts; docs/session_log.md
 - Open questions / risks: Need rerun package smoke and CI after push.
 - Next actions: rerun checks; push update; merge if green.
+
+## 2026-05-17 20:58:50 +10:00
+Objective: Complete PSE-224 planning after workflow audit.
+Decisions made:
+- Selected scaffold-only pilot decision; no new workflow execution UI/IPC will be added.
+- Posted Linear plan covering evidence, risks, files, tests, and out-of-scope items.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need ensure all operator docs avoid overclaiming workflow readiness.
+Next actions: Relabel Workflows UI; update tests/docs; capture UI evidence.
+
+## 2026-05-17 21:02:44 +10:00
+Objective: Implement PSE-224 scaffold-only workflow clarification.
+Decisions made:
+- Relabeled Workflows as Workflow Lab/future scaffold and avoided adding new write IPC.
+- Updated operator/readiness/help docs to stop claiming pilot workflow automation.
+Files changed:
+- apps/desktop/src/renderer/pages/WorkflowsPage.tsx
+- apps/desktop/tests/renderer/workflowsPage.test.tsx
+- packages/core/src/i18n/en.ts
+- packages/features/src/help/HelpContent.ts
+- docs/* workflow/readiness/help files
+Open questions / risks: Need verify tests/build/package and capture actual UI screenshot.
+Next actions: Run targeted tests; fix failures; capture evidence.
+
+## 2026-05-17 21:14:48 +10:00
+Objective: Verify PSE-224 workflow scaffold change.
+Decisions made:
+- Treated packaging metadata warnings as existing PSE-227 caveat, not PSE-224 scope.
+- Captured Workflow Lab UI screenshot from built renderer and ran package smoke.
+Files changed:
+- docs/session_log.md
+- docs/manual-qa/PSE-224-workflow-scaffold-qa.md
+- docs/manual-qa/screenshots/PSE-224-workflow-scaffold/workflow-lab.png
+- docs/release/package-artifact-check.json
+Open questions / risks: Need commit/PR and Linear final update.
+Next actions: Review status; commit; open PR.
+
+## 2026-05-17 21:19:58 +10:00
+Objective: Publish PSE-224 branch and PR.
+Decisions made:
+- Opened draft PR #205; Linear moved to PR Open with evidence and checks summary.
+- CI is still in progress, so merge remains blocked pending GitHub result/review.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI status pending; PSE-227 packaging metadata warning remains out of scope.
+Next actions: Monitor CI; address review feedback; merge when approved.
