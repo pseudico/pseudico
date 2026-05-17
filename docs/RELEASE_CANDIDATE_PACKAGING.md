@@ -36,6 +36,14 @@ Latest packaged dialog/operator evidence is PSE-228:
   because the mixed file/folder dialog could not be reliably completed in the
   manual automation pass; direct packaged `.eml` import by local path passed.
 
+PSE-229 closes the EML-file portion of that caveat:
+
+- `docs/manual-qa/PSE-229-email-native-picker.md` records that packaged Windows
+  email import now exposes separate EML-file and email-folder actions.
+- The native EML file picker cancel/select path passed in the packaged app, and
+  the selected `.eml` created visible Inbox work with the original email copied
+  as a local attachment.
+
 Prior package-hardening evidence is PSE-221:
 
 - `docs/manual-qa/PSE-221-packaged-release-qa.md` records `pnpm package`,

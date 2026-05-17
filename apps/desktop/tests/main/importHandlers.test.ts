@@ -214,6 +214,141 @@ describe("import IPC handlers", () => {
     }
   });
 
+  it("imports a selected EML file through the file-only email chooser", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-email-import-ipc-"));
+    const workspaceRoot = join(tempRoot, "workspace");
+    const sourceRoot = join(tempRoot, "email-source");
+    await mkdir(sourceRoot, { recursive: true });
+    const emailPath = join(sourceRoot, "operator-follow-up.eml");
+    await writeFile(
+      emailPath,
+      `From: Alice <alice@example.test>
+To: Operator <operator@example.test>
+Subject: Native picker follow-up @pilot
+Date: Mon, 18 May 2026 08:30:00 +1000
+Message-ID: <native-picker@example.test>
+Content-Type: text/plain; charset=utf-8
+
+Confirm the Windows picker can select this local EML file.`,
+      "utf8"
+    );
+
+    const databasePath = resolveWorkspaceDatabasePath(workspaceRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+    const workspaceService = {
+      getCurrentWorkspace: () => ({
+        id: "workspace_1",
+        name: "Personal",
+        rootPath: workspaceRoot,
+        databasePath,
+        schemaVersion: 1,
+        openedAt: "2026-05-18T00:00:00.000Z"
+      })
+    };
+    const selectedKinds: string[] = [];
+    const handlers = createImportIpcHandlers(workspaceService, {
+      chooseExportJsonPath: async () => null,
+      chooseEmailImportPath: async (sourceKind) => {
+        selectedKinds.push(sourceKind);
+        return emailPath;
+      }
+    });
+
+    const imported = await handlers.handleChooseAndImportEmailsAsTasks({
+      workspaceId: "workspace_1",
+      sourceKind: "file",
+      extractTags: true
+    });
+
+    expect(selectedKinds).toEqual(["file"]);
+    expect(imported).toMatchObject({
+      ok: true,
+      data: {
+        importedCount: 1,
+        skippedCount: 0,
+        issues: [],
+        importedTasks: [
+          expect.objectContaining({
+            title: "Email: Native picker follow-up @pilot",
+            attachmentId: expect.any(String)
+          })
+        ]
+      }
+    });
+
+    const verification = await createDatabaseConnection({
+      databasePath,
+      fileMustExist: true
+    });
+    try {
+      const task = imported.ok ? imported.data!.importedTasks[0]! : null;
+      expect(new SearchIndexRepository(verification).getByTarget({
+        workspaceId: "workspace_1",
+        targetType: "item",
+        targetId: task?.itemId ?? ""
+      })).toMatchObject({
+        title: "Email: Native picker follow-up @pilot",
+        body: expect.stringContaining("Windows picker")
+      });
+      expect(new AttachmentRepository(verification).getById(
+        task?.attachmentId ?? ""
+      )).toMatchObject({
+        originalName: "operator-follow-up.eml",
+        mimeType: "message/rfc822"
+      });
+      expect(new ActivityLogRepository(verification).listForTarget(
+        "item",
+        task?.itemId ?? ""
+      )).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ action: "task_created", actorType: "importer" })
+        ])
+      );
+      expect(new ActivityLogRepository(verification).listForTarget(
+        "attachment",
+        task?.attachmentId ?? ""
+      )).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ action: "file_attached", actorType: "importer" })
+        ])
+      );
+    } finally {
+      verification.close();
+    }
+  });
+
+  it("routes email folder imports through the directory chooser and treats cancel as no-op", async () => {
+    const chosenKinds: string[] = [];
+    const handlers = createImportIpcHandlers({
+      chooseExportJsonPath: async () => null,
+      chooseEmailImportPath: async (sourceKind) => {
+        chosenKinds.push(sourceKind);
+        return null;
+      }
+    });
+
+    await expect(
+      handlers.handleChooseAndImportEmailsAsTasks({ sourceKind: "directory" })
+    ).resolves.toEqual({
+      ok: true,
+      data: null
+    });
+    expect(chosenKinds).toEqual(["directory"]);
+
+    await expect(
+      handlers.handleChooseAndImportEmailsAsTasks({ sourceKind: "mixed" })
+    ).resolves.toMatchObject({
+      ok: false,
+      error: {
+        code: "INVALID_INPUT"
+      }
+    });
+  });
+
   it("rejects non-JSON file paths before reading", async () => {
     tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-import-ipc-"));
     const exportPath = join(tempRoot, "workspace-export.txt");

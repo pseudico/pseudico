@@ -883,10 +883,14 @@ export type ImportEmailsAsTasksInput = {
   extractTags?: boolean;
 };
 
+export type EmailImportSourceKind = "file" | "directory";
+
 export type ChooseAndImportEmailsInput = Omit<
   ImportEmailsAsTasksInput,
   "sourcePath"
->;
+> & {
+  sourceKind?: EmailImportSourceKind;
+};
 
 export type CreateWorkspaceInput = {
   name: string;

@@ -1,0 +1,71 @@
+{
+  "generatedAt": "2026-05-17T23:10:05.233Z",
+  "issue": "PSE-229",
+  "packagePath": "C:\\tmp\\Pseudico-pse-229\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+  "commitSha": "208d8e85dbd468c437d21c206252fd6bad52d288",
+  "branch": "codex/pse-229-email-picker",
+  "os": "win32",
+  "workspaceRoot": "C:\\tmp\\PSE-229-email-picker-fixtures\\Email Picker Workspace",
+  "emailPath": "C:\\tmp\\PSE-229-email-picker-fixtures\\source-files\\native-picker-follow-up.eml",
+  "missingPath": "C:\\tmp\\PSE-229-email-picker-fixtures\\source-files\\missing-email.eml",
+  "screenshots": [
+    {
+      "file": "docs/manual-qa/screenshots/PSE-229-2026-05-18T09-05-00/01-packaged-welcome.png",
+      "path": "C:\\tmp\\Pseudico-pse-229\\docs\\manual-qa\\screenshots\\PSE-229-2026-05-18T09-05-00\\01-packaged-welcome.png",
+      "description": "Packaged app welcome before creating disposable local workspace."
+    },
+    {
+      "file": "docs/manual-qa/screenshots/PSE-229-2026-05-18T09-05-00/02-settings-email-import-buttons.png",
+      "path": "C:\\tmp\\Pseudico-pse-229\\docs\\manual-qa\\screenshots\\PSE-229-2026-05-18T09-05-00\\02-settings-email-import-buttons.png",
+      "description": "Settings import panel showing separate EML file and email folder actions."
+    },
+    {
+      "file": "docs/manual-qa/screenshots/PSE-229-2026-05-18T09-05-00/03-inbox-after-native-eml-picker.png",
+      "path": "C:\\tmp\\Pseudico-pse-229\\docs\\manual-qa\\screenshots\\PSE-229-2026-05-18T09-05-00\\03-inbox-after-native-eml-picker.png",
+      "description": "Inbox after selecting an EML file through the native Windows file picker."
+    },
+    {
+      "file": "docs/manual-qa/screenshots/PSE-229-2026-05-18T09-05-00/04-settings-after-email-import.png",
+      "path": "C:\\tmp\\Pseudico-pse-229\\docs\\manual-qa\\screenshots\\PSE-229-2026-05-18T09-05-00\\04-settings-after-email-import.png",
+      "description": "Settings after native EML import with separate email file/folder actions still visible."
+    }
+  ],
+  "dialogs": [
+    {
+      "flow": "email file picker cancel",
+      "status": "pass",
+      "beforeCount": 0,
+      "afterCount": 0
+    },
+    {
+      "flow": "email file picker select",
+      "status": "pass",
+      "selectedPath": "C:\\tmp\\PSE-229-email-picker-fixtures\\source-files\\native-picker-follow-up.eml",
+      "taskTitle": "Email: Native picker follow-up @pilot",
+      "itemId": "item_mpae1i0j_11zsjs0d2ep"
+    }
+  ],
+  "operations": {
+    "workspaceCreate": {
+      "status": "pass",
+      "rootPath": "C:\\tmp\\PSE-229-email-picker-fixtures\\Email Picker Workspace"
+    },
+    "importsSectionOpened": {
+      "status": "pass"
+    },
+    "emailFileImport": {
+      "status": "pass",
+      "importedCount": 1,
+      "taskTitle": "Email: Native picker follow-up @pilot",
+      "itemId": "item_mpae1i0j_11zsjs0d2ep"
+    },
+    "missingEmailPath": {
+      "status": "pass",
+      "error": {
+        "code": "WORKSPACE_ERROR",
+        "message": "ENOENT: no such file or directory, stat 'C:\\tmp\\PSE-229-email-picker-fixtures\\source-files\\missing-email.eml'"
+      }
+    }
+  },
+  "passed": true
+}

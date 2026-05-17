@@ -25,6 +25,7 @@ import {
   type CsvImportPreviewSummary,
   type ChooseMarkdownFolderImportInput,
   type EmailImportPreviewSummary,
+  type EmailImportSourceKind,
   type EmailTaskImportSummary,
   type ImportEmailsAsTasksInput,
   type ImportValidationSummary,
@@ -93,7 +94,9 @@ export type ImportIpcHandlers = {
 
 export type ImportIpcPlatform = {
   chooseExportJsonPath: () => Promise<string | null>;
-  chooseEmailImportPath?: () => Promise<string | null>;
+  chooseEmailImportPath?: (
+    sourceKind: EmailImportSourceKind
+  ) => Promise<string | null>;
   chooseMarkdownFolderPath?: () => Promise<string | null>;
 };
 
@@ -201,14 +204,26 @@ export function createImportIpcHandlers(
         );
       }
 
-      const sourcePath = await (platform.chooseEmailImportPath?.() ?? null);
+      const sourcePath = await (platform.chooseEmailImportPath?.(
+        input?.sourceKind ?? "file"
+      ) ?? null);
 
       if (sourcePath === null) {
         return apiOk(null);
       }
 
+      const importInput = input ?? {};
+
       return await this.handleImportEmailsAsTasks({
-        ...(input ?? {}),
+        ...(importInput.workspaceId === undefined
+          ? {}
+          : { workspaceId: importInput.workspaceId }),
+        ...(importInput.containerId === undefined
+          ? {}
+          : { containerId: importInput.containerId }),
+        ...(importInput.extractTags === undefined
+          ? {}
+          : { extractTags: importInput.extractTags }),
         sourcePath
       });
     },
@@ -960,7 +975,10 @@ function isChooseAndImportEmailsInput(
     (isRecord(input) &&
       (input.workspaceId === undefined || isNonEmptyString(input.workspaceId)) &&
       (input.containerId === undefined || isNonEmptyString(input.containerId)) &&
-      (input.extractTags === undefined || typeof input.extractTags === "boolean"))
+      (input.extractTags === undefined || typeof input.extractTags === "boolean") &&
+      (input.sourceKind === undefined ||
+        input.sourceKind === "file" ||
+        input.sourceKind === "directory"))
   );
 }
 
