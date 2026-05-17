@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "current": {
+    "ok": true,
+    "data": {
+      "id": "workspace_mp992y3r_0ykdxx0bx71",
+      "name": "PSE-221 Package Smoke",
+      "rootPath": "C:\\tmp\\pseudico-pse-221-packaged-workspace",
+      "openedAt": "2026-05-17T04:03:40.181Z",
+      "schemaVersion": 23
+    }
+  },
+  "evidenceDir": "C:\\tmp\\Pseudico-pse-221\\docs\\manual-qa\\screenshots\\PSE-221-2026-05-17T03-45-00",
+  "workspaceRoot": "C:/tmp/pseudico-pse-221-packaged-workspace",
+  "userDataDir": "C:/tmp/pseudico-pse-221-user-data",
+  "screenshots": [
+    "01-packaged-welcome.png",
+    "02-packaged-workspace-open.png"
+  ]
+}

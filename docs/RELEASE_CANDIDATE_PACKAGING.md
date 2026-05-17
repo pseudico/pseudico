@@ -28,6 +28,13 @@ Current Electron Builder settings:
 - `asar: true`; native `.node` files are unpacked.
 - `publish: null`; no release feed or auto-update publishing is configured.
 - Windows `signAndEditExecutable: false`; the Windows development package is unsigned.
+- Packaging runs from a temporary `apps/desktop/.package-app/` staging directory
+  produced by `pnpm deploy --prod --legacy`; the staging directory is deleted
+  after packaging.
+- Bundled local workspace packages are resolved by Vite aliases at build time,
+  not packaged as pnpm workspace symlinks under `node_modules/@local-work-os`.
+- TypeScript build cache files (`*.tsbuildinfo` / `.tsbuildinfo/`) and source
+  maps are excluded from package inputs.
 
 ## Required local verification
 

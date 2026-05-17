@@ -1,18 +1,21 @@
 import { spawn } from "node:child_process";
-import {
-  copyFile,
-  mkdir,
-  readFile,
-  rm
-} from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { copyFile, mkdir, readFile, rm } from "node:fs/promises";
+import { dirname, relative, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(scriptDir, "..");
 const repoRoot = resolve(appRoot, "../..");
+const packageStagingRoot = resolve(appRoot, ".package-app");
+const packageOutputRoot = resolve(appRoot, "dist-packaged");
 const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+const electronBuilder = resolve(
+  appRoot,
+  "node_modules",
+  ".bin",
+  process.platform === "win32" ? "electron-builder.CMD" : "electron-builder"
+);
 
 function run(command, args, cwd) {
   return new Promise((resolveRun, rejectRun) => {
@@ -40,6 +43,37 @@ function run(command, args, cwd) {
   });
 }
 
+let packageError;
+
+try {
+  await run(pnpm, ["build"], appRoot);
+  await preparePackagingStaging();
+  const electronVersion = await getElectronVersion();
+  await runElectronBuilderFromStaging(electronVersion);
+  await rebuildStagedNativeModulesForPackagedElectron(electronVersion);
+  await copyStagedNativeModulesToPackagedApp();
+} catch (error) {
+  packageError = error;
+} finally {
+  try {
+    await removeGeneratedPath(packageStagingRoot, appRoot);
+    await restoreDevelopmentNativeModules();
+  } catch (restoreError) {
+    if (packageError instanceof Error) {
+      packageError.message = `${packageError.message}; additionally failed to clean package staging or restore development native modules: ${
+        restoreError instanceof Error ? restoreError.message : String(restoreError)
+      }`;
+    } else {
+      packageError = restoreError;
+    }
+  }
+}
+
+if (packageError !== undefined) {
+  throw packageError;
+}
+
+
 async function restoreDevelopmentNativeModules() {
   await run(
     pnpm,
@@ -53,40 +87,39 @@ async function restoreDevelopmentNativeModules() {
   );
 }
 
-let packageError;
-
-try {
-  await run(pnpm, ["build"], appRoot);
+async function preparePackagingStaging() {
+  await removeGeneratedPath(packageStagingRoot, appRoot);
+  await removeGeneratedPath(packageOutputRoot, appRoot);
   await run(
     pnpm,
-    ["exec", "electron-builder", "--config", "electron-builder.yml", "--dir"],
-    appRoot
+    [
+      "--filter",
+      "@local-work-os/desktop",
+      "deploy",
+      "--prod",
+      "--legacy",
+      packageStagingRoot
+    ],
+    repoRoot
   );
-  await rebuildNativeModulesForPackagedElectron();
-  await copyNativeModulesToPackagedApp();
-} catch (error) {
-  packageError = error;
-} finally {
-  try {
-    await restoreDevelopmentNativeModules();
-  } catch (restoreError) {
-    if (packageError instanceof Error) {
-      packageError.message = `${packageError.message}; additionally failed to restore development native modules: ${
-        restoreError instanceof Error ? restoreError.message : String(restoreError)
-      }`;
-    } else {
-      packageError = restoreError;
-    }
-  }
 }
 
-if (packageError !== undefined) {
-  throw packageError;
+async function runElectronBuilderFromStaging(electronVersion) {
+  await run(
+    electronBuilder,
+    [
+      "--config",
+      "electron-builder.yml",
+      "--dir",
+      `--config.electronVersion=${electronVersion}`,
+      "--config.directories.output=../dist-packaged"
+    ],
+    packageStagingRoot
+  );
 }
 
-async function rebuildNativeModulesForPackagedElectron() {
-  const electronVersion = await getElectronVersion();
 
+async function rebuildStagedNativeModulesForPackagedElectron(electronVersion) {
   await run(
     pnpm,
     [
@@ -95,7 +128,7 @@ async function rebuildNativeModulesForPackagedElectron() {
       "--version",
       electronVersion,
       "--module-dir",
-      appRoot,
+      packageStagingRoot,
       "--only",
       "better-sqlite3",
       "--force",
@@ -105,9 +138,9 @@ async function rebuildNativeModulesForPackagedElectron() {
   );
 }
 
-async function copyNativeModulesToPackagedApp() {
+async function copyStagedNativeModulesToPackagedApp() {
   const sourcePath = resolve(
-    appRoot,
+    packageStagingRoot,
     "node_modules",
     "better-sqlite3",
     "build",
@@ -124,9 +157,25 @@ async function copyNativeModulesToPackagedApp() {
     "better_sqlite3.node"
   );
 
-  await rm(packagedPath, { force: true });
+  await removeGeneratedPath(packagedPath, packageOutputRoot);
   await mkdir(dirname(packagedPath), { recursive: true });
   await copyFile(sourcePath, packagedPath);
+}
+
+async function removeGeneratedPath(targetPath, allowedParentPath) {
+  const resolvedTarget = resolve(targetPath);
+  const resolvedParent = resolve(allowedParentPath);
+  const relativeTarget = relative(resolvedParent, resolvedTarget);
+
+  if (
+    relativeTarget === "" ||
+    relativeTarget.startsWith("..") ||
+    resolve(resolvedParent, relativeTarget) !== resolvedTarget
+  ) {
+    throw new Error(`Refusing to remove generated path outside app root: ${targetPath}`);
+  }
+
+  await rm(resolvedTarget, { force: true, recursive: true });
 }
 
 async function getElectronVersion() {

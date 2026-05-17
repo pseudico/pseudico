@@ -23,15 +23,17 @@ the current OS supports it:
 pnpm package
 ```
 
-The current package command builds the Electron app and runs
-`electron-builder --dir`, producing an unpacked development package under
-`apps/desktop/dist-packaged/`. This verifies the app bundle shape without code
-signing, Windows executable metadata editing, installer generation, auto-update,
-or release CI. It allows `electron-builder` to rebuild native dependencies for
-the packaged Electron runtime, then rebuilds the local development install back
-for Node/Vitest. Manual QA should confirm that workspace paths are still
-user-selected and that workspace databases, attachments, backups, and exports
-are not bundled into the app.
+The current package command builds the Electron app, deploys a temporary
+self-contained desktop package staging directory with `pnpm deploy --prod
+--legacy`, and then runs `electron-builder --dir` from that staging directory.
+The staging directory is removed when packaging completes, and the unpacked
+development package is written under `apps/desktop/dist-packaged/`. This keeps
+pnpm workspace symlinks and TypeScript build-cache files out of Electron Builder
+inputs while still rebuilding `better-sqlite3` for the packaged Electron runtime.
+It verifies the app bundle shape without code signing, Windows executable
+metadata editing, installer generation, auto-update, or release CI. Manual QA
+should confirm that workspace paths are still user-selected and that workspace
+databases, attachments, backups, and exports are not bundled into the app.
 
 For docs-only changes, `pnpm build` is still useful because it proves workspace
 packages remain buildable after repository edits.

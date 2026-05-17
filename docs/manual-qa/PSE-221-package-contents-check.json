@@ -1,0 +1,13 @@
+{
+    "ok":  true,
+    "executable":  "apps/desktop/dist-packaged/win-unpacked/Local Work OS.exe",
+    "appAsar":  "apps/desktop/dist-packaged/win-unpacked/resources/app.asar",
+    "nativeModule":  "apps/desktop/dist-packaged/win-unpacked/resources/app.asar.unpacked/node_modules/better-sqlite3/build/Release/better_sqlite3.node",
+    "tsbuildinfoOnDiskCount":  0,
+    "tsbuildinfoInAsarCount":  0,
+    "hasMainBundle":  true,
+    "hasPreloadBundle":  true,
+    "hasRendererHtml":  true,
+    "hasBetterSqlitePackage":  true,
+    "hasWorkspacePackageNodeModules":  false
+}

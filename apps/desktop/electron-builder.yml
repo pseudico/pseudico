@@ -11,6 +11,8 @@ files:
   - dist/**/*
   - package.json
   - "!dist/**/*.map"
+  - "!**/*.tsbuildinfo"
+  - "!**/.tsbuildinfo{,/**/*}"
 
 extraMetadata:
   main: dist/main/index.js

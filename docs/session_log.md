@@ -7633,3 +7633,37 @@ Decisions made:
 Files changed: docs/session_log.md; docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md; docs/README.md; apps/desktop/src/main/ipc/registerContainerIpc.ts; apps/desktop/src/renderer/pages/ContactDetailPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/main/containerIpcRegistration.test.ts; docs/manual-qa/*
 Open questions / risks: Packaging blocker remains P2 release/tooling follow-up.
 Next actions: Commit, push, open PR, update Linear.
+
+## 2026-05-17 13:09 +10:00
+Objective: Begin PSE-221 packaging hardening from clean main worktree.
+Decisions made:
+- Branch codex/pse-221-packaging-hardening was created from origin/main d82461f3.
+- Use the clean worktree only; original checkout dirty files stay unrelated.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need confirm root cause and package contents before fixing.
+Next actions: Read required docs; post Linear plan; reproduce/investigate package failure.
+
+## 2026-05-17 13:50 +10:00
+Objective: Implement and prove PSE-221 packaging fix.
+Decisions made:
+- Package from pnpm deploy staging instead of appRoot symlink graph.
+- Move TS build info out of package dist and exclude cache inputs.
+- Rebuild/copy better-sqlite3 from staging for Electron runtime.
+Files changed:
+- apps/desktop/package.json; apps/desktop/electron.vite.config.ts; apps/desktop/electron-builder.yml; apps/desktop/scripts/package-development.mjs; package tsconfigs; docs/manual-qa/*; docs/TESTING.md; docs/RELEASE_CANDIDATE_PACKAGING.md; .gitignore
+Open questions / risks: Staging deploy can warn/contact registry with cold store; signing remains out of scope.
+Next actions: Run full checks; commit/push/PR; reconcile Linear/GitHub.
+
+## 2026-05-17 14:10 +10:00
+Objective: Complete PSE-221 validation evidence.
+Decisions made:
+- Final package and packaged smoke passed after staging native rebuild plus dev-module restore.
+- Actual packaged UI screenshots captured for welcome and opened local workspace.
+Files changed:
+- docs/manual-qa/PSE-221-packaged-release-qa.md
+- docs/manual-qa/PSE-221-package-contents-check.json
+- docs/manual-qa/PSE-221-packaged-ui-evidence.json
+- docs/manual-qa/screenshots/PSE-221-2026-05-17T03-45-00/*
+Open questions / risks: P2 registry-warn during staging deploy is documented; no P0/P1 remain.
+Next actions: Stage/commit/push; open PR; update Linear; merge if checks allow.
