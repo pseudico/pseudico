@@ -33,7 +33,8 @@ The repository now contains concrete local-only foundations for:
   package smoke verification.
 - Inbox, projects, contacts, mixed content items, tasks, lists, notes, links,
   files, tabs, metadata, relationships, activity, search, saved views,
-  collections, Today, dashboards, templates, workflows, reminders, recurrence,
+  collections, Today, dashboards, templates, workflow service scaffolding,
+  reminders, recurrence,
   timeline, calendar, import/export, backup, maintenance, printing, appearance,
   localization scaffolding, demo workspace generation, and local help.
 - Electron main/preload IPC boundaries for filesystem and native actions, with
@@ -52,8 +53,9 @@ These are still intentionally not release-complete:
   mobile apps, billing, and remote file storage.
 - Advanced rich-text editing, advanced saved-view builder UX, custom dashboard
   editing, browser capture production bridge, external live calendar sync,
-  monthly/yearly recurrence, workflow scheduling, and broader third-party import
-  execution beyond the currently documented local import paths.
+  monthly/yearly recurrence, workflow scheduling, the primary-operator
+  workflow create/edit/run/history UI, and broader third-party import execution
+  beyond the currently documented local import paths.
 - Release owner decisions for license text, signing certificates, platform
   store requirements, checksum publication, and privacy notice wording.
 

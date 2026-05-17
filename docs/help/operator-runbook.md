@@ -16,6 +16,8 @@ Use this guide when Pseudico is being handed to a nontechnical operator.
 - Move work into projects or contacts when context is clear.
 - Use tags, categories, and relationships to make work findable.
 - Use Today for current action, Dashboard for review, and Search when you know part of a title, note, tag, category, or context.
+- Treat Workflow Lab as scaffold-only during the internal pilot; use manual
+  tasks, lists, templates, and review routines for real work.
 
 ## Recovery basics
 

@@ -5,7 +5,7 @@ This folder contains the local Markdown help content mirrored in the in-app Help
 - `getting-started.md` explains workspace setup and local-only boundaries.
 - `capture-and-triage.md` explains Inbox and Quick Start triage.
 - `projects-contacts.md` explains mixed-content containers.
-- `templates-workflows.md` explains reusable local templates and sample workflows.
+- `templates-workflows.md` explains reusable local templates and the scaffold-only Workflow Lab boundary.
 - `keyboard-commands.md` explains command palette and keyboard shortcuts.
 - `release-readiness.md` explains local release-candidate checks and data safety.
 - `operator-runbook.md` explains nontechnical operator handoff, daily use, backup/restore, and recovery basics.

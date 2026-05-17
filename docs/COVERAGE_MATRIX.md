@@ -48,7 +48,7 @@ A feature is considered covered when at least one ticket defines:
 | Templates | M7, M13 | list/project/contact/tab templates, import/export | Local template files |
 | Recurrence/reminders | M7, M8, M11 | local notifications, recurrence rules, defaults | No push cloud notifications |
 | Pipelines | M8, M11 | list-to-pipeline and card movement | Local display mode |
-| Workflows | M8, M13 | manual/local triggers, variables, date manipulation, templates | No webhooks/cloud actions |
+| Workflows | M8, M13 | service-level manual/local triggers, variables, date manipulation, templates; renderer Workflow Lab is scaffold-only for pilot | No webhooks/cloud actions |
 | Browser capture | M8, M13 | local native messaging/localhost bridge | No hosted browser account |
 | Email objects/import | M11, M13 | local EML/Maildir import, optional IMAP spike | No hosted email-to-task address |
 | Backup/export/import | M6, M13, M14 | manual/scheduled backup, JSON/Markdown/CSV bundles, restore/integrity | Local files only |

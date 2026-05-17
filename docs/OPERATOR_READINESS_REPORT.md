@@ -52,7 +52,7 @@ This remains a meaningful improvement from the Phase 1 discovery verdict at the 
 | Saved views / collections | Present/partial | Fresh workspace smoke, collection pagination, saved-view tests | Advanced builder UX future. |
 | Dashboards | Present/partial | Fresh workspace smoke, widget tests, performance benchmark | Custom dashboard editing future. |
 | Timeline/calendar | Partial-present | Fresh workspace smoke, timeline/calendar services | External/live sync is out of scope. |
-| Templates/workflows | Partial-present | Existing service tests/docs | Scheduling/advanced workflow handoff should be separately qualified. |
+| Templates/workflows | Templates present; workflows scaffold-only for pilot | Existing workflow service tests plus PSE-224 Workflow Lab UI/docs clarification | Workflows are not pilot-supported daily automation; no packaged operator create/edit/run/history loop is exposed. |
 | Backup/export/import/restore | Present/partial | Backup/restore golden, package smoke backup, failure matrix, PSE-223 packaged importer smoke | CSV/TSV, Markdown folder, standalone Markdown note IPC, EML, and ICS have packaged-runtime evidence; third-party service foundations are not pilot UI importers. Real OS-native dialog QA remains PSE-228. |
 | Maintenance tools | Present/partial | Failure matrix, maintenance tests, activity/search rebuild evidence | Long-running packaged-app feedback must be manually checked. |
 
@@ -73,6 +73,7 @@ This remains a meaningful improvement from the Phase 1 discovery verdict at the 
 | Packaging/release | `docs/RELEASE_CANDIDATE_PACKAGING.md`, `docs/release/package-artifact-check.json`, `pnpm package:smoke` | Package smoke and checksum/data-boundary check pass; PSE-211 added normal packaged welcome-window smoke; unsigned unpacked package only. |
 | Manual packaged operator journey | `docs/manual-qa/PSE-206-packaged-operator-journey.md` | **Pass with caveats**: PSE-212 project-opening blocker resolved; run completed through restart/persistence, with P2/P3 caveats for relationship/search/file-dialog evidence. |
 | Packaged importer QA | `docs/manual-qa/PSE-223-packaged-importer-qa.md`, `docs/manual-qa/PSE-223-packaged-importer-qa-summary.json` | CSV/TSV, Markdown folder, Markdown note IPC, EML, and ICS import paths pass packaged-runtime smoke with activity/search/integrity evidence; Notion/Todoist/Trello/Evernote/IMAP remain service-only or scaffold. |
+| Workflow pilot boundary | `docs/manual-qa/PSE-224-workflow-scaffold-qa.md` | Workflows intentionally demoted to Workflow Lab/scaffold-only UI for pilot; services keep validation/activity/search/loop-guard tests but no operator runner is claimed. |
 
 ## Validation commands recorded during final cycle
 

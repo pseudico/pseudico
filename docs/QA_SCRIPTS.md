@@ -119,9 +119,10 @@ Manual verification for a temporary workspace:
 Known limitations to confirm during MVP QA:
 
 - Advanced rich-text editing, custom dashboard editing, advanced saved-view
-  builder UX, browser capture production bridge, workflow scheduling,
-  external live calendar sync, and monthly/yearly recurrence should not appear
-  as completed release workflows.
+  builder UX, browser capture production bridge, workflow scheduling, the
+  primary-operator workflow create/edit/run/history UI, external live calendar
+  sync, and monthly/yearly recurrence should not appear as completed release
+  workflows.
 - Broader third-party import execution remains intentionally scoped; verify the
   documented local import/restore paths rather than assuming cloud migration or
   remote import support.

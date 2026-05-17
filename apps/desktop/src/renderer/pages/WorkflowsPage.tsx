@@ -51,18 +51,51 @@ export function WorkflowsPage(): React.JSX.Element {
     <main className="page workflow-page" aria-labelledby="workflows-title">
       <section className="page-header">
         <div>
-          <p className="eyebrow">Automation</p>
+          <p className="eyebrow">Workflow lab — scaffold only</p>
           <h1 id="workflows-title">Workflows</h1>
           <p>
-            Local-only workflow definitions are versioned, validated before
-            enablement, can interpolate safe variables, and are previewed before
-            any action runs. Completed runs keep local history, diagnostics, and
-            rollback metadata for undoable activity snapshots.
+            Internal pilot status: workflow services, validation, preview
+            models, run history, and loop guards exist for maintainers, but this
+            screen is not a primary-operator create, edit, run, or history
+            workflow loop yet.
           </p>
+        </div>
+        <span className="status-pill danger">Future / scaffold</span>
+      </section>
+
+      <section className="settings-card" aria-labelledby="workflow-pilot-status-title">
+        <div className="settings-card-header">
+          <div>
+            <h2 id="workflow-pilot-status-title">Not pilot-supported for daily automation</h2>
+            <p>
+              For the internal pilot, use Today, project/contact tasks, lists,
+              templates, and manual review rather than expecting Workflows to
+              automate operator work.
+            </p>
+          </div>
+          <span className="status-pill danger">No run UI</span>
+        </div>
+        <div className="settings-grid compact-grid">
+          <div>
+            <h3>What is safe to trust now</h3>
+            <ul>
+              <li>Schema validation rejects unsupported or non-local actions.</li>
+              <li>Service tests cover preview, activity, search, and loop guards.</li>
+              <li>This page documents the local registry for maintainer review.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>What is not ready for operators</h3>
+            <ul>
+              <li>No packaged create/edit workflow form is connected here.</li>
+              <li>No operator-facing run button or run-history browser is exposed.</li>
+              <li>No scheduling, cloud automation, webhooks, or team workflows are in scope.</li>
+            </ul>
+          </div>
         </div>
       </section>
 
-      <section className="panel-stack" aria-label="Workflow validation skeleton">
+      <section className="panel-stack" aria-label="Workflow validation examples">
         <WorkflowEditorSkeleton state={invalidState} />
         <WorkflowEditorSkeleton state={draftState} />
       </section>
@@ -70,11 +103,13 @@ export function WorkflowsPage(): React.JSX.Element {
       <section className="settings-card" aria-labelledby="workflow-registry-title">
         <h2 id="workflow-registry-title">Local registry</h2>
         <p>
-          Only registered local triggers and actions can be enabled. Network,
-          shell, webhook, cloud sync, and remote storage actions are rejected.
-          Action inputs may use variables like {"{{item.title}}"}, {"{{container.name}}"},
-          {"{{today}}"}, {"{{today+3d}}"}, {"{{item.dueAt+1w}}"}, and
-          {"{{previous.targetId}}"}; missing or invalid date variables block the preview.
+          This registry is maintainer evidence, not a pilot workflow builder.
+          Only registered local triggers and actions can be enabled by the
+          service layer. Network, shell, webhook, cloud sync, and remote storage
+          actions are rejected. Action inputs may use variables like{" "}
+          {"{{item.title}}"}, {"{{container.name}}"}, {"{{today}}"},{" "}
+          {"{{today+3d}}"}, {"{{item.dueAt+1w}}"}, and {"{{previous.targetId}}"};
+          missing or invalid date variables block the service preview.
         </p>
         <div className="settings-grid compact-grid">
           <div>
@@ -101,8 +136,9 @@ export function WorkflowsPage(): React.JSX.Element {
           <div>
             <h2 id="workflow-history-title">Run history & rollback</h2>
             <p>
-              Workflow runs record their trigger, action targets, captured
-              activity IDs, success or failure status, and rollback state.
+              The service foundation can record trigger, action target,
+              activity, status, and rollback metadata, but the packaged pilot UI
+              does not expose a normal run-history browser yet.
             </p>
           </div>
           <span className="status-pill success">Local only</span>
@@ -111,9 +147,9 @@ export function WorkflowsPage(): React.JSX.Element {
           <div>
             <h3>Diagnostics</h3>
             <ul>
-              <li>Blocked previews surface the failure reason.</li>
-              <li>Completed actions show target type and target ID.</li>
-              <li>Runs without undoable snapshots are clearly disabled.</li>
+              <li>Service previews surface blocked-action failure reasons.</li>
+              <li>Service run records include target type and target ID.</li>
+              <li>Operator browsing of those records remains future work.</li>
             </ul>
           </div>
           <div>
@@ -121,7 +157,7 @@ export function WorkflowsPage(): React.JSX.Element {
             <ul>
               <li>Rollback applies undoable activity snapshots in reverse order.</li>
               <li>Conflicts are reported as partial or failed rollback.</li>
-              <li>Rollback itself writes an activity-log entry.</li>
+              <li>Rollback itself writes an activity-log entry in service tests.</li>
             </ul>
           </div>
         </div>
@@ -159,10 +195,12 @@ function WorkflowEditorSkeleton({
           </ul>
         </div>
       ) : (
-        <div className="callout success-callout">Preview is available before run.</div>
+        <div className="callout success-callout">
+          Service preview would be available before a future operator run UI.
+        </div>
       )}
 
-      <h3>Preview actions</h3>
+      <h3>Service preview actions</h3>
       {state.actionSummaries.length === 0 ? (
         <p>No previewable local actions until validation passes.</p>
       ) : (
