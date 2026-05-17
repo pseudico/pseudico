@@ -17,6 +17,11 @@ export type TodayLaneProps = {
   emptyDescription?: string;
   loading?: boolean;
   error?: string | null;
+  totalTaskCount?: number;
+  returnedTaskCount?: number;
+  taskLimit?: number | null;
+  hasMore?: boolean;
+  onShowMore?: () => Promise<void> | void;
   onOpenSource?: (task: TodayTaskCardViewModel) => void;
   onToggleComplete?: (task: TodayTaskCardViewModel) => Promise<void> | void;
   onPlanTask?: (
@@ -54,6 +59,11 @@ export function TodayLane({
   emptyDescription = "Tasks matching this lane will appear here.",
   loading = false,
   error = null,
+  totalTaskCount = tasks.length,
+  returnedTaskCount = tasks.length,
+  taskLimit = null,
+  hasMore = false,
+  onShowMore,
   onOpenSource,
   onToggleComplete,
   onPlanTask,
@@ -66,6 +76,8 @@ export function TodayLane({
   const plannedTaskIds = tasks
     .filter((task) => task.plannedLane === kind)
     .map((task) => task.itemId);
+  const countLabel = hasMore ? `${returnedTaskCount}/${totalTaskCount}` : `${totalTaskCount}`;
+  const reachedMaximumVisibleTasks = taskLimit !== null && taskLimit >= 500;
 
   return (
     <section className="today-lane" data-today-lane={kind}>
@@ -74,7 +86,7 @@ export function TodayLane({
           <LaneIcon size={18} aria-hidden="true" />
           <h3>{title}</h3>
         </div>
-        <span>{tasks.length}</span>
+        <span>{countLabel}</span>
       </header>
       <p>{description}</p>
 
@@ -87,6 +99,27 @@ export function TodayLane({
         <div className="today-lane-empty">
           <strong>{emptyTitle}</strong>
           <span>{emptyDescription}</span>
+        </div>
+      ) : null}
+
+      {!loading && error === null && hasMore ? (
+        <div className="today-lane-limit" role="status">
+          <strong>Showing the first {returnedTaskCount} of {totalTaskCount} tasks.</strong>
+          <span>
+            {reachedMaximumVisibleTasks
+              ? "Earliest work is shown first so urgent due and overdue items stay visible. Use Search or narrow the backlog window for the rest of this lane."
+              : "Earliest work is shown first so urgent due and overdue items stay visible. Use Search for a specific task or load more if you need the full lane."}
+          </span>
+          <button
+            className="secondary-button compact-button"
+            disabled={reachedMaximumVisibleTasks}
+            type="button"
+            onClick={() => {
+              void onShowMore?.();
+            }}
+          >
+            Show 50 more
+          </button>
         </div>
       ) : null}
 

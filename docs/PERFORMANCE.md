@@ -24,6 +24,25 @@ The budgets focus on service-level operations:
 - **Export**: in-memory workspace JSON assembly; file writes are outside this
   benchmark.
 
+
+## Today route packaged-memory guardrail
+
+PSE-226 added an operator-visible cap for the Today page initial render in the
+packaged app: each Today lane initially loads the earliest 50 tasks and reports
+the full lane count plus a "Show 50 more" control. This keeps urgent due and
+overdue work visible without rendering thousands of task cards by default.
+
+Current PSE-226 evidence on the 10k benchmark fixture measured the packaged
+process tree at 994.38 MB working set after Today, down from the PSE-209
+observation of roughly 2.29 GB. Evidence lives in
+`docs/manual-qa/PSE-226-packaged-today-memory.md` and
+`docs/manual-qa/PSE-226-packaged-today-memory-summary.json`.
+
+This is an internal-pilot guardrail, not a public guarantee across every machine
+or the 100k release-candidate gate. Operators with very large Today lanes should
+use Search or adjust planning/backlog windows rather than loading every task
+card at once.
+
 ## Operator-readiness QA
 
 `PERFORMANCE_SCALE_QA.md` contains the release-candidate manual UI script for

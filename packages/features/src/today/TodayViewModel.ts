@@ -58,6 +58,13 @@ export type TodayCompletionSummary = {
   show: boolean;
 };
 
+export type TodayLaneSummary = {
+  totalCount: number;
+  returnedCount: number;
+  limit: number | null;
+  hasMore: boolean;
+};
+
 export type TodayViewModel = {
   workspaceId: string;
   generatedAt: string;
@@ -75,6 +82,11 @@ export type TodayViewModel = {
   dueToday: TodayTaskView[];
   overdueBacklog: TodayTaskView[];
   tomorrowPreview: TodayTaskView[];
+  laneSummaries: {
+    dueToday: TodayLaneSummary;
+    overdueBacklog: TodayLaneSummary;
+    tomorrowPreview: TodayLaneSummary;
+  };
 };
 
 export function toTodayTaskView(record: TaskWithItemRecord): TodayTaskView {

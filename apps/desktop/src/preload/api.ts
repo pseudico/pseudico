@@ -1893,6 +1893,13 @@ export type TodayCompletionSummary = {
   show: boolean;
 };
 
+export type TodayLaneSummary = {
+  totalCount: number;
+  returnedCount: number;
+  limit: number | null;
+  hasMore: boolean;
+};
+
 export type PlanningSummaryMetricSummary = {
   plannedCount: number;
   completedCount: number;
@@ -1941,12 +1948,18 @@ export type TodayViewModelSummary = {
   dueToday: TodayTaskSummary[];
   overdueBacklog: TodayTaskSummary[];
   tomorrowPreview: TodayTaskSummary[];
+  laneSummaries?: {
+    dueToday: TodayLaneSummary;
+    overdueBacklog: TodayLaneSummary;
+    tomorrowPreview: TodayLaneSummary;
+  };
 };
 
 export type TodayViewModelInput = {
   workspaceId?: string;
   date?: string | Date;
   backlogDays?: number;
+  laneLimit?: number;
 };
 
 export type UpdateTodayPreferencesInput = Partial<

@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-17T21:24:56.046Z",
+  "localOnly": true,
+  "command": "pnpm benchmark:large",
+  "environment": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "arch": "x64",
+    "node": "v22.21.1",
+    "cpuCount": 16,
+    "totalMemoryMb": 32363.51
+  },
+  "sizes": [
+    {
+      "itemCount": 1000,
+      "workspaceRoot": "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-benchmark-1000-mwv720",
+      "seedElapsedMs": 25.09,
+      "seed": {
+        "workspaceId": "benchmark_workspace_1000",
+        "containerCount": 100,
+        "itemCount": 1000,
+        "taskCount": 800,
+        "noteCount": 100,
+        "listCount": 100,
+        "listItemCount": 300,
+        "searchRecordCount": 1000,
+        "activityEventCount": 1000
+      },
+      "benchmark": {
+        "workspaceId": "benchmark_workspace_1000",
+        "itemCount": 1000,
+        "generatedAt": "2026-05-17T21:24:56.112Z",
+        "passed": true,
+        "operations": [
+          {
+            "operation": "open",
+            "elapsedMs": 0.19,
+            "maxMs": 200,
+            "passedBudget": true,
+            "rowCount": 2102,
+            "notes": "Open summary should use bounded startup counts, not unbounded feed reads."
+          },
+          {
+            "operation": "search",
+            "elapsedMs": 0.57,
+            "maxMs": 150,
+            "passedBudget": true,
+            "rowCount": 25,
+            "notes": "Search budget covers indexed query hydration for the first 25 results."
+          },
+          {
+            "operation": "dashboard",
+            "elapsedMs": 0.43,
+            "maxMs": 250,
+            "passedBudget": true,
+            "rowCount": 1445,
+            "notes": "Dashboard budget covers default local widgets with bounded pages."
+          },
+          {
+            "operation": "today",
+            "elapsedMs": 0.23,
+            "maxMs": 300,
+            "passedBudget": true,
+            "rowCount": 345,
+            "notes": "Today budget covers due, backlog, tomorrow, and summary projections."
+          },
+          {
+            "operation": "export",
+            "elapsedMs": 10.79,
+            "maxMs": 1000,
+            "passedBudget": true,
+            "rowCount": 4401,
+            "notes": "Export budget covers in-memory workspace JSON assembly only."
+          }
+        ]
+      },
+      "memory": {
+        "before": {
+          "rssMb": 43.43,
+          "heapUsedMb": 4.91,
+          "heapTotalMb": 5.59,
+          "externalMb": 1.58
+        },
+        "after": {
+          "rssMb": 56.05,
+          "heapUsedMb": 11.28,
+          "heapTotalMb": 17.35,
+          "externalMb": 1.57
+        }
+      }
+    },
+    {
+      "itemCount": 10000,
+      "workspaceRoot": "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-benchmark-10000-9JAo09",
+      "seedElapsedMs": 306.29,
+      "seed": {
+        "workspaceId": "benchmark_workspace_10000",
+        "containerCount": 100,
+        "itemCount": 10000,
+        "taskCount": 8000,
+        "noteCount": 1000,
+        "listCount": 1000,
+        "listItemCount": 3000,
+        "searchRecordCount": 10000,
+        "activityEventCount": 10000
+      },
+      "benchmark": {
+        "workspaceId": "benchmark_workspace_10000",
+        "itemCount": 10000,
+        "generatedAt": "2026-05-17T21:24:56.544Z",
+        "passed": true,
+        "operations": [
+          {
+            "operation": "open",
+            "elapsedMs": 0.6,
+            "maxMs": 500,
+            "passedBudget": true,
+            "rowCount": 20102,
+            "notes": "Open summary should use bounded startup counts, not unbounded feed reads."
+          },
+          {
+            "operation": "search",
+            "elapsedMs": 5.01,
+            "maxMs": 350,
+            "passedBudget": true,
+            "rowCount": 25,
+            "notes": "Search budget covers indexed query hydration for the first 25 results."
+          },
+          {
+            "operation": "dashboard",
+            "elapsedMs": 3,
+            "maxMs": 750,
+            "passedBudget": true,
+            "rowCount": 13528,
+            "notes": "Dashboard budget covers default local widgets with bounded pages."
+          },
+          {
+            "operation": "today",
+            "elapsedMs": 2.37,
+            "maxMs": 900,
+            "passedBudget": true,
+            "rowCount": 3428,
+            "notes": "Today budget covers due, backlog, tomorrow, and summary projections."
+          },
+          {
+            "operation": "export",
+            "elapsedMs": 99.14,
+            "maxMs": 6000,
+            "passedBudget": true,
+            "rowCount": 43101,
+            "notes": "Export budget covers in-memory workspace JSON assembly only."
+          }
+        ]
+      },
+      "memory": {
+        "before": {
+          "rssMb": 53.99,
+          "heapUsedMb": 11.29,
+          "heapTotalMb": 17.35,
+          "externalMb": 1.57
+        },
+        "after": {
+          "rssMb": 146.08,
+          "heapUsedMb": 60.73,
+          "heapTotalMb": 88.17,
+          "externalMb": 1.57
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Benchmarks run against generated local SQLite workspaces in a temporary folder.",
+    "No telemetry, network upload, or hosted service is used.",
+    "The production service budget constants live in packages/features/src/performance/."
+  ]
+}

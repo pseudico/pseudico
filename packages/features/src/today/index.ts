@@ -1,5 +1,7 @@
 export {
   DEFAULT_TODAY_BACKLOG_DAYS,
+  DEFAULT_TODAY_LANE_LIMIT,
+  MAX_TODAY_LANE_LIMIT,
   TODAY_BACKLOG_DAYS_SETTING_KEY,
   TodayService,
   todayModuleContract
@@ -32,4 +34,4 @@ export type {
   UnplanTaskInput
 } from "./DailyPlanService";
 export type { PlanningSummaryGroup, PlanningSummaryInput, PlanningSummaryMetric, PlanningSummaryView } from "./PlanningSummaryService";
-export type { TodayTaskView, TodayViewModel, TodayPreferencesView, TodayFocusSummary, TodayCompletionSummary } from "./TodayViewModel";
+export type { TodayTaskView, TodayViewModel, TodayPreferencesView, TodayFocusSummary, TodayCompletionSummary, TodayLaneSummary } from "./TodayViewModel";

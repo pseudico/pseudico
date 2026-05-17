@@ -2,12 +2,12 @@
 
 PSE-203 / PSE-OR-008 established service-layer large-workspace evidence.
 PSE-209 added packaged-app UI evidence for representative 1k/10k local
-workspaces. PSE-226 remains the focused follow-up for the 10k Today memory
-caveat.
+workspaces. PSE-226 then bounded the 10k Today initial render payload and recorded
+updated packaged memory evidence.
 
 ## Current verdict
 
-**Internal pilot ready for 1k/10k scale with a P2 Today-memory caveat.**
+**Internal pilot ready for 1k/10k scale with Today lane caps documented.**
 
 Automated service evidence covers deterministic local SQLite fixtures and
 service-layer timings. PSE-209 then exercised the packaged Windows app with
@@ -16,10 +16,11 @@ calendar, project feed scroll, contact detail, backup, export, and search
 rebuild. No P0/P1 freeze, crash, unbounded result dump, or missing completion
 state was observed.
 
-Do not overclaim broad low-memory or nontechnical handoff readiness from this:
-the 10k Today route increased summed packaged working set to roughly **2.29 GB**
-in one run. That app stayed responsive, but the memory headroom requirement is a
-P2 caveat tracked by PSE-226.
+Do not overclaim broad 100k or every-hardware performance readiness from this.
+The PSE-209 10k Today route originally increased summed packaged working set to
+roughly **2.29 GB**. PSE-226 bounded initial Today lane payloads to the earliest
+50 tasks per lane, added explicit operator copy and a load-more control, and
+remeasured the 10k packaged Today route at **994.38 MB** working set after Today.
 
 ## Automated service evidence gate
 
@@ -78,13 +79,13 @@ wall-clock times.
 | 10k | workspace open | 247.99 ms | Pass |
 | 10k | search `fixture` first results | 5.40 ms | Pass |
 | 10k | dashboard load | 191.97 ms | Pass |
-| 10k | Today load | 6.51 ms | Pass with memory caveat |
+| 10k | Today load | 6.51 ms in PSE-209; PSE-226 rerun bounded renderer payload | Pass with bounded-lane caveat |
 | 10k | project feed open + scroll | 514.73 ms | Pass |
 | 10k | create backup | 170.05 ms | Pass |
 | 10k | export JSON | 67.46 ms | Pass |
 | 10k | rebuild search index | 1797.14 ms | Pass |
 
-Memory observation from the same run:
+PSE-209 memory observation from the original packaged run:
 
 | Milestone | Working set MB | Private MB |
 | --- | ---: | ---: |
@@ -93,9 +94,17 @@ Memory observation from the same run:
 | after later 10k rebuild | 2314.27 | 2187.47 |
 
 The app remained responsive and did not show continuous growth in that single
-run, but this memory jump is not acceptable to hide behind a simple pass/fail.
-Before broader low-memory handoff, complete PSE-226 by bounding Today loading,
-adding a clear operator cap/mitigation, or recording owner acceptance.
+run, but the jump was too high to hide. PSE-226 addressed this by bounding the
+initial Today render and recording a new packaged run:
+
+| PSE-226 milestone | Working set MB | Private MB |
+| --- | ---: | ---: |
+| after 10k Dashboard | 478.55 | 335.73 |
+| after bounded 10k Today | 994.38 | 874.20 |
+
+PSE-226 evidence: `docs/manual-qa/PSE-226-packaged-today-memory.md`,
+`docs/manual-qa/PSE-226-packaged-today-memory-summary.json`, and
+`docs/manual-qa/screenshots/PSE-226-packaged-today-memory/10k-today-bounded.png`.
 
 ## Manual UI performance QA script
 
@@ -148,7 +157,7 @@ Create a separate P0/P1 fix ticket if any of these occur:
 
 - The service benchmark is not a substitute for packaged UI measurement.
 - PSE-209 is packaged/CDP evidence, not a purely hands-on stopwatch run.
-- The 10k Today memory jump is tracked by PSE-226 and should be treated as a P2 caveat until fixed or explicitly accepted.
+- The 10k Today memory jump is mitigated by PSE-226 lane caps; very large lanes remain intentionally partial until the operator clicks load more or uses Search.
 - The 100k gate is intended for release-candidate validation, not every small PR.
 - CPU and memory observations are local manual evidence, not telemetry.
 - The benchmark fixture is deterministic but not a perfect copy of every future operator workspace.

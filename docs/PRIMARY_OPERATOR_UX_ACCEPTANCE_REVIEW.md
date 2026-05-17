@@ -103,10 +103,9 @@ Machine-readable evidence summary: `docs/manual-qa/PSE-220-final-acceptance-summ
 ## Recommended follow-up tickets
 
 1. **Restore picker / OS-native dialog packaged QA:** human packaged-app confirmation of native restore folder chooser plus file/import/export/backup dialogs (tracked by PSE-228).
-2. **Today memory bounding:** reduce or explicitly document the 10k Today memory headroom caveat before broader low-memory handoff (tracked by PSE-226).
-3. **Package metadata/release caveat polish:** keep unsigned/unpacked/internal-pilot-only status explicit (tracked by PSE-227).
-4. **Search result dedupe polish:** collapse duplicate file rows when item and attachment metadata match the same local object.
-5. **Welcome recent workspace curation:** hide missing/test workspaces or add cleanup affordance.
+2. **Package metadata/release caveat polish:** keep unsigned/unpacked/internal-pilot-only status explicit (tracked by PSE-227).
+3. **Search result dedupe polish:** collapse duplicate file rows when item and attachment metadata match the same local object.
+4. **Welcome recent workspace curation:** hide missing/test workspaces or add cleanup affordance.
 
 ## Final acceptance checklist
 

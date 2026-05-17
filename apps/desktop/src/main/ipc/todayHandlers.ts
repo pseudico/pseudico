@@ -68,7 +68,7 @@ export function createTodayIpcHandlers(
       if (!isTodayViewModelInput(input)) {
         return apiError(
           "INVALID_INPUT",
-          "getTodayViewModel accepts optional workspaceId, date, and backlogDays fields."
+          "getTodayViewModel accepts optional workspaceId, date, backlogDays, and laneLimit fields."
         );
       }
 
@@ -292,7 +292,8 @@ function isTodayViewModelInput(
     (isRecord(input) &&
       isOptionalString(input.workspaceId) &&
       isOptionalDateInput(input.date) &&
-      isOptionalBacklogDays(input.backlogDays))
+      isOptionalBacklogDays(input.backlogDays) &&
+      isOptionalLaneLimit(input.laneLimit))
   );
 }
 
@@ -398,6 +399,13 @@ function isOptionalBacklogDays(value: unknown): boolean {
   return (
     value === undefined ||
     (typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 365)
+  );
+}
+
+function isOptionalLaneLimit(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 500)
   );
 }
 

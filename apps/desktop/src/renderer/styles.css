@@ -2643,6 +2643,26 @@ a {
   line-height: 1.45;
 }
 
+.today-lane-limit {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e5decf;
+  border-radius: 8px;
+  background: #fff8e8;
+  color: #4f432f;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.today-lane-limit strong {
+  color: #2f2a21;
+}
+
+.today-lane-limit button {
+  justify-self: start;
+}
+
 .today-task-list {
   display: grid;
   gap: 10px;
