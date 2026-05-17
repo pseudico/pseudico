@@ -65,8 +65,10 @@ Electron, raw IPC, Node filesystem APIs, SQLite, or arbitrary network clients.
 ## Manual no-unexpected-network QA
 
 Automated evidence proves the service-level operator smoke does not call
-`fetch`, and static tests identify network-capable source paths. Before claiming
-release-ready status, run a packaged-app manual check on the target OS:
+`fetch`, and static tests identify network-capable source paths. For internal
+pilot, the owner accepts this automated/static evidence as an explicit caveat.
+Before claiming nontechnical-operator-ready or public-release status, run a
+packaged-app manual check on the target OS:
 
 1. Disconnect network or use an OS firewall/network monitor.
 2. Launch the packaged app.
@@ -78,13 +80,15 @@ release-ready status, run a packaged-app manual check on the target OS:
 7. Enable no optional network feature unless the test explicitly calls for it.
 
 Record the tool, date, package build, and result in the final
-operator-readiness report.
+operator-readiness report. Until then, describe OR-R3 as accepted for internal
+pilot only, not fully proven by packaged OS-level monitoring.
 
 ## Open risks and follow-ups
 
 - This is not a penetration test.
 - Packaged-app packet-capture evidence is still manual and belongs in the final
-  operator-readiness report.
+  operator-readiness report before stronger handoff claims. It is owner-accepted
+  as an internal-pilot caveat only.
 - Any future browser capture, web widget, IMAP, ICS URL import, metadata fetch,
   auto-update, remote diagnostics, or licensing work must open a separate
   ticket and preserve the local-only product promise.

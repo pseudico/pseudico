@@ -7881,3 +7881,17 @@ Next actions: Monitor CI; address review feedback; merge when approved.
 - Files changed: docs/session_log.md
 - Open questions / risks: PR mergeability shows pending/unknown from GitHub connector; CI/review outcome still needed.
 - Next actions: Reviewer checks PR; merge if CI/review pass; move Linear to Done after merge.
+
+## 2026-05-18T07:06:49+10:00
+- Objective: Explain OR-R3 options from operator perspective.
+- Decisions made: Keep guidance tight: run network monitor, owner-accept current evidence, or keep as blocker.
+- Files changed: docs/session_log.md
+- Open questions / risks: Owner must choose required confidence level for nontechnical handoff.
+- Next actions: User chooses OR-R3 option; update readiness docs/Linear if needed.
+
+## 2026-05-18T07:09:22+10:00
+- Objective: Apply OR-R3 Option B owner-accepted internal-pilot caveat.
+- Decisions made: OR-R3 accepted for internal pilot on automated/static evidence; packaged monitor still required before stronger handoff unless owner accepts again.
+- Files changed: docs/OPERATOR_READINESS_REPORT.md; docs/LOCAL_ONLY_SECURITY_REVIEW.md; docs/OPERATOR_RUNBOOK.md; docs/session_log.md
+- Open questions / risks: Nontechnical/public-release no-network proof remains unrun.
+- Next actions: Commit/push PR update; update Linear/PR note; run OR-R3 monitor before broader handoff.
