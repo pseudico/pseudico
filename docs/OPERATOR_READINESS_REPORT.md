@@ -1,9 +1,9 @@
 # Operator Readiness Report
 
-Date: 2026-05-17
+Date: 2026-05-18
 Program: PSE-195 operator-readiness review
-Scope: reconciled through latest merged main evidence after PSE-207, PSE-209, PSE-218, PSE-220, PSE-221, PSE-222, PSE-223, and PSE-224.
-Reviewed base for this reconciliation: `d4411c9b3c239c51463fe5a54694b3c0d3b07a94`.
+Scope: reconciled through latest merged main evidence after PSE-207, PSE-209, PSE-218, PSE-220, PSE-221, PSE-222, PSE-223, PSE-224, PSE-226, PSE-227, and PSE-228.
+Reviewed base for this reconciliation: `b2bee031700465a4adb9adb296319be15be6412c`.
 
 ## Verdict
 
@@ -29,6 +29,10 @@ additional packaged/manual evidence closed or narrowed several gates:
   and clearly marks third-party/service foundations as not pilot UI importers.
 - PSE-224 demoted workflows to Workflow Lab / scaffold-only for the internal
   pilot rather than overclaiming an operator automation loop.
+- PSE-228 proved the packaged Windows native picker paths that exist today for
+  attachment selection, Markdown folder import, and backup-restore target
+  selection, while explicitly marking typed-path and workspace-relative flows as
+  not native dialog surfaces.
 
 The remaining blockers for a broader nontechnical handoff are not broad unknowns.
 OR-R3 is now **owner-accepted for internal pilot** on automated/static evidence,
@@ -80,13 +84,13 @@ Use these labels when reading this report:
 
 | Feature | Present/partial/missing | Evidence | Operator-facing caveat |
 | --- | --- | --- | --- |
-| Workspaces / Inbox | Present | Fresh workspace smoke, package smoke, PSE-206 packaged rerun, PSE-221 package smoke | Workspace create/open works in packaged evidence; OS-native dialogs still need PSE-228 human dialog QA. |
+| Workspaces / Inbox | Present | Fresh workspace smoke, package smoke, PSE-206 packaged rerun, PSE-221 package smoke, PSE-228 packaged dialog QA | Workspace create/open works in packaged evidence; current UI uses typed local paths/recent workspace buttons rather than OS-native workspace pickers. |
 | Projects | Present | Service tests, PSE-206/PSE-220 visual evidence, PSE-216 project work-loop QA | PSE-220 fixed prior project/contact layout regressions; advanced project customization remains future. |
 | Contacts | Present/partial | Contact service/UI tests, PSE-220 visual evidence | Deeper CRM workflows remain future; current contact containers are pilot-usable. |
 | Tasks / Today | Present | Today planning tests, PSE-206/PSE-209/PSE-220 evidence | PSE-226 caps initial 10k Today lanes at 50 tasks/lane with visible totals/load-more copy; do not claim 100k or every-hardware readiness. |
 | Lists | Present | List service tests, virtualized UI tests, PSE-206/PSE-220 evidence | Advanced pipeline/list conversion UX remains feature QA. |
 | Notes | Present | Note service tests, search/reconciliation tests, PSE-206 evidence | Markdown-first model; advanced rich text remains future. |
-| Files / attachments | Present | Backup/restore golden, package smoke attach/open/reveal, PSE-207 restore evidence, PSE-222 template integrity | OS-native file picker/dialog proof remains PSE-228; template file placeholders are note reminders, not copied binary files. |
+| Files / attachments | Present | Backup/restore golden, package smoke attach/open/reveal, PSE-207 restore evidence, PSE-222 template integrity, PSE-228 native picker QA | Native attach-file picker passed for cancel and select; template file placeholders are note reminders, not copied binary files. |
 | Links | Present | URL validation/security tests and operator smoke | Metadata fetch/web widgets remain optional/off by default. |
 | Tags / categories | Present | Metadata tests, reconciliation tests, PSE-206/PSE-220 evidence | Advanced metadata browser UX remains future. |
 | Relationships | Present | Service tests, PSE-220 evidence | PSE-206 relationship screenshot/API mismatch remains historical P2/P3 caveat; PSE-220 did not find a P0/P1 primary-loop blocker. |
@@ -96,7 +100,7 @@ Use these labels when reading this report:
 | Timeline/calendar | Partial-present | Timeline/calendar services, PSE-206/PSE-209 evidence | External/live calendar sync is out of scope. |
 | Templates | Present with limitations | Template service tests and PSE-222 template file-placeholder evidence | Binary file placeholders become notes with reattachment guidance; real binary-copy template support is future. |
 | Workflows | Scaffold-only for pilot | Workflow service/schema tests and PSE-224 Workflow Lab QA | No pilot operator create/edit/run/history loop; do not market workflows as daily automation. |
-| Backup/export/import/restore | Present/partial | PSE-207, PSE-218, PSE-223, package smoke, failure matrix | Backup restore is proven; JSON-export restore and OS-native import/export/backup dialogs are not fully human-reviewed; third-party import foundations are not pilot UI importers. |
+| Backup/export/import/restore | Present/partial | PSE-207, PSE-218, PSE-223, PSE-228, package smoke, failure matrix | Backup restore target picker and Markdown folder picker passed packaged dialog QA. Export, backup create/list, CSV import, and workspace create/open are typed-path or workspace-relative flows today, not native destination/source dialogs. Email native picker remains Not reviewed; direct packaged `.eml` import passed. |
 | Maintenance tools | Present/partial | Failure matrix, maintenance tests, activity/search rebuild evidence, PSE-209 search rebuild | Long-running packaged-app feedback has smoke/QA evidence for search rebuild but broad hands-on maintenance coverage remains limited. |
 
 ## Evidence pack
@@ -114,6 +118,7 @@ eview-app-evidence.json`, screenshots folder | Historical packaged automated/vis
 | Template placeholder integrity | `docs/manual-qa/PSE-222-template-file-placeholder-integrity.md` | Source/service regression plus historical packaged repro | Template file placeholders no longer create invalid file items. |
 | Packaged importer QA | `docs/manual-qa/PSE-223-packaged-importer-qa.md`, summary JSON | Packaged automated | Implemented local importers passed smoke/integrity checks; service-only importers are caveated. |
 | Workflow pilot boundary | `docs/manual-qa/PSE-224-workflow-scaffold-qa.md`, `docs/manual-qa/screenshots/PSE-224-workflow-scaffold/workflow-lab.png` | Source/package plus visual | Workflows are explicitly scaffold-only for pilot. |
+| Packaged OS-native dialog QA | `docs/manual-qa/PSE-228-packaged-os-dialog-qa.md`, `docs/manual-qa/PSE-228-packaged-dialog-qa-summary.json`, screenshots under `docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/` | Packaged manual / visual | File attach picker, Markdown folder picker, and restore target picker passed; typed-path/workspace-relative flows and email native picker are caveated. |
 | Release packaging docs | `docs/RELEASE_CANDIDATE_PACKAGING.md` | Documentation | Current artifact is unsigned/unpacked internal-pilot package; no installer/signing/auto-update. |
 | Runbook | `docs/OPERATOR_RUNBOOK.md`, `docs/help/operator-runbook.md` | Documentation | Operator guidance exists, but final nontechnical handoff still requires unresolved caveats to be accepted/closed. |
 
@@ -128,6 +133,7 @@ listed in the PSE-225 PR/check summary.
 | PSE-222 | Targeted template tests plus `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm package`, `pnpm package:smoke`, and `pnpm release:package-check` passed. |
 | PSE-223 | Packaged importer smoke evidence passed; docs distinguish packaged importers from service-only foundations. |
 | PSE-224 | Workflow renderer/service tests plus package smoke passed; workflows demoted to scaffold-only for pilot. |
+| PSE-228 | `pnpm install --frozen-lockfile`, `pnpm package`, `pnpm package:smoke`, and packaged native dialog QA passed. |
 
 ## Risk register
 
@@ -141,10 +147,10 @@ listed in the PSE-225 PR/check summary.
 | OR-R6 | P1 for public release | Auto-update is absent and manual upgrade mistakes could affect users. | Documented limitation. | Use backup-before-upgrade runbook; add auto-update only via future scoped ticket. |
 | OR-R7 | P2 | Advanced UX/product gaps remain: rich text, custom dashboard editing, advanced saved-view builder, scheduling, live calendar sync. | Documented limitation. | Keep out of current handoff claim; create feature tickets as needed. |
 | OR-R8 | P2 | Dependency audit warning: `simple-get` transitive release-tooling dependency is network-capable by purpose. | Tested acceptable for app workflows; documented. | Keep out of normal runtime; revisit on dependency changes. |
-| OR-R9 | P2 | Importer readiness could be overclaimed from service tests/docs without packaged runtime evidence. | Improved by PSE-223. Implemented local paths have packaged evidence; third-party foundations are explicitly service-only/partial. | Keep PSE-228 for OS-native dialog proof and do not mark service-only importers as pilot UI-ready. |
+| OR-R9 | P2 | Importer readiness could be overclaimed from service tests/docs without packaged runtime evidence. | Improved by PSE-223 and PSE-228. Implemented local paths have packaged evidence; native Markdown folder picker passed; third-party foundations are explicitly service-only/partial. | Do not mark service-only importers as pilot UI-ready; keep email native picker caveat visible until PSE-229 follows up. |
 | OR-R10 | P2 | Workflows could be overclaimed as operator automation. | Reduced by PSE-224; Workflow Lab is scaffold-only for pilot. | Do not claim workflow create/edit/run/history until a future ticket implements and proves it. |
 | OR-R11 | P2 | Project-template file placeholders previously created invalid file rows. | Fixed by PSE-222; placeholders become notes with metadata and reattachment guidance. | Do not claim binary file template copying until implemented. |
-| OR-R12 | P3/P2 for dialog trust | OS-native dialogs for file/import/export/backup flows are not fully human-reviewed. | Tracked by PSE-228. | Mark dialog coverage as Not reviewed unless direct PSE-228 evidence exists. |
+| OR-R12 | P2 for email picker / P3 for non-dialog surfaces | OS-native dialogs for file/import/export/backup flows needed direct packaged proof. | PSE-228 proved native attach, Markdown folder, and restore target pickers. Workspace create/open, CSV import, export, and backup create/list are not native dialog flows today; email native picker remains Not reviewed though direct `.eml` import passed. | Do not claim native dialog coverage for typed-path/workspace-relative flows; PSE-229 tracks Windows email picker follow-up. |
 
 ## Owner-accepted limitations for internal pilot
 
@@ -157,7 +163,10 @@ These limitations are acceptable for **internal pilot** only if communicated to 
 - Very large Today lanes initially show the earliest 50 tasks per lane with full counts and load-more controls; use Search/backlog tuning instead of loading every task card at once.
 - Workflows are scaffold-only and should not be used as pilot daily automation.
 - Third-party importer foundations are not pilot UI importers unless PSE-223 marks the family packaged-proven.
-- OS-native dialog behavior remains a separate PSE-228 evidence gap.
+- OS-native dialog behavior is proven only for the PSE-228-covered picker
+  surfaces: file attach, Markdown folder import, and restore target selection.
+  Other local file flows are typed-path/workspace-relative or Not reviewed as
+  documented in `docs/manual-qa/PSE-228-packaged-os-dialog-qa.md`.
 - Public release support boundaries, legal review, and signing decisions remain future work.
 
 ## Final handoff checklist
@@ -180,7 +189,7 @@ These limitations are acceptable for **internal pilot** only if communicated to 
 - [ ] Manual packaged no-network monitor check is completed and recorded, or owner explicitly accepts the automated/static evidence boundary for that nontechnical recipient.
 - [x] Manual/packaged 1k/10k UI performance check is completed and recorded in `docs/manual-qa/PSE-209-packaged-ui-performance.md` (Pass with caveats).
 - [x] PSE-226 Today memory caveat is fixed/documented with operator-visible lane caps and packaged evidence.
-- [ ] PSE-228 OS-native dialog QA is completed or marked out of scope for the target pilot group.
+- [x] PSE-228 OS-native dialog QA is completed for implemented native picker surfaces, with non-dialog/Not-reviewed flows explicitly documented.
 - [ ] Any discovered P0/P1 issue is fixed or explicitly accepted by the owner.
 - [ ] The runbook is updated with any real manual QA caveats.
 
@@ -195,8 +204,8 @@ These limitations are acceptable for **internal pilot** only if communicated to 
 
 ## Recommended next actions
 
-1. Complete PSE-227/PSE-228 to polish package caveats and prove OS-native dialogs before broader handoff.
-2. Run OR-R3 packaged no-network monitor before nontechnical/public-release handoff, unless the owner explicitly accepts the automated/static-only boundary for that recipient.
+1. Run OR-R3 packaged no-network monitor before nontechnical/public-release handoff, unless the owner explicitly accepts the automated/static-only boundary for that recipient.
+2. Complete or explicitly defer PSE-229 if native Windows email import picker coverage is required before broader nontechnical handoff.
 
 ## Final statement
 

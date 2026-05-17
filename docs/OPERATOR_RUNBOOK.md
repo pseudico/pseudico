@@ -138,7 +138,8 @@ Until Pseudico has a signed installer/update channel, upgrades are manual:
 
 Workspace export is for portable local data exchange and recovery testing. It is not a cloud sync feature.
 
-- Export only to a local folder you control.
+- Current packaged exports are written to the workspace-relative `exports/`
+  folder. Move or copy exported files only to a local folder you control.
 - Treat exported data as sensitive because it may contain project names, contact details, notes, links, and attachment references.
 - Keep export files with the same care as the workspace folder.
 
@@ -191,6 +192,11 @@ standalone Markdown note IPC, EML email, and local ICS file imports in the
 packaged runtime. Notion, Todoist, Trello, and Evernote remain service
 foundations without a pilot operator UI path; IMAP remains adapter-required.
 Do not represent those service-only foundations as ready operator importers.
+
+PSE-228 later proved the packaged Markdown folder picker. It also confirmed
+that CSV/TSV import currently uses a typed local file path, and that direct
+packaged `.eml` import works while the Windows native email picker remains Not
+reviewed.
 
 ## 7. Attachments and missing files
 
@@ -296,7 +302,11 @@ Current limitations to explain honestly:
 - Monthly/yearly recurrence, richer drag/drop calendar editing, and advanced planning UX remain future work.
 - Broader third-party import execution remains staged behind service-level validation and fixture coverage unless a packaged operator UI is explicitly added and reviewed.
 - Very large Today lanes are intentionally bounded after PSE-226: Today first shows the earliest 50 tasks in each lane, shows the full lane count, and offers "Show 50 more". Use Search when looking for a specific task in a very large workspace.
-- OS-native file, import, export, backup, and restore dialogs are not all human-reviewed yet; PSE-228 is the focused dialog QA ticket.
+- PSE-228 proved packaged OS-native picker behavior for file attach, Markdown
+  folder import, and restore target selection. Workspace create/open, CSV/TSV
+  import, export destination, and backup create/list are typed-path or
+  workspace-relative flows today; Windows native email picker coverage remains
+  Not reviewed.
 - Local-only does not replace device-level backups.
 
 ## 13. Handoff acceptance checklist
