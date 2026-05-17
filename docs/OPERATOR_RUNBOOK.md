@@ -2,7 +2,7 @@
 
 Status: draft handoff runbook for operator-readiness hardening.
 Audience: nontechnical local desktop operator with no developer nearby.
-Readiness assumption: Pseudico is **pilot ready, not yet release ready** until the operator-readiness report closes the remaining P0/P1 risks.
+Readiness assumption: Pseudico is **internal-pilot ready with caveats, not yet nontechnical-operator ready or public-release ready** until the operator-readiness report closes or owner-accepts the remaining gates.
 
 ## 1. What Pseudico is for
 
@@ -159,6 +159,8 @@ Restore into a clean, empty workspace folder whenever possible:
 
 The advanced portable JSON restore in **Imports & exports** is for deliberate
 local data-portability recovery only. Normal recovery should use backup restore.
+The PSE-207 packaged evidence proves backup restore into a fresh workspace; it
+does not prove every JSON-export restore path through the UI.
 
 After restoring:
 
@@ -254,7 +256,7 @@ Optional or future local-adjacent features, such as browser capture, IMAP import
 | Search misses known content | Run search rebuild if available. If still wrong, record examples and escalate as an activity/search consistency issue. |
 | Attachment missing | Do not delete the file record. Run attachment audit, reattach from source, or restore from backup. |
 | Import rejected | Keep the original import file unchanged. Read validation errors, fix the source copy, and retry in a test workspace first. |
-| App slow with large workspace | Close unused views, avoid huge date ranges, and record startup/search/dashboard timing for the performance ticket. |
+| App slow with large workspace | Close unused views, avoid huge date ranges, and record startup/search/dashboard/Today timing plus memory for the performance ticket. The 10k Today route has a known P2 high-memory caveat until PSE-226 is fixed or accepted. |
 | Unexpected network prompt or traffic | Stop, document the feature and action, and escalate because local-only guarantees may be at risk. |
 
 ## 11. Escalation checklist
@@ -283,7 +285,7 @@ Until the operator-readiness program is complete, do not overclaim release readi
 
 Current limitations to explain honestly:
 
-- Public distribution, installer signing, update path, and support packaging are still release-hardening concerns.
+- Public distribution, installer signing, update path, package metadata polish, and support packaging are still release-hardening concerns.
 - Advanced rich-text editing remains future work; Markdown-first editing is the current model.
 - Advanced saved-view builder UX and custom dashboard editing remain future work.
 - Browser capture production bridge, workflow scheduling, and the primary-operator workflow create/edit/run/history loop remain future work unless explicitly ticketed.
@@ -293,6 +295,8 @@ Current limitations to explain honestly:
 - External live calendar sync is excluded.
 - Monthly/yearly recurrence, richer drag/drop calendar editing, and advanced planning UX remain future work.
 - Broader third-party import execution remains staged behind service-level validation and fixture coverage unless a packaged operator UI is explicitly added and reviewed.
+- The 10k Today route has a known packaged-app memory caveat from PSE-209; use smaller workspaces or avoid very large Today/overdue piles until PSE-226 bounds or documents the behavior.
+- OS-native file, import, export, backup, and restore dialogs are not all human-reviewed yet; PSE-228 is the focused dialog QA ticket.
 - Local-only does not replace device-level backups.
 
 ## 13. Handoff acceptance checklist

@@ -1,7 +1,7 @@
 ﻿# Primary Operator UX Acceptance Review (PSE-220)
 
-Date: 2026-05-17 12:17 Australia/Sydney  
-Linear: PSE-220 — PSE-HUX-008: Primary operator UX acceptance and regression review  
+Date: 2026-05-17 12:17 Australia/Sydney
+Linear: PSE-220 — PSE-HUX-008: Primary operator UX acceptance and regression review
 Scope: final acceptance/regression gate for PSE-213, PSE-214, PSE-215, PSE-216, PSE-217, PSE-218, and PSE-219.
 
 ## Verdict
@@ -65,7 +65,7 @@ Machine-readable evidence summary: `docs/manual-qa/PSE-220-final-acceptance-summ
 | PSE-217 — search trust | Complete; search has visible local scope, result hierarchy, context, and useful trust copy. |
 | PSE-218 — backup/restore | Complete; backup/restore is guided, non-destructive, and previewed before action. |
 | PSE-219 — feedback/navigation | Complete after PSE-220 shell regression fix; tabs, recent navigation, toasts, and activity feedback no longer obscure the main workflow. |
-| PSE-220 — acceptance gate | Complete pending PR/Linear reconciliation and final checks; review evidence and targeted regressions are included here. |
+| PSE-220 - acceptance gate | Complete; review evidence and targeted regressions are included here. Later PSE-221 resolved the packaging blocker that was open during the original review. |
 
 ## Architecture and local-only safety confirmation
 
@@ -86,7 +86,7 @@ Machine-readable evidence summary: `docs/manual-qa/PSE-220-final-acceptance-summ
 | `pnpm typecheck` | Pass. |
 | `pnpm test` | Pass — 229 files, 883 tests. |
 | `pnpm build` | Pass. |
-| `pnpm package` | Fail — known packaging/tooling blocker: electron-builder refuses `packages/core/dist/.tsbuildinfo` as an unsafe pnpm-linked path outside the desktop package. |
+| `pnpm package` | Failed during the original PSE-220 review because electron-builder refused a pnpm-linked `.tsbuildinfo`; superseded by PSE-221, where `pnpm package` passed from a clean worktree. |
 
 ## Risk register
 
@@ -94,7 +94,7 @@ Machine-readable evidence summary: `docs/manual-qa/PSE-220-final-acceptance-summ
 |---|---|---|
 | P0 | None remaining after this review. | No action. |
 | P1 | None remaining after the tab-strip, container IPC, and contact header fixes in this PR. | Verify in CI/manual evidence. |
-| P2 | `pnpm package` previously failed in the clean linked worktree because electron-builder refused a pnpm-linked `.tsbuildinfo` path outside the package. | Release/tooling follow-up; do not treat as operator UI failure, but it blocks packaged-artifact confidence if reproduced. |
+| P3 | PSE-220 originally found a packaging/tooling blocker (`.tsbuildinfo` copied through pnpm links). | Resolved by PSE-221; keep package evidence in `docs/manual-qa/PSE-221-packaged-release-qa.md` and do not treat the PSE-220 package failure as current. |
 | P2 | OS-native restore folder picker cannot be fully exercised through CDP screenshots. | Human packaged-app QA should confirm native dialog path selection. |
 | P2 | This is a pilot-readiness UX gate, not full accessibility/performance/public-release certification. | Separate release gate. |
 | P3 | Search can still show duplicate file rows when both item and attachment metadata match. | Search relevance polish follow-up. |
@@ -102,10 +102,11 @@ Machine-readable evidence summary: `docs/manual-qa/PSE-220-final-acceptance-summ
 
 ## Recommended follow-up tickets
 
-1. **Release packaging hardening:** fix electron-builder/pnpm linked-worktree package output so `pnpm package` passes from clean worktrees without unsafe symlink errors.
-2. **Restore picker packaged QA:** human packaged-app confirmation of native restore folder chooser and restore-to-new-workspace flow.
-3. **Search result dedupe polish:** collapse duplicate file rows when item and attachment metadata match the same local object.
-4. **Welcome recent workspace curation:** hide missing/test workspaces or add cleanup affordance.
+1. **Restore picker / OS-native dialog packaged QA:** human packaged-app confirmation of native restore folder chooser plus file/import/export/backup dialogs (tracked by PSE-228).
+2. **Today memory bounding:** reduce or explicitly document the 10k Today memory headroom caveat before broader low-memory handoff (tracked by PSE-226).
+3. **Package metadata/release caveat polish:** keep unsigned/unpacked/internal-pilot-only status explicit (tracked by PSE-227).
+4. **Search result dedupe polish:** collapse duplicate file rows when item and attachment metadata match the same local object.
+5. **Welcome recent workspace curation:** hide missing/test workspaces or add cleanup affordance.
 
 ## Final acceptance checklist
 
@@ -114,4 +115,4 @@ Machine-readable evidence summary: `docs/manual-qa/PSE-220-final-acceptance-summ
 - [x] P0/P1 findings fixed or classified; no remaining P0/P1 accepted.
 - [x] Architecture/local-only rules preserved.
 - [x] Acceptance evidence documented.
-- [ ] Final command results, PR status, Linear status, and merge state to be reconciled after validation.
+- [x] PSE-220 command results and review evidence were recorded; current readiness docs should read this together with PSE-221 packaging evidence and later PSE-225 reconciliation.
