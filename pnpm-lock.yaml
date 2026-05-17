@@ -26,18 +26,6 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@local-work-os/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@local-work-os/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@local-work-os/features':
-        specifier: workspace:*
-        version: link:../../packages/features
-      '@local-work-os/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       better-sqlite3:
         specifier: ^12.9.0
         version: 12.9.0
