@@ -589,6 +589,37 @@ describe("TodayService", () => {
     expect(markdown).toContain("Launch Plan: planned 3, completed 1");
   });
 
+  it("bounds Today lane payloads while preserving total counts", async () => {
+    const taskService = createTaskService();
+
+    for (let index = 0; index < 7; index += 1) {
+      await taskService.createTask({
+        workspaceId: "workspace_1",
+        containerId: "container_project_1",
+        title: `Due today ${index + 1}`,
+        dueAt: new Date(2026, 4, 15, index + 1).toISOString()
+      });
+    }
+
+    const viewModel = createTodayService().getTodayViewModel({
+      workspaceId: "workspace_1",
+      laneLimit: 3
+    });
+
+    expect(viewModel.dueToday).toHaveLength(3);
+    expect(viewModel.dueToday.map((task) => task.title)).toEqual([
+      "Due today 1",
+      "Due today 2",
+      "Due today 3"
+    ]);
+    expect(viewModel.laneSummaries.dueToday).toEqual({
+      totalCount: 7,
+      returnedCount: 3,
+      limit: 3,
+      hasMore: true
+    });
+  });
+
   it("rejects invalid inputs", () => {
     const service = createTodayService();
 
@@ -598,6 +629,9 @@ describe("TodayService", () => {
     expect(() =>
       service.getTodayViewModel({ workspaceId: "workspace_1", backlogDays: 0 })
     ).toThrow("backlogDays must be an integer between 1 and 365.");
+    expect(() =>
+      service.getTodayViewModel({ workspaceId: "workspace_1", laneLimit: 0 })
+    ).toThrow("laneLimit must be an integer between 1 and 500.");
   });
 });
 

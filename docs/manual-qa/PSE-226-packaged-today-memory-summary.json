@@ -1,0 +1,57 @@
+{
+    "ticket":  "PSE-226",
+    "generatedAt":  "2026-05-17T21:38:56.901Z",
+    "appMode":  "packaged app with local CDP harness",
+    "appArtifact":  "C:\\tmp\\Pseudico-pse-226\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+    "appArtifactSize":  222973952,
+    "baseCommit":  "061aee8f870e598ac1795407cbeb45d12f083575",
+    "os":  "Microsoft Windows NT 10.0.26200.0",
+    "node":  "v22.21.1",
+    "pnpm":  "10.25.0",
+    "fixture":  {
+                    "sourceWorkspaceRoot":  "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-benchmark-10000-9JAo09",
+                    "preparedWorkspaceRoot":  "C:\\tmp\\Pseudico-pse-226\\.tmp\\PSE-226-2026-05-17T21-38-50-101Z\\workspace-10000",
+                    "items":  10000,
+                    "tasks":  8000,
+                    "lists":  1000,
+                    "listItems":  3000,
+                    "searchRecords":  10000,
+                    "activityEvents":  10000
+                },
+    "memory":  {
+                   "afterWelcome":  {
+                                        "processCount":  4,
+                                        "workingSetMb":  403.66,
+                                        "privateMb":  265.64
+                                    },
+                   "afterOpen":  {
+                                     "processCount":  4,
+                                     "workingSetMb":  445.46,
+                                     "privateMb":  303.31
+                                 },
+                   "afterDashboard":  {
+                                          "processCount":  4,
+                                          "workingSetMb":  478.55,
+                                          "privateMb":  335.73
+                                      },
+                   "afterToday":  {
+                                      "processCount":  4,
+                                      "workingSetMb":  994.38,
+                                      "privateMb":  874.2
+                                  }
+               },
+    "domSummary":  {
+                       "hash":  "#/today",
+                       "todayHeader":  "50/502",
+                       "tomorrowHeader":  "50/502",
+                       "backlogHeader":  "50/5019",
+                       "cardsRendered":  150,
+                       "limitCopy":  "Large Today list detected.To keep the app responsive, each lane initially loads the earliest 50 tasks. Counts still show the full lane totals, and urgent due or overdue work stays first. | Showing the first 50 of 502 tasks.Earliest work is shown first so urgent due and overdue items stay visible. Use Search for a specific task or load more if you need the full lane.Show 50 more | Showing the first 50 of 502 tasks.Earliest work is shown first so urgent due and overdue items stay visible. Use Search for a specific task or load more if you need the full lane.Show 50 more | Showing the first 50 of 5019 tasks.Earliest work is shown first so urgent due and overdue items stay visible. Use Search for a specific task or load more if you need the full lane.Show 50 more"
+                   },
+    "screenshots":  {
+                        "today":  "docs/manual-qa/screenshots/PSE-226-packaged-today-memory/10k-today-bounded.png"
+                    },
+    "result":  "Pass",
+    "branch":  "codex/pse-226-today-memory",
+    "codeUnderTest":  "PSE-226 working tree on base commit 061aee8f870e598ac1795407cbeb45d12f083575 before commit; PR commit records final source."
+}

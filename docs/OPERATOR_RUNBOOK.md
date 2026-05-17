@@ -256,7 +256,7 @@ Optional or future local-adjacent features, such as browser capture, IMAP import
 | Search misses known content | Run search rebuild if available. If still wrong, record examples and escalate as an activity/search consistency issue. |
 | Attachment missing | Do not delete the file record. Run attachment audit, reattach from source, or restore from backup. |
 | Import rejected | Keep the original import file unchanged. Read validation errors, fix the source copy, and retry in a test workspace first. |
-| App slow with large workspace | Close unused views, avoid huge date ranges, and record startup/search/dashboard/Today timing plus memory for the performance ticket. The 10k Today route has a known P2 high-memory caveat until PSE-226 is fixed or accepted. |
+| App slow with large workspace | Close unused views, avoid huge date ranges, and record startup/search/dashboard/Today timing plus memory. Today now starts very large lanes at the earliest 50 tasks with full counts and Show 50 more. |
 | Unexpected network prompt or traffic | Stop, document the feature and action, and escalate because local-only guarantees may be at risk. |
 
 ## 11. Escalation checklist
@@ -295,7 +295,7 @@ Current limitations to explain honestly:
 - External live calendar sync is excluded.
 - Monthly/yearly recurrence, richer drag/drop calendar editing, and advanced planning UX remain future work.
 - Broader third-party import execution remains staged behind service-level validation and fixture coverage unless a packaged operator UI is explicitly added and reviewed.
-- The 10k Today route has a known packaged-app memory caveat from PSE-209; use smaller workspaces or avoid very large Today/overdue piles until PSE-226 bounds or documents the behavior.
+- Very large Today lanes are intentionally bounded after PSE-226: Today first shows the earliest 50 tasks in each lane, shows the full lane count, and offers "Show 50 more". Use Search when looking for a specific task in a very large workspace.
 - OS-native file, import, export, backup, and restore dialogs are not all human-reviewed yet; PSE-228 is the focused dialog QA ticket.
 - Local-only does not replace device-level backups.
 

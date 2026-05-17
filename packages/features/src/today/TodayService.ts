@@ -33,11 +33,14 @@ import { PlanningSummaryService } from "./PlanningSummaryService";
 // Does not own task persistence internals or calendar rendering.
 export const DEFAULT_TODAY_BACKLOG_DAYS = DEFAULT_TODAY_PREFERENCES.backlogDays;
 export const TODAY_BACKLOG_DAYS_SETTING_KEY = "today_backlog_days";
+export const DEFAULT_TODAY_LANE_LIMIT = 50;
+export const MAX_TODAY_LANE_LIMIT = 500;
 
 export type TodayQueryInput = {
   workspaceId: string;
   date?: LocalDateInput;
   backlogDays?: number;
+  laneLimit?: number;
 };
 
 type TodayQueryContext = TodayQueryInput & {
@@ -63,6 +66,10 @@ export class TodayService {
     const preferences = this.resolvePreferences(input);
     const backlogDays = input.backlogDays ?? preferences.backlogDays;
     const normalizedInput = { ...input, date, backlogDays, preferences };
+    const dueToday = this.listDueToday(normalizedInput);
+    const overdueBacklog = this.listOverdueBacklog(normalizedInput);
+    const tomorrowPreview = this.listTomorrowPreview(normalizedInput);
+    const laneLimit = normalizeLaneLimit(input.laneLimit);
     const overdueBacklogRange = createLocalDayWindowRange({
       date,
       startOffsetDays: -backlogDays,
@@ -87,7 +94,7 @@ export class TodayService {
         plannedTodayCount: this.countPlannedToday({
           workspaceId: input.workspaceId,
           date,
-          dueToday: this.listDueToday(normalizedInput)
+          dueToday
         }),
         preferences
       }),
@@ -111,9 +118,14 @@ export class TodayService {
           endExclusive: tomorrowRange.endExclusive
         }
       },
-      dueToday: this.listDueToday(normalizedInput),
-      overdueBacklog: this.listOverdueBacklog(normalizedInput),
-      tomorrowPreview: this.listTomorrowPreview(normalizedInput)
+      dueToday: applyLaneLimit(dueToday, laneLimit),
+      overdueBacklog: applyLaneLimit(overdueBacklog, laneLimit),
+      tomorrowPreview: applyLaneLimit(tomorrowPreview, laneLimit),
+      laneSummaries: {
+        dueToday: summarizeLane(dueToday, laneLimit),
+        overdueBacklog: summarizeLane(overdueBacklog, laneLimit),
+        tomorrowPreview: summarizeLane(tomorrowPreview, laneLimit)
+      }
     };
   }
 
@@ -408,6 +420,10 @@ export class TodayService {
     if (input.backlogDays !== undefined) {
       validateBacklogDays(input.backlogDays);
     }
+
+    if (input.laneLimit !== undefined) {
+      validateLaneLimit(input.laneLimit);
+    }
   }
 }
 
@@ -437,6 +453,38 @@ function validateBacklogDays(value: unknown): number {
   }
 
   return value;
+}
+
+function normalizeLaneLimit(value: number | undefined): number | null {
+  return value === undefined ? null : validateLaneLimit(value);
+}
+
+function validateLaneLimit(value: unknown): number {
+  if (
+    typeof value !== "number" ||
+    !Number.isInteger(value) ||
+    value < 1 ||
+    value > MAX_TODAY_LANE_LIMIT
+  ) {
+    throw new Error(`laneLimit must be an integer between 1 and ${MAX_TODAY_LANE_LIMIT}.`);
+  }
+
+  return value;
+}
+
+function applyLaneLimit<T>(tasks: T[], laneLimit: number | null): T[] {
+  return laneLimit === null ? tasks : tasks.slice(0, laneLimit);
+}
+
+function summarizeLane(tasks: TodayTaskView[], laneLimit: number | null) {
+  const returnedCount = laneLimit === null ? tasks.length : Math.min(tasks.length, laneLimit);
+
+  return {
+    totalCount: tasks.length,
+    returnedCount,
+    limit: laneLimit,
+    hasMore: returnedCount < tasks.length
+  };
 }
 
 function compareTodayTasks(left: TodayTaskView, right: TodayTaskView): number {

@@ -15,8 +15,8 @@ additional packaged/manual evidence closed or narrowed several gates:
 
 - PSE-207 proved packaged manual backup restore into a fresh workspace, with
   caveats for JSON-export restore and some visual-search screenshots.
-- PSE-209 proved 1k/10k packaged UI responsiveness, with a P2 memory caveat for
-  the 10k Today route.
+- PSE-209 proved 1k/10k packaged UI responsiveness, and PSE-226 bounded
+  the 10k Today initial render memory behavior.
 - PSE-218 made backup/restore guided, previewed, and non-destructive in the UI.
 - PSE-220 completed the primary-operator UX acceptance gate with screenshots and
   no remaining P0/P1 primary-work-loop blockers.
@@ -59,7 +59,7 @@ Use these labels when reading this report:
 | Backup/restore as a recovery path | High with caveats | PSE-197 automated golden path plus PSE-207 packaged backup restore and PSE-218 guided restore UI prove the primary backup-restore path into a new workspace. JSON-export restore through UI remains a caveat. |
 | Local-only architecture intent | Medium-high | Static/security tests, defaults, URL allowlist, and dependency audit pass. OR-R3 packaged OS-level monitoring is owner-accepted for internal pilot, but remains unrun before stronger handoff claims. |
 | Activity/search/data integrity | High for covered core mutations | Reconciliation tests and later fixes cover core paths; PSE-222 confirms template file placeholders no longer create invalid file rows. |
-| Large-workspace scale | Medium-high for 1k/10k internal pilot | PSE-203 service benchmark and PSE-209 packaged UI run passed without P0/P1 freeze/crash. 10k Today memory rose to ~2.29 GB and remains P2 (PSE-226). |
+| Large-workspace scale | Medium-high for 1k/10k internal pilot | PSE-203 service benchmark, PSE-209 packaged UI run, and PSE-226 bounded Today packaged rerun passed without P0/P1 freeze/crash. 10k Today now starts capped at 50 tasks/lane with visible totals and load-more copy. |
 | Packaged internal pilot handoff | Medium-high | PSE-221 `pnpm package`, `package:smoke`, `release:package-check`, and packaged UI evidence pass. Artifact remains unsigned/unpacked/internal-only. |
 | Primary-operator UX | Medium-high for internal pilot | PSE-220 screenshots/review found no remaining P0/P1 primary-work-loop blocker after targeted fixes. OS-native dialogs and accessibility/performance remain separate caveats. |
 | Importer readiness | Medium for implemented local paths | PSE-223 packaged smoke covers CSV/TSV, Markdown folder, Markdown note IPC, EML, and ICS. Third-party foundations and IMAP are not pilot-ready UI importers. |
@@ -83,7 +83,7 @@ Use these labels when reading this report:
 | Workspaces / Inbox | Present | Fresh workspace smoke, package smoke, PSE-206 packaged rerun, PSE-221 package smoke | Workspace create/open works in packaged evidence; OS-native dialogs still need PSE-228 human dialog QA. |
 | Projects | Present | Service tests, PSE-206/PSE-220 visual evidence, PSE-216 project work-loop QA | PSE-220 fixed prior project/contact layout regressions; advanced project customization remains future. |
 | Contacts | Present/partial | Contact service/UI tests, PSE-220 visual evidence | Deeper CRM workflows remain future; current contact containers are pilot-usable. |
-| Tasks / Today | Present | Today planning tests, PSE-206/PSE-209/PSE-220 evidence | 10k Today memory is a P2 caveat tracked by PSE-226; do not claim broad low-memory large-workspace readiness. |
+| Tasks / Today | Present | Today planning tests, PSE-206/PSE-209/PSE-220 evidence | PSE-226 caps initial 10k Today lanes at 50 tasks/lane with visible totals/load-more copy; do not claim 100k or every-hardware readiness. |
 | Lists | Present | List service tests, virtualized UI tests, PSE-206/PSE-220 evidence | Advanced pipeline/list conversion UX remains feature QA. |
 | Notes | Present | Note service tests, search/reconciliation tests, PSE-206 evidence | Markdown-first model; advanced rich text remains future. |
 | Files / attachments | Present | Backup/restore golden, package smoke attach/open/reveal, PSE-207 restore evidence, PSE-222 template integrity | OS-native file picker/dialog proof remains PSE-228; template file placeholders are note reminders, not copied binary files. |
@@ -108,7 +108,7 @@ eview-app-evidence.json`, screenshots folder | Historical packaged automated/vis
 | Fresh packaged operator journey | `docs/manual-qa/PSE-206-packaged-operator-journey.md` | Packaged automated/visual | Pass with caveats after PSE-212; proves restart/persistence and core loop with P2/P3 caveats. |
 | Packaged backup restore | `docs/manual-qa/PSE-207-packaged-backup-restore.md` | Packaged automated/visual | Pass with caveats; primary backup restore into clean workspace works. |
 | Local-only security | `docs/LOCAL_ONLY_SECURITY_REVIEW.md` | Automated source/static | Normal workflows require no network; packaged network monitor is not reviewed and is owner-accepted for internal pilot only. |
-| Packaged UI performance | `docs/manual-qa/PSE-209-packaged-ui-performance.md`, `docs/manual-qa/PSE-209-run-summary.json` | Packaged automated/visual | Pass with caveats for 1k/10k; 10k Today memory remains P2. |
+| Packaged UI performance | `docs/manual-qa/PSE-209-packaged-ui-performance.md`, `docs/manual-qa/PSE-209-run-summary.json`, `docs/manual-qa/PSE-226-packaged-today-memory.md` | Packaged automated/visual | Pass with caveats for 1k/10k; PSE-226 reduced 10k Today packaged working set to 994.38 MB with visible lane caps. |
 | Primary-operator UX gate | `docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md`, screenshots under `docs/manual-qa/screenshots/PSE-220-*` | Packaged/source visual | Pass for primary-operator pilot UX with documented P2/P3 caveats. |
 | Package hardening | `docs/manual-qa/PSE-221-packaged-release-qa.md`, `docs/manual-qa/PSE-221-package-contents-check.json`, `docs/release/package-artifact-check.json` | Automated/package plus visual | `pnpm package`, smoke, and package checks passed; `.tsbuildinfo` absent from packaged output. |
 | Template placeholder integrity | `docs/manual-qa/PSE-222-template-file-placeholder-integrity.md` | Source/service regression plus historical packaged repro | Template file placeholders no longer create invalid file items. |
@@ -136,7 +136,7 @@ listed in the PSE-225 PR/check summary.
 | OR-R1 | P1 historical, now closed with caveats | Full packaged operator journey needed real-app evidence. | Closed with caveats by PSE-206/PSE-220; no current P0/P1 primary-work-loop blocker in latest UX review. | Keep P2/P3 caveats visible; do not treat them as public-release proof. |
 | OR-R2 | P0 historical, now closed with caveats | Manual packaged backup/restore recovery needed proof. | Closed with caveats by PSE-207 and improved by PSE-218. | Keep backup restore as the normal recovery path; JSON-export restore UI remains caveated. |
 | OR-R3 | P2 accepted for internal pilot / P1 before stronger handoff | No unexpected network behavior has automated/static evidence, but no packaged OS/firewall monitor artifact exists. | Owner accepts automated/static evidence for internal pilot; not fully closed for nontechnical or public-release claims. | Run manual packaged no-network monitor from `docs/LOCAL_ONLY_SECURITY_REVIEW.md` before nontechnical handoff unless the owner explicitly accepts that boundary for the target recipient. |
-| OR-R4 | P1 historical, now P2 caveat | 1k/10k packaged UI responsiveness needed proof. | Closed for P0/P1 freeze/crash by PSE-209; 10k Today memory remains P2. | PSE-226 should bound or document Today memory before broader pilot. |
+| OR-R4 | Closed with P2 scale caveats | 1k/10k packaged UI responsiveness needed proof. | Closed for P0/P1 freeze/crash by PSE-209; PSE-226 bounded 10k Today initial render to 50 tasks/lane and remeasured Today at 994.38 MB working set. | Keep 100k/every-hardware performance out of pilot claims; use Search/load-more for very large Today lanes. |
 | OR-R5 | P1 for public release | Unsigned/unpacked package; installer/signing/notarization absent. | Known limitation; acceptable for internal pilot only. | PSE-227/package release work before broader distribution; owner decides signing/installer path. |
 | OR-R6 | P1 for public release | Auto-update is absent and manual upgrade mistakes could affect users. | Documented limitation. | Use backup-before-upgrade runbook; add auto-update only via future scoped ticket. |
 | OR-R7 | P2 | Advanced UX/product gaps remain: rich text, custom dashboard editing, advanced saved-view builder, scheduling, live calendar sync. | Documented limitation. | Keep out of current handoff claim; create feature tickets as needed. |
@@ -154,7 +154,7 @@ These limitations are acceptable for **internal pilot** only if communicated to 
 - No public installer, auto-update channel, notarization, or code-signing promise exists yet.
 - Optional network-facing features must remain disabled unless specifically tested.
 - Manual backups are required before important imports, maintenance, restore tests, and app upgrades.
-- 10k Today memory usage currently requires high memory headroom until PSE-226 is fixed or explicitly accepted.
+- Very large Today lanes initially show the earliest 50 tasks per lane with full counts and load-more controls; use Search/backlog tuning instead of loading every task card at once.
 - Workflows are scaffold-only and should not be used as pilot daily automation.
 - Third-party importer foundations are not pilot UI importers unless PSE-223 marks the family packaged-proven.
 - OS-native dialog behavior remains a separate PSE-228 evidence gap.
@@ -179,7 +179,7 @@ These limitations are acceptable for **internal pilot** only if communicated to 
 - [x] Manual packaged backup/restore into a fresh workspace is completed and recorded in `docs/manual-qa/PSE-207-packaged-backup-restore.md` (Pass with caveats).
 - [ ] Manual packaged no-network monitor check is completed and recorded, or owner explicitly accepts the automated/static evidence boundary for that nontechnical recipient.
 - [x] Manual/packaged 1k/10k UI performance check is completed and recorded in `docs/manual-qa/PSE-209-packaged-ui-performance.md` (Pass with caveats).
-- [ ] PSE-226 Today memory caveat is fixed, documented with operator mitigation, or owner-accepted for the target pilot group.
+- [x] PSE-226 Today memory caveat is fixed/documented with operator-visible lane caps and packaged evidence.
 - [ ] PSE-228 OS-native dialog QA is completed or marked out of scope for the target pilot group.
 - [ ] Any discovered P0/P1 issue is fixed or explicitly accepted by the owner.
 - [ ] The runbook is updated with any real manual QA caveats.
@@ -195,9 +195,8 @@ These limitations are acceptable for **internal pilot** only if communicated to 
 
 ## Recommended next actions
 
-1. Complete PSE-226 to bound or clearly document 10k Today memory behavior.
-2. Complete PSE-227/PSE-228 to polish package caveats and prove OS-native dialogs before broader handoff.
-3. Run OR-R3 packaged no-network monitor before nontechnical/public-release handoff, unless the owner explicitly accepts the automated/static-only boundary for that recipient.
+1. Complete PSE-227/PSE-228 to polish package caveats and prove OS-native dialogs before broader handoff.
+2. Run OR-R3 packaged no-network monitor before nontechnical/public-release handoff, unless the owner explicitly accepts the automated/static-only boundary for that recipient.
 
 ## Final statement
 

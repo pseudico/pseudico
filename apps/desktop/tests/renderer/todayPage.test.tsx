@@ -34,6 +34,9 @@ describe("Today renderer page", () => {
     expect(html).toContain("2/6 focus tasks planned");
     expect(html).toContain("Completed today:");
     expect(html).toContain("item<!-- -->.");
+    expect(html).toContain("Showing the first");
+    expect(html).toContain("of <!-- -->12");
+    expect(html).toContain("Large Today list detected.");
   });
 });
 
@@ -117,7 +120,12 @@ function todayViewModel(): TodayViewModelSummary {
     ],
     overdueBacklog: [
       todayTask("item_overdue", "Send overdue report", "2026-05-03T09:00:00.000Z")
-    ]
+    ],
+    laneSummaries: {
+      dueToday: { totalCount: 12, returnedCount: 2, limit: 2, hasMore: true },
+      tomorrowPreview: { totalCount: 1, returnedCount: 1, limit: 2, hasMore: false },
+      overdueBacklog: { totalCount: 1, returnedCount: 1, limit: 2, hasMore: false }
+    }
   };
 }
 

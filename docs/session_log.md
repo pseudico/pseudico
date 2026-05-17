@@ -7895,3 +7895,33 @@ Next actions: Monitor CI; address review feedback; merge when approved.
 - Files changed: docs/OPERATOR_READINESS_REPORT.md; docs/LOCAL_ONLY_SECURITY_REVIEW.md; docs/OPERATOR_RUNBOOK.md; docs/session_log.md
 - Open questions / risks: Nontechnical/public-release no-network proof remains unrun.
 - Next actions: Commit/push PR update; update Linear/PR note; run OR-R3 monitor before broader handoff.
+
+## 2026-05-18T07:21:14+10:00
+Objective: Begin PSE-226 from clean latest main and evaluate 10k Today memory caveat end-to-end.
+Decisions made:
+- Use fresh worktree C:\tmp\Pseudico-pse-226 on codex/pse-226-today-memory from origin/main.
+- Keep scope to performance evidence, bounded Today behavior or operator-facing caveat, docs, PR, and merge if safe.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need reproduce current 10k performance and determine whether code change is safer than documentation-only caveat.
+Next actions: Read issue/evidence; inspect Today/performance code; run targeted performance checks.
+
+## 2026-05-18T07:41:54+10:00
+Objective: Implement and evidence PSE-226 Today memory bounding.
+Decisions made:
+- Bounded packaged Today initial render to earliest 50 tasks per lane with visible full counts and Show 50 more.
+- Reproduced 1k/10k service benchmark and captured packaged 10k Today memory/screenshot evidence.
+Files changed:
+- apps/desktop/src/renderer/pages/TodayPage.tsx; packages/ui/src/components/TodayLane.tsx; packages/features/src/today/**; docs/performance/reports/pse-226-main-remeasure.json; docs/manual-qa/PSE-226-packaged-today-memory.md
+Open questions / risks: Very large lanes remain capped by design; 100k/every-hardware performance remains outside this ticket.
+Next actions: Run full checks; commit/push; open PR and merge if safe.
+
+## 2026-05-18T07:47:52+10:00
+Objective: Validate PSE-226 branch before PR.
+Decisions made:
+- Full lint/typecheck/test/build passed; package, package smoke, release package check, benchmark, and packaged Today memory QA passed.
+- Retained PSE-226 screenshot/JSON evidence and removed temporary QA harness from lint scope.
+Files changed:
+- docs/manual-qa/PSE-226-packaged-today-memory.md; docs/manual-qa/PSE-226-packaged-today-memory-summary.json; docs/manual-qa/screenshots/PSE-226-packaged-today-memory/10k-today-bounded.png; docs/release/package-artifact-check.json
+Open questions / risks: Package metadata warnings remain PSE-227, not PSE-226.
+Next actions: Commit; push/open PR; merge if review/CI state allows.

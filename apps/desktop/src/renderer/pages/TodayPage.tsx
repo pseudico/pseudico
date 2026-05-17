@@ -32,6 +32,12 @@ type TodayPageProps = {
   initialViewModel?: TodayViewModelSummary | null;
 };
 
+const DEFAULT_TODAY_LANE_LIMIT = 50;
+const MAX_TODAY_LANE_LIMIT = 500;
+const TODAY_LANE_LIMIT_INCREMENT = 50;
+
+type TodayLaneViewModelKey = "dueToday" | "tomorrowPreview" | "overdueBacklog";
+
 export function TodayPage({
   apiClient = desktopApiClient,
   initialViewModel
@@ -52,6 +58,7 @@ export function TodayPage({
   const [preferencesSaving, setPreferencesSaving] = useState(false);
   const [exportingSummary, setExportingSummary] = useState(false);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const [laneLimit, setLaneLimit] = useState(DEFAULT_TODAY_LANE_LIMIT);
 
   useEffect(() => {
     if (initialViewModel !== undefined) {
@@ -73,7 +80,8 @@ export function TodayPage({
       setError(null);
 
       const result = await apiClient.today.getViewModel({
-        workspaceId
+        workspaceId,
+        laneLimit
       });
 
       if (!active) {
@@ -95,7 +103,7 @@ export function TodayPage({
     return () => {
       active = false;
     };
-  }, [apiClient, currentWorkspace, initialViewModel]);
+  }, [apiClient, currentWorkspace, initialViewModel, laneLimit]);
 
   useEffect(() => {
     if (currentWorkspace === null) {
@@ -148,6 +156,12 @@ export function TodayPage({
     await reloadToday(workspaceId);
   }
 
+  function showMoreTodayTasks(): void {
+    setLaneLimit((current) =>
+      Math.min(current + TODAY_LANE_LIMIT_INCREMENT, MAX_TODAY_LANE_LIMIT)
+    );
+  }
+
   async function reloadToday(workspaceId: string): Promise<void> {
     if (viewModel === null) {
       setLoading(true);
@@ -157,7 +171,8 @@ export function TodayPage({
     setMutationError(null);
 
     const result = await apiClient.today.getViewModel({
-      workspaceId
+      workspaceId,
+      laneLimit
     });
 
     setLoading(false);
@@ -537,6 +552,13 @@ export function TodayPage({
         <ErrorState error={mutationError} title="Task update failed" />
       )}
 
+      {viewModel !== null && hasLimitedTodayLanes(viewModel) ? (
+        <div className="today-lane-limit" role="status">
+          <strong>Large Today list detected.</strong>
+          <span>To keep the app responsive, each lane initially loads the earliest {laneLimit} tasks. Counts still show the full lane totals, and urgent due or overdue work stays first.</span>
+        </div>
+      ) : null}
+
       {viewModel === null ? null : (
         <DailyPlannerEditor
           disabled={plannerLoading || plannerTarget === null}
@@ -577,6 +599,7 @@ export function TodayPage({
           loading={loading && viewModel === null}
           tasks={(viewModel?.dueToday ?? []).map(toTodayTaskCard)}
           title="Today"
+          {...getLaneLimitProps(viewModel, "dueToday", showMoreTodayTasks)}
           busyTaskId={busyTaskId}
           onOpenSource={openTaskSource}
           onPlanTask={planTask}
@@ -594,6 +617,7 @@ export function TodayPage({
           loading={loading && viewModel === null}
           tasks={(viewModel?.tomorrowPreview ?? []).map(toTodayTaskCard)}
           title="Tomorrow"
+          {...getLaneLimitProps(viewModel, "tomorrowPreview", showMoreTodayTasks)}
           busyTaskId={busyTaskId}
           onOpenSource={openTaskSource}
           onPlanTask={planTask}
@@ -613,6 +637,7 @@ export function TodayPage({
           loading={loading && viewModel === null}
           tasks={(viewModel?.overdueBacklog ?? []).map(toTodayTaskCard)}
           title="Backlog"
+          {...getLaneLimitProps(viewModel, "overdueBacklog", showMoreTodayTasks)}
           busyTaskId={busyTaskId}
           onOpenSource={openTaskSource}
           onPlanTask={planTask}
@@ -849,6 +874,34 @@ function TodayPreferencesPanel({
       ) : null}
     </section>
   );
+}
+
+function hasLimitedTodayLanes(viewModel: TodayViewModelSummary): boolean {
+  return Object.values(viewModel.laneSummaries ?? {}).some(
+    (summary) => summary.hasMore
+  );
+}
+
+function getLaneLimitProps(
+  viewModel: TodayViewModelSummary | null,
+  key: TodayLaneViewModelKey,
+  onShowMore: () => void
+) {
+  const fallbackTasks = viewModel?.[key] ?? [];
+  const summary = viewModel?.laneSummaries?.[key] ?? {
+    totalCount: fallbackTasks.length,
+    returnedCount: fallbackTasks.length,
+    limit: null,
+    hasMore: false
+  };
+
+  return {
+    totalTaskCount: summary.totalCount,
+    returnedTaskCount: summary.returnedCount,
+    taskLimit: summary.limit,
+    hasMore: summary.hasMore,
+    onShowMore
+  };
 }
 
 function toTodayTaskCard(task: TodayTaskSummary): TodayTaskCardViewModel {
