@@ -194,9 +194,9 @@ foundations without a pilot operator UI path; IMAP remains adapter-required.
 Do not represent those service-only foundations as ready operator importers.
 
 PSE-228 later proved the packaged Markdown folder picker. It also confirmed
-that CSV/TSV import currently uses a typed local file path, and that direct
-packaged `.eml` import works while the Windows native email picker remains Not
-reviewed.
+that CSV/TSV import currently uses a typed local file path. PSE-229 split email
+import into separate **EML file** and **email folder** actions and proved the
+packaged Windows native `.eml` file picker.
 
 ## 7. Attachments and missing files
 
@@ -302,11 +302,10 @@ Current limitations to explain honestly:
 - Monthly/yearly recurrence, richer drag/drop calendar editing, and advanced planning UX remain future work.
 - Broader third-party import execution remains staged behind service-level validation and fixture coverage unless a packaged operator UI is explicitly added and reviewed.
 - Very large Today lanes are intentionally bounded after PSE-226: Today first shows the earliest 50 tasks in each lane, shows the full lane count, and offers "Show 50 more". Use Search when looking for a specific task in a very large workspace.
-- PSE-228 proved packaged OS-native picker behavior for file attach, Markdown
-  folder import, and restore target selection. Workspace create/open, CSV/TSV
-  import, export destination, and backup create/list are typed-path or
-  workspace-relative flows today; Windows native email picker coverage remains
-  Not reviewed.
+- PSE-228/PSE-229 proved packaged OS-native picker behavior for file attach,
+  Markdown folder import, EML file import, and restore target selection.
+  Workspace create/open, CSV/TSV import, export destination, and backup
+  create/list are typed-path or workspace-relative flows today.
 - Local-only does not replace device-level backups.
 
 ## 13. Handoff acceptance checklist

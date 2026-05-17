@@ -16,10 +16,18 @@ export function registerImportIpc(
 
       return result.canceled ? null : (result.filePaths[0] ?? null);
     },
-    async chooseEmailImportPath() {
+    async chooseEmailImportPath(sourceKind) {
       const result = await dialog.showOpenDialog({
-        filters: [{ name: "Email messages", extensions: ["eml", "*"] }],
-        properties: ["openFile", "openDirectory"]
+        ...(sourceKind === "file"
+          ? {
+              filters: [{ name: "Email message files", extensions: ["eml"] }],
+              properties: ["openFile"] as const,
+              title: "Choose an EML email file to import"
+            }
+          : {
+              properties: ["openDirectory"] as const,
+              title: "Choose a Maildir or email folder to import"
+            })
       });
 
       return result.canceled ? null : (result.filePaths[0] ?? null);

@@ -1059,7 +1059,9 @@ export function SettingsPage({
     }
   }
 
-  async function importEmailMessages(): Promise<void> {
+  async function importEmailMessages(
+    sourceKind: "file" | "directory"
+  ): Promise<void> {
     if (currentWorkspace === null) {
       setUserError("Open a workspace before importing email files.");
       return;
@@ -1080,6 +1082,7 @@ export function SettingsPage({
           }
         : await apiClient.import.chooseAndImportEmailsAsTasks({
             workspaceId: currentWorkspace.id,
+            sourceKind,
             extractTags: true
           });
 
@@ -1095,7 +1098,10 @@ export function SettingsPage({
       showToast(
         `Imported ${result.data.importedCount} email task(s) into Inbox.`,
         {
-          title: "Email import complete",
+          title:
+            sourceKind === "file"
+              ? "EML file import complete"
+              : "Email folder import complete",
           tone: result.data.issues.length === 0 ? "success" : "info"
         }
       );
@@ -2221,10 +2227,19 @@ export function SettingsPage({
               className="secondary-button compact-button"
               disabled={importBusy || currentWorkspace === null}
               type="button"
-              onClick={() => void importEmailMessages()}
+              onClick={() => void importEmailMessages("file")}
             >
               <Upload size={16} aria-hidden="true" />
-              Import EML/Maildir to Inbox
+              Import EML file to Inbox
+            </button>
+            <button
+              className="secondary-button compact-button"
+              disabled={importBusy || currentWorkspace === null}
+              type="button"
+              onClick={() => void importEmailMessages("directory")}
+            >
+              <Upload size={16} aria-hidden="true" />
+              Import email folder to Inbox
             </button>
             <button
               className="secondary-button compact-button"

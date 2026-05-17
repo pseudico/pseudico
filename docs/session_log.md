@@ -7985,3 +7985,33 @@ Files changed:
 - docs/manual-qa/PSE-228-packaged-os-dialog-qa.md; docs/OPERATOR_READINESS_REPORT.md; docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md; docs/session_log.md
 Open questions / risks: PSE-229 should be closed or explicitly deferred before claiming native email picker coverage.
 Next actions: Final diff review; commit and PR.
+
+## 2026-05-18 08:55 +10:00
+Objective: Start PSE-229 implementation from latest merged main.
+Decisions made:
+- Created clean worktree C:\tmp\Pseudico-pse-229 on codex/pse-229-email-picker from origin/main.
+- Base includes PSE-228 merge SHA 208d8e85dbd468c437d21c206252fd6bad52d288.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need choose smallest operator-safe picker change without broad import redesign.
+Next actions: Inspect email import UI/IPC; add tests/evidence; package QA.
+
+## 2026-05-18 09:13 +10:00
+Objective: Implement and validate PSE-229 email native picker fix.
+Decisions made:
+- Split email import into separate EML file and email folder actions to avoid Windows mixed picker ambiguity.
+- Proved packaged Windows EML picker cancel/select, invalid path safety, visible Inbox result, and updated readiness/runbook/release docs.
+Files changed:
+- apps/desktop/src/preload/api.ts; apps/desktop/src/main/ipc/importHandlers.ts; apps/desktop/src/main/ipc/registerImportIpc.ts; apps/desktop/src/renderer/pages/SettingsPage.tsx; apps/desktop/tests/main/importHandlers.test.ts; docs/manual-qa/PSE-229-email-native-picker.md; docs/manual-qa/PSE-229-email-picker-summary.json; docs/manual-qa/screenshots/PSE-229-2026-05-18T09-05-00/*
+Open questions / risks: Maildir folder hands-on selection remains P2 if required for nontechnical handoff.
+Next actions: Review diff; commit/push; open PR and merge if CI is clean.
+
+## 2026-05-18 09:19 +10:00
+Objective: Final PSE-229 validation before PR.
+Decisions made:
+- Full lint/typecheck/test passed after final cleanup; package, package smoke, release package check, and packaged native EML picker QA passed.
+- Retained known package tooling warnings as PSE-227-documented non-runtime advisories.
+Files changed:
+- docs/release/package-artifact-check.json; docs/session_log.md
+Open questions / risks: Folder-style email imports have directory-only chooser but not a separate hands-on nontechnical run.
+Next actions: Stage/commit/push PSE-229; open PR and merge if CI passes.
