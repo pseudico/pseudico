@@ -4,6 +4,13 @@ Local Work OS supports a local-only Trello adapter foundation for
 user-provided board JSON exports and optional raw attachment files that have
 already been expanded/scanned by the desktop import boundary.
 
+## Packaged-app pilot status
+
+PSE-223 did **not** find a pilot operator UI/preload path for Trello import in
+the packaged app. Treat this as a service foundation with fixture/unit coverage,
+not as a packaged operator-ready importer, until a focused UI/dialog ticket adds
+and reviews that flow.
+
 ## Scope
 
 - Preview one Trello board JSON file at a time.

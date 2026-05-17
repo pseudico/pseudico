@@ -171,6 +171,25 @@ After restoring:
 
 Do not delete the original workspace until the restored copy has been verified.
 
+### Import expectations
+
+For the internal pilot, treat imports as deliberate local file movement, not as
+daily capture:
+
+1. Create a manual backup first.
+2. Use **Settings → Imports & exports** only with files or folders you already
+   have on local disk.
+3. Preview CSV/TSV and Markdown folder imports before executing.
+4. After import, search for a known imported title/body token, check recent
+   activity, and verify any copied attachment opens from the workspace
+   attachment area.
+
+Packaged QA for PSE-223 directly exercised CSV/TSV, Markdown folder,
+standalone Markdown note IPC, EML email, and local ICS file imports in the
+packaged runtime. Notion, Todoist, Trello, and Evernote remain service
+foundations without a pilot operator UI path; IMAP remains adapter-required.
+Do not represent those service-only foundations as ready operator importers.
+
 ## 7. Attachments and missing files
 
 - Attached files should be copied into the workspace-controlled attachment area.
@@ -195,7 +214,7 @@ Use maintenance tools only when you understand the expected result.
 | Backup status/retention | Verifying backup schedule and cleanup. | Never keep only one backup of important work. |
 | Search rebuild | Search results look stale or incomplete. | Rebuild should not delete user data. |
 | Attachment audit | Files appear missing or orphaned. | Quarantine/cleanup must be reversible or backed up first. |
-| Import validation | Before importing JSON, CSV/TSV, Markdown, ENEX, or app exports. | Preview and validate before executing. |
+| Import validation | Before importing JSON, CSV/TSV, Markdown, ENEX, or app exports. | Preview and validate before executing; service-only third-party foundations are not pilot UI importers. |
 | Corruption recovery | Database is locked, unavailable, or corrupt. | Stop writing, copy the workspace folder, restore from backup into a new folder. |
 
 ## 9. Privacy and network expectations
@@ -261,7 +280,7 @@ Current limitations to explain honestly:
 - Browser capture production bridge and broader local automation scheduling remain future work unless explicitly ticketed.
 - External live calendar sync is excluded.
 - Monthly/yearly recurrence, richer drag/drop calendar editing, and advanced planning UX remain future work.
-- Broader third-party import execution remains staged behind validation and fixture coverage.
+- Broader third-party import execution remains staged behind service-level validation and fixture coverage unless a packaged operator UI is explicitly added and reviewed.
 - Local-only does not replace device-level backups.
 
 ## 13. Handoff acceptance checklist

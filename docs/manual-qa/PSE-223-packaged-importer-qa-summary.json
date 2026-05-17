@@ -1,0 +1,87 @@
+﻿{
+    "issue":  "PSE-223",
+    "generatedAt":  "2026-05-17T19:27:48.1612493+10:00",
+    "branch":  "codex/pse-223-importer-packaged-qa",
+    "commit":  "97f7968374723fb1a53428f63e78b33f08b44b63",
+    "os":  "Microsoft Windows NT 10.0.26200.0",
+    "node":  "v22.21.1",
+    "pnpm":  "10.25.0",
+    "packagePath":  "C:\\tmp\\Pseudico-pse-223\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+    "packageSmoke":  {
+                         "ok":  true,
+                         "appBundlePath":  "C:\\tmp\\Pseudico-pse-223\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
+                         "workspaceRootPath":  "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-package-smoke-Fu7CAa\\Smoke Workspace",
+                         "databasePath":  "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-package-smoke-Fu7CAa\\Smoke Workspace\\data\\local-work-os.sqlite",
+                         "attachmentsPath":  "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-package-smoke-Fu7CAa\\Smoke Workspace\\attachments",
+                         "projectId":  "container_package_smoke_1",
+                         "taskId":  "item_package_smoke_5",
+                         "attachmentId":  "attachment_mp9kmtkp_1ef6zs090wt",
+                         "attachmentPath":  "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-package-smoke-Fu7CAa\\Smoke Workspace\\attachments\\2026\\05\\attachment_mp9kmtkp_1ef6zs090wt\\packaged-smoke-note.txt",
+                         "openedAttachmentPath":  "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-package-smoke-Fu7CAa\\Smoke Workspace\\attachments\\2026\\05\\attachment_mp9kmtkp_1ef6zs090wt\\packaged-smoke-note.txt",
+                         "revealedAttachmentPath":  "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-package-smoke-Fu7CAa\\Smoke Workspace\\attachments\\2026\\05\\attachment_mp9kmtkp_1ef6zs090wt\\packaged-smoke-note.txt",
+                         "importerEvidence":  {
+                                                  "csvTsv":  {
+                                                                 "previewRows":  1,
+                                                                 "importedCount":  1,
+                                                                 "duplicateSkippedCount":  1,
+                                                                 "searchHitCount":  1
+                                                             },
+                                                  "markdownFolder":  {
+                                                                         "previewRows":  5,
+                                                                         "importedCount":  4,
+                                                                         "attachmentCount":  1,
+                                                                         "searchHitCount":  1
+                                                                     },
+                                                  "markdownNote":  {
+                                                                       "previewRows":  1,
+                                                                       "importedCount":  1,
+                                                                       "searchHitCount":  1
+                                                                   },
+                                                  "email":  {
+                                                                "previewCount":  1,
+                                                                "importedCount":  1,
+                                                                "attachmentCount":  1,
+                                                                "searchHitCount":  1
+                                                            },
+                                                  "ics":  {
+                                                              "importedEventCount":  1,
+                                                              "skippedEventCount":  0
+                                                          },
+                                                  "invalidInput":  {
+                                                                       "csvWrongExtensionRejected":  true,
+                                                                       "markdownFolderWrongPathRejected":  true
+                                                                   },
+                                                  "activityActions":  [
+                                                                          "calendar_feed_imported",
+                                                                          "file_attached",
+                                                                          "task_created",
+                                                                          "markdown_note_import_completed",
+                                                                          "note_created",
+                                                                          "file_attached",
+                                                                          "tag_added",
+                                                                          "tag_created",
+                                                                          "note_created",
+                                                                          "container_tab_created",
+                                                                          "markdown_folder_import_completed",
+                                                                          "container_created",
+                                                                          "csv_import_completed",
+                                                                          "csv_import_completed",
+                                                                          "container_created",
+                                                                          "csv_import_completed",
+                                                                          "task_created",
+                                                                          "file_attached",
+                                                                          "workspace_created",
+                                                                          "task_created",
+                                                                          "container_created"
+                                                                      ],
+                                                  "integrityStatus":  "healthy",
+                                                  "integrityIssueCount":  0
+                                              },
+                         "backupRelativePath":  "backups/2026-05-07T00-03-00-000Z",
+                         "backupDatabasePath":  "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-package-smoke-Fu7CAa\\Smoke Workspace\\backups\\2026-05-07T00-03-00-000Z\\local-work-os.sqlite",
+                         "normalLaunchSmoke":  {
+                                                   "ok":  true,
+                                                   "target":  "welcome window"
+                                               }
+                     }
+}

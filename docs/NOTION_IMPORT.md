@@ -3,6 +3,13 @@
 Local Work OS supports a local-only Notion export adapter foundation for
 Markdown/CSV exports that the user already has on disk.
 
+## Packaged-app pilot status
+
+PSE-223 did **not** find a pilot operator UI/preload path for Notion import in
+the packaged app. Treat this as a service foundation with fixture/unit coverage,
+not as a packaged operator-ready importer, until a focused UI/dialog ticket adds
+and reviews that flow.
+
 ## Scope
 
 - Preview local Notion Markdown pages, database CSV files, assets, and

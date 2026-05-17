@@ -6,6 +6,13 @@ The Evernote importer is local-only and accepts user-provided ENEX and HTML
 notebook export files plus already-copied local resource files. It does not use
 Evernote accounts, APIs, cloud sync, or remote attachment fetching.
 
+## Packaged-app pilot status
+
+PSE-223 did **not** find a pilot operator UI/preload path for Evernote import in
+the packaged app. Treat this as a service foundation with fixture/unit coverage,
+not as a packaged operator-ready importer, until a focused UI/dialog ticket adds
+and reviews that flow.
+
 ## Supported preview/import scope
 
 - ENEX notes with title, tags, created/updated timestamps, note content, and
