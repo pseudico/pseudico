@@ -7735,3 +7735,81 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: No P0/P1 blockers; CI statuses are not configured/reported on the PR head.
 Next actions: Amend/push session log; merge PR #203; update Linear.
+
+## 2026-05-17T18:43:43.0088718+10:00
+Objective: Start PSE-223 from clean latest main worktree.
+Decisions made:
+- Selected PSE-223 as first non-completed issue after merged PSE-222 in the supplied sequence.
+- Created branch codex/pse-223-importer-packaged-qa from origin/main 97f79683.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need importer inventory and packaged QA feasibility.
+Next actions:
+- Read required docs/evidence and post Linear plan.
+
+## 2026-05-17T18:51:45.2393978+10:00
+Objective: Establish PSE-223 implementation baseline.
+Decisions made:
+- Installed dependencies in clean worktree after sandbox EPERM.
+- Began packaged-smoke importer coverage rather than adding new import features.
+Files changed:
+- apps/desktop/src/main/packageSmoke.ts
+- docs/session_log.md
+Open questions / risks:
+- Typecheck/test still pending after smoke extension.
+Next actions:
+- Fix compile issues and add importer matrix docs.
+
+## 2026-05-17T19:29:56.0438615+10:00
+Objective: Document PSE-223 packaged importer evidence.
+Decisions made:
+- Packaged smoke now covers local CSV/TSV, Markdown folder/note, EML, and ICS handlers.
+- Third-party importer docs now label service-only packaged status.
+Files changed:
+- apps/desktop/src/main/packageSmoke.ts
+- docs/manual-qa/PSE-223-packaged-importer-qa.md
+- docs/manual-qa/PSE-223-packaged-importer-qa-summary.json
+- docs/OPERATOR_RUNBOOK.md
+- docs/OPERATOR_READINESS_REPORT.md
+Open questions / risks:
+- OS-native dialog QA remains PSE-228, not claimed here.
+Next actions:
+- Run full checks and prepare PR.
+
+## 2026-05-17T19:35:03.0426277+10:00
+Objective: Complete PSE-223 verification before PR.
+Decisions made:
+- Full lint/typecheck/test/build/package/package:smoke/release checks pass after sandbox-related escalations.
+- Package metadata warnings remain documented PSE-227 scope.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Packaged smoke is structured evidence; human OS-dialog proof still PSE-228.
+Next actions:
+- Commit, push branch, open PR.
+
+## 2026-05-17T19:38:59.3683665+10:00
+Objective: Resume and finish PSE-223 handoff.
+Decisions made:
+- Continue from staged PSE-223 worktree rather than reimplementing.
+Files changed:
+- docs/session_log.md
+Open questions / risks:
+- Need commit, push, PR, and Linear update.
+Next actions:
+- Restage session log, commit, push, open PR.
+
+## 2026-05-17T19:41:29.9578096+10:00
+- Objective: Finalize PSE-223 packaged importer QA handoff after PR creation.
+- Decisions made: PR #204 is ready for review; keep OS-native dialog QA and package metadata caveats in PSE-228/PSE-227.
+- Files changed: docs/session_log.md
+- Open questions / risks: P2 OS-native dialogs not covered here; P3 Windows temp cleanup can be busy after smoke.
+- Next actions: update Linear; await PR review/CI; merge when approved.
+
+## 2026-05-17T19:47:16.9863280+10:00
+- Objective: Review PR #204 before merge and tighten smoke assertions.
+- Decisions made: Treat invalid-input, preview, attachment, and ICS activity regressions as smoke failures before merge.
+- Files changed: apps/desktop/src/main/packageSmoke.ts; docs/session_log.md
+- Open questions / risks: Need rerun package smoke and CI after push.
+- Next actions: rerun checks; push update; merge if green.

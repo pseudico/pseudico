@@ -4,6 +4,13 @@ Local Work OS supports a local-only Todoist adapter foundation for user-provided
 project CSV files and backup ZIPs that have been expanded/scanned by the
 desktop import boundary.
 
+## Packaged-app pilot status
+
+PSE-223 did **not** find a pilot operator UI/preload path for Todoist import in
+the packaged app. Treat this as a service foundation with fixture/unit coverage,
+not as a packaged operator-ready importer, until a focused UI/dialog ticket adds
+and reviews that flow.
+
 ## Scope
 
 - Detect a single project CSV versus a backup-style source containing one or

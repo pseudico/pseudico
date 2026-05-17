@@ -53,7 +53,7 @@ This remains a meaningful improvement from the Phase 1 discovery verdict at the 
 | Dashboards | Present/partial | Fresh workspace smoke, widget tests, performance benchmark | Custom dashboard editing future. |
 | Timeline/calendar | Partial-present | Fresh workspace smoke, timeline/calendar services | External/live sync is out of scope. |
 | Templates/workflows | Partial-present | Existing service tests/docs | Scheduling/advanced workflow handoff should be separately qualified. |
-| Backup/export/import/restore | Present/partial | Backup/restore golden, package smoke backup, failure matrix | Real UI restore/file-dialog QA remains handoff gate. |
+| Backup/export/import/restore | Present/partial | Backup/restore golden, package smoke backup, failure matrix, PSE-223 packaged importer smoke | CSV/TSV, Markdown folder, standalone Markdown note IPC, EML, and ICS have packaged-runtime evidence; third-party service foundations are not pilot UI importers. Real OS-native dialog QA remains PSE-228. |
 | Maintenance tools | Present/partial | Failure matrix, maintenance tests, activity/search rebuild evidence | Long-running packaged-app feedback must be manually checked. |
 
 ## Evidence pack
@@ -72,6 +72,7 @@ This remains a meaningful improvement from the Phase 1 discovery verdict at the 
 | Performance/scale | `docs/PERFORMANCE_SCALE_QA.md`, `docs/performance/reports/operator-readiness-pse-203.json` | 1k/10k service-level gates passed; manual packaged UI remains. |
 | Packaging/release | `docs/RELEASE_CANDIDATE_PACKAGING.md`, `docs/release/package-artifact-check.json`, `pnpm package:smoke` | Package smoke and checksum/data-boundary check pass; PSE-211 added normal packaged welcome-window smoke; unsigned unpacked package only. |
 | Manual packaged operator journey | `docs/manual-qa/PSE-206-packaged-operator-journey.md` | **Pass with caveats**: PSE-212 project-opening blocker resolved; run completed through restart/persistence, with P2/P3 caveats for relationship/search/file-dialog evidence. |
+| Packaged importer QA | `docs/manual-qa/PSE-223-packaged-importer-qa.md`, `docs/manual-qa/PSE-223-packaged-importer-qa-summary.json` | CSV/TSV, Markdown folder, Markdown note IPC, EML, and ICS import paths pass packaged-runtime smoke with activity/search/integrity evidence; Notion/Todoist/Trello/Evernote/IMAP remain service-only or scaffold. |
 
 ## Validation commands recorded during final cycle
 
@@ -98,6 +99,7 @@ Latest completed command set after PSE-212 / PSE-206 rerun:
 | OR-R6 | P1 | Auto-update is absent. Manual upgrade mistakes could affect users. | Documented limitation. | Use backup-before-upgrade runbook; add auto-update only in future scoped ticket. |
 | OR-R7 | P2 | Advanced UX gaps remain: rich text, custom dashboard editing, advanced saved-view builder, scheduling, live calendar sync. | Documented limitation. | Keep out of current handoff claim; create feature tickets if needed. |
 | OR-R8 | P2 | Dependency audit warning: `simple-get` transitive release-tooling dependency is network-capable by purpose. | Tested acceptable for app workflows; documented. | Keep out of normal runtime; revisit on dependency changes. |
+| OR-R9 | P2 | Importer readiness could be overclaimed from service tests/docs without packaged runtime evidence. | Improved by PSE-223. Packaged smoke now exercises CSV/TSV, Markdown folder, standalone Markdown note IPC, EML, and ICS; third-party foundations are explicitly partial/service-only. | Keep PSE-228 for OS-native dialog proof and do not mark Notion/Todoist/Trello/Evernote/IMAP as pilot-ready until a packaged UI path is implemented and reviewed. |
 
 ## Owner-accepted limitations for internal pilot
 

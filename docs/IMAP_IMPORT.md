@@ -5,6 +5,12 @@ mail service. The importer foundation is deliberately adapter-based so the app
 can test a mailbox connection and fetch messages only when the user explicitly
 configures a local IMAP account.
 
+## Packaged-app pilot status
+
+PSE-223 classifies IMAP as scaffold/adapter-required for pilot packaging. The
+packaged Settings UI should continue directing operators to EML/Maildir import
+until a real OS-keychain IMAP adapter is implemented and reviewed.
+
 ## Boundary
 
 - No hosted forwarding address, cloud mailbox mirror, telemetry, or background
