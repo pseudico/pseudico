@@ -7560,3 +7560,12 @@ Decisions made:
 Files changed: apps/desktop/tests/preload/api.test.ts; docs/session_log.md
 Open questions / risks: Need rerun GitHub Actions after push.
 Next actions: commit/push typecheck fix; watch checks; reconcile Linear/GitHub.
+
+## 2026-05-17T10:54+10
+Objective: Confirm PR #199 checks after CI fixes.
+Decisions made:
+- GitHub Actions `lint / typecheck / test / build` passed on head 235de334.
+- Remaining work is PR/Linear final reconciliation and merge if policy permits.
+Files changed: docs/session_log.md
+Open questions / risks: Adding this required log entry will trigger one final CI run.
+Next actions: commit/push log; re-confirm checks; merge and move Linear if allowed.
