@@ -7860,3 +7860,24 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI status pending; PSE-227 packaging metadata warning remains out of scope.
 Next actions: Monitor CI; address review feedback; merge when approved.
+
+## 2026-05-18T06:47:50+10:00
+- Objective: Start PSE-225 docs reconciliation from clean main worktree.
+- Decisions made: Treat "next" as PSE-225; created clean branch codex/pse-225-doc-reconcile from origin/main d4411c9b; posted plan to Linear.
+- Files changed: docs/session_log.md
+- Open questions / risks: Docs may overclaim if source/package/manual evidence is not clearly separated.
+- Next actions: Audit stale readiness/performance/UX wording; update docs only; run lint/typecheck and path checks.
+
+## 2026-05-18T06:54:27+10:00
+- Objective: Complete PSE-225 documentation reconciliation and local verification.
+- Decisions made: Updated docs to internal-pilot-ready-with-caveats; closed OR-R2/OR-R4 with caveats; left OR-R3/PSE-226/PSE-228 caveats explicit.
+- Files changed: docs/OPERATOR_READINESS_REPORT.md; docs/PERFORMANCE_SCALE_QA.md; docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md; docs/OPERATOR_RUNBOOK.md; docs/RELEASE_CANDIDATE_PACKAGING.md; docs/session_log.md
+- Open questions / risks: No new packaged/manual run for PSE-225; OS-native dialogs and 10k Today memory remain follow-ups.
+- Next actions: Commit scoped docs; open PR; update Linear with evidence and risks.
+
+## 2026-05-18T06:57:53+10:00
+- Objective: Publish PSE-225 reconciliation PR and update Linear.
+- Decisions made: Opened PR #206 ready for review; set Linear PSE-225 to PR Open; left Done until merge/review.
+- Files changed: docs/session_log.md
+- Open questions / risks: PR mergeability shows pending/unknown from GitHub connector; CI/review outcome still needed.
+- Next actions: Reviewer checks PR; merge if CI/review pass; move Linear to Done after merge.

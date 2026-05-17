@@ -6,7 +6,20 @@ PSE-204 / PSE-OR-009 records how Local Work OS can be handed to an operator as a
 
 **Internal pilot / operator-readiness candidate:** unpacked Electron directory package produced by `pnpm package` and verified by `pnpm package:smoke` plus `pnpm release:package-check`.
 
-Not yet public-release ready because installer targets, Windows signing, macOS signing/notarization, public checksum publishing, release-channel hosting, and auto-update remain owner decisions or future tickets.
+Not yet public-release ready because package metadata polish, installer targets, Windows signing, macOS signing/notarization, public checksum publishing, release-channel hosting, legal/support process, and auto-update remain owner decisions or future tickets.
+
+## Evidence baseline
+
+Latest reconciled package-hardening evidence is PSE-221:
+
+- `docs/manual-qa/PSE-221-packaged-release-qa.md` records `pnpm package`,
+  `pnpm package:smoke`, and `pnpm release:package-check` passing from a clean
+  worktree after the `.tsbuildinfo` / pnpm linked-package failure was fixed.
+- `docs/manual-qa/PSE-221-package-contents-check.json` records that
+  `.tsbuildinfo` files are absent from the packaged output and that runtime
+  files such as `better_sqlite3.node` are present.
+- Package metadata polish such as missing description/author warnings is tracked
+  by PSE-227 and should not be interpreted as public-release readiness.
 
 ## Build artifacts
 
@@ -112,5 +125,7 @@ A nontechnical operator may receive an internal pilot build only when:
 - package, package smoke, release package check, dependency audit, and core tests pass on the target OS;
 - the operator runbook names the exact build and known limitations;
 - the operator has backup-before-upgrade instructions;
-- any unsigned/unnotarized app warning is explained before handoff; and
+- any unsigned/unnotarized app warning is explained before handoff;
+- package metadata warnings are either resolved or explicitly documented for the
+  internal-pilot recipient; and
 - open P0/P1 release risks are fixed or explicitly accepted by the owner.

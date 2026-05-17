@@ -1,135 +1,182 @@
-﻿# Operator Readiness Report
+# Operator Readiness Report
 
-Date: 2026-05-15
+Date: 2026-05-17
 Program: PSE-195 operator-readiness review
-Scope: PSE-196 through PSE-206 evidence plus PSE-211/PSE-212 packaged-app fixes and PSE-206 rerun
+Scope: reconciled through latest merged main evidence after PSE-207, PSE-209, PSE-218, PSE-220, PSE-221, PSE-222, PSE-223, and PSE-224.
+Reviewed base for this reconciliation: `d4411c9b3c239c51463fe5a54694b3c0d3b07a94`.
 
 ## Verdict
 
-**Pilot ready — not yet nontechnical operator-ready.**
+**Internal pilot ready with documented caveats - not yet nontechnical-operator ready and not public-release ready.**
 
-A technical/internal operator can use Pseudico service/source workflows with the current runbook and known caveats. PSE-211 restores normal packaged app launch, and PSE-212 resolves the PSE-206 packaged project-opening blocker. The current packaged artifact is still **not nontechnical-operator handoffable** because OR-R2/OR-R3/OR-R4 remain open and the PSE-206 rerun recorded P2/P3 UI caveats.
+A technical/internal pilot operator can use Pseudico with the runbook, manual
+backup discipline, and explicit caveats below. Since the earlier PSE-206 report,
+additional packaged/manual evidence closed or narrowed several gates:
 
-This remains a meaningful improvement from the Phase 1 discovery verdict at the source/service level. The review converted broad uncertainty into tested evidence, fixed several data-integrity gaps, added a runbook, produced repeatable package/release checks, and added a normal packaged-window smoke in PSE-211. PSE-206 now closes OR-R1 with caveats and identifies focused follow-up polish for relationships/search/file-dialog checks.
+- PSE-207 proved packaged manual backup restore into a fresh workspace, with
+  caveats for JSON-export restore and some visual-search screenshots.
+- PSE-209 proved 1k/10k packaged UI responsiveness, with a P2 memory caveat for
+  the 10k Today route.
+- PSE-218 made backup/restore guided, previewed, and non-destructive in the UI.
+- PSE-220 completed the primary-operator UX acceptance gate with screenshots and
+  no remaining P0/P1 primary-work-loop blockers.
+- PSE-221 restored package-production confidence after the `.tsbuildinfo` /
+  pnpm-linked-worktree packaging failure.
+- PSE-222 fixed template file-placeholder integrity overclaims by converting
+  unsupported binary placeholders into searchable note reminders instead of
+  invalid file rows.
+- PSE-223 added packaged importer evidence for implemented local import paths
+  and clearly marks third-party/service foundations as not pilot UI importers.
+- PSE-224 demoted workflows to Workflow Lab / scaffold-only for the internal
+  pilot rather than overclaiming an operator automation loop.
+
+The remaining blockers for a broader nontechnical handoff are not broad unknowns:
+manual packaged no-network monitoring (OR-R3), explicit owner acceptance of the
+remaining P2/P3 caveats, and focused follow-up tickets for the known caveats.
+Public release remains out of scope because signing, installers, notarization,
+auto-update, legal/support policy, and public distribution are not complete.
+
+## Evidence classification rules
+
+Use these labels when reading this report:
+
+| Evidence type | Meaning |
+| --- | --- |
+| Automated source/service | Vitest, benchmark, repository/service, static/security, or source renderer checks. Useful but not sufficient for manual UI claims. |
+| Packaged automated | Actual packaged executable exercised by a smoke/CDP harness or smoke mode. Useful for runtime/package confidence; OS-native dialogs may still be unreviewed. |
+| Packaged manual / visual | Human- or actual-app screenshots and manual QA artifacts under `docs/manual-qa/`. Needed for operator-facing claims. |
+| Historical | Evidence from an earlier branch/commit that remains useful context but may have been superseded. |
+| Not reviewed | No direct evidence exists yet; do not claim passed. |
 
 ## Confidence summary
 
 | Area | Confidence | Reason |
 | --- | --- | --- |
-| Core local data model and service workflows | High | Full test suite passes; fresh-workspace and backup/restore smokes added. |
-| Backup/restore as a technical recovery path | High | Golden backup/export/restore test verifies records, attachments, search, activity, dashboard, and relationships. |
-| Local-only architecture intent | Medium-high | Static security tests, defaults, URL allowlist, and dependency audit pass; manual network monitor still pending. |
-| Activity/search/data integrity | High for covered core mutations | Reconciliation test added and found/fixed bootstrap/attachment indexing gaps. |
-| Large-workspace service scale | High for 1k/10k service layer | Benchmark report passed; packaged UI measurement still pending. |
-| Packaged internal pilot handoff | Medium-low for current artifact | PSE-211 fixed normal packaged launch and PSE-212 fixed created-project opening; PSE-206 completed with documented caveats. |
-| Nontechnical operator handoff | Low | Runbook exists and OR-R1 is closed with caveats, but backup/restore UI, no-network monitor, and packaged UI performance gates remain. |
-| Public release readiness | Low-medium | Signing, notarization, installer, public checksums, and update channel are not implemented. |
+| Core local data model and service workflows | High | Full test/build/package command sets have passed in recent issue evidence; repositories/services cover core mutations with activity/search behavior. |
+| Backup/restore as a recovery path | High with caveats | PSE-197 automated golden path plus PSE-207 packaged backup restore and PSE-218 guided restore UI prove the primary backup-restore path into a new workspace. JSON-export restore through UI remains a caveat. |
+| Local-only architecture intent | Medium-high | Static/security tests, defaults, URL allowlist, and dependency audit pass. Manual packaged network monitor evidence remains OR-R3. |
+| Activity/search/data integrity | High for covered core mutations | Reconciliation tests and later fixes cover core paths; PSE-222 confirms template file placeholders no longer create invalid file rows. |
+| Large-workspace scale | Medium-high for 1k/10k internal pilot | PSE-203 service benchmark and PSE-209 packaged UI run passed without P0/P1 freeze/crash. 10k Today memory rose to ~2.29 GB and remains P2 (PSE-226). |
+| Packaged internal pilot handoff | Medium-high | PSE-221 `pnpm package`, `package:smoke`, `release:package-check`, and packaged UI evidence pass. Artifact remains unsigned/unpacked/internal-only. |
+| Primary-operator UX | Medium-high for internal pilot | PSE-220 screenshots/review found no remaining P0/P1 primary-work-loop blocker after targeted fixes. OS-native dialogs and accessibility/performance remain separate caveats. |
+| Importer readiness | Medium for implemented local paths | PSE-223 packaged smoke covers CSV/TSV, Markdown folder, Markdown note IPC, EML, and ICS. Third-party foundations and IMAP are not pilot-ready UI importers. |
+| Workflow readiness | Low for operators by design | PSE-224 explicitly marks workflows scaffold-only; services are tested for maintainers but no operator create/edit/run/history loop is claimed. |
+| Nontechnical operator handoff | Medium-low | Core journeys are much better evidenced, but OR-R3 and owner acceptance remain, and the report still carries P2/P3 caveats. |
+| Public release readiness | Low | Signing, notarization, installers, public checksum publishing, legal/support process, and update channel are not complete. |
 
 ## Readiness level definitions
 
 | Level | Meaning | Current result |
 | --- | --- | --- |
-| Not ready | Major blockers prevent safe real use. | No — core evidence now exists. |
-| Pilot ready | Usable by a technical/internal operator with known caveats. | **Yes.** |
-| Operator ready | Usable by a nontechnical operator with a runbook. | **Not yet.** OR-R1 is closed with caveats; OR-R2/OR-R3/OR-R4 remain. |
-| Release ready | Packaged, documented, supportable, signed/audited/regression-tested. | **No.** Public distribution work remains. |
+| Not ready | Major blockers prevent safe internal real use. | No - core internal-pilot evidence exists. |
+| Internal pilot ready | Usable by a technical/internal operator with known caveats and runbook. | **Yes.** |
+| Nontechnical operator ready | Usable by a nontechnical operator without developer interpretation. | **Not yet.** OR-R3 and owner acceptance remain; P2/P3 caveats must be accepted or closed. |
+| Public release ready | Signed, documented, supportable, packaged, legally reviewed, and update/support policy complete. | **No.** Public distribution work remains. |
 
 ## Feature truth matrix
 
 | Feature | Present/partial/missing | Evidence | Operator-facing caveat |
 | --- | --- | --- | --- |
-| Workspaces / Inbox | Present | Fresh workspace smoke, package smoke, bootstrap/search health fixes | Manual packaged create/open succeeded in the PSE-206 rerun. |
-| Projects | Present | Fresh workspace smoke, service tests, package smoke, PSE-206 packaged rerun | PSE-212 fixed packaged Quick Start project opening; PSE-206 rerun completed with caveats. |
-| Contacts | Present/partial | Fresh workspace smoke creates contact/relationship; service/UI tests | Packaged manual contact workflow still needed. |
-| Tasks / Today | Present | Fresh workspace smoke, Today planning tests, dashboard/timeline/calendar checks | OS notifications/reminder UX not release-critical yet. |
-| Lists | Present | Fresh workspace smoke, list service tests, virtualized UI tests | Complex list conversions/pipeline UX need normal feature QA. |
-| Notes | Present | Fresh workspace smoke, huge-note regression, note service tests | Rich text remains future; Markdown is current contract. |
-| Files / attachments | Present | Backup/restore golden, package smoke attach/open/reveal/backup, failure matrix | Manual large-file/file-picker QA remains. |
-| Links | Present | URL validation/security tests, fresh workspace smoke | Metadata fetch/web widgets remain optional/off by default. |
-| Tags / categories | Present | Fresh workspace smoke, reconciliation test, metadata tests | Advanced metadata browser UX future. |
-| Relationships | Present | Fresh workspace smoke and service tests | Graph/deep UX manual QA still useful. |
-| Search | Present | Fresh workspace smoke, reconciliation health/rebuild, maintenance tests | Advanced relevance/query-builder UX future. |
-| Saved views / collections | Present/partial | Fresh workspace smoke, collection pagination, saved-view tests | Advanced builder UX future. |
-| Dashboards | Present/partial | Fresh workspace smoke, widget tests, performance benchmark | Custom dashboard editing future. |
-| Timeline/calendar | Partial-present | Fresh workspace smoke, timeline/calendar services | External/live sync is out of scope. |
-| Templates/workflows | Templates present; workflows scaffold-only for pilot | Existing workflow service tests plus PSE-224 Workflow Lab UI/docs clarification | Workflows are not pilot-supported daily automation; no packaged operator create/edit/run/history loop is exposed. |
-| Backup/export/import/restore | Present/partial | Backup/restore golden, package smoke backup, failure matrix, PSE-223 packaged importer smoke | CSV/TSV, Markdown folder, standalone Markdown note IPC, EML, and ICS have packaged-runtime evidence; third-party service foundations are not pilot UI importers. Real OS-native dialog QA remains PSE-228. |
-| Maintenance tools | Present/partial | Failure matrix, maintenance tests, activity/search rebuild evidence | Long-running packaged-app feedback must be manually checked. |
+| Workspaces / Inbox | Present | Fresh workspace smoke, package smoke, PSE-206 packaged rerun, PSE-221 package smoke | Workspace create/open works in packaged evidence; OS-native dialogs still need PSE-228 human dialog QA. |
+| Projects | Present | Service tests, PSE-206/PSE-220 visual evidence, PSE-216 project work-loop QA | PSE-220 fixed prior project/contact layout regressions; advanced project customization remains future. |
+| Contacts | Present/partial | Contact service/UI tests, PSE-220 visual evidence | Deeper CRM workflows remain future; current contact containers are pilot-usable. |
+| Tasks / Today | Present | Today planning tests, PSE-206/PSE-209/PSE-220 evidence | 10k Today memory is a P2 caveat tracked by PSE-226; do not claim broad low-memory large-workspace readiness. |
+| Lists | Present | List service tests, virtualized UI tests, PSE-206/PSE-220 evidence | Advanced pipeline/list conversion UX remains feature QA. |
+| Notes | Present | Note service tests, search/reconciliation tests, PSE-206 evidence | Markdown-first model; advanced rich text remains future. |
+| Files / attachments | Present | Backup/restore golden, package smoke attach/open/reveal, PSE-207 restore evidence, PSE-222 template integrity | OS-native file picker/dialog proof remains PSE-228; template file placeholders are note reminders, not copied binary files. |
+| Links | Present | URL validation/security tests and operator smoke | Metadata fetch/web widgets remain optional/off by default. |
+| Tags / categories | Present | Metadata tests, reconciliation tests, PSE-206/PSE-220 evidence | Advanced metadata browser UX remains future. |
+| Relationships | Present | Service tests, PSE-220 evidence | PSE-206 relationship screenshot/API mismatch remains historical P2/P3 caveat; PSE-220 did not find a P0/P1 primary-loop blocker. |
+| Search | Present | Reconciliation health/rebuild, maintenance tests, PSE-217/PSE-220 visual evidence | Advanced relevance/query-builder UX remains future; duplicate file result edge is P3. |
+| Saved views / collections | Present/partial | Collection pagination, saved-view tests, PSE-206 evidence | Advanced builder UX remains future. |
+| Dashboards | Present/partial | Widget tests, PSE-206/PSE-209/PSE-220 evidence | Custom dashboard editing remains future. |
+| Timeline/calendar | Partial-present | Timeline/calendar services, PSE-206/PSE-209 evidence | External/live calendar sync is out of scope. |
+| Templates | Present with limitations | Template service tests and PSE-222 template file-placeholder evidence | Binary file placeholders become notes with reattachment guidance; real binary-copy template support is future. |
+| Workflows | Scaffold-only for pilot | Workflow service/schema tests and PSE-224 Workflow Lab QA | No pilot operator create/edit/run/history loop; do not market workflows as daily automation. |
+| Backup/export/import/restore | Present/partial | PSE-207, PSE-218, PSE-223, package smoke, failure matrix | Backup restore is proven; JSON-export restore and OS-native import/export/backup dialogs are not fully human-reviewed; third-party import foundations are not pilot UI importers. |
+| Maintenance tools | Present/partial | Failure matrix, maintenance tests, activity/search rebuild evidence, PSE-209 search rebuild | Long-running packaged-app feedback has smoke/QA evidence for search rebuild but broad hands-on maintenance coverage remains limited. |
 
 ## Evidence pack
 
-| Evidence area | Artifact / command | Result |
-| --- | --- | --- |
-| Phase 1 discovery | `docs/OPERATOR_READINESS_REVIEW_PHASE1.md` | Initial verdict: pilot ready, not operator ready. |
-| Handoff plan/tickets | `docs/OPERATOR_HANDOFF_PLAN.md`, `docs/tickets/OPERATOR_READINESS_TICKET_PACK.md` | Linear-ready roadmap PSE-196..205. |
-| Fresh workspace journey | `apps/desktop/tests/smoke/operator-readiness-flow.test.ts` | Verifies create/relate/search/saved views/Today/dashboard/timeline/calendar/reopen. |
-| Backup/restore golden path | `apps/desktop/tests/smoke/backup-restore-golden.test.ts` | Verifies restore from export and backup into clean workspaces with attachments. |
-| Operator runbook | `docs/OPERATOR_RUNBOOK.md`, `docs/help/operator-runbook.md` | Nontechnical use/recovery/upgrade guidance exists. |
-| Failure modes | `docs/FAILURE_MODE_MATRIX.md` plus regression tests | Bad paths, malformed inputs, restore/search/maintenance scenarios documented/tested. |
-| Dependency/license audit | `pnpm audit:dependencies`, `docs/release/*` | Passes with one documented network-capable tooling warning. |
-| Local-only security | `docs/LOCAL_ONLY_SECURITY_REVIEW.md` and security regression pack | Network defaults off, renderer boundaries, URL opener hardening evidenced. |
-| Activity/search integrity | `docs/ACTIVITY_SEARCH_RECONCILIATION.md` | Cross-feature write/search/activity reconciliation added; gaps fixed. |
-| Performance/scale | `docs/PERFORMANCE_SCALE_QA.md`, `docs/performance/reports/operator-readiness-pse-203.json` | 1k/10k service-level gates passed; manual packaged UI remains. |
-| Packaging/release | `docs/RELEASE_CANDIDATE_PACKAGING.md`, `docs/release/package-artifact-check.json`, `pnpm package:smoke` | Package smoke and checksum/data-boundary check pass; PSE-211 added normal packaged welcome-window smoke; unsigned unpacked package only. |
-| Manual packaged operator journey | `docs/manual-qa/PSE-206-packaged-operator-journey.md` | **Pass with caveats**: PSE-212 project-opening blocker resolved; run completed through restart/persistence, with P2/P3 caveats for relationship/search/file-dialog evidence. |
-| Packaged importer QA | `docs/manual-qa/PSE-223-packaged-importer-qa.md`, `docs/manual-qa/PSE-223-packaged-importer-qa-summary.json` | CSV/TSV, Markdown folder, Markdown note IPC, EML, and ICS import paths pass packaged-runtime smoke with activity/search/integrity evidence; Notion/Todoist/Trello/Evernote/IMAP remain service-only or scaffold. |
-| Workflow pilot boundary | `docs/manual-qa/PSE-224-workflow-scaffold-qa.md` | Workflows intentionally demoted to Workflow Lab/scaffold-only UI for pilot; services keep validation/activity/search/loop-guard tests but no operator runner is claimed. |
+| Evidence area | Artifact / command | Evidence type | Result |
+| --- | --- | --- | --- |
+| Clean-main review context | `C:	mp\Pseudico-main-review\.review-evidence
+eview-app-evidence.json`, screenshots folder | Historical packaged automated/visual | Identified follow-ups including template placeholder integrity, importer coverage, and workflow overclaim risks. |
+| Fresh packaged operator journey | `docs/manual-qa/PSE-206-packaged-operator-journey.md` | Packaged automated/visual | Pass with caveats after PSE-212; proves restart/persistence and core loop with P2/P3 caveats. |
+| Packaged backup restore | `docs/manual-qa/PSE-207-packaged-backup-restore.md` | Packaged automated/visual | Pass with caveats; primary backup restore into clean workspace works. |
+| Local-only security | `docs/LOCAL_ONLY_SECURITY_REVIEW.md` | Automated source/static | Normal workflows require no network; packaged network monitor remains not reviewed. |
+| Packaged UI performance | `docs/manual-qa/PSE-209-packaged-ui-performance.md`, `docs/manual-qa/PSE-209-run-summary.json` | Packaged automated/visual | Pass with caveats for 1k/10k; 10k Today memory remains P2. |
+| Primary-operator UX gate | `docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md`, screenshots under `docs/manual-qa/screenshots/PSE-220-*` | Packaged/source visual | Pass for primary-operator pilot UX with documented P2/P3 caveats. |
+| Package hardening | `docs/manual-qa/PSE-221-packaged-release-qa.md`, `docs/manual-qa/PSE-221-package-contents-check.json`, `docs/release/package-artifact-check.json` | Automated/package plus visual | `pnpm package`, smoke, and package checks passed; `.tsbuildinfo` absent from packaged output. |
+| Template placeholder integrity | `docs/manual-qa/PSE-222-template-file-placeholder-integrity.md` | Source/service regression plus historical packaged repro | Template file placeholders no longer create invalid file items. |
+| Packaged importer QA | `docs/manual-qa/PSE-223-packaged-importer-qa.md`, summary JSON | Packaged automated | Implemented local importers passed smoke/integrity checks; service-only importers are caveated. |
+| Workflow pilot boundary | `docs/manual-qa/PSE-224-workflow-scaffold-qa.md`, `docs/manual-qa/screenshots/PSE-224-workflow-scaffold/workflow-lab.png` | Source/package plus visual | Workflows are explicitly scaffold-only for pilot. |
+| Release packaging docs | `docs/RELEASE_CANDIDATE_PACKAGING.md` | Documentation | Current artifact is unsigned/unpacked internal-pilot package; no installer/signing/auto-update. |
+| Runbook | `docs/OPERATOR_RUNBOOK.md`, `docs/help/operator-runbook.md` | Documentation | Operator guidance exists, but final nontechnical handoff still requires unresolved caveats to be accepted/closed. |
 
-## Validation commands recorded during final cycle
+## Recent validation command sets
 
-Latest completed command set after PSE-212 / PSE-206 rerun:
+These are evidence references, not commands rerun by this reconciliation unless
+listed in the PSE-225 PR/check summary.
 
-- `pnpm lint` - passed.
-- `pnpm typecheck` - passed.
-- `pnpm --filter @local-work-os/desktop test -- tests/renderer/quickAddModal.test.tsx tests/renderer/projectsPage.test.tsx` - passed.
-- `pnpm package` - passed and rebuilt `apps/desktop/dist-packaged/win-unpacked/`.
-- `pnpm package:smoke` - passed, including normal packaged welcome-window launch.
-- `node C:\tmp\pse206-runner.mjs` - passed with documented P2/P3 caveats.
-- `pnpm test` - passed, 226 files / 868 tests.
-- `pnpm build` - passed.
+| Source | Commands/results |
+| --- | --- |
+| PSE-221 | `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm package`, `pnpm package:smoke`, and `pnpm release:package-check` passed from a clean worktree. |
+| PSE-222 | Targeted template tests plus `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm package`, `pnpm package:smoke`, and `pnpm release:package-check` passed. |
+| PSE-223 | Packaged importer smoke evidence passed; docs distinguish packaged importers from service-only foundations. |
+| PSE-224 | Workflow renderer/service tests plus package smoke passed; workflows demoted to scaffold-only for pilot. |
 
 ## Risk register
 
-| ID | Severity | Risk | Disposition | Required action |
+| ID | Severity | Risk | Current disposition | Required action |
 | --- | --- | --- | --- | --- |
-| OR-R1 | P1 for nontechnical handoff | Full packaged-app operator journey through real packaged UI was rerun after PSE-212. Project opening, content creation, attachment storage, search API verification, collection, Today, dashboard/timeline/calendar, restart, and persistence passed with caveats. | Closed with caveats for OR-R1. | Carry P2/P3 caveats into focused follow-up only; do not block PSE-207 unless owner wants stricter relationship/search/file-dialog manual proof. |
-| OR-R2 | P0 for nontechnical handoff | Backup/restore is automated, but real UI restore/file-picker recovery has not yet been manually signed off. | Open blocker for Operator ready. | Run packaged backup/restore manual QA on a disposable workspace. |
-| OR-R3 | P1 | No unexpected network behavior needs OS/firewall confirmation in packaged app. | Partially tested; manual evidence pending. | Run manual no-network monitor from `docs/LOCAL_ONLY_SECURITY_REVIEW.md`. |
-| OR-R4 | P1 | 1k/10k service performance passed, but packaged UI responsiveness is not manually measured. | Partially tested; manual evidence pending. | Run `docs/PERFORMANCE_SCALE_QA.md` UI script. |
-| OR-R5 | P1 for public release | Windows build is unsigned; macOS notarization/installer targets are not configured. | Known limitation; acceptable for internal pilot only. | Owner decides signing/installer path before public release. |
-| OR-R6 | P1 | Auto-update is absent. Manual upgrade mistakes could affect users. | Documented limitation. | Use backup-before-upgrade runbook; add auto-update only in future scoped ticket. |
-| OR-R7 | P2 | Advanced UX gaps remain: rich text, custom dashboard editing, advanced saved-view builder, scheduling, live calendar sync. | Documented limitation. | Keep out of current handoff claim; create feature tickets if needed. |
+| OR-R1 | P1 historical, now closed with caveats | Full packaged operator journey needed real-app evidence. | Closed with caveats by PSE-206/PSE-220; no current P0/P1 primary-work-loop blocker in latest UX review. | Keep P2/P3 caveats visible; do not treat them as public-release proof. |
+| OR-R2 | P0 historical, now closed with caveats | Manual packaged backup/restore recovery needed proof. | Closed with caveats by PSE-207 and improved by PSE-218. | Keep backup restore as the normal recovery path; JSON-export restore UI remains caveated. |
+| OR-R3 | P1 | No unexpected network behavior still needs packaged OS/firewall confirmation. | Automated/static evidence only; no packaged packet-monitor artifact found. | Run manual packaged no-network monitor from `docs/LOCAL_ONLY_SECURITY_REVIEW.md`; do not claim final nontechnical/public release before this or owner acceptance. |
+| OR-R4 | P1 historical, now P2 caveat | 1k/10k packaged UI responsiveness needed proof. | Closed for P0/P1 freeze/crash by PSE-209; 10k Today memory remains P2. | PSE-226 should bound or document Today memory before broader pilot. |
+| OR-R5 | P1 for public release | Unsigned/unpacked package; installer/signing/notarization absent. | Known limitation; acceptable for internal pilot only. | PSE-227/package release work before broader distribution; owner decides signing/installer path. |
+| OR-R6 | P1 for public release | Auto-update is absent and manual upgrade mistakes could affect users. | Documented limitation. | Use backup-before-upgrade runbook; add auto-update only via future scoped ticket. |
+| OR-R7 | P2 | Advanced UX/product gaps remain: rich text, custom dashboard editing, advanced saved-view builder, scheduling, live calendar sync. | Documented limitation. | Keep out of current handoff claim; create feature tickets as needed. |
 | OR-R8 | P2 | Dependency audit warning: `simple-get` transitive release-tooling dependency is network-capable by purpose. | Tested acceptable for app workflows; documented. | Keep out of normal runtime; revisit on dependency changes. |
-| OR-R9 | P2 | Importer readiness could be overclaimed from service tests/docs without packaged runtime evidence. | Improved by PSE-223. Packaged smoke now exercises CSV/TSV, Markdown folder, standalone Markdown note IPC, EML, and ICS; third-party foundations are explicitly partial/service-only. | Keep PSE-228 for OS-native dialog proof and do not mark Notion/Todoist/Trello/Evernote/IMAP as pilot-ready until a packaged UI path is implemented and reviewed. |
+| OR-R9 | P2 | Importer readiness could be overclaimed from service tests/docs without packaged runtime evidence. | Improved by PSE-223. Implemented local paths have packaged evidence; third-party foundations are explicitly service-only/partial. | Keep PSE-228 for OS-native dialog proof and do not mark service-only importers as pilot UI-ready. |
+| OR-R10 | P2 | Workflows could be overclaimed as operator automation. | Reduced by PSE-224; Workflow Lab is scaffold-only for pilot. | Do not claim workflow create/edit/run/history until a future ticket implements and proves it. |
+| OR-R11 | P2 | Project-template file placeholders previously created invalid file rows. | Fixed by PSE-222; placeholders become notes with metadata and reattachment guidance. | Do not claim binary file template copying until implemented. |
+| OR-R12 | P3/P2 for dialog trust | OS-native dialogs for file/import/export/backup flows are not fully human-reviewed. | Tracked by PSE-228. | Mark dialog coverage as Not reviewed unless direct PSE-228 evidence exists. |
 
 ## Owner-accepted limitations for internal pilot
 
-These limitations are acceptable for **Pilot ready** only if communicated to the operator:
+These limitations are acceptable for **internal pilot** only if communicated to the operator:
 
 - The current artifact is an unpacked unsigned development package.
 - No public installer, auto-update channel, notarization, or code-signing promise exists yet.
 - Optional network-facing features must remain disabled unless specifically tested.
 - Manual backups are required before important imports, maintenance, restore tests, and app upgrades.
+- 10k Today memory usage currently requires high memory headroom until PSE-226 is fixed or explicitly accepted.
+- Workflows are scaffold-only and should not be used as pilot daily automation.
+- Third-party importer foundations are not pilot UI importers unless PSE-223 marks the family packaged-proven.
+- OS-native dialog behavior remains a separate PSE-228 evidence gap.
 - Public release support boundaries, legal review, and signing decisions remain future work.
 
 ## Final handoff checklist
 
 ### Internal technical pilot handoff may proceed when
 
-- [x] Current build is produced with `pnpm package`.
+- [x] Current build can be produced with `pnpm package`.
 - [x] `pnpm package:smoke` passes on the handoff OS.
-- [x] `pnpm release:package-check` passes and checksum report is included.
+- [x] `pnpm release:package-check` passes and checksum/data-boundary report is included.
 - [x] `docs/OPERATOR_RUNBOOK.md` is included.
-- [x] Known limitations are included.
+- [x] Known limitations above are included.
 - [x] Backup-before-upgrade instructions are included.
-- [ ] Owner confirms the recipient is a technical/internal pilot operator.
+- [ ] Owner confirms the recipient and accepts the listed internal-pilot caveats.
 
 ### Nontechnical operator handoff may proceed only when
 
 - [x] Manual packaged-app fresh workspace journey is completed and recorded in `docs/manual-qa/PSE-206-packaged-operator-journey.md` (Pass with caveats).
-- [ ] Manual packaged backup/restore into a fresh workspace is completed and recorded.
-- [ ] Manual packaged no-network monitor check is completed and recorded.
-- [ ] Manual 1k/10k packaged UI performance check is completed and recorded.
+- [x] Manual packaged backup/restore into a fresh workspace is completed and recorded in `docs/manual-qa/PSE-207-packaged-backup-restore.md` (Pass with caveats).
+- [ ] Manual packaged no-network monitor check is completed and recorded, or owner explicitly accepts the automated/static evidence boundary.
+- [x] Manual/packaged 1k/10k UI performance check is completed and recorded in `docs/manual-qa/PSE-209-packaged-ui-performance.md` (Pass with caveats).
+- [ ] PSE-226 Today memory caveat is fixed, documented with operator mitigation, or owner-accepted for the target pilot group.
+- [ ] PSE-228 OS-native dialog QA is completed or marked out of scope for the target pilot group.
 - [ ] Any discovered P0/P1 issue is fixed or explicitly accepted by the owner.
 - [ ] The runbook is updated with any real manual QA caveats.
 
@@ -140,13 +187,19 @@ These limitations are acceptable for **Pilot ready** only if communicated to the
 - [ ] Public checksums are published next to artifacts.
 - [ ] Legal/license review is complete.
 - [ ] Support and update policy is documented.
+- [ ] Auto-update/update-channel policy is designed, tested, and explicitly approved, or public release explicitly ships without auto-update and documents that limitation.
 
 ## Recommended next actions
 
-1. Continue with PSE-207 (next remaining operator-readiness gate).
-2. Optionally open focused P2/P3 follow-ups for relationship UI persistence, search form manual click proof, and OS file-dialog attachment proof.
-3. Keep OR-R2/OR-R3/OR-R4 open until their packaged manual evidence is recorded.
+1. Complete PSE-226 to bound or clearly document 10k Today memory behavior.
+2. Complete PSE-227/PSE-228 to polish package caveats and prove OS-native dialogs before broader handoff.
+3. Run OR-R3 packaged no-network monitor or record explicit owner acceptance of automated/static-only local-only evidence.
 
 ## Final statement
 
-Pseudico is now substantially evidenced as a local-only internal pilot application. The remaining work is not broad unknown engineering; it is targeted manual packaged-app verification and owner risk acceptance. Do **not** claim nontechnical operator-ready or release-ready status until those final gates are complete.
+Pseudico is now substantially evidenced as a local-only internal pilot
+application. The handoff risk has shifted from broad unknown functionality to a
+short list of named P2/P3 caveats and one remaining manual packaged security
+confirmation gate. Do **not** claim nontechnical operator-ready or public-release
+ready status until the relevant checklist items are closed or explicitly
+accepted by the owner.
