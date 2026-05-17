@@ -7542,3 +7542,12 @@ Decisions made:
 Files changed: docs/session_log.md
 Open questions / risks: Need push, PR checks, Linear update, and merge-policy confirmation.
 Next actions: push branch; open PR; reconcile checks and Linear.
+
+## 2026-05-17T10:46+10
+Objective: Fix PR #199 CI preload channel coverage failure.
+Decisions made:
+- Updated preload API channel-count and backup routing assertions for the three new guided restore IPC channels.
+- Confirmed targeted desktop tests and full `pnpm test` now pass locally.
+Files changed: apps/desktop/tests/preload/api.test.ts; docs/session_log.md
+Open questions / risks: Need rerun CI after pushing amended PR branch.
+Next actions: commit/push fix; watch checks; update Linear and merge if allowed.
