@@ -388,6 +388,9 @@ async function runPackagedImporterSmoke(input: {
     conflictStrategy: "skip_existing"
   });
   assertApiOk(csvPreview, "CSV/TSV preview");
+  if (csvPreview.data.rows.length === 0) {
+    throw new Error("CSV/TSV packaged smoke preview returned no rows.");
+  }
 
   const csvImport = await importHandlers.handleImportDelimitedFile({
     workspaceId: input.workspaceId,
@@ -430,6 +433,9 @@ async function runPackagedImporterSmoke(input: {
       projectName: "Markdown folder package smoke"
     });
   assertApiOk(markdownFolderPreview, "Markdown folder preview");
+  if (markdownFolderPreview.data.rows.length === 0) {
+    throw new Error("Markdown folder packaged smoke preview returned no rows.");
+  }
 
   const markdownFolderImport = await importHandlers.handleImportMarkdownFolder({
     workspaceId: input.workspaceId,
@@ -437,6 +443,16 @@ async function runPackagedImporterSmoke(input: {
     projectName: "Markdown folder package smoke"
   });
   assertApiOk(markdownFolderImport, "Markdown folder import");
+  if (markdownFolderImport.data.importedCount < 1) {
+    throw new Error("Markdown folder packaged smoke imported no records.");
+  }
+  const markdownFolderAttachmentCount =
+    markdownFolderImport.data.created.filter(
+      (target) => target.targetType === "attachment"
+    ).length;
+  if (markdownFolderAttachmentCount < 1) {
+    throw new Error("Markdown folder packaged smoke copied no attachments.");
+  }
 
   const markdownNotePreview =
     await importHandlers.handlePreviewMarkdownNoteImport({
@@ -446,6 +462,9 @@ async function runPackagedImporterSmoke(input: {
       filePaths: [standaloneNotePath]
     });
   assertApiOk(markdownNotePreview, "Markdown note preview");
+  if (markdownNotePreview.data.rows.length === 0) {
+    throw new Error("Markdown note packaged smoke preview returned no rows.");
+  }
 
   const markdownNoteImport = await importHandlers.handleImportMarkdownNotes({
     workspaceId: input.workspaceId,
@@ -454,6 +473,9 @@ async function runPackagedImporterSmoke(input: {
     filePaths: [standaloneNotePath]
   });
   assertApiOk(markdownNoteImport, "Markdown note import");
+  if (markdownNoteImport.data.importedCount < 1) {
+    throw new Error("Markdown note packaged smoke imported no notes.");
+  }
 
   const emailPreview = await importHandlers.handlePreviewEmails({
     workspaceId: input.workspaceId,
@@ -461,6 +483,9 @@ async function runPackagedImporterSmoke(input: {
     containerId: input.projectId
   });
   assertApiOk(emailPreview, "Email preview");
+  if (emailPreview.data.length === 0) {
+    throw new Error("Email packaged smoke preview returned no messages.");
+  }
 
   const emailImport = await importHandlers.handleImportEmailsAsTasks({
     workspaceId: input.workspaceId,
@@ -469,6 +494,15 @@ async function runPackagedImporterSmoke(input: {
     extractTags: true
   });
   assertApiOk(emailImport, "Email import");
+  if (emailImport.data.importedCount < 1) {
+    throw new Error("Email packaged smoke imported no messages.");
+  }
+  const emailAttachmentCount = emailImport.data.importedTasks.filter(
+    (task) => task.attachmentId !== null
+  ).length;
+  if (emailAttachmentCount < 1) {
+    throw new Error("Email packaged smoke copied no original-message attachment.");
+  }
 
   const calendarImport = await createCalendarIpcHandlers(
     input.workspaceService
@@ -478,6 +512,9 @@ async function runPackagedImporterSmoke(input: {
     sourceName: "Package smoke ICS"
   });
   assertApiOk(calendarImport, "ICS import");
+  if (calendarImport.data.importedEventCount < 1) {
+    throw new Error("ICS packaged smoke imported no events.");
+  }
 
   const wrongExtension = await importHandlers.handlePreviewDelimitedFileImport({
     workspaceId: input.workspaceId,
@@ -488,6 +525,12 @@ async function runPackagedImporterSmoke(input: {
     workspaceId: input.workspaceId,
     folderPath: join(importFixtureRoot, "missing-folder")
   });
+  if (wrongExtension.ok) {
+    throw new Error("CSV/TSV packaged smoke accepted a wrong file extension.");
+  }
+  if (missingFolder.ok) {
+    throw new Error("Markdown folder packaged smoke accepted a missing folder.");
+  }
 
   const connection = await createDatabaseConnection({
     databasePath: resolveWorkspacePath(input.workspaceRootPath, "databasePath"),
@@ -528,6 +571,7 @@ async function runPackagedImporterSmoke(input: {
       "csv_import_completed",
       "markdown_folder_import_completed",
       "markdown_note_import_completed",
+      "calendar_feed_imported",
       "task_created",
       "file_attached"
     ];
@@ -572,9 +616,7 @@ async function runPackagedImporterSmoke(input: {
       markdownFolder: {
         previewRows: markdownFolderPreview.data.rows.length,
         importedCount: markdownFolderImport.data.importedCount,
-        attachmentCount: markdownFolderImport.data.created.filter(
-          (target) => target.targetType === "attachment"
-        ).length,
+        attachmentCount: markdownFolderAttachmentCount,
         searchHitCount: markdownFolderHits.length
       },
       markdownNote: {
@@ -585,9 +627,7 @@ async function runPackagedImporterSmoke(input: {
       email: {
         previewCount: emailPreview.data.length,
         importedCount: emailImport.data.importedCount,
-        attachmentCount: emailImport.data.importedTasks.filter(
-          (task) => task.attachmentId !== null
-        ).length,
+        attachmentCount: emailAttachmentCount,
         searchHitCount: emailHits.length
       },
       ics: {

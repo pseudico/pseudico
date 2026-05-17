@@ -7806,3 +7806,10 @@ Next actions:
 - Files changed: docs/session_log.md
 - Open questions / risks: P2 OS-native dialogs not covered here; P3 Windows temp cleanup can be busy after smoke.
 - Next actions: update Linear; await PR review/CI; merge when approved.
+
+## 2026-05-17T19:47:16.9863280+10:00
+- Objective: Review PR #204 before merge and tighten smoke assertions.
+- Decisions made: Treat invalid-input, preview, attachment, and ICS activity regressions as smoke failures before merge.
+- Files changed: apps/desktop/src/main/packageSmoke.ts; docs/session_log.md
+- Open questions / risks: Need rerun package smoke and CI after push.
+- Next actions: rerun checks; push update; merge if green.
