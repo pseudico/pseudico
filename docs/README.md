@@ -74,6 +74,9 @@ docs and the linked Linear issue.
 - `OPERATOR_HANDOFF_PLAN.md` defines the Linear hardening waves required for nontechnical operator handoff.
 - `OPERATOR_READINESS_REPORT.md` is the final go/no-go certification report
   with verdict, evidence pack, risk register, and handoff checklist.
+- `PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md` records the PSE-HUX final
+  primary-operator UX gate, screenshot evidence, regression fixes, and
+  remaining P0/P1/P2/P3 risks.
 - `OPERATOR_RUNBOOK.md` is the nontechnical operator manual for daily use, backup/restore, recovery, troubleshooting, and known limitations.
 - `tickets/OPERATOR_READINESS_TICKET_PACK.md` contains import-ready Linear tickets for closing operator-readiness gaps.
 - `PERFORMANCE.md` defines large-workspace benchmark fixtures, budgets, and

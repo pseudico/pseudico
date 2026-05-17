@@ -1559,7 +1559,7 @@ export function ContactDetailPage({
         Back to contacts
       </Link>
 
-      <header className="project-detail-header">
+      <header className="project-detail-header contact-detail-header">
         <ContainerMediaPreview
           busy={contactMediaBusy}
           error={contactMediaError}

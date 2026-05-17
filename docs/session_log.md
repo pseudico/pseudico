@@ -7605,3 +7605,31 @@ Decisions made:
 Files changed: docs/session_log.md
 Open questions / risks: Need GitHub checks to pass before merge; package issue remains follow-up.
 Next actions: commit/push log; update Linear; watch checks and merge if allowed.
+
+## 2026-05-17T11:50+10
+Objective: Start PSE-220 final primary-operator UX gate.
+Decisions made:
+- Created clean worktree `C:\tmp\Pseudico-pse-220` from latest `origin/main` at PSE-219 merge.
+- Confirmed PSE-220 is Spec Ready and reviewed linked PSE-213 through PSE-219 Linear outcomes/comments.
+Files changed: docs/session_log.md
+Open questions / risks: Need gather latest screenshot evidence and avoid implementing new UX fixes.
+Next actions: post plan; review docs/artifacts; produce acceptance review and evidence.
+
+## 2026-05-17T12:19+10:00
+Objective: Complete PSE-220 evidence capture and regression fixes.
+Decisions made:
+- Fixed P1 shell tab strip grid regression blocking main content after multiple tabs.
+- Fixed P1 container IPC event/input forwarding regression blocking contact detail preferences and contact rendering.
+- Fixed contact detail header layout so contact identity/fields are readable.
+Files changed: apps/desktop/src/renderer/styles.css; apps/desktop/src/main/ipc/registerContainerIpc.ts; apps/desktop/src/renderer/pages/ContactDetailPage.tsx; apps/desktop/tests/main/containerIpcRegistration.test.ts; docs/manual-qa/PSE-220-final-acceptance-summary.json; docs/manual-qa/screenshots/PSE-220-2026-05-17T02-17-15-998Z/*
+Open questions / risks: Package command still needs recheck after code fixes; earlier package failed on electron-builder/pnpm linked tsbuildinfo in worktree.
+Next actions: Write acceptance review; run validation; reconcile PR/Linear.
+
+## 2026-05-17T12:25+10:00
+Objective: Validate PSE-220 implementation and acceptance evidence.
+Decisions made:
+- pnpm lint, pnpm typecheck, targeted Vitest, pnpm test, and pnpm build passed.
+- pnpm package failed on known electron-builder/pnpm .tsbuildinfo unsafe-path packaging blocker.
+Files changed: docs/session_log.md; docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md; docs/README.md; apps/desktop/src/main/ipc/registerContainerIpc.ts; apps/desktop/src/renderer/pages/ContactDetailPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/main/containerIpcRegistration.test.ts; docs/manual-qa/*
+Open questions / risks: Packaging blocker remains P2 release/tooling follow-up.
+Next actions: Commit, push, open PR, update Linear.
