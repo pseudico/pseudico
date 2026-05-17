@@ -169,7 +169,7 @@ a {
 .app-frame {
   display: grid;
   min-width: 0;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
 }
 
 .top-bar {
@@ -3376,6 +3376,16 @@ a {
   margin: 0;
   color: #514e49;
   line-height: 1.55;
+}
+
+.contact-detail-header {
+  grid-template-columns: auto 18px minmax(0, 1fr) auto;
+  align-items: center;
+  max-width: 1180px;
+}
+
+.contact-detail-header .button-row {
+  justify-self: end;
 }
 
 .project-status-strip {

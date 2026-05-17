@@ -45,23 +45,23 @@ export function registerContainerIpc(
 
   registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.containers.getPreferences,
-    handlers.handleGetPreferences
+    (_event, input) => handlers.handleGetPreferences(input)
   );
   registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.containers.updatePreferences,
-    handlers.handleUpdatePreferences
+    (_event, input) => handlers.handleUpdatePreferences(input)
   );
   registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.containers.getGrouping,
-    handlers.handleGetGrouping
+    (_event, input) => handlers.handleGetGrouping(input)
   );
   registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.containers.getGroupingPreferences,
-    handlers.handleGetGroupingPreferences
+    (_event, input) => handlers.handleGetGroupingPreferences(input)
   );
   registerTypedIpcHandler(
     LOCAL_WORK_OS_IPC_CHANNELS.containers.updateGroupingPreferences,
-    handlers.handleUpdateGroupingPreferences
+    (_event, input) => handlers.handleUpdateGroupingPreferences(input)
   );
 }
 

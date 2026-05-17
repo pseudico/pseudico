@@ -1,0 +1,110 @@
+﻿{
+    "issue":  "PSE-220",
+    "capturedAt":  "2026-05-17T02:17:16.009Z",
+    "workspaceRoot":  "C:\\tmp\\pseudico-pse220-demo-2026-05-17T02-17-15-998Z",
+    "restoredRoot":  "C:\\tmp\\pseudico-pse220-demo-2026-05-17T02-17-15-998Z-restored",
+    "packageStatus":  "Final pnpm package failed after successful build because electron-builder refused packages/core/dist/.tsbuildinfo as an unsafe pnpm-linked path outside the desktop package.",
+    "screenshots":  [
+                        {
+                            "label":  "Welcome / workspace open",
+                            "file":  "C:\\tmp\\Pseudico-pse-220\\docs\\manual-qa\\screenshots\\PSE-220-2026-05-17T02-17-15-998Z\\01-welcome.png",
+                            "operatorQuestion":  "Can an operator understand this is a local-only workspace and the safe next action?"
+                        },
+                        {
+                            "label":  "Project detail",
+                            "file":  "C:\\tmp\\Pseudico-pse-220\\docs\\manual-qa\\screenshots\\PSE-220-2026-05-17T02-17-15-998Z\\02-project-detail.png",
+                            "projectName":  "Launch Readiness",
+                            "operatorQuestion":  "Can project context, next actions, related notes/tasks/links/files stay beside the project?"
+                        },
+                        {
+                            "label":  "Contact detail",
+                            "file":  "C:\\tmp\\Pseudico-pse-220\\docs\\manual-qa\\screenshots\\PSE-220-2026-05-17T02-17-15-998Z\\03-contact-detail.png",
+                            "contactName":  "Alex Morgan",
+                            "operatorQuestion":  "Can an operator see the person/client context and related work without developer interpretation?"
+                        },
+                        {
+                            "label":  "Today planning",
+                            "file":  "C:\\tmp\\Pseudico-pse-220\\docs\\manual-qa\\screenshots\\PSE-220-2026-05-17T02-17-15-998Z\\04-today.png",
+                            "operatorQuestion":  "Can an operator plan the day and tell what is due/next?"
+                        },
+                        {
+                            "label":  "Dashboard / review",
+                            "file":  "C:\\tmp\\Pseudico-pse-220\\docs\\manual-qa\\screenshots\\PSE-220-2026-05-17T02-17-15-998Z\\05-dashboard.png",
+                            "operatorQuestion":  "Can an operator review workload and system orientation at a glance?"
+                        },
+                        {
+                            "label":  "Search results",
+                            "file":  "C:\\tmp\\Pseudico-pse-220\\docs\\manual-qa\\screenshots\\PSE-220-2026-05-17T02-17-15-998Z\\06-search-results.png",
+                            "query":  "client",
+                            "operatorQuestion":  "Is search scope, hierarchy, match context, and empty/error behavior trustworthy?"
+                        },
+                        {
+                            "label":  "Settings overview",
+                            "file":  "C:\\tmp\\Pseudico-pse-220\\docs\\manual-qa\\screenshots\\PSE-220-2026-05-17T02-17-15-998Z\\07-settings-overview.png",
+                            "operatorQuestion":  "Are settings organized around operator intent with admin tools secondary?"
+                        },
+                        {
+                            "label":  "Backup and guided restore preview",
+                            "file":  "C:\\tmp\\Pseudico-pse-220\\docs\\manual-qa\\screenshots\\PSE-220-2026-05-17T02-17-15-998Z\\08-backup-restore.png",
+                            "operatorQuestion":  "Is backup/restore guided, safe, understandable, and recoverable without overwriting local data?"
+                        }
+                    ],
+    "app":  {
+                "workspace":  {
+                                  "id":  "workspace_mp95a6ij_1lbi1l00m10",
+                                  "name":  "PSE-220 Demo Workspace",
+                                  "rootPath":  "C:\\tmp\\pseudico-pse220-demo-2026-05-17T02-17-15-998Z",
+                                  "openedAt":  "2026-05-17T02:17:17.179Z",
+                                  "schemaVersion":  23
+                              },
+                "demoRecords":  {
+                                    "project":  {
+                                                    "id":  "container_mp95a6jy_26pr4wnufag",
+                                                    "workspaceId":  "workspace_mp95a6ij_1lbi1l00m10",
+                                                    "type":  "project",
+                                                    "name":  "Launch Readiness",
+                                                    "slug":  "launch-readiness",
+                                                    "description":  "Demo project showing tasks, notes, files, links, tags, and dashboard-ready activity.",
+                                                    "status":  "active",
+                                                    "categoryId":  "category_mp95a6jw_2826fohzjwe",
+                                                    "color":  "#245c55",
+                                                    "isFavorite":  true,
+                                                    "sortOrder":  0,
+                                                    "createdAt":  "2026-05-17T02:17:17.230Z",
+                                                    "updatedAt":  "2026-05-17T02:17:17.230Z",
+                                                    "archivedAt":  null,
+                                                    "deletedAt":  null
+                                                },
+                                    "contact":  {
+                                                    "id":  "container_mp95a6k0_1zw0oskr4a6",
+                                                    "workspaceId":  "workspace_mp95a6ij_1lbi1l00m10",
+                                                    "type":  "contact",
+                                                    "name":  "Alex Morgan",
+                                                    "slug":  "alex-morgan",
+                                                    "description":  "Demo stakeholder for the launch workspace. Fictional sample contact.",
+                                                    "status":  "active",
+                                                    "categoryId":  "category_mp95a6jx_118tbsav7eq",
+                                                    "color":  null,
+                                                    "isFavorite":  true,
+                                                    "sortOrder":  0,
+                                                    "createdAt":  "2026-05-17T02:17:17.232Z",
+                                                    "updatedAt":  "2026-05-17T02:17:17.232Z",
+                                                    "archivedAt":  null,
+                                                    "deletedAt":  null
+                                                },
+                                    "projectCount":  2,
+                                    "contactCount":  2
+                                },
+                "finalUiCheck":  {
+                                     "location":  "#/settings",
+                                     "bodyText":  "Skip to workspace content\nL\nLocal Work OS\nLocal only\nToday\nInbox\nProjects\nProject Tags\nContacts\nContact Labels\nCollections\nTags \u0026 Categories\nTemplates\nSearch\nDashboard\nTimeline\nCalendar\nWorkflows\nHelp\nSettings\nTrash\n\nPINNED \u0026 FAVORITES\n\nDemo workspace orientation\nAlex Morgan\nInbox\nLaunch Readiness\nDemo tagged work\nDemo waiting follow-ups\nSomeday / Waiting Review\n\nWORKSPACE SHELL\n\nSettings\nBack\nForward\nRecent\nCommands\nCtrl/Cmd K\nSearch\nSearch\nQuick Start\nProject\nRecently opened project\nContact\nRecently opened contact\nSearch\nLocal full-text search will appear here.\n\nSETTINGS\n\nWorkspace settings\n\nLocal workspace: C:\\tmp\\pseudico-pse220-demo-2026-05-17T02-17-15-998Z\n\nOverview\nStart with daily settings and safe next actions.\nAppearance \u0026 readability\nTheme, density, font size, locale, and shortcuts.\nBackup \u0026 restore\nCreate local backups and restore into a new workspace.\nPrivacy \u0026 local-only\nUnderstand local boundaries and optional network controls.\nCategories / metadata\nManage operator-facing organisation labels.\nImports \u0026 exports\nMove data in or out using local files.\nAdvanced maintenance\nTroubleshoot health, search, attachments, and database care.\n\nRECENT SETTINGS ACTIVITY\n\nWhat just happened stays visible here.\n\nBackup, export, restore, and search maintenance results remain findable after their toast disappears.\n\nBackup\nBackup created at backups/2026-05-17T02-17-25-510Z.\nReview\nBackup \u0026 restore\n\nUse this to create local backup snapshots and restore a backup into a fresh workspace folder. This will not overwrite your current workspace.\n\nRefresh\nCreate backup\n\nBackup created at backups/2026-05-17T02-17-25-510Z.\n\nEnable automatic backups\nInterval hours\nAlso check when the app closes\nAlways back up before migrations\nKeep automatic backups\nMax age days\nMax size MiB\nSave automatic backup settings\nRun due check now\n\nAutomatic backup status: last successful never; next run not scheduled; last cleanup removed 0 backup(s).\n\n1. Choose where the restored workspace will be created\n\nCurrent workspace: C:\\tmp\\pseudico-pse220-demo-2026-05-17T02-17-15-998Z. Restore always creates a separate local workspace and will not overwrite the workspace you are using now.\n\nChoose restore folder\nRestore destination\nC:\\tmp\\pseudico-pse220-demo-2026-05-17T02-17-15-998Z-restored\nAdvanced: paste a destination path instead\nDestination folder path\n2. Pick the backup to restore\nNewest backups appear first with database and attachment status.\n5/17/2026, 12:17:25 PM â€” selected for restore\nbackups/2026-05-17T02-17-25-510Z Â· manual\n1 attachments\n316 B manifest total\n704.0 KB database\nPreview restore\n3. Review restore before it runs\n\nPseudico will create a new local workspace from this backup. It will block unsafe targets such as the active workspace.\n\nCURRENT WORKSPACE\nC:\\tmp\\pseudico-pse220-demo-2026-05-17T02-17-15-998Z\nBACKUP SOURCE\nbackups/2026-05-17T02-17-25-510Z\nBACKUP DATE\n5/17/2026, 12:17:25 PM\nINCLUDED DATA\n704.0 KB database; 1 attachment record(s), 316 B manifest total\nRESTORE DE",
+                                     "headings":  [
+                                                      "Settings",
+                                                      "Workspace settings",
+                                                      "What just happened stays visible here.",
+                                                      "Backup \u0026 restore",
+                                                      "Local-only boundary"
+                                                  ]
+                                 }
+            }
+}
