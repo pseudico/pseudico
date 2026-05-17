@@ -7667,3 +7667,71 @@ Files changed:
 - docs/manual-qa/screenshots/PSE-221-2026-05-17T03-45-00/*
 Open questions / risks: P2 registry-warn during staging deploy is documented; no P0/P1 remain.
 Next actions: Stage/commit/push; open PR; update Linear; merge if checks allow.
+
+## 2026-05-17T18:04:33+10:00
+Objective: Recover active Linear issue and establish clean PSE-222 worktree.
+Decisions made:
+- Selected PSE-222 from the provided clean-main follow-up sequence after fetching full Linear details.
+- Created clean worktree from origin/main reviewed commit 5d2b69fd.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Original file placeholder issue still needs reproduction.
+Next actions: Read required docs; inspect template/file/integrity code; post plan.
+
+## 2026-05-17T18:11:42+10:00
+Objective: Complete PSE-222 planning and begin implementation.
+Decisions made:
+- Posted Linear plan and moved PSE-222 to In Progress.
+- Chose non-file placeholder representation unless binary copy support exists, avoiding fake attachment rows.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need verify tests/docs align with template placeholder semantics.
+Next actions: Patch TemplateService; add integrity/search/activity tests; update docs/evidence.
+
+## 2026-05-17T18:20:23+10:00
+Objective: Implement PSE-222 template file placeholder fix.
+Decisions made:
+- Template file placeholders now materialize as clear notes, not orphan file items.
+- Unsafe placeholder attachment paths are rejected during validation.
+Files changed:
+- packages/features/src/templates/TemplateService.ts
+- packages/features/tests/containerTemplateService.test.ts
+- docs/TEMPLATE_FILE_FORMAT.md
+- docs/OPERATOR_RUNBOOK.md
+- docs/DATA_MODEL.md
+- docs/manual-qa/PSE-222-template-file-placeholder-integrity.md
+- docs/session_log.md
+Open questions / risks: Binary template attachment copying remains future scope.
+Next actions: Run lint/typecheck/test/build evidence; package/manual checks if feasible; prepare PR.
+
+## 2026-05-17T18:29:30+10:00
+Objective: Verify PSE-222 fix and package/runtime boundaries.
+Decisions made:
+- Treated clean-main JSON as original packaged reproduction and source/service regression as post-fix proof.
+- Recorded package smoke and release package check as runtime boundary evidence.
+Files changed:
+- docs/manual-qa/PSE-222-template-file-placeholder-integrity.md
+- docs/release/package-artifact-check.json
+- docs/session_log.md
+Open questions / risks: Packaging metadata warnings remain PSE-227 scope.
+Next actions: Review diff; commit; open PR/update Linear.
+
+## 2026-05-17T18:32:55+10:00
+Objective: Publish PSE-222 branch and PR, update Linear.
+Decisions made:
+- Opened GitHub PR #203 against main and linked it to Linear.
+- Moved PSE-222 to PR Open with summary, checks, evidence, caveats.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PR review/CI result pending; binary template attachment copy remains future scope.
+Next actions: Monitor PR review/CI; merge when approved.
+
+## 2026-05-17T18:37:00+10:00
+Objective: Review PR #203 for PSE-222 and prepare merge.
+Decisions made:
+- Reviewed GitHub diff, PR metadata, comments, and commit status before merge.
+- Accepted empty GitHub status list based on completed local checks and no PR comments.
+Files changed:
+- docs/session_log.md
+Open questions / risks: No P0/P1 blockers; CI statuses are not configured/reported on the PR head.
+Next actions: Amend/push session log; merge PR #203; update Linear.

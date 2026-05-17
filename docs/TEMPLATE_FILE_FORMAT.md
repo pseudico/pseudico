@@ -55,3 +55,11 @@ copied into template packs.
 - Embedded template payload migrations should preserve `metadata.templateJsonVersion`.
 - File placeholders preserve attachment metadata but do not copy binary files
   into the template export.
+- Applying a project/contact template materializes each file placeholder as a
+  note titled `File placeholder: <name>` with the original attachment metadata
+  and reattachment guidance. This deliberately avoids creating a `file` item
+  unless a real workspace attachment row/file can be created through the normal
+  file service path.
+- Attachment placeholder `storagePath` values must remain workspace-relative
+  under `attachments/`; absolute paths and traversal segments are rejected
+  during template validation.

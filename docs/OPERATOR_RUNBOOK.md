@@ -174,6 +174,11 @@ Do not delete the original workspace until the restored copy has been verified.
 ## 7. Attachments and missing files
 
 - Attached files should be copied into the workspace-controlled attachment area.
+- Project/contact templates do not copy binary attachment files. When a
+  template contains a file placeholder, the created project/contact shows a
+  note named `File placeholder: ...` with the original local file metadata and
+  instructions to reattach the source file. Treat that note as a reminder, not
+  as an attached file.
 - If an attachment is missing, do not remove the file record immediately.
 - First run the attachment or workspace health check if available.
 - If the file was moved outside the workspace, reattach it from the original source.

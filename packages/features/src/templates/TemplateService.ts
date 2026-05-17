@@ -10,6 +10,7 @@ import type {
 } from "@local-work-os/core";
 import {
   ActivityAction,
+  ATTACHMENT_STORAGE_ROOT,
   createIsoTimestamp,
   createLocalId,
   isContactFieldType,
@@ -1397,46 +1398,35 @@ export class ContainerTemplateService {
     }
 
     if (input.itemTemplate.type === "file") {
-      const item = new ItemRepository(this.connection).create({
-        id: this.idFactory("item"),
-        workspaceId: input.workspaceId,
-        containerId: input.containerId,
-        containerTabId: input.containerTabId,
-        type: "file",
-        title: input.itemTemplate.filePlaceholder?.originalName ?? input.itemTemplate.title,
-        body: input.itemTemplate.filePlaceholder?.description ?? input.itemTemplate.body,
-        categoryId: common.categoryId,
-        sortOrder: input.itemTemplate.sortOrder,
-        pinned: input.itemTemplate.pinned,
-        timestamp: input.timestamp
-      });
-      new ActivityLogService({
+      const placeholder = input.itemTemplate.filePlaceholder;
+      const title = placeholder?.originalName ?? input.itemTemplate.title;
+      const result = await new NoteService({
         connection: this.connection,
-        idFactory: this.idFactory
-      }).logEvent({
-        workspaceId: item.workspaceId,
-        actorType: input.actorType ?? "local_user",
-        action: ActivityAction.itemCreated,
-        targetType: "item",
-        targetId: item.id,
-        summary: `Created file placeholder "${item.title}" from template.`,
-        beforeJson: null,
-        afterJson: JSON.stringify({ item, placeholder: input.itemTemplate.filePlaceholder ?? null }),
-        timestamp: input.timestamp
+        idFactory: this.idFactory,
+        now: this.now
+      }).createNote({
+        ...common,
+        title: `File placeholder: ${title}`,
+        content: buildFilePlaceholderNoteContent({
+          title,
+          description: placeholder?.description ?? input.itemTemplate.body,
+          attachments: placeholder?.attachments ?? []
+        }),
+        format: "markdown"
       });
-      this.copyTagsForItem(item, input.itemTemplate.tags, input.timestamp);
+      this.copyTagsForItem(result.item, input.itemTemplate.tags, input.timestamp);
       new SearchIndexService({
         connection: this.connection,
         idFactory: this.idFactory,
         now: this.now
-      }).upsertItem(item, {
+      }).upsertNote(result.item, result.note, {
         timestamp: input.timestamp,
         metadata: {
           templateFilePlaceholder: true,
-          sourceAttachments: input.itemTemplate.filePlaceholder?.attachments ?? []
+          sourceAttachments: placeholder?.attachments ?? []
         }
       });
-      return [item];
+      return [result.item];
     }
 
     return [];
@@ -2173,11 +2163,7 @@ function validateNoteTemplate(value: unknown): NonNullable<TemplateContainerItem
 
 function validateFilePlaceholderTemplate(
   value: unknown
-): TemplateFileAttachmentPlaceholderJsonV1 & {
-  originalName: string;
-  description: string | null;
-  attachments: TemplateFileAttachmentPlaceholderJsonV1[];
-} {
+): NonNullable<TemplateContainerItemJsonV1["filePlaceholder"]> {
   if (!isRecord(value)) {
     throw new Error("item.filePlaceholder must be an object.");
   }
@@ -2191,11 +2177,6 @@ function validateFilePlaceholderTemplate(
 
   return {
     originalName: value.originalName,
-    storedName: value.originalName,
-    mimeType: null,
-    sizeBytes: 0,
-    checksum: null,
-    storagePath: "",
     description: (value.description ?? null) as string | null,
     attachments: value.attachments.map(validateAttachmentPlaceholder)
   };
@@ -2214,6 +2195,7 @@ function validateAttachmentPlaceholder(
   assertOptionalNullableString(value.checksum, "attachment.checksum");
   assertOptionalNullableString(value.description, "attachment.description");
   assertNonEmptyString(value.storagePath, "attachment.storagePath");
+  validateAttachmentStoragePath(value.storagePath);
 
   if (typeof value.sizeBytes !== "number" || !Number.isInteger(value.sizeBytes) || value.sizeBytes < 0) {
     throw new Error("attachment.sizeBytes must be a non-negative integer.");
@@ -2431,5 +2413,56 @@ function assertOptionalNullableInteger(value: unknown, fieldName: string): void 
     (typeof value !== "number" || !Number.isInteger(value))
   ) {
     throw new Error(`${fieldName} must be an integer, null, or undefined.`);
+  }
+}
+
+function buildFilePlaceholderNoteContent(input: {
+  title: string;
+  description: string | null | undefined;
+  attachments: readonly TemplateFileAttachmentPlaceholderJsonV1[];
+}): string {
+  const lines = [
+    "# File placeholder",
+    "",
+    `Template requested a file named **${input.title}**, but template application does not copy binary attachment files yet.`,
+    "Reattach the source file from local storage before relying on this as an available attachment."
+  ];
+  const description = normalizeNullableString(input.description);
+
+  if (description !== null) {
+    lines.push("", "Description:", "", description);
+  }
+
+  if (input.attachments.length > 0) {
+    lines.push("", "Source attachment metadata:", "");
+
+    for (const attachment of input.attachments) {
+      lines.push(
+        `- ${attachment.originalName} (${attachment.sizeBytes} bytes, original workspace path ${attachment.storagePath})`
+      );
+    }
+  }
+
+  return lines.join("\n");
+}
+
+function validateAttachmentStoragePath(storagePath: string): void {
+  const trimmed = storagePath.trim();
+
+  if (
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("\\") ||
+    /^[a-zA-Z]:/.test(trimmed)
+  ) {
+    throw new Error("attachment.storagePath must be workspace-relative.");
+  }
+
+  const segments = trimmed.replace(/\\/g, "/").split("/");
+
+  if (
+    segments[0] !== ATTACHMENT_STORAGE_ROOT ||
+    segments.some((segment) => segment.length === 0 || segment === "." || segment === "..")
+  ) {
+    throw new Error("attachment.storagePath must stay inside workspace attachments.");
   }
 }
