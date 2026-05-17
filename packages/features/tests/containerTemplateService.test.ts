@@ -1,15 +1,16 @@
 import {
   ActivityLogRepository,
-  AttachmentRepository,
   CategoryRepository,
   ContainerRepository,
   ContainerTabRepository,
   ItemRepository,
   ListRepository,
   MigrationService,
+  NoteRepository,
   SearchIndexRepository,
   TagRepository,
   TaskRepository,
+  WorkspaceSeedService,
   createDatabaseConnection,
   type DatabaseConnection
 } from "@local-work-os/db";
@@ -18,6 +19,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   ContainerTemplateService,
   FileAttachmentService,
+  IntegrityCheckService,
   ListService,
   NoteService,
   ProjectService,
@@ -25,7 +27,6 @@ import {
   TaskService,
   validateContainerTemplateJson
 } from "../src";
-import { WorkspaceRepository } from "@local-work-os/db";
 
 let cleanup: (() => Promise<void>) | undefined;
 let connection: DatabaseConnection;
@@ -39,11 +40,11 @@ describe("ContainerTemplateService", () => {
       databasePath: testDb.databasePath
     });
     new MigrationService({ connection }).runPendingMigrations();
-    new WorkspaceRepository(connection).create({
-      id: "workspace_1",
-      name: "Personal Work",
-      schemaVersion: 1,
-      timestamp: "2026-05-01T00:00:00.000Z"
+    idCounter = 0;
+    new WorkspaceSeedService({ connection, idFactory: createId, now }).ensureWorkspaceSeed({
+      workspaceId: "workspace_1",
+      workspaceName: "Personal Work",
+      schemaVersion: 1
     });
     new CategoryRepository(connection).create({
       id: "category_1",
@@ -60,7 +61,6 @@ describe("ContainerTemplateService", () => {
       slug: "launch",
       timestamp: "2026-05-01T00:00:00.000Z"
     });
-    idCounter = 0;
   });
 
   afterEach(async () => {
@@ -221,6 +221,9 @@ describe("ContainerTemplateService", () => {
     const createdFile = new ItemRepository(connection)
       .listByContainer(createdContainer.id, { type: "file" })
       .find((item) => item.title === "brief.pdf");
+    const createdFilePlaceholderNote = new NoteRepository(connection)
+      .listByWorkspace("workspace_1")
+      .find(({ item }) => item.title === "File placeholder: brief.pdf");
 
     expect(createdContainer).toMatchObject({
       name: "June launch",
@@ -237,13 +240,15 @@ describe("ContainerTemplateService", () => {
       title: "Draft launch brief",
       dueAt: "2026-06-04T00:00:00.000Z"
     });
-    expect(createdFile).toBeDefined();
-    expect(
-      new AttachmentRepository(connection).listForItem({
-        workspaceId: "workspace_1",
-        itemId: createdFile!.id
-      })
-    ).toEqual([]);
+    expect(createdFile).toBeUndefined();
+    expect(createdFilePlaceholderNote).toBeDefined();
+    expect(createdFilePlaceholderNote?.item.body).toContain(
+      "template application does not copy binary attachment files yet"
+    );
+    expect(createdFilePlaceholderNote?.note.content).toContain("brief.pdf");
+    expect(createdFilePlaceholderNote?.note.content).toContain(
+      "attachments/2026/05/file_1/brief.pdf"
+    );
     expect(
       new TagRepository(connection).listTagsForTarget({
         workspaceId: "workspace_1",
@@ -259,12 +264,102 @@ describe("ContainerTemplateService", () => {
       })
     ).toMatchObject({ tags: "launch", category: "Client Work" });
     expect(
+      new SearchIndexRepository(connection).getByTarget({
+        workspaceId: "workspace_1",
+        targetType: "item",
+        targetId: createdFilePlaceholderNote!.item.id
+      })
+    ).toMatchObject({
+      targetType: "item",
+      title: "File placeholder: brief.pdf",
+      body: expect.stringContaining("template application does not copy binary attachment files yet")
+    });
+    expect(
       new ActivityLogRepository(connection)
         .listForTarget("template", template.id)
         .map((event) => event.action)
     ).toEqual(["template_created", "template_applied"]);
+    expect(
+      new ActivityLogRepository(connection)
+        .listForTarget("item", createdFilePlaceholderNote!.item.id)
+        .map((event) => event.action)
+    ).toContain("note_created");
+    const integrity = await new IntegrityCheckService({
+      connection,
+      now,
+      fileSystem: {
+        workspacePathExists: async (workspaceRelativePath) =>
+          workspaceRelativePath === "attachments/2026/05/file_1/brief.pdf"
+      }
+    }).runWorkspaceIntegrityCheck("workspace_1");
+    const issueCodes = integrity.sections.flatMap((section) =>
+      section.issues.map((issue) => issue.code)
+    );
+    expect(issueCodes).not.toContain("file_details_missing");
+    expect(integrity.status).toBe("healthy");
     expect(new ContainerRepository(connection).getById(createdContainer.id)).not.toBeNull();
     expect(row.listItem.title).toBe("Draft launch brief");
+  });
+
+  it("rejects unsafe attachment paths in imported file placeholders before apply", () => {
+    expect(() =>
+      validateContainerTemplateJson({
+        version: 1,
+        kind: "project",
+        createdFrom: {
+          sourceType: "project",
+          sourceId: "container_source"
+        },
+        baseDate: "2026-05-01",
+        container: {
+          type: "project",
+          name: "Unsafe template",
+          description: null,
+          status: "active",
+          categoryId: null,
+          color: null,
+          isFavorite: false,
+          tags: [],
+          contactFields: [],
+          tabs: [],
+          items: [
+            {
+              stableId: "item_file_unsafe",
+              tabStableId: null,
+              type: "file",
+              title: "Unsafe.pdf",
+              body: null,
+              categoryId: null,
+              status: "active",
+              sortOrder: 1,
+              pinned: false,
+              startAt: null,
+              dueAt: null,
+              completedAt: null,
+              startOffsetDays: null,
+              dueOffsetDays: null,
+              completedOffsetDays: null,
+              tags: [],
+              filePlaceholder: {
+                originalName: "Unsafe.pdf",
+                description: null,
+                attachments: [
+                  {
+                    originalName: "Unsafe.pdf",
+                    storedName: "Unsafe.pdf",
+                    mimeType: null,
+                    sizeBytes: 10,
+                    checksum: null,
+                    description: null,
+                    storagePath: "../outside/Unsafe.pdf"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      })
+    ).toThrow("attachment.storagePath must stay inside workspace attachments");
   });
 });
 

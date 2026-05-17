@@ -149,6 +149,11 @@ MVP object graph:
   the existing template JSON payload. The envelope records capabilities,
   portable tag/category references, source metadata, and file-version
   information while keeping binary attachments as placeholders.
+- Applying project/contact templates keeps those binary attachment placeholders
+  as explicit note items rather than creating `file` items without attachment
+  rows. The note carries the original file metadata and reattachment guidance,
+  keeping integrity diagnostics, backup/restore, activity, and search aligned
+  until a future scoped ticket adds real binary-copy support for templates.
 
 Search remains a local projection table behind `SearchIndexService`,
 `SearchService`, and feature-level orchestrators. It indexes source records
