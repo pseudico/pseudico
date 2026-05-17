@@ -252,6 +252,22 @@ export type RestoreBackupToNewWorkspaceInput = {
   targetRootPath: string;
 };
 
+export type ChooseRestoreTargetFolderInput = {
+  defaultPath?: string;
+};
+
+export type RevealBackupFolderInput = {
+  backupRelativePath: string;
+};
+
+export type RevealRestoredWorkspaceFolderInput = {
+  rootPath: string;
+};
+
+export type RevealedFolderSummary = {
+  path: string;
+};
+
 export type ListBackupsForWorkspacePathInput = {
   rootPath: string;
 };
@@ -4110,7 +4126,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     restoreBackupFromWorkspacePath:
       "local-work-os:backup:restore-backup-from-workspace-path",
     restoreExportToNewWorkspace:
-      "local-work-os:backup:restore-export-to-new-workspace"
+      "local-work-os:backup:restore-export-to-new-workspace",
+    chooseRestoreTargetFolder:
+      "local-work-os:backup:choose-restore-target-folder",
+    revealBackupFolder: "local-work-os:backup:reveal-backup-folder",
+    revealRestoredWorkspaceFolder:
+      "local-work-os:backup:reveal-restored-workspace-folder"
   },
   import: {
     validateWorkspaceExportJson:
@@ -5035,6 +5056,18 @@ export type LocalWorkOsIpcContracts = {
     input: RestoreExportToNewWorkspaceInput;
     result: ApiResult<RestoreWorkspaceSummary>;
   };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.chooseRestoreTargetFolder]: {
+    input: ChooseRestoreTargetFolderInput | undefined;
+    result: ApiResult<string | null>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.revealBackupFolder]: {
+    input: RevealBackupFolderInput;
+    result: ApiResult<RevealedFolderSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.backup.revealRestoredWorkspaceFolder]: {
+    input: RevealRestoredWorkspaceFolderInput;
+    result: ApiResult<RevealedFolderSummary>;
+  };
   [LOCAL_WORK_OS_IPC_CHANNELS.import.validateWorkspaceExportJson]: {
     input: ValidateWorkspaceExportJsonInput;
     result: ApiResult<ImportValidationSummary>;
@@ -5875,6 +5908,15 @@ export type LocalWorkOsApi = {
     restoreExportToNewWorkspace: (
       input: RestoreExportToNewWorkspaceInput
     ) => Promise<ApiResult<RestoreWorkspaceSummary>>;
+    chooseRestoreTargetFolder?: (
+      input?: ChooseRestoreTargetFolderInput
+    ) => Promise<ApiResult<string | null>>;
+    revealBackupFolder?: (
+      input: RevealBackupFolderInput
+    ) => Promise<ApiResult<RevealedFolderSummary>>;
+    revealRestoredWorkspaceFolder?: (
+      input: RevealRestoredWorkspaceFolderInput
+    ) => Promise<ApiResult<RevealedFolderSummary>>;
   };
   import: {
     validateWorkspaceExportJson: (
@@ -6695,6 +6737,18 @@ export function createLocalWorkOsApi(
       restoreExportToNewWorkspace: (input) =>
         invoke(
           LOCAL_WORK_OS_IPC_CHANNELS.backup.restoreExportToNewWorkspace,
+          input
+        ),
+      chooseRestoreTargetFolder: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.backup.chooseRestoreTargetFolder,
+          input
+        ),
+      revealBackupFolder: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.backup.revealBackupFolder, input),
+      revealRestoredWorkspaceFolder: (input) =>
+        invoke(
+          LOCAL_WORK_OS_IPC_CHANNELS.backup.revealRestoredWorkspaceFolder,
           input
         )
     },

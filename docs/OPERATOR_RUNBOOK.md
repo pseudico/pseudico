@@ -144,7 +144,21 @@ Workspace export is for portable local data exchange and recovery testing. It is
 
 ### Restore expectations
 
-Restore into a clean, empty workspace folder whenever possible.
+Restore into a clean, empty workspace folder whenever possible:
+
+1. Open **Settings → Backup & restore**.
+2. Select **Choose restore folder** and pick the folder that should become the
+   restored workspace. Do not choose the currently open workspace folder.
+3. Select **Preview restore** on the backup you intend to recover.
+4. Confirm the preview shows the current workspace, backup source, restore
+   destination, included database/attachment status, and the new-workspace-only
+   safety policy.
+5. Run **Restore into new workspace** only after the destination is correct.
+6. On success, use **Open restored workspace**, **Show restored folder**, or
+   **Show backup folder** as the next safe action.
+
+The advanced portable JSON restore in **Imports & exports** is for deliberate
+local data-portability recovery only. Normal recovery should use backup restore.
 
 After restoring:
 

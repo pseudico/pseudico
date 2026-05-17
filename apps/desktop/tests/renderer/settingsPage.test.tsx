@@ -3,6 +3,10 @@ import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { SettingsPage } from "../../src/renderer/pages/SettingsPage";
 import { workspaceStore } from "../../src/renderer/state/workspaceStore";
+import type {
+  BackupSnapshotSummary,
+  RestoreWorkspaceSummary
+} from "../../src/preload/api";
 
 describe("SettingsPage", () => {
   afterEach(() => {
@@ -63,10 +67,36 @@ describe("SettingsPage", () => {
 
     expect(html).toContain("Backup &amp; restore");
     expect(html).toContain("Create backup");
-    expect(html).toContain("New restore workspace folder");
+    expect(html).toContain("Choose restore folder");
+    expect(html).toContain("No folder chosen yet");
+    expect(html).toContain("Advanced: paste a destination path instead");
     expect(html).toContain("No backups yet");
     expect(html).toContain("This will not overwrite your");
     expect(html).not.toContain("Validate portable JSON import");
+  });
+
+  it("guides backup restore through destination, preview, and success states", () => {
+    const backup = createBackupSnapshot();
+    const restoreSummary = createRestoreSummary(backup);
+    const html = renderSettings("backup", {
+      initialBackups: [backup],
+      initialRestoreSummary: restoreSummary,
+      initialRestoreTargetPath: "C:\\Work\\Personal-restored",
+      initialSelectedRestoreBackupId: backup.id
+    });
+
+    expect(html).toContain("Preview restore");
+    expect(html).toContain("selected for restore");
+    expect(html).toContain("3. Review restore before it runs");
+    expect(html).toContain("Current workspace");
+    expect(html).toContain("Backup source");
+    expect(html).toContain("Restore destination");
+    expect(html).toContain("New workspace only; current workspace is not overwritten.");
+    expect(html).toContain("Restore into new workspace");
+    expect(html).toContain("Restore complete: new workspace created");
+    expect(html).toContain("Open restored workspace");
+    expect(html).toContain("Show restored folder");
+    expect(html).toContain("Show backup folder");
   });
 
   it("keeps imports and exports reachable but separated from daily settings", () => {
@@ -76,6 +106,7 @@ describe("SettingsPage", () => {
     expect(html).toContain("Markdown folder path");
     expect(html).toContain("CSV/TSV file path");
     expect(html).toContain("Validate portable JSON import");
+    expect(html).toContain("Advanced portable data restore from JSON export");
     expect(html).toContain("Restore export to new workspace");
     expect(html).toContain("Exports to local files");
     expect(html).toContain("Export portable JSON");
@@ -100,7 +131,8 @@ describe("SettingsPage", () => {
 });
 
 function renderSettings(
-  initialSection?: ComponentProps<typeof SettingsPage>["initialSection"]
+  initialSection?: ComponentProps<typeof SettingsPage>["initialSection"],
+  props: Partial<ComponentProps<typeof SettingsPage>> = {}
 ): string {
   workspaceStore.setCurrentWorkspace({
     id: "workspace_1",
@@ -112,9 +144,64 @@ function renderSettings(
 
   return renderToString(
     initialSection === undefined ? (
-      <SettingsPage />
+      <SettingsPage {...props} />
     ) : (
-      <SettingsPage initialSection={initialSection} />
+      <SettingsPage initialSection={initialSection} {...props} />
     )
   );
+}
+
+function createBackupSnapshot(): BackupSnapshotSummary {
+  return {
+    id: "backup_1",
+    workspaceId: "workspace_1",
+    createdAt: "2026-05-16T10:00:00.000Z",
+    relativePath: "backups/2026-05-16T10-00-00-000Z",
+    databaseRelativePath:
+      "backups/2026-05-16T10-00-00-000Z/local-work-os.sqlite",
+    manifestRelativePath:
+      "backups/2026-05-16T10-00-00-000Z/attachment-manifest.json",
+    attachmentCount: 2,
+    totalAttachmentBytes: 4096,
+    databaseSizeBytes: 688128,
+    kind: "manual"
+  };
+}
+
+function createRestoreSummary(
+  backup: BackupSnapshotSummary
+): RestoreWorkspaceSummary {
+  return {
+    valid: true,
+    sourceType: "backup",
+    sourcePath: backup.relativePath,
+    workspace: {
+      id: "workspace_1",
+      name: "Personal",
+      schemaVersion: 1
+    },
+    counts: {
+      containers: 1,
+      items: 3,
+      listItems: 0,
+      attachments: 2
+    },
+    targetPolicy: {
+      mode: "new_workspace_only",
+      canApplyToActiveWorkspace: false,
+      message:
+        "Restore creates a separate workspace and does not overwrite the active workspace."
+    },
+    issues: [],
+    restoredAt: "2026-05-17T00:00:00.000Z",
+    targetWorkspaceRootPath: "C:\\Work\\Personal-restored",
+    copiedAttachmentCount: 2,
+    missingAttachmentCount: 0,
+    searchIndex: {
+      indexedContainerCount: 1,
+      indexedItemCount: 3,
+      indexedListItemCount: 0,
+      indexedAttachmentCount: 2
+    }
+  };
 }

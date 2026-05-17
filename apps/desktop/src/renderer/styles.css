@@ -3882,6 +3882,88 @@ a {
   gap: 8px;
 }
 
+.backup-list-heading,
+.restore-destination-card,
+.restore-preview-card,
+.restore-success-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--app-accent, #245c55) 24%, #ece8dc);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--app-accent, #245c55) 5%, #ffffff);
+}
+
+.backup-list-heading span,
+.restore-destination-path span {
+  color: #514e49;
+}
+
+.restore-destination-path {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid #ece8dc;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.restore-destination-path strong,
+.restore-preview-grid dd {
+  overflow-wrap: anywhere;
+}
+
+.restore-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.restore-preview-grid div {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid #ece8dc;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.restore-preview-grid dt {
+  color: #514e49;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.restore-preview-grid dd {
+  margin: 0;
+}
+
+.advanced-disclosure {
+  display: grid;
+  gap: 10px;
+}
+
+.advanced-disclosure summary {
+  cursor: pointer;
+  color: #514e49;
+  font-weight: 700;
+}
+
+.advanced-disclosure label {
+  display: grid;
+  gap: 6px;
+}
+
+.advanced-restore-disclosure {
+  padding: 12px;
+  border: 1px dashed #dedbd1;
+  border-radius: 10px;
+  background: #fbfaf7;
+}
+
 .backup-list-row {
   display: grid;
   gap: 8px;
@@ -3889,6 +3971,11 @@ a {
   border: 1px solid #ece8dc;
   border-radius: 8px;
   background: #fbfaf7;
+}
+
+.backup-list-row-selected {
+  border-color: var(--app-accent, #245c55);
+  background: color-mix(in srgb, var(--app-accent, #245c55) 7%, #ffffff);
 }
 
 .backup-list-row > div:first-child {
