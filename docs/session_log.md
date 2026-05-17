@@ -7497,3 +7497,75 @@ Decisions made:
 Files changed: apps/desktop/src/renderer/pages/SearchPage.tsx; apps/desktop/src/renderer/shell/TopBar.tsx; docs/manual-qa/PSE-217-search-visual-trust.md
 Open questions / risks: P3 duplicate file result rows documented for later relevance/deduplication.
 Next actions: stage/commit/push; create PR; update Linear and merge if allowed.
+
+## 2026-05-17T10:07+10
+Objective: Recover PSE-218 issue context and post implementation plan.
+Decisions made:
+- Treat PSE-207 raw-path restore friction as the primary product gap.
+- Keep work scoped to guided local backup/restore UI plus narrow IPC/tests/docs if needed.
+Files changed: docs/session_log.md
+Open questions / risks: Folder picker/reveal IPC must not become broad unsafe filesystem access.
+Next actions: inspect backup IPC/UI; implement guided preview and success states; add tests/evidence.
+
+## 2026-05-17T10:33+10
+Objective: Implement and verify PSE-218 guided backup/restore flow.
+Decisions made:
+- Added normal restore folder picker IPC plus narrow reveal helpers; kept advanced path/JSON restore secondary.
+- Packaged QA used advanced destination field for execution because native OS picker is not CDP-automatable.
+Files changed: apps/desktop/src/main/ipc/backupHandlers.ts; apps/desktop/src/main/ipc/registerBackupIpc.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/api/desktopApiClient.ts; apps/desktop/src/renderer/pages/SettingsPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/main/backupHandlers.test.ts; apps/desktop/tests/renderer/settingsPage.test.tsx; docs/OPERATOR_RUNBOOK.md; docs/manual-qa/PSE-218-guided-backup-restore.md; docs/manual-qa/PSE-218-packaged-backup-restore-summary.json; docs/manual-qa/screenshots/PSE-218-2026-05-17T00-32-11-101Z
+Open questions / risks: P2 picker click not captured due native dialog automation limits; IPC covered by tests.
+Next actions: rerun broad checks; commit/push/PR; update Linear and merge if allowed.
+
+## 2026-05-17T10:36+10
+Objective: Complete PSE-218 verification on current branch.
+Decisions made:
+- Rebuilt package after TypeScript fixes; package smoke passed on rebuilt win-unpacked app.
+- Retained final packaged evidence run as visual proof of guided restore states.
+Files changed: docs/session_log.md
+Open questions / risks: Evidence run used packaged UI plus advanced destination entry for dialog automation limit.
+Next actions: inspect git diff; commit and push; open/update PR.
+
+## 2026-05-17T10:40+10
+Objective: Tighten PSE-218 reveal safety before publishing.
+Decisions made:
+- Added backup folder existence/directory check before reveal.
+- Re-ran targeted backup/settings tests and full typecheck successfully.
+Files changed: apps/desktop/src/main/ipc/backupHandlers.ts; docs/session_log.md
+Open questions / risks: P2 native picker interaction remains manual/IPC-tested due automation limits.
+Next actions: stage/commit; push branch; create PR and reconcile Linear/GitHub.
+
+## 2026-05-17T10:42+10
+Objective: Commit PSE-218 guided restore implementation.
+Decisions made:
+- Staged only PSE-218 UI, IPC, tests, runbook, manual QA evidence, screenshots, and session log.
+- Created commit c6fa2dc3 for GitHub PR publishing.
+Files changed: docs/session_log.md
+Open questions / risks: Need push, PR checks, Linear update, and merge-policy confirmation.
+Next actions: push branch; open PR; reconcile checks and Linear.
+
+## 2026-05-17T10:46+10
+Objective: Fix PR #199 CI preload channel coverage failure.
+Decisions made:
+- Updated preload API channel-count and backup routing assertions for the three new guided restore IPC channels.
+- Confirmed targeted desktop tests and full `pnpm test` now pass locally.
+Files changed: apps/desktop/tests/preload/api.test.ts; docs/session_log.md
+Open questions / risks: Need rerun CI after pushing amended PR branch.
+Next actions: commit/push fix; watch checks; update Linear and merge if allowed.
+
+## 2026-05-17T10:49+10
+Objective: Fix PR #199 CI typecheck failure.
+Decisions made:
+- Marked optional guided restore preload helpers as intentionally present in the routing test.
+- Confirmed targeted desktop tests and full typecheck now pass locally.
+Files changed: apps/desktop/tests/preload/api.test.ts; docs/session_log.md
+Open questions / risks: Need rerun GitHub Actions after push.
+Next actions: commit/push typecheck fix; watch checks; reconcile Linear/GitHub.
+
+## 2026-05-17T10:54+10
+Objective: Confirm PR #199 checks after CI fixes.
+Decisions made:
+- GitHub Actions `lint / typecheck / test / build` passed on head 235de334.
+- Remaining work is PR/Linear final reconciliation and merge if policy permits.
+Files changed: docs/session_log.md
+Open questions / risks: Adding this required log entry will trigger one final CI run.
+Next actions: commit/push log; re-confirm checks; merge and move Linear if allowed.

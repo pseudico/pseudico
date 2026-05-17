@@ -1,0 +1,129 @@
+{
+  "runId": "PSE-218-2026-05-17T00-32-11-101Z",
+  "startedAt": "2026-05-17T00:32:11.101Z",
+  "exePath": "C:\\tmp\\Pseudico-pse-218\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+  "workspacePath": "C:/tmp/PSE-218-2026-05-17T00-32-11-101Z-workspace",
+  "restoredPath": "C:/tmp/PSE-218-2026-05-17T00-32-11-101Z-restored-workspace",
+  "token": "PSE-218-Recovery-Proof",
+  "screenshots": [
+    "docs/manual-qa/screenshots/PSE-218-2026-05-17T00-32-11-101Z/01-backup-list-and-folder-picker.png",
+    "docs/manual-qa/screenshots/PSE-218-2026-05-17T00-32-11-101Z/02-restore-preview-safety-destination.png",
+    "docs/manual-qa/screenshots/PSE-218-2026-05-17T00-32-11-101Z/03-unsafe-active-workspace-target-error.png",
+    "docs/manual-qa/screenshots/PSE-218-2026-05-17T00-32-11-101Z/04-restore-success-open-show-actions.png",
+    "docs/manual-qa/screenshots/PSE-218-2026-05-17T00-32-11-101Z/05-restored-workspace-opened.png"
+  ],
+  "steps": [
+    {
+      "step": "Create packaged workspace with project/note and manual backup",
+      "result": "Pass",
+      "notes": "backups/2026-05-17T00-32-11-539Z"
+    },
+    {
+      "step": "Backup settings list shows created backup and normal folder-picker path",
+      "result": "Pass",
+      "notes": "backups/2026-05-17T00-32-11-539Z"
+    },
+    {
+      "step": "Restore preview explains current workspace, backup source, destination, and safety",
+      "result": "Pass",
+      "notes": ""
+    },
+    {
+      "step": "Unsafe active-workspace restore target remains blocked and visible",
+      "result": "Pass",
+      "notes": "C:/tmp/PSE-218-2026-05-17T00-32-11-101Z-workspace"
+    },
+    {
+      "step": "Backup restore succeeds into a new local workspace with obvious success actions",
+      "result": "Pass",
+      "notes": "C:/tmp/PSE-218-2026-05-17T00-32-11-101Z-restored-workspace"
+    },
+    {
+      "step": "Restored workspace is open and restored project is visible",
+      "result": "Pass",
+      "notes": "PSE-218-Recovery-Proof Project"
+    }
+  ],
+  "ids": {
+    "workspace": {
+      "id": "workspace_mp91j104_2ag0x9b8v9s",
+      "name": "PSE-218 Recovery Workspace",
+      "rootPath": "C:\\tmp\\PSE-218-2026-05-17T00-32-11-101Z-workspace",
+      "openedAt": "2026-05-17T00:32:11.476Z",
+      "schemaVersion": 23
+    },
+    "project": {
+      "id": "container_mp91j11e_06nxuusfq8s",
+      "workspaceId": "workspace_mp91j104_2ag0x9b8v9s",
+      "type": "project",
+      "name": "PSE-218-Recovery-Proof Project",
+      "slug": "pse-218-recovery-proof-project",
+      "description": "Project data restored by PSE-218-Recovery-Proof.",
+      "status": "active",
+      "categoryId": null,
+      "color": null,
+      "isFavorite": false,
+      "sortOrder": 0,
+      "createdAt": "2026-05-17T00:32:11.522Z",
+      "updatedAt": "2026-05-17T00:32:11.522Z",
+      "archivedAt": null,
+      "deletedAt": null
+    },
+    "note": {
+      "id": "item_mp91j11l_27rdpp7m1mo",
+      "workspaceId": "workspace_mp91j104_2ag0x9b8v9s",
+      "containerId": "container_mp91j11e_06nxuusfq8s",
+      "containerTabId": null,
+      "type": "note",
+      "title": "PSE-218-Recovery-Proof Note",
+      "body": "Backup restore evidence note for PSE-218-Recovery-Proof.",
+      "categoryId": null,
+      "status": "active",
+      "sortOrder": 1024,
+      "pinned": false,
+      "createdAt": "2026-05-17T00:32:11.529Z",
+      "updatedAt": "2026-05-17T00:32:11.529Z",
+      "completedAt": null,
+      "archivedAt": null,
+      "deletedAt": null,
+      "tags": [],
+      "format": "markdown",
+      "content": "Backup restore evidence note for PSE-218-Recovery-Proof.",
+      "preview": "Backup restore evidence note for PSE-218-Recovery-Proof.",
+      "noteCreatedAt": "2026-05-17T00:32:11.529Z",
+      "noteUpdatedAt": "2026-05-17T00:32:11.529Z",
+      "wikilinks": []
+    },
+    "backup": {
+      "id": "backup_mp91j120_1dlue9soimi",
+      "workspaceId": "workspace_mp91j104_2ag0x9b8v9s",
+      "createdAt": "2026-05-17T00:32:11.539Z",
+      "relativePath": "backups/2026-05-17T00-32-11-539Z",
+      "databaseRelativePath": "backups/2026-05-17T00-32-11-539Z/local-work-os.sqlite",
+      "manifestRelativePath": "backups/2026-05-17T00-32-11-539Z/attachment-manifest.json",
+      "attachmentCount": 0,
+      "totalAttachmentBytes": 0,
+      "databaseSizeBytes": 659456,
+      "kind": "manual",
+      "manifest": {
+        "id": "backup_mp91j120_1dlue9soimi",
+        "kind": "manual",
+        "workspaceId": "workspace_mp91j104_2ag0x9b8v9s",
+        "workspaceName": "PSE-218 Recovery Workspace",
+        "createdAt": "2026-05-17T00:32:11.539Z",
+        "database": {
+          "sourceRelativePath": "data/local-work-os.sqlite",
+          "backupRelativePath": "backups/2026-05-17T00-32-11-539Z/local-work-os.sqlite",
+          "sizeBytes": 659456,
+          "checksum": "1d85978bb9d4da88bf70dfc2fab4020621a89d23efab5c9ab02435a6c3e601c4"
+        },
+        "attachments": [],
+        "attachmentCount": 0,
+        "totalAttachmentBytes": 0
+      }
+    }
+  },
+  "issues": [],
+  "ok": true,
+  "finishedAt": "2026-05-17T00:32:18.761Z"
+}

@@ -25,10 +25,14 @@ import {
   type BackupSnapshotSummary,
   type BackupSchedulerSettings,
   type BackupSchedulerStatus,
+  type ChooseRestoreTargetFolderInput,
   type CreateManualBackupInput,
   type ListBackupsForWorkspacePathInput,
   type ListBackupsInput,
   type ManualBackupSnapshotSummary,
+  type RevealedFolderSummary,
+  type RevealBackupFolderInput,
+  type RevealRestoredWorkspaceFolderInput,
   type RunAutomaticBackupInput,
   type AutomaticBackupRunSummary,
   type RestoreBackupToNewWorkspaceInput,
@@ -61,6 +65,13 @@ type CurrentWorkspaceService = Pick<
   "getCurrentWorkspace"
 > &
   Partial<Pick<WorkspaceFileSystemService, "openWorkspace">>;
+
+export type BackupIpcPlatform = {
+  chooseRestoreTargetFolder?: (
+    input: ChooseRestoreTargetFolderInput | undefined
+  ) => Promise<string | null>;
+  revealPath?: (path: string) => Promise<void> | void;
+};
 
 export type BackupIpcHandlers = {
   handleCreateManualBackup: (
@@ -99,11 +110,21 @@ export type BackupIpcHandlers = {
   handleRestoreExportToNewWorkspace: (
     input: unknown
   ) => Promise<ApiResult<RestoreWorkspaceSummary>>;
+  handleChooseRestoreTargetFolder: (
+    input: unknown
+  ) => Promise<ApiResult<string | null>>;
+  handleRevealBackupFolder: (
+    input: unknown
+  ) => Promise<ApiResult<RevealedFolderSummary>>;
+  handleRevealRestoredWorkspaceFolder: (
+    input: unknown
+  ) => Promise<ApiResult<RevealedFolderSummary>>;
 };
 
 export function createBackupIpcHandlers(
   workspaceService: CurrentWorkspaceService,
-  now: () => Date = () => new Date()
+  now: () => Date = () => new Date(),
+  platform: BackupIpcPlatform = {}
 ): BackupIpcHandlers {
   return {
     async handleCreateManualBackup(input) {
@@ -507,6 +528,96 @@ export function createBackupIpcHandlers(
           connection.close();
         }
       });
+    },
+
+    async handleChooseRestoreTargetFolder(input) {
+      if (!isChooseRestoreTargetFolderInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "chooseRestoreTargetFolder accepts an optional defaultPath string."
+        );
+      }
+
+      if (platform.chooseRestoreTargetFolder === undefined) {
+        return apiError(
+          "IPC_ERROR",
+          "Restore target folder picker is not available."
+        );
+      }
+
+      try {
+        return apiOk(await platform.chooseRestoreTargetFolder(input));
+      } catch (error) {
+        return apiError(
+          "WORKSPACE_ERROR",
+          error instanceof Error
+            ? error.message
+            : "Could not choose a restore target folder."
+        );
+      }
+    },
+
+    async handleRevealBackupFolder(input) {
+      if (!isRevealBackupFolderInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "revealBackupFolder requires a backupRelativePath."
+        );
+      }
+
+      if (platform.revealPath === undefined) {
+        return apiError("IPC_ERROR", "Folder reveal is not available.");
+      }
+
+      return await withCurrentWorkspace(workspaceService, async (workspace) => {
+        await readBackupSnapshot(workspace.rootPath, input.backupRelativePath);
+        const folderPath = resolveInsideWorkspace(
+          workspace.rootPath,
+          input.backupRelativePath
+        );
+        const pathStats = await stat(folderPath);
+
+        if (!pathStats.isDirectory()) {
+          return apiError("INVALID_INPUT", "Backup folder was not found.");
+        }
+
+        await platform.revealPath?.(folderPath);
+
+        return apiOk({ path: folderPath });
+      });
+    },
+
+    async handleRevealRestoredWorkspaceFolder(input) {
+      if (!isRevealRestoredWorkspaceFolderInput(input)) {
+        return apiError(
+          "INVALID_INPUT",
+          "revealRestoredWorkspaceFolder requires a rootPath."
+        );
+      }
+
+      if (platform.revealPath === undefined) {
+        return apiError("IPC_ERROR", "Folder reveal is not available.");
+      }
+
+      try {
+        const rootPath = assertSafeWorkspaceRootPath(input.rootPath);
+        const pathStats = await stat(rootPath);
+
+        if (!pathStats.isDirectory()) {
+          return apiError("INVALID_INPUT", "Restore target is not a folder.");
+        }
+
+        await platform.revealPath(rootPath);
+
+        return apiOk({ path: rootPath });
+      } catch (error) {
+        return apiError(
+          "WORKSPACE_ERROR",
+          error instanceof Error
+            ? error.message
+            : "Could not reveal the restored workspace folder."
+        );
+      }
     }
   };
 }
@@ -943,6 +1054,26 @@ function isRestoreBackupToNewWorkspaceInput(
     isNonEmptyString(input.backupRelativePath) &&
     isNonEmptyString(input.targetRootPath)
   );
+}
+
+function isChooseRestoreTargetFolderInput(
+  input: unknown
+): input is ChooseRestoreTargetFolderInput | undefined {
+  return (
+    input === undefined ||
+    (isRecord(input) &&
+      (input.defaultPath === undefined || isNonEmptyString(input.defaultPath)))
+  );
+}
+
+function isRevealBackupFolderInput(input: unknown): input is RevealBackupFolderInput {
+  return isRecord(input) && isNonEmptyString(input.backupRelativePath);
+}
+
+function isRevealRestoredWorkspaceFolderInput(
+  input: unknown
+): input is RevealRestoredWorkspaceFolderInput {
+  return isRecord(input) && isNonEmptyString(input.rootPath);
 }
 
 function isRestoreBackupFromWorkspacePathInput(

@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(250);
+    expect(channels).toHaveLength(253);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -704,6 +704,15 @@ describe("typed preload API", () => {
       filePath: "C:\\exports\\workspace.json",
       targetRootPath: "C:\\restored-export"
     });
+    await api.backup.chooseRestoreTargetFolder!({
+      defaultPath: "C:\\restores"
+    });
+    await api.backup.revealBackupFolder!({
+      backupRelativePath: "backups/snapshot"
+    });
+    await api.backup.revealRestoredWorkspaceFolder!({
+      rootPath: "C:\\restored"
+    });
 
     expect(calls).toEqual([
       {
@@ -761,6 +770,24 @@ describe("typed preload API", () => {
         input: {
           filePath: "C:\\exports\\workspace.json",
           targetRootPath: "C:\\restored-export"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.chooseRestoreTargetFolder,
+        input: {
+          defaultPath: "C:\\restores"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.revealBackupFolder,
+        input: {
+          backupRelativePath: "backups/snapshot"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.backup.revealRestoredWorkspaceFolder,
+        input: {
+          rootPath: "C:\\restored"
         }
       }
     ]);

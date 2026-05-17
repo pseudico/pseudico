@@ -562,7 +562,22 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       restoreBackupFromWorkspacePath: (input) =>
         callApi(() => api.backup.restoreBackupFromWorkspacePath(input)),
       restoreExportToNewWorkspace: (input) =>
-        callApi(() => api.backup.restoreExportToNewWorkspace(input))
+        callApi(() => api.backup.restoreExportToNewWorkspace(input)),
+      chooseRestoreTargetFolder: (input) =>
+        callApi(() =>
+          api.backup.chooseRestoreTargetFolder?.(input) ??
+          unavailable("Restore target folder picker API is not available.")
+        ),
+      revealBackupFolder: (input) =>
+        callApi(() =>
+          api.backup.revealBackupFolder?.(input) ??
+          unavailable("Backup folder reveal API is not available.")
+        ),
+      revealRestoredWorkspaceFolder: (input) =>
+        callApi(() =>
+          api.backup.revealRestoredWorkspaceFolder?.(input) ??
+          unavailable("Restored workspace folder reveal API is not available.")
+        )
     },
     import: {
       validateWorkspaceExportJson: (input) =>
@@ -1253,7 +1268,16 @@ export const desktopApiClient: LocalWorkOsApi = {
     restoreBackupFromWorkspacePath: (input) =>
       getDesktopApiClient().backup.restoreBackupFromWorkspacePath(input),
     restoreExportToNewWorkspace: (input) =>
-      getDesktopApiClient().backup.restoreExportToNewWorkspace(input)
+      getDesktopApiClient().backup.restoreExportToNewWorkspace(input),
+    chooseRestoreTargetFolder: (input) =>
+      getDesktopApiClient().backup.chooseRestoreTargetFolder?.(input) ??
+      unavailable("Restore target folder picker API is not available."),
+    revealBackupFolder: (input) =>
+      getDesktopApiClient().backup.revealBackupFolder?.(input) ??
+      unavailable("Backup folder reveal API is not available."),
+    revealRestoredWorkspaceFolder: (input) =>
+      getDesktopApiClient().backup.revealRestoredWorkspaceFolder?.(input) ??
+      unavailable("Restored workspace folder reveal API is not available.")
   },
   import: {
     validateWorkspaceExportJson: (input) =>

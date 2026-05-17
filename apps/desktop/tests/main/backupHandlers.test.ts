@@ -416,4 +416,76 @@ describe("backup IPC handlers", () => {
     });
     expect(openedPath).toBe(recoveryTargetRoot);
   });
+
+  it("chooses restore folders and reveals backup/recovery folders through narrow IPC helpers", async () => {
+    tempRoot = await mkdtemp(join(tmpdir(), "local-work-os-restore-guidance-"));
+    const restoredRoot = join(tempRoot, "restored");
+    const databasePath = resolveWorkspaceDatabasePath(tempRoot);
+    await new DatabaseBootstrapService().bootstrapWorkspaceDatabase({
+      databasePath,
+      workspaceId: "workspace_1",
+      workspaceName: "Personal"
+    });
+    await mkdir(restoredRoot, { recursive: true });
+
+    const revealedPaths: string[] = [];
+    const handlers = createBackupIpcHandlers(
+      {
+        getCurrentWorkspace: () => ({
+          id: "workspace_1",
+          name: "Personal",
+          rootPath: tempRoot!,
+          openedAt: "2026-05-01T00:00:00.000Z",
+          schemaVersion: 1
+        })
+      },
+      () => new Date("2026-05-01T00:00:00.000Z"),
+      {
+        chooseRestoreTargetFolder: async () => restoredRoot,
+        revealPath: (path) => {
+          revealedPaths.push(path);
+        }
+      }
+    );
+
+    await expect(
+      handlers.handleChooseRestoreTargetFolder({
+        defaultPath: join(tempRoot, "suggested-restore")
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: restoredRoot
+    });
+
+    const created = await handlers.handleCreateManualBackup({
+      workspaceId: "workspace_1"
+    });
+
+    if (!created.ok) {
+      throw new Error(created.error.message);
+    }
+
+    await expect(
+      handlers.handleRevealBackupFolder({
+        backupRelativePath: created.data.relativePath
+      })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        path: join(tempRoot, created.data.relativePath)
+      }
+    });
+    await expect(
+      handlers.handleRevealRestoredWorkspaceFolder({ rootPath: restoredRoot })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        path: restoredRoot
+      }
+    });
+    expect(revealedPaths).toEqual([
+      join(tempRoot, created.data.relativePath),
+      restoredRoot
+    ]);
+  });
 });

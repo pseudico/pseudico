@@ -62,7 +62,11 @@ import type {
 
 type SettingsPageProps = {
   apiClient?: LocalWorkOsApi;
+  initialBackups?: BackupSnapshotSummary[];
   initialCategories?: CategorySummary[];
+  initialRestoreSummary?: RestoreWorkspaceSummary | null;
+  initialRestoreTargetPath?: string;
+  initialSelectedRestoreBackupId?: string | null;
   initialSection?: SettingsSectionId;
 };
 
@@ -157,7 +161,11 @@ const defaultPrivacyNetworkSettings: PrivacyNetworkSettingsSummary = {
 
 export function SettingsPage({
   apiClient = desktopApiClient,
+  initialBackups = [],
   initialCategories = [],
+  initialRestoreSummary = null,
+  initialRestoreTargetPath = "",
+  initialSelectedRestoreBackupId = null,
   initialSection = "overview"
 }: SettingsPageProps): React.JSX.Element {
   const { currentWorkspace } = useWorkspaceStore();
@@ -187,7 +195,8 @@ export function SettingsPage({
   const [exportBusy, setExportBusy] = useState(false);
   const [importBusy, setImportBusy] = useState(false);
   const [restoreBusy, setRestoreBusy] = useState(false);
-  const [backups, setBackups] = useState<BackupSnapshotSummary[]>([]);
+  const [restoreTargetPickerBusy, setRestoreTargetPickerBusy] = useState(false);
+  const [backups, setBackups] = useState<BackupSnapshotSummary[]>(initialBackups);
   const [backupSchedulerSettings, setBackupSchedulerSettings] =
     useState<BackupSchedulerSettings | null>(null);
   const [backupSchedulerStatus, setBackupSchedulerStatus] =
@@ -196,10 +205,14 @@ export function SettingsPage({
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
   const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
-  const [restoreTargetPath, setRestoreTargetPath] = useState("");
+  const [restoreTargetPath, setRestoreTargetPath] = useState(
+    initialRestoreTargetPath
+  );
   const [restoreExportPath, setRestoreExportPath] = useState("");
+  const [selectedRestoreBackupId, setSelectedRestoreBackupId] =
+    useState<string | null>(initialSelectedRestoreBackupId);
   const [restoreSummary, setRestoreSummary] =
-    useState<RestoreWorkspaceSummary | null>(null);
+    useState<RestoreWorkspaceSummary | null>(initialRestoreSummary);
   const [diagnosticsBusy, setDiagnosticsBusy] = useState(false);
   const [maintenanceBusy, setMaintenanceBusy] = useState(false);
   const [maintenanceJobs, setMaintenanceJobs] = useState<MaintenanceJobSummary[]>([]);
@@ -1253,9 +1266,48 @@ export function SettingsPage({
     });
   }
 
+  async function chooseRestoreTargetFolder(): Promise<void> {
+    if (apiClient.backup.chooseRestoreTargetFolder === undefined) {
+      setUserError(
+        "Folder picker is not available in this build. Use the advanced path field only if support asks you to."
+      );
+      return;
+    }
+
+    setRestoreTargetPickerBusy(true);
+    setError(null);
+
+    const result = await apiClient.backup.chooseRestoreTargetFolder(
+      currentWorkspace === null
+        ? undefined
+        : { defaultPath: `${currentWorkspace.rootPath}-restored` }
+    );
+
+    setRestoreTargetPickerBusy(false);
+
+    if (!result.ok) {
+      setUserError(result.error, "Restore folder picker failed");
+      return;
+    }
+
+    if (result.data === null) {
+      return;
+    }
+
+    setRestoreTargetPath(result.data);
+    setRestoreMessage(`Restore destination set to ${result.data}.`);
+  }
+
+  function previewRestoreBackup(backup: BackupSnapshotSummary): void {
+    setSelectedRestoreBackupId(backup.id);
+    setRestoreSummary(null);
+    setRestoreMessage(null);
+    setError(null);
+  }
+
   async function restoreBackup(backup: BackupSnapshotSummary): Promise<void> {
     if (restoreTargetPath.trim().length === 0) {
-      setUserError("Enter a new target workspace folder before restoring.");
+      setUserError("Choose a restore destination folder before restoring.");
       return;
     }
 
@@ -1286,6 +1338,59 @@ export function SettingsPage({
     void refreshCurrentWorkspace(apiClient);
   }
 
+  async function openRestoredWorkspace(summary: RestoreWorkspaceSummary): Promise<void> {
+    const result = await apiClient.workspace.openWorkspace({
+      rootPath: summary.targetWorkspaceRootPath
+    });
+
+    if (!result.ok) {
+      setUserError(result.error, "Open restored workspace failed");
+      return;
+    }
+
+    const message = `Opened restored workspace at ${result.data.rootPath}.`;
+    setRestoreMessage(message);
+    showToast(message, { title: "Restored workspace opened", tone: "success" });
+    void refreshCurrentWorkspace(apiClient);
+  }
+
+  async function revealRestoredWorkspace(
+    summary: RestoreWorkspaceSummary
+  ): Promise<void> {
+    if (apiClient.backup.revealRestoredWorkspaceFolder === undefined) {
+      setUserError("Folder reveal is not available in this build.");
+      return;
+    }
+
+    const result = await apiClient.backup.revealRestoredWorkspaceFolder({
+      rootPath: summary.targetWorkspaceRootPath
+    });
+
+    if (!result.ok) {
+      setUserError(result.error, "Show restored folder failed");
+    }
+  }
+
+  async function revealBackupFolder(sourcePath: string | null): Promise<void> {
+    if (sourcePath === null) {
+      setUserError("This restore summary does not include a backup source path.");
+      return;
+    }
+
+    if (apiClient.backup.revealBackupFolder === undefined) {
+      setUserError("Folder reveal is not available in this build.");
+      return;
+    }
+
+    const result = await apiClient.backup.revealBackupFolder({
+      backupRelativePath: sourcePath
+    });
+
+    if (!result.ok) {
+      setUserError(result.error, "Show backup folder failed");
+    }
+  }
+
   async function restoreWorkspaceExport(): Promise<void> {
     if (restoreExportPath.trim().length === 0) {
       setUserError("Enter a workspace export JSON file path before restoring.");
@@ -1293,7 +1398,7 @@ export function SettingsPage({
     }
 
     if (restoreTargetPath.trim().length === 0) {
-      setUserError("Enter a new target workspace folder before restoring.");
+      setUserError("Choose a restore destination folder before restoring.");
       return;
     }
 
@@ -1323,6 +1428,11 @@ export function SettingsPage({
     });
     void refreshCurrentWorkspace(apiClient);
   }
+
+  const selectedRestoreBackup =
+    selectedRestoreBackupId === null
+      ? null
+      : backups.find((backup) => backup.id === selectedRestoreBackupId) ?? null;
 
   return (
     <section className="settings-layout">
@@ -1912,19 +2022,53 @@ export function SettingsPage({
           </p>
         )}
 
-        <div className="category-form" aria-label="Restore target">
-          <label>
-            <span>New restore workspace folder</span>
-            <input
-              disabled={restoreBusy}
-              placeholder="C:\\Users\\you\\Local Work OS Restored"
-              value={restoreTargetPath}
-              onChange={(event) => setRestoreTargetPath(event.target.value)}
-            />
-          </label>
+        <div className="restore-destination-card" aria-label="Restore destination">
+          <div>
+            <strong>1. Choose where the restored workspace will be created</strong>
+            <p className="muted-text">
+              Current workspace: {currentWorkspace?.rootPath ?? "No workspace open"}.
+              Restore always creates a separate local workspace and will not
+              overwrite the workspace you are using now.
+            </p>
+          </div>
+          <div className="top-actions">
+            <button
+              className="primary-button"
+              disabled={restoreBusy || restoreTargetPickerBusy}
+              type="button"
+              onClick={() => void chooseRestoreTargetFolder()}
+            >
+              <FolderOpen size={17} aria-hidden="true" />
+              {restoreTargetPickerBusy ? "Choosing..." : "Choose restore folder"}
+            </button>
+          </div>
+          <div className="restore-destination-path">
+            <span>Restore destination</span>
+            <strong>
+              {restoreTargetPath.trim().length === 0
+                ? "No folder chosen yet"
+                : restoreTargetPath}
+            </strong>
+          </div>
+          <details className="advanced-disclosure">
+            <summary>Advanced: paste a destination path instead</summary>
+            <label>
+              <span>Destination folder path</span>
+              <input
+                disabled={restoreBusy}
+                placeholder="C:\\Users\\you\\Local Work OS Restored"
+                value={restoreTargetPath}
+                onChange={(event) => setRestoreTargetPath(event.target.value)}
+              />
+            </label>
+          </details>
         </div>
 
         <div className="backup-list" aria-label="Backup list">
+          <div className="backup-list-heading">
+            <strong>2. Pick the backup to restore</strong>
+            <span>Newest backups appear first with database and attachment status.</span>
+          </div>
           {backups.length === 0 ? (
             <EmptyState
               description="Manual backup snapshots will appear after the first local backup completes."
@@ -1936,11 +2080,33 @@ export function SettingsPage({
                 key={backup.id}
                 backup={backup}
                 restoreBusy={restoreBusy}
-                onRestore={restoreBackup}
+                selected={selectedRestoreBackupId === backup.id}
+                onPreview={previewRestoreBackup}
               />
             ))
           )}
         </div>
+        {selectedRestoreBackup === null ? null : (
+          <RestorePreviewPanel
+            backup={selectedRestoreBackup}
+            currentWorkspaceRootPath={currentWorkspace?.rootPath ?? null}
+            restoreBusy={restoreBusy}
+            targetRootPath={restoreTargetPath.trim()}
+            onChooseTarget={chooseRestoreTargetFolder}
+            onRestore={restoreBackup}
+          />
+        )}
+        {restoreMessage === null ? null : (
+          <p className="form-message form-message-ok">{restoreMessage}</p>
+        )}
+        {restoreSummary === null ? null : (
+          <RestoreSummaryPanel
+            summary={restoreSummary}
+            onOpenRestoredWorkspace={openRestoredWorkspace}
+            onRevealBackupFolder={revealBackupFolder}
+            onRevealRestoredWorkspace={revealRestoredWorkspace}
+          />
+        )}
       </section>
       ) : null}
 
@@ -2085,6 +2251,15 @@ export function SettingsPage({
           />
         )}
 
+        <details
+          className="advanced-disclosure advanced-restore-disclosure"
+          aria-label="Advanced portable data restore"
+        >
+          <summary>Advanced portable data restore from JSON export</summary>
+          <p className="muted-text">
+            Use this only when deliberately restoring a portable workspace JSON
+            export. Normal recovery should use the backup restore guide above.
+          </p>
         <div className="category-form" aria-label="Restore workspace export">
           <label>
             <span>Workspace export JSON path</span>
@@ -2114,12 +2289,18 @@ export function SettingsPage({
             Restore export to new workspace
           </button>
         </div>
+        </details>
 
         {restoreMessage === null ? null : (
           <p className="form-message form-message-ok">{restoreMessage}</p>
         )}
         {restoreSummary === null ? null : (
-          <RestoreSummaryPanel summary={restoreSummary} />
+          <RestoreSummaryPanel
+            summary={restoreSummary}
+            onOpenRestoredWorkspace={openRestoredWorkspace}
+            onRevealBackupFolder={revealBackupFolder}
+            onRevealRestoredWorkspace={revealRestoredWorkspace}
+          />
         )}
         {emailImportSummary === null ? null : (
           <div className="backup-list" aria-label="Email import summary">
@@ -2720,9 +2901,106 @@ function SavedViewDiagnosticsPanel({
   );
 }
 
+function RestorePreviewPanel({
+  backup,
+  currentWorkspaceRootPath,
+  onChooseTarget,
+  onRestore,
+  restoreBusy,
+  targetRootPath
+}: {
+  backup: BackupSnapshotSummary;
+  currentWorkspaceRootPath: string | null;
+  onChooseTarget: () => Promise<void>;
+  onRestore: (backup: BackupSnapshotSummary) => Promise<void>;
+  restoreBusy: boolean;
+  targetRootPath: string;
+}): React.JSX.Element {
+  const canRestore =
+    targetRootPath.length > 0 &&
+    backup.databaseRelativePath !== null &&
+    backup.manifestRelativePath !== null;
+
+  return (
+    <div className="restore-preview-card" aria-label="Restore preview">
+      <div>
+        <strong>3. Review restore before it runs</strong>
+        <p className="muted-text">
+          Pseudico will create a new local workspace from this backup. It will
+          block unsafe targets such as the active workspace.
+        </p>
+      </div>
+      <dl className="restore-preview-grid">
+        <div>
+          <dt>Current workspace</dt>
+          <dd>{currentWorkspaceRootPath ?? "No workspace open"}</dd>
+        </div>
+        <div>
+          <dt>Backup source</dt>
+          <dd>{backup.relativePath}</dd>
+        </div>
+        <div>
+          <dt>Backup date</dt>
+          <dd>{formatBackupDate(backup.createdAt)}</dd>
+        </div>
+        <div>
+          <dt>Included data</dt>
+          <dd>
+            {backup.databaseSizeBytes === null
+              ? "Database copy missing"
+              : `${formatBytes(backup.databaseSizeBytes)} database`}
+            ; {backup.attachmentCount} attachment record(s),{" "}
+            {formatBytes(backup.totalAttachmentBytes)} manifest total
+          </dd>
+        </div>
+        <div>
+          <dt>Restore destination</dt>
+          <dd>
+            {targetRootPath.length === 0
+              ? "Choose a destination folder before restoring."
+              : targetRootPath}
+          </dd>
+        </div>
+        <div>
+          <dt>Safety policy</dt>
+          <dd>New workspace only; current workspace is not overwritten.</dd>
+        </div>
+      </dl>
+      <div className="top-actions">
+        {targetRootPath.length === 0 ? (
+          <button
+            className="secondary-button"
+            disabled={restoreBusy}
+            type="button"
+            onClick={() => void onChooseTarget()}
+          >
+            <FolderOpen size={17} aria-hidden="true" />
+            Choose destination first
+          </button>
+        ) : null}
+        <button
+          className="primary-button"
+          disabled={!canRestore || restoreBusy}
+          type="button"
+          onClick={() => void onRestore(backup)}
+        >
+          <Archive size={17} aria-hidden="true" />
+          {restoreBusy ? "Restoring..." : "Restore into new workspace"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function RestoreSummaryPanel({
+  onOpenRestoredWorkspace,
+  onRevealBackupFolder,
+  onRevealRestoredWorkspace,
   summary
 }: {
+  onOpenRestoredWorkspace: (summary: RestoreWorkspaceSummary) => Promise<void>;
+  onRevealBackupFolder: (sourcePath: string | null) => Promise<void>;
+  onRevealRestoredWorkspace: (summary: RestoreWorkspaceSummary) => Promise<void>;
   summary: RestoreWorkspaceSummary;
 }): React.JSX.Element {
   const warningCount = summary.issues.filter(
@@ -2730,10 +3008,10 @@ function RestoreSummaryPanel({
   ).length;
 
   return (
-    <div className="backup-list" aria-label="Restore summary">
+    <div className="restore-success-card" aria-label="Restore summary">
       <div className="backup-list-row">
         <div>
-          <strong>Restored new workspace</strong>
+          <strong>Restore complete: new workspace created</strong>
           <span>{summary.targetWorkspaceRootPath}</span>
         </div>
         <div className="backup-list-meta">
@@ -2744,6 +3022,30 @@ function RestoreSummaryPanel({
         </div>
       </div>
       <p className="muted-text">{summary.targetPolicy.message}</p>
+      <div className="top-actions">
+        <button
+          className="primary-button"
+          type="button"
+          onClick={() => void onOpenRestoredWorkspace(summary)}
+        >
+          <FolderOpen size={17} aria-hidden="true" />
+          Open restored workspace
+        </button>
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={() => void onRevealRestoredWorkspace(summary)}
+        >
+          Show restored folder
+        </button>
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={() => void onRevealBackupFolder(summary.sourcePath)}
+        >
+          Show backup folder
+        </button>
+      </div>
     </div>
   );
 }
@@ -2862,17 +3164,26 @@ function formatEnabledPrivacyFeatures(
 
 function BackupListRow({
   backup,
-  onRestore,
-  restoreBusy
+  onPreview,
+  restoreBusy,
+  selected
 }: {
   backup: BackupSnapshotSummary;
-  onRestore: (backup: BackupSnapshotSummary) => Promise<void>;
+  onPreview: (backup: BackupSnapshotSummary) => void;
   restoreBusy: boolean;
+  selected: boolean;
 }): React.JSX.Element {
   return (
-    <div className="backup-list-row">
+    <div
+      className={
+        selected ? "backup-list-row backup-list-row-selected" : "backup-list-row"
+      }
+    >
       <div>
-        <strong>{formatBackupDate(backup.createdAt)}</strong>
+        <strong>
+          {formatBackupDate(backup.createdAt)}
+          {selected ? " — selected for restore" : ""}
+        </strong>
         <span>
           {backup.relativePath}
           {backup.kind === undefined ? "" : ` · ${formatBackupKind(backup.kind)}`}
@@ -2894,9 +3205,9 @@ function BackupListRow({
             backup.manifestRelativePath === null
           }
           type="button"
-          onClick={() => void onRestore(backup)}
+          onClick={() => onPreview(backup)}
         >
-          Restore to new workspace
+          Preview restore
         </button>
       </div>
     </div>
