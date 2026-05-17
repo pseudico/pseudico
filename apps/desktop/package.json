@@ -1,6 +1,8 @@
 {
   "name": "@local-work-os/desktop",
   "version": "0.0.0",
+  "description": "Local-only desktop work operating system for internal pilot use.",
+  "author": "Pseudico",
   "private": true,
   "type": "module",
   "main": "dist/main/index.js",

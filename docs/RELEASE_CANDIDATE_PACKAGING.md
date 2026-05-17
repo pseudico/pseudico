@@ -6,11 +6,25 @@ PSE-204 / PSE-OR-009 records how Local Work OS can be handed to an operator as a
 
 **Internal pilot / operator-readiness candidate:** unpacked Electron directory package produced by `pnpm package` and verified by `pnpm package:smoke` plus `pnpm release:package-check`.
 
-Not yet public-release ready because package metadata polish, installer targets, Windows signing, macOS signing/notarization, public checksum publishing, release-channel hosting, legal/support process, and auto-update remain owner decisions or future tickets.
+Not yet public-release ready because installer targets, Windows signing,
+macOS signing/notarization, public checksum publishing, release-channel hosting,
+legal/support process, and auto-update remain owner decisions or future tickets.
 
 ## Evidence baseline
 
-Latest reconciled package-hardening evidence is PSE-221:
+Latest reconciled package metadata and release-caveat evidence is PSE-227:
+
+- `docs/manual-qa/PSE-227-package-metadata-release-caveats.md` records
+  `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm package`,
+  `pnpm package:smoke`, and `pnpm release:package-check` passing from a clean
+  worktree based on PSE-226's merged main.
+- `docs/release/package-artifact-check.json` records current Windows unpacked
+  artifact paths, checksums, disabled publish/update status, unsigned
+  development-package status, package metadata checks, and data-boundary checks.
+- Desktop package metadata now includes a package description and author, so the
+  Electron Builder missing description/author warnings are resolved.
+
+Prior package-hardening evidence is PSE-221:
 
 - `docs/manual-qa/PSE-221-packaged-release-qa.md` records `pnpm package`,
   `pnpm package:smoke`, and `pnpm release:package-check` passing from a clean
@@ -18,8 +32,8 @@ Latest reconciled package-hardening evidence is PSE-221:
 - `docs/manual-qa/PSE-221-package-contents-check.json` records that
   `.tsbuildinfo` files are absent from the packaged output and that runtime
   files such as `better_sqlite3.node` are present.
-- Package metadata polish such as missing description/author warnings is tracked
-  by PSE-227 and should not be interpreted as public-release readiness.
+- PSE-221 fixed the unsafe `.tsbuildinfo` / pnpm linked-package packaging
+  failure and remains the baseline for the staging/package-boundary design.
 
 ## Build artifacts
 
@@ -41,6 +55,8 @@ Current Electron Builder settings:
 - `asar: true`; native `.node` files are unpacked.
 - `publish: null`; no release feed or auto-update publishing is configured.
 - Windows `signAndEditExecutable: false`; the Windows development package is unsigned.
+- Desktop package metadata includes `description` and `author`; Electron Builder
+  no longer emits missing description/author warnings for the staged app.
 - Packaging runs from a temporary `apps/desktop/.package-app/` staging directory
   produced by `pnpm deploy --prod --legacy`; the staging directory is deleted
   after packaging.
@@ -48,6 +64,16 @@ Current Electron Builder settings:
   not packaged as pnpm workspace symlinks under `node_modules/@local-work-os`.
 - TypeScript build cache files (`*.tsbuildinfo` / `.tsbuildinfo/`) and source
   maps are excluded from package inputs.
+
+Current non-blocking packaging advisories:
+
+- `pnpm deploy --legacy` can print shared-lockfile/registry timing warnings while
+  building the temporary staging app. These are packaging-machine/tooling
+  warnings, not runtime network dependencies for the operator.
+- Electron Builder can print an `@electron/rebuild` duplicate-use advisory. The
+  packaging script still deliberately rebuilds and copies `better-sqlite3` for
+  the packaged Electron ABI because PSE-221 proved this path is needed for the
+  packaged smoke test.
 
 ## Required local verification
 
