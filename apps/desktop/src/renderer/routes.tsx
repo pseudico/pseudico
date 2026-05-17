@@ -187,14 +187,40 @@ export const appRoutes = [
 
 export const navRoutes = appRoutes.filter((route) => route.nav);
 
+const routeParentByPrefix: Array<{
+  id: AppRouteId;
+  prefix: string;
+}> = [
+  { id: "projects", prefix: "/projects/" },
+  { id: "contacts", prefix: "/contacts/" }
+];
+
 export function getRouteByPath(pathname: string): AppRoute {
   return (
     appRoutes.find((route) => route.path === pathname) ??
-    (pathname.startsWith("/projects/")
-      ? appRoutes.find((route) => route.path === "/projects")
-      : pathname.startsWith("/contacts/")
-        ? appRoutes.find((route) => route.path === "/contacts")
-      : undefined) ??
+    getActiveNavRoute(pathname) ??
     appRoutes.find((route) => route.path === "/welcome")!
   );
+}
+
+export function getActiveNavRoute(pathname: string): AppRoute | undefined {
+  const exactRoute = navRoutes.find((route) => route.path === pathname);
+
+  if (exactRoute !== undefined) {
+    return exactRoute;
+  }
+
+  const parentRoute = routeParentByPrefix.find((route) =>
+    pathname.startsWith(route.prefix)
+  );
+
+  if (parentRoute === undefined) {
+    return undefined;
+  }
+
+  return navRoutes.find((route) => route.id === parentRoute.id);
+}
+
+export function getActiveNavRouteId(pathname: string): AppRouteId | null {
+  return getActiveNavRoute(pathname)?.id ?? null;
 }

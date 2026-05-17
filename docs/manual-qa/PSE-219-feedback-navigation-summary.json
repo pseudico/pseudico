@@ -1,0 +1,12 @@
+{
+  "capturedAt": "2026-05-17T01:29:30.153Z",
+  "evidenceType": "built Electron app via local CDP",
+  "workspaceRoot": "C:\\tmp\\Pseudico-pse-219\\.tmp\\pse-219-evidence-workspace",
+  "screenshots": [
+    "01-today-after-several-completions.png",
+    "02-dashboard-after-several-completions.png",
+    "03-settings-persistent-activity-after-toast-dismissal.png",
+    "04-project-tags-active-nav.png"
+  ],
+  "packageNote": "Evidence used the built Electron app because pnpm package is blocked in this clean linked worktree by electron-builder treating pnpm workspace package symlinks outside apps/desktop as unsafe paths."
+}

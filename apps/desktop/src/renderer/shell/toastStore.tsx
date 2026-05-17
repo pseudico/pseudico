@@ -14,6 +14,8 @@ type ToastInput = {
 const listeners = new Set<() => void>();
 let toasts: ToastViewModel[] = [];
 let nextToastId = 1;
+const maxToastBacklog = 8;
+const maxVisibleToasts = 2;
 
 function emit(): void {
   for (const listener of listeners) {
@@ -49,21 +51,22 @@ export function showToast(message: string, input: ToastInput = {}): string {
     toast.action = input.action;
   }
 
-  toasts = [
-    ...toasts,
-    toast
-  ];
+  toasts = [...toasts, toast].slice(-maxToastBacklog);
   emit();
   return id;
 }
 
 export function dismissToast(id: string): void {
-  toasts = toasts.filter((toast) => toast.id !== id);
+  toasts =
+    id === "toast-overflow-summary"
+      ? toasts.slice(-maxVisibleToasts)
+      : toasts.filter((toast) => toast.id !== id);
   emit();
 }
 
 export function ToastHost(): React.JSX.Element | null {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  const visibleToasts = getVisibleToasts(snapshot);
 
   useEffect(() => {
     if (snapshot.length === 0) {
@@ -77,5 +80,29 @@ export function ToastHost(): React.JSX.Element | null {
     return () => window.clearTimeout(timeout);
   }, [snapshot]);
 
-  return <ToastViewport onDismiss={dismissToast} toasts={snapshot} />;
+  return <ToastViewport onDismiss={dismissToast} toasts={visibleToasts} />;
+}
+
+export function getVisibleToasts(
+  snapshot: readonly ToastViewModel[]
+): ToastViewModel[] {
+  if (snapshot.length <= maxVisibleToasts) {
+    return [...snapshot];
+  }
+
+  const hiddenCount = snapshot.length - maxVisibleToasts;
+  const latestToasts = snapshot.slice(-maxVisibleToasts);
+
+  return [
+    {
+      id: "toast-overflow-summary",
+      message:
+        hiddenCount === 1
+          ? "1 earlier update will clear automatically."
+          : `${hiddenCount} earlier updates will clear automatically.`,
+      title: "More updates",
+      tone: "info"
+    },
+    ...latestToasts
+  ];
 }

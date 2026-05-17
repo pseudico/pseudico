@@ -5,6 +5,7 @@ import { SettingsPage } from "../../src/renderer/pages/SettingsPage";
 import { workspaceStore } from "../../src/renderer/state/workspaceStore";
 import type {
   BackupSnapshotSummary,
+  MaintenanceJobSummary,
   RestoreWorkspaceSummary
 } from "../../src/preload/api";
 
@@ -128,6 +129,23 @@ describe("SettingsPage", () => {
     expect(html).toContain("Run maintenance");
     expect(html).toContain("Quarantine orphans");
   });
+
+  it("keeps important job completions findable after toasts disappear", () => {
+    const html = renderSettings("overview", {
+      initialBackupMessage:
+        "Manual backup created at backups/2026-05-17T11-00-00-000Z.",
+      initialExportMessage:
+        "Workspace JSON export created at exports/workspace-2026-05-17.json.",
+      initialMaintenanceJobs: [createSearchRebuildJob()]
+    });
+
+    expect(html).toContain("Recent Settings activity");
+    expect(html).toContain("What just happened stays visible here.");
+    expect(html).toContain("Manual backup created");
+    expect(html).toContain("Workspace JSON export created");
+    expect(html).toContain("Search index rebuilt");
+    expect(html).toContain("Review");
+  });
 });
 
 function renderSettings(
@@ -203,5 +221,30 @@ function createRestoreSummary(
       indexedListItemCount: 0,
       indexedAttachmentCount: 2
     }
+  };
+}
+
+function createSearchRebuildJob(): MaintenanceJobSummary {
+  return {
+    id: "maintenance_1",
+    workspaceId: "workspace_1",
+    status: "completed",
+    operations: ["rebuild_search_index"],
+    startedAt: "2026-05-17T11:00:00.000Z",
+    completedAt: "2026-05-17T11:00:05.000Z",
+    backup: null,
+    sqliteIntegrity: null,
+    attachmentManifestAudit: null,
+    searchReindex: {
+      indexedContainerCount: 4,
+      indexedItemCount: 25,
+      indexedListItemCount: 7,
+      indexedAttachmentCount: 3
+    },
+    vacuum: null,
+    orphanAttachmentScan: null,
+    orphanAttachmentCleanup: null,
+    entries: [],
+    error: null
   };
 }

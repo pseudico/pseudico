@@ -7569,3 +7569,39 @@ Decisions made:
 Files changed: docs/session_log.md
 Open questions / risks: Adding this required log entry will trigger one final CI run.
 Next actions: commit/push log; re-confirm checks; merge and move Linear if allowed.
+
+## 2026-05-17T11:03+10
+Objective: Start PSE-219 feedback/navigation orientation work.
+Decisions made:
+- Confirmed PSE-217 and PSE-218 are Done; selected PSE-219 as next unstarted HUX ticket.
+- Created clean worktree from merged main and posted Linear plan.
+Files changed: docs/session_log.md
+Open questions / risks: Need keep changes renderer-scoped and avoid noisy notification chrome.
+Next actions: implement nav/toast/status improvements; add tests; capture screenshots.
+
+## 2026-05-17T11:30+10
+Objective: Implement PSE-219 feedback and navigation polish.
+Decisions made:
+- Capped visible toasts, added recoverable Settings activity, and fixed sidebar/top-bar orientation.
+- Captured built-Electron screenshots for Today, Dashboard, Settings, and Project Tags.
+Files changed: apps/desktop/src/renderer/*; apps/desktop/tests/*; docs/manual-qa/PSE-219-feedback-navigation.md; docs/session_log.md
+Open questions / risks: Package command still has linked-worktree symlink blocker; document as P2.
+Next actions: rerun final checks; remove temp runner; commit/push/PR.
+
+## 2026-05-17T11:37+10
+Objective: Complete PSE-219 local verification.
+Decisions made:
+- `pnpm lint`, `pnpm typecheck`, `pnpm test`, targeted desktop tests, and `pnpm build` passed.
+- `pnpm package` failed on electron-builder unsafe linked-worktree `.tsbuildinfo` symlink path; documented as P2 non-functional blocker.
+Files changed: docs/session_log.md; docs/manual-qa/PSE-219-feedback-navigation.md
+Open questions / risks: Need CI confirmation after push; package blocker may need separate tooling follow-up.
+Next actions: stage/commit/push; open PR; update Linear and merge if checks allow.
+
+## 2026-05-17T11:40+10
+Objective: Open PSE-219 PR.
+Decisions made:
+- Pushed branch `codex/pse-219-feedback-navigation` and opened PR #200.
+- PR description includes tests, screenshots, acceptance, architecture safety, and package P2 risk.
+Files changed: docs/session_log.md
+Open questions / risks: Need GitHub checks to pass before merge; package issue remains follow-up.
+Next actions: commit/push log; update Linear; watch checks and merge if allowed.
