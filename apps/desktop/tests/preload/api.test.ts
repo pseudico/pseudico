@@ -704,13 +704,13 @@ describe("typed preload API", () => {
       filePath: "C:\\exports\\workspace.json",
       targetRootPath: "C:\\restored-export"
     });
-    await api.backup.chooseRestoreTargetFolder({
+    await api.backup.chooseRestoreTargetFolder!({
       defaultPath: "C:\\restores"
     });
-    await api.backup.revealBackupFolder({
+    await api.backup.revealBackupFolder!({
       backupRelativePath: "backups/snapshot"
     });
-    await api.backup.revealRestoredWorkspaceFolder({
+    await api.backup.revealRestoredWorkspaceFolder!({
       rootPath: "C:\\restored"
     });
 

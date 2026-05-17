@@ -7551,3 +7551,12 @@ Decisions made:
 Files changed: apps/desktop/tests/preload/api.test.ts; docs/session_log.md
 Open questions / risks: Need rerun CI after pushing amended PR branch.
 Next actions: commit/push fix; watch checks; update Linear and merge if allowed.
+
+## 2026-05-17T10:49+10
+Objective: Fix PR #199 CI typecheck failure.
+Decisions made:
+- Marked optional guided restore preload helpers as intentionally present in the routing test.
+- Confirmed targeted desktop tests and full typecheck now pass locally.
+Files changed: apps/desktop/tests/preload/api.test.ts; docs/session_log.md
+Open questions / risks: Need rerun GitHub Actions after push.
+Next actions: commit/push typecheck fix; watch checks; reconcile Linear/GitHub.
