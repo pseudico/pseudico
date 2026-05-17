@@ -8015,3 +8015,23 @@ Files changed:
 - docs/release/package-artifact-check.json; docs/session_log.md
 Open questions / risks: Folder-style email imports have directory-only chooser but not a separate hands-on nontechnical run.
 Next actions: Stage/commit/push PSE-229; open PR and merge if CI passes.
+
+## 2026-05-18 09:30 +10:00
+Objective: Audit PSE-203 large-workspace UI performance ticket against merged git evidence.
+Decisions made:
+- Use clean audit worktree C:\tmp\Pseudico-pse-203-audit from latest origin/main after PSE-229 merge.
+- Check whether PSE-203 acceptance is already satisfied by tracked PSE-209/PSE-226 docs, scripts, screenshots, and PR history before changing Linear.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need avoid closing PSE-203 if acceptance requires a missing script/report rather than only later caveat docs.
+Next actions: Inspect performance docs, manual QA artifacts, scripts, git history, and update Linear with status.
+
+## 2026-05-18 09:31 +10:00
+Objective: Close PSE-203 audit with tracked git evidence.
+Decisions made:
+- Added a concise closure audit instead of rerunning packaged QA because PSE-209/PSE-226 evidence is already tracked and merged.
+- Verdict is internal-pilot 1k/10k readiness only; no public-release or 100k-workspace claim.
+Files changed:
+- docs/manual-qa/PSE-203-large-workspace-closure-audit.md; docs/session_log.md
+Open questions / risks: PSE-209 Linear status also appears stale even though its evidence is present.
+Next actions: Validate docs diff; commit/PR/merge audit; update Linear PSE-203.
