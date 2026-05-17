@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-17T21:47:39.081Z",
+  "generatedAt": "2026-05-17T22:02:36.279Z",
   "localOnly": true,
   "platform": {
     "os": "win32",
@@ -10,8 +10,8 @@
   "package": {
     "productName": "Local Work OS",
     "packageKind": "unpacked-dir",
-    "unpackedRoot": "C:\\tmp\\Pseudico-pse-226\\apps\\desktop\\dist-packaged\\win-unpacked",
-    "resourcesRoot": "C:\\tmp\\Pseudico-pse-226\\apps\\desktop\\dist-packaged\\win-unpacked\\resources",
+    "unpackedRoot": "C:\\tmp\\Pseudico-pse-227\\apps\\desktop\\dist-packaged\\win-unpacked",
+    "resourcesRoot": "C:\\tmp\\Pseudico-pse-227\\apps\\desktop\\dist-packaged\\win-unpacked\\resources",
     "signingStatus": "unsigned Windows development package; signAndEditExecutable is false",
     "installerStatus": "not produced by current dir target",
     "autoUpdateStatus": "disabled; electron-builder publish is null and no update feed is configured",
@@ -20,15 +20,15 @@
   "artifacts": [
     {
       "kind": "executable",
-      "path": "C:\\tmp\\Pseudico-pse-226\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+      "path": "C:\\tmp\\Pseudico-pse-227\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
       "sizeBytes": 222973952,
-      "sha256": "94eed652b0196e13aeadca0386895ad0455def63922f98f9f8aa2100e3683fdb"
+      "sha256": "9ba4ebd0c0b2ed49d1caf6b4686f972cd1f46b08c792e339afdb21571d83ea4b"
     },
     {
       "kind": "app.asar",
-      "path": "C:\\tmp\\Pseudico-pse-226\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
-      "sizeBytes": 35913513,
-      "sha256": "e1dff0fbc26333a66a4f2784f53da7e8c0fd470fd98b55c53d2d49f514c7d158"
+      "path": "C:\\tmp\\Pseudico-pse-227\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
+      "sizeBytes": 35913622,
+      "sha256": "54f5d7c1182a3d489c74cb788f6a2ccaa4445eb708176664a93c073329ed94b3"
     }
   ],
   "checks": [
@@ -36,28 +36,28 @@
       "name": "unpacked app directory exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\Pseudico-pse-226\\apps\\desktop\\dist-packaged\\win-unpacked"
+        "path": "C:\\tmp\\Pseudico-pse-227\\apps\\desktop\\dist-packaged\\win-unpacked"
       }
     },
     {
       "name": "packaged resources directory exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\Pseudico-pse-226\\apps\\desktop\\dist-packaged\\win-unpacked\\resources"
+        "path": "C:\\tmp\\Pseudico-pse-227\\apps\\desktop\\dist-packaged\\win-unpacked\\resources"
       }
     },
     {
       "name": "packaged executable exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\Pseudico-pse-226\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe"
+        "path": "C:\\tmp\\Pseudico-pse-227\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe"
       }
     },
     {
       "name": "packaged app.asar exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\Pseudico-pse-226\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar"
+        "path": "C:\\tmp\\Pseudico-pse-227\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar"
       }
     },
     {
@@ -86,6 +86,27 @@
       "passed": true,
       "details": {
         "expected": "asar: true"
+      }
+    },
+    {
+      "name": "desktop package description metadata present",
+      "passed": true,
+      "details": {
+        "packageJson": "C:\\tmp\\Pseudico-pse-227\\apps\\desktop\\package.json"
+      }
+    },
+    {
+      "name": "desktop package author metadata present",
+      "passed": true,
+      "details": {
+        "packageJson": "C:\\tmp\\Pseudico-pse-227\\apps\\desktop\\package.json"
+      }
+    },
+    {
+      "name": "product name configured",
+      "passed": true,
+      "details": {
+        "expected": "productName: Local Work OS"
       }
     }
   ],

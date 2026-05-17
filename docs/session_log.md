@@ -7925,3 +7925,23 @@ Files changed:
 - docs/manual-qa/PSE-226-packaged-today-memory.md; docs/manual-qa/PSE-226-packaged-today-memory-summary.json; docs/manual-qa/screenshots/PSE-226-packaged-today-memory/10k-today-bounded.png; docs/release/package-artifact-check.json
 Open questions / risks: Package metadata warnings remain PSE-227, not PSE-226.
 Next actions: Commit; push/open PR; merge if review/CI state allows.
+
+## 2026-05-18T07:52:07+10:00
+Objective: Begin PSE-227 package metadata/release caveat polish from latest main.
+Decisions made:
+- PSE-226 was already merged and Linear Done; proceed to PSE-227 per queued instruction.
+- Use fresh worktree C:\tmp\Pseudico-pse-227 on codex/pse-227-package-metadata from origin/main.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need verify metadata warning source and avoid adding signing/update/release services.
+Next actions: Read packaging docs/config; post plan to Linear; implement smallest metadata/docs correction.
+
+## 2026-05-18 08:04 +10:00
+Objective: Implement PSE-227 package metadata and release caveat evidence.
+Decisions made:
+- Resolved missing description/author warnings via desktop package metadata.
+- Documented remaining package advisories as tooling-only/internal-pilot caveats.
+Files changed:
+- apps/desktop/package.json; scripts/check-release-package.mjs; docs/RELEASE_CANDIDATE_PACKAGING.md; docs/manual-qa/PSE-227-package-metadata-release-caveats.md; docs/release/package-artifact-check.json; docs/session_log.md
+Open questions / risks: P3 tooling advisories remain; public release still needs owner signing/installer/update decisions.
+Next actions: review diff; commit; open/merge PR.

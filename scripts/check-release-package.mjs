@@ -9,7 +9,9 @@ const repoRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const appRoot = resolve(repoRoot, "apps", "desktop");
 const outputPath = resolve(repoRoot, "docs", "release", "package-artifact-check.json");
 const builderConfigPath = resolve(appRoot, "electron-builder.yml");
+const appPackageJsonPath = resolve(appRoot, "package.json");
 const builderConfig = await readFile(builderConfigPath, "utf8");
+const appPackageJson = JSON.parse(await readFile(appPackageJsonPath, "utf8"));
 const packaged = getPackagedPaths();
 const checks = [];
 
@@ -38,6 +40,27 @@ checks.push({
   name: "asar enabled",
   passed: /asar:\s*true/.test(builderConfig),
   details: { expected: "asar: true" }
+});
+checks.push({
+  name: "desktop package description metadata present",
+  passed:
+    typeof appPackageJson.description === "string" &&
+    appPackageJson.description.trim().length > 0,
+  details: { packageJson: appPackageJsonPath }
+});
+checks.push({
+  name: "desktop package author metadata present",
+  passed:
+    typeof appPackageJson.author === "string"
+      ? appPackageJson.author.trim().length > 0
+      : typeof appPackageJson.author?.name === "string" &&
+        appPackageJson.author.name.trim().length > 0,
+  details: { packageJson: appPackageJsonPath }
+});
+checks.push({
+  name: "product name configured",
+  passed: /productName:\s*Local Work OS/.test(builderConfig),
+  details: { expected: "productName: Local Work OS" }
 });
 
 const signing = getSigningStatus(builderConfig);
