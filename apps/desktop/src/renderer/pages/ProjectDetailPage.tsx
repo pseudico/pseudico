@@ -174,6 +174,7 @@ type PendingConfirmAction = {
 
 type ProjectDetailPageProps = {
   apiClient?: LocalWorkOsApi;
+  disableLiveLoading?: boolean;
   initialProject?: ProjectSummary | null;
   initialCategories?: CategorySummary[];
   initialItems?: UniversalItemViewModel[];
@@ -185,6 +186,10 @@ type ProjectDetailPageProps = {
   initialRelatedContacts?: RelatedContactSummary[];
   initialPreferences?: ContainerPreferencesSummary | null;
   initialWebWidgetsEnabled?: boolean;
+  initialInspector?: {
+    item: ItemInspectorItem;
+    activity: ItemInspectorActivity[];
+  } | null;
 };
 
 const emptyProjectItems: UniversalItemViewModel[] = [];
@@ -232,6 +237,7 @@ function getFallbackContainerPreferences(
 
 export function ProjectDetailPage({
   apiClient = desktopApiClient,
+  disableLiveLoading = false,
   initialProject,
   initialCategories = [],
   initialItems = emptyProjectItems,
@@ -242,7 +248,8 @@ export function ProjectDetailPage({
   initialAvailableContacts = [],
   initialRelatedContacts = [],
   initialPreferences = null,
-  initialWebWidgetsEnabled = false
+  initialWebWidgetsEnabled = false,
+  initialInspector = null
 }: ProjectDetailPageProps): React.JSX.Element {
   const { projectId } = useParams();
   const navigate = useNavigate();
@@ -337,6 +344,10 @@ export function ProjectDetailPage({
     useState<PendingConfirmAction | null>(null);
 
   useEffect(() => {
+    if (disableLiveLoading) {
+      return;
+    }
+
     if (project === null) {
       return;
     }
@@ -357,7 +368,7 @@ export function ProjectDetailPage({
     return () => {
       cancelled = true;
     };
-  }, [apiClient, project?.id]);
+  }, [apiClient, disableLiveLoading, project?.id]);
 
   async function changeProjectViewMode(mode: ViewMode): Promise<void> {
     if (project === null || mode === viewMode) {
@@ -390,9 +401,15 @@ export function ProjectDetailPage({
   const [inspector, setInspector] = useState<{
     item: ItemInspectorItem;
     activity: ItemInspectorActivity[];
-  } | null>(null);
+  } | null>(initialInspector);
 
   useEffect(() => {
+    if (disableLiveLoading) {
+      setLoading(false);
+      setItemsLoading(false);
+      return;
+    }
+
     if (projectId === undefined) {
       setLoading(false);
       setError("Project id is missing.");
@@ -611,9 +628,13 @@ export function ProjectDetailPage({
     return () => {
       active = false;
     };
-  }, [apiClient, projectId]);
+  }, [apiClient, disableLiveLoading, projectId]);
 
   useEffect(() => {
+    if (disableLiveLoading) {
+      return;
+    }
+
     if (loading || project !== null || projectId === undefined) {
       return;
     }
@@ -631,9 +652,13 @@ export function ProjectDetailPage({
     return () => {
       active = false;
     };
-  }, [apiClient, loading, project, projectId]);
+  }, [apiClient, disableLiveLoading, loading, project, projectId]);
 
   useEffect(() => {
+    if (disableLiveLoading) {
+      return;
+    }
+
     if (projectId === undefined || apiClient.containerMedia === undefined) {
       return;
     }
@@ -655,16 +680,20 @@ export function ProjectDetailPage({
     return () => {
       active = false;
     };
-  }, [apiClient, projectId]);
+  }, [apiClient, disableLiveLoading, projectId]);
 
   useEffect(() => {
+    if (disableLiveLoading) {
+      return;
+    }
+
     if (projectId === undefined) {
       setRelationshipGraph(null);
       return;
     }
 
     void refreshRelationshipGraph(projectId);
-  }, [apiClient, projectId, relationshipGraphFilter]);
+  }, [apiClient, disableLiveLoading, projectId, relationshipGraphFilter]);
 
   useEffect(() => {
     if (
@@ -3246,9 +3275,6 @@ export function ProjectDetailPage({
       }}
     />
   );
-  const showSummaryFirst =
-    containerPreferences?.summaryFirst === true ||
-    containerPreferences?.defaultView === "summary";
   const relationshipGraphTargets = createRelationshipTargetOptions({
     currentContainerId: project.id,
     contacts,
@@ -3350,234 +3376,290 @@ export function ProjectDetailPage({
         </article>
       </section>
 
-      <section className="project-linked-context" aria-label="Project linked context">
-        <div className="panel-heading-actions">
-          <div className="panel-heading">
-            <FolderKanban size={17} aria-hidden="true" />
-            <h3>Linked context</h3>
-          </div>
-          <p className="muted-text">Contacts and related work connected to this project.</p>
-        </div>
-        <RelatedContactsPanel
-          availableContacts={availableContacts}
-          busy={relationshipBusy}
-          error={relationshipError}
-          relatedContacts={relatedContactViewModels}
-          selectedContactId={selectedContactId}
-          onLinkContact={() => void linkSelectedContact()}
-          onSelectedContactChange={setSelectedContactId}
-          onUnlinkContact={(relationshipId) => void unlinkRelatedContact(relationshipId)}
-        />
-      </section>
-
-      {showSummaryFirst ? tabSummaryCards : null}
-
-      {showSummaryFirst ? null : tabSummaryCards}
-
       <section
-        className="project-content-section"
-        id="project-content-feed"
-        aria-label="Project content"
-        onDragOver={(event) => {
-          if (Array.from(event.dataTransfer.types).includes("Files")) {
-            event.preventDefault();
-          }
-        }}
-        onDrop={(event) => {
-          void attachDroppedProjectFiles(event);
-        }}
+        className="project-detail-workbench"
+        data-space-budget-surface="project-detail"
+        aria-label="Project work container"
       >
-        <div className="panel-heading-actions">
-          <div className="panel-heading">
-            <FolderKanban size={17} aria-hidden="true" />
-            <h3>Content feed</h3>
+        <aside className="project-outline-panel" aria-label="Project outline and context">
+          <div className="panel-heading-actions">
+            <div className="panel-heading">
+              <FolderKanban size={17} aria-hidden="true" />
+              <h3>Sections</h3>
+            </div>
+            <p className="muted-text">Secondary outline and contacts collapse before the feed gets cramped.</p>
           </div>
-          <ViewModeSwitcher
-            disabled={viewModeSaving}
-            value={viewMode}
-            onChange={(mode) => void changeProjectViewMode(mode)}
-          />
-          <button
-            className="secondary-button compact-button"
-            disabled={itemsLoading}
-            type="button"
-            onClick={() => void refreshProjectContent(project.id)}
-          >
-            <RefreshCw size={16} aria-hidden="true" />
-            Refresh
-          </button>
-          <button
-            className="primary-button compact-button"
-            disabled={itemsLoading}
-            type="button"
-            onClick={openProjectDefaultQuickAdd}
-          >
-            Quick Start ({formatQuickAddType(containerPreferences?.defaultQuickAddType)})
-          </button>
-        </div>
+          {tabSummaryCards}
+          <section className="project-linked-context" aria-label="Project linked context">
+            <div className="panel-heading-actions">
+              <div className="panel-heading">
+                <FolderKanban size={17} aria-hidden="true" />
+                <h3>Linked context</h3>
+              </div>
+              <p className="muted-text">Contacts and related work connected to this project.</p>
+            </div>
+            <RelatedContactsPanel
+              availableContacts={availableContacts}
+              busy={relationshipBusy}
+              error={relationshipError}
+              relatedContacts={relatedContactViewModels}
+              selectedContactId={selectedContactId}
+              onLinkContact={() => void linkSelectedContact()}
+              onSelectedContactChange={setSelectedContactId}
+              onUnlinkContact={(relationshipId) => void unlinkRelatedContact(relationshipId)}
+            />
+          </section>
+        </aside>
 
-        <TaskQuickAdd
-          contextLabel={project.name}
-          disabled={savingTask || itemsLoading}
-          error={taskError}
-          onSubmit={createProjectTask}
-        />
-
-        <CreateListForm
-          contextLabel={project.name}
-          disabled={savingList || itemsLoading}
-          error={listBusyId === null ? listError : null}
-          onSubmit={createProjectList}
-        />
-
-        {noteEditorOpen ? (
-          <NoteEditor
-            contextLabel={project.name}
-            disabled={savingNote || itemsLoading}
-            draftKey={`local-work-os:note-draft:${project.workspaceId}:${project.id}:${activeTabId ?? "feed"}:new`}
-            error={noteErrorItemId === null ? noteError : null}
-            resetOnSubmit
-            submitLabel="Add note"
-            onCancel={() => {
-              setNoteEditorOpen(false);
-              setNoteError(null);
-              setNoteErrorItemId(null);
-            }}
-            wikilinkSuggestions={createProjectWikilinkSuggestions(projects, contacts, items)}
-            onSubmit={createProjectNote}
-          />
-        ) : (
-          <button
-            className="secondary-button note-create-button"
-            disabled={itemsLoading}
-            type="button"
-            onClick={() => {
-              setNoteEditorOpen(true);
-              setNoteError(null);
-              setNoteErrorItemId(null);
-            }}
-          >
-            <StickyNote size={17} aria-hidden="true" />
-            New note
-          </button>
-        )}
-
-        {linkEditorOpen ? (
-          <LinkEditor
-            disabled={savingLink || itemsLoading}
-            error={linkError}
-            resetOnSubmit
-            submitLabel="Add link"
-            onCancel={() => {
-              setLinkEditorOpen(false);
-              setLinkError(null);
-            }}
-            onSubmit={createProjectLink}
-          />
-        ) : (
-          <button
-            className="secondary-button note-create-button"
-            disabled={itemsLoading}
-            type="button"
-            onClick={() => {
-              setLinkEditorOpen(true);
-              setLinkError(null);
-            }}
-          >
-            <Link2 size={17} aria-hidden="true" />
-            New link
-          </button>
-        )}
-
-        {locationEditorOpen ? (
-          <LocationEditor
-            disabled={savingLocation || itemsLoading}
-            error={locationError}
-            resetOnSubmit
-            submitLabel="Add location"
-            onCancel={() => {
-              setLocationEditorOpen(false);
-              setLocationError(null);
-            }}
-            onSubmit={createProjectLocation}
-          />
-        ) : (
-          <button
-            className="secondary-button note-create-button"
-            disabled={itemsLoading}
-            type="button"
-            onClick={() => {
-              setLocationEditorOpen(true);
-              setLocationError(null);
-            }}
-          >
-            <MapPin size={17} aria-hidden="true" />
-            New location
-          </button>
-        )}
-
-        <button
-          className="secondary-button note-create-button"
-          disabled={savingFile || itemsLoading}
-          type="button"
-          onClick={() => void attachProjectFile()}
+        <section
+          className="project-content-section"
+          id="project-content-feed"
+          aria-label="Project mixed content feed"
+          onDragOver={(event) => {
+            if (Array.from(event.dataTransfer.types).includes("Files")) {
+              event.preventDefault();
+            }
+          }}
+          onDrop={(event) => {
+            void attachDroppedProjectFiles(event);
+          }}
         >
-          <Paperclip size={17} aria-hidden="true" />
-          Attach file
-        </button>
+          <div className="panel-heading-actions project-feed-heading">
+            <div className="panel-heading">
+              <FolderKanban size={17} aria-hidden="true" />
+              <h3>Mixed content feed</h3>
+            </div>
+            <ViewModeSwitcher
+              disabled={viewModeSaving}
+              value={viewMode}
+              onChange={(mode) => void changeProjectViewMode(mode)}
+            />
+            <button
+              className="secondary-button compact-button"
+              disabled={itemsLoading}
+              type="button"
+              onClick={() => void refreshProjectContent(project.id)}
+            >
+              <RefreshCw size={16} aria-hidden="true" />
+              Refresh
+            </button>
+          </div>
 
-        {fileError === null || fileBusyId !== null ? null : (
-          <p className="form-message form-message-error">{fileError}</p>
-        )}
-        {fileMessage === null || fileError !== null || fileBusyId !== null ? null : (
-          <p className="form-message form-message-ok">{fileMessage}</p>
-        )}
-        {linkError === null || linkBusyId !== null || linkEditorOpen ? null : (
-          <p className="form-message form-message-error">{linkError}</p>
-        )}
-        {locationError === null || locationBusyId !== null || locationEditorOpen ? null : (
-          <p className="form-message form-message-error">{locationError}</p>
-        )}
+          <div className="project-quick-action-row" aria-label="Quick-start actions">
+            <a className="secondary-button" href="#project-new-task">+ Task</a>
+            <a className="secondary-button" href="#project-new-checklist">+ Checklist</a>
+            <button
+              className="secondary-button"
+              disabled={itemsLoading}
+              type="button"
+              onClick={() => {
+                setNoteEditorOpen(true);
+                setNoteError(null);
+                setNoteErrorItemId(null);
+              }}
+            >
+              <StickyNote size={17} aria-hidden="true" />
+              + Note
+            </button>
+            <button
+              className="secondary-button"
+              disabled={savingFile || itemsLoading}
+              type="button"
+              onClick={() => void attachProjectFile()}
+            >
+              <Paperclip size={17} aria-hidden="true" />
+              Attach file
+            </button>
+            <button
+              className="secondary-button"
+              disabled={itemsLoading}
+              type="button"
+              onClick={() => {
+                setLinkEditorOpen(true);
+                setLinkError(null);
+              }}
+            >
+              <Link2 size={17} aria-hidden="true" />
+              Add link
+            </button>
+            <button
+              className="secondary-button"
+              disabled={itemsLoading}
+              type="button"
+              onClick={() => {
+                setLocationEditorOpen(true);
+                setLocationError(null);
+              }}
+            >
+              <MapPin size={17} aria-hidden="true" />
+              Add location
+            </button>
+          </div>
 
-        {viewMode === "list" ? (
-          <ItemFeed
-            ariaLabel="Project content items"
-            emptyDescription="Tasks, checklists, notes, and files created for this project will appear here with inline controls."
-            emptyTitle={
-              activeTab === null
-                ? "No project content yet"
-                : `No content in ${activeTab.name} yet`
-            }
-            error={itemError}
-            getDisabledActions={getDisabledActionsForProjectItem}
-            items={visibleItems}
-            loading={itemsLoading}
-            renderContent={renderItemContent}
-            onAction={handleItemAction}
-            onDropFilesOnItem={attachDroppedFilesToItem}
-            onReorderItem={reorderProjectItem}
-          />
-        ) : (
-          <DatedItemProjection
-            items={tabItems}
-            mode={viewMode}
-            title={viewMode === "timeline" ? "Project timeline" : "Project calendar"}
-          />
-        )}
-        {hasMoreItems ? (
+          <div className="project-create-stack" aria-label="Create project content">
+            <div id="project-new-task" className="project-create-panel">
+              <TaskQuickAdd
+                contextLabel={project.name}
+                disabled={savingTask || itemsLoading}
+                error={taskError}
+                onSubmit={createProjectTask}
+              />
+            </div>
+
+            <div id="project-new-checklist" className="project-create-panel">
+              <CreateListForm
+                contextLabel={project.name}
+                disabled={savingList || itemsLoading}
+                error={listBusyId === null ? listError : null}
+                onSubmit={createProjectList}
+              />
+            </div>
+
+            {noteEditorOpen ? (
+              <NoteEditor
+                contextLabel={project.name}
+                disabled={savingNote || itemsLoading}
+                draftKey={`local-work-os:note-draft:${project.workspaceId}:${project.id}:${activeTabId ?? "feed"}:new`}
+                error={noteErrorItemId === null ? noteError : null}
+                resetOnSubmit
+                submitLabel="Add note"
+                onCancel={() => {
+                  setNoteEditorOpen(false);
+                  setNoteError(null);
+                  setNoteErrorItemId(null);
+                }}
+                wikilinkSuggestions={createProjectWikilinkSuggestions(projects, contacts, items)}
+                onSubmit={createProjectNote}
+              />
+            ) : null}
+
+            {linkEditorOpen ? (
+              <LinkEditor
+                disabled={savingLink || itemsLoading}
+                error={linkError}
+                resetOnSubmit
+                submitLabel="Add link"
+                onCancel={() => {
+                  setLinkEditorOpen(false);
+                  setLinkError(null);
+                }}
+                onSubmit={createProjectLink}
+              />
+            ) : null}
+
+            {locationEditorOpen ? (
+              <LocationEditor
+                disabled={savingLocation || itemsLoading}
+                error={locationError}
+                resetOnSubmit
+                submitLabel="Add location"
+                onCancel={() => {
+                  setLocationEditorOpen(false);
+                  setLocationError(null);
+                }}
+                onSubmit={createProjectLocation}
+              />
+            ) : null}
+          </div>
+
+          {fileError === null || fileBusyId !== null ? null : (
+            <p className="form-message form-message-error">{fileError}</p>
+          )}
+          {fileMessage === null || fileError !== null || fileBusyId !== null ? null : (
+            <p className="form-message form-message-ok">{fileMessage}</p>
+          )}
+          {linkError === null || linkBusyId !== null || linkEditorOpen ? null : (
+            <p className="form-message form-message-error">{linkError}</p>
+          )}
+          {locationError === null || locationBusyId !== null || locationEditorOpen ? null : (
+            <p className="form-message form-message-error">{locationError}</p>
+          )}
+
+          {viewMode === "list" ? (
+            <ItemFeed
+              ariaLabel="Project content items"
+              emptyDescription="Tasks, checklists, notes, files, links, and locations created for this project will appear here with inline controls."
+              emptyTitle={
+                activeTab === null
+                  ? "No project content yet"
+                  : `No content in ${activeTab.name} yet`
+              }
+              error={itemError}
+              getDisabledActions={getDisabledActionsForProjectItem}
+              items={visibleItems}
+              loading={itemsLoading}
+              renderContent={renderItemContent}
+              onAction={handleItemAction}
+              onDropFilesOnItem={attachDroppedFilesToItem}
+              onReorderItem={reorderProjectItem}
+            />
+          ) : (
+            <DatedItemProjection
+              items={tabItems}
+              mode={viewMode}
+              title={viewMode === "timeline" ? "Project timeline" : "Project calendar"}
+            />
+          )}
+          {hasMoreItems ? (
+            <button
+              className="secondary-button load-more-button"
+              disabled={itemsLoading}
+              type="button"
+              onClick={() =>
+                setVisibleItemCount((current) =>
+                  Math.min(current + PROJECT_FEED_PAGE_SIZE, items.length)
+                )
+              }
+            >
+              Load more
+            </button>
+          ) : null}
+        </section>
+
+        <aside className="project-context-inspector-panel" aria-label="Project inspector budget">
+          <p className="top-eyebrow">Inspector</p>
+          {inspector === null ? (
+            <>
+              <h3>Select an item to inspect</h3>
+              <p>
+                The inspector opens as a roomy drawer with long title, category, tags,
+                body, dates, relationships, attachments, and activity. It is not squeezed
+                into the feed when space is tight.
+              </p>
+            </>
+          ) : (
+            <>
+              <h3>{inspector.item.title}</h3>
+              <p>{inspector.item.body ?? "No body text on this item yet."}</p>
+            </>
+          )}
+          <dl className="project-inspector-budget-list">
+            <div>
+              <dt>Title/category budget</dt>
+              <dd>Long titles wrap in the drawer; category and tags keep full rows.</dd>
+            </div>
+            <div>
+              <dt>Body budget</dt>
+              <dd>Note/task body text gets paragraph space instead of a tiny input.</dd>
+            </div>
+            <div>
+              <dt>1280px fallback</dt>
+              <dd>Outline/context collapse before the central feed drops below 620px.</dd>
+            </div>
+          </dl>
           <button
-            className="secondary-button load-more-button"
-            disabled={itemsLoading}
+            className="secondary-button"
+            disabled={visibleItems.length === 0}
             type="button"
-            onClick={() =>
-              setVisibleItemCount((current) =>
-                Math.min(current + PROJECT_FEED_PAGE_SIZE, items.length)
-              )
-            }
+            onClick={() => {
+              if (visibleItems[0] !== undefined) {
+                void openInspector(visibleItems[0].id);
+              }
+            }}
           >
-            Load more
+            Inspect first feed item
           </button>
-        ) : null}
+        </aside>
       </section>
 
       <details className="project-advanced-details">
@@ -4356,23 +4438,6 @@ function parseOptionalNumber(value: string): number | null {
   }
 
   return parsed;
-}
-
-function formatQuickAddType(
-  type: ContainerPreferencesSummary["defaultQuickAddType"] | undefined
-): string {
-  switch (type) {
-    case "note":
-      return "Note";
-    case "list":
-      return "List";
-    case "link":
-      return "Link";
-    case "file":
-      return "File";
-    default:
-      return "Task";
-  }
 }
 
 function selectInitialTabId(
