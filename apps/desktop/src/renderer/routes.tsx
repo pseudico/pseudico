@@ -19,7 +19,8 @@ export type AppRouteId =
   | "workflows"
   | "help"
   | "settings"
-  | "trash";
+  | "trash"
+  | "spaceBudgetPrimitives";
 
 export type AppRoute = {
   id: AppRouteId;
@@ -182,6 +183,14 @@ export const appRoutes = [
     title: t("nav.trash.title"),
     summary: t("nav.trash.summary"),
     nav: true
+  },
+  {
+    id: "spaceBudgetPrimitives",
+    path: "/space-budget-primitives",
+    label: "SBUX Demo",
+    title: "SBUX Demo",
+    summary: "Hidden SBUX route fixture for shared readable UI primitives.",
+    nav: false
   }
 ] as const satisfies readonly AppRoute[];
 
