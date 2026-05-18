@@ -14,6 +14,7 @@ export type TodayTaskView = {
   sourceItemId: string | null;
   workspaceId: string;
   containerId: string;
+  containerTitle: string | null;
   containerTabId: string | null;
   title: string;
   body: string | null;
@@ -96,6 +97,7 @@ export function toTodayTaskView(record: TaskWithItemRecord): TodayTaskView {
     sourceItemId: null,
     workspaceId: record.item.workspaceId,
     containerId: record.item.containerId,
+    containerTitle: null,
     containerTabId: record.item.containerTabId,
     title: record.item.title,
     body: record.item.body,
@@ -126,6 +128,7 @@ export function toTodayListItemView(
     sourceItemId: record.list.item.id,
     workspaceId: record.listItem.workspaceId,
     containerId: record.list.item.containerId,
+    containerTitle: null,
     containerTabId: record.list.item.containerTabId,
     title: record.listItem.title,
     body: record.listItem.body,

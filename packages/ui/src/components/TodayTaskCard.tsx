@@ -78,6 +78,7 @@ export function TodayTaskCard({
       <div className="today-task-card-main">
         <button
           className="today-task-title-button"
+          title={task.title}
           type="button"
           onClick={() => onOpenSource?.(task)}
         >
@@ -90,10 +91,17 @@ export function TodayTaskCard({
       </div>
 
       <div className="today-task-card-meta">
+        {task.containerLabel === undefined || task.containerLabel === null ? null : (
+          <span title={task.containerLabel}>Destination: {task.containerLabel}</span>
+        )}
         <span>
           <Clock3 size={14} aria-hidden="true" />
           {dueLabel}
         </span>
+        {task.plannedLane === undefined || task.plannedLane === null ? null : (
+          <span>Planned: {formatLane(task.plannedLane)}</span>
+        )}
+        {task.addedManually === true ? <span>Moved manually</span> : null}
         {task.priority === undefined || task.priority === null ? null : (
           <span>Priority {task.priority}</span>
         )}
@@ -169,6 +177,17 @@ export function TodayTaskCard({
       </div>
     </article>
   );
+}
+
+function formatLane(value: "today" | "tomorrow" | "backlog"): string {
+  switch (value) {
+    case "today":
+      return "Today";
+    case "tomorrow":
+      return "Tomorrow";
+    case "backlog":
+      return "Backlog";
+  }
 }
 
 function formatDueLabel(value: string | null): string {

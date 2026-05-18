@@ -26,7 +26,7 @@ describe("primary-operator readability styles", () => {
     expect(styles).toContain(".search-result-card");
     expect(styles).toContain(".today-task-card");
     expect(styles).toContain(".dashboard-widget-row");
-    expect(styles).toContain(".daily-planner-lane-input input");
+    expect(styles).toContain(".daily-planner-lane-input textarea");
     expect(styles).toContain(".appearance-settings-form select");
     expect(styles).toContain(".backup-list-row");
   });
@@ -57,6 +57,16 @@ describe("primary-operator readability styles", () => {
     expect(styles).toContain("width: min(860px, calc(100vw - 48px))");
     expect(styles).toContain(".quick-add-form textarea");
     expect(styles).toContain("min-height: 140px");
+  });
+
+  it("keeps Today planning controls above the SBUX row and capture budgets", () => {
+    expect(styles).toContain(".daily-planner-lane-input textarea");
+    expect(styles).toContain("min-height: 142px");
+    expect(styles).toContain(".daily-planner-feedback");
+    expect(styles).toContain(".today-lane-grid .today-lane[data-today-lane=\"today\"]");
+    expect(styles).toContain("flex: 1.25 1 420px");
+    expect(styles).toContain(".today-task-card");
+    expect(styles).toContain("min-height: 72px");
   });
 
   it("collapses navigation chrome at 1280px before shrinking command/search", () => {

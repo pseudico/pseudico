@@ -2300,11 +2300,20 @@ a {
 }
 
 .today-lane-grid {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   max-width: 1180px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   align-items: start;
+}
+
+.today-lane-grid .today-lane[data-today-lane="today"] {
+  flex: 1.25 1 420px;
+}
+
+.today-lane-grid .today-lane[data-today-lane="tomorrow"],
+.today-lane-grid .today-lane[data-today-lane="backlog"] {
+  flex: 1 1 340px;
 }
 
 
@@ -2552,7 +2561,7 @@ a {
 
 .daily-planner-editor-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
   gap: 12px;
 }
 
@@ -2564,19 +2573,46 @@ a {
   font-weight: 700;
 }
 
-.daily-planner-lane-input input {
-  min-height: 42px;
+.daily-planner-lane-input textarea {
+  min-height: 142px;
   padding: 10px 12px;
   border: 1px solid #d5d0c4;
   border-radius: 12px;
   background: #fff;
   color: #262624;
   font: inherit;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.daily-planner-feedback {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid #d9eadf;
+  border-radius: 12px;
+  background: #f4fbf5;
+  color: #245c55;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.daily-planner-feedback span {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid #c7e3cf;
+  border-radius: 999px;
+  background: #fff;
 }
 
 .today-lane {
   display: grid;
-  min-width: 0;
+  min-width: min(100%, 340px);
   gap: 12px;
   padding: 14px;
   border: 1px solid #dedbd1;
@@ -2670,6 +2706,7 @@ a {
 
 .today-task-card {
   display: grid;
+  min-height: 72px;
   gap: 10px;
   padding: 12px;
   border: 1px solid #ece8dc;
@@ -2690,7 +2727,7 @@ a {
 .today-task-title-button {
   display: flex;
   width: 100%;
-  min-height: 34px;
+  min-height: 46px;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -2705,7 +2742,7 @@ a {
 
 .today-task-title-button span {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .today-task-title-button:hover span {
@@ -2716,7 +2753,7 @@ a {
   margin: 0;
   color: #514e49;
   line-height: 1.45;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .today-task-card-meta {
@@ -2737,11 +2774,12 @@ a {
   border: 1px solid #ece8dc;
   border-radius: 999px;
   background: #ffffff;
+  overflow-wrap: break-word;
 }
 
 .today-task-card-actions {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
 }
@@ -2753,9 +2791,16 @@ a {
   gap: 6px;
 }
 
+.today-task-card-actions > .primary-button,
+.today-task-card-actions > .secondary-button {
+  flex: 0 1 180px;
+}
+
 .snooze-menu {
   display: flex;
-  min-width: 0;
+  flex: 1 1 100%;
+  width: 100%;
+  min-width: min(100%, 320px);
   flex-wrap: wrap;
   gap: 6px;
 }
@@ -2763,6 +2808,7 @@ a {
 .snooze-menu-custom {
   display: inline-flex;
   min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
 }
@@ -5164,8 +5210,6 @@ a {
     .dashboard-editor-add-row,
     .daily-planner-editor-grid,
     .today-preferences-controls,
-    .today-lane-grid,
-    .today-task-card-actions,
     .checklist-inline-add,
   .checklist-bulk-add {
     grid-template-columns: 1fr;
@@ -7982,7 +8026,7 @@ textarea {
 .dashboard-editor-add-row input,
 .today-preferences-controls input,
 .today-preferences-controls select,
-.daily-planner-lane-input input,
+.daily-planner-lane-input textarea,
 .snooze-menu-custom input,
 .reminder-picker-field input,
 .reminder-picker-field select,
@@ -8166,12 +8210,8 @@ textarea {
   border-radius: 14px;
 }
 
-.today-lane-grid {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-}
-
 .daily-planner-editor-grid {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
 }
 
 .daily-planner-editor,
@@ -8275,10 +8315,6 @@ textarea {
 
 @media (max-width: 960px) {
   .quick-add-form,
-  .today-task-card-actions {
-    grid-template-columns: 1fr;
-  }
-
   .dashboard-widget-grid {
     grid-template-columns: 1fr;
   }

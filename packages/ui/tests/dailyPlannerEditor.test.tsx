@@ -23,14 +23,16 @@ describe("DailyPlannerEditor", () => {
     expect(html).toContain("Keyboard planner");
     expect(html).toContain("Today task");
     expect(html).toContain("Tomorrow task");
-    expect(html).toContain("Enter saves and plans");
+    expect(html).toContain("real multiline field");
+    expect(html).toContain("Destination:");
+    expect(html).toContain("Ctrl/Cmd+Enter");
     expect(html).toContain("Saving to Inbox");
   });
 
   it("builds lane submissions with default lane dates", () => {
     const result = buildDailyPlannerSubmission({
       lane: "tomorrow",
-      title: "Write status note",
+      title: "Write status note\nwith owner handoff context",
       targetContainerId: "container_inbox",
       todayDueAt: "2026-05-10T00:00:00.000Z",
       tomorrowDueAt: "2026-05-11T00:00:00.000Z"
@@ -40,7 +42,7 @@ describe("DailyPlannerEditor", () => {
       ok: true,
       values: {
         lane: "tomorrow",
-        title: "Write status note",
+        title: "Write status note with owner handoff context",
         targetContainerId: "container_inbox",
         dueAt: "2026-05-11T00:00:00.000Z",
         allDay: true
@@ -86,9 +88,21 @@ describe("DailyPlannerEditor", () => {
     })).toBe("today");
     expect(getDailyPlannerKeyCommand({
       key: "Enter",
+      ctrlKey: true,
       lane: "today",
       title: "Draft"
     })).toBe("submit");
+    expect(getDailyPlannerKeyCommand({
+      key: "Enter",
+      lane: "today",
+      title: "Draft"
+    })).toBe("none");
+    expect(getDailyPlannerKeyCommand({
+      key: "Enter",
+      shiftKey: true,
+      lane: "today",
+      title: "Draft"
+    })).toBe("none");
     expect(getDailyPlannerKeyCommand({
       key: "Escape",
       lane: "today",

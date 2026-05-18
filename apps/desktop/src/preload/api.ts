@@ -1817,6 +1817,7 @@ export type TodayTaskSummary = {
   sourceItemId: string | null;
   workspaceId: string;
   containerId: string;
+  containerTitle: string | null;
   containerTabId: string | null;
   title: string;
   body: string | null;

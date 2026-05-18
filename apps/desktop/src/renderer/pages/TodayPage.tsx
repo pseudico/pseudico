@@ -916,6 +916,7 @@ function toTodayTaskCard(task: TodayTaskSummary): TodayTaskCardViewModel {
     dueAt: task.dueAt,
     priority: task.priority,
     containerId: task.containerId,
+    containerLabel: task.containerTitle,
     plannedLane: task.plannedLane,
     plannedSortOrder: task.plannedSortOrder,
     addedManually: task.addedManually,

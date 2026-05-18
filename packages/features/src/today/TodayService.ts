@@ -9,6 +9,7 @@ import {
 } from "@local-work-os/core";
 import {
   AppSettingsRepository,
+  ContainerRepository,
   DailyPlanRepository,
   ListRepository,
   TaskRepository,
@@ -118,9 +119,9 @@ export class TodayService {
           endExclusive: tomorrowRange.endExclusive
         }
       },
-      dueToday: applyLaneLimit(dueToday, laneLimit),
-      overdueBacklog: applyLaneLimit(overdueBacklog, laneLimit),
-      tomorrowPreview: applyLaneLimit(tomorrowPreview, laneLimit),
+      dueToday: this.withContainerTitles(applyLaneLimit(dueToday, laneLimit)),
+      overdueBacklog: this.withContainerTitles(applyLaneLimit(overdueBacklog, laneLimit)),
+      tomorrowPreview: this.withContainerTitles(applyLaneLimit(tomorrowPreview, laneLimit)),
       laneSummaries: {
         dueToday: summarizeLane(dueToday, laneLimit),
         overdueBacklog: summarizeLane(overdueBacklog, laneLimit),
@@ -412,6 +413,22 @@ export class TodayService {
       plannedTodayCompletedCount: completedTasks.length,
       show: input.preferences.showDailyCompletionSummary
     };
+  }
+
+  private withContainerTitles(tasks: TodayTaskView[]): TodayTaskView[] {
+    const repository = new ContainerRepository(this.connection);
+    const cache = new Map<string, string | null>();
+
+    return tasks.map((task) => {
+      if (!cache.has(task.containerId)) {
+        cache.set(task.containerId, repository.getById(task.containerId)?.name ?? null);
+      }
+
+      return {
+        ...task,
+        containerTitle: cache.get(task.containerId) ?? null
+      };
+    });
   }
 
   private validateInput(input: TodayQueryInput): void {

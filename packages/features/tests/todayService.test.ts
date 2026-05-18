@@ -188,12 +188,14 @@ describe("TodayService", () => {
       itemId: listItemToday.listItem.id,
       itemType: "list_item",
       sourceItemId: list.item.id,
+      containerTitle: "Launch Plan",
       taskStatus: "open",
       dueAt: new Date(2026, 4, 15, 16).toISOString()
     });
     expect(viewModel.dueToday[1]).toMatchObject({
       itemId: dueToday.item.id,
       itemType: "task",
+      containerTitle: "Launch Plan",
       taskStatus: "open",
       dueAt: new Date(2026, 4, 15, 23, 30).toISOString()
     });
