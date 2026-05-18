@@ -69,6 +69,18 @@ describe("primary-operator readability styles", () => {
     expect(styles).toContain("min-height: 72px");
   });
 
+  it("keeps search, collections, and saved-view surfaces above PSE-235 space budgets", () => {
+    expect(styles).toContain("grid-template-columns: minmax(min(100%, 640px), 1fr) auto auto");
+    expect(styles).toContain(".search-page-input");
+    expect(styles).toContain("min-width: min(100%, 640px)");
+    expect(styles).toContain(".search-layout");
+    expect(styles).toContain("grid-template-columns: minmax(260px, 300px) minmax(620px, 1fr)");
+    expect(styles).toContain(".search-preview-panel");
+    expect(styles).toContain(".search-result-card-why");
+    expect(styles).toContain(".collections-layout");
+    expect(styles).toContain("grid-template-columns: minmax(280px, 340px) minmax(620px, 1fr)");
+  });
+
   it("collapses navigation chrome at 1280px before shrinking command/search", () => {
     expect(styles).toContain("@media (max-width: 1280px)");
     expect(styles).toContain("grid-template-columns: 72px minmax(0, 1fr)");

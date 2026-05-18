@@ -15,6 +15,7 @@ import { ProjectDetailSpaceBudgetFixturePage } from "./pages/ProjectDetailSpaceB
 import { ProjectTagBrowserPage } from "./pages/ProjectTagBrowserPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { SearchPage } from "./pages/SearchPage";
+import { SearchCollectionsSpaceBudgetFixturePage } from "./pages/SearchCollectionsSpaceBudgetFixturePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { SpaceBudgetPrimitiveDemoPage } from "./pages/SpaceBudgetPrimitiveDemoPage";
 import { TagsCategoriesPage } from "./pages/TagsCategoriesPage";
@@ -49,6 +50,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/tags-categories" element={<TagsCategoriesPage />} />
         <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/search-collections-space-budget-fixture" element={<SearchCollectionsSpaceBudgetFixturePage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/timeline" element={<TimelinePage />} />
         <Route path="/calendar" element={<CalendarPage />} />
