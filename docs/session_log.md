@@ -8098,3 +8098,10 @@ Decisions made: - Selected PSE-233 as first unblocked unfinished SBUX ticket; - 
 Files changed: apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/App.tsx; apps/desktop/src/renderer/pages/TodayPage.tsx; apps/desktop/src/renderer/pages/TodaySpaceBudgetFixturePage.tsx; apps/desktop/src/renderer/styles.css; packages/features/src/today/TodayService.ts; packages/features/src/today/TodayViewModel.ts; packages/ui/src/components/DailyPlannerEditor.tsx; packages/ui/src/components/TodayTaskCard.tsx; tests; docs/manual-qa/PSE-233-today-space-budget.md
 Open questions / risks: P2 screenshot path uses fixture data rather than live workspace mutation; P3 reusable screenshot harness still needed.
 Next actions: commit; push branch; open/update PR.
+
+## 2026-05-19T06:32:00+10:00
+Objective: Open PSE-233 PR and prepare reconciliation.
+Decisions made: - Created ready-for-review PR #214; - Included tests, screenshot evidence, acceptance checklist, and local-only safety notes; - Kept merge pending CI/policy verification.
+Files changed: docs/session_log.md
+Open questions / risks: PR checks/review policy still need confirmation.
+Next actions: push log update; update Linear; inspect PR checks and merge blockers.
