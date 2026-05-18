@@ -11,6 +11,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { HelpPage } from "./pages/HelpPage";
 import { InboxPage } from "./pages/InboxPage";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
+import { ProjectDetailSpaceBudgetFixturePage } from "./pages/ProjectDetailSpaceBudgetFixturePage";
 import { ProjectTagBrowserPage } from "./pages/ProjectTagBrowserPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { SearchPage } from "./pages/SearchPage";
@@ -32,6 +33,7 @@ export function AppRoutes(): React.JSX.Element {
     <Routes>
       <Route path="/" element={<Navigate to="/welcome" replace />} />
       <Route path="/welcome" element={<WelcomePage />} />
+      <Route path="/project-detail-space-budget-fixture" element={<ProjectDetailSpaceBudgetFixturePage />} />
       <Route element={<AppShell />}>
         <Route path="/workspace" element={<WorkspaceHomePage />} />
         <Route path="/today" element={<TodayPage />} />

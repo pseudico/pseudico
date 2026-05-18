@@ -83,6 +83,10 @@ export function UniversalItemCard({
         className={`universal-item-card${selection?.selected === true ? " universal-item-card-selected" : ""}`}
         data-item-id={item.id}
         data-item-type={knownType ? item.type : "unknown"}
+        data-space-budget-min-height="86px"
+        data-space-budget-min-width="560px"
+        data-space-budget-surface="mixed-feed"
+        data-space-budget-type={item.type}
         {...(accentStyle === undefined ? {} : { style: accentStyle })}
       >
         <header className="universal-item-card-header">

@@ -8105,3 +8105,35 @@ Decisions made: - Created ready-for-review PR #214; - Included tests, screenshot
 Files changed: docs/session_log.md
 Open questions / risks: PR checks/review policy still need confirmation.
 Next actions: push log update; update Linear; inspect PR checks and merge blockers.
+
+- Timestamp: 2026-05-19T06:50:37.0804316+10:00
+- Objective: Isolate PSE-234 implementation branch/worktree from dirty primary checkout.
+- Decisions made: Created C:\tmp\Pseudico-pse-234 on origin/main after fetching PSE-233 squash merge; selected PSE-234 as first uncompleted unblocked child.
+- Files changed: docs/session_log.md
+- Open questions / risks: ui-redesign source docs exist in primary checkout as untracked artifacts, not origin/main; will use them as read-only evidence.
+- Next actions: inspect project detail code/tests; post Linear plan; implement scoped UI pass.
+
+- Timestamp: 2026-05-19T06:52:59.7240084+10:00
+- Objective: Post PSE-234 implementation plan and start ticket.
+- Decisions made: Linear plan posted; PSE-234 moved to In Progress; implementation remains renderer/UI-only with no storage/schema change.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need evidence route/screenshots using production UI; ensure all core content types visible without over-scoping.
+- Next actions: patch project detail layout; add tests; capture manual QA evidence.
+
+## 2026-05-19T07:14:00+10:00
+Objective: Implement and evidence PSE-234 project detail mixed-content work container.
+Decisions made:
+- Kept project detail scoped to reusable SBUX item cards plus a three-column workbench with 1280px fallback.
+- Added a production renderer fixture route for long-data project detail screenshots.
+Files changed: apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/pages/ProjectDetailSpaceBudgetFixturePage.tsx; apps/desktop/src/renderer/App.tsx; apps/desktop/src/renderer/styles.css; packages/ui/src/components/ItemCard.tsx; apps/desktop/tests/renderer/projectsPage.test.tsx; docs/manual-qa/PSE-234-project-detail-space-budget.md
+Open questions / risks: P2 fixture route is isolated from the app shell for browser capture; shell layout was covered by PSE-232.
+Next actions: rerun checks; reconcile PR and Linear; merge if policy allows.
+
+## 2026-05-19T07:18:00+10:00
+Objective: Verify PSE-234 implementation before PR reconciliation.
+Decisions made:
+- Fixed lint by removing an unused quick-add formatter after simplifying project quick actions.
+- Captured 1440, 1280, and tall all-types production renderer evidence.
+Files changed: docs/manual-qa/screenshots/PSE-234-project-detail/; docs/session_log.md
+Open questions / risks: P2 browser evidence uses hidden route with live loading disabled; runtime app paths keep IPC-only writes.
+Next actions: stage/commit; push and open PR; update Linear and merge if allowed.

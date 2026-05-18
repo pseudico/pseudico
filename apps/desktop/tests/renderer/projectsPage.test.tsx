@@ -28,6 +28,7 @@ import {
   type WorkspaceSummary
 } from "../../src/preload/api";
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
+import { ProjectDetailSpaceBudgetFixturePage } from "../../src/renderer/pages/ProjectDetailSpaceBudgetFixturePage";
 import { ContactLabelBrowserPage } from "../../src/renderer/pages/ContactLabelBrowserPage";
 import { ContactsPage } from "../../src/renderer/pages/ContactsPage";
 import { ProjectTagBrowserPage } from "../../src/renderer/pages/ProjectTagBrowserPage";
@@ -1522,7 +1523,12 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Content here");
     expect(html).toContain("Linked context");
     expect(html).toContain("Advanced project options");
-    expect(html).toContain("Content feed");
+    expect(html).toContain("Sections");
+    expect(html).toContain("Mixed content feed");
+    expect(html).toContain("Quick-start actions");
+    expect(html).toContain("+ Checklist");
+    expect(html).toContain("Add location");
+    expect(html).toContain("Inspector");
     expect(html).toContain("Recent activity");
     expect(html).toContain("Related contacts");
     expect(html).toContain("Alex Chen");
@@ -1539,6 +1545,29 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Complete");
     expect(html).toContain("Due");
     expect(html).toContain("Actions for Book launch venue");
+  });
+
+  it("renders the project detail space-budget fixture with all core content types", () => {
+    const html = renderToString(
+      <MemoryRouter>
+        <ProjectDetailSpaceBudgetFixturePage />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Mixed content feed");
+    expect(html).toContain("+ Task");
+    expect(html).toContain("+ Checklist");
+    expect(html).toContain("+ Note");
+    expect(html).toContain("Attach file");
+    expect(html).toContain("Add link");
+    expect(html).toContain("Add location");
+    expect(html).toContain("Launch readiness checklist");
+    expect(html).toContain("Client approval notes from the 17 May local ownership review");
+    expect(html).toContain("2026-05-operator-readiness-backup-restore-evidence-with-attachment-manifest-v03.final.pdf");
+    expect(html).toContain("docs.local-work-os.example");
+    expect(html).toContain("Level 4, Building B");
+    expect(html).toContain("Title/category budget");
+    expect(html).toContain("Object inspector");
   });
 
   it("renders the Tags & Categories browser with filters and grouped results", () => {
