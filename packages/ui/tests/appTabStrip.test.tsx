@@ -30,6 +30,7 @@ describe("AppTabStrip", () => {
     expect(html).toContain("Open app tabs");
     expect(html).toContain("Launch Plan");
     expect(html).toContain("Recently opened project");
+    expect(html).toContain("title=\"Launch Plan - Recently opened project\"");
     expect(html).toContain("Search");
     expect(html).toContain("aria-current=\"page\"");
     expect(html).toContain("Close Launch Plan tab");

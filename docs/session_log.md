@@ -8035,3 +8035,32 @@ Files changed:
 - docs/manual-qa/PSE-203-large-workspace-closure-audit.md; docs/session_log.md
 Open questions / risks: PSE-209 Linear status also appears stale even though its evidence is present.
 Next actions: Validate docs diff; commit/PR/merge audit; update Linear PSE-203.
+## 2026-05-18 20:42 +10:00
+Objective: Start PSE-232 implementation plan.
+Decisions made:
+- Created clean worktree C:\tmp\Pseudico-pse-232 on codex/pse-232-shell from origin/main.
+- Posted PSE-232 plan to Linear and moved issue to In Progress.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Required ui-redesign docs are local untracked source artifacts, not present on origin/main.
+Next actions: Implement shell budget changes; add tests; capture production screenshots.
+
+## 2026-05-18 21:06 +10:00
+Objective: Complete PSE-232 shell implementation and visual evidence.
+Decisions made:
+- Use PSE-231 primitives as guardrails while changing only shell/nav/capture surfaces.
+- Preserve search/Quick Start budgets before compacting nav history, shortcut hints, and side labels.
+Files changed:
+- apps/desktop/src/renderer/shell/TopBar.tsx; apps/desktop/src/renderer/shell/Sidebar.tsx; apps/desktop/src/renderer/styles.css; packages/ui/src/forms/QuickAddForm.tsx; packages/ui/src/components/AppTabStrip.tsx; docs/manual-qa/PSE-232-shell-space-budget.md; docs/manual-qa/screenshots/PSE-232-shell/
+Open questions / risks: P2 uncommitted ui-redesign source docs remain outside origin/main; screenshot helper timed out only on Electron shutdown.
+Next actions: Rerun final checks; commit/push; open PR and reconcile Linear/GitHub.
+
+## 2026-05-18 21:13 +10:00
+Objective: Commit PSE-232 and attempt GitHub handoff.
+Decisions made:
+- Committed scoped shell changes as 8e3e803c on codex/pse-232-shell after lint/typecheck/test/build passed.
+- Push requires explicit approval because it uploads repository changes and screenshots to GitHub.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Push/PR/merge/Linear final update are blocked until the user approves GitHub upload.
+Next actions: Get explicit push approval; push branch; open/update PR.

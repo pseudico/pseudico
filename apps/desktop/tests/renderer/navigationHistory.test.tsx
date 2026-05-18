@@ -1,11 +1,12 @@
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 import type { NavigationRecentTargetSummary } from "../../src/preload/api";
 import {
   createAppTabTargetFromLocation,
   createNavigationTargetFromLocation
 } from "../../src/renderer/navigation/navigationTargets";
-import { RecentNavigationMenu } from "../../src/renderer/shell/TopBar";
+import { RecentNavigationMenu, TopBar } from "../../src/renderer/shell/TopBar";
 
 describe("navigation history renderer helpers", () => {
   it("resolves routes into recent target types", () => {
@@ -75,6 +76,21 @@ describe("navigation history renderer helpers", () => {
     expect(html).toContain("Recently opened");
     expect(html).toContain("Today");
     expect(html).toContain("Recently opened project");
+  });
+
+  it("renders command/search before secondary shell controls with explicit space budgets", () => {
+    const html = renderToString(
+      <MemoryRouter initialEntries={["/today"]}>
+        <TopBar />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("shell-command-search");
+    expect(html).toContain("data-space-budget-min-width=\"420px\"");
+    expect(html).toContain("data-space-budget-preferred-width=\"560px\"");
+    expect(html.indexOf("shell-command-search")).toBeLessThan(
+      html.indexOf("shell-quick-add-button")
+    );
   });
 });
 

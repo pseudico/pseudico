@@ -72,45 +72,14 @@ export function TopBar({
         <h1>{route.title}</h1>
       </div>
 
-      <div className="top-actions">
-        <div className="navigation-controls" aria-label={t("app.topBar.navigationHistory")}>
-          <button
-            type="button"
-            className="icon-button compact-icon-button"
-            disabled={!canGoBack}
-            aria-label={t("app.topBar.back")}
-            onClick={onGoBack}
-          >
-            <ArrowLeft size={18} aria-hidden="true" />
-            <span>{t("app.topBar.back")}</span>
-          </button>
-          <button
-            type="button"
-            className="icon-button compact-icon-button"
-            disabled={!canGoForward}
-            aria-label={t("app.topBar.forward")}
-            onClick={onGoForward}
-          >
-            <ArrowRight size={18} aria-hidden="true" />
-            <span>{t("app.topBar.forward")}</span>
-          </button>
-        </div>
-        <RecentNavigationMenu
-          recentTargets={recentTargets}
-          disabled={currentWorkspace === null}
-          onNavigateRecent={onNavigateRecent}
-        />
-        <button
-          type="button"
-          className="icon-button"
-          aria-label={t("app.topBar.openCommandPalette")}
-          onClick={onOpenCommandPalette}
+      <div className="top-actions" data-space-budget-surface="app-shell">
+        <form
+          className="search-control shell-command-search"
+          data-space-budget-min-width="420px"
+          data-space-budget-preferred-width="560px"
+          role="search"
+          onSubmit={submitSearch}
         >
-          <Command size={18} aria-hidden="true" />
-          <span>{t("app.topBar.commands")}</span>
-          <kbd>{t("app.topBar.commandShortcut")}</kbd>
-        </button>
-        <form className="search-control" role="search" onSubmit={submitSearch}>
           <label>
             <Search size={16} aria-hidden="true" />
             <span className="sr-only">{t("app.topBar.search")}</span>
@@ -133,7 +102,7 @@ export function TopBar({
         </form>
         <button
           type="button"
-          className="icon-button"
+          className="icon-button shell-quick-add-button"
           disabled={currentWorkspace === null}
           aria-label={t("app.topBar.quickStart")}
           onClick={() => onQuickAdd(getQuickAddContext(location.pathname))}
@@ -141,6 +110,43 @@ export function TopBar({
           <Plus size={18} aria-hidden="true" />
           <span>{t("app.topBar.quickStart")}</span>
         </button>
+        <button
+          type="button"
+          className="icon-button shell-command-button"
+          aria-label={t("app.topBar.openCommandPalette")}
+          onClick={onOpenCommandPalette}
+        >
+          <Command size={18} aria-hidden="true" />
+          <span>{t("app.topBar.commands")}</span>
+          <kbd>{t("app.topBar.commandShortcut")}</kbd>
+        </button>
+        <RecentNavigationMenu
+          recentTargets={recentTargets}
+          disabled={currentWorkspace === null}
+          onNavigateRecent={onNavigateRecent}
+        />
+        <div className="navigation-controls" aria-label={t("app.topBar.navigationHistory")}>
+          <button
+            type="button"
+            className="icon-button compact-icon-button"
+            disabled={!canGoBack}
+            aria-label={t("app.topBar.back")}
+            onClick={onGoBack}
+          >
+            <ArrowLeft size={18} aria-hidden="true" />
+            <span>{t("app.topBar.back")}</span>
+          </button>
+          <button
+            type="button"
+            className="icon-button compact-icon-button"
+            disabled={!canGoForward}
+            aria-label={t("app.topBar.forward")}
+            onClick={onGoForward}
+          >
+            <ArrowRight size={18} aria-hidden="true" />
+            <span>{t("app.topBar.forward")}</span>
+          </button>
+        </div>
       </div>
     </header>
   );
