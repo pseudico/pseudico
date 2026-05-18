@@ -8167,3 +8167,10 @@ Files changed:
 - docs/session_log.md; docs/manual-qa/PSE-235-search-collections-space-budget.md; docs/manual-qa/screenshots/PSE-235-search-collections/*
 Open questions / risks: Screenshot fixture is deterministic, not live workspace mutation evidence.
 Next actions: Review diff; commit/push; open/update PR and reconcile checks.
+
+### 2026-05-19T08:07:54.3651550+10:00
+- Objective: Open PSE-235 GitHub PR after implementation and validation.
+- Decisions made: Created ready PR #216 against main; kept screenshot fixture hidden from navigation.
+- Files changed: docs/session_log.md
+- Open questions / risks: Await GitHub checks/mergeability; possible branch protection or review requirement.
+- Next actions: Check PR status; merge if policy allows; update Linear final state.
