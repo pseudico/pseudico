@@ -195,6 +195,35 @@ export {
   type SearchFiltersValue
 } from "./components/SearchFilters";
 export {
+  CommandSearchInput,
+  getSpaceBudgetMode,
+  joinSpaceBudgetClassName,
+  MixedFeedItem,
+  MultilineCapturePanel,
+  ReadableWorkRow,
+  SpaceBudgetInspector,
+  SpaceBudgetResponsiveFrame,
+  spaceBudgetTokens,
+  TimelineSpaceRow,
+  type CommandSearchInputProps,
+  type MixedFeedItemProps,
+  type MultilineCapturePanelProps,
+  type ReadableWorkRowProps,
+  type SpaceBudgetMetadataEntry,
+  type SpaceBudgetMode,
+  type SpaceBudgetResponsiveFrameProps,
+  type SpaceBudgetSurface,
+  type SpaceBudgetInspectorProps,
+  type TimelineSpaceRowProps
+} from "./components/SpaceBudgetPrimitives";
+export {
+  longDataFixtures,
+  spaceBudgetInspectorFixture,
+  spaceBudgetMixedFeedFixtures,
+  spaceBudgetReadableRowFixture,
+  spaceBudgetTimelineFixture
+} from "./fixtures/spaceBudgetFixtures";
+export {
   focusFirstFocusableElement,
   getFocusableElements,
   getFocusTrapKeyCommand,

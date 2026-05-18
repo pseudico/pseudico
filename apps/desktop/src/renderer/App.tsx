@@ -15,6 +15,7 @@ import { ProjectTagBrowserPage } from "./pages/ProjectTagBrowserPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { SearchPage } from "./pages/SearchPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { SpaceBudgetPrimitiveDemoPage } from "./pages/SpaceBudgetPrimitiveDemoPage";
 import { TagsCategoriesPage } from "./pages/TagsCategoriesPage";
 import { TemplatesPage } from "./pages/TemplatesPage";
 import { TimelinePage } from "./pages/TimelinePage";
@@ -51,6 +52,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/help" element={<HelpPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/trash" element={<TrashPage />} />
+        <Route path="/space-budget-primitives" element={<SpaceBudgetPrimitiveDemoPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/welcome" replace />} />
     </Routes>

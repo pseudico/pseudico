@@ -27,7 +27,8 @@ const expectedRoutePaths = [
   "/workflows",
   "/help",
   "/settings",
-  "/trash"
+  "/trash",
+  "/space-budget-primitives"
 ];
 
 describe("desktop shell routes", () => {
@@ -77,6 +78,12 @@ describe("desktop shell routes", () => {
       "projects",
       "projects"
     ]);
+  });
+
+  it("keeps the SBUX primitive fixture hidden from primary navigation", () => {
+    expect(navRoutes.map((route) => route.path)).not.toContain(
+      "/space-budget-primitives"
+    );
   });
 
   it("renders the welcome page", () => {

@@ -36,4 +36,15 @@ describe("primary-operator readability styles", () => {
     expect(styles).toContain(".today-page-heading h2");
     expect(styles).toContain("overflow-wrap: anywhere");
   });
+
+  it("defines shared space-budget primitive minimums and 1280px fallback rules", () => {
+    expect(styles).toContain(".space-budget-command-input");
+    expect(styles).toContain("minmax(420px, 1fr)");
+    expect(styles).toContain(".space-budget-capture-panel textarea");
+    expect(styles).toContain("min-height: 140px");
+    expect(styles).toContain(".space-budget-responsive-frame");
+    expect(styles).toContain("@media (max-width: 1280px)");
+    expect(styles).toContain(".space-budget-timeline-row");
+    expect(styles).toContain("grid-template-columns: minmax(300px, 330px) minmax(520px, 1fr)");
+  });
 });
