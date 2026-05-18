@@ -45,7 +45,15 @@ export function CreateCollectionForm({
   }
 
   return (
-    <form className="collection-create-form" onSubmit={submit}>
+    <form
+      className="collection-create-form"
+      data-space-budget-surface="saved-view-create"
+      onSubmit={submit}
+    >
+      <div className="panel-heading">
+        <h3>Save a collection</h3>
+        <p>Use a readable name and one clear local tag or keyword.</p>
+      </div>
       <div className="collection-mode-control" role="tablist" aria-label="Collection type">
         <button
           type="button"
@@ -75,18 +83,18 @@ export function CreateCollectionForm({
           type="text"
           value={value}
           disabled={disabled}
-          placeholder={mode === "tag" ? "phone-call" : "supplier brief"}
+          placeholder={mode === "tag" ? "operator-handoff" : "backup evidence"}
           onChange={(event) => setValue(event.target.value)}
         />
       </label>
 
       <label className="field-label">
-        <span>Name</span>
+        <span>Readable saved view name</span>
         <input
           type="text"
           value={name}
           disabled={disabled}
-          placeholder={mode === "tag" ? "Phone calls" : "Supplier brief"}
+          placeholder={mode === "tag" ? "Operator handoff work" : "Backup evidence to review"}
           onChange={(event) => setName(event.target.value)}
         />
       </label>

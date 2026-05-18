@@ -16,6 +16,7 @@ export type SearchResultCardViewModel = {
   kind: string;
   title: string;
   body?: string | null;
+  whyMatched?: string | null;
   titleHighlights?: readonly SearchHighlightSegmentViewModel[];
   excerptSegments?: readonly SearchHighlightSegmentViewModel[];
   status?: string | null;
@@ -58,6 +59,8 @@ export function SearchResultCard({
     <div
       className={`search-result-card${selected ? " search-result-card-selected" : ""}`}
       data-search-result-id={result.id}
+      data-space-budget-min-width="620px"
+      data-space-budget-surface="search-result"
     >
       {onSelectionChange === undefined ? null : (
         <label className="selection-checkbox">
@@ -82,6 +85,12 @@ export function SearchResultCard({
         </span>
         {getBodySegments(result).length === 0 ? null : (
           <span className="search-result-card-body">{renderHighlightSegments(getBodySegments(result), result.body ?? "")}</span>
+        )}
+        {result.whyMatched === undefined || result.whyMatched === null ? null : (
+          <span className="search-result-card-why">
+            <span>Why matched</span>
+            <strong>{result.whyMatched}</strong>
+          </span>
         )}
         <span className="search-result-card-meta">
           {result.status === undefined || result.status === null ? null : (

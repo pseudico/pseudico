@@ -17,16 +17,19 @@ import type {
   SearchFilterInput,
   SearchResultKind,
   SearchWorkspaceInput,
-  SearchResultSummary
+  SearchResultSummary,
+  WorkspaceSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
 
 type SearchPageProps = {
   apiClient?: LocalWorkOsApi;
+  disableLiveLoading?: boolean;
   initialQuery?: string;
   initialKinds?: SearchResultKind[];
   initialResults?: SearchResultSummary[];
+  initialWorkspace?: WorkspaceSummary;
 };
 
 const searchKindOptions = [
@@ -61,13 +64,16 @@ type SearchResultGroup = {
 
 export function SearchPage({
   apiClient = desktopApiClient,
+  disableLiveLoading = false,
   initialQuery,
   initialKinds = [],
-  initialResults = []
+  initialResults = [],
+  initialWorkspace
 }: SearchPageProps): React.JSX.Element {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { currentWorkspace } = useWorkspaceStore();
+  const workspace = initialWorkspace ?? currentWorkspace;
   const searchParamsKey = searchParams.toString();
   const queryFromRoute = searchParams.get("q") ?? "";
   const [draftQuery, setDraftQuery] = useState(initialQuery ?? queryFromRoute);
@@ -140,13 +146,13 @@ export function SearchPage({
   }, [initialQuery, queryFromRoute, searchParamsKey]);
 
   useEffect(() => {
-    if (currentWorkspace === null) {
+    if (workspace === null || disableLiveLoading) {
       setRecentSearches([]);
       return;
     }
 
     let active = true;
-    void apiClient.search.listRecentSearches(currentWorkspace.id).then((result) => {
+    void apiClient.search.listRecentSearches(workspace.id).then((result) => {
       if (!active || !result.ok) {
         return;
       }
@@ -156,10 +162,10 @@ export function SearchPage({
     return () => {
       active = false;
     };
-  }, [apiClient, currentWorkspace]);
+  }, [apiClient, disableLiveLoading, workspace]);
 
   useEffect(() => {
-    if (currentWorkspace === null || initialResults.length > 0) {
+    if (workspace === null || initialResults.length > 0 || disableLiveLoading) {
       return;
     }
 
@@ -176,7 +182,7 @@ export function SearchPage({
     }
 
     let active = true;
-    const workspaceId = currentWorkspace.id;
+    const workspaceId = workspace.id;
     const searchStateKey = activeSearchStateKey;
 
     async function runSearch(): Promise<void> {
@@ -219,7 +225,7 @@ export function SearchPage({
     return () => {
       active = false;
     };
-  }, [activeSearchStateKey, apiClient, activeFilters, activeQuery, currentWorkspace, initialResults.length]);
+  }, [activeSearchStateKey, apiClient, activeFilters, activeQuery, disableLiveLoading, initialResults.length, workspace]);
 
   function submitSearch(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -238,14 +244,14 @@ export function SearchPage({
   }
 
   async function saveCurrentSearch(): Promise<void> {
-    if (currentWorkspace === null || activeQuery.trim().length === 0) {
+    if (workspace === null || activeQuery.trim().length === 0) {
       return;
     }
 
     setError(null);
     setSavedMessage(null);
     const result = await apiClient.search.saveSearch({
-      workspaceId: currentWorkspace.id,
+      workspaceId: workspace.id,
       query: activeQuery,
       name: `Search: ${activeQuery.trim().slice(0, 64)}`
     });
@@ -259,7 +265,7 @@ export function SearchPage({
   }
 
   async function reloadSearchResults(): Promise<void> {
-    if (currentWorkspace === null) {
+    if (workspace === null) {
       return;
     }
 
@@ -275,7 +281,7 @@ export function SearchPage({
     setError(null);
 
     const input: SearchWorkspaceInput = {
-      workspaceId: currentWorkspace.id,
+      workspaceId: workspace.id,
       query: trimmedQuery,
       limit: Math.max(results.length, SEARCH_PAGE_SIZE),
       offset: 0
@@ -346,7 +352,7 @@ export function SearchPage({
   }
 
   async function loadMoreResults(): Promise<void> {
-    if (currentWorkspace === null || loading) {
+    if (workspace === null || loading) {
       return;
     }
 
@@ -361,7 +367,7 @@ export function SearchPage({
     setError(null);
 
     const input: SearchWorkspaceInput = {
-      workspaceId: currentWorkspace.id,
+      workspaceId: workspace.id,
       query: trimmedQuery,
       limit: SEARCH_PAGE_SIZE,
       offset: results.length
@@ -413,11 +419,11 @@ export function SearchPage({
   }
 
   async function refreshRecentSearches(): Promise<void> {
-    if (currentWorkspace === null) {
+    if (workspace === null || disableLiveLoading) {
       return;
     }
 
-    const result = await apiClient.search.listRecentSearches(currentWorkspace.id);
+    const result = await apiClient.search.listRecentSearches(workspace.id);
 
     if (result.ok) {
       setRecentSearches(result.data);
@@ -461,7 +467,11 @@ export function SearchPage({
     }
   }
 
-  if (currentWorkspace === null) {
+  const activeResult = visibleResults.length === 0
+    ? null
+    : (visibleResults[Math.min(activeResultIndex, visibleResults.length - 1)] ?? null);
+
+  if (workspace === null) {
     return (
       <section className="search-page">
         <div className="page-heading">
@@ -485,13 +495,18 @@ export function SearchPage({
       </div>
 
       <form className="search-page-form" role="search" onSubmit={submitSearch}>
-        <label className="search-page-input">
+        <label
+          className="search-page-input"
+          data-space-budget-min-width="640px"
+          data-space-budget-fallback-min-width="420px"
+          data-space-budget-surface="search-command"
+        >
           <Search size={18} aria-hidden="true" />
           <span className="sr-only">Search query</span>
           <input
             type="search"
             value={draftQuery}
-            placeholder="Search local workspace"
+            placeholder="Search task, note, file, link, project, contact, tag, or saved view"
             onChange={(event) => setDraftQuery(event.target.value)}
           />
         </label>
@@ -504,7 +519,7 @@ export function SearchPage({
           disabled={activeQuery.trim().length === 0}
           onClick={() => void saveCurrentSearch()}
         >
-          Save search
+          Save search as view
         </button>
       </form>
 
@@ -565,7 +580,13 @@ export function SearchPage({
           )}
         </aside>
 
-        <section className="search-results-panel" aria-busy={loading} onKeyDown={handleResultsKeyDown}>
+        <section
+          className="search-results-panel"
+          aria-busy={loading}
+          data-space-budget-min-width="620px"
+          data-space-budget-surface="search-results"
+          onKeyDown={handleResultsKeyDown}
+        >
           <div className="metadata-results-heading">
             <div>
               <p className="top-eyebrow">Results</p>
@@ -663,8 +684,116 @@ export function SearchPage({
             </div>
           )}
         </section>
+        <SearchResultPreviewPanel
+          activeQuery={activeQuery}
+          filterSummary={activeFilterSummary}
+          result={activeResult}
+          {...(activeResult === null
+            ? {}
+            : { onOpen: () => openResult(activeResult.id) })}
+        />
       </div>
     </section>
+  );
+}
+
+function SearchResultPreviewPanel({
+  activeQuery,
+  filterSummary,
+  onOpen,
+  result
+}: {
+  activeQuery: string;
+  filterSummary: string[];
+  onOpen?: () => void;
+  result: SearchResultCardViewModel | null;
+}): React.JSX.Element {
+  if (result === null) {
+    return (
+      <aside
+        className="search-preview-panel"
+        data-space-budget-min-width="320px"
+        data-space-budget-surface="search-preview"
+        aria-label="Search result preview"
+      >
+        <div className="panel-heading">
+          <h3>Preview</h3>
+        </div>
+        <p>
+          Select a result to see the full title, why it matched, container context,
+          metadata, and the next safe action.
+        </p>
+        <div className="search-preview-context">
+          <span>Current query</span>
+          <strong>{activeQuery.trim().length === 0 ? "Not started" : activeQuery}</strong>
+        </div>
+      </aside>
+    );
+  }
+
+  const tags = result.tags?.filter((tag) => tag.slug.trim().length > 0) ?? [];
+
+  return (
+    <aside
+      className="search-preview-panel"
+      data-space-budget-min-width="320px"
+      data-space-budget-surface="search-preview"
+      aria-label={`Preview for ${result.title}`}
+    >
+      <div className="panel-heading">
+        <p className="top-eyebrow">{formatKindLabelForPreview(result.kind)}</p>
+        <h3>{result.title}</h3>
+      </div>
+      <p className="search-preview-body">
+        {result.body === undefined || result.body === null || result.body.trim().length === 0
+          ? "No body preview is available for this result; use Open to inspect the full local record."
+          : result.body}
+      </p>
+      <dl className="search-preview-metadata">
+        <div>
+          <dt>Why matched</dt>
+          <dd>{result.whyMatched ?? "Matched title, body, metadata, or active filters."}</dd>
+        </div>
+        <div>
+          <dt>Container</dt>
+          <dd>{result.contextLabel ?? "Workspace-level result"}</dd>
+        </div>
+        <div>
+          <dt>Status/date</dt>
+          <dd>
+            {[result.status, result.taskStatus, result.dueAt, result.updatedLabel]
+              .filter((value): value is string => value !== undefined && value !== null && value.length > 0)
+              .join(" · ") || "No status metadata"}
+          </dd>
+        </div>
+        <div>
+          <dt>Active filters</dt>
+          <dd>{filterSummary.length === 0 ? "None" : filterSummary.join(" · ")}</dd>
+        </div>
+      </dl>
+      {tags.length === 0 ? null : (
+        <div className="item-tag-list" aria-label="Preview tags">
+          {tags.map((tag) => (
+            <span key={tag.id ?? tag.slug} className="tag-badge">
+              #{tag.slug}
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="button-row">
+        <button
+          type="button"
+          className="primary-button"
+          disabled={onOpen === undefined || result.disabled === true}
+          onClick={onOpen}
+        >
+          Open result
+        </button>
+        <button type="button" className="secondary-button" disabled>
+          Add to Today
+        </button>
+      </div>
+    </aside>
   );
 }
 
@@ -749,6 +878,7 @@ function toSearchResultCardViewModel(
       source: "manual"
     })),
     contextLabel: buildContextLabel(result),
+    whyMatched: buildWhyMatchedLabel(result, query),
     updatedLabel: result.updatedAt.slice(0, 10),
     dueAt: result.dueAt ?? null,
     taskStatus: result.taskStatus ?? null,
@@ -774,6 +904,54 @@ function toSearchResultCardViewModel(
   }
 
   return viewModel;
+}
+
+function formatKindLabelForPreview(kind: string): string {
+  return getSearchResultGroupLabel(kind).replace(/s$/, "");
+}
+
+function buildWhyMatchedLabel(result: SearchResultSummary, query: string): string {
+  const structured = parseStructuredSearchChips(query);
+  const plainTerms = getSearchPlainTerms(query);
+
+  if (result.excerpt?.segments.some((segment) => segment.match)) {
+    return "The body or note preview contains the searched phrase.";
+  }
+
+  if (result.titleHighlights?.some((segment) => segment.match) === true) {
+    return "The title contains the searched phrase.";
+  }
+
+  if (plainTerms.some((term) => result.title.toLowerCase().includes(term.toLowerCase()))) {
+    return "The title contains the searched phrase.";
+  }
+
+  if (
+    result.containerTitle !== null &&
+    plainTerms.some((term) => result.containerTitle?.toLowerCase().includes(term.toLowerCase()))
+  ) {
+    return "The containing project or contact matches the query.";
+  }
+
+  if (
+    result.tags.some((tag) =>
+      plainTerms.some((term) => tag.toLowerCase().includes(term.toLowerCase()))
+    )
+  ) {
+    return "A tag or metadata value matches the query.";
+  }
+
+  if (structured.length > 0) {
+    return `Matched structured filter${structured.length === 1 ? "" : "s"}: ${structured
+      .map((chip) => `${chip.label} ${chip.value}`)
+      .join(", ")}.`;
+  }
+
+  if (result.category !== null) {
+    return `Matched local search projection or active category ${result.category}.`;
+  }
+
+  return "Matched the local workspace search index.";
 }
 
 function groupSearchResults(

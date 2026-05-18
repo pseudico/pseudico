@@ -37,32 +37,42 @@ import type {
   ProjectSummary,
   SmartListPreviewSummary,
   SmartListSummary,
-  TagCountSummary
+  TagCountSummary,
+  WorkspaceSummary
 } from "../../preload/api";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
 
 type CollectionsPageProps = {
   apiClient?: LocalWorkOsApi;
+  disableLiveLoading?: boolean;
   initialCollections?: CollectionSummary[];
   initialEvaluation?: CollectionEvaluationSummary | null;
   initialProjects?: ProjectSummary[];
   initialContacts?: ContactSummary[];
   initialSmartLists?: SmartListSummary[];
+  initialTags?: TagCountSummary[];
+  initialCategories?: CategoryCountSummary[];
+  initialWorkspace?: WorkspaceSummary;
 };
 
 const COLLECTION_PAGE_SIZE = 50;
 
 export function CollectionsPage({
   apiClient = desktopApiClient,
+  disableLiveLoading = false,
   initialCollections,
   initialEvaluation = null,
   initialProjects,
   initialContacts,
-  initialSmartLists
+  initialSmartLists,
+  initialTags,
+  initialCategories,
+  initialWorkspace
 }: CollectionsPageProps): React.JSX.Element {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspaceStore();
+  const workspace = initialWorkspace ?? currentWorkspace;
   const [collections, setCollections] = useState<CollectionSummary[]>(
     initialCollections ?? []
   );
@@ -71,8 +81,10 @@ export function CollectionsPage({
   const [smartLists, setSmartLists] = useState<SmartListSummary[]>(
     initialSmartLists ?? []
   );
-  const [tags, setTags] = useState<TagCountSummary[]>([]);
-  const [categories, setCategories] = useState<CategoryCountSummary[]>([]);
+  const [tags, setTags] = useState<TagCountSummary[]>(initialTags ?? []);
+  const [categories, setCategories] = useState<CategoryCountSummary[]>(
+    initialCategories ?? []
+  );
   const [smartListPreview, setSmartListPreview] =
     useState<SmartListPreviewSummary | null>(null);
   const [smartListMessage, setSmartListMessage] = useState<string | null>(null);
@@ -164,7 +176,7 @@ export function CollectionsPage({
   );
 
   const loadCollections = useCallback(async () => {
-    if (currentWorkspace === null || initialCollections !== undefined) {
+    if (workspace === null || initialCollections !== undefined || disableLiveLoading) {
       return;
     }
 
@@ -179,12 +191,12 @@ export function CollectionsPage({
       tagResult,
       categoryResult
     ] = await Promise.all([
-      apiClient.collections.listCollections(currentWorkspace.id),
-      apiClient.projects.listProjects(currentWorkspace.id),
-      apiClient.contacts.list(currentWorkspace.id),
-      apiClient.collections.listSmartLists(currentWorkspace.id),
-      apiClient.metadata.listTagsWithCounts(currentWorkspace.id),
-      apiClient.metadata.listCategoriesWithCounts(currentWorkspace.id)
+      apiClient.collections.listCollections(workspace.id),
+      apiClient.projects.listProjects(workspace.id),
+      apiClient.contacts.list(workspace.id),
+      apiClient.collections.listSmartLists(workspace.id),
+      apiClient.metadata.listTagsWithCounts(workspace.id),
+      apiClient.metadata.listCategoriesWithCounts(workspace.id)
     ]);
 
     setLoading(false);
@@ -243,7 +255,7 @@ export function CollectionsPage({
     if (firstCollectionId !== undefined && selectedCollectionId === null) {
       setSelectedCollectionId(firstCollectionId);
     }
-  }, [apiClient, currentWorkspace, initialCollections, selectedCollectionId]);
+  }, [apiClient, disableLiveLoading, initialCollections, selectedCollectionId, workspace]);
 
   const evaluateSelectedCollection = useCallback(async () => {
     if (selectedCollectionId === null || initialEvaluation !== null) {
@@ -338,7 +350,7 @@ export function CollectionsPage({
   }
 
   async function createCollection(values: CreateCollectionFormValues): Promise<void> {
-    if (currentWorkspace === null) {
+    if (workspace === null) {
       return;
     }
 
@@ -348,12 +360,12 @@ export function CollectionsPage({
     const result =
       values.mode === "tag"
         ? await apiClient.collections.createTagCollection({
-            workspaceId: currentWorkspace.id,
+            workspaceId: workspace.id,
             tagSlug: values.value,
             ...(values.name.length === 0 ? {} : { name: values.name })
           })
         : await apiClient.collections.createKeywordCollection({
-            workspaceId: currentWorkspace.id,
+            workspaceId: workspace.id,
             query: values.value,
             ...(values.name.length === 0 ? {} : { name: values.name })
           });
@@ -371,7 +383,7 @@ export function CollectionsPage({
   }
 
   async function previewSmartList(values: SmartListEditorValues): Promise<void> {
-    if (currentWorkspace === null) {
+    if (workspace === null) {
       return;
     }
 
@@ -380,7 +392,7 @@ export function CollectionsPage({
     setError(null);
 
     const result = await apiClient.collections.previewSmartList({
-      workspaceId: currentWorkspace.id,
+      workspaceId: workspace.id,
       criteria: toSmartListCriteria(values),
       limit: COLLECTION_PAGE_SIZE,
       offset: 0
@@ -399,7 +411,7 @@ export function CollectionsPage({
   }
 
   async function saveSmartList(values: SmartListEditorValues): Promise<void> {
-    if (currentWorkspace === null) {
+    if (workspace === null) {
       return;
     }
 
@@ -408,7 +420,7 @@ export function CollectionsPage({
     setError(null);
 
     const result = await apiClient.collections.createSmartList({
-      workspaceId: currentWorkspace.id,
+      workspaceId: workspace.id,
       name: values.name.trim(),
       description:
         values.description.trim().length === 0 ? null : values.description.trim(),
@@ -514,7 +526,7 @@ export function CollectionsPage({
     event.preventDefault();
 
     if (
-      currentWorkspace === null ||
+      workspace === null ||
       selectedCollection === null ||
       taskContainerId.length === 0 ||
       inlineTitle.trim().length === 0 ||
@@ -528,13 +540,13 @@ export function CollectionsPage({
 
     const result = inlineItemType === "task"
       ? await apiClient.collections.createTaskInCollection({
-          workspaceId: currentWorkspace.id,
+          workspaceId: workspace.id,
           collectionId: selectedCollection.id,
           containerId: taskContainerId,
           title: inlineTitle.trim()
         })
       : await apiClient.collections.createNoteInCollection({
-          workspaceId: currentWorkspace.id,
+          workspaceId: workspace.id,
           collectionId: selectedCollection.id,
           containerId: taskContainerId,
           title: inlineTitle.trim(),
@@ -554,7 +566,7 @@ export function CollectionsPage({
   }
 
   async function printSelectedCollectionPdf(): Promise<void> {
-    if (currentWorkspace === null || selectedCollection === null) {
+    if (workspace === null || selectedCollection === null) {
       return;
     }
 
@@ -573,7 +585,7 @@ export function CollectionsPage({
     setError(null);
 
     const result = await apiClient.print?.printPdf({
-      workspaceId: currentWorkspace.id,
+      workspaceId: workspace.id,
       title: selectedCollection.name,
       itemIds: printableItemIds
     });
@@ -593,7 +605,7 @@ export function CollectionsPage({
     setPrintMessage(`Collection PDF created at ${result.data.relativePath}.`);
   }
 
-  if (currentWorkspace === null) {
+  if (workspace === null) {
     return (
       <section className="collections-page">
         <div className="page-heading">
@@ -610,14 +622,22 @@ export function CollectionsPage({
       <div className="page-heading">
         <p className="top-eyebrow">Saved views</p>
         <h2>Collections</h2>
+        <p>
+          Saved local views keep cross-object work readable: filters stay explicit,
+          results stay central, and maintenance actions stay secondary.
+        </p>
       </div>
 
       {error === null ? null : (
         <p className="form-message form-message-error">{error}</p>
       )}
 
-      <div className="collections-layout">
-        <aside className="collections-sidebar" aria-label="Collections">
+      <div className="collections-layout" data-space-budget-surface="collections">
+        <aside
+          className="collections-sidebar"
+          data-space-budget-min-width="280px"
+          aria-label="Collections"
+        >
           <CreateCollectionForm disabled={saving} onSubmit={createCollection} />
 
           <SmartListEditor
@@ -649,7 +669,7 @@ export function CollectionsPage({
                   <div className="collection-list-item">
                     <span>
                       <strong>{smartList.name}</strong>
-                      <small>smart_list</small>
+                      <small>{formatSmartListFilterSummary(smartList)}</small>
                     </span>
                     <span>{countSmartListConditions(smartList)} criteria</span>
                   </div>
@@ -685,7 +705,7 @@ export function CollectionsPage({
                       <strong>{collection.name}</strong>
                       <small>{formatCollectionDetail(collection)}</small>
                     </span>
-                    <span>{collection.kind}</span>
+                    <span>{formatCollectionKind(collection.kind)}</span>
                   </button>
                 </ContextMenu>
               ))
@@ -693,7 +713,11 @@ export function CollectionsPage({
           </div>
         </aside>
 
-        <main className="collections-results-panel">
+        <main
+          className="collections-results-panel"
+          data-space-budget-min-width="620px"
+          data-space-budget-surface="collection-results"
+        >
           {selectedCollection === null ? (
             <div className="item-feed-empty-state">
               <h3>Select a collection</h3>
@@ -911,6 +935,50 @@ function formatCollectionDetail(collection: CollectionSummary): string {
   }
 
   return "Saved query";
+}
+
+function formatCollectionKind(kind: CollectionSummary["kind"]): string {
+  if (kind === "tag") return "Tag";
+  if (kind === "keyword") return "Keyword";
+  return "Custom";
+}
+
+function formatSmartListFilterSummary(smartList: SmartListSummary): string {
+  const criteria = smartList.criteria;
+
+  if (criteria === null) {
+    return "Saved filter criteria";
+  }
+
+  const parts = [
+    criteria.text !== undefined && criteria.text.trim().length > 0
+      ? `text "${criteria.text.trim()}"`
+      : null,
+    criteria.itemTypes !== undefined && criteria.itemTypes.length > 0
+      ? `types ${criteria.itemTypes.join(", ")}`
+      : null,
+    criteria.tagSlugs !== undefined && criteria.tagSlugs.length > 0
+      ? `tags ${criteria.tagSlugs.map((tag) => `@${tag}`).join(", ")}`
+      : null,
+    criteria.categoryMode !== undefined && criteria.categoryMode !== "any"
+      ? `category ${criteria.categoryMode}`
+      : null,
+    criteria.taskStatuses !== undefined && criteria.taskStatuses.length > 0
+      ? `status ${criteria.taskStatuses.join(", ")}`
+      : null,
+    criteria.dueFilter !== undefined && criteria.dueFilter !== "any"
+      ? `due ${criteria.dueFilter}`
+      : null,
+    criteria.archivedFilter !== undefined && criteria.archivedFilter !== "active"
+      ? `archive ${criteria.archivedFilter}`
+      : null
+  ].filter((part): part is string => part !== null);
+
+  if (parts.length === 0) {
+    return "All active local work";
+  }
+
+  return parts.join(" · ");
 }
 
 function toSmartListCriteria(values: SmartListEditorValues) {

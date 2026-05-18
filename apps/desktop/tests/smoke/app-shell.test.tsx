@@ -28,7 +28,8 @@ const expectedRoutePaths = [
   "/help",
   "/settings",
   "/trash",
-  "/space-budget-primitives"
+  "/space-budget-primitives",
+  "/search-collections-space-budget-fixture"
 ];
 
 describe("desktop shell routes", () => {
@@ -83,6 +84,9 @@ describe("desktop shell routes", () => {
   it("keeps the SBUX primitive fixture hidden from primary navigation", () => {
     expect(navRoutes.map((route) => route.path)).not.toContain(
       "/space-budget-primitives"
+    );
+    expect(navRoutes.map((route) => route.path)).not.toContain(
+      "/search-collections-space-budget-fixture"
     );
   });
 

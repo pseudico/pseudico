@@ -41,9 +41,15 @@ export function SearchFilters<TKind extends string = string>({
   }
 
   return (
-    <div className="search-filter-panel" aria-label="Search filters">
+    <div
+      className="search-filter-panel"
+      data-space-budget-min-width="260px"
+      data-space-budget-surface="search-filters"
+      aria-label="Search filters"
+    >
       <div className="panel-heading">
         <h3>Filters</h3>
+        <p>Type, tag, category, status, and date filters narrow results without crowding titles.</p>
       </div>
       <div className="search-filter-list" aria-label="Type filters">
         {kindOptions.map((option) => (

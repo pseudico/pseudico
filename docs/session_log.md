@@ -8137,3 +8137,40 @@ Decisions made:
 Files changed: docs/manual-qa/screenshots/PSE-234-project-detail/; docs/session_log.md
 Open questions / risks: P2 browser evidence uses hidden route with live loading disabled; runtime app paths keep IPC-only writes.
 Next actions: stage/commit; push and open PR; update Linear and merge if allowed.
+
+## 2026-05-19T07:39:20.2228890+10:00
+Objective: Select and plan the next SBUX child ticket.
+Decisions made:
+- Selected PSE-235 because PSE-231..PSE-234 are Done with merged PR/final updates.
+- Created clean branch/worktree C:\tmp\Pseudico-pse-235 from origin/main.
+Files changed:
+- docs/session_log.md
+Open questions / risks: ui-redesign source docs remain untracked in original checkout, not origin/main.
+Next actions: Implement scoped search/collections UI pass; add tests; capture evidence.
+
+## 2026-05-19T07:48:38.1752535+10:00
+Objective: Implement PSE-235 search/collections space-budget pass.
+Decisions made:
+- Kept changes renderer/UI-only with fixture route for deterministic long-data evidence.
+- Added search preview and why-matched context without changing search indexing.
+Files changed:
+- apps/desktop/src/renderer/pages/SearchPage.tsx; apps/desktop/src/renderer/pages/CollectionsPage.tsx; apps/desktop/src/renderer/pages/SearchCollectionsSpaceBudgetFixturePage.tsx; apps/desktop/src/renderer/styles.css; packages/ui/src/components/SearchResultCard.tsx; packages/ui/src/components/SearchFilters.tsx; packages/ui/src/forms/CreateCollectionForm.tsx; tests
+Open questions / risks: Need production screenshots and full validation.
+Next actions: Capture visual evidence; run standard checks; prepare PR.
+
+## 2026-05-19T08:04:04.9099071+10:00
+Objective: Complete PSE-235 validation and visual evidence.
+Decisions made:
+- Used production-built renderer hidden fixture routes for deterministic screenshots.
+- Full standard validation passed after updating a legacy test assertion.
+Files changed:
+- docs/session_log.md; docs/manual-qa/PSE-235-search-collections-space-budget.md; docs/manual-qa/screenshots/PSE-235-search-collections/*
+Open questions / risks: Screenshot fixture is deterministic, not live workspace mutation evidence.
+Next actions: Review diff; commit/push; open/update PR and reconcile checks.
+
+### 2026-05-19T08:07:54.3651550+10:00
+- Objective: Open PSE-235 GitHub PR after implementation and validation.
+- Decisions made: Created ready PR #216 against main; kept screenshot fixture hidden from navigation.
+- Files changed: docs/session_log.md
+- Open questions / risks: Await GitHub checks/mergeability; possible branch protection or review requirement.
+- Next actions: Check PR status; merge if policy allows; update Linear final state.
