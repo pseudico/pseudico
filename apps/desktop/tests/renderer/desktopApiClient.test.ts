@@ -1529,6 +1529,7 @@ function todayViewModelSummary(): TodayViewModelSummary {
         sourceItemId: null,
         workspaceId: "workspace_1",
         containerId: "container_1",
+        containerTitle: "Launch Plan",
         containerTabId: null,
         title: "Call accountant",
         body: null,

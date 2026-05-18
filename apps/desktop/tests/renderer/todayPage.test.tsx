@@ -21,6 +21,8 @@ describe("Today renderer page", () => {
     expect(html).toContain("Keyboard planner");
     expect(html).toContain("Today task");
     expect(html).toContain("Tomorrow task");
+    expect(html).toContain("real multiline field");
+    expect(html).toContain("Destination: <!-- -->Inbox");
     expect(html).toContain("Complete");
     expect(html).toContain("Open source");
     expect(html).toContain("Tomorrow");
@@ -37,6 +39,10 @@ describe("Today renderer page", () => {
     expect(html).toContain("Showing the first");
     expect(html).toContain("of <!-- -->12");
     expect(html).toContain("Large Today list detected.");
+    expect(html).toContain("Prepare the operator handoff checklist with backup evidence");
+    expect(html).toContain("Destination: <!-- -->Client Launch Project");
+    expect(html).toContain("Moved manually");
+    expect(html).toContain("Reopen");
   });
 });
 
@@ -113,6 +119,18 @@ function todayViewModel(): TodayViewModelSummary {
         plannedLane: "today" as const,
         plannedSortOrder: 2048,
         addedManually: true
+      },
+      {
+        ...todayTask(
+          "item_today_long",
+          "Prepare the operator handoff checklist with backup evidence, long filename verification, and follow-up owner notes before Thursday review",
+          "2026-05-04T14:00:00.000Z"
+        ),
+        taskStatus: "done" as const,
+        itemStatus: "completed",
+        plannedLane: "today" as const,
+        plannedSortOrder: 3072,
+        addedManually: true
       }
     ],
     tomorrowPreview: [
@@ -136,6 +154,7 @@ function todayTask(itemId: string, title: string, dueAt: string) {
     sourceItemId: null,
     workspaceId: "workspace_1",
     containerId: "container_project_1",
+    containerTitle: "Client Launch Project",
     containerTabId: null,
     title,
     body: null,

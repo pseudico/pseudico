@@ -8064,3 +8064,37 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Push/PR/merge/Linear final update are blocked until the user approves GitHub upload.
 Next actions: Get explicit push approval; push branch; open/update PR.
+## 2026-05-19T05:57:53
+Objective: Prepare clean PSE-233 implementation workspace.
+Decisions made:
+- Created isolated worktree at C:\tmp\Pseudico-pse233 from origin/main on codex/pse-233-today-planning.
+- Kept unrelated dirty files in original checkout out of scope.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need inspect PSE-232 merged outputs from clean worktree before coding.
+Next actions: Read Today route/primitives; post PSE-233 Linear plan; implement scoped Today UI.
+## 2026-05-19T06:10:38
+Objective: Implement PSE-233 Today space-budget UI slice.
+Decisions made:
+- Converted day planner to multiline lane capture with parse/destination feedback and Ctrl/Cmd+Enter submit.
+- Added container titles to Today view model and readable lane/card budgets with deterministic long-data fixture route.
+Files changed:
+- packages/ui/src/components/DailyPlannerEditor.tsx; packages/ui/src/components/TodayTaskCard.tsx; packages/features/src/today/*; apps/desktop/src/renderer/pages/*; apps/desktop/src/renderer/styles.css; tests
+Open questions / risks: Hidden fixture route is evidence-only; real workspace screenshots still preferred if harness time allows.
+Next actions: Run broader checks; capture 1440/1280 screenshots; document manual QA.
+## 2026-05-19T06:22:18
+Objective: Validate PSE-233 implementation and capture evidence.
+Decisions made:
+- Used hidden production renderer fixture route for deterministic long-data Today screenshots.
+- Confirmed lint/typecheck/test/build pass after targeted tests and native module rebuild for Node ABI.
+Files changed:
+- docs/manual-qa/PSE-233-today-space-budget.md; docs/manual-qa/screenshots/PSE-233-today/*; docs/session_log.md
+Open questions / risks: Screenshot fixture is not a live workspace submission path; documented as P2 caveat.
+Next actions: Commit/push branch; open PR; update Linear and reconcile merge policy.
+
+## 2026-05-19T06:25:06+10:00
+Objective: Commit PSE-233 Today planning implementation after validation.
+Decisions made: - Selected PSE-233 as first unblocked unfinished SBUX ticket; - Kept Today scope local-only and UI-focused; - Used hidden fixture route for production screenshot evidence.
+Files changed: apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/App.tsx; apps/desktop/src/renderer/pages/TodayPage.tsx; apps/desktop/src/renderer/pages/TodaySpaceBudgetFixturePage.tsx; apps/desktop/src/renderer/styles.css; packages/features/src/today/TodayService.ts; packages/features/src/today/TodayViewModel.ts; packages/ui/src/components/DailyPlannerEditor.tsx; packages/ui/src/components/TodayTaskCard.tsx; tests; docs/manual-qa/PSE-233-today-space-budget.md
+Open questions / risks: P2 screenshot path uses fixture data rather than live workspace mutation; P3 reusable screenshot harness still needed.
+Next actions: commit; push branch; open/update PR.

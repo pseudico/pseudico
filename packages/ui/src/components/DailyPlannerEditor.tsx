@@ -33,6 +33,9 @@ export type DailyPlannerKey =
   | "ArrowUp"
   | "ArrowDown"
   | "Enter"
+  | "Meta+Enter"
+  | "Ctrl+Enter"
+  | "Shift+Enter"
   | "Escape";
 
 export function DailyPlannerEditor({
@@ -51,14 +54,14 @@ export function DailyPlannerEditor({
   });
   const [activeLane, setActiveLane] = useState<DailyPlannerLane>("today");
   const [formError, setFormError] = useState<string | null>(null);
-  const todayInputRef = useRef<HTMLInputElement | null>(null);
-  const tomorrowInputRef = useRef<HTMLInputElement | null>(null);
+  const todayInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const tomorrowInputRef = useRef<HTMLTextAreaElement | null>(null);
   const activeDraft = drafts[activeLane];
   const activePreview = useMemo(
     () =>
       buildDailyPlannerSubmission(toDailyPlannerSubmissionInput({
         lane: activeLane,
-        title: activeDraft,
+        title: normalizePlannerDraft(activeDraft),
         targetContainerId,
         todayDueAt,
         tomorrowDueAt,
@@ -77,7 +80,7 @@ export function DailyPlannerEditor({
   async function submitLane(lane: DailyPlannerLane): Promise<void> {
     const submission = buildDailyPlannerSubmission(toDailyPlannerSubmissionInput({
       lane,
-      title: drafts[lane],
+      title: normalizePlannerDraft(drafts[lane]),
       targetContainerId,
       todayDueAt,
       tomorrowDueAt,
@@ -106,11 +109,14 @@ export function DailyPlannerEditor({
 
   function handleKeyDown(
     lane: DailyPlannerLane,
-    event: React.KeyboardEvent<HTMLInputElement>
+    event: React.KeyboardEvent<HTMLTextAreaElement>
   ): void {
     const command = getDailyPlannerKeyCommand({
       key: event.key,
       lane,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      shiftKey: event.shiftKey,
       title: drafts[lane]
     });
 
@@ -143,8 +149,9 @@ export function DailyPlannerEditor({
           <p className="top-eyebrow">Rapid day planner</p>
           <h3 id="daily-planner-editor-title">Keyboard planner</h3>
           <p>
-            Type tasks directly into Today or Tomorrow. Enter saves and plans the
-            task; Arrow Up/Down switches lanes; Escape clears the current draft.
+            Capture a complete task in a real multiline field. Ctrl/Cmd+Enter
+            saves and plans the task; Shift+Enter adds another line; Arrow
+            Up/Down switches lanes; Escape clears the current draft.
           </p>
         </div>
         <span>Saving to {targetContainerName}</span>
@@ -173,11 +180,18 @@ export function DailyPlannerEditor({
         />
       </div>
 
-      {activePreview.ok && activePreview.values.dueAt != null ? (
-        <p className="muted-text" aria-live="polite">
-          Active draft due date: {(activePreview.values.dueAt ?? "").slice(0, 10)}
-        </p>
-      ) : null}
+      <div className="daily-planner-feedback" aria-live="polite">
+        <span>Active lane: {formatPlannerLane(activeLane)}</span>
+        <span>Destination: {targetContainerName}</span>
+        <span>
+          Due: {activePreview.ok && activePreview.values.dueAt != null
+            ? activePreview.values.dueAt.slice(0, 10)
+            : activeLane === "today"
+              ? todayDueAt.slice(0, 10)
+              : tomorrowDueAt.slice(0, 10)}
+        </span>
+        <span>Submit: Ctrl/Cmd+Enter</span>
+      </div>
       {formError === null && error === null ? null : (
         <p className="form-message form-message-error">{formError ?? error}</p>
       )}
@@ -212,7 +226,7 @@ export function buildDailyPlannerSubmission(input: {
   return {
     ok: true,
     values: {
-      title: result.values.title,
+      title: normalizePlannerDraft(result.values.title),
       dueDate: result.values.dueDate,
       dueAt: result.values.dueAt ?? laneDueAt,
       startAt: result.values.startAt ?? null,
@@ -252,8 +266,11 @@ function toDailyPlannerSubmissionInput(input: {
 }
 
 export function getDailyPlannerKeyCommand(input: {
+  ctrlKey?: boolean;
   key: string;
   lane: DailyPlannerLane;
+  metaKey?: boolean;
+  shiftKey?: boolean;
   title: string;
 }): DailyPlannerLane | "clear" | "none" | "submit" {
   if (input.key === "ArrowDown") {
@@ -264,7 +281,14 @@ export function getDailyPlannerKeyCommand(input: {
     return input.lane === "tomorrow" ? "today" : "tomorrow";
   }
 
-  if (input.key === "Enter") {
+  if (input.key === "Enter" && input.shiftKey === true) {
+    return "none";
+  }
+
+  if (
+    input.key === "Enter" &&
+    (input.ctrlKey === true || input.metaKey === true)
+  ) {
     return "submit";
   }
 
@@ -286,7 +310,7 @@ function DailyPlannerLaneInput({
   onKeyDown
 }: {
   disabled: boolean;
-  inputRef: React.RefObject<HTMLInputElement | null>;
+  inputRef: React.RefObject<HTMLTextAreaElement | null>;
   label: string;
   lane: DailyPlannerLane;
   value: string;
@@ -294,16 +318,17 @@ function DailyPlannerLaneInput({
   onFocus: () => void;
   onKeyDown: (
     lane: DailyPlannerLane,
-    event: React.KeyboardEvent<HTMLInputElement>
+    event: React.KeyboardEvent<HTMLTextAreaElement>
   ) => void;
 }): React.JSX.Element {
   return (
     <label className="daily-planner-lane-input">
       <span>{label}</span>
-      <input
+      <textarea
         ref={inputRef}
         disabled={disabled}
-        placeholder={`Add a ${lane} task`}
+        placeholder={`Add a ${lane} task with the full next action, destination, and useful date context`}
+        rows={4}
         value={value}
         onChange={(event) => onChange(event.currentTarget.value)}
         onFocus={onFocus}
@@ -311,4 +336,13 @@ function DailyPlannerLaneInput({
       />
     </label>
   );
+}
+
+
+function normalizePlannerDraft(value: string): string {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+function formatPlannerLane(lane: DailyPlannerLane): string {
+  return lane === "today" ? "Today" : "Tomorrow";
 }
