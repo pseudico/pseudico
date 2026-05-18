@@ -196,8 +196,8 @@ a {
 }
 
 .top-bar-title {
-  flex: 0 0 clamp(180px, 22vw, 300px);
-  min-width: 180px;
+  flex: 0 1 clamp(160px, 18vw, 240px);
+  min-width: 160px;
 }
 
 .top-eyebrow {
@@ -8281,5 +8281,203 @@ textarea {
 
   .dashboard-widget-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* PSE-232: shell space budgets.
+   The shell compresses navigation chrome before command/search or Quick Add
+   fall below the documented operator budget. */
+.top-actions[data-space-budget-surface="app-shell"] {
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) auto auto auto auto;
+  flex: 1 1 min(100%, 920px);
+  justify-content: stretch;
+}
+
+.shell-command-search {
+  width: 100%;
+  min-width: min(100%, 420px);
+  max-width: 720px;
+  justify-self: stretch;
+}
+
+.shell-command-search input {
+  min-width: 0;
+}
+
+.shell-quick-add-button {
+  border-color: #245c55;
+  background: #245c55;
+  color: #ffffff;
+}
+
+.sidebar-route-group {
+  gap: 6px;
+}
+
+.sidebar-route-group + .sidebar-route-group {
+  padding-top: 10px;
+  border-top: 1px solid #dedbd1;
+}
+
+.sidebar-route-group-secondary .nav-item {
+  color: #6d6a62;
+}
+
+.sidebar-route-group-primary .nav-item {
+  font-weight: 750;
+}
+
+.quick-start-dialog {
+  width: min(860px, calc(100vw - 48px));
+}
+
+.quick-add-form {
+  grid-template-columns: minmax(150px, 180px) minmax(260px, 1fr) auto;
+  align-items: end;
+}
+
+.quick-add-task-capture {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.quick-add-form textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 11px 13px;
+  border: 1px solid #d5d0c3;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #262624;
+  font-size: 1rem;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.quick-start-form {
+  grid-template-columns: minmax(320px, 1fr) minmax(220px, 260px) auto;
+}
+
+.quick-start-form textarea {
+  grid-column: 1 / -1;
+}
+
+.app-tab {
+  min-width: 220px;
+  max-width: 340px;
+}
+
+.app-tab-active .app-tab-target span {
+  white-space: normal;
+}
+
+@media (max-width: 1500px) {
+  .top-bar {
+    gap: 16px;
+    padding-inline: 24px;
+  }
+
+  .top-actions[data-space-budget-surface="app-shell"] {
+    grid-template-columns: minmax(420px, 1fr) auto auto auto;
+  }
+
+  .navigation-controls,
+  .shell-command-button kbd {
+    display: none;
+  }
+}
+
+@media (max-width: 1280px) {
+  .app-shell {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .sidebar {
+    gap: 14px;
+    padding-inline: 10px;
+  }
+
+  .brand-link {
+    grid-template-columns: 42px;
+    justify-content: center;
+    padding-inline: 5px;
+  }
+
+  .brand-link > span:not(.brand-mark),
+  .nav-section-label,
+  .nav-item span,
+  .pinned-favorites-nav {
+    display: none;
+  }
+
+  .nav-item {
+    min-height: 46px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding-inline: 9px;
+  }
+
+  .sidebar-route-group + .sidebar-route-group {
+    padding-top: 8px;
+  }
+
+  .top-bar {
+    display: grid;
+    grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px 18px;
+  }
+
+  .top-bar-title {
+    min-width: 0;
+    flex-basis: auto;
+  }
+
+  .top-bar-title h1 {
+    font-size: 19px;
+  }
+
+  .top-actions[data-space-budget-surface="app-shell"] {
+    grid-template-columns: minmax(420px, 1fr) auto auto auto;
+  }
+
+  .navigation-controls {
+    display: none;
+  }
+
+  .recent-navigation-menu .icon-button span,
+  .shell-command-button span {
+    display: none;
+  }
+
+  .app-tab-strip {
+    padding-inline: 18px;
+  }
+}
+
+@media (max-width: 1040px) {
+  .top-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .top-actions[data-space-budget-surface="app-shell"] {
+    grid-template-columns: minmax(420px, 1fr) auto auto;
+  }
+
+  .recent-navigation-menu {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .top-actions[data-space-budget-surface="app-shell"],
+  .quick-add-form,
+  .quick-start-form {
+    grid-template-columns: 1fr;
+  }
+
+  .shell-command-search {
+    min-width: 0;
   }
 }

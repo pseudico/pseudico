@@ -156,12 +156,13 @@ export function QuickAddForm({
         void handleSubmit(event);
       }}
     >
-      <label>
+      <label className="quick-add-task-capture">
         <span>Task</span>
-        <input
+        <textarea
           autoFocus
           disabled={disabledForm}
-          placeholder="New task"
+          placeholder="Capture the full task, note to self, destination, date, and any @tags. Example: Call Priya tomorrow about revised launch-readiness evidence @client"
+          rows={4}
           value={title}
           onChange={(event) => setTitle(event.currentTarget.value)}
         />

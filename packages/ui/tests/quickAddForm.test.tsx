@@ -27,7 +27,8 @@ describe("QuickAddForm", () => {
     );
 
     expect(html).toContain("Quick add task");
-    expect(html).toContain("New task");
+    expect(html).toContain("<textarea");
+    expect(html).toContain("Capture the full task");
     expect(html).toContain("type=\"date\"");
     expect(html).toContain("Inbox");
     expect(html).toContain("Launch Plan");

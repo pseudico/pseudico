@@ -47,4 +47,24 @@ describe("primary-operator readability styles", () => {
     expect(styles).toContain(".space-budget-timeline-row");
     expect(styles).toContain("grid-template-columns: minmax(300px, 330px) minmax(520px, 1fr)");
   });
+
+  it("keeps the persistent shell command and Quick Add above operator space budgets", () => {
+    expect(styles).toContain(".top-actions[data-space-budget-surface=\"app-shell\"]");
+    expect(styles).toContain("grid-template-columns: minmax(420px, 1fr) auto auto auto auto");
+    expect(styles).toContain(".shell-command-search");
+    expect(styles).toContain("min-width: min(100%, 420px)");
+    expect(styles).toContain(".quick-start-dialog");
+    expect(styles).toContain("width: min(860px, calc(100vw - 48px))");
+    expect(styles).toContain(".quick-add-form textarea");
+    expect(styles).toContain("min-height: 140px");
+  });
+
+  it("collapses navigation chrome at 1280px before shrinking command/search", () => {
+    expect(styles).toContain("@media (max-width: 1280px)");
+    expect(styles).toContain("grid-template-columns: 72px minmax(0, 1fr)");
+    expect(styles).toContain(".nav-item span");
+    expect(styles).toContain("display: none");
+    expect(styles).toContain("grid-template-columns: minmax(420px, 1fr) auto auto auto");
+    expect(styles).toContain(".navigation-controls");
+  });
 });

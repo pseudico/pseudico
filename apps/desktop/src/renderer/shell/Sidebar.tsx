@@ -42,6 +42,35 @@ const routeIcons: Partial<Record<AppRouteId, LucideIcon>> = {
   trash: Trash2
 };
 
+const sidebarRouteGroups: Array<{
+  label: string;
+  routeIds: AppRouteId[];
+  tone?: "primary" | "secondary";
+}> = [
+  {
+    label: "Daily work",
+    tone: "primary",
+    routeIds: ["today", "inbox", "projects", "contacts", "collections", "search"]
+  },
+  {
+    label: "Organise",
+    routeIds: [
+      "dashboard",
+      "projectTags",
+      "contactLabels",
+      "tagsCategories",
+      "templates",
+      "timeline",
+      "calendar"
+    ]
+  },
+  {
+    label: "Maintenance",
+    tone: "secondary",
+    routeIds: ["settings", "trash", "workflows", "help"]
+  }
+];
+
 type SidebarProps = {
   apiClient?: LocalWorkOsApi;
   initialPinnedFavorites?: PinnedFavoriteTargetSummary[];
@@ -102,24 +131,36 @@ export function Sidebar({
         </span>
       </NavLink>
 
-      <nav className="nav-list">
-        {navRoutes.map((route) => {
-          const Icon = routeIcons[route.id] ?? LayoutDashboard;
-          const isActive = activeRouteId === route.id;
+      {sidebarRouteGroups.map((group) => (
+        <nav
+          key={group.label}
+          className={`nav-list sidebar-route-group sidebar-route-group-${group.tone ?? "standard"}`}
+          aria-label={group.label}
+        >
+          <p className="nav-section-label">{group.label}</p>
+          {group.routeIds
+            .map((routeId) => navRoutes.find((route) => route.id === routeId))
+            .filter((route): route is (typeof navRoutes)[number] => route !== undefined)
+            .map((route) => {
+              const Icon = routeIcons[route.id] ?? LayoutDashboard;
+              const isActive = activeRouteId === route.id;
 
-          return (
-            <NavLink
-              key={route.id}
-              to={route.path}
-              aria-current={isActive ? "page" : undefined}
-              className={isActive ? "nav-item nav-item-active" : "nav-item"}
-            >
-              <Icon size={18} aria-hidden="true" />
-              <span>{route.label}</span>
-            </NavLink>
-          );
-        })}
-      </nav>
+              return (
+                <NavLink
+                  key={route.id}
+                  to={route.path}
+                  aria-current={isActive ? "page" : undefined}
+                  aria-label={route.label}
+                  className={isActive ? "nav-item nav-item-active" : "nav-item"}
+                  title={route.label}
+                >
+                  <Icon size={18} aria-hidden="true" />
+                  <span>{route.label}</span>
+                </NavLink>
+              );
+            })}
+        </nav>
+      ))}
 
       <PinnedFavoritesNav favorites={pinnedFavorites} />
     </aside>

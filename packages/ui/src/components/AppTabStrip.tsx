@@ -40,7 +40,7 @@ export function AppTabStrip({
               type="button"
               className="app-tab-target"
               aria-current={selected ? "page" : undefined}
-              title={tab.subtitle ?? tab.path}
+              title={`${tab.label}${tab.subtitle === null ? "" : ` - ${tab.subtitle}`}`}
               onClick={() => onSelectTab(tab.id)}
             >
               <span>{tab.label}</span>
