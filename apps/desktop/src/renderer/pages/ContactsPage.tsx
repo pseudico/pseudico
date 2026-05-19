@@ -357,7 +357,7 @@ export function ContactsPage({
   }
 
   return (
-    <section className="projects-page">
+    <section className="projects-page contacts-library-page" data-space-budget-surface="contacts-library">
       <div className="page-heading page-heading-actions">
         <div>
           <p className="top-eyebrow">Contact containers</p>
@@ -607,8 +607,8 @@ function ContactListRow({
   onLifecycle: (contact: ContactSummary, action: ContactLifecycleAction) => void;
 }): React.JSX.Element {
   return (
-    <div className="project-list-row">
-      <Link className="project-list-main" to={`/contacts/${contact.id}`}>
+    <div className="project-list-row contact-list-row" data-space-budget-surface="contact-list-row">
+      <Link className="project-list-main contact-list-main" to={`/contacts/${contact.id}`}>
         <span
           className="project-list-color"
           style={{ backgroundColor: contact.color ?? "#2c6b8f" }}

@@ -8218,3 +8218,30 @@ Next actions: Review diff; commit/push; open/update PR and reconcile checks.
 - Files changed: apps/desktop/src/renderer/*; apps/desktop/tests/renderer/*; docs/manual-qa/PSE-237-home-dashboard-projects-space-budget.md; docs/session_log.md
 - Open questions / risks: CI/PR merge policy still to reconcile after push.
 - Next actions: Commit; push; open PR and update Linear.
+
+## 2026-05-19T12:36:10+10:00
+Objective: Plan PSE-238 implementation after docs and prior SBUX evidence review.
+Decisions made:
+- Selected PSE-238 as next unblocked ticket; posted plan to Linear.
+- Created clean worktree C:\tmp\pseudico-pse238 on origin/main to avoid unrelated dirty files.
+Files changed: docs/session_log.md
+Open questions / risks: Need keep changes UI-only and avoid maintenance over-promotion.
+Next actions: Implement contact/maintenance layout pass; add tests; capture screenshots.
+
+## 2026-05-19T12:55:00+10:00
+Objective: Implement PSE-238 contact and maintenance space-budget UI pass.
+Decisions made:
+- Contact detail now uses contact/profile, central mixed feed, and follow-up context budgets.
+- Maintenance surfaces use explicit settings/trash/workflow data attributes and readable path/action panels.
+Files changed: apps/desktop/src/renderer/pages/*; apps/desktop/src/renderer/styles.css; apps/desktop/tests/renderer/*; docs/manual-qa/*; docs/session_log.md
+Open questions / risks: Fixture screenshots are deterministic production renderer evidence, not live workspace mutation.
+Next actions: Run full validation; prepare PR/Linear final update; reconcile merge.
+
+## 2026-05-19T13:05:00+10:00
+Objective: Open and reconcile PSE-238 PR for contact/maintenance space budgets.
+Decisions made:
+- Reused existing PR #219 for branch codex/pse-238-contacts-maintenance.
+- Kept PR ready-for-review while repository CI was still running.
+Files changed: docs/session_log.md
+Open questions / risks: CI completion and merge policy still pending.
+Next actions: wait for checks; update Linear; merge if allowed.

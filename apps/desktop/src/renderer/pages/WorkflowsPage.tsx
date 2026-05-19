@@ -48,7 +48,7 @@ export function WorkflowsPage(): React.JSX.Element {
   });
 
   return (
-    <main className="page workflow-page" aria-labelledby="workflows-title">
+    <main className="page workflow-page" data-space-budget-surface="workflow-lab" aria-labelledby="workflows-title">
       <section className="page-header">
         <div>
           <p className="eyebrow">Workflow lab — scaffold only</p>
