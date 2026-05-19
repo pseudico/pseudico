@@ -11128,3 +11128,362 @@ body {
     position: static;
   }
 }
+
+/* PSE-241/PSE-247 full-app operator cohesion gate.
+   These primitives keep production pages square, bounded, and primary-work-first
+   without changing local data/service behavior. */
+.operator-page,
+.main-content > section,
+.main-content > main {
+  min-width: 0;
+}
+
+.operator-page {
+  display: grid;
+  gap: 14px;
+}
+
+.operator-page-header {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--app-border, #dedbd1);
+  border-radius: 0;
+  background: #eef4f5;
+  box-shadow: none;
+}
+
+.operator-page-header > div,
+.operator-page-header h1,
+.operator-page-header h2,
+.operator-page-header h3,
+.operator-page-header p {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  hyphens: none;
+}
+
+.operator-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 8px;
+}
+
+.operator-workbench {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  align-items: start;
+}
+
+.operator-workbench[data-operator-workbench-layout="primary-rail"] {
+  grid-template-columns: minmax(620px, 1fr) minmax(280px, 340px);
+}
+
+.operator-workbench[data-operator-workbench-layout="primary-two-rails"] {
+  grid-template-columns: minmax(620px, 1fr) minmax(260px, 320px) minmax(260px, 320px);
+}
+
+.operator-panel {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--app-border, #dedbd1);
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.operator-panel-primary {
+  min-width: min(100%, 620px);
+}
+
+.operator-panel h1,
+.operator-panel h2,
+.operator-panel h3,
+.operator-panel h4,
+.operator-panel p,
+.operator-panel strong,
+.operator-panel span,
+.operator-panel li,
+.operator-panel dd {
+  overflow-wrap: anywhere;
+  hyphens: none;
+}
+
+/* Normalize production work surfaces back toward the square/dense option-10 treatment. */
+[data-space-budget-surface],
+.workspace-pinned-work-panel,
+.workspace-feed-panel,
+.workspace-today-panel,
+.workspace-project-health-panel,
+.workspace-maintenance-panel,
+.dashboard-operator-summary,
+.project-library-summary,
+.project-detail-header-work-first,
+.project-work-card,
+.project-linked-context,
+.project-advanced-details,
+.project-outline-panel,
+.project-context-inspector-panel,
+.project-detail-workbench .project-content-section,
+.search-filter-panel,
+.search-results-panel,
+.search-preview-panel,
+.metadata-filter-panel,
+.metadata-results-panel,
+.category-management-panel,
+.backup-management-panel,
+.export-management-panel,
+.settings-card,
+.settings-overview-panel,
+.backup-restore-panel,
+.trash-group,
+.template-manager-list,
+.template-preview-panel,
+.help-page-sidebar,
+.help-page-content,
+.help-context-panel {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Primary text on production work surfaces wraps; truncation is reserved for explicit metadata classes. */
+[data-space-budget-surface] :where(h1, h2, h3, h4, p, strong, label, li, dd, input, textarea, button),
+.operator-page :where(h1, h2, h3, h4, p, strong, label, li, dd, input, textarea, button),
+.project-detail-page :where(h2, h3, h4, p, strong),
+.templates-page :where(h1, h2, h3, p, strong),
+.workflow-page :where(h1, h2, h3, p, strong) {
+  overflow-wrap: anywhere;
+  hyphens: none;
+  text-overflow: clip;
+}
+
+/* Contact detail corrective rebuild: make the mixed content feed visually primary and bounded. */
+.contact-detail-page {
+  display: grid;
+  gap: 14px;
+}
+
+.contact-detail-page .contact-detail-header {
+  display: grid;
+  grid-template-columns: 56px 10px minmax(0, 1fr) auto;
+  align-items: start;
+  max-width: none;
+  padding: 16px;
+  border: 1px solid var(--app-border, #dedbd1);
+  border-radius: 0;
+  background: #eef4f5;
+  box-shadow: none;
+}
+
+.contact-detail-page .container-media-preview,
+.contact-detail-page .container-media-avatar {
+  min-width: 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 0;
+}
+
+.contact-detail-page .project-detail-color,
+.project-detail-page .project-detail-color,
+.project-list-color,
+.project-widget-color,
+.category-badge-swatch,
+.category-list-swatch,
+.timeline-group-dot,
+.shell-rail-brand-mark {
+  border-radius: 0 !important;
+}
+
+.contact-detail-page .project-detail-title-block,
+.contact-detail-page .project-detail-title-block h2,
+.contact-detail-page .project-detail-title-block p {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.contact-detail-page .project-detail-header h2 {
+  font-size: clamp(24px, 2.3vw, 34px);
+  line-height: 1.12;
+}
+
+.contact-detail-page .button-row,
+.contact-detail-page .project-primary-actions {
+  align-items: start;
+  justify-content: end;
+}
+
+.contact-detail-page .project-meta-grid {
+  max-width: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.contact-detail-workbench {
+  display: grid;
+  grid-template-areas:
+    "feed profile"
+    "feed context";
+  grid-template-columns: minmax(660px, 1fr) minmax(300px, 360px);
+  gap: 12px;
+  align-items: start;
+  max-width: 1500px;
+}
+
+.contact-profile-panel,
+.contact-content-feed,
+.contact-context-panel {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--app-border, #dedbd1);
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.contact-profile-panel {
+  grid-area: profile;
+}
+
+.contact-content-feed {
+  grid-area: feed;
+  min-width: min(100%, 640px);
+  max-width: none;
+}
+
+.contact-context-panel {
+  grid-area: context;
+}
+
+.contact-detail-workbench .container-tabs-panel,
+.contact-detail-workbench .contact-fields-editor,
+.contact-detail-workbench .related-projects-panel,
+.contact-detail-workbench .related-content-graph-panel,
+.contact-detail-workbench .follow-up-summary-card,
+.contact-detail-workbench .contact-timeline,
+.contact-detail-workbench .recent-activity-list,
+.contact-detail-workbench .container-tab-summary-cards,
+.contact-detail-workbench .task-quick-add,
+.contact-detail-workbench .note-editor,
+.contact-detail-workbench .note-create-button,
+.contact-detail-workbench .view-mode-empty-state,
+.contact-detail-workbench .universal-item-card,
+.contact-detail-workbench .item-feed-empty-state {
+  min-width: 0;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Secondary/admin routes: bound route dumps without letting maintenance dominate. */
+.metadata-page,
+.templates-page,
+.settings-layout,
+.trash-page,
+.workflow-page,
+.help-page,
+.inbox-page,
+.projects-page,
+.dashboard-page,
+.timeline-page,
+.calendar-page,
+.collections-page {
+  max-width: none;
+}
+
+.metadata-browser-layout,
+.template-manager-layout,
+.settings-layout,
+.help-page-grid,
+.collections-layout,
+.search-layout {
+  min-width: 0;
+  align-items: start;
+}
+
+.template-manager-layout {
+  grid-template-columns: minmax(560px, 1fr) minmax(320px, 380px);
+}
+
+.help-page-grid {
+  grid-template-columns: minmax(620px, 1fr) minmax(280px, 340px);
+}
+
+.workflow-page .settings-card,
+.workflow-page .panel-stack {
+  max-width: none;
+}
+
+/* Low-radius controls are allowed only where component semantics require a compact marker; main buttons stay rectangular. */
+.primary-button,
+.secondary-button,
+.danger-button,
+.icon-button,
+.compact-button,
+.ghost-icon-button,
+.top-search-submit,
+.template-action-row button,
+.search-page-form button,
+.timeline-filter-bar button,
+.calendar-filter-bar button {
+  border-radius: 0 !important;
+}
+
+@media (max-width: 1280px) {
+  .operator-workbench[data-operator-workbench-layout="primary-rail"],
+  .help-page-grid,
+  .template-manager-layout {
+    grid-template-columns: minmax(620px, 1fr) minmax(280px, 320px);
+  }
+
+  .operator-workbench[data-operator-workbench-layout="primary-two-rails"] {
+    grid-template-columns: minmax(620px, 1fr) minmax(280px, 320px);
+  }
+
+  .operator-workbench[data-operator-workbench-layout="primary-two-rails"] > :nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .contact-detail-workbench {
+    grid-template-columns: minmax(640px, 1fr) minmax(280px, 320px);
+  }
+}
+
+@media (max-width: 1120px) {
+  .operator-workbench,
+  .operator-workbench[data-operator-workbench-layout="primary-rail"],
+  .operator-workbench[data-operator-workbench-layout="primary-two-rails"],
+  .contact-detail-workbench,
+  .help-page-grid,
+  .template-manager-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-detail-workbench {
+    grid-template-areas:
+      "feed"
+      "profile"
+      "context";
+  }
+
+  .operator-panel-primary,
+  .contact-content-feed {
+    min-width: 0;
+  }
+
+  .contact-detail-page .contact-detail-header {
+    grid-template-columns: 48px 10px minmax(0, 1fr);
+  }
+
+  .contact-detail-page .contact-detail-header .button-row {
+    grid-column: 1 / -1;
+    justify-content: start;
+  }
+
+  .contact-detail-page .project-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}

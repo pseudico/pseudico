@@ -5,6 +5,12 @@ import {
   createWorkflowEditorSkeletonState,
   type WorkflowDefinitionSchema
 } from "@local-work-os/features/workflows/schema";
+import {
+  OperatorPage,
+  OperatorPageHeader,
+  OperatorPanel,
+  OperatorWorkbench
+} from "../components/OperatorPageFrame";
 
 const invalidExample = {
   kind: "local-work-os.workflow",
@@ -48,22 +54,24 @@ export function WorkflowsPage(): React.JSX.Element {
   });
 
   return (
-    <main className="page workflow-page" data-space-budget-surface="workflow-lab" aria-labelledby="workflows-title">
-      <section className="page-header">
-        <div>
-          <p className="eyebrow">Workflow lab — scaffold only</p>
-          <h1 id="workflows-title">Workflows</h1>
-          <p>
-            Internal pilot status: workflow services, validation, preview
-            models, run history, and loop guards exist for maintainers, but this
-            screen is not a primary-operator create, edit, run, or history
-            workflow loop yet.
-          </p>
-        </div>
+    <OperatorPage
+      className="page workflow-page"
+      kind="maintenance"
+      labelledBy="workflows-title"
+      routeId="workflows"
+    >
+      <OperatorPageHeader
+        eyebrow="Workflow lab — scaffold only"
+        id="workflows-title"
+        summary="Internal pilot status: workflow services, validation, preview models, run history, and loop guards exist for maintainers, but this screen is not a primary-operator create, edit, run, or history workflow loop yet."
+        title="Workflows"
+        actions={
         <span className="status-pill danger">Future / scaffold</span>
-      </section>
+        }
+      />
 
-      <section className="settings-card" aria-labelledby="workflow-pilot-status-title">
+      <OperatorWorkbench layout="single">
+      <OperatorPanel className="settings-card" role="primary">
         <div className="settings-card-header">
           <div>
             <h2 id="workflow-pilot-status-title">Not pilot-supported for daily automation</h2>
@@ -93,7 +101,7 @@ export function WorkflowsPage(): React.JSX.Element {
             </ul>
           </div>
         </div>
-      </section>
+      </OperatorPanel>
 
       <section className="panel-stack" aria-label="Workflow validation examples">
         <WorkflowEditorSkeleton state={invalidState} />
@@ -162,7 +170,8 @@ export function WorkflowsPage(): React.JSX.Element {
           </div>
         </div>
       </section>
-    </main>
+      </OperatorWorkbench>
+    </OperatorPage>
   );
 }
 
