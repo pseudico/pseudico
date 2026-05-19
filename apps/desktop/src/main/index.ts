@@ -24,10 +24,17 @@ app.whenReady().then(async () => {
     return;
   }
 
+  const pse240CaptureMode =
+    process.env.LOCAL_WORK_OS_CAPTURE_PSE240 === "1" ||
+    process.argv.includes("--pse240-capture");
+  if (pse240CaptureMode) {
+    console.log("[PSE-240 capture] mode detected");
+  }
+
   const createWindow = () => createWorkspaceWindow();
   const services = createDesktopIpcServices();
 
-  if (process.env.LOCAL_WORK_OS_CAPTURE_PSE240 === "1") {
+  if (pse240CaptureMode) {
     registerDesktopIpc(services);
     const window = createWindow();
 

@@ -8351,3 +8351,39 @@ Decisions made:
 Files changed: docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*; docs/session_log.md
 Open questions / risks: Env-gated capture harness remains QA-only; keep normal startup untouched.
 Next actions: Commit; open PR; update Linear/merge if allowed.
+
+## 2026-05-19T17:09:32.9167080+10:00
+Objective: Respond to screenshot review request for PSE-240 route areas.
+Decisions made:
+- Showed the final PSE-240 contact sheet plus full-size evidence paths.
+- Assessed cohesion across the captured production route family.
+Files changed: docs/session_log.md
+Open questions / risks: Cohesion assessment covers captured PSE-240 routes, not every secondary app surface.
+Next actions: Review screenshots visually; file optional polish follow-up only if desired.
+
+## 2026-05-19T17:15:46.3998246+10:00
+Objective: Start corrective pass for PSE-240 screenshot/UI failures.
+Decisions made:
+- Treat rounded panels, hidden text, and compressed content as functional defects.
+- Re-open route CSS/layout work from current PSE-240 evidence branch/worktree.
+Files changed: docs/session_log.md
+Open questions / risks: Need verify screenshots after patch, not rely on visual intent.
+Next actions: Inspect CSS; patch budgets; recapture evidence.
+
+## 2026-05-19 19:23 +10:00
+Objective: Correct PSE-240 functional UI regressions from screenshot review.
+Decisions made:
+- Forced option-10 target routes to square/no-pill surfaces and wrapping text.
+- Rebalanced project/workbench grids so content width wins before side panels.
+Files changed: apps/desktop/src/renderer/styles.css; apps/desktop/src/main/pse240Capture.ts; apps/desktop/src/main/index.ts; apps/desktop/tests/renderer/readabilityStyles.test.ts; docs/manual-qa/PSE-240-option-10-production-parity.md; docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*
+Open questions / risks: Native Electron capture needs ABI rebuild/restore around better-sqlite3.
+Next actions: Review final contact sheet; commit/push corrective branch; open PR if desired.
+
+## 2026-05-19 19:24 +10:00
+Objective: Validate final PSE-240 corrective screenshots and checks.
+Decisions made:
+- Kept final evidence on production routes at 1440x1000 and 1280x800.
+- Confirmed full test suite passes after ABI restore.
+Files changed: docs/session_log.md; docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*
+Open questions / risks: PR/review policy still determines merge timing.
+Next actions: Commit/push branch; open corrective PR; update Linear/GitHub if proceeding.

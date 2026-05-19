@@ -10630,3 +10630,405 @@ body {
     margin-left: 0;
   }
 }
+
+/* PSE-240 corrective functional pass.
+   The option-10 production surfaces must stay square, dense, and usable:
+   no pill/card rounding, no clipped primary text, and no narrow side panel
+   stealing budget from the actual work/feed content. */
+:root {
+  --option10-radius: 0;
+  --option10-content-min: 620px;
+  --option10-outline-width: 300px;
+  --option10-inspector-width: 340px;
+}
+
+.workspace-pinned-work-panel,
+.workspace-feed-panel,
+.workspace-today-panel,
+.workspace-project-health-panel,
+.workspace-maintenance-panel,
+.workspace-pinned-card,
+.workspace-feed-row,
+.workspace-task-row,
+.workspace-health-card,
+.planning-summary-panel,
+.today-preferences-panel,
+.daily-planner-editor,
+.daily-planner-lane-input textarea,
+.today-lane,
+.today-task-card,
+.today-selected-task-inspector,
+.project-detail-header-work-first,
+.project-work-card,
+.project-linked-context,
+.project-advanced-details,
+.project-outline-panel,
+.project-context-inspector-panel,
+.project-detail-workbench .project-content-section,
+.project-quick-action-row,
+.universal-item-card,
+.tab-summary-card,
+.tab-summary-counts div,
+.tab-summary-preview-button,
+.search-filter-panel,
+.search-results-panel,
+.search-preview-panel,
+.search-page-input,
+.search-result-card,
+.search-trust-summary article,
+.search-preview-body,
+.search-preview-metadata div,
+.search-preview-context,
+.search-result-card-why,
+.collection-create-form,
+.collection-task-form,
+.collections-results-panel,
+.collection-list-item,
+.timeline-filter-bar,
+.timeline-advanced-filters,
+.timeline-workload-summary,
+.timeline-group,
+.timeline-item-date,
+.timeline-item-card,
+.timeline-range-bar,
+.timeline-range-marker,
+.calendar-filter-bar,
+.month-calendar-day,
+.month-calendar-item,
+.calendar-schedule-day,
+.primary-button,
+.secondary-button,
+.icon-button,
+.compact-icon-button,
+.segmented-button,
+.top-search-submit,
+.search-control,
+.app-tab,
+.shell-today-status strong {
+  border-radius: var(--option10-radius) !important;
+}
+
+.workspace-page *,
+.today-page *,
+.project-detail-page *,
+.search-page *,
+.timeline-page *,
+.calendar-page *,
+.collections-page * {
+  border-radius: var(--option10-radius) !important;
+}
+
+.project-detail-page,
+.workspace-operator-surface,
+.today-page,
+.search-page,
+.timeline-page,
+.calendar-page,
+.collections-page {
+  --app-radius: var(--option10-radius);
+}
+
+.project-detail-header-work-first {
+  align-items: start;
+  min-height: 0;
+  padding: 14px;
+}
+
+.project-detail-title-block {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.project-detail-title-block h2,
+.project-detail-title-block p {
+  margin: 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.project-detail-header h2 {
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.project-detail-header p:last-child {
+  max-width: 980px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.project-status-strip {
+  align-self: end;
+  gap: 8px;
+}
+
+.project-status-strip span {
+  white-space: normal;
+}
+
+.project-work-loop-summary {
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+}
+
+.project-work-card {
+  min-height: 76px;
+}
+
+.project-work-card h3,
+.project-work-card p {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.project-detail-workbench {
+  grid-template-columns:
+    minmax(260px, var(--option10-outline-width))
+    minmax(var(--option10-content-min), 1fr)
+    minmax(300px, var(--option10-inspector-width));
+  align-items: start;
+}
+
+.project-outline-panel,
+.project-context-inspector-panel,
+.project-detail-workbench .project-content-section {
+  min-width: 0;
+  overflow: visible;
+}
+
+.project-outline-panel .panel-heading-actions > .muted-text {
+  display: none;
+}
+
+.project-outline-panel .panel-heading,
+.project-feed-heading .panel-heading {
+  min-width: 0;
+}
+
+.project-outline-panel .panel-heading h3,
+.project-feed-heading h3,
+.project-context-inspector-panel h3 {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.project-outline-panel .tab-summary-cards,
+.project-outline-panel .tab-summary-card-grid,
+.project-outline-panel .tab-summary-card,
+.project-outline-panel .tab-summary-card-open,
+.project-outline-panel .tab-summary-card-open span,
+.project-outline-panel .tab-summary-preview-button {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.project-outline-panel .tab-summary-card-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.project-outline-panel .tab-summary-card {
+  padding: 10px;
+  overflow: visible;
+}
+
+.project-outline-panel .tab-summary-card-open {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+.project-outline-panel .tab-summary-card-open strong {
+  font-size: 18px;
+}
+
+.project-outline-panel .tab-summary-card-open small,
+.project-outline-panel .tab-summary-preview-button span,
+.project-outline-panel .tab-summary-preview-button strong {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.project-outline-panel .tab-summary-counts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.project-outline-panel .tab-summary-preview-list {
+  gap: 6px;
+}
+
+.project-outline-panel .tab-summary-preview-button {
+  overflow: visible;
+}
+
+.project-detail-workbench .project-content-section {
+  min-width: 0;
+}
+
+.project-quick-action-row {
+  align-items: center;
+}
+
+.universal-item-card {
+  overflow: visible;
+}
+
+.universal-item-card-heading,
+.universal-item-card-heading strong,
+.universal-item-card p,
+.universal-item-card small,
+.item-card-body,
+.project-context-inspector-panel h3,
+.project-context-inspector-panel p,
+.project-inspector-budget-list dt,
+.project-inspector-budget-list dd {
+  display: block;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: initial;
+}
+
+.project-context-inspector-panel {
+  gap: 10px;
+}
+
+.project-context-inspector-panel p {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.project-inspector-budget-list {
+  gap: 8px;
+}
+
+.project-inspector-budget-list div {
+  border-radius: 0;
+}
+
+.workspace-pinned-card strong,
+.workspace-pinned-card span,
+.workspace-pinned-card small,
+.workspace-feed-row strong,
+.workspace-feed-row span,
+.workspace-task-row strong,
+.workspace-task-row span,
+.workspace-health-card strong,
+.workspace-health-card small,
+.today-task-title-button,
+.today-task-card-main p,
+.search-result-card-title,
+.search-result-card-title strong,
+.search-result-card-body,
+.search-result-card-why,
+.search-preview-panel h3,
+.search-preview-panel p,
+.timeline-item-title,
+.timeline-item-meta,
+.timeline-item-body,
+.timeline-item-date {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: initial;
+}
+
+.workspace-home-grid {
+  grid-template-columns: minmax(560px, 1fr) minmax(280px, 340px) minmax(220px, 280px);
+}
+
+.workspace-pinned-work-strip {
+  overflow-x: auto;
+}
+
+.workspace-maintenance-panel {
+  font-size: 12px;
+}
+
+.today-planning-workbench {
+  grid-template-columns: minmax(680px, 1fr) minmax(280px, 320px);
+}
+
+.today-lane-grid {
+  grid-template-columns: repeat(3, minmax(210px, 1fr));
+}
+
+.search-layout {
+  grid-template-columns: minmax(210px, 260px) minmax(560px, 1fr) minmax(290px, 340px);
+}
+
+.timeline-scale {
+  margin-left: 280px;
+}
+
+.timeline-list-item {
+  grid-template-columns: minmax(260px, 280px) minmax(0, 1fr);
+}
+
+@media (max-width: 1280px) {
+  .project-work-loop-summary {
+    grid-template-columns: repeat(4, minmax(145px, 1fr));
+  }
+
+  .project-detail-workbench {
+    grid-template-columns: minmax(620px, 1fr) minmax(280px, 320px);
+  }
+
+  .project-detail-workbench .project-content-section {
+    order: 1;
+  }
+
+  .project-context-inspector-panel {
+    order: 2;
+  }
+
+  .project-outline-panel {
+    order: 3;
+    grid-column: 1 / -1;
+  }
+
+  .workspace-home-grid {
+    grid-template-columns: minmax(520px, 1fr) minmax(270px, 330px);
+  }
+
+  .today-planning-workbench {
+    grid-template-columns: minmax(610px, 1fr) minmax(250px, 285px);
+  }
+
+  .today-lane-grid {
+    grid-template-columns: repeat(3, minmax(190px, 1fr));
+  }
+
+  .search-layout {
+    grid-template-columns: minmax(190px, 230px) minmax(500px, 1fr) minmax(250px, 290px);
+  }
+
+  .timeline-scale {
+    margin-left: 250px;
+  }
+
+  .timeline-list-item {
+    grid-template-columns: minmax(230px, 250px) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1120px) {
+  .project-detail-workbench,
+  .workspace-home-grid,
+  .today-planning-workbench,
+  .search-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .project-context-inspector-panel,
+  .today-selected-task-inspector {
+    position: static;
+  }
+}

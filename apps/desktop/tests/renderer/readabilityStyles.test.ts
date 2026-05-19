@@ -132,4 +132,18 @@ describe("primary-operator readability styles", () => {
     expect(styles).toContain('.workflow-page[data-space-budget-surface="workflow-lab"]');
   });
 
+  it("keeps PSE-240 option-10 production surfaces square and unclipped", () => {
+    expect(styles).toContain("PSE-240 corrective functional pass");
+    expect(styles).toContain("--option10-radius: 0");
+    expect(styles).toContain("border-radius: var(--option10-radius) !important");
+    expect(styles).toContain(".project-detail-workbench");
+    expect(styles).toContain("minmax(var(--option10-content-min), 1fr)");
+    expect(styles).toContain(".project-outline-panel .tab-summary-card-grid");
+    expect(styles).toContain("grid-template-columns: minmax(0, 1fr)");
+    expect(styles).toContain(".project-outline-panel .panel-heading-actions > .muted-text");
+    expect(styles).toContain("display: none");
+    expect(styles).toContain("-webkit-line-clamp: unset");
+    expect(styles).toContain("text-overflow: clip");
+  });
+
 });
