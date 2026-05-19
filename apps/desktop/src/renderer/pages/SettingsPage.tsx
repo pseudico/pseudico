@@ -1528,7 +1528,7 @@ export function SettingsPage({
       ? null
       : backups.find((backup) => backup.id === selectedRestoreBackupId) ?? null;
   return (
-    <section className="settings-layout">
+    <section className="settings-layout" data-space-budget-surface="maintenance-settings">
       <div className="page-heading">
         <p className="top-eyebrow">Settings</p>
         <h2>{t("settings.page.title")}</h2>

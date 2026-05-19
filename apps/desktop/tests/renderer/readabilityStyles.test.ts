@@ -118,4 +118,18 @@ describe("primary-operator readability styles", () => {
     expect(styles).toContain(".project-list-main");
     expect(styles).toContain("grid-template-columns: 14px minmax(320px, 1fr)");
   });
+
+  it("keeps contacts and maintenance above PSE-238 space budgets", () => {
+    expect(styles).toContain('[data-space-budget-surface="contact-detail"]');
+    expect(styles).toContain('.contact-detail-workbench[data-space-budget-surface="contact-workbench"]');
+    expect(styles).toContain("grid-template-columns: minmax(280px, 320px) minmax(620px, 1fr) minmax(300px, 360px)");
+    expect(styles).toContain(".contact-content-feed");
+    expect(styles).toContain("min-width: min(100%, 620px)");
+    expect(styles).toContain('.settings-layout[data-space-budget-surface="maintenance-settings"]');
+    expect(styles).toContain("grid-template-columns: minmax(220px, 280px) minmax(620px, 1fr)");
+    expect(styles).toContain('.trash-page[data-space-budget-surface="maintenance-trash"] .trash-row');
+    expect(styles).toContain("grid-template-columns: minmax(520px, 1fr) auto");
+    expect(styles).toContain('.workflow-page[data-space-budget-surface="workflow-lab"]');
+  });
+
 });

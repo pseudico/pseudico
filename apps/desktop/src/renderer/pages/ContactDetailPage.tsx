@@ -1548,11 +1548,12 @@ export function ContactDetailPage({
 
   return (
     <section
-      className={`project-detail-page${
+      className={`project-detail-page contact-detail-page${
         containerPreferences?.compactMode === true
           ? " container-preferences-compact"
           : ""
       }`}
+      data-space-budget-surface="contact-detail"
     >
       <Link className="text-link page-action-link" to="/contacts">
         <ArrowLeft size={16} aria-hidden="true" />
@@ -1636,204 +1637,230 @@ export function ContactDetailPage({
         </div>
       </dl>
 
-      <ContactFieldsEditor
-        disabled={savingField}
-        error={fieldError}
-        fields={fields.map(toContactFieldViewModel)}
-        onAddField={addContactField}
-        onUpdateField={updateContactField}
-      />
-
-      <RelatedProjectsPanel
-        availableProjects={availableProjects}
-        busy={relationshipBusy}
-        error={relationshipError}
-        relatedProjects={relatedProjectViewModels}
-        selectedProjectId={selectedProjectId}
-        onLinkProject={() => void linkSelectedProject()}
-        onSelectedProjectChange={setSelectedProjectId}
-        onUnlinkProject={(relationshipId) => void unlinkRelatedProject(relationshipId)}
-      />
-
-      {showSummaryFirst ? tabSummaryCards : null}
-
-      <RelatedContentGraphPanel
-        availableTargets={relationshipGraphTargets}
-        busy={relationshipBusy}
-        error={relationshipError}
-        graph={relationshipGraph as RelatedContentGraphViewModel | null}
-        relationFilter={relationshipGraphFilter}
-        selectedRelationType={selectedGraphRelationType}
-        selectedTargetKey={selectedGraphTargetKey}
-        onCreateRelationship={() => void linkSelectedGraphTarget()}
-        onOpenTarget={openRelationshipTarget}
-        onRelationFilterChange={(relationType) =>
-          setRelationshipGraphFilter(relationType)
-        }
-        onRemoveRelationship={(relationshipId) =>
-          void removeGraphRelationship(relationshipId)
-        }
-        onSelectedRelationTypeChange={setSelectedGraphRelationType}
-        onSelectedTargetChange={setSelectedGraphTargetKey}
-      />
-
-      <FollowUpSummaryCard
-        summary={
-          timeline?.followUpSummary ?? {
-            generatedAt: "",
-            nextDueTask: null,
-            openFollowUpCount: 0,
-            openFollowUps: [],
-            overdueTaskCount: 0
-          }
-        }
-      />
-
-      <ContactTimeline
-        entries={timeline?.entries ?? []}
-        error={timelineError}
-        filter={timelineFilter}
-        loading={timelineLoading}
-        onFilterChange={(filter) => {
-          setTimelineFilter(filter);
-          void refreshContactTimeline(contact.id, filter);
-        }}
-      />
-
-      <RecentActivityList
-        activity={activity}
-        emptyMessage="No contact activity recorded yet."
-      />
-
-      <ContainerTabsPanel
-        activeTabId={activeTabId}
-        busy={tabBusy}
-        error={tabError}
-        managedTabs={managedTabs}
-        tabs={tabs}
-        templates={tabTemplates}
-        onArchiveTab={(tabId) => void mutateContactTab(tabId, "archive")}
-        onCreateTab={createContactTab}
-        onCreateTabFromTemplate={(templateId) => void createContactTabFromTemplate(templateId)}
-        onDeleteTab={(tabId) => void deleteContactTab(tabId)}
-        onDuplicateTab={(tabId) => void mutateContactTab(tabId, "duplicate")}
-        onHideTab={(tabId) => void mutateContactTab(tabId, "hide")}
-        onRenameTab={renameContactTab}
-        onReorderTabs={(tabIds) => void reorderContactTabs(tabIds)}
-        onSelectTab={(tabId) => {
-          setActiveTabId(tabId);
-          setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
-        }}
-        onShowTab={(tabId) => void mutateContactTab(tabId, "show")}
-      />
-
-      {showSummaryFirst ? null : tabSummaryCards}
-
-      <section className="project-content-section" aria-label="Contact content">
-        <div className="panel-heading-actions">
-          <div className="panel-heading">
-            <Contact size={17} aria-hidden="true" />
-            <h3>Content feed</h3>
+      <section
+        className="contact-detail-workbench"
+        data-space-budget-surface="contact-workbench"
+        aria-label="Contact work container"
+      >
+        <aside className="contact-profile-panel" aria-label="Contact profile and relationships">
+          <div className="panel-heading-actions">
+            <div className="panel-heading">
+              <Contact size={17} aria-hidden="true" />
+              <h3>Profile and linked work</h3>
+            </div>
+            <p className="muted-text">Facts, related projects, and tabs stay readable as secondary context.</p>
           </div>
-          <ViewModeSwitcher
-            disabled={viewModeSaving}
-            value={viewMode}
-            onChange={(mode) => void changeContactViewMode(mode)}
+          <ContactFieldsEditor
+            disabled={savingField}
+            error={fieldError}
+            fields={fields.map(toContactFieldViewModel)}
+            onAddField={addContactField}
+            onUpdateField={updateContactField}
           />
-          <button
-            className="secondary-button compact-button"
-            disabled={itemsLoading}
-            type="button"
-            onClick={() => void refreshContactContent(contact.id)}
-          >
-            <RefreshCw size={16} aria-hidden="true" />
-            Refresh
-          </button>
-          <button
-            className="primary-button compact-button"
-            disabled={itemsLoading}
-            type="button"
-            onClick={openContactDefaultQuickAdd}
-          >
-            Quick Start ({formatQuickAddType(containerPreferences?.defaultQuickAddType)})
-          </button>
-        </div>
 
-        <TaskQuickAdd
-          contextLabel={contact.name}
-          disabled={savingTask || itemsLoading}
-          error={taskError}
-          onSubmit={createContactTask}
-        />
+          <RelatedProjectsPanel
+            availableProjects={availableProjects}
+            busy={relationshipBusy}
+            error={relationshipError}
+            relatedProjects={relatedProjectViewModels}
+            selectedProjectId={selectedProjectId}
+            onLinkProject={() => void linkSelectedProject()}
+            onSelectedProjectChange={setSelectedProjectId}
+            onUnlinkProject={(relationshipId) => void unlinkRelatedProject(relationshipId)}
+          />
 
-        {noteEditorOpen ? (
-          <NoteEditor
+          <ContainerTabsPanel
+            activeTabId={activeTabId}
+            busy={tabBusy}
+            error={tabError}
+            managedTabs={managedTabs}
+            tabs={tabs}
+            templates={tabTemplates}
+            onArchiveTab={(tabId) => void mutateContactTab(tabId, "archive")}
+            onCreateTab={createContactTab}
+            onCreateTabFromTemplate={(templateId) => void createContactTabFromTemplate(templateId)}
+            onDeleteTab={(tabId) => void deleteContactTab(tabId)}
+            onDuplicateTab={(tabId) => void mutateContactTab(tabId, "duplicate")}
+            onHideTab={(tabId) => void mutateContactTab(tabId, "hide")}
+            onRenameTab={renameContactTab}
+            onReorderTabs={(tabIds) => void reorderContactTabs(tabIds)}
+            onSelectTab={(tabId) => {
+              setActiveTabId(tabId);
+              setVisibleItemCount(CONTACT_FEED_PAGE_SIZE);
+            }}
+            onShowTab={(tabId) => void mutateContactTab(tabId, "show")}
+          />
+
+        </aside>
+
+          <section className="project-content-section contact-content-feed" aria-label="Contact mixed content feed">
+          <div className="panel-heading-actions">
+            <div className="panel-heading">
+              <Contact size={17} aria-hidden="true" />
+              <h3>Content feed</h3>
+            </div>
+            <ViewModeSwitcher
+              disabled={viewModeSaving}
+              value={viewMode}
+              onChange={(mode) => void changeContactViewMode(mode)}
+            />
+            <button
+              className="secondary-button compact-button"
+              disabled={itemsLoading}
+              type="button"
+              onClick={() => void refreshContactContent(contact.id)}
+            >
+              <RefreshCw size={16} aria-hidden="true" />
+              Refresh
+            </button>
+            <button
+              className="primary-button compact-button"
+              disabled={itemsLoading}
+              type="button"
+              onClick={openContactDefaultQuickAdd}
+            >
+              Quick Start ({formatQuickAddType(containerPreferences?.defaultQuickAddType)})
+            </button>
+          </div>
+
+          <TaskQuickAdd
             contextLabel={contact.name}
-            disabled={savingNote || itemsLoading}
-            draftKey={`local-work-os:note-draft:${contact.workspaceId}:${contact.id}:${activeTabId ?? "feed"}:new`}
-            error={noteErrorItemId === null ? noteError : null}
-            resetOnSubmit
-            submitLabel="Add note"
-            onCancel={() => {
-              setNoteEditorOpen(false);
-              setNoteError(null);
-              setNoteErrorItemId(null);
-            }}
-            wikilinkSuggestions={createContactWikilinkSuggestions(contact, projects, items)}
-            onSubmit={createContactNote}
+            disabled={savingTask || itemsLoading}
+            error={taskError}
+            onSubmit={createContactTask}
           />
-        ) : (
-          <button
-            className="secondary-button note-create-button"
-            disabled={itemsLoading}
-            type="button"
-            onClick={() => {
-              setNoteEditorOpen(true);
-              setNoteError(null);
-              setNoteErrorItemId(null);
-            }}
-          >
-            <StickyNote size={17} aria-hidden="true" />
-            New note
-          </button>
-        )}
 
-        {viewMode === "list" ? (
-          <ItemFeed
-            ariaLabel="Contact content items"
-            emptyDescription="Follow-up tasks and notes created for this contact will appear here with inline controls."
-            emptyTitle={
-              activeTab === null
-                ? "No contact content yet"
-                : `No content in ${activeTab.name} yet`
+          {noteEditorOpen ? (
+            <NoteEditor
+              contextLabel={contact.name}
+              disabled={savingNote || itemsLoading}
+              draftKey={`local-work-os:note-draft:${contact.workspaceId}:${contact.id}:${activeTabId ?? "feed"}:new`}
+              error={noteErrorItemId === null ? noteError : null}
+              resetOnSubmit
+              submitLabel="Add note"
+              onCancel={() => {
+                setNoteEditorOpen(false);
+                setNoteError(null);
+                setNoteErrorItemId(null);
+              }}
+              wikilinkSuggestions={createContactWikilinkSuggestions(contact, projects, items)}
+              onSubmit={createContactNote}
+            />
+          ) : (
+            <button
+              className="secondary-button note-create-button"
+              disabled={itemsLoading}
+              type="button"
+              onClick={() => {
+                setNoteEditorOpen(true);
+                setNoteError(null);
+                setNoteErrorItemId(null);
+              }}
+            >
+              <StickyNote size={17} aria-hidden="true" />
+              New note
+            </button>
+          )}
+
+          {viewMode === "list" ? (
+            <ItemFeed
+              ariaLabel="Contact content items"
+              emptyDescription="Follow-up tasks and notes created for this contact will appear here with inline controls."
+              emptyTitle={
+                activeTab === null
+                  ? "No contact content yet"
+                  : `No content in ${activeTab.name} yet`
+              }
+              error={itemError}
+              items={visibleItems}
+              loading={itemsLoading}
+              renderContent={renderItemContent}
+              onAction={handleItemAction}
+            />
+          ) : (
+            <DatedContactItemProjection
+              items={tabItems}
+              mode={viewMode}
+              title={viewMode === "timeline" ? "Contact timeline" : "Contact calendar"}
+            />
+          )}
+          {hasMoreItems ? (
+            <button
+              className="secondary-button load-more-button"
+              disabled={itemsLoading}
+              type="button"
+              onClick={() =>
+                setVisibleItemCount((current) =>
+                  Math.min(current + CONTACT_FEED_PAGE_SIZE, items.length)
+                )
+              }
+            >
+              Load more
+            </button>
+          ) : null}
+        </section>
+
+        <aside className="contact-context-panel" aria-label="Contact follow-up and activity context">
+          <div className="panel-heading-actions">
+            <div className="panel-heading">
+              <Contact size={17} aria-hidden="true" />
+              <h3>Follow-up context</h3>
+            </div>
+            <p className="muted-text">Next follow-up, relationship graph, timeline, and activity remain readable.</p>
+          </div>
+          {showSummaryFirst ? tabSummaryCards : null}
+
+          <RelatedContentGraphPanel
+            availableTargets={relationshipGraphTargets}
+            busy={relationshipBusy}
+            error={relationshipError}
+            graph={relationshipGraph as RelatedContentGraphViewModel | null}
+            relationFilter={relationshipGraphFilter}
+            selectedRelationType={selectedGraphRelationType}
+            selectedTargetKey={selectedGraphTargetKey}
+            onCreateRelationship={() => void linkSelectedGraphTarget()}
+            onOpenTarget={openRelationshipTarget}
+            onRelationFilterChange={(relationType) =>
+              setRelationshipGraphFilter(relationType)
             }
-            error={itemError}
-            items={visibleItems}
-            loading={itemsLoading}
-            renderContent={renderItemContent}
-            onAction={handleItemAction}
-          />
-        ) : (
-          <DatedContactItemProjection
-            items={tabItems}
-            mode={viewMode}
-            title={viewMode === "timeline" ? "Contact timeline" : "Contact calendar"}
-          />
-        )}
-        {hasMoreItems ? (
-          <button
-            className="secondary-button load-more-button"
-            disabled={itemsLoading}
-            type="button"
-            onClick={() =>
-              setVisibleItemCount((current) =>
-                Math.min(current + CONTACT_FEED_PAGE_SIZE, items.length)
-              )
+            onRemoveRelationship={(relationshipId) =>
+              void removeGraphRelationship(relationshipId)
             }
-          >
-            Load more
-          </button>
-        ) : null}
+            onSelectedRelationTypeChange={setSelectedGraphRelationType}
+            onSelectedTargetChange={setSelectedGraphTargetKey}
+          />
+
+          <FollowUpSummaryCard
+            summary={
+              timeline?.followUpSummary ?? {
+                generatedAt: "",
+                nextDueTask: null,
+                openFollowUpCount: 0,
+                openFollowUps: [],
+                overdueTaskCount: 0
+              }
+            }
+          />
+
+          <ContactTimeline
+            entries={timeline?.entries ?? []}
+            error={timelineError}
+            filter={timelineFilter}
+            loading={timelineLoading}
+            onFilterChange={(filter) => {
+              setTimelineFilter(filter);
+              void refreshContactTimeline(contact.id, filter);
+            }}
+          />
+
+          <RecentActivityList
+            activity={activity}
+            emptyMessage="No contact activity recorded yet."
+          />
+
+          {showSummaryFirst ? null : tabSummaryCards}
+
+        </aside>
       </section>
     </section>
   );

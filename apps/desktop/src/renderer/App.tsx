@@ -7,6 +7,7 @@ import { CalendarPage } from "./pages/CalendarPage";
 import { ContactsPage } from "./pages/ContactsPage";
 import { ContactDetailPage } from "./pages/ContactDetailPage";
 import { ContactLabelBrowserPage } from "./pages/ContactLabelBrowserPage";
+import { ContactMaintenanceSpaceBudgetFixturePage } from "./pages/ContactMaintenanceSpaceBudgetFixturePage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { HelpPage } from "./pages/HelpPage";
 import { InboxPage } from "./pages/InboxPage";
@@ -47,6 +48,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/project-tags" element={<ProjectTagBrowserPage />} />
         <Route path="/contacts" element={<ContactsPage />} />
         <Route path="/contact-labels" element={<ContactLabelBrowserPage />} />
+        <Route path="/contact-maintenance-space-budget-fixture" element={<ContactMaintenanceSpaceBudgetFixturePage />} />
         <Route path="/contacts/:contactId" element={<ContactDetailPage />} />
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/tags-categories" element={<TagsCategoriesPage />} />

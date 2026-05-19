@@ -153,7 +153,7 @@ export function TrashPage({
 
   if (currentWorkspace === null) {
     return (
-      <section className="content-page trash-page">
+      <section className="content-page trash-page" data-space-budget-surface="maintenance-trash">
         <PageHeader onRefresh={() => void refreshCurrentWorkspace(apiClient)} />
         <EmptyState
           icon={<Trash2 size={24} aria-hidden="true" />}
@@ -165,7 +165,7 @@ export function TrashPage({
   }
 
   return (
-    <section className="content-page trash-page">
+    <section className="content-page trash-page" data-space-budget-surface="maintenance-trash">
       <PageHeader onRefresh={() => void loadTrash()} />
 
       <div className="trash-toolbar" aria-label="Trash controls">
