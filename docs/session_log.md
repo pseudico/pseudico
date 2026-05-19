@@ -8236,3 +8236,12 @@ Decisions made:
 Files changed: apps/desktop/src/renderer/pages/*; apps/desktop/src/renderer/styles.css; apps/desktop/tests/renderer/*; docs/manual-qa/*; docs/session_log.md
 Open questions / risks: Fixture screenshots are deterministic production renderer evidence, not live workspace mutation.
 Next actions: Run full validation; prepare PR/Linear final update; reconcile merge.
+
+## 2026-05-19T13:05:00+10:00
+Objective: Open and reconcile PSE-238 PR for contact/maintenance space budgets.
+Decisions made:
+- Reused existing PR #219 for branch codex/pse-238-contacts-maintenance.
+- Kept PR ready-for-review while repository CI was still running.
+Files changed: docs/session_log.md
+Open questions / risks: CI completion and merge policy still pending.
+Next actions: wait for checks; update Linear; merge if allowed.
