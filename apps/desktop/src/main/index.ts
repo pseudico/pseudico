@@ -6,6 +6,7 @@ import { AutomaticBackupRunner } from "./services/backup/AutomaticBackupRunner";
 import { startConfiguredCaptureBridge } from "./services/capture/configuredCaptureBridge";
 import { createWorkspaceWindow } from "./workspaceWindow";
 import { runPse240Capture } from "./pse240Capture";
+import { runPse241FullAppCapture } from "./pse241Capture";
 
 app.whenReady().then(async () => {
   if (
@@ -27,19 +28,29 @@ app.whenReady().then(async () => {
   const pse240CaptureMode =
     process.env.LOCAL_WORK_OS_CAPTURE_PSE240 === "1" ||
     process.argv.includes("--pse240-capture");
+  const pse241CaptureMode =
+    process.env.LOCAL_WORK_OS_CAPTURE_PSE241 === "1" ||
+    process.argv.includes("--pse241-capture");
   if (pse240CaptureMode) {
     console.log("[PSE-240 capture] mode detected");
+  }
+  if (pse241CaptureMode) {
+    console.log("[PSE-241 capture] mode detected");
   }
 
   const createWindow = () => createWorkspaceWindow();
   const services = createDesktopIpcServices();
 
-  if (pse240CaptureMode) {
+  if (pse240CaptureMode || pse241CaptureMode) {
     registerDesktopIpc(services);
     const window = createWindow();
 
     try {
-      await runPse240Capture({ app, services, window });
+      if (pse241CaptureMode) {
+        await runPse241FullAppCapture({ app, services, window });
+      } else {
+        await runPse240Capture({ app, services, window });
+      }
     } catch (error) {
       console.error(error);
       process.exitCode = 1;

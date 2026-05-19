@@ -8405,3 +8405,27 @@ Decisions made:
 Files changed: apps/desktop/src/renderer/App.tsx; apps/desktop/src/renderer/pages/WelcomePage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/src/main/pse240Capture.ts; apps/desktop/tests/renderer/readabilityStyles.test.ts; docs/manual-qa/PSE-240-option-10-production-parity.md; docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*
 Open questions / risks: Capture still requires Electron/Node ABI rebuild cycle.
 Next actions: Commit/push; open PR; merge if allowed.
+- Timestamp: 2026-05-19 21:19:07 +10:00
+- Objective: Isolate PSE-241 implementation workspace from unrelated dirty checkout state.
+- Decisions made: Created worktree C:\tmp\pseudico-pse241 on codex/pse-241-full-app-ui-cohesion from origin/main.
+- Files changed: docs/session_log.md
+- Open questions / risks: Original checkout has unrelated dirty/untracked files that must remain excluded.
+- Next actions: Read required repo docs/evidence from clean worktree; post Linear plan.
+- Timestamp: 2026-05-19 21:20:47 +10:00
+- Objective: Complete required pre-coding context recovery and Linear planning.
+- Decisions made: Posted PSE-241 recursive plan; moved PSE-241 to In Progress; treat missing full-ui-review directory as evidence gap.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need implement truthful capture over actual production routes and avoid fixture-only evidence.
+- Next actions: Add route manifest/identity gate; add shared frame; migrate routes.
+- Timestamp: 2026-05-19 21:48:16 +10:00
+- Objective: Complete implementation and visual evidence pass for PSE-242 through PSE-247.
+- Decisions made: Added route manifest/identity capture, operator frame primitives, contact-detail layout, secondary route cohesion CSS, and final screenshot docs.
+- Files changed: apps/desktop/src/shared/productionRouteManifest.ts; apps/desktop/src/main/pse241Capture.ts; apps/desktop/src/renderer/components/OperatorPageFrame.tsx; apps/desktop/src/renderer/styles.css; docs/manual-qa/*PSE-24*.md
+- Open questions / risks: Remaining risks are P3 polish only; no P0/P1/P2 found in final screenshots.
+- Next actions: Run lint/test/build; publish PR; update Linear.
+- Timestamp: 2026-05-19 21:56:52 +10:00
+- Objective: Complete validation for PSE-241 full-app cohesion changes.
+- Decisions made: Rebuilt better-sqlite3 for Node ABI after Electron capture; full test suite passed after rerun.
+- Files changed: docs/session_log.md
+- Open questions / risks: Electron capture can switch native ABI; documented rebuild step in QA evidence.
+- Next actions: Commit/push branch; open PR; update Linear with final state.

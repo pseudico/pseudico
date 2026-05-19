@@ -13,6 +13,12 @@ import {
   HelpShortcutList,
   OnboardingChecklist
 } from "@local-work-os/ui";
+import {
+  OperatorPage,
+  OperatorPageHeader,
+  OperatorWorkbench,
+  OperatorPanel
+} from "../components/OperatorPageFrame";
 
 const helpShortcuts = [
   { label: "Command palette", value: "Ctrl/Cmd+K" },
@@ -37,24 +43,26 @@ export function HelpPage(): React.JSX.Element {
   }
 
   return (
-    <section className="help-page" aria-label="Local help center">
-      <div className="page-heading page-heading-actions">
-        <div>
-          <p className="top-eyebrow">Local help</p>
-          <h2>Help center and onboarding</h2>
-          <p>
-            Local Markdown guides, command references, onboarding steps, sample
-            work routines, and the Workflow Lab boundary. No network connection
-            or hosted account required.
-          </p>
-        </div>
+    <OperatorPage
+      className="help-page"
+      kind="secondary"
+      labelledBy="help-page-title"
+      routeId="help"
+    >
+      <OperatorPageHeader
+        eyebrow="Local help"
+        id="help-page-title"
+        summary="Local Markdown guides, command references, onboarding steps, sample work routines, and the Workflow Lab boundary. No network connection or hosted account required."
+        title="Help center and onboarding"
+        actions={
         <Link to="/workspace" className="secondary-button">
           Back to workspace
         </Link>
-      </div>
+        }
+      />
 
-      <div className="help-page-grid">
-        <aside className="help-page-sidebar">
+      <OperatorWorkbench className="help-page-grid" layout="primary-rail">
+        <OperatorPanel className="help-page-sidebar" role="rail">
           <HelpNavigation
             articles={helpArticles}
             selectedArticleId={selectedArticle.id}
@@ -65,9 +73,9 @@ export function HelpPage(): React.JSX.Element {
             items={onboardingChecklist}
             onOpenHelp={selectArticle}
           />
-        </aside>
+        </OperatorPanel>
 
-        <div className="help-page-content">
+        <OperatorPanel className="help-page-content" role="primary">
           <HelpArticleView
             article={selectedArticle}
             onOpenRoute={(route) => navigate(route)}
@@ -93,9 +101,9 @@ export function HelpPage(): React.JSX.Element {
           </section>
 
           <HelpShortcutList shortcuts={helpShortcuts} />
-        </div>
-      </div>
-    </section>
+        </OperatorPanel>
+      </OperatorWorkbench>
+    </OperatorPage>
   );
 }
 
