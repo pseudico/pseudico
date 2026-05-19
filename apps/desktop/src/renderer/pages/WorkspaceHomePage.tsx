@@ -10,6 +10,7 @@ import type {
   DashboardTaskWidgetItemSummary,
   DashboardViewModelSummary,
   DashboardWidgetDataSummary,
+  ContactSummary,
   LocalWorkOsApi,
   PinnedFavoriteTargetSummary,
   ProjectSummary,
@@ -27,6 +28,7 @@ type WorkspaceHomePageProps = {
   initialDashboard?: DashboardViewModelSummary | null;
   initialPinnedWork?: PinnedFavoriteTargetSummary[];
   initialProjects?: ProjectSummary[];
+  initialContacts?: ContactSummary[];
   initialWorkspace?: WorkspaceSummary | null;
 };
 
@@ -35,6 +37,7 @@ export function WorkspaceHomePage({
   initialDashboard,
   initialPinnedWork,
   initialProjects,
+  initialContacts,
   initialWorkspace
 }: WorkspaceHomePageProps = {}): React.JSX.Element {
   const { currentWorkspace: storedWorkspace, loading } = useWorkspaceStore();
@@ -46,6 +49,7 @@ export function WorkspaceHomePage({
     initialPinnedWork ?? []
   );
   const [projects, setProjects] = useState<ProjectSummary[]>(initialProjects ?? []);
+  const [contacts, setContacts] = useState<ContactSummary[]>(initialContacts ?? []);
   const [summaryError, setSummaryError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -61,7 +65,8 @@ export function WorkspaceHomePage({
       currentWorkspace === null ||
       initialDashboard !== undefined ||
       initialPinnedWork !== undefined ||
-      initialProjects !== undefined
+      initialProjects !== undefined ||
+      initialContacts !== undefined
     ) {
       return;
     }
@@ -72,10 +77,11 @@ export function WorkspaceHomePage({
     async function loadOperatorSummary(): Promise<void> {
       setSummaryError(null);
 
-      const [dashboardResult, pinnedResult, projectsResult] = await Promise.all([
+      const [dashboardResult, pinnedResult, projectsResult, contactsResult] = await Promise.all([
         apiClient.dashboard.getDefault({ workspaceId }),
         apiClient.navigation.listPinnedFavorites(workspaceId),
-        apiClient.projects.list({ workspaceId, includeArchived: false })
+        apiClient.projects.list({ workspaceId, includeArchived: false }),
+        apiClient.contacts.listContacts(workspaceId)
       ]);
 
       if (!active) {
@@ -95,6 +101,10 @@ export function WorkspaceHomePage({
       if (projectsResult.ok) {
         setProjects(projectsResult.data.filter((project) => project.archivedAt === null));
       }
+
+      if (contactsResult.ok) {
+        setContacts(contactsResult.data.filter((contact) => contact.archivedAt === null));
+      }
     }
 
     void loadOperatorSummary();
@@ -102,7 +112,7 @@ export function WorkspaceHomePage({
     return () => {
       active = false;
     };
-  }, [apiClient, currentWorkspace, initialDashboard, initialPinnedWork, initialProjects]);
+  }, [apiClient, currentWorkspace, initialDashboard, initialPinnedWork, initialProjects, initialContacts]);
 
   const favoriteWidgetItems = getFavorites(dashboard);
   const pinnedItems = pinnedWork.length > 0 ? pinnedWork : favoriteWidgetItems;
@@ -253,34 +263,43 @@ export function WorkspaceHomePage({
               </div>
             </aside>
 
-            <aside className="workspace-project-health-panel" aria-label="Project health summary">
+            <aside className="workspace-project-health-panel workspace-contacts-panel" aria-label="Active contacts and project signals">
               <div className="section-heading">
                 <div>
-                  <p className="top-eyebrow">Project health</p>
-                  <h3>Where attention is needed</h3>
+                  <p className="top-eyebrow">Active contacts</p>
+                  <h3>People and handoffs</h3>
                 </div>
-                <Link to="/dashboard" className="secondary-button compact-button">
-                  Dashboard
+                <Link to="/contacts" className="secondary-button compact-button">
+                  Contacts
                 </Link>
               </div>
               <div className="workspace-health-list">
-                {projectHealth.slice(0, 3).map((health) => (
-                  <Link key={health.projectId} to={`/projects/${health.projectId}`} className="workspace-health-card">
-                    <span className="project-list-color" style={{ backgroundColor: health.color ?? "#245c55" }} aria-hidden="true" />
+                {contacts.slice(0, 3).map((contact) => (
+                  <Link key={contact.id} to={`/contacts/${contact.id}`} className="workspace-health-card">
+                    <span className="project-list-color" style={{ backgroundColor: contact.color ?? "#2c6b8f" }} aria-hidden="true" />
                     <span>
-                      <strong>{health.name}</strong>
-                      <small>
-                        {health.status} · {health.openTaskCount} open · {health.overdueTaskCount} overdue
-                      </small>
+                      <strong>{contact.name}</strong>
+                      <small>{contact.status} - {contact.description ?? "No contact note recorded."}</small>
                     </span>
                   </Link>
                 ))}
-                {projectHealth.length === 0 ? (
+                {contacts.length === 0
+                  ? projectHealth.slice(0, 2).map((health) => (
+                      <Link key={health.projectId} to={`/projects/${health.projectId}`} className="workspace-health-card">
+                        <span className="project-list-color" style={{ backgroundColor: health.color ?? "#245c55" }} aria-hidden="true" />
+                        <span>
+                          <strong>{health.name}</strong>
+                          <small>{health.status} - {health.openTaskCount} open - {health.overdueTaskCount} overdue</small>
+                        </span>
+                      </Link>
+                    ))
+                  : null}
+                {contacts.length === 0 && projectHealth.length === 0 ? (
                   <div className="workspace-health-card">
                     <span className="project-list-color" aria-hidden="true" />
                     <span>
-                      <strong>No project health signals yet</strong>
-                      <small>Projects with tasks and activity will appear here.</small>
+                      <strong>No contact handoffs yet</strong>
+                      <small>Contacts and project signals will appear here without displacing daily work.</small>
                     </span>
                   </div>
                 ) : null}

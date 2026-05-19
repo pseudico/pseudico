@@ -1,10 +1,11 @@
-import { ArrowLeft, ArrowRight, Clock3, Command, Plus, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Clock3, Command, Plus, Search, Settings } from "lucide-react";
 import { t } from "@local-work-os/core";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useId, useRef, useState } from "react";
 import type { QuickAddContext } from "../components/QuickAddModal";
 import { getQuickAddContext } from "../shortcuts/appShortcuts";
 import { getRouteByPath } from "../routes";
+import { desktopApiClient } from "../api/desktopApiClient";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import type { NavigationRecentTargetSummary } from "../../preload/api";
 
@@ -32,6 +33,48 @@ export function TopBar({
   const route = getRouteByPath(location.pathname);
   const { currentWorkspace } = useWorkspaceStore();
   const [searchQuery, setSearchQuery] = useState("");
+  const [todayCount, setTodayCount] = useState<number | null>(null);
+
+
+
+  useEffect(() => {
+    if (currentWorkspace === null) {
+      setTodayCount(null);
+      return;
+    }
+
+    let active = true;
+    const workspaceId = currentWorkspace.id;
+
+    async function loadTodayCount(): Promise<void> {
+      try {
+        const result = await desktopApiClient.today.getViewModel({
+          workspaceId,
+          laneLimit: 1
+        });
+
+        if (!active) {
+          return;
+        }
+
+        setTodayCount(
+          result.ok
+            ? (result.data.laneSummaries?.dueToday.totalCount ?? result.data.dueToday.length)
+            : null
+        );
+      } catch {
+        if (active) {
+          setTodayCount(null);
+        }
+      }
+    }
+
+    void loadTodayCount();
+
+    return () => {
+      active = false;
+    };
+  }, [currentWorkspace]);
 
   useEffect(() => {
     if (location.pathname !== "/search") {
@@ -100,6 +143,11 @@ export function TopBar({
             Search
           </button>
         </form>
+        <Link to="/today" className="icon-button shell-today-status" aria-label="Open Today planning">
+          <CalendarDays size={16} aria-hidden="true" />
+          <span>Today</span>
+          <strong>{todayCount ?? "?"}</strong>
+        </Link>
         <button
           type="button"
           className="icon-button shell-quick-add-button"
@@ -125,6 +173,10 @@ export function TopBar({
           disabled={currentWorkspace === null}
           onNavigateRecent={onNavigateRecent}
         />
+        <Link to="/settings" className="icon-button shell-settings-button" aria-label="Open Settings">
+          <Settings size={16} aria-hidden="true" />
+          <span>Settings</span>
+        </Link>
         <div className="navigation-controls" aria-label={t("app.topBar.navigationHistory")}>
           <button
             type="button"

@@ -508,6 +508,14 @@ export function TodayPage({
     navigate(`/projects/${task.containerId}${sourceItemId}`);
   }
 
+  const selectedTask = viewModel === null
+    ? null
+    : [
+        ...viewModel.dueToday,
+        ...viewModel.tomorrowPreview,
+        ...viewModel.overdueBacklog
+      ][0] ?? null;
+
   if (currentWorkspace === null && initialViewModel === undefined) {
     return (
       <section className="today-page">
@@ -590,7 +598,8 @@ export function TodayPage({
         />
       )}
 
-      <div className="today-lane-grid">
+      <div className="today-planning-workbench">
+        <div className="today-lane-grid">
         <TodayLane
           description="Tasks due on the selected local day."
           emptyDescription="Due-today tasks will appear here once they exist."
@@ -647,8 +656,51 @@ export function TodayPage({
           onToggleComplete={toggleTaskComplete}
           onUnplanTask={unplanTask}
         />
+        </div>
+        <SelectedTaskInspector task={selectedTask} />
       </div>
     </section>
+  );
+}
+
+function SelectedTaskInspector({
+  task
+}: {
+  task: TodayTaskSummary | null;
+}): React.JSX.Element {
+  return (
+    <aside className="today-selected-task-inspector" aria-label="Selected task inspector">
+      <p className="top-eyebrow">Selected task</p>
+      {task === null ? (
+        <>
+          <h3>No task selected</h3>
+          <p>Choose a Today, Tomorrow, or Backlog row to inspect the next safe action.</p>
+        </>
+      ) : (
+        <>
+          <h3>{task.title}</h3>
+          <p>{task.body ?? "No note preview recorded yet."}</p>
+          <dl>
+            <div>
+              <dt>Project</dt>
+              <dd>{task.containerTitle}</dd>
+            </div>
+            <div>
+              <dt>Lane</dt>
+              <dd>{task.plannedLane ?? "Due date"}</dd>
+            </div>
+            <div>
+              <dt>Due</dt>
+              <dd>{task.dueAt?.slice(0, 10) ?? "No due date"}</dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd>{task.taskStatus}</dd>
+            </div>
+          </dl>
+        </>
+      )}
+    </aside>
   );
 }
 
