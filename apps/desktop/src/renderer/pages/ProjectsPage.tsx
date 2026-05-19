@@ -413,7 +413,7 @@ export function ProjectsPage({
   }
 
   return (
-    <section className="projects-page">
+    <section className="projects-page" data-space-budget-surface="projects-library">
       <div className="page-heading page-heading-actions">
         <div>
           <p className="top-eyebrow">Project containers</p>
@@ -451,6 +451,13 @@ export function ProjectsPage({
         </div>
         <ProjectForm submitting={creating} onSubmit={createProject} />
       </dialog>
+
+      <ProjectLibrarySummary
+        categories={categories}
+        groupingMode={libraryGrouping}
+        projects={projects}
+        visibilityFilter={visibilityFilter}
+      />
 
       <CreateFromTemplateDialog
         open={selectedTemplate !== null}
@@ -522,6 +529,9 @@ export function ProjectsPage({
             <option value="stale">Stale</option>
           </select>
         </label>
+        <Link to="/project-tags" className="secondary-button compact-button">
+          Open tag browser
+        </Link>
       </div>
 
       {visibilityFilter === "active" ? (
@@ -552,6 +562,7 @@ export function ProjectsPage({
           cloningProjectId={cloningProjectId}
           transitioningProjectId={transitioningProjectId}
           visibilityFilter={visibilityFilter}
+          categories={categories}
           onSaveTemplate={saveProjectAsTemplate}
           onClone={cloneProject}
           onLifecycle={(entry, action) => setPendingLifecycle({ project: entry, action })}
@@ -559,6 +570,109 @@ export function ProjectsPage({
         />
       </div>
     </section>
+  );
+}
+
+function ProjectLibrarySummary({
+  categories,
+  groupingMode,
+  projects,
+  visibilityFilter
+}: {
+  categories: CategorySummary[];
+  groupingMode: ProjectLibraryGroupingMode;
+  projects: ProjectSummary[];
+  visibilityFilter: ContainerVisibilityFilter;
+}): React.JSX.Element {
+  const active = projects.filter((project) => project.status === "active").length;
+  const waiting = projects.filter((project) => project.status === "waiting").length;
+  const completed = projects.filter((project) => project.status === "completed").length;
+  const favorites = projects.filter((project) => project.isFavorite).length;
+
+  return (
+    <section className="project-library-summary" aria-label="Project library readable summary">
+      <div className="project-library-summary-main">
+        <div>
+          <p className="top-eyebrow">Library scan</p>
+          <h3>Readable project browsing</h3>
+          <p>
+            Category/tag browsing stays secondary to full project names and next
+            actions. Columns scroll horizontally before shrinking below the
+            operator budget.
+          </p>
+        </div>
+        <dl className="workspace-summary-metrics">
+          <div>
+            <dt>{visibilityFilter === "archived" ? "Archived" : "Active"}</dt>
+            <dd>{active}</dd>
+          </div>
+          <div>
+            <dt>Waiting</dt>
+            <dd>{waiting}</dd>
+          </div>
+          <div>
+            <dt>Completed</dt>
+            <dd>{completed}</dd>
+          </div>
+          <div>
+            <dt>Pinned</dt>
+            <dd>{favorites}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div className="project-category-browser" aria-label="Category browser preview">
+        <ProjectCategoryColumn
+          count={projects.filter((project) => project.categoryId === null).length}
+          label="Uncategorized"
+          projects={projects.filter((project) => project.categoryId === null)}
+        />
+        {categories.map((category) => (
+          <ProjectCategoryColumn
+            key={category.id}
+            color={category.color}
+            count={projects.filter((project) => project.categoryId === category.id).length}
+            label={category.name}
+            projects={projects.filter((project) => project.categoryId === category.id)}
+          />
+        ))}
+      </div>
+      <p className="project-library-grouping-note">
+        Current library grouping: <strong>{groupingMode}</strong>. Use the tag
+        browser for cross-cutting tag drill-down without squeezing project names
+        into chips.
+      </p>
+    </section>
+  );
+}
+
+function ProjectCategoryColumn({
+  color,
+  count,
+  label,
+  projects
+}: {
+  color?: string;
+  count: number;
+  label: string;
+  projects: ProjectSummary[];
+}): React.JSX.Element {
+  return (
+    <article className="project-category-column" style={{ borderTopColor: color ?? "#8b8173" }}>
+      <header>
+        <strong>{label}</strong>
+        <span>{count}</span>
+      </header>
+      {projects.slice(0, 3).map((project) => (
+        <Link key={project.id} to={`/projects/${project.id}`} className="project-category-card">
+          <strong>{project.name}</strong>
+          <span>{project.description ?? "No next action recorded."}</span>
+        </Link>
+      ))}
+      {projects.length === 0 ? (
+        <p>No matching projects yet.</p>
+      ) : null}
+    </article>
   );
 }
 
@@ -585,6 +699,7 @@ function ProjectsEmptyState({
 function GroupedProjectList({
   groupingView,
   projects,
+  categories,
   savingTemplateId,
   cloningProjectId,
   transitioningProjectId,
@@ -596,6 +711,7 @@ function GroupedProjectList({
 }: {
   groupingView: ContainerGroupingViewModelSummary | null;
   projects: ProjectSummary[];
+  categories: CategorySummary[];
   savingTemplateId: string | null;
   cloningProjectId: string | null;
   transitioningProjectId: string | null;
@@ -605,6 +721,7 @@ function GroupedProjectList({
   onLifecycle: (project: ProjectSummary, action: ProjectLifecycleAction) => void;
   onToggleGroup: (groupKey: string) => void;
 }): React.JSX.Element {
+  const categoryNameById = new Map(categories.map((category) => [category.id, category.name]));
   const groups =
     groupingView?.groups.map((group) => ({
       key: group.key,
@@ -647,6 +764,11 @@ function GroupedProjectList({
                 <ProjectListRow
                   key={`${group.key}:${project.id}`}
                   project={project}
+                  categoryName={
+                    project.categoryId === null
+                      ? "Uncategorized"
+                      : categoryNameById.get(project.categoryId) ?? "Category"
+                  }
                   savingTemplate={savingTemplateId === project.id}
                   cloning={cloningProjectId === project.id}
                   transitioning={transitioningProjectId === project.id}
@@ -666,6 +788,7 @@ function GroupedProjectList({
 
 function ProjectListRow({
   project,
+  categoryName,
   savingTemplate,
   cloning,
   transitioning,
@@ -675,6 +798,7 @@ function ProjectListRow({
   onLifecycle
 }: {
   project: ProjectSummary;
+  categoryName: string;
   savingTemplate: boolean;
   cloning: boolean;
   transitioning: boolean;
@@ -706,12 +830,14 @@ function ProjectListRow({
           />
           <span>
             <strong>{project.name}</strong>
-            <span>{project.description ?? "No description"}</span>
+            <span>{project.description ?? "No next action or description recorded yet."}</span>
           </span>
         </Link>
         <span className="project-list-meta">
           {project.isFavorite ? <Star size={16} aria-label="Pinned" /> : null}
           <span>{project.status}</span>
+          <span>{categoryName}</span>
+          <span>Updated {project.updatedAt.slice(0, 10)}</span>
           {visibilityFilter === "archived" ? (
             <button
               type="button"

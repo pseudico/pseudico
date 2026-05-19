@@ -1474,6 +1474,8 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Projects");
     expect(html).toContain("No projects yet");
     expect(html).toContain("Create project");
+    expect(html).toContain("Readable project browsing");
+    expect(html).toContain("Open tag browser");
     expect(html).toContain("Library grouping");
     expect(html).toContain("Status");
   });

@@ -417,7 +417,7 @@ export function DashboardPage({
   );
 
   return (
-    <section className="dashboard-page">
+    <section className="dashboard-page" data-space-budget-surface="dashboard-work-loop">
       <div className="page-heading page-heading-actions">
         <div>
           <p className="top-eyebrow">Overview</p>
@@ -468,6 +468,15 @@ export function DashboardPage({
         <p className="form-message">{printMessage}</p>
       )}
 
+      <DashboardOperatorSummary
+        favorites={getFavoriteWidgetItems(orderedWidgets)}
+        projectHealth={getProjectHealthWidgetItems(orderedWidgets)}
+        recentActivity={getActivityWidgetItems(orderedWidgets)}
+        todayTasks={getTaskWidgetItems(orderedWidgets, "today")}
+        overdueTasks={getTaskWidgetItems(orderedWidgets, "overdue")}
+        upcomingTasks={getTaskWidgetItems(orderedWidgets, "upcoming")}
+      />
+
       {editMode ? (
         <DashboardEditorPanel
           busy={widgetMutationBusy}
@@ -500,6 +509,84 @@ export function DashboardPage({
             onSnoozeTask={snoozeTask}
           />
         ))}
+      </div>
+    </section>
+  );
+}
+
+type DashboardOperatorSummaryProps = {
+  todayTasks: DashboardTaskWidgetItem[];
+  overdueTasks: DashboardTaskWidgetItem[];
+  upcomingTasks: DashboardTaskWidgetItem[];
+  favorites: DashboardFavoriteWidgetItem[];
+  projectHealth: ProjectHealthViewModel[];
+  recentActivity: DashboardActivityWidgetItem[];
+};
+
+function DashboardOperatorSummary({
+  todayTasks,
+  overdueTasks,
+  upcomingTasks,
+  favorites,
+  projectHealth,
+  recentActivity
+}: DashboardOperatorSummaryProps): React.JSX.Element {
+  const riskProjects = projectHealth.filter(
+    (project) => project.overdueTaskCount > 0 || project.isStale || project.waitingTaskCount > 0
+  );
+
+  return (
+    <section className="dashboard-operator-summary" aria-label="Dashboard work-loop summary">
+      <div className="dashboard-operator-primary">
+        <div className="section-heading">
+          <div>
+            <p className="top-eyebrow">Daily work first</p>
+            <h3>Actionable overview</h3>
+          </div>
+        </div>
+        <dl className="workspace-summary-metrics">
+          <div>
+            <dt>Today</dt>
+            <dd>{todayTasks.length}</dd>
+          </div>
+          <div data-dashboard-risk={overdueTasks.length > 0 ? "true" : "false"}>
+            <dt>Overdue</dt>
+            <dd>{overdueTasks.length}</dd>
+          </div>
+          <div>
+            <dt>Upcoming</dt>
+            <dd>{upcomingTasks.length}</dd>
+          </div>
+          <div>
+            <dt>Health risks</dt>
+            <dd>{riskProjects.length}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div className="dashboard-operator-list">
+        <strong>Pinned/recent launch points</strong>
+        {favorites.slice(0, 3).map((favorite) => (
+          <span key={`${favorite.targetType}:${favorite.targetId}`}>
+            {favorite.title} · {favorite.subtitle}
+          </span>
+        ))}
+        {favorites.length === 0 ? <span>No pinned work yet.</span> : null}
+      </div>
+
+      <div className="dashboard-operator-list">
+        <strong>Recent movement</strong>
+        {recentActivity.slice(0, 3).map((activity) => (
+          <span key={activity.activityId}>
+            {activity.description} · {activity.createdAt.slice(0, 10)}
+          </span>
+        ))}
+        {recentActivity.length === 0 ? <span>No recent activity in this dashboard window.</span> : null}
+      </div>
+
+      <div className="dashboard-operator-secondary">
+        <strong>Maintenance stays secondary</strong>
+        <span>Edit layout, print/PDF, web widgets, and troubleshooting tools remain available without replacing Today, pinned work, and project health as the primary scan.</span>
       </div>
     </section>
   );

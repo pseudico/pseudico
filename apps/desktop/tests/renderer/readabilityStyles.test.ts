@@ -102,4 +102,20 @@ describe("primary-operator readability styles", () => {
     expect(styles).toContain(".pipeline-stage-board,");
     expect(styles).toContain("grid-auto-columns: minmax(280px, 320px)");
   });
+
+  it("keeps workspace, dashboard, and projects launch surfaces above PSE-237 budgets", () => {
+    expect(styles).toContain("[data-space-budget-surface=\"workspace-home\"]");
+    expect(styles).toContain(".workspace-pinned-work-strip");
+    expect(styles).toContain("grid-auto-columns: minmax(260px, 320px)");
+    expect(styles).toContain(".workspace-home-grid");
+    expect(styles).toContain("grid-template-columns: minmax(520px, 1fr) minmax(300px, 360px) minmax(260px, 320px)");
+    expect(styles).toContain("[data-space-budget-surface=\"dashboard-work-loop\"]");
+    expect(styles).toContain(".dashboard-operator-summary");
+    expect(styles).toContain("grid-template-columns: minmax(420px, 1.2fr) minmax(260px, 0.8fr) minmax(260px, 0.8fr) minmax(240px, 0.7fr)");
+    expect(styles).toContain("[data-space-budget-surface=\"projects-library\"]");
+    expect(styles).toContain(".project-category-browser");
+    expect(styles).toContain("grid-auto-columns: minmax(240px, 300px)");
+    expect(styles).toContain(".project-list-main");
+    expect(styles).toContain("grid-template-columns: 14px minmax(320px, 1fr)");
+  });
 });

@@ -13,6 +13,8 @@ describe("Dashboard renderer page", () => {
     );
 
     expect(html).toContain("Dashboard");
+    expect(html).toContain("Daily work first");
+    expect(html).toContain("Maintenance stays secondary");
     expect(html).toContain("Today");
     expect(html).toContain("Overdue");
     expect(html).toContain("Upcoming");

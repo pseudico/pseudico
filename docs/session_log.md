@@ -8205,3 +8205,16 @@ Next actions: Review diff; commit/push; open/update PR and reconcile checks.
 - Files changed: docs/manual-qa/PSE-236-planning-space-budget.md; docs/manual-qa/screenshots/PSE-236-planning/*; docs/session_log.md
 - Open questions / risks: Need full repo validation, PR, CI/merge reconciliation.
 - Next actions: Run standard checks; commit/push; open/update PR.
+
+## 2026-05-19T11:44:00.0862044+10:00
+- Objective: Post PSE-237 implementation plan and enter scoped branch work.
+- Decisions made: Use isolated worktree C:\tmp\Pseudico-pse-237 from origin/main; keep PSE-237 renderer/UI-only.
+- Files changed: docs/session_log.md
+- Open questions / risks: Required ui-redesign docs are local-only/untracked in primary checkout, not origin/main.
+- Next actions: Implement home/dashboard/projects budgets; add tests; capture evidence.
+## 2026-05-19T12:06:46.8971334+10:00
+- Objective: Complete PSE-237 implementation, tests, and manual evidence.
+- Decisions made: Keep changes renderer/UI-only; add deterministic production fixture and 1280x800 screenshots for space-budget QA.
+- Files changed: apps/desktop/src/renderer/*; apps/desktop/tests/renderer/*; docs/manual-qa/PSE-237-home-dashboard-projects-space-budget.md; docs/session_log.md
+- Open questions / risks: CI/PR merge policy still to reconcile after push.
+- Next actions: Commit; push; open PR and update Linear.
