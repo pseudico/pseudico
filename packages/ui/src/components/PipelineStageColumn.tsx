@@ -88,6 +88,9 @@ export function PipelineStageColumn({
               }}
             >
               <strong>{card.title}</strong>
+              <span className="pipeline-card-meta">
+                {card.status === "done" ? "Done" : "Open"} · {stage.title}
+              </span>
               {card.body === undefined || card.body === null || card.body.length === 0 ? null : (
                 <p>{card.body}</p>
               )}

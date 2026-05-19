@@ -254,7 +254,7 @@ function CalendarItemStack({
           >
             <span className="month-calendar-item-title">{item.title}</span>
             <span className="month-calendar-item-meta">
-              {item.kind === "list_item" ? "List item" : "Task"}
+              {item.kind === "list_item" ? "List item" : item.kind === "calendar_event" ? "Event" : "Task"}
               {" · "}
               {item.containerName}
               {item.categoryName === null ? "" : ` · ${item.categoryName}`}

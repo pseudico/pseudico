@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   color: #262624;
   background: #f6f5f0;
   font-family:
@@ -8819,5 +8819,364 @@ textarea {
 
   .shell-command-search {
     min-width: 0;
+  }
+}
+
+/* PSE-236 planning space-budget pass.
+   Timeline bars show date/status/category; full titles live in row labels and selected detail.
+   Calendar cells use compact counts/dots with a readable agenda fallback.
+   Pipeline/Kanban columns scroll horizontally before cards shrink below budget. */
+.timeline-view[data-space-budget-surface="timeline-planning"] {
+  --timeline-label-width: 330px;
+  --timeline-day-min-width: 58px;
+  --timeline-track-min-width: max(620px, calc(var(--timeline-scale-columns, 7) * var(--timeline-day-min-width)));
+}
+
+.timeline-planning-layout,
+.calendar-planning-layout {
+  display: grid;
+  grid-template-columns: minmax(620px, 1fr) minmax(320px, 360px);
+  gap: 16px;
+  align-items: start;
+}
+
+.timeline-planning-main,
+.calendar-planning-main {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.timeline-scale {
+  min-width: calc(var(--timeline-label-width) + var(--timeline-track-min-width));
+  margin-left: 0;
+  padding-left: var(--timeline-label-width);
+}
+
+.timeline-list {
+  gap: 12px;
+}
+
+.timeline-list-item {
+  display: grid;
+  min-width: calc(var(--timeline-label-width) + var(--timeline-track-min-width));
+  grid-template-columns: minmax(300px, var(--timeline-label-width)) minmax(var(--timeline-track-min-width), 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.timeline-row-label {
+  display: grid;
+  min-height: 86px;
+  gap: 6px;
+  align-content: center;
+  border: 1px solid var(--app-border, #dedbd1);
+  border-radius: 14px;
+  background: var(--app-surface-strong, #ffffff);
+  color: inherit;
+  cursor: pointer;
+  padding: 12px;
+  text-align: left;
+}
+
+.timeline-row-label[aria-pressed="true"] {
+  border-color: var(--app-accent, #245c55);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-accent, #245c55) 14%, transparent);
+}
+
+.timeline-row-label .timeline-item-title,
+.timeline-selected-panel h3,
+.calendar-agenda-item strong,
+.pipeline-card strong,
+.kanban-card-title-row strong {
+  overflow-wrap: anywhere;
+  hyphens: none;
+  line-height: 1.3;
+}
+
+.timeline-row-label .timeline-item-title {
+  display: block;
+  overflow: visible;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.timeline-row-label .timeline-item-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--app-text-muted, #6d6a62);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.timeline-item-card {
+  min-height: 86px;
+  overflow: visible;
+  background: linear-gradient(180deg, #fffdf7, #fffaf0);
+}
+
+.timeline-range-bar,
+.timeline-range-marker {
+  position: absolute;
+  top: 50%;
+  left: var(--timeline-range-left, 0%);
+  z-index: 0;
+  height: 34px;
+  min-width: 86px;
+  width: max(86px, var(--timeline-range-width, 8%));
+  margin: 0;
+  transform: translateY(-50%);
+  background: var(--timeline-range-color, var(--accent));
+  color: #fff;
+  opacity: 0.9;
+}
+
+.timeline-range-bar {
+  display: flex;
+  align-items: center;
+  border-top-left-radius: var(--timeline-range-radius-left, 999px);
+  border-bottom-left-radius: var(--timeline-range-radius-left, 999px);
+  border-top-right-radius: var(--timeline-range-radius-right, 999px);
+  border-bottom-right-radius: var(--timeline-range-radius-right, 999px);
+  padding: 0 10px;
+}
+
+.timeline-range-marker {
+  display: grid;
+  place-items: center;
+  width: 86px;
+  border: 2px solid var(--timeline-range-color, var(--accent));
+  border-radius: 999px;
+  background: var(--timeline-range-color, var(--accent));
+}
+
+.timeline-range-label,
+.timeline-range-fallback {
+  display: block;
+  overflow: hidden;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.timeline-selected-panel,
+.calendar-agenda-panel,
+.planning-fixture-panel {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--app-border, #dedbd1);
+  border-radius: 18px;
+  background: var(--app-surface-strong, #ffffff);
+  padding: 16px;
+}
+
+.timeline-selected-panel {
+  position: sticky;
+  top: 16px;
+}
+
+.timeline-selected-panel h3,
+.calendar-agenda-panel h3,
+.planning-fixture-panel h3 {
+  margin: 0;
+}
+
+.timeline-selected-panel p,
+.calendar-agenda-panel p {
+  margin: 0;
+  color: var(--app-text-muted, #6d6a62);
+  line-height: 1.45;
+}
+
+.timeline-selected-panel dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.timeline-selected-panel dl div {
+  display: grid;
+  gap: 2px;
+}
+
+.timeline-selected-panel dt {
+  color: var(--app-text-muted, #6d6a62);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.timeline-selected-panel dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-weight: 800;
+}
+
+.month-calendar-day-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--app-text-muted, #6d6a62);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.month-calendar-event-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.month-calendar-event-dots i,
+.month-calendar-item-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--app-accent, #245c55);
+}
+
+.month-calendar-item {
+  grid-template-columns: 8px minmax(0, 1fr);
+  align-items: start;
+  min-height: 36px;
+}
+
+.month-calendar-item-title,
+.month-calendar-item-meta {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.month-calendar-item-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.25;
+}
+
+.month-calendar-item-meta {
+  grid-column: 2;
+}
+
+.month-calendar-more {
+  color: var(--app-text-muted, #6d6a62);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.calendar-agenda-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calendar-agenda-item {
+  display: grid;
+  width: 100%;
+  min-height: 72px;
+  gap: 4px;
+  border: 1px solid var(--app-border, #dedbd1);
+  border-radius: 14px;
+  background: var(--app-surface, #fffdf7);
+  color: inherit;
+  cursor: pointer;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.calendar-agenda-kind,
+.calendar-agenda-meta,
+.calendar-agenda-body {
+  color: var(--app-text-muted, #6d6a62);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.calendar-agenda-body {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: 700;
+}
+
+.calendar-week-grid {
+  grid-template-columns: repeat(7, minmax(180px, 1fr));
+  min-width: 1260px;
+}
+
+.calendar-day-view .calendar-schedule-day {
+  max-width: 680px;
+}
+
+.pipeline-stage-board,
+.kanban-board {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(280px, 320px);
+  grid-template-columns: none;
+  align-items: start;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.pipeline-stage-column,
+.kanban-column {
+  min-width: 280px;
+}
+
+.pipeline-card,
+.kanban-card {
+  min-height: 72px;
+}
+
+.pipeline-card-meta {
+  color: var(--app-text-muted, #6d6a62);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pipeline-card p,
+.kanban-card p {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.35;
+}
+
+.planning-space-budget-fixture-page {
+  display: grid;
+  gap: 18px;
+}
+
+.planning-pipeline-grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (max-width: 1280px) {
+  .timeline-planning-layout,
+  .calendar-planning-layout {
+    grid-template-columns: minmax(620px, 1fr);
+  }
+
+  .timeline-selected-panel,
+  .calendar-agenda-panel {
+    position: static;
+  }
+
+  .month-calendar-items {
+    display: none;
   }
 }

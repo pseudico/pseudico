@@ -29,7 +29,8 @@ const expectedRoutePaths = [
   "/settings",
   "/trash",
   "/space-budget-primitives",
-  "/search-collections-space-budget-fixture"
+  "/search-collections-space-budget-fixture",
+  "/planning-space-budget-fixture"
 ];
 
 describe("desktop shell routes", () => {
@@ -87,6 +88,9 @@ describe("desktop shell routes", () => {
     );
     expect(navRoutes.map((route) => route.path)).not.toContain(
       "/search-collections-space-budget-fixture"
+    );
+    expect(navRoutes.map((route) => route.path)).not.toContain(
+      "/planning-space-budget-fixture"
     );
   });
 

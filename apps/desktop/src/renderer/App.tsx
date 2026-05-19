@@ -12,6 +12,7 @@ import { HelpPage } from "./pages/HelpPage";
 import { InboxPage } from "./pages/InboxPage";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
 import { ProjectDetailSpaceBudgetFixturePage } from "./pages/ProjectDetailSpaceBudgetFixturePage";
+import { PlanningSpaceBudgetFixturePage } from "./pages/PlanningSpaceBudgetFixturePage";
 import { ProjectTagBrowserPage } from "./pages/ProjectTagBrowserPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { SearchPage } from "./pages/SearchPage";
@@ -54,6 +55,7 @@ export function AppRoutes(): React.JSX.Element {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/timeline" element={<TimelinePage />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/planning-space-budget-fixture" element={<PlanningSpaceBudgetFixturePage />} />
         <Route path="/workflows" element={<WorkflowsPage />} />
         <Route path="/help" element={<HelpPage />} />
         <Route path="/settings" element={<SettingsPage />} />
