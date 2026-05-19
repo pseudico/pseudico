@@ -110,7 +110,7 @@ export function WelcomePage({
   const createReady = pathReady && workspaceName.trim().length > 0;
 
   return (
-    <main className="welcome-screen">
+    <section className="welcome-screen" data-space-budget-surface="workspace-entry">
       <section className="welcome-content">
         <div className="welcome-copy">
           <p className="top-eyebrow">Local-only desktop workspace</p>
@@ -268,7 +268,7 @@ export function WelcomePage({
           </dl>
         </div>
       </section>
-    </main>
+    </section>
   );
 }
 
