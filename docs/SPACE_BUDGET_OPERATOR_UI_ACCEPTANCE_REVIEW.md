@@ -123,3 +123,17 @@ All listed screenshots were captured from production Electron/production-built r
 PSE-231 through PSE-238 collectively move Pseudico from a functional/developer-feeling UI toward an operator-readable Local Work OS. The primary SBUX standard is met: full task/project/contact/note/file/link/search/timeline meaning is no longer forced into tiny boxes, and 1280x800 behavior generally changes pattern before primary text becomes unreadable.
 
 **Verdict:** pilot acceptable with caveats and ready for the next visual-identity pass. Do not claim public release or nontechnical operator handoff from this review alone.
+
+## 11. PSE-240 corrective option-10 parity addendum
+
+PSE-240 corrected the main caveat from this PSE-239 gate: the app no longer only proves the abstract space-budget rules. The five primary production routes now have actual production-route screenshots against the option-10 hard visual/layout baselines:
+
+- `docs/manual-qa/PSE-240-option-10-production-parity.md`
+- `docs/manual-qa/screenshots/PSE-240-option-10-production-parity/workspace-home-1440x1000.png`
+- `docs/manual-qa/screenshots/PSE-240-option-10-production-parity/today-planning-1440x1000.png`
+- `docs/manual-qa/screenshots/PSE-240-option-10-production-parity/project-detail-1440x1000.png`
+- `docs/manual-qa/screenshots/PSE-240-option-10-production-parity/search-collections-1440x1000.png`
+- `docs/manual-qa/screenshots/PSE-240-option-10-production-parity/timeline-calendar-1440x1000.png`
+- Matching 1280x800 screenshots for all five surfaces in the same directory.
+
+**Updated UI verdict after PSE-240:** option-10 production-route parity is acceptable within implementation tolerance for the scoped route family, while retaining the earlier SBUX legibility budgets and local-only constraints. This still does not claim public release, signed installer readiness, cloud sync, account/team behavior, or nontechnical handoff readiness.

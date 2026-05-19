@@ -8302,3 +8302,52 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: GitHub CI is in progress; mergeability not yet confirmed.
 Next actions: amend/push log; monitor checks; update Linear and merge if allowed.
+
+## 2026-05-19T15:18:46.3070771+10:00
+Objective: Establish clean PSE-240 worktree from merged SBUX baseline.
+Decisions made:
+- Created C:\tmp\Pseudico-PSE240 on codex/pse-240-option10-production-parity from origin/main.
+- Original checkout has unrelated dirty/untracked files; keep PSE-240 work isolated.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need compare production screenshots to option-10 targets before coding.
+Next actions: Read required docs/code; post Linear plan; implement route parity.
+
+## 2026-05-19T15:22:56.0931879+10:00
+Objective: Complete required context recovery and Linear planning for PSE-240.
+Decisions made:
+- PSE-240 is In Progress; plan posted with option-10 screenshots as hard baselines.
+- PSE-240 work remains presentational/renderer-only unless tiny UI data shaping is unavoidable.
+Files changed:
+- docs/session_log.md
+Open questions / risks: docs/ui-redesign/* baselines are missing from origin/main and may need to be added from local evidence checkout.
+Next actions: Implement shell/route visual parity; add tests; capture production evidence.
+
+## 2026-05-19T15:28:52.8568528+10:00
+Objective: Implement first PSE-240 shell/route parity pass.
+Decisions made:
+- Added option-10 compact shell controls, Today count, narrow dark rail, and Today selected-task inspector.
+- Added missing option-10 docs/screenshots from local evidence checkout for required baselines.
+Files changed:
+- apps/desktop/src/renderer/shell/TopBar.tsx; apps/desktop/src/renderer/pages/TodayPage.tsx; apps/desktop/src/renderer/styles.css; docs/ui-redesign/*; docs/session_log.md
+Open questions / risks: Need visual screenshot verification and possible CSS tuning.
+Next actions: Run targeted tests; capture production route screenshots; document evidence.
+
+## 2026-05-19T15:47:16.2235486+10:00
+Objective: Capture PSE-240 production-route visual evidence and document QA.
+Decisions made:
+- Used built Electron routes with local demo workspace plus long realistic seeded data, not fixture routes.
+- Added PSE-240 QA doc and acceptance-review addendum for corrected option-10 parity verdict.
+Files changed:
+- apps/desktop/src/main/pse240Capture.ts; apps/desktop/src/main/index.ts; docs/manual-qa/PSE-240-option-10-production-parity.md; docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*; docs/SPACE_BUDGET_OPERATOR_UI_ACCEPTANCE_REVIEW.md; docs/session_log.md
+Open questions / risks: Need full validation and PR publication; Electron rebuild may require Node ABI rebuild before Vitest.
+Next actions: Run full checks; inspect diff; commit/push/open PR.
+
+## 2026-05-19T15:59:09.3265140+10:00
+Objective: Complete PSE-240 validation and current-code screenshot evidence.
+Decisions made:
+- Re-captured production route screenshots after final Workspace Home contact-panel fix.
+- Restored better-sqlite3 to Node ABI after Electron capture.
+Files changed: docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*; docs/session_log.md
+Open questions / risks: Env-gated capture harness remains QA-only; keep normal startup untouched.
+Next actions: Commit; open PR; update Linear/merge if allowed.

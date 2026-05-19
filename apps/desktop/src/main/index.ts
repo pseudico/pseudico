@@ -5,6 +5,7 @@ import { runPackageSmoke } from "./packageSmoke";
 import { AutomaticBackupRunner } from "./services/backup/AutomaticBackupRunner";
 import { startConfiguredCaptureBridge } from "./services/capture/configuredCaptureBridge";
 import { createWorkspaceWindow } from "./workspaceWindow";
+import { runPse240Capture } from "./pse240Capture";
 
 app.whenReady().then(async () => {
   if (
@@ -25,6 +26,23 @@ app.whenReady().then(async () => {
 
   const createWindow = () => createWorkspaceWindow();
   const services = createDesktopIpcServices();
+
+  if (process.env.LOCAL_WORK_OS_CAPTURE_PSE240 === "1") {
+    registerDesktopIpc(services);
+    const window = createWindow();
+
+    try {
+      await runPse240Capture({ app, services, window });
+    } catch (error) {
+      console.error(error);
+      process.exitCode = 1;
+    } finally {
+      app.exit(typeof process.exitCode === "number" ? process.exitCode : 0);
+    }
+
+    return;
+  }
+
   const configuredCaptureBridge = await startConfiguredCaptureBridge(
     services.workspaceService
   );
