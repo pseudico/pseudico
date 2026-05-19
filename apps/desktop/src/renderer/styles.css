@@ -10709,6 +10709,9 @@ body {
 }
 
 .workspace-page *,
+.welcome-screen *,
+.inbox-page *,
+.projects-page *,
 .today-page *,
 .project-detail-page *,
 .search-page *,
@@ -10720,12 +10723,105 @@ body {
 
 .project-detail-page,
 .workspace-operator-surface,
+.welcome-screen,
+.inbox-page,
+.projects-page,
 .today-page,
 .search-page,
 .timeline-page,
 .calendar-page,
 .collections-page {
   --app-radius: var(--option10-radius);
+}
+
+.welcome-screen[data-space-budget-surface="workspace-entry"] {
+  min-height: 0;
+  place-items: stretch;
+  padding: 0;
+  background: transparent;
+}
+
+.welcome-screen[data-space-budget-surface="workspace-entry"] .welcome-content {
+  width: 100%;
+  max-width: none;
+  grid-template-columns: minmax(620px, 1fr) minmax(280px, 360px);
+  align-items: start;
+  gap: 12px;
+}
+
+.welcome-screen[data-space-budget-surface="workspace-entry"] .welcome-copy,
+.welcome-screen[data-space-budget-surface="workspace-entry"] .welcome-system,
+.welcome-screen[data-space-budget-surface="workspace-entry"] .recent-workspaces {
+  min-width: 0;
+  border: 1px solid var(--option10-line);
+  background: var(--option10-panel-strong);
+  box-shadow: none;
+}
+
+.welcome-screen[data-space-budget-surface="workspace-entry"] .welcome-copy {
+  padding: 14px;
+}
+
+.welcome-screen[data-space-budget-surface="workspace-entry"] .welcome-system,
+.welcome-screen[data-space-budget-surface="workspace-entry"] .recent-workspaces {
+  padding: 12px;
+}
+
+.welcome-screen[data-space-budget-surface="workspace-entry"] .welcome-copy h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.welcome-screen[data-space-budget-surface="workspace-entry"] .welcome-copy p,
+.welcome-screen[data-space-budget-surface="workspace-entry"] .recent-workspace-button span,
+.welcome-screen[data-space-budget-surface="workspace-entry"] .welcome-system dd {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.welcome-screen[data-space-budget-surface="workspace-entry"] .workspace-form {
+  max-width: none;
+}
+
+.inbox-page,
+.projects-page {
+  max-width: none;
+  gap: 12px;
+}
+
+.inbox-content-section,
+.project-content-section,
+.projects-page .project-list-panel,
+.projects-page .project-board-toolbar,
+.projects-page .project-library-summary,
+.projects-page .project-category-column,
+.projects-page .project-category-card,
+.projects-page .project-list-row,
+.projects-page .grouped-results-heading,
+.inbox-page .item-feed-empty-state,
+.inbox-page .content-feed-placeholder {
+  max-width: none;
+  min-width: 0;
+  border-radius: var(--option10-radius) !important;
+  box-shadow: none;
+}
+
+.inbox-page strong,
+.inbox-page p,
+.inbox-page span,
+.projects-page strong,
+.projects-page p,
+.projects-page span,
+.projects-page small {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: initial;
 }
 
 .project-detail-header-work-first {

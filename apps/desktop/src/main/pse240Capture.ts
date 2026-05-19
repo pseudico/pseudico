@@ -17,6 +17,9 @@ type CaptureTarget = {
 };
 
 const captureTargets = (projectId: string): CaptureTarget[] => [
+  { key: "welcome-entry", route: "/welcome" },
+  { key: "inbox", route: "/inbox" },
+  { key: "projects-list", route: "/projects" },
   { key: "workspace-home", route: "/workspace" },
   { key: "today-planning", route: "/today" },
   { key: "project-detail", route: `/projects/${projectId}` },

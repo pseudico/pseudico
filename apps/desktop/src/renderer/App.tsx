@@ -36,9 +36,9 @@ export function AppRoutes(): React.JSX.Element {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/welcome" replace />} />
-      <Route path="/welcome" element={<WelcomePage />} />
       <Route path="/project-detail-space-budget-fixture" element={<ProjectDetailSpaceBudgetFixturePage />} />
       <Route element={<AppShell />}>
+        <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/workspace" element={<WorkspaceHomePage />} />
         <Route path="/today" element={<TodayPage />} />
         <Route path="/today-space-budget-fixture" element={<TodaySpaceBudgetFixturePage />} />

@@ -135,6 +135,9 @@ describe("primary-operator readability styles", () => {
   it("keeps PSE-240 option-10 production surfaces square and unclipped", () => {
     expect(styles).toContain("PSE-240 corrective functional pass");
     expect(styles).toContain("--option10-radius: 0");
+    expect(styles).toContain("[data-space-budget-surface=\"workspace-entry\"]");
+    expect(styles).toContain(".inbox-page *");
+    expect(styles).toContain(".projects-page *");
     expect(styles).toContain("border-radius: var(--option10-radius) !important");
     expect(styles).toContain(".project-detail-workbench");
     expect(styles).toContain("minmax(var(--option10-content-min), 1fr)");

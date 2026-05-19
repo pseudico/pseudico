@@ -8387,3 +8387,21 @@ Decisions made:
 Files changed: docs/session_log.md; docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*
 Open questions / risks: PR/review policy still determines merge timing.
 Next actions: Commit/push branch; open corrective PR; update Linear/GitHub if proceeding.
+
+## 2026-05-19 19:34 +10:00
+Objective: Start follow-up audit for pre-main/entry route visual regressions.
+Decisions made:
+- Created clean branch codex/pse-240-entry-route-fix from merged main.
+- Treat old-style and top-compressed pages as PSE-240 route-family defects, not polish.
+Files changed: docs/session_log.md
+Open questions / risks: Need identify exact entry/adjacent routes from capture evidence.
+Next actions: Audit routes; patch shared CSS/capture; validate screenshots.
+
+## 2026-05-19 19:49 +10:00
+Objective: Fix pre-main PSE-240 entry/adjacent route regressions.
+Decisions made:
+- Moved Welcome into persistent shell and flattened Welcome/Inbox/Projects surfaces.
+- Added production capture targets for Welcome, Inbox, and Projects list.
+Files changed: apps/desktop/src/renderer/App.tsx; apps/desktop/src/renderer/pages/WelcomePage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/src/main/pse240Capture.ts; apps/desktop/tests/renderer/readabilityStyles.test.ts; docs/manual-qa/PSE-240-option-10-production-parity.md; docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*
+Open questions / risks: Capture still requires Electron/Node ABI rebuild cycle.
+Next actions: Commit/push; open PR; merge if allowed.
