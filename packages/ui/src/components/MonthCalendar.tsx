@@ -1,4 +1,4 @@
-import { CalendarPlus } from "lucide-react";
+﻿import { CalendarPlus } from "lucide-react";
 import { EmptyState } from "./EmptyState";
 
 export type MonthCalendarItem = {
@@ -86,35 +86,61 @@ export function MonthCalendar({
             {day.items.length === 0 ? (
               <p className="month-calendar-empty">No dated work</p>
             ) : (
-              <ol className="month-calendar-items">
-                {day.items.map((item) => (
-                  <li key={item.id}>
-                    <button
-                      className="month-calendar-item"
-                      type="button"
-                      onClick={() => onOpenItem?.(item)}
-                    >
-                      <span className="month-calendar-item-title">
-                        {item.title}
-                      </span>
-                      <span className="month-calendar-item-meta">
-                        {item.kind === "list_item" ? "List item" : "Task"}
-                        {" · "}
-                        {item.containerName}
-                        {item.categoryName === null
-                          ? ""
-                          : ` · ${item.categoryName}`}
-                        {item.priority === null ? "" : ` · P${item.priority}`}
-                        {item.status === "done" ? " · done" : ""}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ol>
+              <>
+                <div className="month-calendar-day-summary" aria-label={`${day.items.length} dated work items`}>
+                  <span>{day.items.length} scheduled</span>
+                  <span className="month-calendar-event-dots" aria-hidden="true">
+                    {day.items.slice(0, 4).map((item) => (
+                      <i key={item.id} />
+                    ))}
+                  </span>
+                </div>
+                <ol className="month-calendar-items">
+                  {day.items.slice(0, 3).map((item) => (
+                    <li key={item.id}>
+                      <button
+                        className="month-calendar-item"
+                        type="button"
+                        onClick={() => onOpenItem?.(item)}
+                      >
+                        <span className="month-calendar-item-dot" aria-hidden="true" />
+                        <span className="month-calendar-item-title">
+                          {item.title}
+                        </span>
+                        <span className="month-calendar-item-meta">
+                          {formatMonthItemKind(item.kind)}
+                          {" · "}
+                          {item.containerName}
+                          {item.categoryName === null
+                            ? ""
+                            : ` · ${item.categoryName}`}
+                          {item.priority === null ? "" : ` · P${item.priority}`}
+                          {item.status === "done" ? " · done" : ""}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                  {day.items.length > 3 ? (
+                    <li className="month-calendar-more">+{day.items.length - 3} more in agenda</li>
+                  ) : null}
+                </ol>
+              </>
             )}
           </article>
         ))}
       </div>
     </section>
   );
+}
+
+function formatMonthItemKind(kind: MonthCalendarItem["kind"]): string {
+  if (kind === "list_item") {
+    return "List item";
+  }
+
+  if (kind === "calendar_event") {
+    return "Event";
+  }
+
+  return "Task";
 }

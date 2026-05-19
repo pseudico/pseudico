@@ -2,11 +2,13 @@ import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  CalendarAgenda,
   CalendarDayView,
   CalendarWeekView,
   EmptyState,
   ErrorState,
   MonthCalendar,
+  type CalendarAgendaItem,
   type CalendarRescheduleDrop,
   type CalendarScheduleDay,
   type CalendarScheduleItem,
@@ -25,11 +27,15 @@ import { useWorkspaceStore } from "../state/workspaceStore";
 type CalendarPageProps = {
   apiClient?: LocalWorkOsApi;
   initialCalendar?: CalendarMonthViewModelSummary | null;
+  initialSelectedDate?: string;
+  initialViewMode?: "month" | "week" | "day";
 };
 
 export function CalendarPage({
   apiClient = desktopApiClient,
-  initialCalendar
+  initialCalendar,
+  initialSelectedDate,
+  initialViewMode = "month"
 }: CalendarPageProps): React.JSX.Element {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspaceStore();
@@ -37,9 +43,9 @@ export function CalendarPage({
   const defaultDate = useMemo(() => toDateInputValue(new Date()), []);
   const [month, setMonth] = useState(initialCalendar?.range.month ?? defaultMonth);
   const [selectedDate, setSelectedDate] = useState(
-    initialCalendar?.days[0]?.date ?? defaultDate
+    initialSelectedDate ?? initialCalendar?.days[0]?.date ?? defaultDate
   );
-  const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
+  const [viewMode, setViewMode] = useState<"month" | "week" | "day">(initialViewMode);
   const [includeCompleted, setIncludeCompleted] = useState(false);
   const [calendar, setCalendar] =
     useState<CalendarMonthViewModelSummary | null>(initialCalendar ?? null);
@@ -237,9 +243,27 @@ export function CalendarPage({
     navigate(getCalendarItemDestination(fullItem));
   }
 
+  function openCalendarAgendaItem(item: CalendarAgendaItem): void {
+    const fullItem = calendar?.days
+      .flatMap((day) => day.items)
+      .find((candidate) => candidate.id === item.id);
+
+    if (fullItem === undefined) {
+      return;
+    }
+
+    navigate(getCalendarItemDestination(fullItem));
+  }
+
   function changeMonth(delta: number): void {
     setMonth(offsetMonth(month, delta));
   }
+
+  const selectedDay = (calendar?.days ?? []).find((day) => day.date === selectedDate) ?? null;
+  const agendaItems =
+    viewMode === "month"
+      ? getMonthAgendaItems(calendar?.days ?? [])
+      : (selectedDay?.items ?? []).map(toAgendaItem);
 
   if (currentWorkspace === null && initialCalendar === undefined) {
     return (
@@ -353,38 +377,50 @@ export function CalendarPage({
         <p className="muted-text">Importing read-only ICS events...</p>
       ) : null}
 
-      {viewMode === "month" ? (
-        <MonthCalendar
-          days={(calendar?.days ?? []).map(toMonthCalendarDay)}
-          loading={loading && calendar === null}
-          monthLabel={formatMonthLabel(month)}
-          onCreateTask={(date) => {
-            setSelectedDate(date);
-            void createTaskForDay(date);
-          }}
-          onOpenItem={openCalendarItem}
+      <div className="calendar-planning-layout" data-space-budget-surface="calendar-planning">
+        <div className="calendar-planning-main">
+          {viewMode === "month" ? (
+            <MonthCalendar
+              days={(calendar?.days ?? []).map(toMonthCalendarDay)}
+              loading={loading && calendar === null}
+              monthLabel={formatMonthLabel(month)}
+              onCreateTask={(date) => {
+                setSelectedDate(date);
+                void createTaskForDay(date);
+              }}
+              onOpenItem={openCalendarItem}
+            />
+          ) : null}
+          {viewMode === "week" ? (
+            <CalendarWeekView
+              days={getWeekDays(calendar?.days ?? [], selectedDate).map(toRequiredScheduleDay)}
+              loading={loading && calendar === null}
+              onCreateTask={(date, hour) => void createTaskForDay(date, hour)}
+              onOpenItem={openCalendarItem}
+              onRescheduleItem={(drop) => void rescheduleCalendarItem(drop)}
+            />
+          ) : null}
+          {viewMode === "day" ? (
+            <CalendarDayView
+              day={toScheduleDay(selectedDay)}
+              loading={loading && calendar === null}
+              onCreateTask={(date, hour) => void createTaskForDay(date, hour)}
+              onOpenItem={openCalendarItem}
+              onRescheduleItem={(drop) => void rescheduleCalendarItem(drop)}
+            />
+          ) : null}
+        </div>
+        <CalendarAgenda
+          description={
+            viewMode === "month"
+              ? "Full titles for dated work stay readable here when month cells use counts or compact event chips."
+              : "Full titles for the selected day stay readable outside narrow calendar columns."
+          }
+          items={agendaItems}
+          title={viewMode === "month" ? `${formatMonthLabel(month)} agenda` : `${selectedDate} agenda`}
+          onOpenItem={openCalendarAgendaItem}
         />
-      ) : null}
-      {viewMode === "week" ? (
-        <CalendarWeekView
-          days={getWeekDays(calendar?.days ?? [], selectedDate).map(toRequiredScheduleDay)}
-          loading={loading && calendar === null}
-          onCreateTask={(date, hour) => void createTaskForDay(date, hour)}
-          onOpenItem={openCalendarItem}
-          onRescheduleItem={(drop) => void rescheduleCalendarItem(drop)}
-        />
-      ) : null}
-      {viewMode === "day" ? (
-        <CalendarDayView
-          day={toScheduleDay(
-            (calendar?.days ?? []).find((day) => day.date === selectedDate) ?? null
-          )}
-          loading={loading && calendar === null}
-          onCreateTask={(date, hour) => void createTaskForDay(date, hour)}
-          onOpenItem={openCalendarItem}
-          onRescheduleItem={(drop) => void rescheduleCalendarItem(drop)}
-        />
-      ) : null}
+      </div>
     </section>
   );
 }
@@ -468,6 +504,29 @@ function toScheduleItem(item: CalendarItemSummary): CalendarScheduleItem {
     dueAt: item.dueAt,
     allDay: item.allDay
   };
+}
+
+function toAgendaItem(item: CalendarItemSummary): CalendarAgendaItem {
+  return {
+    id: item.id,
+    kind: item.kind,
+    title: item.title,
+    containerName: item.containerName,
+    categoryName: item.categoryName,
+    status: item.status,
+    priority: item.priority,
+    startAt: item.startAt,
+    dueAt: item.dueAt,
+    allDay: item.allDay,
+    body: item.body
+  };
+}
+
+function getMonthAgendaItems(days: CalendarDaySummary[]): CalendarAgendaItem[] {
+  return days
+    .flatMap((day) => day.items)
+    .slice(0, 8)
+    .map(toAgendaItem);
 }
 
 function toMonthInputValue(date: Date): string {

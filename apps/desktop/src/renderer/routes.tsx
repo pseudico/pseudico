@@ -21,7 +21,8 @@ export type AppRouteId =
   | "settings"
   | "trash"
   | "spaceBudgetPrimitives"
-  | "searchCollectionsSpaceBudget";
+  | "searchCollectionsSpaceBudget"
+  | "planningSpaceBudget";
 
 export type AppRoute = {
   id: AppRouteId;
@@ -199,6 +200,14 @@ export const appRoutes = [
     label: "SBUX Search",
     title: "SBUX Search",
     summary: "Hidden PSE-235 route fixture for readable search, collections, and saved views.",
+    nav: false
+  },
+  {
+    id: "planningSpaceBudget",
+    path: "/planning-space-budget-fixture",
+    label: "SBUX Planning",
+    title: "SBUX Planning",
+    summary: "Hidden PSE-236 route fixture for readable timeline, calendar, and pipeline planning.",
     nav: false
   }
 ] as const satisfies readonly AppRoute[];

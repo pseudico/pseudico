@@ -89,4 +89,17 @@ describe("primary-operator readability styles", () => {
     expect(styles).toContain("grid-template-columns: minmax(420px, 1fr) auto auto auto");
     expect(styles).toContain(".navigation-controls");
   });
+
+  it("keeps timeline, calendar, and pipeline planning above PSE-236 budgets", () => {
+    expect(styles).toContain("data-space-budget-surface=\"timeline-planning\"");
+    expect(styles).toContain("--timeline-label-width: 330px");
+    expect(styles).toContain("--timeline-day-min-width: 58px");
+    expect(styles).toContain("grid-template-columns: minmax(300px, var(--timeline-label-width)) minmax(var(--timeline-track-min-width), 1fr)");
+    expect(styles).toContain(".timeline-range-label");
+    expect(styles).toContain(".calendar-planning-layout");
+    expect(styles).toContain(".calendar-agenda-panel");
+    expect(styles).toContain("grid-template-columns: repeat(7, minmax(180px, 1fr))");
+    expect(styles).toContain(".pipeline-stage-board,");
+    expect(styles).toContain("grid-auto-columns: minmax(280px, 320px)");
+  });
 });

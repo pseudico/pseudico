@@ -295,6 +295,11 @@ export {
   type MonthCalendarProps
 } from "./components/MonthCalendar";
 export {
+  CalendarAgenda,
+  type CalendarAgendaItem,
+  type CalendarAgendaProps
+} from "./components/CalendarAgenda";
+export {
   CalendarDayView,
   CalendarWeekView,
   type CalendarDayViewProps,

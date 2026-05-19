@@ -1,4 +1,5 @@
-import { CalendarDays } from "lucide-react";
+﻿import { CalendarDays } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
   createTimelineDateScale,
   mapTimelineRangeToScale,
@@ -73,6 +74,20 @@ export function TimelineView({
   emptyDescription = "Dated tasks in the selected range will appear here.",
   onOpenTask
 }: TimelineViewProps): React.JSX.Element {
+  const firstItem = groups[0]?.items[0] ?? null;
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(
+    firstItem?.itemId ?? null
+  );
+  const selectedItem = useMemo(
+    () =>
+      groups
+        .flatMap((group) => group.items)
+        .find((item) => item.itemId === selectedItemId) ??
+      firstItem ??
+      null,
+    [firstItem, groups, selectedItemId]
+  );
+
   if (loading) {
     return <p className="muted-text">Loading timeline...</p>;
   }
@@ -95,66 +110,130 @@ export function TimelineView({
         });
 
   return (
-    <div className="timeline-view">
+    <div
+      className="timeline-view"
+      data-space-budget-surface="timeline-planning"
+      style={
+        scale === null
+          ? undefined
+          : ({
+              "--timeline-scale-columns": String(scale.ticks.length)
+            } as React.CSSProperties)
+      }
+    >
       {workload === undefined ? null : <TimelineWorkloadSummaryView workload={workload} />}
-      {scale === null ? null : <TimelineScaleHeader scale={scale} />}
-      {groups.map((group) => (
-        <section className="timeline-group" key={group.key}>
-          <header className="timeline-group-header">
-            <div>
-              <span
-                aria-hidden="true"
-                className="timeline-group-dot"
-                style={{ backgroundColor: group.color ?? "var(--accent)" }}
-              />
-              <h3>{group.label}</h3>
-            </div>
-            <span>
-              {group.itemCount} task{group.itemCount === 1 ? "" : "s"}
-              {group.completedCount > 0
-                ? ` · ${group.completedCount} done`
-                : ""}
-            </span>
-          </header>
-          <ol className="timeline-list">
-            {group.items.map((item) => (
-              <li className="timeline-list-item" key={item.itemId}>
-                <div className="timeline-item-date">
-                  <CalendarDays size={16} aria-hidden="true" />
-                  <span>{formatTimelineRange(item)}</span>
+      <div className="timeline-planning-layout">
+        <div className="timeline-planning-main">
+          {scale === null ? null : <TimelineScaleHeader scale={scale} />}
+          {groups.map((group) => (
+            <section className="timeline-group" key={group.key}>
+              <header className="timeline-group-header">
+                <div>
+                  <span
+                    aria-hidden="true"
+                    className="timeline-group-dot"
+                    style={{ backgroundColor: group.color ?? "var(--accent)" }}
+                  />
+                  <h3>{group.label}</h3>
                 </div>
-                <button
-                  className="timeline-item-card"
-                  style={getTimelineItemStyle(item, scale)}
-                  type="button"
-                  onClick={() => onOpenTask?.(item)}
-                >
-                  {scale === null ? null : (
-                    <span
-                      aria-hidden="true"
-                      className={
-                        isDueOnly(item)
-                          ? "timeline-range-marker"
-                          : "timeline-range-bar"
-                      }
-                    />
-                  )}
-                  <span className="timeline-item-title">{item.title}</span>
-                  <span className="timeline-item-meta">
-                    {item.containerName}
-                    {item.categoryName === null ? "" : ` · ${item.categoryName}`}
-                    {item.priority === null ? "" : ` · P${item.priority}`}
-                    {item.taskStatus === "done" ? " · done" : ""}
-                  </span>
-                  {item.body === null || item.body.trim().length === 0 ? null : (
-                    <span className="timeline-item-body">{item.body}</span>
-                  )}
-                </button>
-              </li>
-            ))}
-          </ol>
-        </section>
-      ))}
+                <span>
+                  {group.itemCount} task{group.itemCount === 1 ? "" : "s"}
+                  {group.completedCount > 0
+                    ? ` · ${group.completedCount} done`
+                    : ""}
+                </span>
+              </header>
+              <ol className="timeline-list">
+                {group.items.map((item) => (
+                  <li className="timeline-list-item" key={item.itemId}>
+                    <button
+                      aria-pressed={selectedItem?.itemId === item.itemId}
+                      className="timeline-row-label"
+                      type="button"
+                      onClick={() => setSelectedItemId(item.itemId)}
+                      onDoubleClick={() => onOpenTask?.(item)}
+                    >
+                      <span className="timeline-item-title">{item.title}</span>
+                      <span className="timeline-item-meta">
+                        {item.containerName}
+                        {item.categoryName === null ? "" : ` · ${item.categoryName}`}
+                        {item.priority === null ? "" : ` · P${item.priority}`}
+                        {item.taskStatus === "done" ? " · done" : ""}
+                      </span>
+                      <span className="timeline-item-date">
+                        <CalendarDays size={16} aria-hidden="true" />
+                        {formatTimelineRange(item)}
+                      </span>
+                    </button>
+                    <button
+                      className="timeline-item-card"
+                      style={getTimelineItemStyle(item, scale)}
+                      type="button"
+                      onClick={() => {
+                        setSelectedItemId(item.itemId);
+                        onOpenTask?.(item);
+                      }}
+                    >
+                      {scale === null ? (
+                        <span className="timeline-range-fallback">
+                          {formatTimelineRange(item)}
+                        </span>
+                      ) : (
+                        <span
+                          className={
+                            isDueOnly(item)
+                              ? "timeline-range-marker"
+                              : "timeline-range-bar"
+                          }
+                        >
+                          <span className="timeline-range-label">
+                            {formatTimelineRangeLabel(item)}
+                          </span>
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))}
+        </div>
+        {selectedItem === null ? null : (
+          <aside className="timeline-selected-panel" aria-label="Selected timeline item">
+            <span className="top-eyebrow">Selected work</span>
+            <h3>{selectedItem.title}</h3>
+            <p>{selectedItem.body?.trim() || "No note body for this dated work item."}</p>
+            <dl>
+              <div>
+                <dt>When</dt>
+                <dd>{formatTimelineRange(selectedItem)}</dd>
+              </div>
+              <div>
+                <dt>Container</dt>
+                <dd>{selectedItem.containerName}</dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>
+                  {selectedItem.taskStatus}
+                  {selectedItem.categoryName === null
+                    ? ""
+                    : ` · ${selectedItem.categoryName}`}
+                </dd>
+              </div>
+            </dl>
+            {onOpenTask === undefined ? null : (
+              <button
+                className="secondary-button compact-button"
+                type="button"
+                onClick={() => onOpenTask(selectedItem)}
+              >
+                Open source item
+              </button>
+            )}
+          </aside>
+        )}
+      </div>
     </div>
   );
 }
@@ -235,6 +314,11 @@ function formatTimelineRange(item: TimelineViewItem): string {
   return start === end ? start : `${start} – ${end}`;
 }
 
+function formatTimelineRangeLabel(item: TimelineViewItem): string {
+  const status = item.taskStatus === "done" ? "Done" : item.taskStatus;
+  return `${shortDate(item.timelineStartAt)} · ${status}`;
+}
+
 function isDueOnly(item: TimelineViewItem): boolean {
   return item.timelineStartAt === item.timelineEndAt || item.startAt === null;
 }
@@ -243,5 +327,12 @@ function formatDateTime(value: string): string {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
     timeStyle: "short"
+  }).format(new Date(value));
+}
+
+function shortDate(value: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    day: "numeric",
+    month: "short"
   }).format(new Date(value));
 }
