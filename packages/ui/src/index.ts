@@ -1,3 +1,4 @@
+export { formatAustralianDate, formatAustralianDateTime } from "./dateFormat";
 export const uiPackageName = "@local-work-os/ui";
 
 export const designSystemStatus = "pending";

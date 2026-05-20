@@ -1,3 +1,4 @@
+import { formatAustralianDate } from "../../dateFormat";
 import { DashboardWidget } from "../DashboardWidget";
 
 export type MiniTimelineWidgetGroup = {
@@ -50,5 +51,5 @@ export function MiniTimelineWidget({
 }
 
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(value));
+  return formatAustralianDate(value);
 }

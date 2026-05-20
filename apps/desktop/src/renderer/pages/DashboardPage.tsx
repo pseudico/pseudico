@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Edit3, Plus, Printer, RefreshCw, Settings, Trash2 } from "lucide-react";
+﻿import { ArrowDown, ArrowUp, Edit3, Plus, Printer, RefreshCw, Settings, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,6 +18,7 @@ import {
   type DashboardFavoriteWidgetItem,
   type DashboardTaskWidgetItem,
   type ProjectHealthViewModel,
+  formatAustralianDate,
   type SnoozePreset
 } from "@local-work-os/ui";
 import type {
@@ -568,7 +569,7 @@ function DashboardOperatorSummary({
         <strong>Pinned/recent launch points</strong>
         {favorites.slice(0, 3).map((favorite) => (
           <span key={`${favorite.targetType}:${favorite.targetId}`}>
-            {favorite.title} · {favorite.subtitle}
+            {favorite.title} - {favorite.subtitle}
           </span>
         ))}
         {favorites.length === 0 ? <span>No pinned work yet.</span> : null}
@@ -578,7 +579,7 @@ function DashboardOperatorSummary({
         <strong>Recent movement</strong>
         {recentActivity.slice(0, 3).map((activity) => (
           <span key={activity.activityId}>
-            {activity.description} · {activity.createdAt.slice(0, 10)}
+            {activity.description} · {formatAustralianDate(activity.createdAt)}
           </span>
         ))}
         {recentActivity.length === 0 ? <span>No recent activity in this dashboard window.</span> : null}

@@ -1,4 +1,4 @@
-import { CalendarClock, CalendarMinus, CalendarPlus, Clock3 } from "lucide-react";
+﻿import { CalendarClock, CalendarMinus, CalendarPlus, Clock3 } from "lucide-react";
 import { useState } from "react";
 
 export type SnoozePreset = "later_today" | "tomorrow" | "next_week";
@@ -21,7 +21,7 @@ export function SnoozeMenu({
   return (
     <div className="snooze-menu">
       <button
-        className="secondary-button compact-button"
+        className="secondary-button compact-button snooze-menu-preset"
         disabled={busy}
         type="button"
         onClick={() => {
@@ -32,7 +32,7 @@ export function SnoozeMenu({
         Later today
       </button>
       <button
-        className="secondary-button compact-button"
+        className="secondary-button compact-button snooze-menu-preset"
         disabled={busy}
         type="button"
         onClick={() => {
@@ -43,7 +43,7 @@ export function SnoozeMenu({
         Tomorrow
       </button>
       <button
-        className="secondary-button compact-button"
+        className="secondary-button compact-button snooze-menu-preset"
         disabled={busy}
         type="button"
         onClick={() => {
@@ -56,13 +56,14 @@ export function SnoozeMenu({
       <label className="snooze-menu-custom">
         <input
           aria-label="Custom due date"
+          className={customDate.length === 0 ? "date-input-empty" : undefined}
           disabled={busy}
           type="date"
           value={customDate}
           onChange={(event) => setCustomDate(event.currentTarget.value)}
         />
         <button
-          className="secondary-button compact-button"
+          className="secondary-button compact-button snooze-menu-apply"
           disabled={busy || customDate.length === 0}
           type="button"
           onClick={() => {
@@ -74,7 +75,7 @@ export function SnoozeMenu({
       </label>
       {showRemoveDue ? (
         <button
-          className="secondary-button compact-button"
+          className="secondary-button compact-button snooze-menu-remove"
           disabled={busy}
           type="button"
           onClick={() => {

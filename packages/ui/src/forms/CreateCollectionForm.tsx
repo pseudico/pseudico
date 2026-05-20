@@ -83,7 +83,6 @@ export function CreateCollectionForm({
           type="text"
           value={value}
           disabled={disabled}
-          placeholder={mode === "tag" ? "operator-handoff" : "backup evidence"}
           onChange={(event) => setValue(event.target.value)}
         />
       </label>
@@ -94,7 +93,6 @@ export function CreateCollectionForm({
           type="text"
           value={name}
           disabled={disabled}
-          placeholder={mode === "tag" ? "Operator handoff work" : "Backup evidence to review"}
           onChange={(event) => setName(event.target.value)}
         />
       </label>

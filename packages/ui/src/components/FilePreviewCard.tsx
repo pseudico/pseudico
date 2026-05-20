@@ -1,3 +1,5 @@
+import { formatAustralianDateTime } from "../dateFormat";
+
 export type FilePreviewKind =
   | "image"
   | "pdf"
@@ -110,5 +112,5 @@ function formatDate(value: string): string {
     return value;
   }
 
-  return date.toLocaleString();
+  return formatAustralianDateTime(value);
 }

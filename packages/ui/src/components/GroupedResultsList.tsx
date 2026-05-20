@@ -1,3 +1,4 @@
+import { formatAustralianDate } from "../dateFormat";
 import { ArrowUpRight, Check, Circle } from "lucide-react";
 import { useState } from "react";
 import { TagBadge } from "./TagBadge";
@@ -188,7 +189,7 @@ function GroupedResultRows({
                       <span>P{result.taskPriority}</span>
                     )}
                     {result.dueAt === undefined || result.dueAt === null ? null : (
-                      <span>{result.dueAt.slice(0, 10)}</span>
+                      <span>{formatAustralianDate(result.dueAt)}</span>
                     )}
                   </div>
                   {result.tags.length === 0 ? null : (

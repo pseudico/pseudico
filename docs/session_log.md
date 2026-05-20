@@ -8429,3 +8429,166 @@ Next actions: Commit/push; open PR; merge if allowed.
 - Files changed: docs/session_log.md
 - Open questions / risks: Electron capture can switch native ABI; documented rebuild step in QA evidence.
 - Next actions: Commit/push branch; open PR; update Linear with final state.
+
+## 2026-05-20T09:39:02.9643365+10:00
+Objective: Correct user-identified 1440px UI failures before lower-resolution work.
+Decisions made:
+- Use 1440x1000 as the primary acceptance surface; defer 1280 fixes until 1440 is visually acceptable.
+- Treat existing 1280 captures as non-decisive evidence for this pass.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need user review of 1440 screenshots before lower-res tuning.
+Next actions: Review 1440 shots; fix remaining 1440 issues; then run targeted lower-res pass.
+
+## 2026-05-20T09:43:36.7627721+10:00
+Objective: Fix dead screenshot links in user-facing response.
+Decisions made:
+- Previous Markdown used Windows backslashes, which the client stripped; use forward-slash absolute paths instead.
+- Steering to 1440-first is correct and did not block work.
+Files changed:
+- docs/session_log.md
+Open questions / risks: User still needs to inspect full-resolution 1440 images.
+Next actions: Provide working 1440 image embeds; continue 1440-only fixes.
+
+## 2026-05-20T10:22:29.4039067+10:00
+Objective: Review 1440 screenshots after user flagged DOA Settings vertical nav.
+Decisions made:
+- Settings two-column/sticky nav caused 7 tabs to squeeze into vertical letters; forced full-width horizontal flex nav.
+- Added 1440-only capture switch to avoid wasting time on 1280 until 1440 passes.
+Files changed:
+- apps/desktop/src/renderer/styles.css; apps/desktop/src/main/pse241Capture.ts; docs/session_log.md
+Open questions / risks: Dashboard/topbar/box-heavy surfaces still need 1440 review/fixes.
+Next actions: Continue 1440 review; reduce box-heavy dashboard/task chrome; recapture targeted pages.
+
+## 2026-05-20 10:48:04 +10:00
+Objective: Re-audit all 1440 UI screenshots and fix obvious visual failures called out by reviewer.
+Decisions made: 1440 remains the only acceptance surface for this pass; treat vertical text, overflow, topbar crowding, and mis-sized cards as blockers.
+Files changed: pending
+Open questions / risks: every route may need shared CSS correction beyond the called-out examples.
+Next actions: audit screenshots; patch shared layout/CSS; recapture 1440 evidence
+
+## 2026-05-20 11:19:40 +10:00
+Objective: Complete 1440 corrective UI pass for reviewer-called visual failures.
+Decisions made: hide crowded shell overflow labels; force horizontal project-tag text; compact Today planner; remove dashboard inline snooze controls; hide outline previews that clipped.
+Files changed: apps/desktop/src/renderer/styles.css; packages/ui/src/forms/TaskQuickAdd.tsx; docs/session_log.md
+Open questions / risks: remaining visual taste issues may need another human-directed pass before PR.
+Next actions: show refreshed 1440 screenshots; await reviewer markup; then continue lower-res pass
+
+## 2026-05-20 11:31:21 +10:00
+Objective: Fix Settings nav vertical text hard failure from reviewer screenshot.
+Decisions made: treat vertical settings tabs as structural blocker, not cosmetic issue.
+Files changed: pending
+Open questions / risks: Settings layout CSS may be overridden by grid/container width rules.
+Next actions: inspect DOM/CSS; patch full-width horizontal nav; recapture 1440
+
+## 2026-05-20 11:37:34 +10:00
+Objective: Verify Settings tab vertical-text failure is fixed in refreshed 1440 evidence.
+Decisions made: base Settings rules now use one-column page layout and horizontal auto-fit section tabs; added hard guardrail against vertical writing.
+Files changed: apps/desktop/src/renderer/styles.css; docs/session_log.md
+Open questions / risks: reviewer may still want less boxed Settings cards, but vertical text blocker is removed.
+Next actions: show refreshed Settings screenshot; continue reviewer-led visual corrections; keep lower-res pass deferred
+
+## 2026-05-20 11:38:26 +10:00
+Objective: Fix app shell topbar/tab strip visual failure flagged by reviewer.
+Decisions made: shell chrome must be full-width, stable, and not waste left space or let Recent/tab controls overlap.
+Files changed: pending
+Open questions / risks: app tab behavior should remain available without dominating page work.
+Next actions: inspect shell CSS cascade; patch topbar/tab strip; recapture 1440
+
+## 2026-05-20 11:46:41 +10:00
+Objective: Verify topbar/tab strip shell chrome fix with refreshed 1440 capture.
+Decisions made: search now fills left-to-right; top actions compact; app tabs fixed-height single row with no Recent overlap artifact.
+Files changed: apps/desktop/src/renderer/styles.css; docs/session_log.md
+Open questions / risks: shell visual density may still need product taste review after route content fixes.
+Next actions: show refreshed Today screenshot; await reviewer markup; continue correcting visible route failures
+
+## 2026-05-20 11:47:30 +10:00
+Objective: Fix Project Detail left rail tab-preview clipping failure.
+Decisions made: narrow outline rail must not contain full feed preview text; use compact section summary only.
+Files changed: pending
+Open questions / risks: preserving tab selection while removing noisy previews from the rail.
+Next actions: inspect implementation; patch component/CSS; recapture Project Detail 1440
+
+## 2026-05-20 11:58:50 +10:00
+Objective: Verify Project Detail outline no longer clips full preview text.
+Decisions made: replaced full tab preview cards with compact section summary; primary feed owns readable item titles/previews.
+Files changed: apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/styles.css; docs/session_log.md
+Open questions / risks: capture run timed out after refreshed Project Detail; later routes not recaptured in this run.
+Next actions: show Project Detail screenshot; await next reviewer mark-up; recapture all routes before final PR
+
+## 2026-05-20 11:59:54 +10:00
+Objective: Fix uneven snooze/date/remove control sizing in task cards.
+Decisions made: task action clusters need consistent button rhythm; date/apply row must align with preset buttons.
+Files changed: pending
+Open questions / risks: affects shared SnoozeMenu wherever embedded in cards.
+Next actions: patch SnoozeMenu classes/CSS; run checks; recapture 1440 evidence
+
+## 2026-05-20 12:16:11 +10:00
+Objective: Complete task action sizing fix for snooze/date/remove controls.
+Decisions made: SnoozeMenu actions now use explicit classes and a single-width vertical stack in task cards.
+Files changed: packages/ui/src/components/SnoozeMenu.tsx; apps/desktop/src/renderer/styles.css; docs/session_log.md
+Open questions / risks: screenshot refresh timed out before producing a new image; existing checks pass.
+Next actions: rerun focused capture; review Today/Dashboard cards; continue visible UI corrections
+
+## 2026-05-20 12:17:00 +10:00
+Objective: Explain root cause of vertical Settings text failure.
+Decisions made: vertical appearance is one-character wrapping from narrow containers plus broad text-wrap CSS, not intended vertical writing.
+Files changed: docs/session_log.md
+Open questions / risks: need remove broad wrapping guardrails and enforce min-width/nav layout before more visual passes.
+Next actions: patch root CSS cascade; add visual guard; recapture Settings
+
+## 2026-05-20 12:35:01 +10:00
+Objective: Fix root cause of vertical-looking text by removing one-character wrapping on controls.
+Decisions made: nav/button/tab labels must never use overflow-wrap:anywhere; enforce stable min widths for Settings tabs.
+Files changed: pending
+Open questions / risks: broad prior CSS may override route-specific fixes unless late guardrails are added.
+Next actions: inspect wrap rules; patch CSS; run checks and fresh capture
+
+## 2026-05-20 12:39:59 +10:00
+Objective: Confirm no-vertical-text Settings proof capture after CSS guardrail.
+Decisions made: added global control no-wrap guardrails and focused capture target support; evidence uses new uncached screenshot directory.
+Files changed: apps/desktop/src/renderer/styles.css; apps/desktop/src/main/pse241Capture.ts; docs/session_log.md
+Open questions / risks: lower-res behavior still deferred; old chat thumbnails may remain cached.
+Next actions: show fresh proof screenshot; continue UI review; rerun full route set later
+
+## 2026-05-20 12:40:39 +10:00
+Objective: Produce fresh screenshots validating the last five UI fixes.
+Decisions made: use focused capture target support to avoid stale thumbnails and long full-app capture timeouts.
+Files changed: docs/session_log.md
+Open questions / risks: screenshots validate 1440 only; lower-res pass remains deferred.
+Next actions: capture Settings, Today, Project Detail, Project Tags, Dashboard; show full-resolution evidence
+
+## 2026-05-20 12:46:01 +10:00
+Objective: Show fresh validation screenshots for the last five UI fixes.
+Decisions made: evidence directory PSE-241-last-5-fix-validation contains fresh 1440 captures for target routes.
+Files changed: docs/session_log.md
+Open questions / risks: screenshots are 1440 only and still need human review for remaining visual taste failures.
+Next actions: reviewer inspects validation images; address marked failures; then run lower-res pass
+
+## 2026-05-20 13:07:48 +10:00
+Objective: Publish validated PSE-241 visual fixes to GitHub and merge if policy allows.
+Decisions made: proceed with current worktree branch; use GitHub publish workflow; verify diff before staging.
+Files changed: pending
+Open questions / risks: repo checks/branch protection may block merge; unrelated dirty files must be excluded if present.
+Next actions: inspect status/diff; commit and push; open/comment/review/merge PR
+
+## 2026-05-20 13:11:09 +10:00
+- Objective: Prepare accepted PSE-241 visual corrections for GitHub PR/review/merge.
+- Decisions made: Scope reviewed as UI/capture/evidence/session-log only; 1440 evidence remains the accepted gate for this stage.
+- Files changed: docs/session_log.md
+- Open questions / risks: Merge depends on GitHub checks and repository policy.
+- Next actions: stage changes; commit and push; open/update PR.
+
+## 2026-05-20 13:16:53 +10:00
+- Objective: Fix GitHub CI lint failures for PR #225.
+- Decisions made: Removed unused Search/Trash/MiniTimeline variables/import residue; kept Australian date formatting intact.
+- Files changed: apps/desktop/src/renderer/pages/SearchPage.tsx; apps/desktop/src/renderer/pages/TrashPage.tsx; packages/ui/src/components/widgets/MiniTimelineWidget.tsx; docs/session_log.md
+- Open questions / risks: Await rerun of GitHub CI after amended push.
+- Next actions: amend commit; push update; re-check PR checks.
+
+## 2026-05-20 13:24:23 +10:00
+- Objective: Resolve remaining PR #225 CI test expectation failures.
+- Decisions made: Updated tests to assert Australian due dates and new single-column Settings no-vertical-text budget rule.
+- Files changed: packages/ui/tests/contactComponents.test.tsx; apps/desktop/tests/renderer/readabilityStyles.test.ts; docs/session_log.md
+- Open questions / risks: Full local pnpm test is blocked on broad Windows DB setup failures, but CI-targeted failing tests pass locally.
+- Next actions: amend/push; wait for CI; merge if green.

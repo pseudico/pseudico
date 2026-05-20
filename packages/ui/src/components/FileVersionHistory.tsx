@@ -1,3 +1,4 @@
+import { formatAustralianDateTime } from "../dateFormat";
 import { History, RotateCcw, Save, ExternalLink } from "lucide-react";
 import { useState } from "react";
 
@@ -175,7 +176,7 @@ function formatCreatedAt(value: string): string {
     return value;
   }
 
-  return date.toLocaleString();
+  return formatAustralianDateTime(value);
 }
 
 function formatFileSize(sizeBytes: number): string {

@@ -18,6 +18,19 @@ const captureSizes = [
   { label: "1280x800", width: 1280, height: 800 }
 ] as const;
 
+function getRequestedCaptureSizes(): readonly (typeof captureSizes)[number][] {
+  const requested = process.env.LOCAL_WORK_OS_CAPTURE_SIZES;
+
+  if (requested === undefined || requested.trim().length === 0) {
+    return captureSizes;
+  }
+
+  const allowed = new Set(requested.split(",").map((value) => value.trim()));
+  const filtered = captureSizes.filter((size) => allowed.has(size.label));
+
+  return filtered.length === 0 ? captureSizes : filtered;
+}
+
 export async function runPse241FullAppCapture(input: {
   app: App;
   services: DesktopIpcServices;
@@ -57,7 +70,7 @@ export async function runPse241FullAppCapture(input: {
     "| --- | --- | --- | --- |"
   ];
 
-  for (const size of captureSizes) {
+  for (const size of getRequestedCaptureSizes()) {
     input.window.setContentSize(size.width, size.height);
     await delay(500);
 
@@ -81,7 +94,17 @@ export async function runPse241FullAppCapture(input: {
 }
 
 function resolveCaptureTargets(seed: SeedResult): CaptureTarget[] {
-  return productionRouteManifest.map((entry) => ({
+  const requestedTargets = process.env.LOCAL_WORK_OS_CAPTURE_TARGETS;
+  const allowed =
+    requestedTargets === undefined || requestedTargets.trim().length === 0
+      ? null
+      : new Set(requestedTargets.split(",").map((value) => value.trim()).filter(Boolean));
+
+  return productionRouteManifest.filter((entry) =>
+    allowed === null ||
+    allowed.has(entry.screenshotKey) ||
+    allowed.has(entry.path)
+  ).map((entry) => ({
     ...entry,
     route: entry.path
       .replace(":projectId", seed.projectId)
@@ -186,7 +209,7 @@ async function navigateToRoute(window: BrowserWindow, target: CaptureTarget): Pr
     delay(6000)
   ]);
   await waitForRendererIdle(window);
-  await delay(1400);
+  await delay(2600);
 }
 
 async function assertRouteIdentity(window: BrowserWindow, target: CaptureTarget): Promise<{

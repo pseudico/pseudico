@@ -1,3 +1,5 @@
+import { formatAustralianDate } from "../dateFormat";
+
 export type ContactTimelineFilterValue =
   | "all"
   | "activity"
@@ -108,5 +110,5 @@ function formatKindLabel(value: string): string {
 }
 
 function formatDateLabel(value: string): string {
-  return value.slice(0, 10);
+  return formatAustralianDate(value);
 }

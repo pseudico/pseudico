@@ -1,3 +1,5 @@
+import { formatAustralianDate } from "../dateFormat";
+
 export type FollowUpTaskViewModel = {
   itemId: string;
   title: string;
@@ -61,5 +63,5 @@ export function FollowUpSummaryCard({
 }
 
 function formatDateLabel(value: string): string {
-  return value.slice(0, 10);
+  return formatAustralianDate(value);
 }

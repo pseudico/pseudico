@@ -20,7 +20,6 @@ import {
 import {
   CategoryBadge,
   CategoryPicker,
-  ContainerTabSummaryCards,
   ConfirmDialog,
   ContainerMediaPreview,
   CreateListForm,
@@ -43,7 +42,6 @@ import {
   TaskQuickAdd,
   ViewModeSwitcher,
   type ChecklistBulkAction,
-  type ContainerTabSummaryCardViewModel,
   type CreateListFormValues,
   type FileCardViewModel,
   type FileMetadataEditorValues,
@@ -3259,21 +3257,43 @@ export function ProjectDetailPage({
   );
   const visibleItems = tabItems.slice(0, visibleItemCount);
   const hasMoreItems = visibleItemCount < tabItems.length;
-  const tabSummaryCards = (
-    <ContainerTabSummaryCards
-      activeTabId={activeTabId}
-      busy={itemsLoading || tabBusy}
-      summaries={tabSummaries.map(toContainerTabSummaryCardViewModel)}
-      onOpenItem={(itemId, tabId) => {
-        setActiveTabId(tabId);
-        setVisibleItemCount(PROJECT_FEED_PAGE_SIZE);
-        void openInspector(itemId);
-      }}
-      onSelectTab={(tabId) => {
-        setActiveTabId(tabId);
-        setVisibleItemCount(PROJECT_FEED_PAGE_SIZE);
-      }}
-    />
+  const projectSectionSummary = (
+    <div className="project-section-summary-list" aria-label="Project section summary">
+      {tabSummaries.length === 0 ? (
+        <p className="muted-text">No sections are available yet.</p>
+      ) : (
+        tabSummaries.map((summary) => {
+          const selected = activeTabId === summary.tab.id;
+
+          return (
+            <button
+              aria-pressed={selected}
+              className={
+                selected
+                  ? "project-section-summary-button is-active"
+                  : "project-section-summary-button"
+              }
+              disabled={itemsLoading || tabBusy}
+              key={summary.tab.id}
+              type="button"
+              onClick={() => {
+                setActiveTabId(summary.tab.id);
+                setVisibleItemCount(PROJECT_FEED_PAGE_SIZE);
+              }}
+            >
+              <span>
+                <strong>{summary.tab.name}</strong>
+                {summary.tab.isDefault ? <small>Main</small> : null}
+              </span>
+              <em>
+                {summary.totalItemCount} items · {summary.openTaskCount} open ·{" "}
+                {summary.upcomingTaskCount} upcoming
+              </em>
+            </button>
+          );
+        })
+      )}
+    </div>
   );
   const relationshipGraphTargets = createRelationshipTargetOptions({
     currentContainerId: project.id,
@@ -3389,7 +3409,7 @@ export function ProjectDetailPage({
             </div>
             <p className="muted-text">Secondary outline and contacts collapse before the feed gets cramped.</p>
           </div>
-          {tabSummaryCards}
+          {projectSectionSummary}
           <section className="project-linked-context" aria-label="Project linked context">
             <div className="panel-heading-actions">
               <div className="panel-heading">
@@ -3850,27 +3870,6 @@ export function ProjectDetailPage({
   );
 }
 
-
-function toContainerTabSummaryCardViewModel(
-  summary: ContainerTabContentSummary
-): ContainerTabSummaryCardViewModel {
-  return {
-    tabId: summary.tab.id,
-    name: summary.tab.name,
-    isDefault: summary.tab.isDefault,
-    totalItemCount: summary.totalItemCount,
-    openTaskCount: summary.openTaskCount,
-    completedTaskCount: summary.completedTaskCount,
-    overdueTaskCount: summary.overdueTaskCount,
-    upcomingTaskCount: summary.upcomingTaskCount,
-    noteCount: summary.noteCount,
-    fileCount: summary.fileCount,
-    linkCount: summary.linkCount,
-    listCount: summary.listCount,
-    openTaskPreviews: summary.openTaskPreviews,
-    recentContentPreviews: summary.recentContentPreviews
-  };
-}
 
 function toProjectTaskViewModel(
   task: TaskSummary,

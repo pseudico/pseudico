@@ -126,7 +126,8 @@ describe("primary-operator readability styles", () => {
     expect(styles).toContain(".contact-content-feed");
     expect(styles).toContain("min-width: min(100%, 620px)");
     expect(styles).toContain('.settings-layout[data-space-budget-surface="maintenance-settings"]');
-    expect(styles).toContain("grid-template-columns: minmax(220px, 280px) minmax(620px, 1fr)");
+    expect(styles).toContain("grid-template-columns: 1fr !important");
+    expect(styles).toContain("grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important");
     expect(styles).toContain('.trash-page[data-space-budget-surface="maintenance-trash"] .trash-row');
     expect(styles).toContain("grid-template-columns: minmax(520px, 1fr) auto");
     expect(styles).toContain('.workflow-page[data-space-budget-surface="workflow-lab"]');

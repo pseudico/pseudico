@@ -3,6 +3,7 @@ import {
   type QuickAddFormValues
 } from "../forms/QuickAddForm";
 import type { NaturalDateParserOptions } from "@local-work-os/core";
+import { formatAustralianDate } from "../dateFormat";
 import { useMemo, useRef, useState } from "react";
 
 export type DailyPlannerLane = "today" | "tomorrow";
@@ -185,10 +186,10 @@ export function DailyPlannerEditor({
         <span>Destination: {targetContainerName}</span>
         <span>
           Due: {activePreview.ok && activePreview.values.dueAt != null
-            ? activePreview.values.dueAt.slice(0, 10)
+            ? formatAustralianDate(activePreview.values.dueAt)
             : activeLane === "today"
-              ? todayDueAt.slice(0, 10)
-              : tomorrowDueAt.slice(0, 10)}
+              ? formatAustralianDate(todayDueAt)
+              : formatAustralianDate(tomorrowDueAt)}
         </span>
         <span>Submit: Ctrl/Cmd+Enter</span>
       </div>
@@ -327,7 +328,6 @@ function DailyPlannerLaneInput({
       <textarea
         ref={inputRef}
         disabled={disabled}
-        placeholder={`Add a ${lane} task with the full next action, destination, and useful date context`}
         rows={4}
         value={value}
         onChange={(event) => onChange(event.currentTarget.value)}
