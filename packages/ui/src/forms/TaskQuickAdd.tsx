@@ -70,6 +70,7 @@ export function TaskQuickAdd({
         <span className="task-date-input">
           <CalendarPlus size={16} aria-hidden="true" />
           <input
+            className={dueDate.length === 0 ? "date-input-empty" : undefined}
             disabled={disabled}
             type="date"
             value={dueDate}

@@ -1,6 +1,6 @@
 import { RefreshCw, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { EmptyState, ErrorState, formatUserError } from "@local-work-os/ui";
+import { EmptyState, ErrorState, formatAustralianDateTime, formatUserError } from "@local-work-os/ui";
 import { desktopApiClient } from "../api/desktopApiClient";
 import { showToast } from "../shell/toastStore";
 import {
@@ -308,6 +308,5 @@ function formatTargetType(targetType: TrashTargetTypeSummary): string {
 }
 
 function formatDate(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+  return formatAustralianDateTime(value);
 }

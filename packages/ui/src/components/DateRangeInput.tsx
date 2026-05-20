@@ -54,7 +54,6 @@ export function DateRangeInput({
       <input
         aria-invalid={error === null ? undefined : true}
         disabled={disabled}
-        placeholder="May 1 9am - May 3 5pm"
         value={value}
         onBlur={() => {
           void submit(value);

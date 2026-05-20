@@ -1,3 +1,4 @@
+import { formatAustralianDate } from "../dateFormat";
 import { FileText, ListChecks, Paperclip, StickyNote } from "lucide-react";
 
 export type TabSummaryPreviewViewModel = {
@@ -129,7 +130,7 @@ export function ContainerTabSummaryCards({
                       >
                         <span>
                           {item.kind === "open_task" ? "Task" : getItemLabel(item.type)}
-                          {item.dueAt === null ? null : ` ? ${item.dueAt.slice(0, 10)}`}
+                          {item.dueAt === null ? null : ` - ${formatAustralianDate(item.dueAt)}`}
                         </span>
                         <strong>{item.title}</strong>
                         {item.preview === null || item.preview.trim().length === 0 ? null : (

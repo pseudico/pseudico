@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { onboardingChecklist } from "@local-work-os/features/help";
-import { EmptyState, OnboardingChecklist, renderLoadableState } from "@local-work-os/ui";
+import { EmptyState, OnboardingChecklist, formatAustralianDate, renderLoadableState } from "@local-work-os/ui";
 import { WorkspaceHealthPanel } from "./WorkspaceHealthPanel";
 import type {
   DashboardActivityWidgetItemSummary,
@@ -379,5 +379,5 @@ function formatDateLabel(value: string | null): string {
   if (value === null || value.length === 0) {
     return "No date";
   }
-  return value.slice(0, 10);
+  return formatAustralianDate(value);
 }

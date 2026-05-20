@@ -4,6 +4,7 @@ import {
   type DashboardWidgetKind
 } from "../DashboardWidget";
 import { SnoozeMenu, type SnoozePreset } from "../SnoozeMenu";
+import { formatAustralianDate } from "../../dateFormat";
 
 export type DashboardTaskWidgetItem = {
   itemId: string;
@@ -72,7 +73,7 @@ export function TaskDashboardWidget({
                     <strong>{task.title}</strong>
                     <span>
                       <CalendarDays size={14} aria-hidden="true" />
-                      {task.dueAt ?? "No due date"}
+                      {task.dueAt === null ? "No due date" : formatAustralianDate(task.dueAt)}
                     </span>
                   </span>
                   <span className="dashboard-widget-row-meta">

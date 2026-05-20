@@ -10,6 +10,7 @@ import {
   CreateFromTemplateDialog,
   ProjectForm,
   TemplateLibrary,
+  formatAustralianDate,
   renderLoadableState,
   type TemplateLibraryItem,
   type ProjectFormValues
@@ -837,7 +838,7 @@ function ProjectListRow({
           {project.isFavorite ? <Star size={16} aria-label="Pinned" /> : null}
           <span>{project.status}</span>
           <span>{categoryName}</span>
-          <span>Updated {project.updatedAt.slice(0, 10)}</span>
+          <span>Updated {formatAustralianDate(project.updatedAt)}</span>
           {visibilityFilter === "archived" ? (
             <button
               type="button"

@@ -239,7 +239,6 @@ export function SmartListEditor({
           type="text"
           value={values.name}
           disabled={disabled}
-          placeholder="Waiting project tasks"
           onChange={(event) => setValues({ ...values, name: event.target.value })}
         />
       </label>
@@ -249,7 +248,6 @@ export function SmartListEditor({
         <textarea
           value={values.description}
           disabled={disabled}
-          placeholder="Optional note about when to use this smart list"
           onChange={(event) =>
             setValues({ ...values, description: event.target.value })
           }
@@ -386,7 +384,6 @@ export function SmartListEditor({
           type="search"
           value={values.text}
           disabled={disabled}
-          placeholder="supplier, invoice, @client"
           onChange={(event) => setValues({ ...values, text: event.target.value })}
         />
       </label>

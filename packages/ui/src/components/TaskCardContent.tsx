@@ -1,3 +1,4 @@
+import { formatAustralianDate } from "../dateFormat";
 import { CheckCircle2, RotateCcw } from "lucide-react";
 import type { ParsedDateRange } from "@local-work-os/core";
 import type { UniversalItemViewModel } from "./ItemCard";
@@ -174,7 +175,7 @@ export function TaskDetailsRow({
       {dueAt === undefined || dueAt === null ? (
         <span>No due date</span>
       ) : (
-        <span>Due {dueAt.slice(0, 10)}</span>
+        <span>Due {formatAustralianDate(dueAt)}</span>
       )}
       {timezone === undefined || timezone === null ? null : <span>{timezone}</span>}
     </div>

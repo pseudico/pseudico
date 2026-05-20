@@ -1,4 +1,5 @@
-﻿import { CalendarDays } from "lucide-react";
+﻿import { formatAustralianDateTime } from "../dateFormat";
+import { CalendarDays } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   createTimelineDateScale,
@@ -324,10 +325,7 @@ function isDueOnly(item: TimelineViewItem): boolean {
 }
 
 function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short"
-  }).format(new Date(value));
+  return formatAustralianDateTime(value);
 }
 
 function shortDate(value: string): string {

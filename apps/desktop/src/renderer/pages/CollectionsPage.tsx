@@ -16,6 +16,7 @@ import {
   SmartListEditor,
   TimelineView,
   ViewModeSwitcher,
+  formatAustralianDate,
   type CreateCollectionFormValues,
   type GroupedResultGroupViewModel,
   type GroupedResultViewModel,
@@ -1183,8 +1184,5 @@ function formatCalendarMonthLabel(days: readonly MonthCalendarDay[]): string {
 }
 
 function formatDateHeading(date: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeZone: "UTC"
-  }).format(new Date(`${date}T00:00:00.000Z`));
+  return formatAustralianDate(date);
 }

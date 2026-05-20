@@ -1,4 +1,6 @@
-﻿export type CalendarAgendaItem = {
+﻿import { formatAustralianDateTime } from "../dateFormat";
+
+export type CalendarAgendaItem = {
   id: string;
   kind: "task" | "list_item" | "calendar_event";
   title: string;
@@ -76,9 +78,6 @@ export function CalendarAgenda({
 }
 
 function formatAgendaDate(value: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short"
-  }).format(new Date(value));
+  return formatAustralianDateTime(value);
 }
 

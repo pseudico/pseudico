@@ -6,6 +6,7 @@ import {
   ErrorState,
   SearchFilters,
   SearchResultCard,
+  formatAustralianDate,
   renderLoadableState,
   type SearchFiltersValue,
   type SearchResultCardViewModel,
@@ -612,7 +613,6 @@ export function SearchPage({
 
           <SearchTrustSummary
             activeQuery={activeQuery}
-            filterSummary={activeFilterSummary}
             groupCount={visibleResultGroups.length}
             includeArchived={activeFilters.includeArchived}
             loading={searchPending}
@@ -799,14 +799,12 @@ function SearchResultPreviewPanel({
 
 function SearchTrustSummary({
   activeQuery,
-  filterSummary,
   groupCount,
   includeArchived,
   loading,
   resultCount
 }: {
   activeQuery: string;
-  filterSummary: string[];
   groupCount: number;
   includeArchived: boolean;
   loading: boolean;
@@ -830,11 +828,6 @@ function SearchTrustSummary({
         <span>Visible result shape</span>
         <strong>{loading && resultCount === 0 ? "Searching..." : `${resultCount} result${resultCount === 1 ? "" : "s"} in ${groupCount} group${groupCount === 1 ? "" : "s"}`}</strong>
         <small>Cards show type, title, snippet, context, status/date, tags, and highlights when available.</small>
-      </article>
-      <article>
-        <span>Filters</span>
-        <strong>{filterSummary.length === 0 ? "None" : filterSummary.join(" · ")}</strong>
-        <small>Filters narrow the local index without hiding the query state.</small>
       </article>
     </div>
   );
@@ -879,8 +872,8 @@ function toSearchResultCardViewModel(
     })),
     contextLabel: buildContextLabel(result),
     whyMatched: buildWhyMatchedLabel(result, query),
-    updatedLabel: result.updatedAt.slice(0, 10),
-    dueAt: result.dueAt ?? null,
+    updatedLabel: formatAustralianDate(result.updatedAt),
+    dueAt: result.dueAt === null || result.dueAt === undefined ? null : formatAustralianDate(result.dueAt),
     taskStatus: result.taskStatus ?? null,
     disabled: result.destinationPath === null
   };

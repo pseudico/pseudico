@@ -1,3 +1,4 @@
+import { formatAustralianDate } from "../../dateFormat";
 import { Activity, AlertTriangle, CalendarClock } from "lucide-react";
 import { DashboardWidget } from "../DashboardWidget";
 import { ProjectHealthBadges, type ProjectHealthViewModel } from "../ProjectHealthCard";
@@ -44,7 +45,7 @@ export function ProjectHealthWidget({
                     <Activity size={13} aria-hidden="true" />
                     {`${project.openTaskCount} open / ${project.waitingTaskCount} waiting`}
                     <CalendarClock size={13} aria-hidden="true" />
-                    {project.nextTask?.dueAt?.slice(0, 10) ?? "No due date"}
+                    {project.nextTask?.dueAt == null ? "No due date" : formatAustralianDate(project.nextTask.dueAt)}
                   </span>
                   <ProjectHealthBadges badges={project.healthBadges} />
                 </span>

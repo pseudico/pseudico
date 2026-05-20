@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { ReorderControls } from "./ReorderControls";
 import { SnoozeMenu, type SnoozePreset } from "./SnoozeMenu";
+import { formatAustralianDate, formatAustralianDateTime } from "../dateFormat";
 
 export type TodayTaskCardViewModel = {
   itemType?: "task" | "list_item";
@@ -196,17 +197,14 @@ function formatDueLabel(value: string | null): string {
   }
 
   if (value.endsWith("T00:00:00.000Z")) {
-    return value.slice(0, 10);
+    return formatAustralianDate(value);
   }
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return value.slice(0, 10);
+    return formatAustralianDate(value);
   }
 
-  return date.toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short"
-  });
+  return formatAustralianDateTime(value);
 }

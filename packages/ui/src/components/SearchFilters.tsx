@@ -47,9 +47,8 @@ export function SearchFilters<TKind extends string = string>({
       data-space-budget-surface="search-filters"
       aria-label="Search filters"
     >
-      <div className="panel-heading">
+      <div className="panel-heading search-filter-heading">
         <h3>Filters</h3>
-        <p>Type, tag, category, status, and date filters narrow results without crowding titles.</p>
       </div>
       <div className="search-filter-list" aria-label="Type filters">
         {kindOptions.map((option) => (
@@ -67,7 +66,6 @@ export function SearchFilters<TKind extends string = string>({
       <label>
         <span>Tags</span>
         <input
-          placeholder="call, ops"
           value={value.tags}
           onChange={(event) => update({ tags: event.target.value })}
         />
@@ -75,7 +73,6 @@ export function SearchFilters<TKind extends string = string>({
       <label>
         <span>Category</span>
         <input
-          placeholder="Work"
           value={value.category}
           onChange={(event) => update({ category: event.target.value })}
         />
@@ -83,7 +80,6 @@ export function SearchFilters<TKind extends string = string>({
       <label>
         <span>Status</span>
         <input
-          placeholder="open"
           value={value.status}
           onChange={(event) => update({ status: event.target.value })}
         />

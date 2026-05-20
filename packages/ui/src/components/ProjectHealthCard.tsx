@@ -1,3 +1,4 @@
+import { formatAustralianDate } from "../dateFormat";
 import { AlertTriangle, CalendarClock, CheckCircle2, Clock3, ListTodo } from "lucide-react";
 import type { RecentActivityViewModel } from "./RecentActivityList";
 
@@ -162,5 +163,5 @@ function formatDateLabel(value: string | null): string {
     return "No due date";
   }
 
-  return value.slice(0, 10);
+  return formatAustralianDate(value);
 }

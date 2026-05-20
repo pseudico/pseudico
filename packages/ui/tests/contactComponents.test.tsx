@@ -306,7 +306,7 @@ describe("Contact timeline UI", () => {
     expect(html).toContain("Follow-ups");
     expect(html).toContain("Follow up with Alex");
     expect(html).toContain("Confirm contract timing.");
-    expect(html).toContain("Due 2026-05-08 - overdue");
+    expect(html).toContain("Due 08/05/2026 - overdue");
   });
 });
 

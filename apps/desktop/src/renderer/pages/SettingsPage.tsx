@@ -26,6 +26,7 @@ import {
   CategoryBadge,
   EmptyState,
   ErrorState,
+  formatAustralianDateTime,
   formatUserError
 } from "@local-work-os/ui";
 import { WorkspaceHealthPanel } from "./WorkspaceHealthPanel";
@@ -3464,9 +3465,7 @@ function formatBackupKind(kind: BackupSnapshotSummary["kind"]): string {
 }
 
 function formatDiagnosticDate(value: string): string {
-  const date = new Date(value);
-
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+  return formatAustralianDateTime(value);
 }
 
 function formatBytes(value: number): string {

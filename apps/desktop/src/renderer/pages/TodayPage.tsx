@@ -6,6 +6,7 @@ import {
   EmptyState,
   ErrorState,
   TodayLane,
+  formatAustralianDate,
   type DailyPlannerSubmission,
   type SnoozePreset,
   type TodayTaskCardViewModel
@@ -691,7 +692,7 @@ function SelectedTaskInspector({
             </div>
             <div>
               <dt>Due</dt>
-              <dd>{task.dueAt?.slice(0, 10) ?? "No due date"}</dd>
+              <dd>{task.dueAt === null ? "No due date" : formatAustralianDate(task.dueAt)}</dd>
             </div>
             <div>
               <dt>Status</dt>
