@@ -162,6 +162,7 @@ Run the package build and packaged smoke entry point:
 ```bash
 pnpm package
 pnpm package:smoke
+pnpm qa:packaged-launch -- --screenshot=docs/manual-qa/screenshots/PSE-248-packaged-launch-check/welcome.png
 pnpm release:package-check
 ```
 
@@ -170,8 +171,56 @@ The packaged smoke command launches the packaged executable with
 a project and task through the main-process service layer, reopens the database,
 checks activity-log persistence, verifies the database and attachment paths are
 outside the packaged app bundle, then removes the temporary workspace.
+
+The packaged launch check is the canonical manual-QA launch proof for
+operator/release screenshots. It launches the current unpacked packaged app
+with a remote-debugging port, waits for the welcome shell to render, optionally
+captures a screenshot, prints package metadata, and exits within a bounded
+timeout. Use it when a QA pass needs to prove which build is being driven:
+
+```bash
+pnpm qa:packaged-launch -- --screenshot=docs/manual-qa/screenshots/<ticket>/welcome.png
+```
+
+The JSON output includes the packaged executable path, `resources/app.asar`
+path, SHA-256 checksums, file modified times, package versions, git SHA when
+available, and a normal-launch result. If it fails with Windows display/Mojo
+errors such as `No displays detected`, `platform_channel`, or `Access is
+denied`, rerun it from a display-capable session. Do not reclassify a
+sandbox/no-display Electron failure as an app regression without a
+display-capable packaged-app retry.
+
 The release package check writes artifact checksums and package/data-boundary
 status to `docs/release/package-artifact-check.json`.
+
+### Canonical launch matrix
+
+| Intent | Command / target | Use for final QA evidence? | Notes |
+| --- | --- | --- | --- |
+| Active renderer/main development | `pnpm dev` | No | Use only while editing source. It runs an Electron/Vite dev shell and can be unsuitable for release/operator screenshots. Do not run it as an unbounded background command. |
+| Build current unpacked app | `pnpm package` | Prerequisite | Produces the unpacked app under `apps/desktop/dist-packaged/`. |
+| Service/data smoke of packaged app | `pnpm package:smoke` | Yes, command evidence | Exercises smoke mode and normal launch; may require display-capable execution on Windows/Electron. |
+| Operator/release screenshot launch proof | `pnpm qa:packaged-launch -- --screenshot=...` | Yes | Preferred proof that the current packaged app renders and that screenshots come from the intended artifact. |
+| Manual operator work | `apps/desktop/dist-packaged/win-unpacked/Local Work OS.exe` | Yes | Use the exact packaged executable after package/smoke/launch proof has identified the artifact. |
+
+Before asking Codex to populate a workspace or take screenshots, confirm the QA
+pass is using the packaged app path above unless the ticket explicitly says it
+is testing `pnpm dev`.
+
+### Stale packaged-QA process cleanup
+
+If a launch attempt is interrupted, identify Pseudico processes by command line
+before stopping anything:
+
+```powershell
+Get-CimInstance Win32_Process |
+  Where-Object { $_.CommandLine -match 'Local Work OS.exe|run-packaged-launch-check|run-package-smoke|electron-vite dev' } |
+  Select-Object ProcessId,Name,CommandLine
+```
+
+Stop only the confirmed stale Pseudico launch or smoke processes. Do not run a
+broad `Stop-Process node` or kill all Electron/Node processes, because Codex,
+package managers, and other local tools may also be running on Node.
 
 Manual verification for a temporary workspace:
 
