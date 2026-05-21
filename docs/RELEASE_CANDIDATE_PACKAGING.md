@@ -4,7 +4,7 @@ PSE-204 / PSE-OR-009 records how Local Work OS can be handed to an operator as a
 
 ## Current distribution tier
 
-**Internal pilot / operator-readiness candidate:** unpacked Electron directory package produced by `pnpm package` and verified by `pnpm package:smoke` plus `pnpm release:package-check`.
+**Internal pilot / operator-readiness candidate:** unpacked Electron directory package produced by `pnpm package` and verified by `pnpm package:smoke`, `pnpm qa:packaged-launch`, and `pnpm release:package-check`.
 
 Not yet public-release ready because installer targets, Windows signing,
 macOS signing/notarization, public checksum publishing, release-channel hosting,
@@ -102,6 +102,7 @@ Run in this order on the target OS:
 ```bash
 pnpm package
 pnpm package:smoke
+pnpm qa:packaged-launch -- --screenshot=docs/manual-qa/screenshots/<ticket>/welcome.png
 pnpm release:package-check
 ```
 
@@ -113,6 +114,30 @@ pnpm release:package-check
 - create a manual backup;
 - reopen the database and verify activity persistence; and
 - keep workspace database, attachments, and backups outside the packaged app bundle.
+
+`pnpm qa:packaged-launch` is the canonical packaged-app launch proof for
+manual QA and screenshot runs. It launches the current packaged executable with
+a bounded timeout and DevTools endpoint, verifies the welcome shell rendered,
+optionally captures a screenshot, and prints artifact evidence:
+
+- packaged executable path and SHA-256;
+- `resources/app.asar` path and SHA-256;
+- artifact modified times and sizes;
+- root and desktop package names/versions;
+- git SHA when available; and
+- normal-launch status and stderr tail for display/sandbox diagnostics.
+
+Use this helper before final operator screenshots so the evidence proves which
+modern/current packaged artifact is under test. Do not substitute an unbounded
+background `pnpm dev` launch for release/operator QA screenshots. `pnpm dev`
+is acceptable for active development only; it runs a Vite/Electron dev shell
+and may not reflect the packaged app an operator receives.
+
+On Windows, Electron may fail from sandboxed or non-display sessions with
+messages such as `No displays detected`, `platform_channel`, or `Access is
+denied`. Rerun package smoke/launch checks from a display-capable session
+before filing a product launch regression. Those errors are launch-environment
+evidence unless reproduced in the normal packaged app session.
 
 `pnpm release:package-check` writes `docs/release/package-artifact-check.json` with:
 

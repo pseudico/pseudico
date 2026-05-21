@@ -35,6 +35,28 @@ Do **not** use it as:
 
 ## 3. First-run checklist
 
+### Which Pseudico build am I opening?
+
+For internal pilot QA and screenshots, use the unpacked packaged app, not a
+developer server:
+
+- Windows packaged app:
+  `apps/desktop/dist-packaged/win-unpacked/Local Work OS.exe`
+- Build it with `pnpm package` when the artifact is missing or stale.
+- Prove the current artifact before final QA with:
+  `pnpm qa:packaged-launch -- --screenshot=docs/manual-qa/screenshots/<ticket>/welcome.png`
+
+The packaged launch proof prints the executable path, `app.asar` path,
+checksums, modified times, package versions, and git SHA when available. Use
+that evidence to confirm you are opening the modern/current build. `pnpm dev`
+is for active development only and should not be used as final operator QA
+evidence unless the ticket explicitly says it is testing dev mode.
+
+On Windows, Electron launch checks need a display-capable session. If a
+sandboxed/background launch reports `No displays detected`, Mojo
+`platform_channel`, or `Access is denied`, retry the packaged launch proof from
+a display-capable session before treating it as a Pseudico product failure.
+
 1. Open Pseudico.
 2. Choose **Create workspace** or **Open workspace**.
 3. Select a local folder that you can read and write.

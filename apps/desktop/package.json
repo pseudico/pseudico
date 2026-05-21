@@ -18,7 +18,8 @@
     "test": "vitest run --config vitest.config.ts --passWithNoTests",
     "build": "electron-vite build",
     "package": "node scripts/package-development.mjs",
-    "package:smoke": "node scripts/run-package-smoke.mjs"
+    "package:smoke": "node scripts/run-package-smoke.mjs",
+    "qa:packaged-launch": "node scripts/run-packaged-launch-check.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^12.9.0",
