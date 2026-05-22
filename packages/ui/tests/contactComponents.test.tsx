@@ -225,6 +225,9 @@ describe("Relationship panels", () => {
 
     expect(html).toContain("Related contacts");
     expect(html).toContain("Alex Chen");
+    expect(html).toContain("status-badge");
+    expect(html).toContain("Active");
+    expect(html).not.toContain("Alex Chenactive");
     expect(html).toContain("2 open follow-ups");
     expect(html).toContain("Updated Alex Chen.");
     expect(html).toContain("Open contact");
@@ -248,6 +251,7 @@ describe("Relationship panels", () => {
         ]}
         selectedProjectId="project_2"
         onLinkProject={() => undefined}
+        onOpenProject={() => undefined}
         onSelectedProjectChange={() => undefined}
         onUnlinkProject={() => undefined}
       />
@@ -255,8 +259,12 @@ describe("Relationship panels", () => {
 
     expect(html).toContain("Related projects");
     expect(html).toContain("Launch Plan");
+    expect(html).toContain("status-badge");
+    expect(html).toContain("Active");
+    expect(html).not.toContain("Launch Planactive");
     expect(html).toContain("1 open follow-up");
     expect(html).toContain("Link project");
+    expect(html).toContain("Open project");
   });
 });
 

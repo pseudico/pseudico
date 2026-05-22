@@ -8617,3 +8617,13 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: GitHub CI is in progress; PR is draft and not mergeable until evidence gaps are closed.
 Next actions: complete missing screenshots; mark PR ready; merge only after CI/review policy allows.
+
+## 2026-05-22 12:21:48 +10:00
+Objective: Apply screenshot-observation fixes for contact card information/layout issues in household-renovation QA.
+Decisions made:
+- Separated relationship titles from status chips and added explicit open-project action from contact relationships.
+- Replaced contact TAGS Placeholder with an intentional empty tag state.
+Files changed:
+- apps/desktop/src/renderer/pages/ContactDetailPage.tsx; apps/desktop/src/renderer/styles.css; packages/ui/src/components/RelatedContactsPanel.tsx; packages/ui/src/components/RelatedProjectsPanel.tsx; packages/ui/tests/contactComponents.test.tsx
+Open questions / risks: New screenshots not captured in this pass; PR remains draft pending broader manual evidence.
+Next actions: Push UI polish; update PR/Linear; capture final packaged screenshots later.
