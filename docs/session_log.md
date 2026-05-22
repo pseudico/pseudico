@@ -8592,3 +8592,48 @@ Next actions: inspect status/diff; commit and push; open/comment/review/merge PR
 - Files changed: packages/ui/tests/contactComponents.test.tsx; apps/desktop/tests/renderer/readabilityStyles.test.ts; docs/session_log.md
 - Open questions / risks: Full local pnpm test is blocked on broad Windows DB setup failures, but CI-targeted failing tests pass locally.
 - Next actions: amend/push; wait for CI; merge if green.
+
+## 2026-05-22T11:12:27.8838904+10:00
+Objective: Package, document, and evidence household-renovation QA corrective fixes.
+Decisions made:
+- Packaged app build succeeded; PSE-249/PSE-254 visual evidence captured, but search/today/save action screenshots hit CDP workspace-state timeout.
+- Created per-ticket evidence docs and marked remaining screenshot gaps as P2 evidence follow-up.
+Files changed:
+- docs/manual-qa/PSE-249-contact-detail-route-fix.md
+- docs/manual-qa/PSE-250-search-result-loading-fix.md
+- docs/manual-qa/PSE-251-project-display-settings-fix.md
+- docs/manual-qa/PSE-252-today-metrics-reconciliation.md
+- docs/manual-qa/PSE-253-search-attachment-deduplication.md
+- docs/manual-qa/PSE-254-project-tag-header-display.md
+Open questions / risks: Manual packaged screenshots for PSE-250/PSE-252/PSE-253 and save-persist proof for PSE-251 remain pending.
+Next actions: rerun verification after docs; create PR; update Linear with PR and evidence status.
+
+## 2026-05-22T11:16:45.2164810+10:00
+Objective: Publish household-renovation QA corrective PR and reconcile Linear.
+Decisions made:
+- Opened draft PR #227 because local checks pass but manual packaged evidence remains incomplete.
+- Updated PSE-249 through PSE-254 with PR, checks, evidence, status, and residual P2 risks.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub CI is in progress; PR is draft and not mergeable until evidence gaps are closed.
+Next actions: complete missing screenshots; mark PR ready; merge only after CI/review policy allows.
+
+## 2026-05-22 12:21:48 +10:00
+Objective: Apply screenshot-observation fixes for contact card information/layout issues in household-renovation QA.
+Decisions made:
+- Separated relationship titles from status chips and added explicit open-project action from contact relationships.
+- Replaced contact TAGS Placeholder with an intentional empty tag state.
+Files changed:
+- apps/desktop/src/renderer/pages/ContactDetailPage.tsx; apps/desktop/src/renderer/styles.css; packages/ui/src/components/RelatedContactsPanel.tsx; packages/ui/src/components/RelatedProjectsPanel.tsx; packages/ui/tests/contactComponents.test.tsx
+Open questions / risks: New screenshots not captured in this pass; PR remains draft pending broader manual evidence.
+Next actions: Push UI polish; update PR/Linear; capture final packaged screenshots later.
+
+## 2026-05-22 17:45:20 +10:00
+Objective: Prepare PR #227 for correct merge path.
+Decisions made:
+- Rebuilt packaged app and captured refreshed PSE-249/PSE-251/PSE-254 production-route screenshots.
+- Fixed project tags to render in the production work-first header, not only the advanced metadata area.
+Files changed:
+- apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; docs/manual-qa/PSE-249-contact-detail-route-fix.md; docs/manual-qa/PSE-251-project-display-settings-fix.md; docs/manual-qa/PSE-254-project-tag-header-display.md; docs/manual-qa/screenshots/PSE-249-contact-detail-route-fix/contact-direct-card-polished.png; docs/manual-qa/screenshots/PSE-249-contact-detail-route-fix/project-relationship-card-polished.png; docs/manual-qa/screenshots/PSE-251-project-display-settings-fix/project-display-settings-compact-persisted.png; docs/manual-qa/screenshots/PSE-254-project-tag-header-display/project-tags-real-tags.png; docs/session_log.md
+Open questions / risks: PSE-250/PSE-252/PSE-253 packaged evidence capture still times out after workspace refresh; do not merge while PR is draft.
+Next actions: Run checks; push merge-prep commit; keep PR draft unless remaining evidence is completed.

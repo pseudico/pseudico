@@ -253,9 +253,11 @@ export class SearchService {
       }
     }
 
-    return filterStructuredSearchResults(
-      this.searchResultHydrator.hydrateSearchResults(records, hydrateOptions),
-      parsed
+    return deduplicateAttachmentFilePairs(
+      filterStructuredSearchResults(
+        this.searchResultHydrator.hydrateSearchResults(records, hydrateOptions),
+        parsed
+      )
     )
       .map((result) => decorateSearchResult(result, parsed.textQuery))
       .sort(compareDecoratedSearchResults)
@@ -608,6 +610,21 @@ function compareDecoratedSearchResults(left: SearchResult, right: SearchResult):
   }
 
   return right.updatedAt.localeCompare(left.updatedAt) || left.title.localeCompare(right.title);
+}
+
+function deduplicateAttachmentFilePairs(results: SearchResult[]): SearchResult[] {
+  const fileItemIds = new Set(
+    results
+      .filter((result) => result.targetType === "item" && result.kind === "file")
+      .map((result) => result.targetId)
+  );
+
+  return results.filter(
+    (result) =>
+      result.targetType !== "attachment" ||
+      result.parentItemId === null ||
+      !fileItemIds.has(result.parentItemId)
+  );
 }
 
 function calculateSearchScore(result: SearchResult, terms: readonly SearchTerm[]): number {

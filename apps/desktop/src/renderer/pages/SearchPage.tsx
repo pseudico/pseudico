@@ -189,6 +189,8 @@ export function SearchPage({
     async function runSearch(): Promise<void> {
       setLoading(true);
       setError(null);
+      setResults([]);
+      setHasMoreResults(false);
 
       const input: SearchWorkspaceInput = {
         workspaceId,

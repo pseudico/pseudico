@@ -1575,7 +1575,7 @@ export function ContactDetailPage({
           style={{ backgroundColor: contact.color ?? "#2c6b8f" }}
           aria-hidden="true"
         />
-        <div>
+        <div className="project-detail-title-block contact-detail-title-block">
           <p className="top-eyebrow">Contact</p>
           <h2>{contact.name}</h2>
           <p>{contact.description ?? "No description added yet."}</p>
@@ -1630,9 +1630,9 @@ export function ContactDetailPage({
         </div>
         <div>
           <dt>Tags</dt>
-          <dd>
+          <dd className="project-header-tags">
             <Tag size={15} aria-hidden="true" />
-            Placeholder
+            <span className="muted-text">No contact tags assigned</span>
           </dd>
         </div>
       </dl>
@@ -1665,6 +1665,7 @@ export function ContactDetailPage({
             relatedProjects={relatedProjectViewModels}
             selectedProjectId={selectedProjectId}
             onLinkProject={() => void linkSelectedProject()}
+            onOpenProject={(projectId) => navigate(`/projects/${encodeURIComponent(projectId)}`)}
             onSelectedProjectChange={setSelectedProjectId}
             onUnlinkProject={(relationshipId) => void unlinkRelatedProject(relationshipId)}
           />

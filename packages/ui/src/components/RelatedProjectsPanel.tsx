@@ -21,6 +21,7 @@ export type RelatedProjectsPanelProps = {
   relatedProjects: readonly RelatedProjectViewModel[];
   availableProjects: readonly RelatedProjectOption[];
   selectedProjectId: string;
+  onOpenProject?: (projectId: string) => void;
   onSelectedProjectChange: (projectId: string) => void;
   onLinkProject: () => void;
   onUnlinkProject: (relationshipId: string) => void;
@@ -32,6 +33,7 @@ export function RelatedProjectsPanel({
   relatedProjects,
   availableProjects,
   selectedProjectId,
+  onOpenProject,
   onSelectedProjectChange,
   onLinkProject,
   onUnlinkProject,
@@ -75,15 +77,15 @@ export function RelatedProjectsPanel({
           {relatedProjects.map((project) => (
             <li key={project.relationshipId}>
               <article className="related-summary-card">
-                <div>
+                <div className="related-summary-card-header">
                   <strong>{project.name}</strong>
-                  <span>{project.status}</span>
+                  <span className="status-badge">{formatStatusLabel(project.status)}</span>
                 </div>
                 {project.description !== null ? (
-                  <p>{project.description}</p>
+                  <p className="related-summary-description">{project.description}</p>
                 ) : null}
                 <small>
-                  {formatFollowUpCount(project.openTaskCount)} ·{" "}
+                  {formatFollowUpCount(project.openTaskCount)}{" \u00b7 "}
                   {formatActivityCount(project.recentActivityCount)}
                 </small>
                 {project.recentActivity.length > 0 ? (
@@ -93,13 +95,22 @@ export function RelatedProjectsPanel({
                     ))}
                   </ul>
                 ) : null}
-                <button
-                  type="button"
-                  onClick={() => onUnlinkProject(project.relationshipId)}
-                  disabled={busy}
-                >
-                  Unlink
-                </button>
+                <div className="button-row">
+                  <button
+                    type="button"
+                    onClick={() => onOpenProject?.(project.projectId)}
+                    disabled={busy || onOpenProject === undefined}
+                  >
+                    Open project
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onUnlinkProject(project.relationshipId)}
+                    disabled={busy}
+                  >
+                    Unlink
+                  </button>
+                </div>
               </article>
             </li>
           ))}
@@ -115,4 +126,10 @@ function formatFollowUpCount(count: number): string {
 
 function formatActivityCount(count: number): string {
   return `${count} recent activity event${count === 1 ? "" : "s"}`;
+}
+
+function formatStatusLabel(status: string): string {
+  return status.length === 0
+    ? "Unknown"
+    : `${status.slice(0, 1).toUpperCase()}${status.slice(1)}`;
 }

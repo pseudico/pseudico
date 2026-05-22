@@ -1508,6 +1508,9 @@ describe("Projects renderer pages", () => {
                 initialAvailableContacts={[contact]}
                 initialRelatedContacts={[relatedContact]}
                 initialProject={project}
+                initialProjectTags={[
+                  { id: "tag_launch", name: "Launch", slug: "launch", source: "manual" }
+                ]}
                 initialItems={[projectItem, projectNote, projectFile]}
               />
             }
@@ -1520,6 +1523,8 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Status");
     expect(html).toContain("Category");
     expect(html).toContain("Tags");
+    expect(html).toMatch(/@(?:<!-- -->)?launch/);
+    expect(html).not.toContain("Placeholder");
     expect(html).toContain("Next work");
     expect(html).toContain("Task load");
     expect(html).toContain("Content here");

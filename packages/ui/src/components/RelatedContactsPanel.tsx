@@ -26,6 +26,7 @@ export type RelatedContactsPanelProps = {
   relatedContacts: readonly RelatedContactViewModel[];
   availableContacts: readonly RelatedContactOption[];
   selectedContactId: string;
+  onOpenContact?: (contactId: string) => void;
   onSelectedContactChange: (contactId: string) => void;
   onLinkContact: () => void;
   onUnlinkContact: (relationshipId: string) => void;
@@ -37,6 +38,7 @@ export function RelatedContactsPanel({
   relatedContacts,
   availableContacts,
   selectedContactId,
+  onOpenContact,
   onSelectedContactChange,
   onLinkContact,
   onUnlinkContact,
@@ -80,15 +82,15 @@ export function RelatedContactsPanel({
           {relatedContacts.map((contact) => (
             <li key={contact.relationshipId}>
               <article className="related-summary-card">
-                <div>
+                <div className="related-summary-card-header">
                   <strong>{contact.name}</strong>
-                  <span>{contact.status}</span>
+                  <span className="status-badge">{formatStatusLabel(contact.status)}</span>
                 </div>
                 {contact.description !== null ? (
-                  <p>{contact.description}</p>
+                  <p className="related-summary-description">{contact.description}</p>
                 ) : null}
                 <small>
-                  {formatFollowUpCount(contact.openTaskCount)} ·{" "}
+                  {formatFollowUpCount(contact.openTaskCount)}{" \u00b7 "}
                   {formatActivityCount(contact.recentActivityCount)}
                 </small>
                 {contact.recentActivity.length > 0 ? (
@@ -98,13 +100,22 @@ export function RelatedContactsPanel({
                     ))}
                   </ul>
                 ) : null}
-                <button
-                  type="button"
-                  onClick={() => onUnlinkContact(contact.relationshipId)}
-                  disabled={busy}
-                >
-                  Unlink
-                </button>
+                <div className="button-row">
+                  <button
+                    type="button"
+                    onClick={() => onOpenContact?.(contact.contactId)}
+                    disabled={busy || onOpenContact === undefined}
+                  >
+                    Open contact
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onUnlinkContact(contact.relationshipId)}
+                    disabled={busy}
+                  >
+                    Unlink
+                  </button>
+                </div>
               </article>
             </li>
           ))}
@@ -120,4 +131,11 @@ function formatFollowUpCount(count: number): string {
 
 function formatActivityCount(count: number): string {
   return `${count} recent activity event${count === 1 ? "" : "s"}`;
+}
+
+
+function formatStatusLabel(status: string): string {
+  return status.length === 0
+    ? "Unknown"
+    : `${status.slice(0, 1).toUpperCase()}${status.slice(1)}`;
 }
