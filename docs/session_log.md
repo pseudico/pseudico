@@ -8627,3 +8627,13 @@ Files changed:
 - apps/desktop/src/renderer/pages/ContactDetailPage.tsx; apps/desktop/src/renderer/styles.css; packages/ui/src/components/RelatedContactsPanel.tsx; packages/ui/src/components/RelatedProjectsPanel.tsx; packages/ui/tests/contactComponents.test.tsx
 Open questions / risks: New screenshots not captured in this pass; PR remains draft pending broader manual evidence.
 Next actions: Push UI polish; update PR/Linear; capture final packaged screenshots later.
+
+## 2026-05-22 17:45:20 +10:00
+Objective: Prepare PR #227 for correct merge path.
+Decisions made:
+- Rebuilt packaged app and captured refreshed PSE-249/PSE-251/PSE-254 production-route screenshots.
+- Fixed project tags to render in the production work-first header, not only the advanced metadata area.
+Files changed:
+- apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; docs/manual-qa/PSE-249-contact-detail-route-fix.md; docs/manual-qa/PSE-251-project-display-settings-fix.md; docs/manual-qa/PSE-254-project-tag-header-display.md; docs/manual-qa/screenshots/PSE-249-contact-detail-route-fix/contact-direct-card-polished.png; docs/manual-qa/screenshots/PSE-249-contact-detail-route-fix/project-relationship-card-polished.png; docs/manual-qa/screenshots/PSE-251-project-display-settings-fix/project-display-settings-compact-persisted.png; docs/manual-qa/screenshots/PSE-254-project-tag-header-display/project-tags-real-tags.png; docs/session_log.md
+Open questions / risks: PSE-250/PSE-252/PSE-253 packaged evidence capture still times out after workspace refresh; do not merge while PR is draft.
+Next actions: Run checks; push merge-prep commit; keep PR draft unless remaining evidence is completed.

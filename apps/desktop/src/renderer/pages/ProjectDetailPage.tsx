@@ -3349,6 +3349,18 @@ export function ProjectDetailPage({
             <span>Category: {projectCategory === null ? "None" : projectCategory.name}</span>
             <span>{relatedContactViewModels.length} linked contact{relatedContactViewModels.length === 1 ? "" : "s"}</span>
           </div>
+          <div className="project-header-tags" aria-label="Project tags">
+            {projectTags.length === 0 ? (
+              <span className="muted-text">No project tags assigned</span>
+            ) : (
+              projectTags.map((tag) => (
+                <span key={tag.id} className="tag-badge">
+                  <Tag size={15} aria-hidden="true" />
+                  @{tag.slug}
+                </span>
+              ))
+            )}
+          </div>
         </div>
         <div className="project-primary-actions" aria-label="Project primary actions">
           <button
