@@ -8592,3 +8592,28 @@ Next actions: inspect status/diff; commit and push; open/comment/review/merge PR
 - Files changed: packages/ui/tests/contactComponents.test.tsx; apps/desktop/tests/renderer/readabilityStyles.test.ts; docs/session_log.md
 - Open questions / risks: Full local pnpm test is blocked on broad Windows DB setup failures, but CI-targeted failing tests pass locally.
 - Next actions: amend/push; wait for CI; merge if green.
+
+## 2026-05-22T11:12:27.8838904+10:00
+Objective: Package, document, and evidence household-renovation QA corrective fixes.
+Decisions made:
+- Packaged app build succeeded; PSE-249/PSE-254 visual evidence captured, but search/today/save action screenshots hit CDP workspace-state timeout.
+- Created per-ticket evidence docs and marked remaining screenshot gaps as P2 evidence follow-up.
+Files changed:
+- docs/manual-qa/PSE-249-contact-detail-route-fix.md
+- docs/manual-qa/PSE-250-search-result-loading-fix.md
+- docs/manual-qa/PSE-251-project-display-settings-fix.md
+- docs/manual-qa/PSE-252-today-metrics-reconciliation.md
+- docs/manual-qa/PSE-253-search-attachment-deduplication.md
+- docs/manual-qa/PSE-254-project-tag-header-display.md
+Open questions / risks: Manual packaged screenshots for PSE-250/PSE-252/PSE-253 and save-persist proof for PSE-251 remain pending.
+Next actions: rerun verification after docs; create PR; update Linear with PR and evidence status.
+
+## 2026-05-22T11:16:45.2164810+10:00
+Objective: Publish household-renovation QA corrective PR and reconcile Linear.
+Decisions made:
+- Opened draft PR #227 because local checks pass but manual packaged evidence remains incomplete.
+- Updated PSE-249 through PSE-254 with PR, checks, evidence, status, and residual P2 risks.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub CI is in progress; PR is draft and not mergeable until evidence gaps are closed.
+Next actions: complete missing screenshots; mark PR ready; merge only after CI/review policy allows.

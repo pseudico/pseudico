@@ -217,6 +217,7 @@ describe("Relationship panels", () => {
         ]}
         selectedContactId="contact_2"
         onLinkContact={() => undefined}
+        onOpenContact={() => undefined}
         onSelectedContactChange={() => undefined}
         onUnlinkContact={() => undefined}
       />
@@ -226,6 +227,7 @@ describe("Relationship panels", () => {
     expect(html).toContain("Alex Chen");
     expect(html).toContain("2 open follow-ups");
     expect(html).toContain("Updated Alex Chen.");
+    expect(html).toContain("Open contact");
   });
 
   it("renders related projects with link controls", () => {

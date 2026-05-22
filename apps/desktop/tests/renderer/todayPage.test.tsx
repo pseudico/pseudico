@@ -29,6 +29,10 @@ describe("Today renderer page", () => {
     expect(html).toContain("Remove");
     expect(html).toContain("Move down");
     expect(html).toContain("Daily and weekly summary");
+    expect(html).toContain("Manually planned");
+    expect(html).toContain("Manual plan lanes");
+    expect(html).toContain("Visible work lanes");
+    expect(html).toContain("Due-date lane counts");
     expect(html).toContain("Export Markdown");
     expect(html).toContain("Client Launch");
     expect(html).toContain("Operations");

@@ -290,6 +290,85 @@ describe("SearchService", () => {
     ]);
   });
 
+  it("deduplicates file item and attachment records that represent the same visible file", () => {
+    const project = new ContainerRepository(connection).create({
+      id: "container_1",
+      workspaceId: "workspace_1",
+      type: "project",
+      name: "Balcony Plan",
+      slug: "balcony-plan",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const fileItem = new ItemRepository(connection).create({
+      id: "item_file_1",
+      workspaceId: "workspace_1",
+      containerId: project.id,
+      type: "file",
+      title: "balcony_screen_concept.png",
+      body: "Balcony screen concept image",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const attachment = new AttachmentRepository(connection).create({
+      id: "attachment_1",
+      workspaceId: "workspace_1",
+      itemId: fileItem.id,
+      originalName: "balcony_screen_concept.png",
+      storedName: "balcony_screen_concept.png",
+      storagePath: "attachments/2026/05/attachment_1/balcony_screen_concept.png",
+      sizeBytes: 42,
+      checksum: "d".repeat(64),
+      description: "Balcony screen concept image",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const service = createService();
+
+    service.upsertItem(fileItem);
+    service.upsertAttachment(attachment);
+
+    const results = service.search({
+      workspaceId: "workspace_1",
+      query: "balcony_screen_concept",
+      kinds: ["file"]
+    });
+
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      targetType: "item",
+      targetId: "item_file_1",
+      kind: "file",
+      title: "balcony_screen_concept.png"
+    });
+  });
+
+  it("routes contact search hits directly to the contact detail page", () => {
+    const contact = new ContainerRepository(connection).create({
+      id: "container_contact_1",
+      workspaceId: "workspace_1",
+      type: "contact",
+      name: "DJ DeRiu",
+      slug: "dj-deriu",
+      description: "Electrical collaborator",
+      timestamp: "2026-04-30T00:00:00.000Z"
+    });
+    const service = createService();
+
+    service.upsertContainer(contact);
+
+    expect(
+      service.search({
+        workspaceId: "workspace_1",
+        query: "DJ"
+      })
+    ).toMatchObject([
+      {
+        targetType: "container",
+        targetId: "container_contact_1",
+        kind: "contact",
+        destinationPath: "/contacts/container_contact_1"
+      }
+    ]);
+  });
+
   it("ranks title matches ahead of body-only matches and returns safe highlight excerpts", () => {
     const project = new ContainerRepository(connection).create({
       id: "container_rank",

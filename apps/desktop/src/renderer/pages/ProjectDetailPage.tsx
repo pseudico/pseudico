@@ -90,6 +90,7 @@ import type {
   ContactSummary,
   FileItemSummary,
   ContainerMediaSummary,
+  ItemTagSummary,
   ItemSummary,
   LinkSummary,
   LocationSummary,
@@ -183,6 +184,7 @@ type ProjectDetailPageProps = {
   initialAvailableContacts?: ContactSummary[];
   initialRelatedContacts?: RelatedContactSummary[];
   initialPreferences?: ContainerPreferencesSummary | null;
+  initialProjectTags?: ItemTagSummary[];
   initialWebWidgetsEnabled?: boolean;
   initialInspector?: {
     item: ItemInspectorItem;
@@ -246,6 +248,7 @@ export function ProjectDetailPage({
   initialAvailableContacts = [],
   initialRelatedContacts = [],
   initialPreferences = null,
+  initialProjectTags = [],
   initialWebWidgetsEnabled = false,
   initialInspector = null
 }: ProjectDetailPageProps): React.JSX.Element {
@@ -274,6 +277,7 @@ export function ProjectDetailPage({
   );
   const [containerPreferences, setContainerPreferences] =
     useState<ContainerPreferencesSummary | null>(initialPreferences);
+  const [projectTags, setProjectTags] = useState<ItemTagSummary[]>(initialProjectTags);
   const [webWidgetsEnabled, setWebWidgetsEnabled] = useState(
     initialWebWidgetsEnabled
   );
@@ -442,6 +446,7 @@ export function ProjectDetailPage({
         contactsResult,
         relatedContactsResult,
         preferencesResult,
+        projectTagsResult,
         privacyResult
       ] = await Promise.all([
         getProjectWithRetry(apiClient, activeProjectId),
@@ -465,6 +470,7 @@ export function ProjectDetailPage({
         apiClient.contacts.list(),
         apiClient.relationships.listContactsForProject(activeProjectId),
         apiClient.containers.getPreferences(activeProjectId),
+        apiClient.metadata.getProjectTagBrowser({}),
         apiClient.privacy?.getSettings()
       ]);
 
@@ -560,6 +566,11 @@ export function ProjectDetailPage({
         return;
       }
 
+      if (!projectTagsResult.ok) {
+        setItemError(projectTagsResult.error.message);
+        return;
+      }
+
       if (projectResult.data === null) {
         setProject(null);
         return;
@@ -587,6 +598,10 @@ export function ProjectDetailPage({
       setTabSummaries(tabSummariesResult.data);
       setTabTemplates(tabTemplatesResult.data);
       setContainerPreferences(preferences);
+      setProjectTags(
+        projectTagsResult.data.projects.find((candidate) => candidate.id === activeProjectId)
+          ?.tags ?? []
+      );
       setWebWidgetsEnabled(
         privacyResult !== undefined && privacyResult.ok
           ? privacyResult.data.webWidgetsEnabled
@@ -1701,7 +1716,7 @@ export function ProjectDetailPage({
 
     if (!result.ok) {
       setPreferencesSaving(false);
-      setPreferencesError(result.error.message);
+      setPreferencesError(formatContainerPreferencesError(result.error.message));
       return;
     }
 
@@ -3424,6 +3439,7 @@ export function ProjectDetailPage({
               error={relationshipError}
               relatedContacts={relatedContactViewModels}
               selectedContactId={selectedContactId}
+              onOpenContact={(contactId) => navigate(`/contacts/${encodeURIComponent(contactId)}`)}
               onLinkContact={() => void linkSelectedContact()}
               onSelectedContactChange={setSelectedContactId}
               onUnlinkContact={(relationshipId) => void unlinkRelatedContact(relationshipId)}
@@ -3739,9 +3755,17 @@ export function ProjectDetailPage({
               </div>
               <div>
                 <dt>Tags</dt>
-                <dd>
-                  <Tag size={15} aria-hidden="true" />
-                  Placeholder
+                <dd className="project-header-tags">
+                  {projectTags.length === 0 ? (
+                    <span className="muted-text">No project tags assigned</span>
+                  ) : (
+                    projectTags.map((tag) => (
+                      <span key={tag.id} className="tag-badge">
+                        <Tag size={15} aria-hidden="true" />
+                        @{tag.slug}
+                      </span>
+                    ))
+                  )}
                 </dd>
               </div>
             </dl>
@@ -4569,6 +4593,13 @@ function summarizeProjectContent(
     .join(" · ");
 }
 
+function formatContainerPreferencesError(message: string): string {
+  if (message.includes("updateContainerPreferences requires")) {
+    return "Choose at least one valid display setting before saving.";
+  }
+
+  return message;
+}
 
 function DatedItemProjection({
   items,

@@ -26,6 +26,7 @@ export type RelatedContactsPanelProps = {
   relatedContacts: readonly RelatedContactViewModel[];
   availableContacts: readonly RelatedContactOption[];
   selectedContactId: string;
+  onOpenContact?: (contactId: string) => void;
   onSelectedContactChange: (contactId: string) => void;
   onLinkContact: () => void;
   onUnlinkContact: (relationshipId: string) => void;
@@ -37,6 +38,7 @@ export function RelatedContactsPanel({
   relatedContacts,
   availableContacts,
   selectedContactId,
+  onOpenContact,
   onSelectedContactChange,
   onLinkContact,
   onUnlinkContact,
@@ -98,13 +100,22 @@ export function RelatedContactsPanel({
                     ))}
                   </ul>
                 ) : null}
-                <button
-                  type="button"
-                  onClick={() => onUnlinkContact(contact.relationshipId)}
-                  disabled={busy}
-                >
-                  Unlink
-                </button>
+                <div className="button-row">
+                  <button
+                    type="button"
+                    onClick={() => onOpenContact?.(contact.contactId)}
+                    disabled={busy || onOpenContact === undefined}
+                  >
+                    Open contact
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onUnlinkContact(contact.relationshipId)}
+                    disabled={busy}
+                  >
+                    Unlink
+                  </button>
+                </div>
               </article>
             </li>
           ))}

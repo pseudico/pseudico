@@ -581,12 +581,15 @@ export function TodayPage({
       )}
 
       {viewModel?.planningSummary === undefined ? null : (
-        <PlanningSummaryPanel
-          disabled={exportingSummary}
-          exportMessage={exportMessage}
-          summary={viewModel.planningSummary}
-          onExport={exportPlanningSummary}
-        />
+        <>
+          <PlanningSummaryPanel
+            disabled={exportingSummary}
+            exportMessage={exportMessage}
+            summary={viewModel.planningSummary}
+            onExport={exportPlanningSummary}
+          />
+          <VisibleLaneSummaryPanel viewModel={viewModel} />
+        </>
       )}
 
       {viewModel === null ? null : (
@@ -725,8 +728,9 @@ function PlanningSummaryPanel({
           <p className="top-eyebrow">Local review</p>
           <h3 id="planning-summary-title">Daily and weekly summary</h3>
           <p>
-            Counts are calculated locally from daily plans, task/list activity,
-            and dated work. Weekly groups cover {summary.weekly.startDate} to {summary.weekly.endDate}.
+            Manual-plan counts are calculated locally from daily plans and task/list
+            activity. Due-date lanes below may include additional dated tasks. Weekly
+            groups cover {summary.weekly.startDate} to {summary.weekly.endDate}.
           </p>
         </div>
         <button
@@ -741,14 +745,14 @@ function PlanningSummaryPanel({
       </div>
 
       <div className="planning-summary-metrics" role="list" aria-label="Daily planning metrics">
-        <PlanningMetric label="Planned" value={summary.daily.plannedCount} />
+        <PlanningMetric label="Manually planned" value={summary.daily.plannedCount} />
         <PlanningMetric label="Completed" value={summary.daily.completedCount} />
         <PlanningMetric label="Snoozed" value={summary.daily.snoozedCount} />
         <PlanningMetric label="Overdue" value={summary.daily.overdueCount} />
       </div>
 
       <p className="planning-summary-lanes">
-        Today {summary.daily.plannedByLane.today} &middot; Tomorrow {summary.daily.plannedByLane.tomorrow} &middot; Backlog {summary.daily.plannedByLane.backlog}
+        Manual plan lanes: Today {summary.daily.plannedByLane.today} &middot; Tomorrow {summary.daily.plannedByLane.tomorrow} &middot; Backlog {summary.daily.plannedByLane.backlog}
       </p>
 
       <div className="planning-summary-groups">
@@ -759,6 +763,35 @@ function PlanningSummaryPanel({
       {exportMessage === null ? null : (
         <p className="planning-summary-export" role="status">{exportMessage}</p>
       )}
+    </section>
+  );
+}
+
+function VisibleLaneSummaryPanel({
+  viewModel
+}: {
+  viewModel: TodayViewModelSummary;
+}): React.JSX.Element {
+  const dueToday = viewModel.laneSummaries?.dueToday.totalCount ?? viewModel.dueToday.length;
+  const tomorrow = viewModel.laneSummaries?.tomorrowPreview.totalCount ?? viewModel.tomorrowPreview.length;
+  const backlog = viewModel.laneSummaries?.overdueBacklog.totalCount ?? viewModel.overdueBacklog.length;
+
+  return (
+    <section className="planning-summary-panel compact-summary" aria-label="Visible due-date lane counts">
+      <div className="planning-summary-heading">
+        <div>
+          <p className="top-eyebrow">Visible work lanes</p>
+          <h3>Due-date lane counts</h3>
+          <p>
+            These counts reconcile with the visible Today, Tomorrow, and Backlog
+            workbench lanes. Manual planning counts above can differ when tasks are
+            shown because of due dates rather than explicit daily-plan entries.
+          </p>
+        </div>
+      </div>
+      <p className="planning-summary-lanes">
+        Today {dueToday} &middot; Tomorrow {tomorrow} &middot; Backlog {backlog}
+      </p>
     </section>
   );
 }

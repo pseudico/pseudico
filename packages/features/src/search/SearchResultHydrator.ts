@@ -301,7 +301,7 @@ function getContainerDestinationPath(container: ContainerRecord): string | null 
   }
 
   if (container.type === "contact") {
-    return "/contacts";
+    return `/contacts/${container.id}`;
   }
 
   return null;
@@ -320,7 +320,7 @@ function getItemDestinationPath(
   }
 
   if (container?.type === "contact") {
-    return "/contacts";
+    return `/contacts/${container.id}`;
   }
 
   return null;
