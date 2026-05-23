@@ -46,6 +46,7 @@ export default defineConfig({
       "**/.playwright-mcp/**",
       "**/docs/manual-qa/**"
     ],
+    testTimeout: 30_000,
     passWithNoTests: false
   }
 });

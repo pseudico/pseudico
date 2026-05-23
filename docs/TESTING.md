@@ -16,6 +16,15 @@ pnpm test
 pnpm build
 ```
 
+The root Vitest config deliberately excludes disposable/generated QA locations
+(`.tmp/`, `.worktrees/`, `.codex-output/`, `.playwright-mcp/`,
+`dist-packaged/`, and `docs/manual-qa/`) so a root test gate does not rerun
+duplicate worktree suites or generated evidence helpers. Product source and
+tracked product tests remain in scope. The global test timeout is 30 seconds so
+the integrated fresh-workspace and backup/restore smoke tests can run in the
+full root suite on slower Windows/package-validation machines without treating
+normal I/O as a product failure.
+
 Packaging-related tickets should also run the desktop packaging command when
 the current OS supports it:
 
@@ -30,6 +39,11 @@ The staging directory is removed when packaging completes, and the unpacked
 development package is written under `apps/desktop/dist-packaged/`. This keeps
 pnpm workspace symlinks and TypeScript build-cache files out of Electron Builder
 inputs while still rebuilding `better-sqlite3` for the packaged Electron runtime.
+After packaging, the script explicitly rebuilds `better-sqlite3` for the
+development Node runtime used by `pnpm test` (`process.versions.modules`, ABI
+127 on the current Node 22 setup). The packaged app keeps its Electron ABI copy
+inside `resources/app.asar.unpacked/`, while the workspace `node_modules` copy
+must remain loadable by shell Node tests.
 It verifies the app bundle shape without code signing, Windows executable
 metadata editing, installer generation, auto-update, or release CI. Manual QA
 should confirm that workspace paths are still user-selected and that workspace
@@ -45,6 +59,19 @@ pnpm --filter @local-work-os/test-utils test
 pnpm --filter @local-work-os/db test
 pnpm --filter @local-work-os/desktop test
 ```
+
+If a test run reports that `better_sqlite3.node` was compiled for Electron
+instead of shell Node, repair the developer modules explicitly before rerunning
+tests:
+
+```bash
+pnpm --filter @local-work-os/db rebuild better-sqlite3
+pnpm --filter @local-work-os/desktop rebuild better-sqlite3
+pnpm test
+```
+
+Do not skip failing product tests to work around an ABI mismatch; fix the
+native-module state first, then rerun the same gate.
 
 Coverage-map tickets and release-hardening reviews should also validate the
 feature-to-test matrix and the local parity QA report:

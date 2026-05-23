@@ -8677,3 +8677,58 @@ Decisions made:
 Files changed: docs/session_log.md
 Open questions / risks: PR remains draft; no Linear issue moved Done because final visual evidence is outstanding.
 Next actions: Capture packaged screenshots/click-throughs; mark PR ready; merge after policy checks/review.
+## 2026-05-23 18:57:53 +10:00
+Objective: Isolate beta verification work on PSE-262 branch.
+Decisions made:
+- Created worktree branch codex/pse-262-beta-verification from origin/main (8c4d06b5).
+- Existing root checkout dirty files left untouched.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-262 root test/package failures still need reproduction.
+Next actions: Read required docs/scripts, post Linear plan, run targeted gate diagnostics.
+
+## 2026-05-23 18:59:55 +10:00
+Objective: Post required beta/PSE-262 implementation plan to Linear.
+Decisions made:
+- PSE-262 marked In Progress and planned before broader beta QA.
+- HRQA PR #227 recognized as already merged but with P2 evidence gaps to reconcile later.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need verify actual root gate failures on isolated branch.
+Next actions: Diagnose native ABI, process cleanup, lint/test scope, then patch scripts/docs.
+
+## 2026-05-23 19:26:48 +10:00
+Objective: Complete PSE-262 gate fixes and verification evidence.
+Decisions made:
+- Kept product tests in scope; increased slow smoke/performance setup timeouts instead of hiding failures.
+- Added scoped Windows cleanup for generated-package Local Work OS processes.
+Files changed:
+- apps/desktop/scripts/package-development.mjs
+- apps/desktop/scripts/run-package-smoke.mjs
+- vitest.config.ts
+- eslint.config.js
+- docs/manual-qa/PSE-262-verification-packaging-reproducibility.md
+Open questions / risks: Need PR creation/merge policy and Linear final update.
+Next actions: Review diff, commit/push/open PR, reconcile PSE-262 Linear.
+
+## 2026-05-23 19:42:27 +10:00
+Objective: Rebase PSE-262 branch onto latest main and rerun gates.
+Decisions made:
+- Resolved vitest config by keeping latest main exclusions plus PSE-262 timeout.
+- Preserved both main and PSE-262 session-log entries.
+Files changed:
+- vitest.config.ts
+- docs/session_log.md
+- docs/manual-qa/PSE-262-verification-packaging-reproducibility.md
+Open questions / risks: PR #229 still requires human review before merge.
+Next actions: Amend commit, force-push rebased branch, update Linear.
+
+## 2026-05-23 19:45:44 +10:00
+Objective: Open and reconcile PSE-262 PR/Linear status.
+Decisions made:
+- PR #229 opened/updated and left unmerged due human review requirement in OPERATING_PLAN.
+- Linear PSE-262 moved to Review with PR/evidence summary.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI status list is empty; human/Codex review still pending.
+Next actions: Human reviews PR #229; merge if approved; then continue PSE-263 reconciliation.

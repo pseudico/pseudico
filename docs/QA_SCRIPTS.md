@@ -171,6 +171,9 @@ The packaged smoke command launches the packaged executable with
 a project and task through the main-process service layer, reopens the database,
 checks activity-log persistence, verifies the database and attachment paths are
 outside the packaged app bundle, then removes the temporary workspace.
+For beta/package-reproducibility evidence, run `pnpm package:smoke` twice in a
+row and then rerun `pnpm package` to prove the smoke process tree exited and the
+generated `dist-packaged` output is not locked.
 
 The packaged launch check is the canonical manual-QA launch proof for
 operator/release screenshots. It launches the current unpacked packaged app
@@ -208,6 +211,11 @@ pass is using the packaged app path above unless the ticket explicitly says it
 is testing `pnpm dev`.
 
 ### Stale packaged-QA process cleanup
+
+The current package and package-smoke scripts clean up stale generated-package
+`Local Work OS.exe` processes by exact executable path where they can do so
+safely. If a manual launch or external tool is interrupted, use this manual
+check before deleting or rebuilding package outputs.
 
 If a launch attempt is interrupted, identify Pseudico processes by command line
 before stopping anything:

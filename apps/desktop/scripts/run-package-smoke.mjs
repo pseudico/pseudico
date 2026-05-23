@@ -75,6 +75,7 @@ class CdpClient {
 await access(executablePath);
 
 try {
+  await stopPackagedExecutableProcesses();
   try {
     await runSmokeTarget({
       command: executablePath,
@@ -113,6 +114,7 @@ try {
     normalLaunchSmoke: { ok: true, target: "welcome window" }
   }, null, 2));
 } finally {
+  await stopPackagedExecutableProcesses();
   await rm(resultDir, { force: true, recursive: true });
 }
 
@@ -128,27 +130,39 @@ function runNormalLaunchSmoke(input) {
       stdio: "inherit",
       windowsHide: true
     });
+    let settled = false;
+
+    const settle = async (type, value) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timeout);
+      await terminateProcessTree(child);
+      if (type === "resolve") {
+        resolveRun(value);
+      } else {
+        rejectRun(value);
+      }
+    };
 
     const timeout = setTimeout(() => {
-      child.kill();
-      rejectRun(new Error(`${input.label} timed out after ${input.timeoutMs}ms.`));
+      void settle(
+        "reject",
+        new Error(`${input.label} timed out after ${input.timeoutMs}ms.`)
+      );
     }, input.timeoutMs);
 
     child.on("error", (error) => {
-      clearTimeout(timeout);
-      rejectRun(error);
+      void settle("reject", error);
     });
 
     waitForNormalLaunch(port, input.timeoutMs - 1_000)
       .then(async () => {
-        clearTimeout(timeout);
-        child.kill();
-        resolveRun();
+        await settle("resolve");
       })
       .catch((error) => {
-        clearTimeout(timeout);
-        child.kill();
-        rejectRun(error);
+        void settle("reject", error);
       });
   });
 }
@@ -228,24 +242,42 @@ function runSmokeTarget(input) {
       stdio: "inherit",
       windowsHide: true
     });
+    let settled = false;
+
+    const settle = async (type, value) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timeout);
+      if (type === "reject") {
+        await terminateProcessTree(child);
+      }
+      if (type === "resolve") {
+        resolveRun(value);
+      } else {
+        rejectRun(value);
+      }
+    };
+
     const timeout = setTimeout(() => {
-      child.kill();
-      rejectRun(new Error(`${input.label} timed out after ${input.timeoutMs}ms.`));
+      void settle(
+        "reject",
+        new Error(`${input.label} timed out after ${input.timeoutMs}ms.`)
+      );
     }, input.timeoutMs);
 
     child.on("error", (error) => {
-      clearTimeout(timeout);
-      rejectRun(error);
+      void settle("reject", error);
     });
     child.on("exit", (code, signal) => {
-      clearTimeout(timeout);
-
       if (code === 0) {
-        resolveRun();
+        void settle("resolve");
         return;
       }
 
-      rejectRun(
+      void settle(
+        "reject",
         new Error(
           `${input.label} failed with ${
             signal === null ? `exit code ${code}` : `signal ${signal}`
@@ -253,6 +285,60 @@ function runSmokeTarget(input) {
         )
       );
     });
+  });
+}
+
+async function terminateProcessTree(child) {
+  if (child.exitCode !== null || child.signalCode !== null) {
+    return;
+  }
+
+  if (child.pid === undefined) {
+    return;
+  }
+
+  if (process.platform !== "win32") {
+    child.kill();
+    return;
+  }
+
+  await new Promise((resolveTaskkill) => {
+    const killer = spawn("taskkill.exe", ["/pid", String(child.pid), "/t", "/f"], {
+      stdio: "ignore",
+      windowsHide: true
+    });
+
+    killer.on("error", () => resolveTaskkill());
+    killer.on("exit", () => resolveTaskkill());
+  });
+}
+
+async function stopPackagedExecutableProcesses() {
+  if (process.platform !== "win32") {
+    return;
+  }
+
+  const escapedExecutablePath = executablePath.replace(/'/g, "''");
+  const command = [
+    `$target = '${escapedExecutablePath}'`,
+    "Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -eq $target } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }"
+  ].join("; ");
+
+  await new Promise((resolveCleanup) => {
+    const cleanup = spawn("powershell.exe", [
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-Command",
+      command
+    ], {
+      stdio: "ignore",
+      windowsHide: true
+    });
+
+    cleanup.on("error", () => resolveCleanup());
+    cleanup.on("exit", () => resolveCleanup());
   });
 }
 
