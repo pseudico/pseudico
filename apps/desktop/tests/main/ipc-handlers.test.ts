@@ -1604,6 +1604,25 @@ describe("List IPC handlers", () => {
       }
     });
 
+    await expect(
+      handlers.handleEnablePipelineMode(createdList.data)
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: createdList.data.id,
+        displayMode: "pipeline"
+      }
+    });
+    await expect(
+      handlers.handleDisablePipelineMode({ list: createdList.data })
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        id: createdList.data.id,
+        displayMode: "checklist"
+      }
+    });
+
     const createdItem = await handlers.handleAddListItem({
       listId: createdList.data.id,
       title: "Confirm copy"
@@ -1614,7 +1633,7 @@ describe("List IPC handlers", () => {
     }
 
     await expect(
-      handlers.handleCompleteListItem(createdItem.data.id)
+      handlers.handleCompleteListItem(createdItem.data)
     ).resolves.toMatchObject({
       ok: true,
       data: {
@@ -1623,7 +1642,7 @@ describe("List IPC handlers", () => {
       }
     });
     await expect(
-      handlers.handleReopenListItem(createdItem.data.id)
+      handlers.handleReopenListItem({ listItem: createdItem.data })
     ).resolves.toMatchObject({
       ok: true,
       data: {
@@ -1666,7 +1685,7 @@ describe("List IPC handlers", () => {
     }
 
     await expect(
-      handlers.handleEnablePipelineMode(createdList.data.id)
+      handlers.handleEnablePipelineMode(createdList.data)
     ).resolves.toMatchObject({
       ok: true,
       data: {
@@ -1675,7 +1694,7 @@ describe("List IPC handlers", () => {
       }
     });
     await expect(
-      handlers.handleGetPipelineViewModel(createdList.data.id)
+      handlers.handleGetPipelineViewModel({ id: createdList.data.id })
     ).resolves.toMatchObject({
       ok: true,
       data: {
@@ -1689,9 +1708,9 @@ describe("List IPC handlers", () => {
     });
     await expect(
       handlers.handleMovePipelineCard({
-        listId: createdList.data.id,
-        cardId: pipelineCard.data.id,
-        targetStageId: bulkResult.data[0]!.id,
+        listId: createdList.data,
+        cardId: pipelineCard.data,
+        targetStageId: bulkResult.data[0]!,
         sortOrder: 4096
       })
     ).resolves.toMatchObject({
@@ -1703,7 +1722,7 @@ describe("List IPC handlers", () => {
       }
     });
     await expect(
-      handlers.handleIndentListItem(bulkResult.data[0]!.id)
+      handlers.handleIndentListItem({ listItemId: bulkResult.data[0]! })
     ).resolves.toMatchObject({
       ok: true,
       data: {
@@ -1714,7 +1733,7 @@ describe("List IPC handlers", () => {
     });
     await expect(
       handlers.handleMoveListItem({
-        listItemId: bulkResult.data[0]!.id,
+        listItemId: bulkResult.data[0]!,
         direction: "down"
       })
     ).resolves.toMatchObject({
@@ -1724,7 +1743,7 @@ describe("List IPC handlers", () => {
       }
     });
     await expect(
-      handlers.handleOutdentListItem(bulkResult.data[0]!.id)
+      handlers.handleOutdentListItem({ item: bulkResult.data[0]! })
     ).resolves.toMatchObject({
       ok: true,
       data: {
@@ -1734,7 +1753,7 @@ describe("List IPC handlers", () => {
       }
     });
     await expect(
-      handlers.handleDisablePipelineMode(createdList.data.id)
+      handlers.handleDisablePipelineMode({ item: createdList.data })
     ).resolves.toMatchObject({
       ok: true,
       data: {

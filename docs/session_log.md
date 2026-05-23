@@ -8637,3 +8637,34 @@ Files changed:
 - apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; docs/manual-qa/PSE-249-contact-detail-route-fix.md; docs/manual-qa/PSE-251-project-display-settings-fix.md; docs/manual-qa/PSE-254-project-tag-header-display.md; docs/manual-qa/screenshots/PSE-249-contact-detail-route-fix/contact-direct-card-polished.png; docs/manual-qa/screenshots/PSE-249-contact-detail-route-fix/project-relationship-card-polished.png; docs/manual-qa/screenshots/PSE-251-project-display-settings-fix/project-display-settings-compact-persisted.png; docs/manual-qa/screenshots/PSE-254-project-tag-header-display/project-tags-real-tags.png; docs/session_log.md
 Open questions / risks: PSE-250/PSE-252/PSE-253 packaged evidence capture still times out after workspace refresh; do not merge while PR is draft.
 Next actions: Run checks; push merge-prep commit; keep PR draft unless remaining evidence is completed.
+
+## 2026-05-23 15:48:50 +10:00
+Objective: Restart corrective implementation from current main in a clean worktree.
+Decisions made:
+- Root workspace is dirty/stale; use C:\tmp\Pseudico-pse255-260 on branch codex/pse-255-260-complete-exam-main based on main containing PSE-249..254.
+- Reapplied PSE-259/PSE-260 lint/test discovery excludes for disposable artifacts only.
+Files changed:
+- eslint.config.js
+- vitest.config.ts
+- docs/session_log.md
+Open questions / risks: Original root remains dirty; native better-sqlite3 lock in root is unrelated to clean worktree gate.
+Next actions: Run clean-worktree lint/typecheck/test; inspect remaining product failures.
+
+## 2026-05-23T16:04:08+10:00
+Objective: Complete PSE-255..260 corrective fixes and release-gate verification.
+Decisions made:
+- Kept clean main-based worktree; excluded only disposable/generated artifacts from lint/test discovery.
+- Normalized returned list/list-item summaries at IPC and supported CSV @tag notation.
+- Shortened only overlong portable bundle container filenames while preserving manifest source mapping.
+Files changed: .gitignore; eslint.config.js; vitest.config.ts; apps/desktop/src/main/ipc/listHandlers.ts; apps/desktop/tests/main/ipc-handlers.test.ts; apps/desktop/tests/renderer/projectsPage.test.tsx; packages/features/src/export/ExportService.ts; packages/features/src/import/CsvImportService.ts; docs/manual-qa/*; docs/session_log.md
+Open questions / risks: P2 packaged screenshot recapture still recommended before final release handoff.
+Next actions: Update Linear; create PR; reconcile GitHub merge policy.
+
+## 2026-05-23T16:08:00+10:00
+Objective: Verify complete-examination corrective branch gates.
+Decisions made:
+- Re-ran targeted tests, lint, typecheck, root test, and build after final cleanup.
+- Recorded per-ticket and complete-examination evidence docs; screenshot recapture remains a release sign-off risk.
+Files changed: docs/manual-qa/*; docs/session_log.md
+Open questions / risks: P2 packaged-app visual recapture and human review before merge if policy requires.
+Next actions: Commit/push branch; open PR; update Linear with PR and evidence.

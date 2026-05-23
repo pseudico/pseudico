@@ -312,6 +312,80 @@ describe("ExportService", () => {
       }
     ]);
   });
+
+  it("shortens long realistic container names in portable bundle paths while preserving manifest source mapping", async () => {
+    const longProjectName =
+      "Extremely long complete-examination project title visual wrap " +
+      "with enough detail to overflow Windows export paths when copied into filenames";
+    const longContactName =
+      "Contact With An Absurdly Long Name For Complete Examination Relationship Evidence " +
+      "And Retrieval Checks Across Export Manifests";
+    const containerRepository = new ContainerRepository(connection);
+    containerRepository.create({
+      id: "container_project_extremely_long_complete_exam_20260523",
+      workspaceId: "workspace_1",
+      type: "project",
+      name: longProjectName,
+      slug: slugForTest(longProjectName),
+      categoryId: null,
+      timestamp
+    });
+    containerRepository.create({
+      id: "container_contact_absurdly_long_complete_exam_20260523",
+      workspaceId: "workspace_1",
+      type: "contact",
+      name: longContactName,
+      slug: slugForTest(longContactName),
+      categoryId: null,
+      timestamp
+    });
+
+    const result = await createService().exportHtmlCsvTsvMarkdownBundle({
+      workspaceId: "workspace_1",
+      exportRelativePath: "exports/test-long-name-bundle"
+    });
+
+    const markdownFiles = result.manifest.files.filter(
+      (file) => file.role === "container_markdown"
+    );
+    const longProjectFile = markdownFiles.find(
+      (file) =>
+        file.sourceId === "container_project_extremely_long_complete_exam_20260523"
+    );
+    const longContactFile = markdownFiles.find(
+      (file) =>
+        file.sourceId === "container_contact_absurdly_long_complete_exam_20260523"
+    );
+
+    expect(longProjectFile).toMatchObject({
+      sourceType: "container",
+      sourceId: "container_project_extremely_long_complete_exam_20260523"
+    });
+    expect(longContactFile).toMatchObject({
+      sourceType: "container",
+      sourceId: "container_contact_absurdly_long_complete_exam_20260523"
+    });
+    expect(longProjectFile!.relativePath).toContain(
+      "project-extremely-long-complete-examination"
+    );
+    expect(longProjectFile!.relativePath).toContain(
+      "exam-20260523.md"
+    );
+    expect(longContactFile!.relativePath).toContain(
+      "contact-contact-with-an-absurdly-long-name"
+    );
+    expect(longContactFile!.relativePath).toContain(
+      "exam-20260523.md"
+    );
+    expect(
+      longProjectFile!.relativePath.split("/").at(-1)!.length
+    ).toBeLessThanOrEqual(100);
+    expect(
+      longContactFile!.relativePath.split("/").at(-1)!.length
+    ).toBeLessThanOrEqual(100);
+    expect(writtenExports.has(longProjectFile!.relativePath)).toBe(true);
+    expect(writtenExports.has(longContactFile!.relativePath)).toBe(true);
+  });
 });
 
 function seedWorkspace(): void {
@@ -562,6 +636,14 @@ function createService(): ExportService {
       }
     }
   });
+}
+
+function slugForTest(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function createId(prefix: string): string {

@@ -757,7 +757,14 @@ function inferFormat(contents: string): CsvImportFormat {
 }
 
 function splitList(value: string): string[] {
-  return Array.from(new Set(value.split(/[;,]/).map((entry) => entry.trim().replace(/^@/, "")).filter(Boolean)));
+  return Array.from(
+    new Set(
+      value
+        .split(/[;,\s]+/)
+        .map((entry) => entry.trim().replace(/^@+/, ""))
+        .filter(Boolean)
+    )
+  );
 }
 
 function normalizeHeader(value: string): string {
