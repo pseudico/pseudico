@@ -23,8 +23,8 @@ Pseudico is beta-ready for nontechnical testers only when:
 | Issue | Purpose | Current beta disposition |
 | --- | --- | --- |
 | PSE-261 | Master nontechnical beta gate | Spec Ready; final owner decision remains required. |
-| PSE-262 | Clean verification/package reproducibility | In Progress on `codex/pse-262-beta-verification`. |
-| PSE-263 | Coordinate HRQA trust-bug closure | Spec Ready; PR #227 is already merged but P2 manual evidence gaps require reconciliation. |
+| PSE-262 | Clean verification/package reproducibility | Done; PR #229 merged (`5e59de10761c8acc5a5ac8989e3ec187058340c1`) after Codex review. |
+| PSE-263 | Coordinate HRQA trust-bug closure | In progress; PR #227 merged, PSE-249/PSE-251/PSE-254 have packaged evidence, and PSE-250/PSE-252/PSE-253 still need packaged user-visible evidence before final HRQA gate closure. |
 | PSE-264 | Complete deliberate packaged-app functionality pass | Pending PSE-262 and HRQA reconciliation. |
 | PSE-265 | Tester handoff package/checksums/runbook/rollback | Pending fresh beta candidate package. |
 | PSE-266 | Final go/no-go/docs sync/merge audit | Pending prior beta gates. |
@@ -33,12 +33,13 @@ Pseudico is beta-ready for nontechnical testers only when:
 
 | Issue | Problem | Beta disposition |
 | --- | --- | --- |
-| PSE-249 | Contact detail route showed `Contact not found`. | Implemented/merged in PR #227; final beta evidence still needs reconciliation. |
-| PSE-250 | Search count appeared while cards remained loading. | Implemented/merged in PR #227; PR body recorded P2 packaged screenshot gap. |
-| PSE-251 | Project Display settings save failed. | Implemented/merged in PR #227; persisted screenshot exists in PR evidence. |
+| PSE-249 | Contact detail route showed `Contact not found`. | Implemented/merged in PR #227 with packaged direct-route and project-relationship evidence; no P0/P1 known. |
+| PSE-250 | Search count appeared while cards remained loading. | Implemented/merged in PR #227; code/tests pass, but packaged `retrospective` / `Painting weekend` screenshots remain a P2 evidence gap. |
+| PSE-251 | Project Display settings save failed. | Implemented/merged in PR #227 with packaged persisted Compact-mode evidence; no P0/P1 known. |
 | PSE-252 | Today metrics did not reconcile with visible lanes. | Implemented/merged in PR #227; PR body recorded P2 packaged transition-evidence gap. |
 | PSE-253 | Duplicate-looking attachment search results. | Implemented/merged in PR #227; PR body recorded P2 packaged screenshot gap. |
-| PSE-254 | Project header showed `TAGS Placeholder`. | Implemented/merged in PR #227 with packaged tag evidence. |
+| PSE-254 | Project header showed `TAGS Placeholder`. | Implemented/merged in PR #227 with packaged real-tag/header evidence; no P0/P1 known. |
+| PSE-267 | Capture remaining HRQA packaged evidence for Search/Today/attachments. | Created as the explicit P2 follow-up for PSE-250/PSE-252/PSE-253 evidence gaps before PSE-263 can close. |
 
 ## PR / merge standard for beta tickets
 

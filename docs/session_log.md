@@ -8732,3 +8732,59 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: CI status list is empty; human/Codex review still pending.
 Next actions: Human reviews PR #229; merge if approved; then continue PSE-263 reconciliation.
+
+## 2026-05-23 19:54:37 +10:00
+Objective: Continue from merged PSE-262 into PSE-263 HRQA reconciliation.
+Decisions made:
+- Created clean worktree branch codex/pse-263-hrqa-reconciliation from merged main.
+- PSE-263 scope is evidence reconciliation first, not broad new feature work.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-250/PSE-252/PSE-253 packaged evidence gaps may still require app QA capture.
+Next actions: Inspect merged PR #227 docs/screenshots; update child tickets; identify remaining evidence.
+
+## 2026-05-23 20:12:00 +10:00
+Objective: Reconcile merged HRQA PR #227 against PSE-263 beta gate.
+Decisions made:
+- PSE-249/PSE-251/PSE-254 have merged code, tests, and packaged evidence.
+- PSE-250/PSE-252/PSE-253 remain code-pass but P2 packaged-evidence incomplete.
+Files changed:
+- docs/manual-qa/PSE-263-hrqa-merged-reconciliation.md
+- docs/tickets/BETA_READINESS_TICKET_PACK.md
+- docs/session_log.md
+Open questions / risks: PSE-263 cannot truthfully close until Search/Today/balcony packaged evidence is captured or owner-accepted.
+Next actions: Update Linear statuses/comments; create/focus P2 evidence follow-up; then continue packaged evidence capture.
+
+## 2026-05-23 20:20:38 +10:00
+Objective: Convert remaining HRQA P2 packaged-evidence gaps into a specific Linear follow-up.
+Decisions made:
+- Created PSE-267 for Search/Today/balcony packaged evidence rather than burying gaps.
+- PSE-263 remains not done until PSE-267 evidence or owner acceptance resolves the gap.
+Files changed:
+- docs/manual-qa/PSE-263-hrqa-merged-reconciliation.md
+- docs/tickets/BETA_READINESS_TICKET_PACK.md
+- docs/session_log.md
+Open questions / risks: Need display-capable packaged capture path for production routes.
+Next actions: Update PSE-249/PSE-251/PSE-254 final state; set remaining tickets to QA/evidence capture.
+
+## 2026-05-23 20:04:51 +10:00
+Objective: Update Linear after HRQA merged reconciliation.
+Decisions made:
+- PSE-249/PSE-251/PSE-254 moved Done with final merged evidence comments.
+- PSE-250/PSE-252/PSE-253 and PSE-263 remain In Progress due PSE-267 evidence gap.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Linear QA status is completed-type, so incomplete evidence tickets were kept In Progress.
+Next actions: Commit/push reconciliation docs; attempt packaged evidence capture if dependencies/package are available.
+
+## 2026-05-23 20:07:10 +10:00
+Objective: Commit PSE-263 reconciliation evidence docs.
+Decisions made:
+- Created a local docs-only commit for PSE-263 HRQA reconciliation and amended it before push.
+- No code/product behavior changed in this commit.
+Files changed:
+- docs/session_log.md
+- docs/tickets/BETA_READINESS_TICKET_PACK.md
+- docs/manual-qa/PSE-263-hrqa-merged-reconciliation.md
+Open questions / risks: Branch pushed/PR opened after this commit; PSE-267 evidence capture remains open.
+Next actions: Review/merge PR #230 if repository policy allows; continue PSE-267 capture.
