@@ -8788,3 +8788,36 @@ Files changed:
 - docs/manual-qa/PSE-263-hrqa-merged-reconciliation.md
 Open questions / risks: Branch pushed/PR opened after this commit; PSE-267 evidence capture remains open.
 Next actions: Review/merge PR #230 if repository policy allows; continue PSE-267 capture.
+
+## 2026-05-23 20:09:35 +10:00
+Objective: Review and merge PSE-263 reconciliation PR, then continue to PSE-267.
+Decisions made:
+- Reviewed PR #230 and merged it as docs-only reconciliation (`d8d72fc7`).
+- Created branch codex/pse-267-hrqa-packaged-evidence from updated main.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Remaining HRQA work is packaged evidence, not code closure.
+Next actions: Recover package/test environment; capture PSE-250/PSE-252/PSE-253 evidence.
+
+## 2026-05-23 20:29:45 +10:00
+Objective: Attempt PSE-267 packaged Search/Today evidence capture.
+Decisions made:
+- Fresh package and package smoke passed; copied household workspace used for safe QA.
+- Search route capture timed out/froze; Today route did not reach expected metric labels.
+Files changed:
+- docs/manual-qa/PSE-267-hrqa-packaged-evidence.md
+- docs/session_log.md
+Open questions / risks: P1 beta blocker: remaining HRQA packaged route evidence cannot be captured yet.
+Next actions: Update Linear with blocker; debug packaged Search/Today route behavior before PSE-264.
+
+## 2026-05-23 20:36:25 +10:00
+Objective: Commit and Linear-update PSE-267 packaged evidence blocker.
+Decisions made:
+- PSE-267, PSE-263, PSE-250, PSE-252, and PSE-253 Linear comments now record the blocker.
+- Local docs commit created for the failed packaged evidence attempt.
+Files changed:
+- docs/session_log.md
+- docs/tickets/BETA_READINESS_TICKET_PACK.md
+- docs/manual-qa/PSE-267-hrqa-packaged-evidence.md
+Open questions / risks: Branch not pushed yet; packaged Search/Today root cause still unknown.
+Next actions: Amend log into commit; push/open PR; continue root-cause debugging.
