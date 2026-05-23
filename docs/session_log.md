@@ -8668,3 +8668,12 @@ Decisions made:
 Files changed: docs/manual-qa/*; docs/session_log.md
 Open questions / risks: P2 packaged-app visual recapture and human review before merge if policy requires.
 Next actions: Commit/push branch; open PR; update Linear with PR and evidence.
+
+## 2026-05-23T16:14:05+10:00
+Objective: Reconcile PR and Linear for PSE-255..260 corrective branch.
+Decisions made:
+- Opened draft PR #228; CI passed but merge is blocked by missing packaged visual/manual evidence.
+- Posted implementation/test/evidence comments and CI updates to PSE-255 through PSE-260.
+Files changed: docs/session_log.md
+Open questions / risks: PR remains draft; no Linear issue moved Done because final visual evidence is outstanding.
+Next actions: Capture packaged screenshots/click-throughs; mark PR ready; merge after policy checks/review.
