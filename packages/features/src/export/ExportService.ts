@@ -1141,9 +1141,7 @@ function buildContainerMarkdownFiles(input: {
   return input.exportData.data.containers
     .filter((container) => container.type === "project" || container.type === "contact")
     .map((container) => {
-      const baseName = `${container.type}-${slugifyExportSegment(
-        container.slug || container.name || container.id
-      )}`;
+      const baseName = buildPortableContainerExportBaseName(container);
       const count = countsByName.get(baseName) ?? 0;
       countsByName.set(baseName, count + 1);
       const fileName = count === 0 ? `${baseName}.md` : `${baseName}-${count + 1}.md`;
@@ -1445,6 +1443,32 @@ function slugifyExportSegment(value: string): string {
     .replace(/^-+|-+$/g, "");
 
   return slug.length === 0 ? "export" : slug;
+}
+
+const PORTABLE_CONTAINER_FILE_BASENAME_LIMIT = 96;
+
+function buildPortableContainerExportBaseName(container: ContainerRecord): string {
+  const typePrefix = container.type === "contact" ? "contact" : "project";
+  const sourceSlug = slugifyExportSegment(container.slug || container.name || container.id);
+  const unqualifiedLimit =
+    PORTABLE_CONTAINER_FILE_BASENAME_LIMIT - `${typePrefix}-`.length;
+  if (sourceSlug.length <= unqualifiedLimit) {
+    return `${typePrefix}-${sourceSlug}`;
+  }
+
+  const idSuffix = slugifyExportSegment(container.id).replace(/_/g, "-").slice(-18);
+  const suffix = idSuffix.length > 0 ? `-${idSuffix}` : "";
+  const staticLength = `${typePrefix}-`.length + suffix.length;
+  const segmentLimit = Math.max(
+    16,
+    PORTABLE_CONTAINER_FILE_BASENAME_LIMIT - staticLength
+  );
+  const shortenedSlug =
+    sourceSlug.length > segmentLimit
+      ? sourceSlug.slice(0, segmentLimit).replace(/[-_.]+$/g, "")
+      : sourceSlug;
+
+  return `${typePrefix}-${shortenedSlug || "export"}${suffix}`;
 }
 
 function sortContainers(records: ContainerRecord[]): ContainerRecord[] {

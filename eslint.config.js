@@ -4,11 +4,20 @@ import tseslint from "typescript-eslint";
 export default [
   {
     ignores: [
+      "**/.codex-output/**",
+      "**/.playwright-mcp/**",
+      "**/.tmp/**",
+      "**/.worktrees/**",
       "**/dist/**",
+      "**/dist-packaged/**",
+      "**/docs/manual-qa/**/*.js",
+      "**/docs/manual-qa/**/*.mjs",
       "**/node_modules/**",
+      "**/.pnpm-store/**",
       "**/coverage/**",
       "**/.turbo/**",
       "**/.vite/**",
+      "**/.tsbuildinfo/**",
       "**/*.config.js"
     ]
   },

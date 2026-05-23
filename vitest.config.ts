@@ -35,7 +35,17 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["**/tests/**/*.test.ts", "**/tests/**/*.test.tsx"],
-    exclude: ["**/node_modules/**", "**/dist/**", "**/.git/**"],
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/dist-packaged/**",
+      "**/.git/**",
+      "**/.tmp/**",
+      "**/.worktrees/**",
+      "**/.codex-output/**",
+      "**/.playwright-mcp/**",
+      "**/docs/manual-qa/**"
+    ],
     passWithNoTests: false
   }
 });

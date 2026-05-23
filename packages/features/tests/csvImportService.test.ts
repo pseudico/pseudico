@@ -151,6 +151,54 @@ describe("CsvImportService", () => {
     );
   });
 
+  it("normalizes @tag notation consistently in preview and execution", async () => {
+    const contents =
+      "Project,Task,Due,Priority,Tags,Category,Body\n" +
+      'Renovation,Order fixtures,2026-05-24,1,"@kitchen @supplier",Ops,Use complete-examination tag notation\n';
+    const service = createService();
+
+    const preview = service.previewImport({
+      workspaceId: "workspace_1",
+      targetType: "task",
+      contents,
+      conflictStrategy: "create_new"
+    });
+
+    expect(preview).toMatchObject({
+      valid: true,
+      rows: [
+        expect.objectContaining({
+          action: "create",
+          tags: ["kitchen", "supplier"]
+        })
+      ]
+    });
+
+    const summary = await service.executeImport({
+      workspaceId: "workspace_1",
+      targetType: "task",
+      contents,
+      conflictStrategy: "create_new"
+    });
+
+    expect(summary).toMatchObject({
+      valid: true,
+      importedCount: 1,
+      rows: [
+        expect.objectContaining({
+          action: "create",
+          tags: ["kitchen", "supplier"]
+        })
+      ]
+    });
+
+    expect(new TagRepository(connection).listTagsForTarget({
+      workspaceId: "workspace_1",
+      targetType: "item",
+      targetId: summary.created[0]!.id
+    }).map((tag) => tag.slug)).toEqual(["kitchen", "supplier"]);
+  });
+
   it("imports contacts with flexible mapped fields and container tags", async () => {
     const summary = await createService().executeImport({
       workspaceId: "workspace_1",

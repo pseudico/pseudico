@@ -30,6 +30,7 @@ import {
 import { ProjectDetailPage } from "../../src/renderer/pages/ProjectDetailPage";
 import { ProjectDetailSpaceBudgetFixturePage } from "../../src/renderer/pages/ProjectDetailSpaceBudgetFixturePage";
 import { ContactLabelBrowserPage } from "../../src/renderer/pages/ContactLabelBrowserPage";
+import { ContactDetailPage } from "../../src/renderer/pages/ContactDetailPage";
 import { ContactsPage } from "../../src/renderer/pages/ContactsPage";
 import { ProjectTagBrowserPage } from "../../src/renderer/pages/ProjectTagBrowserPage";
 import { ProjectsPage } from "../../src/renderer/pages/ProjectsPage";
@@ -1552,6 +1553,58 @@ describe("Projects renderer pages", () => {
     expect(html).toContain("Complete");
     expect(html).toContain("Due");
     expect(html).toContain("Actions for Book launch venue");
+  });
+
+  it("renders a valid contact detail route instead of the not-found state", () => {
+    const html = renderToString(
+      <MemoryRouter initialEntries={["/contacts/contact_1"]}>
+        <Routes>
+          <Route
+            path="/contacts/:contactId"
+            element={
+              <ContactDetailPage
+                apiClient={createMockApi([project])}
+                initialActivity={[activitySummary()]}
+                initialAvailableProjects={[project]}
+                initialContactDetail={{
+                  contact,
+                  fields: [
+                    {
+                      id: "contact_field_company",
+                      workspaceId: "workspace_1",
+                      containerId: contact.id,
+                      label: "Company",
+                      value: "Acme Renovations",
+                      type: "text",
+                      sortOrder: 0,
+                      createdAt: "2026-05-01T00:00:00.000Z",
+                      updatedAt: "2026-05-01T00:00:00.000Z",
+                      deletedAt: null
+                    }
+                  ]
+                }}
+                initialRelatedProjects={[
+                  {
+                    relationshipId: "relationship_contact_project_1",
+                    relationshipCreatedAt: "2026-05-01T00:00:00.000Z",
+                    project,
+                    openTaskCount: 1,
+                    recentActivityCount: 1,
+                    recentActivity: []
+                  }
+                ]}
+              />
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(html).toContain("Alex Chen");
+    expect(html).toContain("Client stakeholder");
+    expect(html).toContain("Acme Renovations");
+    expect(html).toContain("Launch Plan");
+    expect(html).not.toContain("Contact not found");
   });
 
   it("renders the project detail space-budget fixture with all core content types", () => {

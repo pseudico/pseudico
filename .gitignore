@@ -18,6 +18,7 @@ test-results/
 # Local runtime data
 *.log
 *.tmp
+_tmp_*
 *.db
 *.db-shm
 *.db-wal

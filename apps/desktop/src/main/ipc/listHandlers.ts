@@ -145,49 +145,52 @@ export function createListIpcHandlers(
     },
 
     async handleCompleteListItem(input) {
-      if (!isNonEmptyString(input)) {
+      const listItemId = coerceListItemId(input);
+      if (listItemId === null) {
         return apiError(
           "INVALID_INPUT",
-          "completeListItem requires a list item id string."
+          "completeListItem requires a list item id string or returned list item summary."
         );
       }
 
       return await withListService(workspaceService, async (context) =>
         apiOk(
           toListItemSummary(
-            (await context.listService.completeListItem(input)).listItem
+            (await context.listService.completeListItem(listItemId)).listItem
           )
         )
       );
     },
 
     async handleReopenListItem(input) {
-      if (!isNonEmptyString(input)) {
+      const listItemId = coerceListItemId(input);
+      if (listItemId === null) {
         return apiError(
           "INVALID_INPUT",
-          "reopenListItem requires a list item id string."
+          "reopenListItem requires a list item id string or returned list item summary."
         );
       }
 
       return await withListService(workspaceService, async (context) =>
         apiOk(
           toListItemSummary(
-            (await context.listService.reopenListItem(input)).listItem
+            (await context.listService.reopenListItem(listItemId)).listItem
           )
         )
       );
     },
 
     async handleEnablePipelineMode(input) {
-      if (!isNonEmptyString(input)) {
+      const listId = coerceListId(input);
+      if (listId === null) {
         return apiError(
           "INVALID_INPUT",
-          "enablePipelineMode requires a list id string."
+          "enablePipelineMode requires a list id string or returned list summary."
         );
       }
 
       return await withListService(workspaceService, async (context) => {
-        const result = await context.listService.enablePipelineMode(input);
+        const result = await context.listService.enablePipelineMode(listId);
         const listItems = context.listService.listItems(result.item.id);
 
         return apiOk(
@@ -197,15 +200,16 @@ export function createListIpcHandlers(
     },
 
     async handleDisablePipelineMode(input) {
-      if (!isNonEmptyString(input)) {
+      const listId = coerceListId(input);
+      if (listId === null) {
         return apiError(
           "INVALID_INPUT",
-          "disablePipelineMode requires a list id string."
+          "disablePipelineMode requires a list id string or returned list summary."
         );
       }
 
       return await withListService(workspaceService, async (context) => {
-        const result = await context.listService.disablePipelineMode(input);
+        const result = await context.listService.disablePipelineMode(listId);
         const listItems = context.listService.listItems(result.item.id);
 
         return apiOk(
@@ -215,15 +219,16 @@ export function createListIpcHandlers(
     },
 
     async handleGetPipelineViewModel(input) {
-      if (!isNonEmptyString(input)) {
+      const listId = coerceListId(input);
+      if (listId === null) {
         return apiError(
           "INVALID_INPUT",
-          "getPipelineViewModel requires a list id string."
+          "getPipelineViewModel requires a list id string or returned list summary."
         );
       }
 
       return await withListService(workspaceService, async (context) => {
-        const viewModel = context.listService.getPipelineViewModel(input);
+        const viewModel = context.listService.getPipelineViewModel(listId);
 
         return apiOk({
           list: toListSummary(
@@ -236,34 +241,36 @@ export function createListIpcHandlers(
     },
 
     async handleMovePipelineCard(input) {
-      if (!isMovePipelineCardInput(input)) {
+      const moveInput = normalizeMovePipelineCardInput(input);
+      if (moveInput === null) {
         return apiError(
           "INVALID_INPUT",
-          "movePipelineCard requires listId, cardId, and targetStageId fields."
+          "movePipelineCard requires listId, cardId, and targetStageId fields or returned summaries in those fields."
         );
       }
 
       return await withListService(workspaceService, async (context) =>
         apiOk(
           toListItemSummary(
-            (await context.listService.movePipelineCard(input)).card
+            (await context.listService.movePipelineCard(moveInput)).card
           )
         )
       );
     },
 
     async handleIndentListItem(input) {
-      if (!isNonEmptyString(input)) {
+      const listItemId = coerceListItemId(input);
+      if (listItemId === null) {
         return apiError(
           "INVALID_INPUT",
-          "indentListItem requires a list item id string."
+          "indentListItem requires a list item id string or returned list item summary."
         );
       }
 
       return await withListService(workspaceService, async (context) =>
         apiOk(
           toListItemSummary(
-            (await context.listService.indentListItem({ listItemId: input }))
+            (await context.listService.indentListItem({ listItemId }))
               .listItem
           )
         )
@@ -271,17 +278,18 @@ export function createListIpcHandlers(
     },
 
     async handleOutdentListItem(input) {
-      if (!isNonEmptyString(input)) {
+      const listItemId = coerceListItemId(input);
+      if (listItemId === null) {
         return apiError(
           "INVALID_INPUT",
-          "outdentListItem requires a list item id string."
+          "outdentListItem requires a list item id string or returned list item summary."
         );
       }
 
       return await withListService(workspaceService, async (context) =>
         apiOk(
           toListItemSummary(
-            (await context.listService.outdentListItem({ listItemId: input }))
+            (await context.listService.outdentListItem({ listItemId }))
               .listItem
           )
         )
@@ -289,7 +297,8 @@ export function createListIpcHandlers(
     },
 
     async handleMoveListItem(input) {
-      if (!isMoveListItemInput(input)) {
+      const moveInput = normalizeMoveListItemInput(input);
+      if (moveInput === null) {
         return apiError(
           "INVALID_INPUT",
           "moveListItem requires listItemId and direction fields."
@@ -299,7 +308,7 @@ export function createListIpcHandlers(
       return await withListService(workspaceService, async (context) =>
         apiOk(
           toListItemSummary(
-            (await context.listService.moveListItem(input)).listItem
+            (await context.listService.moveListItem(moveInput)).listItem
           )
         )
       );
@@ -674,17 +683,107 @@ function isBulkUpdateListItemsInput(
   );
 }
 
-function isMovePipelineCardInput(
+function coerceListId(input: unknown): string | null {
+  if (isNonEmptyString(input)) {
+    return input;
+  }
+  if (!isRecord(input)) {
+    return null;
+  }
+  if (isNonEmptyString(input.id)) {
+    return input.id;
+  }
+  if (isNonEmptyString(input.listId)) {
+    return input.listId;
+  }
+  if (isRecord(input.listId) && isNonEmptyString(input.listId.id)) {
+    return input.listId.id;
+  }
+  if (isRecord(input.list) && isNonEmptyString(input.list.id)) {
+    return input.list.id;
+  }
+  if (isRecord(input.item) && isNonEmptyString(input.item.id)) {
+    return input.item.id;
+  }
+  return null;
+}
+
+function coerceListItemId(input: unknown): string | null {
+  if (isNonEmptyString(input)) {
+    return input;
+  }
+  if (!isRecord(input)) {
+    return null;
+  }
+  if (isNonEmptyString(input.id)) {
+    return input.id;
+  }
+  if (isNonEmptyString(input.listItemId)) {
+    return input.listItemId;
+  }
+  if (isRecord(input.listItemId) && isNonEmptyString(input.listItemId.id)) {
+    return input.listItemId.id;
+  }
+  if (isRecord(input.listItem) && isNonEmptyString(input.listItem.id)) {
+    return input.listItem.id;
+  }
+  if (isRecord(input.item) && isNonEmptyString(input.item.id)) {
+    return input.item.id;
+  }
+  if (isRecord(input.card) && isNonEmptyString(input.card.id)) {
+    return input.card.id;
+  }
+  if (isRecord(input.stage) && isNonEmptyString(input.stage.id)) {
+    return input.stage.id;
+  }
+  return null;
+}
+
+function normalizeMovePipelineCardInput(
   input: unknown
-): input is MovePipelineCardInput {
-  return (
-    isRecord(input) &&
-    isNonEmptyString(input.listId) &&
-    isNonEmptyString(input.cardId) &&
-    isNonEmptyString(input.targetStageId) &&
-    isOptionalActorType(input.actorType) &&
-    isOptionalNumber(input.sortOrder)
-  );
+): MovePipelineCardInput | null {
+  if (!isRecord(input)) {
+    return null;
+  }
+  const listId = coerceListId(input.listId);
+  const cardId = coerceListItemId(input.cardId);
+  const targetStageId = coerceListItemId(input.targetStageId);
+  if (listId === null || cardId === null || targetStageId === null) {
+    return null;
+  }
+  const normalized: MovePipelineCardInput = {
+    listId,
+    cardId,
+    targetStageId
+  };
+  if (isActorTypeValue(input.actorType)) {
+    normalized.actorType = input.actorType;
+  }
+  if (typeof input.sortOrder === "number") {
+    normalized.sortOrder = input.sortOrder;
+  }
+  return normalized;
+}
+
+function normalizeMoveListItemInput(input: unknown): MoveListItemInput | null {
+  if (!isRecord(input)) {
+    return null;
+  }
+  const listItemId = coerceListItemId(input.listItemId);
+  if (
+    listItemId === null ||
+    (input.direction !== "up" && input.direction !== "down")
+  ) {
+    return null;
+  }
+  const normalized: MoveListItemInput = {
+    listItemId,
+    direction: input.direction
+  };
+  if (isActorTypeValue(input.actorType)) {
+    normalized.actorType = input.actorType;
+  }
+  return normalized;
 }
 
 function isBulkUpdateListItemsOperationValue(
@@ -697,15 +796,6 @@ function isBulkUpdateListItemsOperationValue(
     value === "move_down" ||
     value === "indent" ||
     value === "outdent"
-  );
-}
-
-function isMoveListItemInput(input: unknown): input is MoveListItemInput {
-  return (
-    isRecord(input) &&
-    isNonEmptyString(input.listItemId) &&
-    (input.direction === "up" || input.direction === "down") &&
-    isOptionalActorType(input.actorType)
   );
 }
 
@@ -798,6 +888,12 @@ function isOptionalActorType(value: unknown): boolean {
     value === "system" ||
     value === "importer"
   );
+}
+
+function isActorTypeValue(
+  value: unknown
+): value is NonNullable<MoveListItemInput["actorType"]> {
+  return value === "local_user" || value === "system" || value === "importer";
 }
 
 function isListItemStatusValue(value: unknown): value is ListItemStatus {
