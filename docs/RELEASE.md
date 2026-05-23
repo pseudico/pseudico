@@ -90,6 +90,13 @@ SHA-256 checksums for the packaged executable and `app.asar`, checks that
 Electron Builder remains a non-publishing `dir` package, records signing/update
 status, and scans the packaged app folder for workspace database/manifest files.
 
+For nontechnical beta-readiness, package validation must be repeatable: run
+`pnpm package`, `pnpm package:smoke` twice, and then `pnpm package` again before
+recording the package check. The package scripts are expected to restore the
+development `better-sqlite3` native module for shell Node tests after rebuilding
+the packaged Electron copy, and to stop only stale generated-package
+`Local Work OS.exe` processes that would lock `dist-packaged`.
+
 The current Windows development package intentionally disables executable
 signing with `signAndEditExecutable: false` in `apps/desktop/electron-builder.yml`.
 Code signing, notarization, installer targets, and certificate management remain

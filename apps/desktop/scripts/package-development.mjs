@@ -46,6 +46,7 @@ function run(command, args, cwd) {
 let packageError;
 
 try {
+  await stopPackagedAppProcesses();
   await run(pnpm, ["build"], appRoot);
   await preparePackagingStaging();
   const electronVersion = await getElectronVersion();
@@ -102,6 +103,50 @@ async function preparePackagingStaging() {
     ],
     repoRoot
   );
+}
+
+async function stopPackagedAppProcesses() {
+  if (process.platform !== "win32") {
+    return;
+  }
+
+  const executablePath = resolve(packageOutputRoot, "win-unpacked", "Local Work OS.exe");
+  const escapedExecutablePath = executablePath.replace(/'/g, "''");
+  const command = [
+    `$target = '${escapedExecutablePath}'`,
+    "Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -eq $target } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }"
+  ].join("; ");
+
+  await new Promise((resolveStop, rejectStop) => {
+    const child = spawn("powershell.exe", [
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-Command",
+      command
+    ], {
+      cwd: repoRoot,
+      stdio: "inherit",
+      windowsHide: true
+    });
+
+    child.on("error", rejectStop);
+    child.on("exit", (code, signal) => {
+      if (code === 0) {
+        resolveStop();
+        return;
+      }
+
+      rejectStop(
+        new Error(
+          `stopping generated packaged app processes failed with ${
+            signal === null ? `exit code ${code}` : `signal ${signal}`
+          }`
+        )
+      );
+    });
+  });
 }
 
 async function runElectronBuilderFromStaging(electronVersion) {

@@ -80,6 +80,11 @@ Current Electron Builder settings:
 - Packaging runs from a temporary `apps/desktop/.package-app/` staging directory
   produced by `pnpm deploy --prod --legacy`; the staging directory is deleted
   after packaging.
+- On Windows, `pnpm package` first stops stale `Local Work OS.exe` processes
+  whose executable path is inside the generated `dist-packaged/win-unpacked/`
+  folder before deleting/rebuilding that generated output. This is scoped to the
+  generated package path and is intended to recover from interrupted package
+  smoke/launch checks without killing unrelated Electron or Node processes.
 - Bundled local workspace packages are resolved by Vite aliases at build time,
   not packaged as pnpm workspace symlinks under `node_modules/@local-work-os`.
 - TypeScript build cache files (`*.tsbuildinfo` / `.tsbuildinfo/`) and source
@@ -94,6 +99,11 @@ Current non-blocking packaging advisories:
   packaging script still deliberately rebuilds and copies `better-sqlite3` for
   the packaged Electron ABI because PSE-221 proved this path is needed for the
   packaged smoke test.
+- `better-sqlite3` has two native-module contexts during package validation:
+  shell Node tests use the development `node_modules` copy, while the packaged
+  Electron app uses the rebuilt copy under `resources/app.asar.unpacked/`. The
+  package script restores the development copy after packaging so `pnpm test`
+  remains a Node-compatible gate.
 
 ## Required local verification
 
@@ -102,6 +112,8 @@ Run in this order on the target OS:
 ```bash
 pnpm package
 pnpm package:smoke
+pnpm package:smoke
+pnpm package
 pnpm qa:packaged-launch -- --screenshot=docs/manual-qa/screenshots/<ticket>/welcome.png
 pnpm release:package-check
 ```
@@ -114,6 +126,11 @@ pnpm release:package-check
 - create a manual backup;
 - reopen the database and verify activity persistence; and
 - keep workspace database, attachments, and backups outside the packaged app bundle.
+
+The package smoke script also runs a bounded normal-launch check and terminates
+the spawned process tree on Windows. Running `pnpm package:smoke` twice in a row
+should not leave `Local Work OS.exe` processes from the current generated
+package path or lock `dist-packaged` for the following `pnpm package` run.
 
 `pnpm qa:packaged-launch` is the canonical packaged-app launch proof for
 manual QA and screenshot runs. It launches the current packaged executable with
