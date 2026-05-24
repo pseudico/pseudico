@@ -38,6 +38,7 @@ const routes = [
     hash: "#/search?q=retrospective",
     waitFor: ["retrospective"],
     waitUntilNot: ["Searching local index"],
+    scrollY: 620,
     screenshot: "01-search-retrospective.png"
   },
   {
@@ -45,6 +46,7 @@ const routes = [
     hash: "#/search?q=Painting%20weekend",
     waitFor: ["Painting weekend"],
     waitUntilNot: ["Searching local index"],
+    scrollY: 620,
     screenshot: "02-search-painting-weekend.png"
   },
   {
@@ -52,6 +54,7 @@ const routes = [
     hash: "#/search?q=balcony",
     waitFor: ["balcony"],
     waitUntilNot: ["Searching local index"],
+    scrollY: 620,
     screenshot: "03-search-balcony.png"
   },
   {
@@ -243,13 +246,18 @@ try {
         timeoutMs
       });
     }
+    await waitForRendererPaint();
+    if (route.scrollY !== undefined) {
+      await client.evaluate(`window.scrollTo(0, ${JSON.stringify(route.scrollY)})`);
+      await waitForRendererPaint();
+    }
     const screenshotPath = join(screenshotDir, route.screenshot);
     if (args.blindCapture === undefined) {
       await client.send("Page.bringToFront");
     }
     const captured = await client.send("Page.captureScreenshot", {
       format: "png",
-      fromSurface: true
+      fromSurface: args.fromSurface === undefined
     });
     await writeFile(screenshotPath, Buffer.from(captured.data, "base64"));
     const summary = await evaluateOptionalSummary(client);
@@ -333,6 +341,10 @@ async function evaluateOptionalSummary(client) {
   }
 }
 
+async function waitForRendererPaint() {
+  await delay(Number(args.paintDelayMs ?? 1_500));
+}
+
 async function waitForSearchSettled(client, input) {
   const startedAt = Date.now();
   let state = null;
@@ -341,14 +353,15 @@ async function waitForSearchSettled(client, input) {
     state = await client.evaluate(`
       (() => {
         const bodyText = document.body?.innerText ?? "";
+        const normalizedBodyText = bodyText.toLocaleLowerCase();
         const cardCount = document.querySelectorAll(".search-result-card").length;
         return {
           bodyText: bodyText.slice(0, 1000),
-          includes: ${JSON.stringify(input.includes)}.every((term) => bodyText.includes(term)),
-          searching: bodyText.includes("Searching local index"),
+          includes: ${JSON.stringify(input.includes)}.every((term) => normalizedBodyText.includes(term.toLocaleLowerCase())),
+          searching: normalizedBodyText.includes("searching local index"),
           cardCount,
-          empty: bodyText.includes("No visible matches"),
-          error: bodyText.includes("Search error")
+          empty: normalizedBodyText.includes("no visible matches"),
+          error: normalizedBodyText.includes("search error")
         };
       })()
     `);
@@ -407,9 +420,12 @@ async function waitForBodyText(client, input) {
 
   while (Date.now() - startedAt < input.timeoutMs) {
     bodyText = await client.evaluate("document.body?.innerText ?? ''");
-    const includesOk = input.includes.every((term) => bodyText.includes(term));
+    const normalizedBodyText = bodyText.toLocaleLowerCase();
+    const includesOk = input.includes.every((term) =>
+      normalizedBodyText.includes(term.toLocaleLowerCase())
+    );
     const excludesOk = (input.excludes ?? []).every(
-      (term) => !bodyText.includes(term)
+      (term) => !normalizedBodyText.includes(term.toLocaleLowerCase())
     );
 
     if (includesOk && excludesOk) {

@@ -62,3 +62,27 @@ Do not claim HRQA packaged evidence complete. The fresh package and smoke gate a
 ### Decision update
 
 Do not proceed to final nontechnical beta candidate until PSE-268 is fixed and PSE-267 Search/Today evidence is rerun successfully or explicitly owner-accepted. Owner acceptance is not recommended for this blocker because Search is a primary retrieval workflow.
+
+## Fixed rerun — 2026-05-24
+
+PSE-268 was fixed in the beta candidate branch by stabilizing `SearchPage` default `initialKinds` / `initialResults` props and deriving Search filters from a stable `initialKindsKey`. This stops the packaged production Search route from continuously restarting/cancelling the live route search.
+
+Final packaged route evidence after rebuild:
+
+| Route | Result | Evidence |
+| --- | --- | --- |
+| `#/search?q=retrospective` | Pass; 2 result cards | `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/01-search-retrospective.png` |
+| `#/search?q=Painting%20weekend` | Pass; 2 result cards | `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/02-search-painting-weekend.png` |
+| `#/search?q=balcony` | Pass; 30 result cards in DOM summary | `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/03-search-balcony.png` |
+| `#/today` | Pass; Today summary rendered | `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/04-today.png` |
+
+Route evidence JSON: `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled-route-evidence.json`.
+
+Classification after rerun:
+
+- P0: none.
+- P1: none remaining for controlled internal beta.
+- P2: packaged OS-level no-network monitor still requires owner acceptance or a separate manual monitor before stronger public-release/local-only claims.
+- P3: public packaging/signing/installer/update polish remains future work.
+
+Decision update: PSE-267 is now complete for the Search/Today production-route evidence needed by the beta handoff, subject to the caveats in `docs/BETA_HANDOFF_STATUS_2026-05-24.md`.

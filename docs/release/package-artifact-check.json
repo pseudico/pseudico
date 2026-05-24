@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-24T05:47:43.597Z",
+  "generatedAt": "2026-05-24T06:13:26.049Z",
   "localOnly": true,
   "platform": {
     "os": "win32",
@@ -22,13 +22,13 @@
       "kind": "executable",
       "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
       "sizeBytes": 222973952,
-      "sha256": "149e0ec7220a7e78b2ad4d3f69b7be4ae3c2441159e37a4ee1c339c4b7543ec0"
+      "sha256": "e3c131148ffd8da8964b17aff72800441cc6b2758c58858912981d9b9a22198f"
     },
     {
       "kind": "app.asar",
       "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
-      "sizeBytes": 36231138,
-      "sha256": "89ac0db77f2dd1f7035a22bb4f0afa88ff0ecbc1b2980f3d9b348f1b415d61eb"
+      "sizeBytes": 36231322,
+      "sha256": "761e44b39ae1631ec448776aa9221f947435e2df336a5b6fca742e36148eee56"
     }
   ],
   "checks": [
