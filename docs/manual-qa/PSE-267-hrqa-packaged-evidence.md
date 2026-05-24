@@ -42,3 +42,23 @@ Do not claim HRQA packaged evidence complete. The fresh package and smoke gate a
 1. Debug packaged Search route freeze/hang on `retrospective` using the copied household-renovation workspace.
 2. Debug packaged Today route not reaching expected metric labels.
 3. Re-run PSE-267 capture and attach screenshots only after production routes visibly resolve.
+
+## Clean beta handoff rerun — 2026-05-24
+
+- Worktree: `C:\tmp\Pseudico-beta-candidate` on `codex/beta-candidate-handoff`.
+- Base: `origin/main` / `55311c874a61d0417a297c8c126c50e667fe8d2f`.
+- Package artifact: `C:\tmp\Pseudico-beta-candidate\apps\desktop\dist-packaged\win-unpacked\Local Work OS.exe`.
+- Workspace copy: `C:\tmp\Pseudico-beta-handoff-house-renovation-workspace`.
+- Fresh package, two package smoke runs, rebuild-after-smoke, release package check, and dependency audit passed.
+- Packaged API preflight passed: direct Search IPC returned `retrospective` = 2 results, `Painting weekend` = 2 results, `balcony` = 30 results, and recent searches = 6.
+- Production Search route evidence still failed: `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa/01-search-retrospective.png` shows `Searching local index...`, and later route captures timed out after Search route navigation.
+
+### Classification update
+
+- P0: none proven.
+- P1: **PSE-268** created. Nontechnical beta handoff is blocked because packaged production Search routes do not yet produce reliable human-visible retrieval evidence.
+- P2: PSE-250/PSE-253/PSE-267 packaged screenshots remain incomplete.
+
+### Decision update
+
+Do not proceed to final nontechnical beta candidate until PSE-268 is fixed and PSE-267 Search/Today evidence is rerun successfully or explicitly owner-accepted. Owner acceptance is not recommended for this blocker because Search is a primary retrieval workflow.
