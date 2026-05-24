@@ -8283,3 +8283,67 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+.workflow-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+  gap: 1rem;
+}
+
+.workflow-safety-list,
+.workflow-preview-list,
+.workflow-history-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.workflow-template-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.workflow-template-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.85rem;
+  background: var(--surface);
+  color: inherit;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.9rem;
+  text-align: left;
+}
+
+.workflow-template-card.selected,
+.workflow-template-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-soft);
+}
+
+.workflow-preview-list,
+.workflow-history-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.workflow-preview-list li,
+.workflow-history-list li {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.workflow-preview-list small,
+.workflow-history-list small {
+  color: var(--text-muted);
+}
+
+.workflow-confirm-box {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+@media (max-width: 900px) {
+  .workflow-grid {
+    grid-template-columns: 1fr;
+  }
+}

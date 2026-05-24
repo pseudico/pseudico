@@ -44,7 +44,7 @@ export function HelpPage(): React.JSX.Element {
           <h2>Help center and onboarding</h2>
           <p>
             Local Markdown guides, command references, onboarding steps, sample
-            work routines, and the Workflow Lab boundary. No network connection
+            work routines, and guided Workflows boundaries. No network connection
             or hosted account required.
           </p>
         </div>

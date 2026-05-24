@@ -1,24 +1,34 @@
-# Templates and Workflow Lab
+# Templates and Workflows
 
 Templates help repeat local project/contact/list patterns without cloud services
 or hosted automation.
 
-## Pilot workflow status
+## Beta workflow status
 
-Workflow automation is **future/scaffold-only** for the internal pilot. The
-Workflow Lab can show maintainers which local triggers/actions are validated and
-which non-local actions are rejected, but it is not a primary-operator
-create/edit/run/history loop yet.
+Workflows are a **small guided beta feature**, not a broad automation engine.
+The Workflows page supports predefined household-renovation review workflows:
 
-Use Today, tasks, lists, templates, and manual review for real pilot work.
+- Project review.
+- Contact follow-up.
+- Approval and decision review.
 
-## Sample workflow ideas
+The safe loop is always:
 
-These are future ideas, not pilot-supported automation:
+```text
+choose template -> fill small form -> preview -> confirm -> run -> review result/history
+```
 
-- Project kickoff: create a project, add a checklist, add a planning note, and tag it with @kickoff.
-- Client follow-up: create a contact task, add a due date, and link it to the related project.
-- Weekly review: open Today, review overdue work, then check dashboard and timeline summaries.
+Preview does not change data. Running a workflow creates local tasks/notes and
+relationships through the same services used elsewhere in Pseudico, so activity
+logs and search records are updated.
+
+## What workflows do not do
+
+- No background execution.
+- No user-authored scripts.
+- No webhooks, cloud sync, accounts, telemetry, or hosted workflow services.
+- No external messages are sent.
+- No approvals or decisions are changed automatically.
 
 ## Template guidance
 

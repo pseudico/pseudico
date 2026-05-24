@@ -1,0 +1,54 @@
+{
+  "ok": true,
+  "sourceWorkspace": "C:/tmp/Pseudico-beta-handoff-house-renovation-workspace",
+  "safeWorkspace": "C:/tmp/Pseudico-workflows-beta-evidence-workspace-2026-05-24T08-10-32-915Z",
+  "evidenceRoot": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z",
+  "screenshots": [
+    {
+      "label": "Template selection",
+      "fileName": "01-template-selection.png",
+      "filePath": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z\\01-template-selection.png"
+    },
+    {
+      "label": "Project review preview",
+      "fileName": "02-project-review-preview.png",
+      "filePath": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z\\02-project-review-preview.png"
+    },
+    {
+      "label": "Confirmation before execution",
+      "fileName": "03-confirmation-checked.png",
+      "filePath": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z\\03-confirmation-checked.png"
+    },
+    {
+      "label": "Project review result summary",
+      "fileName": "04-result-summary-project-review.png",
+      "filePath": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z\\04-result-summary-project-review.png"
+    },
+    {
+      "label": "Run history after project/contact/approval workflows",
+      "fileName": "05-run-history-after-four-runs.png",
+      "filePath": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z\\05-run-history-after-four-runs.png"
+    },
+    {
+      "label": "Search retrieval of created review note",
+      "fileName": "06-search-created-review-note.png",
+      "filePath": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z\\06-search-created-review-note.png"
+    },
+    {
+      "label": "Search retrieval of created contact follow-up task",
+      "fileName": "07-search-created-strata-task.png",
+      "filePath": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z\\07-search-created-strata-task.png"
+    },
+    {
+      "label": "Run history after app restart/reopen",
+      "fileName": "08-reopen-run-history-persistence.png",
+      "filePath": "C:\\Users\\AlastairLacey\\Pseudico\\docs\\manual-qa\\screenshots\\WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z\\08-reopen-run-history-persistence.png"
+    }
+  ],
+  "workflowsRun": [
+    "project review workflow against House Renovation and Fit-Out 2026",
+    "contact follow-up workflow for Strata manager / owners corporation",
+    "contact follow-up workflow for Terry",
+    "approval/decision workflow for balcony/bathroom approvals"
+  ]
+}

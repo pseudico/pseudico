@@ -51,7 +51,7 @@ describe("desktop shell routes", () => {
       "Dashboard",
       "Timeline",
       "Calendar",
-      "Workflow Lab",
+      "Workflows",
       "Help",
       "Settings",
       "Trash"

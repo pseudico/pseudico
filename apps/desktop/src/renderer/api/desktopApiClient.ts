@@ -143,6 +143,16 @@ export function createDesktopApiClient(api: LocalWorkOsApi): LocalWorkOsApi {
       chooseAndImportTemplatePack: (input) =>
         callApi(() => api.templates!.chooseAndImportTemplatePack(input))
     },
+    workflows: {
+      listTemplates: () =>
+        callApi(() => api.workflows!.listTemplates()),
+      preview: (input) =>
+        callApi(() => api.workflows!.preview(input)),
+      execute: (input) =>
+        callApi(() => api.workflows!.execute(input)),
+      listRuns: (input) =>
+        callApi(() => api.workflows!.listRuns(input))
+    },
     notes: {
       create: (input) => callApi(() => api.notes.create(input)),
       update: (input) => callApi(() => api.notes.update(input)),
@@ -852,6 +862,16 @@ export const desktopApiClient: LocalWorkOsApi = {
       getDesktopApiClient().templates!.importTemplatePack(input),
     chooseAndImportTemplatePack: (input) =>
       getDesktopApiClient().templates!.chooseAndImportTemplatePack(input)
+  },
+  workflows: {
+    listTemplates: () =>
+      getDesktopApiClient().workflows!.listTemplates(),
+    preview: (input) =>
+      getDesktopApiClient().workflows!.preview(input),
+    execute: (input) =>
+      getDesktopApiClient().workflows!.execute(input),
+    listRuns: (input) =>
+      getDesktopApiClient().workflows!.listRuns(input)
   },
   notes: {
     create: (input) => getDesktopApiClient().notes.create(input),

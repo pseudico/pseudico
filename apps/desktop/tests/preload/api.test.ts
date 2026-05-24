@@ -19,7 +19,7 @@ describe("typed preload API", () => {
   it("keeps IPC channels centralized and unique", () => {
     const channels = allChannelValues();
 
-    expect(channels).toHaveLength(253);
+    expect(channels).toHaveLength(257);
     expect(new Set(channels).size).toBe(channels.length);
     expect(channels.every((channel) => channel.startsWith("local-work-os:"))).toBe(
       true
@@ -50,6 +50,7 @@ describe("typed preload API", () => {
       "reminders",
       "lists",
       "templates",
+      "workflows",
       "notes",
       "links",
       "locations",
@@ -173,6 +174,64 @@ describe("typed preload API", () => {
       {
         channel: LOCAL_WORK_OS_IPC_CHANNELS.templates.chooseAndImportTemplatePack,
         input: { workspaceId: "workspace_1" }
+      }
+    ]);
+  });
+
+  it("routes guided workflow calls through their named channels", async () => {
+    const calls: { channel: string; input: unknown }[] = [];
+    const invoke: LocalWorkOsIpcInvoke = <Channel extends LocalWorkOsIpcChannel>(
+      channel: Channel,
+      input: LocalWorkOsIpcInput<Channel>
+    ) => {
+      calls.push({ channel, input });
+      return Promise.resolve(apiOk([])) as Promise<
+        LocalWorkOsIpcResult<Channel>
+      >;
+    };
+
+    const api = createLocalWorkOsApi(invoke);
+    await api.workflows!.listTemplates();
+    await api.workflows!.preview({
+      workspaceId: "workspace_1",
+      templateId: "house_project_review",
+      projectId: "container_1"
+    });
+    await api.workflows!.execute({
+      workspaceId: "workspace_1",
+      templateId: "house_contact_follow_up",
+      projectId: "container_1",
+      contactId: "contact_1",
+      confirmed: true
+    });
+    await api.workflows!.listRuns({ workspaceId: "workspace_1", limit: 5 });
+
+    expect(calls).toEqual([
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.workflows.listTemplates,
+        input: undefined
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.workflows.preview,
+        input: {
+          workspaceId: "workspace_1",
+          templateId: "house_project_review",
+          projectId: "container_1"
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.workflows.execute,
+        input: {
+          workspaceId: "workspace_1",
+          templateId: "house_contact_follow_up",
+          projectId: "container_1",
+          contactId: "contact_1",
+          confirmed: true
+        }
+      },
+      {
+        channel: LOCAL_WORK_OS_IPC_CHANNELS.workflows.listRuns,
+        input: { workspaceId: "workspace_1", limit: 5 }
       }
     ]);
   });
