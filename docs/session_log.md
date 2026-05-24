@@ -8666,3 +8666,38 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Optional-input screenshots remain a P2 evidence refresh item only.
 Next actions: Push conflict-free branch; confirm mergeability; merge if allowed.
+
+## 2026-05-24T21:03:41.0388042+10:00
+Objective: Sync beta handoff docs after guided Workflows landed.
+Decisions made:
+- Updated final beta status, handoff, PSE-264/PSE-266, readiness, and packaging docs to use workflow-enabled artifact and caveats.
+- Workflows are now documented as predefined guided beta templates, not scaffold-only or broad automation.
+Files changed:
+- docs/BETA_HANDOFF_STATUS_2026-05-24.md
+- docs/NONTECHNICAL_BETA_HANDOFF_DRAFT.md
+- docs/manual-qa/PSE-264-complete-functionality-beta-pass.md
+- docs/manual-qa/PSE-266-final-beta-go-decision.md
+- docs/OPERATOR_READINESS_REPORT.md
+- docs/RELEASE_CANDIDATE_PACKAGING.md
+Open questions / risks: Packaged OS-level no-network monitor remains a P2 caveat for public-release claims.
+Next actions: Run consistency grep/diff check; commit and open docs-sync PR.
+
+## 2026-05-24T21:07:37.5902221+10:00
+Objective: Publish beta docs-sync PR.
+Decisions made:
+- Opened PR #236 for docs-only handoff sync; leaving merge pending CI/review policy.
+- Validation recorded: diff whitespace check passed and stale artifact/hash grep was clean.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PR CI is pending; packaged no-network monitor remains P2 caveat.
+Next actions: Watch PR #236 checks; merge when policy allows; hand off workflow-enabled package.
+
+## 2026-05-24T21:50:34.3006731+10:00
+Objective: Review and merge beta docs-sync PR.
+Decisions made:
+- Reviewed PR #236 scope as docs-only beta handoff sync.
+- Confirmed stale artifact/hash grep is clean except contextual wording; merge will wait for required check if present.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub check is pending after latest branch update.
+Next actions: Push log entry; wait for PR check; merge PR #236 if allowed.

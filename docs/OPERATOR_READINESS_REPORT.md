@@ -4,7 +4,7 @@
 
 Evidence: `docs/BETA_HANDOFF_STATUS_2026-05-24.md`, `docs/manual-qa/PSE-264-complete-functionality-beta-pass.md`, `docs/manual-qa/PSE-266-final-beta-go-decision.md`, and final screenshots under `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/`.
 
-Owner caveats still required for beta: unsigned/unpacked Windows package, no installer/auto-update, manual backup-before-upgrade/import, workspace data outside the app folder, workflows lab-only, and no packaged OS-level firewall/no-network monitor in this pass.
+Owner caveats still required for beta: unsigned/unpacked Windows package, no installer/auto-update, manual backup-before-upgrade/import/workflow runs, workspace data outside the app folder, Workflows limited to predefined guided beta templates, and no packaged OS-level firewall/no-network monitor in this pass.
 # Operator Readiness Report
 
 Date: 2026-05-18
@@ -34,8 +34,11 @@ additional packaged/manual evidence closed or narrowed several gates:
   invalid file rows.
 - PSE-223 added packaged importer evidence for implemented local import paths
   and clearly marks third-party/service foundations as not pilot UI importers.
-- PSE-224 demoted workflows to Workflow Lab / scaffold-only for the internal
-  pilot rather than overclaiming an operator automation loop.
+- PSE-224 initially demoted workflows to Workflow Lab / scaffold-only to avoid
+  overclaiming automation. PSE-269 through PSE-274 then added and evidenced a
+  narrow guided Workflow beta loop with predefined local household templates,
+  preview, explicit confirmation, result summary, Search retrieval, and durable
+  run history.
 - PSE-228 proved the packaged Windows native picker paths that exist today for
   attachment selection, Markdown folder import, and backup-restore target
   selection, while explicitly marking typed-path and workspace-relative flows as
@@ -76,7 +79,7 @@ Use these labels when reading this report:
 | Packaged internal pilot handoff | Medium-high | PSE-221 `pnpm package`, `package:smoke`, `release:package-check`, and packaged UI evidence pass. Artifact remains unsigned/unpacked/internal-only. |
 | Primary-operator UX | Medium-high for internal pilot | PSE-220 screenshots/review found no remaining P0/P1 primary-work-loop blocker after targeted fixes. OS-native dialogs and accessibility/performance remain separate caveats. |
 | Importer readiness | Medium for implemented local paths | PSE-223 packaged smoke covers CSV/TSV, Markdown folder, Markdown note IPC, EML, and ICS. Third-party foundations and IMAP are not pilot-ready UI importers. |
-| Workflow readiness | Low for operators by design | PSE-224 explicitly marks workflows scaffold-only; services are tested for maintainers but no operator create/edit/run/history loop is claimed. |
+| Workflow readiness | Medium for predefined guided beta templates | PSE-269 through PSE-274 prove a narrow guided local loop: template selection, simple inputs, read-only preview, explicit confirmation, execution, result summary, Search retrieval, and run history. Broad builder/scheduling/background automation remains future. |
 | Nontechnical operator handoff | Medium-low | Core journeys are much better evidenced, but the packaged no-network monitor is still unrun for nontechnical handoff and the report still carries P2/P3 caveats. |
 | Public release readiness | Low | Signing, notarization, installers, public checksum publishing, legal/support process, and update channel are not complete. |
 
@@ -108,7 +111,7 @@ Use these labels when reading this report:
 | Dashboards | Present/partial | Widget tests, PSE-206/PSE-209/PSE-220 evidence | Custom dashboard editing remains future. |
 | Timeline/calendar | Partial-present | Timeline/calendar services, PSE-206/PSE-209 evidence | External/live calendar sync is out of scope. |
 | Templates | Present with limitations | Template service tests and PSE-222 template file-placeholder evidence | Binary file placeholders become notes with reattachment guidance; real binary-copy template support is future. |
-| Workflows | Scaffold-only for pilot | Workflow service/schema tests and PSE-224 Workflow Lab QA | No pilot operator create/edit/run/history loop; do not market workflows as daily automation. |
+| Workflows | Guided beta templates with limitations | PSE-269 through PSE-274; `docs/manual-qa/workflow-beta-evidence-2026-05-24.md`; `docs/manual-qa/WF-006-guided-workflows-beta.md` | Only predefined guided local household-renovation workflows are beta-supported. No arbitrary scripting, background runs, scheduling, webhooks, cloud services, or general builder. |
 | Backup/export/import/restore | Present/partial | PSE-207, PSE-218, PSE-223, PSE-228, PSE-229, package smoke, failure matrix | Backup restore target picker, Markdown folder picker, and EML file picker passed packaged dialog QA. Export, backup create/list, CSV import, and workspace create/open are typed-path or workspace-relative flows today, not native destination/source dialogs. |
 | Maintenance tools | Present/partial | Failure matrix, maintenance tests, activity/search rebuild evidence, PSE-209 search rebuild | Long-running packaged-app feedback has smoke/QA evidence for search rebuild but broad hands-on maintenance coverage remains limited. |
 
@@ -126,7 +129,7 @@ eview-app-evidence.json`, screenshots folder | Historical packaged automated/vis
 | Package hardening | `docs/manual-qa/PSE-221-packaged-release-qa.md`, `docs/manual-qa/PSE-221-package-contents-check.json`, `docs/release/package-artifact-check.json` | Automated/package plus visual | `pnpm package`, smoke, and package checks passed; `.tsbuildinfo` absent from packaged output. |
 | Template placeholder integrity | `docs/manual-qa/PSE-222-template-file-placeholder-integrity.md` | Source/service regression plus historical packaged repro | Template file placeholders no longer create invalid file items. |
 | Packaged importer QA | `docs/manual-qa/PSE-223-packaged-importer-qa.md`, summary JSON | Packaged automated | Implemented local importers passed smoke/integrity checks; service-only importers are caveated. |
-| Workflow pilot boundary | `docs/manual-qa/PSE-224-workflow-scaffold-qa.md`, `docs/manual-qa/screenshots/PSE-224-workflow-scaffold/workflow-lab.png` | Source/package plus visual | Workflows are explicitly scaffold-only for pilot. |
+| Guided Workflow beta loop | `docs/WORKFLOWS_BETA_CONTRACT.md`, `docs/manual-qa/workflow-beta-evidence-2026-05-24.md`, `docs/manual-qa/WF-006-guided-workflows-beta.md`, screenshots under `docs/manual-qa/screenshots/WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z/` | Packaged visual plus automated service/renderer | Predefined local workflow templates are beta-supported with caveats; broad automation remains excluded. |
 | Packaged OS-native dialog QA | `docs/manual-qa/PSE-228-packaged-os-dialog-qa.md`, `docs/manual-qa/PSE-228-packaged-dialog-qa-summary.json`, screenshots under `docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/` | Packaged manual / visual | File attach picker, Markdown folder picker, and restore target picker passed; typed-path/workspace-relative flows and email native picker are caveated. |
 | Packaged email native picker QA | `docs/manual-qa/PSE-229-email-native-picker.md`, `docs/manual-qa/PSE-229-email-picker-summary.json`, screenshots under `docs/manual-qa/screenshots/PSE-229-2026-05-18T09-05-00/` | Packaged manual / visual | EML file picker cancel/select passed after splitting email file and folder actions. |
 | Release packaging docs | `docs/RELEASE_CANDIDATE_PACKAGING.md` | Documentation | Current artifact is unsigned/unpacked internal-pilot package; no installer/signing/auto-update. |
@@ -142,7 +145,8 @@ listed in the PSE-225 PR/check summary.
 | PSE-221 | `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm package`, `pnpm package:smoke`, and `pnpm release:package-check` passed from a clean worktree. |
 | PSE-222 | Targeted template tests plus `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm package`, `pnpm package:smoke`, and `pnpm release:package-check` passed. |
 | PSE-223 | Packaged importer smoke evidence passed; docs distinguish packaged importers from service-only foundations. |
-| PSE-224 | Workflow renderer/service tests plus package smoke passed; workflows demoted to scaffold-only for pilot. |
+| PSE-224 | Workflow scaffold boundary was made explicit to prevent overclaiming before beta Workflow work. |
+| PSE-269 through PSE-274 | Guided Workflow beta contract, typed templates, preview, confirmed execution, UI, packaged evidence, and caveat-removal decision completed via PR #235. |
 | PSE-228 | `pnpm install --frozen-lockfile`, `pnpm package`, `pnpm package:smoke`, and packaged native dialog QA passed. |
 | PSE-229 | Targeted email picker IPC tests, `pnpm lint`, `pnpm typecheck`, `pnpm package`, `pnpm package:smoke`, and packaged Windows EML picker QA passed. |
 
@@ -159,7 +163,7 @@ listed in the PSE-225 PR/check summary.
 | OR-R7 | P2 | Advanced UX/product gaps remain: rich text, custom dashboard editing, advanced saved-view builder, scheduling, live calendar sync. | Documented limitation. | Keep out of current handoff claim; create feature tickets as needed. |
 | OR-R8 | P2 | Dependency audit warning: `simple-get` transitive release-tooling dependency is network-capable by purpose. | Tested acceptable for app workflows; documented. | Keep out of normal runtime; revisit on dependency changes. |
 | OR-R9 | P2 | Importer readiness could be overclaimed from service tests/docs without packaged runtime evidence. | Improved by PSE-223, PSE-228, and PSE-229. Implemented local paths have packaged evidence; native Markdown folder and EML file pickers passed; third-party foundations are explicitly service-only/partial. | Do not mark service-only importers as pilot UI-ready. |
-| OR-R10 | P2 | Workflows could be overclaimed as operator automation. | Reduced by PSE-224; Workflow Lab is scaffold-only for pilot. | Do not claim workflow create/edit/run/history until a future ticket implements and proves it. |
+| OR-R10 | P2 reduced to scoped caveat | Workflows could be overclaimed as broad automation. | PSE-269 through PSE-274 prove only predefined guided local beta templates. | Do not claim arbitrary workflow builder, scheduling, background runs, scripting, webhooks, or cloud automation. |
 | OR-R11 | P2 | Project-template file placeholders previously created invalid file rows. | Fixed by PSE-222; placeholders become notes with metadata and reattachment guidance. | Do not claim binary file template copying until implemented. |
 | OR-R12 | P3 for non-dialog surfaces | OS-native dialogs for file/import/export/backup flows needed direct packaged proof. | PSE-228 proved native attach, Markdown folder, and restore target pickers; PSE-229 proved native EML file picker. Workspace create/open, CSV import, export, and backup create/list are not native dialog flows today. | Do not claim native dialog coverage for typed-path/workspace-relative flows. |
 
@@ -172,7 +176,7 @@ These limitations are acceptable for **internal pilot** only if communicated to 
 - Optional network-facing features must remain disabled unless specifically tested.
 - Manual backups are required before important imports, maintenance, restore tests, and app upgrades.
 - Very large Today lanes initially show the earliest 50 tasks per lane with full counts and load-more controls; use Search/backlog tuning instead of loading every task card at once.
-- Workflows are scaffold-only and should not be used as pilot daily automation.
+- Workflows are limited to predefined guided beta templates; they require preview and confirmation and must not be treated as broad automation.
 - Third-party importer foundations are not pilot UI importers unless PSE-223 marks the family packaged-proven.
 - OS-native dialog behavior is proven only for the PSE-228-covered picker
   surfaces: file attach, Markdown folder import, EML file import, and restore target selection.
