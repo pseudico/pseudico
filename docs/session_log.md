@@ -8821,3 +8821,29 @@ Files changed:
 - docs/manual-qa/PSE-267-hrqa-packaged-evidence.md
 Open questions / risks: Branch not pushed yet; packaged Search/Today root cause still unknown.
 Next actions: Amend log into commit; push/open PR; continue root-cause debugging.
+## 2026-05-24T15:51:33.1522499+10:00
+Objective: Execute nontechnical beta handoff sequence from a clean candidate worktree.
+Decisions made:
+- Built and verified a fresh package from origin/main but stopped handoff at PSE-267 due Search route blocker.
+- Created PSE-268 as P1 beta blocker; drafted no-go handoff status instead of overclaiming beta readiness.
+Files changed:
+- docs/session_log.md
+- docs/BETA_HANDOFF_STATUS_2026-05-24.md
+- docs/NONTECHNICAL_BETA_HANDOFF_DRAFT.md
+Open questions / risks: PSE-268 blocks Search/HRQA evidence and therefore PSE-264/265/266 final beta Go.
+Next actions: fix PSE-268; rerun PSE-267; resume PSE-264 full packaged pass.
+
+## 2026-05-24T16:17:44.3911308+10:00
+Objective: Fix PSE-268, rerun HRQA evidence, and complete PSE-264/PSE-265/PSE-266 beta handoff artifacts.
+Decisions made:
+- Stabilized Search route defaults rather than hiding Search evidence; final verdict is Go-with-caveats for controlled internal beta.
+- Retained unsigned/no-installer/no-network-monitor caveats as owner-acceptance items, not public-release claims.
+Files changed:
+- apps/desktop/src/renderer/pages/SearchPage.tsx
+- apps/desktop/scripts/run-packaged-route-evidence.mjs
+- docs/BETA_HANDOFF_STATUS_2026-05-24.md
+- docs/NONTECHNICAL_BETA_HANDOFF_DRAFT.md
+- docs/manual-qa/PSE-264-complete-functionality-beta-pass.md
+- docs/manual-qa/PSE-266-final-beta-go-decision.md
+Open questions / risks: Packaged OS-level no-network monitor remains a P2 caveat before stronger public-release/local-only claims.
+Next actions: Update Linear/PR; push candidate branch; owner accepts caveats before sending testers.

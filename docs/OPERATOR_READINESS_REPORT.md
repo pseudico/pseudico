@@ -1,3 +1,10 @@
+# 2026-05-24 Beta handoff addendum
+
+**Updated targeted verdict:** controlled nontechnical internal beta is now **Go with caveats** after PSE-268 was fixed and rerun. This addendum supersedes the older nontechnical-readiness verdict below only for the 2026-05-24 internal beta candidate; public release remains **No**.
+
+Evidence: `docs/BETA_HANDOFF_STATUS_2026-05-24.md`, `docs/manual-qa/PSE-264-complete-functionality-beta-pass.md`, `docs/manual-qa/PSE-266-final-beta-go-decision.md`, and final screenshots under `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/`.
+
+Owner caveats still required for beta: unsigned/unpacked Windows package, no installer/auto-update, manual backup-before-upgrade/import, workspace data outside the app folder, workflows lab-only, and no packaged OS-level firewall/no-network monitor in this pass.
 # Operator Readiness Report
 
 Date: 2026-05-18

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-23T09:41:55.542Z",
+  "generatedAt": "2026-05-24T06:13:35.350Z",
   "localOnlyGuardrails": {
     "telemetry": "forbidden by default",
     "cloudSync": "forbidden",

@@ -17,6 +17,8 @@ const repoRoot = resolve(appRoot, "../..");
 const args = parseArgs(process.argv.slice(2));
 const timeoutMs = Number(args.timeoutMs ?? args.timeout ?? 30_000);
 const port = Number(args.port ?? 9351);
+const userDataDir =
+  args.userDataDir === undefined ? null : resolve(String(args.userDataDir));
 const screenshotPath =
   args.screenshot === undefined ? null : resolve(repoRoot, args.screenshot);
 const executablePath = getPackagedExecutablePath();
@@ -115,6 +117,7 @@ try {
         appAsarPath,
         timeoutMs,
         port,
+        userDataDir,
         error: error instanceof Error ? error.message : String(error),
         operatorHint:
           "If this failed with Windows display/Mojo access errors, rerun from a display-capable session. Do not treat a sandbox/no-display Electron failure as a product launch regression.",
@@ -129,7 +132,14 @@ try {
 }
 
 async function runPackagedLaunchCheck() {
-  const child = spawn(executablePath, [`--remote-debugging-port=${port}`], {
+  const launchArgs = [`--remote-debugging-port=${port}`];
+
+  if (userDataDir !== null) {
+    await mkdir(userDataDir, { recursive: true });
+    launchArgs.push(`--user-data-dir=${userDataDir}`);
+  }
+
+  const child = spawn(executablePath, launchArgs, {
     cwd: appRoot,
     env: {
       ...process.env,
@@ -166,9 +176,7 @@ async function runPackagedLaunchCheck() {
     await client.send("Runtime.enable");
     await client.send("Page.enable");
     const locationHref = await client.evaluate("location.href");
-    const bodyText = await client.evaluate(
-      "document.body?.innerText?.slice(0, 2000) ?? ''"
-    );
+    const bodyText = await waitForRenderedShell(client);
     const rendered = bodyText.includes("Local Work OS");
 
     if (!rendered) {
@@ -223,6 +231,25 @@ async function runPackagedLaunchCheck() {
       child.kill();
     }
   }
+}
+
+async function waitForRenderedShell(client) {
+  const startedAt = Date.now();
+  let bodyText = "";
+
+  while (Date.now() - startedAt < timeoutMs) {
+    bodyText = await client.evaluate(
+      "document.body?.innerText?.slice(0, 2000) ?? ''"
+    );
+
+    if (bodyText.includes("Local Work OS")) {
+      return bodyText;
+    }
+
+    await delay(250);
+  }
+
+  return bodyText;
 }
 
 async function waitForNormalLaunch(input) {

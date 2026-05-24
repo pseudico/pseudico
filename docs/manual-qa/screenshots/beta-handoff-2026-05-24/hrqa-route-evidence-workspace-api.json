@@ -1,0 +1,70 @@
+﻿{
+  "ok": true,
+  "workspace": {
+    "id": "workspace_mpg4xgw1_1twlscuxhd8",
+    "name": "House Renovation QA 2026 v2",
+    "rootPath": "C:\\tmp\\Pseudico-beta-handoff-house-renovation-workspace",
+    "openedAt": "2026-05-24T05:42:55.529Z",
+    "schemaVersion": 23
+  },
+  "apiChecks": [
+    {
+      "query": "retrospective",
+      "ok": true,
+      "durationMs": 9,
+      "count": 2,
+      "error": null
+    },
+    {
+      "query": "Painting weekend",
+      "ok": true,
+      "durationMs": 26,
+      "count": 2,
+      "error": null
+    },
+    {
+      "query": "balcony",
+      "ok": true,
+      "durationMs": 39,
+      "count": 30,
+      "error": null
+    },
+    {
+      "query": "recent-searches",
+      "ok": true,
+      "durationMs": 2,
+      "count": 6,
+      "error": null
+    }
+  ],
+  "workspaceRootPath": "C:\\tmp\\Pseudico-beta-handoff-house-renovation-workspace",
+  "screenshotDir": "C:\\tmp\\Pseudico-beta-candidate\\docs\\manual-qa\\screenshots\\beta-handoff-2026-05-24\\hrqa",
+  "userDataDir": "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-route-evidence-1779601374923",
+  "routes": [
+    {
+      "key": "workspace",
+      "hash": "#/workspace",
+      "screenshotPath": "C:\\tmp\\Pseudico-beta-candidate\\docs\\manual-qa\\screenshots\\beta-handoff-2026-05-24\\hrqa\\00-workspace.png",
+      "url": "file:///C:/tmp/Pseudico-beta-candidate/apps/desktop/dist-packaged/win-unpacked/resources/app.asar/dist/renderer/index.html#/workspace",
+      "bodyTextPreview": "Skip to workspace content\nL\nSearch\nSearch\nToday\n0\nSearch\nSearch\nSearch\nContacts\nSearch\nSearch\nContact\nProject\nSearch\nSearch\n\nWORKSPACE\n\nHouse Renovation QA 2026 v2\n\nC:\\tmp\\Pseudico-beta-handoff-house-renovation-workspace\n\nLAUNCH POINTS\n\nPinned and recent work\nOpen projects\nInbox\nInbox · active\nPinned favorite · 21/05/2026\nSomeday / Waiting Review\nSmart list\nPinned favorite · 21/05/2026\n\nOPERATOR FEED\n\nRecent movement\nSearch\nUpdated view mode for project \"House Renovation and Fit-Out 2026\" to list.\n22/05/2026 · workspace_preferences_updated\nUpdated view mode for project \"House Renovation and Fit-Out 2026\" to calendar.\n21/05/2026 · workspace_preferences_updated\nUpdated view mode for project \"House Renovation and Fit-Out 2026\" to timeline.\n21/05/2026 · workspace_preferences_updated\nCreated references relationship.\n21/05/2026 · relationship_created\nCreated references relationship.\n21/05/2026 · relationship_created\nCreated references relationship.\n21/05/2026 · relationship_created\n\nTODAY\n\nPlan and unblock\nOpen Today\nTODAY\n0\nOVERDUE\n0\nUPCOMING\n0\n\nACTIVE CONTACTS\n\nPeople and handoffs\nContacts\nStrata manager / owners corporationactive - Balcony concrete rot, broken tiles, common-property r",
+      "bodyTextLength": 2111,
+      "searchResultCardCount": 0,
+      "searchResultCards": []
+    }
+  ],
+  "gitSha": "55311c874a61d0417a297c8c126c50e667fe8d2f",
+  "executablePath": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+  "appAsarPath": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
+  "executable": {
+    "sizeBytes": 222973952,
+    "modifiedAt": "2026-05-24T05:28:22.441Z",
+    "sha256": "149e0ec7220a7e78b2ad4d3f69b7be4ae3c2441159e37a4ee1c339c4b7543ec0"
+  },
+  "appAsar": {
+    "sizeBytes": 36231138,
+    "modifiedAt": "2026-05-24T05:28:14.754Z",
+    "sha256": "89ac0db77f2dd1f7035a22bb4f0afa88ff0ecbc1b2980f3d9b348f1b415d61eb"
+  },
+  "stdoutTail": "\r\n",
+  "stderrTail": "\r\nDevTools listening on ws://127.0.0.1:9367/devtools/browser/4ecaf0b0-160e-4716-96b4-8f8598cc8bbc\r\n"
+}

@@ -1,0 +1,199 @@
+﻿{
+  "ok": true,
+  "workspace": {
+    "id": "workspace_mpg4xgw1_1twlscuxhd8",
+    "name": "House Renovation QA 2026 v2",
+    "rootPath": "C:\\tmp\\Pseudico-beta-handoff-house-renovation-workspace",
+    "openedAt": "2026-05-24T06:12:51.182Z",
+    "schemaVersion": 23
+  },
+  "apiChecks": [
+    {
+      "query": "retrospective",
+      "ok": true,
+      "durationMs": 12,
+      "count": 2,
+      "error": null
+    },
+    {
+      "query": "Painting weekend",
+      "ok": true,
+      "durationMs": 12,
+      "count": 2,
+      "error": null
+    },
+    {
+      "query": "balcony",
+      "ok": true,
+      "durationMs": 17,
+      "count": 30,
+      "error": null
+    },
+    {
+      "query": "recent-searches",
+      "ok": true,
+      "durationMs": 40,
+      "count": 6,
+      "error": null
+    }
+  ],
+  "workspaceRootPath": "C:\\tmp\\Pseudico-beta-handoff-house-renovation-workspace",
+  "screenshotDir": "C:\\tmp\\Pseudico-beta-candidate\\docs\\manual-qa\\screenshots\\beta-handoff-2026-05-24\\hrqa-fixed-scrolled",
+  "userDataDir": "C:\\Users\\ALASTA~1\\AppData\\Local\\Temp\\local-work-os-route-evidence-1779603170283",
+  "routes": [
+    {
+      "key": "search-retrospective",
+      "hash": "#/search?q=retrospective",
+      "screenshotPath": "C:\\tmp\\Pseudico-beta-candidate\\docs\\manual-qa\\screenshots\\beta-handoff-2026-05-24\\hrqa-fixed-scrolled\\01-search-retrospective.png",
+      "url": "file:///C:/tmp/Pseudico-beta-candidate/apps/desktop/dist-packaged/win-unpacked/resources/app.asar/dist/renderer/index.html#/search?q=retrospective",
+      "bodyTextPreview": "Skip to workspace content\nL\nSearch\nSearch\nToday\n0\nSearch\nSearch\nContacts\nSearch\nSearch\nContact\nProject\nSearch\nSearch\nSearch\n\nFIND\n\nSearch\n\nSearch projects, tasks, lists, notes, files, tags, and categories from the local workspace index.\n\nSearch query\nSearch\nSave search as view\nText: retrospective\nFilters\nInbox\nProjects\nContacts\nTasks\nLists\nNotes\nFiles\nLinks\nChecklist rows\nTags\nCategory\nStatus\nDue from\nDue to\nInclude archived results\nApply filters\nReset\nRecent\nretrospective\nbalcony\nPainting weekend\npainting outcome\ndeferred\ndeferred bathroom balcony painting\n\nRESULTS\n\nretrospective\n2 results\nText: retrospective\nQUERY\n\"retrospective\"\nRoute, field, and results stay in sync after Enter or Search.\nSCOPE\nActive local records\nNo cloud index or remote search is used.\nVISIBLE RESULT SHAPE\n2 results in 2 groups\nCards show type, title, snippet, context, status/date, tags, and highlights when available.\nNotes\n\nNote titles and body snippets from the local index.\n\n1 result\nNote\nRetrospective: House Renovation and Fit-Out 2026\nRetrospective: House Renovation and Fit-Out 2026 Completed/advanced: source notes structured, contacts linked, links/files attached, strata chronology create...\nWHY MATCHED",
+      "bodyTextLength": 2219,
+      "searchResultCardCount": 2,
+      "searchResultCards": [
+        {
+          "title": "NoteRetrospective: House Renovation and Fit-Out 2026",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "TaskFinal project retrospective review @review",
+          "meta": "activeBudget riskHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        }
+      ]
+    },
+    {
+      "key": "search-painting-weekend",
+      "hash": "#/search?q=Painting%20weekend",
+      "screenshotPath": "C:\\tmp\\Pseudico-beta-candidate\\docs\\manual-qa\\screenshots\\beta-handoff-2026-05-24\\hrqa-fixed-scrolled\\02-search-painting-weekend.png",
+      "url": "file:///C:/tmp/Pseudico-beta-candidate/apps/desktop/dist-packaged/win-unpacked/resources/app.asar/dist/renderer/index.html#/search?q=Painting%20weekend",
+      "bodyTextPreview": "Skip to workspace content\nL\nSearch\nSearch\nToday\n0\nSearch\nSearch\nContacts\nSearch\nSearch\nContact\nProject\nSearch\nSearch\nSearch\n\nFIND\n\nSearch\n\nSearch projects, tasks, lists, notes, files, tags, and categories from the local workspace index.\n\nSearch query\nSearch\nSave search as view\nText: Painting weekend\nFilters\nInbox\nProjects\nContacts\nTasks\nLists\nNotes\nFiles\nLinks\nChecklist rows\nTags\nCategory\nStatus\nDue from\nDue to\nInclude archived results\nApply filters\nReset\nRecent\nPainting weekend\nretrospective\nbalcony\npainting outcome\ndeferred\ndeferred bathroom balcony painting\n\nRESULTS\n\nPainting weekend\n2 results\nText: Painting weekend\nQUERY\n\"Painting weekend\"\nRoute, field, and results stay in sync after Enter or Search.\nSCOPE\nActive local records\nNo cloud index or remote search is used.\nVISIBLE RESULT SHAPE\n2 results in 1 group\nCards show type, title, snippet, context, status/date, tags, and highlights when available.\nTasks\n\nActionable work with status, dates, project/contact context, and tags.\n\n2 results\nTask\nPainting weekend: prep and first coat @calendar\nCalendar-style dated task for first coat.\nWHY MATCHED\nThe title contains the searched phrase.\ncompleted\nPainting\nHouse Renovation and Fit-Out ",
+      "bodyTextLength": 1902,
+      "searchResultCardCount": 2,
+      "searchResultCards": [
+        {
+          "title": "TaskPainting weekend: prep and first coat @calendar",
+          "meta": "completedPaintingHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "TaskConfirm spring painting weekend with Phillipa @painting",
+          "meta": "completedPaintingHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        }
+      ]
+    },
+    {
+      "key": "search-balcony",
+      "hash": "#/search?q=balcony",
+      "screenshotPath": "C:\\tmp\\Pseudico-beta-candidate\\docs\\manual-qa\\screenshots\\beta-handoff-2026-05-24\\hrqa-fixed-scrolled\\03-search-balcony.png",
+      "url": "file:///C:/tmp/Pseudico-beta-candidate/apps/desktop/dist-packaged/win-unpacked/resources/app.asar/dist/renderer/index.html#/search?q=balcony",
+      "bodyTextPreview": "Skip to workspace content\nL\nSearch\nSearch\nToday\n0\nSearch\nSearch\nContacts\nSearch\nSearch\nContact\nProject\nSearch\nSearch\nSearch\n\nFIND\n\nSearch\n\nSearch projects, tasks, lists, notes, files, tags, and categories from the local workspace index.\n\nSearch query\nSearch\nSave search as view\nText: balcony\nFilters\nInbox\nProjects\nContacts\nTasks\nLists\nNotes\nFiles\nLinks\nChecklist rows\nTags\nCategory\nStatus\nDue from\nDue to\nInclude archived results\nApply filters\nReset\nRecent\nbalcony\nPainting weekend\nretrospective\npainting outcome\ndeferred\ndeferred bathroom balcony painting\n\nRESULTS\n\nbalcony\n30 results\nText: balcony\nQUERY\n\"balcony\"\nRoute, field, and results stay in sync after Enter or Search.\nSCOPE\nActive local records\nNo cloud index or remote search is used.\nVISIBLE RESULT SHAPE\n30 results in 8 groups\nCards show type, title, snippet, context, status/date, tags, and highlights when available.\nNotes\n\nNote titles and body snippets from the local index.\n\n9 results\nNote\nBalcony defect chronology and evidence\nRecord of concrete rot/spalling and broken tiles. First follow-up asks whether balcony slab/waterproofing/tiles are common property, requests inspection timi...\nWHY MATCHED\nThe body or note preview conta",
+      "bodyTextLength": 11319,
+      "searchResultCardCount": 30,
+      "searchResultCards": [
+        {
+          "title": "NoteBalcony defect chronology and evidence",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "NoteBalcony screen brief for Terry",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "NoteCompletion note: strata and balcony evidence",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "NoteDecision log: balcony screen and BBQ deferred",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "NoteMeasurements register",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "NoteProcurement watchlist notes",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "NoteBathroom redesign: old design review",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "NoteRetrospective: House Renovation and Fit-Out 2026",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "NoteOriginal house project dump from May 2026",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "TaskAsk Terry for balcony screen feasibility @balcony",
+          "meta": "completedBalconyHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "TaskFollow up strata: balcony concrete rot and broken tiles @balcony @strata",
+          "meta": "completedBalconyHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "TaskTake balcony defect photos for strata record @evidence",
+          "meta": "completedBalconyHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "TaskConfirm by-laws for BBQ/screen mounting @approval",
+          "meta": "activeBalconyHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "TaskCall strata again if no balcony inspection booked @test-entry",
+          "meta": "completedNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "TaskMeasure balcony, closets, doors, bookshelf wall, dining area @measurements",
+          "meta": "completedFurnitureHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "TaskRefresh LikeButter bookshelf quote @bookshelf",
+          "meta": "activeFurnitureHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "TaskAsk strata about bathroom approval path @bathroom @approval",
+          "meta": "activeBathroomHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "Filebalcony_screen_concept.png",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "Filebalcony_defect_reference.png",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        },
+        {
+          "title": "ListBalcony repair, screen, BBQ, and furniture",
+          "meta": "activeNo categoryHouse Renovation and Fit-Out 2026Updated 21/05/2026"
+        }
+      ]
+    },
+    {
+      "key": "today",
+      "hash": "#/today",
+      "screenshotPath": "C:\\tmp\\Pseudico-beta-candidate\\docs\\manual-qa\\screenshots\\beta-handoff-2026-05-24\\hrqa-fixed-scrolled\\04-today.png",
+      "url": "file:///C:/tmp/Pseudico-beta-candidate/apps/desktop/dist-packaged/win-unpacked/resources/app.asar/dist/renderer/index.html#/today",
+      "bodyTextPreview": "Skip to workspace content\nL\nSearch\nSearch\nToday\n0\nSearch\nSearch\nContacts\nSearch\nSearch\nContact\nProject\nSearch\nSearch\nSearch\n\nPLANNING\n\nToday\n\nDue, overdue, and tomorrow-preview tasks from the current local workspace.\n\nRefresh\nKeyboard planner\nSaving to Inbox\nToday task\nTomorrow task\nActive lane: Today\nDestination: Inbox\nDue: 23/05/2026\nSubmit: Ctrl/Cmd+Enter\n\nLOCAL REVIEW\n\nDaily and weekly summary\n\nManual-plan counts are calculated locally from daily plans and task/list activity. Due-date lanes below may include additional dated tasks. Weekly groups cover 2026-05-18 to 2026-05-24.\n\nExport Markdown\n0\nManually planned\n0\nCompleted\n0\nSnoozed\n0\nOverdue\n\nManual plan lanes: Today 0 · Tomorrow 0 · Backlog 0\n\nVISIBLE WORK LANES\n\nDue-date lane counts\n\nThese counts reconcile with the visible Today, Tomorrow, and Backlog workbench lanes. Manual planning counts above can differ when tasks are shown because of due dates rather than explicit daily-plan entries.\n\nToday 0 · Tomorrow 0 · Backlog 0\n\nPLANNING PREFERENCES\n\nFocus mode\n0/6 focus tasks planned\nPlanning mode\nStandard\nTop Six\nIvy Lee\nMax focus tasks\nBacklog lookback\nShow waiting tasks\nShow deferred tasks\nDaily completion summary\n\nCompleted ",
+      "bodyTextLength": 1711,
+      "searchResultCardCount": 0,
+      "searchResultCards": []
+    }
+  ],
+  "gitSha": "fb18796a89b693db7312a3f360df60671f4a9e52",
+  "executablePath": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+  "appAsarPath": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
+  "executable": {
+    "sizeBytes": 222973952,
+    "modifiedAt": "2026-05-24T06:12:10.329Z",
+    "sha256": "e3c131148ffd8da8964b17aff72800441cc6b2758c58858912981d9b9a22198f"
+  },
+  "appAsar": {
+    "sizeBytes": 36231322,
+    "modifiedAt": "2026-05-24T06:12:09.971Z",
+    "sha256": "761e44b39ae1631ec448776aa9221f947435e2df336a5b6fca742e36148eee56"
+  },
+  "stdoutTail": "\r\n",
+  "stderrTail": "\r\nDevTools listening on ws://127.0.0.1:9375/devtools/browser/f5268fcc-88a3-4884-a348-ae3838ec223c\r\n"
+}

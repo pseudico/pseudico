@@ -46,6 +46,8 @@ const searchKindOptions = [
 ] as const satisfies readonly { label: string; value: SearchResultKind }[];
 
 const SEARCH_PAGE_SIZE = 30;
+const EMPTY_INITIAL_SEARCH_KINDS: SearchResultKind[] = [];
+const EMPTY_INITIAL_SEARCH_RESULTS: SearchResultSummary[] = [];
 const emptySearchFilters: SearchFiltersValue<SearchResultKind> = {
   kinds: [],
   tags: "",
@@ -67,8 +69,8 @@ export function SearchPage({
   apiClient = desktopApiClient,
   disableLiveLoading = false,
   initialQuery,
-  initialKinds = [],
-  initialResults = [],
+  initialKinds = EMPTY_INITIAL_SEARCH_KINDS,
+  initialResults = EMPTY_INITIAL_SEARCH_RESULTS,
   initialWorkspace
 }: SearchPageProps): React.JSX.Element {
   const navigate = useNavigate();
@@ -77,6 +79,7 @@ export function SearchPage({
   const workspace = initialWorkspace ?? currentWorkspace;
   const searchParamsKey = searchParams.toString();
   const queryFromRoute = searchParams.get("q") ?? "";
+  const initialKindsKey = initialKinds.join("\u0000");
   const [draftQuery, setDraftQuery] = useState(initialQuery ?? queryFromRoute);
   const [filterDraft, setFilterDraft] = useState<SearchFiltersValue<SearchResultKind>>(
     () => {
@@ -105,7 +108,7 @@ export function SearchPage({
       initialQuery === undefined
         ? parseSearchFiltersFromParams(new URLSearchParams(searchParamsKey))
         : { ...emptySearchFilters, kinds: initialKinds },
-    [initialKinds, initialQuery, searchParamsKey]
+    [initialKindsKey, initialQuery, searchParamsKey]
   );
   const parsedQuery = useMemo(
     () => ({ chips: parseStructuredSearchChips(draftQuery) }),

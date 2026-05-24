@@ -42,3 +42,47 @@ Do not claim HRQA packaged evidence complete. The fresh package and smoke gate a
 1. Debug packaged Search route freeze/hang on `retrospective` using the copied household-renovation workspace.
 2. Debug packaged Today route not reaching expected metric labels.
 3. Re-run PSE-267 capture and attach screenshots only after production routes visibly resolve.
+
+## Clean beta handoff rerun — 2026-05-24
+
+- Worktree: `C:\tmp\Pseudico-beta-candidate` on `codex/beta-candidate-handoff`.
+- Base: `origin/main` / `55311c874a61d0417a297c8c126c50e667fe8d2f`.
+- Package artifact: `C:\tmp\Pseudico-beta-candidate\apps\desktop\dist-packaged\win-unpacked\Local Work OS.exe`.
+- Workspace copy: `C:\tmp\Pseudico-beta-handoff-house-renovation-workspace`.
+- Fresh package, two package smoke runs, rebuild-after-smoke, release package check, and dependency audit passed.
+- Packaged API preflight passed: direct Search IPC returned `retrospective` = 2 results, `Painting weekend` = 2 results, `balcony` = 30 results, and recent searches = 6.
+- Production Search route evidence still failed: `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa/01-search-retrospective.png` shows `Searching local index...`, and later route captures timed out after Search route navigation.
+
+### Classification update
+
+- P0: none proven.
+- P1: **PSE-268** created. Nontechnical beta handoff is blocked because packaged production Search routes do not yet produce reliable human-visible retrieval evidence.
+- P2: PSE-250/PSE-253/PSE-267 packaged screenshots remain incomplete.
+
+### Decision update
+
+Do not proceed to final nontechnical beta candidate until PSE-268 is fixed and PSE-267 Search/Today evidence is rerun successfully or explicitly owner-accepted. Owner acceptance is not recommended for this blocker because Search is a primary retrieval workflow.
+
+## Fixed rerun — 2026-05-24
+
+PSE-268 was fixed in the beta candidate branch by stabilizing `SearchPage` default `initialKinds` / `initialResults` props and deriving Search filters from a stable `initialKindsKey`. This stops the packaged production Search route from continuously restarting/cancelling the live route search.
+
+Final packaged route evidence after rebuild:
+
+| Route | Result | Evidence |
+| --- | --- | --- |
+| `#/search?q=retrospective` | Pass; 2 result cards | `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/01-search-retrospective.png` |
+| `#/search?q=Painting%20weekend` | Pass; 2 result cards | `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/02-search-painting-weekend.png` |
+| `#/search?q=balcony` | Pass; 30 result cards in DOM summary | `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/03-search-balcony.png` |
+| `#/today` | Pass; Today summary rendered | `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/04-today.png` |
+
+Route evidence JSON: `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled-route-evidence.json`.
+
+Classification after rerun:
+
+- P0: none.
+- P1: none remaining for controlled internal beta.
+- P2: packaged OS-level no-network monitor still requires owner acceptance or a separate manual monitor before stronger public-release/local-only claims.
+- P3: public packaging/signing/installer/update polish remains future work.
+
+Decision update: PSE-267 is now complete for the Search/Today production-route evidence needed by the beta handoff, subject to the caveats in `docs/BETA_HANDOFF_STATUS_2026-05-24.md`.

@@ -217,3 +217,19 @@ A nontechnical operator may receive an internal pilot build only when:
 - package metadata warnings are either resolved or explicitly documented for the
   internal-pilot recipient; and
 - open P0/P1 release risks are fixed or explicitly accepted by the owner.
+
+## 2026-05-24 beta candidate addendum
+
+Final controlled internal-beta candidate after the PSE-268 fix:
+
+- Folder: `C:\tmp\Pseudico-beta-candidate\apps\desktop\dist-packaged\win-unpacked`
+- Executable: `C:\tmp\Pseudico-beta-candidate\apps\desktop\dist-packaged\win-unpacked\Local Work OS.exe`
+- Executable SHA-256: `e3c131148ffd8da8964b17aff72800441cc6b2758c58858912981d9b9a22198f`
+- app.asar SHA-256: `761e44b39ae1631ec448776aa9221f947435e2df336a5b6fca742e36148eee56`
+- Final package metadata: `docs/release/package-artifact-check.json`
+- Final handoff status: `docs/BETA_HANDOFF_STATUS_2026-05-24.md`
+- Tester handoff note: `docs/NONTECHNICAL_BETA_HANDOFF_DRAFT.md`
+
+Final gates passed on Windows: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm package`, two consecutive `pnpm package:smoke` runs, final `pnpm package`, `pnpm qa:packaged-launch`, `pnpm release:package-check`, and `pnpm audit:dependencies`.
+
+Distribution remains internal-beta only: unsigned unpacked package, no installer, no auto-update, no public signing/notarization, and no public support/legal release process.

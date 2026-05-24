@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-23T09:41:55.680Z",
+  "generatedAt": "2026-05-24T06:13:26.049Z",
   "localOnly": true,
   "platform": {
     "os": "win32",
@@ -10,8 +10,8 @@
   "package": {
     "productName": "Local Work OS",
     "packageKind": "unpacked-dir",
-    "unpackedRoot": "C:\\Users\\AlastairLacey\\Pseudico\\.worktrees\\pse-262-beta-verification\\apps\\desktop\\dist-packaged\\win-unpacked",
-    "resourcesRoot": "C:\\Users\\AlastairLacey\\Pseudico\\.worktrees\\pse-262-beta-verification\\apps\\desktop\\dist-packaged\\win-unpacked\\resources",
+    "unpackedRoot": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked",
+    "resourcesRoot": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\resources",
     "signingStatus": "unsigned Windows development package; signAndEditExecutable is false",
     "installerStatus": "not produced by current dir target",
     "autoUpdateStatus": "disabled; electron-builder publish is null and no update feed is configured",
@@ -20,15 +20,15 @@
   "artifacts": [
     {
       "kind": "executable",
-      "path": "C:\\Users\\AlastairLacey\\Pseudico\\.worktrees\\pse-262-beta-verification\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+      "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
       "sizeBytes": 222973952,
-      "sha256": "1621afe75195bd64dd6cbbd45f8b45afc71a22a567219d02944d09036c8807b6"
+      "sha256": "e3c131148ffd8da8964b17aff72800441cc6b2758c58858912981d9b9a22198f"
     },
     {
       "kind": "app.asar",
-      "path": "C:\\Users\\AlastairLacey\\Pseudico\\.worktrees\\pse-262-beta-verification\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
-      "sizeBytes": 36231142,
-      "sha256": "45a0eab9c2827f1171376bb5d55981e782e1bef6b9cfcd55f87f75a307c920f8"
+      "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
+      "sizeBytes": 36231322,
+      "sha256": "761e44b39ae1631ec448776aa9221f947435e2df336a5b6fca742e36148eee56"
     }
   ],
   "checks": [
@@ -36,28 +36,28 @@
       "name": "unpacked app directory exists",
       "passed": true,
       "details": {
-        "path": "C:\\Users\\AlastairLacey\\Pseudico\\.worktrees\\pse-262-beta-verification\\apps\\desktop\\dist-packaged\\win-unpacked"
+        "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked"
       }
     },
     {
       "name": "packaged resources directory exists",
       "passed": true,
       "details": {
-        "path": "C:\\Users\\AlastairLacey\\Pseudico\\.worktrees\\pse-262-beta-verification\\apps\\desktop\\dist-packaged\\win-unpacked\\resources"
+        "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\resources"
       }
     },
     {
       "name": "packaged executable exists",
       "passed": true,
       "details": {
-        "path": "C:\\Users\\AlastairLacey\\Pseudico\\.worktrees\\pse-262-beta-verification\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe"
+        "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe"
       }
     },
     {
       "name": "packaged app.asar exists",
       "passed": true,
       "details": {
-        "path": "C:\\Users\\AlastairLacey\\Pseudico\\.worktrees\\pse-262-beta-verification\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar"
+        "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar"
       }
     },
     {
@@ -92,14 +92,14 @@
       "name": "desktop package description metadata present",
       "passed": true,
       "details": {
-        "packageJson": "C:\\Users\\AlastairLacey\\Pseudico\\.worktrees\\pse-262-beta-verification\\apps\\desktop\\package.json"
+        "packageJson": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\package.json"
       }
     },
     {
       "name": "desktop package author metadata present",
       "passed": true,
       "details": {
-        "packageJson": "C:\\Users\\AlastairLacey\\Pseudico\\.worktrees\\pse-262-beta-verification\\apps\\desktop\\package.json"
+        "packageJson": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\package.json"
       }
     },
     {
