@@ -201,7 +201,11 @@ function isPreviewInput(value: unknown): value is PreviewGuidedWorkflowInput {
 
   return optionalString(value.workspaceId) &&
     optionalString(value.projectId) &&
-    optionalString(value.contactId);
+    optionalString(value.contactId) &&
+    optionalString(value.reviewFocus) &&
+    optionalString(value.followUpType) &&
+    optionalString(value.dueDate) &&
+    optionalString(value.approvalArea);
 }
 
 function isExecuteInput(value: unknown): value is ExecuteGuidedWorkflowInput {

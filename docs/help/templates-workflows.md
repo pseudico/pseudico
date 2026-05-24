@@ -12,6 +12,12 @@ The Workflows page supports predefined household-renovation review workflows:
 - Contact follow-up.
 - Approval and decision review.
 
+Each workflow asks only for small, nontechnical choices. Project review can be
+focused on balcony approvals, painting, electrical, bathroom, budget risk, or
+all. Contact follow-up asks for the contact, follow-up type, related project,
+and optional due date. Approval and decision review asks for the project and
+approval area.
+
 The safe loop is always:
 
 ```text

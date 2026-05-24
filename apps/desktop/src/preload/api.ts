@@ -3870,6 +3870,23 @@ export type GuidedWorkflowFieldSummary =
       defaultValue: string;
       helpText: string;
       options: Array<{ id: string; label: string }>;
+    }
+  | {
+      id: "reviewFocus" | "followUpType" | "approvalArea";
+      label: string;
+      kind: "select";
+      required: boolean;
+      defaultValue: string;
+      helpText: string;
+      options: Array<{ id: string; label: string }>;
+    }
+  | {
+      id: "dueDate";
+      label: string;
+      kind: "date";
+      required: false;
+      defaultValue: string;
+      helpText: string;
     };
 
 export type GuidedWorkflowTemplateSummary = {
@@ -3887,6 +3904,10 @@ export type PreviewGuidedWorkflowInput = {
   templateId: GuidedWorkflowTemplateId;
   projectId?: string;
   contactId?: string;
+  reviewFocus?: string;
+  followUpType?: string;
+  dueDate?: string;
+  approvalArea?: string;
 };
 
 export type ExecuteGuidedWorkflowInput = PreviewGuidedWorkflowInput & {
@@ -3905,6 +3926,7 @@ export type GuidedWorkflowPlannedChangeSummary = {
   targetContactName: string | null;
   tags: string[];
   categoryName: string | null;
+  dueDate: string | null;
 };
 
 export type GuidedWorkflowPreviewSummary = {

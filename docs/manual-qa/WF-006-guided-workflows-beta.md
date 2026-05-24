@@ -16,6 +16,14 @@ Workflows run:
 3. Contact follow-up workflow for `Terry`.
 4. Approval/decision workflow for balcony/bathroom approvals.
 
+Follow-up implementation note:
+
+- The beta UI and service now also expose the required small operator inputs:
+  project review focus, contact follow-up type, optional follow-up due date, and
+  approval review area. These are covered by automated service and renderer
+  tests; the screenshot set below remains the packaged evidence for the core
+  choose → preview → confirm → run → search/history → restart loop.
+
 Evidence screenshots:
 
 - `01-template-selection.png` — predefined template selection and safe beta rules.

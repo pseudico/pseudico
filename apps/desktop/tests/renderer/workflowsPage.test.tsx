@@ -28,6 +28,7 @@ describe("WorkflowsPage", () => {
     expect(html).toContain("I understand this will create or link the items shown above.");
     expect(html).toContain("Project review");
     expect(html).toContain("Contact follow-up");
+    expect(html).toContain("Review focus");
     expect(html).toContain("Workflow review: House Renovation and Fit-Out 2026");
     expect(html).toContain("Review open balcony approvals @review @balcony");
     expect(html).toContain("Run history");
@@ -51,6 +52,15 @@ const templates: GuidedWorkflowTemplateSummary[] = [
         required: true,
         defaultValue: "container_mpg4xp68_0703fc0zpbr",
         helpText: "Choose the project."
+      },
+      {
+        id: "reviewFocus",
+        label: "Review focus",
+        kind: "select",
+        required: false,
+        defaultValue: "all",
+        helpText: "Choose the focus.",
+        options: [{ id: "all", label: "All" }]
       }
     ],
     creates: ["Workflow review"],
@@ -83,6 +93,23 @@ const templates: GuidedWorkflowTemplateSummary[] = [
             label: "Strata manager / owners corporation"
           }
         ]
+      },
+      {
+        id: "followUpType",
+        label: "Follow-up type",
+        kind: "select",
+        required: true,
+        defaultValue: "approval",
+        helpText: "Choose a type.",
+        options: [{ id: "approval", label: "Approval" }]
+      },
+      {
+        id: "dueDate",
+        label: "Optional due date",
+        kind: "date",
+        required: false,
+        defaultValue: "",
+        helpText: "Optional due date."
       }
     ],
     creates: ["Follow-up task", "Follow-up note"],
@@ -112,7 +139,8 @@ const preview: GuidedWorkflowPreviewSummary = {
       targetContactId: null,
       targetContactName: null,
       tags: ["review", "renovation"],
-      categoryName: null
+      categoryName: null,
+      dueDate: null
     },
     {
       id: "review-balcony-approvals",
@@ -125,7 +153,8 @@ const preview: GuidedWorkflowPreviewSummary = {
       targetContactId: null,
       targetContactName: null,
       tags: ["review", "balcony"],
-      categoryName: null
+      categoryName: null,
+      dueDate: null
     }
   ]
 };

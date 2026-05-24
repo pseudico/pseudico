@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-24T06:13:26.049Z",
+  "generatedAt": "2026-05-24T10:06:13.327Z",
   "localOnly": true,
   "platform": {
     "os": "win32",
@@ -10,8 +10,8 @@
   "package": {
     "productName": "Local Work OS",
     "packageKind": "unpacked-dir",
-    "unpackedRoot": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked",
-    "resourcesRoot": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\resources",
+    "unpackedRoot": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked",
+    "resourcesRoot": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\resources",
     "signingStatus": "unsigned Windows development package; signAndEditExecutable is false",
     "installerStatus": "not produced by current dir target",
     "autoUpdateStatus": "disabled; electron-builder publish is null and no update feed is configured",
@@ -20,15 +20,15 @@
   "artifacts": [
     {
       "kind": "executable",
-      "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+      "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
       "sizeBytes": 222973952,
-      "sha256": "e3c131148ffd8da8964b17aff72800441cc6b2758c58858912981d9b9a22198f"
+      "sha256": "6f4886ad03ab6f097d8adaceb419535d1c13eb5202ee53eaf76e629585d06cb9"
     },
     {
       "kind": "app.asar",
-      "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
-      "sizeBytes": 36231322,
-      "sha256": "761e44b39ae1631ec448776aa9221f947435e2df336a5b6fca742e36148eee56"
+      "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
+      "sizeBytes": 36259422,
+      "sha256": "3d144627764840e218b27b2eee86bdfa9cf32bb663d25d30b90cc1612f968b66"
     }
   ],
   "checks": [
@@ -36,28 +36,28 @@
       "name": "unpacked app directory exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked"
+        "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked"
       }
     },
     {
       "name": "packaged resources directory exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\resources"
+        "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\resources"
       }
     },
     {
       "name": "packaged executable exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe"
+        "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe"
       }
     },
     {
       "name": "packaged app.asar exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar"
+        "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar"
       }
     },
     {
@@ -92,14 +92,14 @@
       "name": "desktop package description metadata present",
       "passed": true,
       "details": {
-        "packageJson": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\package.json"
+        "packageJson": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\package.json"
       }
     },
     {
       "name": "desktop package author metadata present",
       "passed": true,
       "details": {
-        "packageJson": "C:\\tmp\\Pseudico-beta-candidate\\apps\\desktop\\package.json"
+        "packageJson": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\package.json"
       }
     },
     {
