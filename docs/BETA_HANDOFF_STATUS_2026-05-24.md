@@ -2,62 +2,62 @@
 
 ## Verdict
 
-**Go with explicit internal-beta caveats for nontechnical testers.** The PSE-268 Search-route blocker has been fixed and rerun against the final Windows unpacked package. Automated release gates, package smoke, package launch, release package checks, dependency audit, and the HRQA Search/Today production-route evidence now pass.
+**Go with explicit internal-beta caveats for nontechnical testers.** The PSE-268 Search-route blocker is fixed, the PSE-269 through PSE-274 guided Workflow beta loop is merged, and the workflow-enabled Windows unpacked package has package smoke, package metadata, dependency audit, workflow tests, GitHub CI, HRQA Search/Today evidence, and packaged Workflow evidence.
 
 This is **not** a public release: the build is unsigned, unpacked, manually distributed, and has no installer, auto-update, public support process, or signing/notarization.
 
 ## Candidate under test
 
-- Worktree: `C:\tmp\Pseudico-beta-candidate`
-- Branch: `codex/beta-candidate-handoff`
-- Package folder: `C:\tmp\Pseudico-beta-candidate\apps\desktop\dist-packaged\win-unpacked`
-- Run: `C:\tmp\Pseudico-beta-candidate\apps\desktop\dist-packaged\win-unpacked\Local Work OS.exe`
-- Executable SHA-256: `e3c131148ffd8da8964b17aff72800441cc6b2758c58858912981d9b9a22198f`
-- app.asar SHA-256: `761e44b39ae1631ec448776aa9221f947435e2df336a5b6fca742e36148eee56`
+- Worktree used for latest package evidence: `C:\tmp\pse-269-review-merge`
+- Merged code: `origin/main` at `6c7ce43dc3583d8be89ee34936dc460fa49690ae`
+- Package folder: `C:\tmp\pse-269-review-merge\apps\desktop\dist-packaged\win-unpacked`
+- Run: `C:\tmp\pse-269-review-merge\apps\desktop\dist-packaged\win-unpacked\Local Work OS.exe`
+- Executable SHA-256: `6f4886ad03ab6f097d8adaceb419535d1c13eb5202ee53eaf76e629585d06cb9`
+- app.asar SHA-256: `3d144627764840e218b27b2eee86bdfa9cf32bb663d25d30b90cc1612f968b66`
 - Artifact metadata: `docs/release/package-artifact-check.json`
 
-## Gates run after the PSE-268 fix
+## Gates and evidence now in scope
 
-| Gate | Result | Notes |
+| Gate / evidence | Result | Notes |
 | --- | --- | --- |
-| `pnpm lint` | Pass | Includes the fixed route-evidence harness. |
-| `pnpm typecheck` | Pass | All workspace projects. |
-| `pnpm test` | Pass | 238 files / 921 tests. |
-| Targeted Search tests | Pass | `apps/desktop/tests/renderer/projectsPage.test.tsx` and `packages/features/tests/searchService.test.ts`; 21 tests. |
-| `pnpm build` | Pass | Production Electron/Vite build. |
-| `pnpm package` | Pass | Fresh Windows unpacked package built after the fix. |
-| `pnpm package:smoke` | Pass twice | Workspace creation, SQLite, attachments, backup, import smoke, and normal launch. |
-| `pnpm package` after smoke | Pass | Rebuild after smoke confirmed package output was not locked. |
-| `pnpm qa:packaged-launch` | Pass | Final welcome screenshot captured. |
-| `pnpm release:package-check` | Pass | Final checksums written. |
+| GitHub CI for PR #235 | Pass | `lint / typecheck / test / build` passed before merge. |
+| `pnpm package:smoke` | Pass | Re-run against workflow-enabled package on 2026-05-24. |
+| `pnpm release:package-check` | Pass | Final workflow-enabled checksums are listed above. |
 | `pnpm audit:dependencies` | Pass with 1 warning | Existing `simple-get` network-capable dependency remains documented and outside normal runtime. |
-| `git diff --check` | Pass | Line-ending warnings only. |
+| Guided workflow service tests | Pass | `guidedWorkflowService.test.ts` coverage includes template, mutation-free preview, execution, activity/search/run-history, optional input, invalid input, and blocked preview behavior. |
+| Guided workflow renderer test | Pass | `workflowsPage.test.tsx` covers nontechnical UI copy and preview/confirmation/history states. |
+| HRQA Search/Today evidence | Pass | PSE-268 rerun remains valid for Search route and Today route behavior. |
+| Packaged guided Workflow evidence | Pass with caveats | WF-006 captured select -> preview -> confirm -> result -> search/history -> restart evidence using a safe copy of the household renovation workspace. |
 
 ## Evidence captured
 
-- Final Welcome launch: `docs/manual-qa/screenshots/beta-handoff-2026-05-24/final/welcome.png`
-- Final HRQA route evidence JSON: `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled-route-evidence.json`
-- Final HRQA screenshots:
-  - `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/01-search-retrospective.png`
-  - `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/02-search-painting-weekend.png`
-  - `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/03-search-balcony.png`
-  - `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/04-today.png`
-- Earlier blocker/preflight evidence retained for traceability:
-  - `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-route-evidence-workspace-api.json`
-  - `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa/01-search-retrospective.png`
+Search/Today beta evidence:
 
-## PSE-268 resolution
+- `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled-route-evidence.json`
+- `docs/manual-qa/screenshots/beta-handoff-2026-05-24/hrqa-fixed-scrolled/`
 
-PSE-268 was caused by unstable default array props on `SearchPage`: `initialKinds = []` created a new dependency identity every render, so the live route search effect repeatedly restarted/cancelled even though direct Search IPC returned results quickly. The fix uses stable empty constants and a stable `initialKindsKey` dependency for filter derivation.
+Guided Workflow beta evidence:
 
-Packaged production-route rerun results:
+- `docs/WORKFLOWS_BETA_CONTRACT.md`
+- `docs/manual-qa/workflow-beta-evidence-2026-05-24.md`
+- `docs/manual-qa/WF-006-guided-workflows-beta.md`
+- `docs/manual-qa/screenshots/WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z/`
 
-| Route | Result |
-| --- | --- |
-| `#/search?q=retrospective` | Pass; 2 visible Search result cards. |
-| `#/search?q=Painting%20weekend` | Pass; 2 visible Search result cards. |
-| `#/search?q=balcony` | Pass; 30 Search result cards in DOM summary and visible note result cards in screenshot. |
-| `#/today` | Pass; Today planning summary rendered. |
+## Workflow beta decision
+
+Workflows are no longer scaffold-only for this internal beta. They are **beta-supported with caveats** for predefined guided local household-renovation workflows only:
+
+1. Project review workflow.
+2. Contact follow-up workflow.
+3. Approval / decision review workflow.
+
+Workflow caveats:
+
+- No arbitrary scripting.
+- No background automation or scheduling.
+- No webhooks, cloud sync, accounts, telemetry, hosted services, public sharing, or team workflows.
+- No broad user-authored workflow builder.
+- Preview is read-only; execution requires explicit confirmation.
 
 ## Decision and caveats
 
@@ -70,8 +70,8 @@ Required caveats to include with the handoff:
 3. Testers must keep workspace folders outside the app/package folder.
 4. Testers must run an in-app backup before importing real data or moving to a newer build.
 5. Optional network-capable features remain off by default; no packaged OS firewall/no-network monitor was run in this pass, so public-release local-only claims still require that manual monitor.
-6. Workflows remain scaffold/lab only; do not present them as daily automation.
+6. Workflows are limited to the predefined guided beta templates and must not be presented as broad automation.
 
 ## Required human action before sending
 
-Owner should copy or zip the entire `win-unpacked` folder, include the tester handoff note, and explicitly accept the unsigned/internal-beta caveats above. No P0/P1 blocker remains from this rerun.
+Owner should copy or zip the entire workflow-enabled `win-unpacked` folder, include the tester handoff note, and explicitly accept the unsigned/internal-beta caveats above. No P0/P1 blocker remains from this review.

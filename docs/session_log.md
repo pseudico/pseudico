@@ -8666,3 +8666,18 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Optional-input screenshots remain a P2 evidence refresh item only.
 Next actions: Push conflict-free branch; confirm mergeability; merge if allowed.
+
+## 2026-05-24T21:03:41.0388042+10:00
+Objective: Sync beta handoff docs after guided Workflows landed.
+Decisions made:
+- Updated final beta status, handoff, PSE-264/PSE-266, readiness, and packaging docs to use workflow-enabled artifact and caveats.
+- Workflows are now documented as predefined guided beta templates, not scaffold-only or broad automation.
+Files changed:
+- docs/BETA_HANDOFF_STATUS_2026-05-24.md
+- docs/NONTECHNICAL_BETA_HANDOFF_DRAFT.md
+- docs/manual-qa/PSE-264-complete-functionality-beta-pass.md
+- docs/manual-qa/PSE-266-final-beta-go-decision.md
+- docs/OPERATOR_READINESS_REPORT.md
+- docs/RELEASE_CANDIDATE_PACKAGING.md
+Open questions / risks: Packaged OS-level no-network monitor remains a P2 caveat for public-release claims.
+Next actions: Run consistency grep/diff check; commit and open docs-sync PR.

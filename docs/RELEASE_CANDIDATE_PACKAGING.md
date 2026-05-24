@@ -220,16 +220,16 @@ A nontechnical operator may receive an internal pilot build only when:
 
 ## 2026-05-24 beta candidate addendum
 
-Final controlled internal-beta candidate after the PSE-268 fix:
+Final controlled internal-beta candidate after the PSE-268 Search fix and PSE-269 through PSE-274 guided Workflow beta loop:
 
-- Folder: `C:\tmp\Pseudico-beta-candidate\apps\desktop\dist-packaged\win-unpacked`
-- Executable: `C:\tmp\Pseudico-beta-candidate\apps\desktop\dist-packaged\win-unpacked\Local Work OS.exe`
-- Executable SHA-256: `e3c131148ffd8da8964b17aff72800441cc6b2758c58858912981d9b9a22198f`
-- app.asar SHA-256: `761e44b39ae1631ec448776aa9221f947435e2df336a5b6fca742e36148eee56`
+- Folder: `C:\tmp\pse-269-review-merge\apps\desktop\dist-packaged\win-unpacked`
+- Executable: `C:\tmp\pse-269-review-merge\apps\desktop\dist-packaged\win-unpacked\Local Work OS.exe`
+- Executable SHA-256: `6f4886ad03ab6f097d8adaceb419535d1c13eb5202ee53eaf76e629585d06cb9`
+- app.asar SHA-256: `3d144627764840e218b27b2eee86bdfa9cf32bb663d25d30b90cc1612f968b66`
 - Final package metadata: `docs/release/package-artifact-check.json`
 - Final handoff status: `docs/BETA_HANDOFF_STATUS_2026-05-24.md`
 - Tester handoff note: `docs/NONTECHNICAL_BETA_HANDOFF_DRAFT.md`
 
-Final gates passed on Windows: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm package`, two consecutive `pnpm package:smoke` runs, final `pnpm package`, `pnpm qa:packaged-launch`, `pnpm release:package-check`, and `pnpm audit:dependencies`.
+Final gates passed on Windows across the beta handoff and workflow-enabled candidate evidence: GitHub CI `lint / typecheck / test / build`, `pnpm package:smoke`, `pnpm release:package-check`, `pnpm audit:dependencies`, targeted guided Workflow service/renderer tests, HRQA packaged route evidence, and packaged guided Workflow evidence.
 
 Distribution remains internal-beta only: unsigned unpacked package, no installer, no auto-update, no public signing/notarization, and no public support/legal release process.
