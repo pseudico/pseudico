@@ -8691,3 +8691,13 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: PR CI is pending; packaged no-network monitor remains P2 caveat.
 Next actions: Watch PR #236 checks; merge when policy allows; hand off workflow-enabled package.
+
+## 2026-05-24T21:50:34.3006731+10:00
+Objective: Review and merge beta docs-sync PR.
+Decisions made:
+- Reviewed PR #236 scope as docs-only beta handoff sync.
+- Confirmed stale artifact/hash grep is clean except contextual wording; merge will wait for required check if present.
+Files changed:
+- docs/session_log.md
+Open questions / risks: GitHub check is pending after latest branch update.
+Next actions: Push log entry; wait for PR check; merge PR #236 if allowed.
