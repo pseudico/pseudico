@@ -25,6 +25,15 @@ The beta Workflows surface supports only predefined guided templates:
 2. Contact follow-up for the known renovation contacts.
 3. Approval/decision review for unresolved balcony and bathroom decisions.
 
+Supported nontechnical inputs are intentionally small:
+
+- Project review: project plus optional focus (`all`, balcony approvals,
+  painting, electrical, bathroom, or budget risk).
+- Contact follow-up: contact, related project, follow-up type (`call`, `email`,
+  `quote`, `approval`, or `availability`), and an optional local due date.
+- Approval/decision review: project plus approval area (`all`, balcony,
+  bathroom, or electrical).
+
 The beta loop is:
 
 ```text
@@ -74,6 +83,8 @@ choose predefined template
 - Prove preview does not mutate database rows.
 - Prove execution creates tasks/notes, activity events, search records, workflow
   run history, and contact relationships where applicable.
+- Prove optional inputs affect planned changes without enabling arbitrary
+  actions or non-local behavior.
 - Update renderer tests for template selection, preview, confirmation, results,
   and run history wording.
 - Run lint/typecheck/test/build/package/package-smoke where the local environment

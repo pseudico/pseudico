@@ -8657,3 +8657,12 @@ Decisions made:
 Files changed: docs/session_log.md
 Open questions / risks: Worktree still contains unrelated dirty/untracked files; target merge branch/PR remains unspecified.
 Next actions: Push branch/open PR; merge after review/CI; handle unrelated files separately.
+## 2026-05-24T20:06:22.7614878+10:00
+Objective: Resolve PR #235 conflicts and review merge readiness.
+Decisions made:
+- Rebuilt PR branch on current main in clean C:\tmp worktree.
+- Verified lint, typecheck, full test, build, package, package:smoke, and package-check pass.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Optional-input screenshots remain a P2 evidence refresh item only.
+Next actions: Push conflict-free branch; confirm mergeability; merge if allowed.

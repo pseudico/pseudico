@@ -67,6 +67,41 @@ export type GuidedWorkflowField =
       defaultValue: string;
       helpText: string;
       options: Array<{ id: string; label: string }>;
+    }
+  | {
+      id: "reviewFocus";
+      label: string;
+      kind: "select";
+      required: false;
+      defaultValue: "all";
+      helpText: string;
+      options: Array<{ id: "balcony_approvals" | "painting" | "electrical" | "bathroom" | "budget_risk" | "all"; label: string }>;
+    }
+  | {
+      id: "followUpType";
+      label: string;
+      kind: "select";
+      required: true;
+      defaultValue: "approval";
+      helpText: string;
+      options: Array<{ id: "call" | "email" | "quote" | "approval" | "availability"; label: string }>;
+    }
+  | {
+      id: "dueDate";
+      label: string;
+      kind: "date";
+      required: false;
+      defaultValue: "";
+      helpText: string;
+    }
+  | {
+      id: "approvalArea";
+      label: string;
+      kind: "select";
+      required: true;
+      defaultValue: "all";
+      helpText: string;
+      options: Array<{ id: "balcony" | "bathroom" | "electrical" | "all"; label: string }>;
     };
 
 export type GuidedWorkflowTemplate = {
@@ -94,6 +129,22 @@ export const GUIDED_WORKFLOW_TEMPLATES: readonly GuidedWorkflowTemplate[] = [
         required: true,
         defaultValue: HOUSE_RENOVATION_PROJECT_ID,
         helpText: "Choose the project that should receive the review note and tasks."
+      },
+      {
+        id: "reviewFocus",
+        label: "Review focus",
+        kind: "select",
+        required: false,
+        defaultValue: "all",
+        helpText: "Choose the part of the project to review, or keep All for the full beta review set.",
+        options: [
+          { id: "all", label: "All" },
+          { id: "balcony_approvals", label: "Balcony approvals" },
+          { id: "painting", label: "Painting" },
+          { id: "electrical", label: "Electrical" },
+          { id: "bathroom", label: "Bathroom" },
+          { id: "budget_risk", label: "Budget risk" }
+        ]
       }
     ],
     creates: [
@@ -131,6 +182,29 @@ export const GUIDED_WORKFLOW_TEMPLATES: readonly GuidedWorkflowTemplate[] = [
           id: contact.id,
           label: contact.name
         }))
+      },
+      {
+        id: "followUpType",
+        label: "Follow-up type",
+        kind: "select",
+        required: true,
+        defaultValue: "approval",
+        helpText: "Choose the kind of follow-up task to prepare.",
+        options: [
+          { id: "call", label: "Call" },
+          { id: "email", label: "Email" },
+          { id: "quote", label: "Quote" },
+          { id: "approval", label: "Approval" },
+          { id: "availability", label: "Availability" }
+        ]
+      },
+      {
+        id: "dueDate",
+        label: "Optional due date",
+        kind: "date",
+        required: false,
+        defaultValue: "",
+        helpText: "Optional local task due date. Leave blank if this follow-up is not dated yet."
       }
     ],
     creates: [
@@ -154,13 +228,27 @@ export const GUIDED_WORKFLOW_TEMPLATES: readonly GuidedWorkflowTemplate[] = [
         required: true,
         defaultValue: HOUSE_RENOVATION_PROJECT_ID,
         helpText: "Choose the project that should receive approval review work."
+      },
+      {
+        id: "approvalArea",
+        label: "Approval area",
+        kind: "select",
+        required: true,
+        defaultValue: "all",
+        helpText: "Choose the approval/decision area to review.",
+        options: [
+          { id: "all", label: "All" },
+          { id: "balcony", label: "Balcony" },
+          { id: "bathroom", label: "Bathroom" },
+          { id: "electrical", label: "Electrical" }
+        ]
       }
     ],
     creates: [
-      "Workflow approvals review: balcony and bathroom",
-      "Confirm by-laws for BBQ/screen mounting @approval @review @balcony",
-      "Ask strata about bathroom approval path @bathroom @approval @review",
-      "Review deferred balcony screen, BBQ, and bathroom decisions @decision @deferred @review"
+      `Approval review: ${HOUSE_RENOVATION_PROJECT_NAME}`,
+      "Confirm balcony BBQ/screen by-law path @approval @balcony",
+      "Confirm bathroom approval path with strata @approval @bathroom",
+      "Record deferred decisions after approval review @decision"
     ],
     doesNotDo: ["No approval is submitted.", "No vendor is contacted.", "No decisions are changed automatically."]
   }

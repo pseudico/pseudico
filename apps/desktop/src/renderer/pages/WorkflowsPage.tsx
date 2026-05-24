@@ -29,6 +29,8 @@ type WorkflowsPageProps = {
   initialRuns?: GuidedWorkflowRunHistoryEntrySummary[];
 };
 
+type WorkflowSelectOption = { id: string; label: string };
+
 const DEFAULT_PROJECT_ID = "container_mpg4xp68_0703fc0zpbr";
 const DEFAULT_CONTACT_ID = "container_mpg4y338_1f6bjrvu1at";
 
@@ -50,6 +52,10 @@ export function WorkflowsPage({
   );
   const [projectId, setProjectId] = useState(DEFAULT_PROJECT_ID);
   const [contactId, setContactId] = useState(DEFAULT_CONTACT_ID);
+  const [reviewFocus, setReviewFocus] = useState("all");
+  const [followUpType, setFollowUpType] = useState("approval");
+  const [dueDate, setDueDate] = useState("");
+  const [approvalArea, setApprovalArea] = useState("all");
   const [preview, setPreview] = useState<GuidedWorkflowPreviewSummary | null>(initialPreview);
   const [result, setResult] = useState<GuidedWorkflowExecutionSummary | null>(initialResult);
   const [runs, setRuns] = useState<GuidedWorkflowRunHistoryEntrySummary[]>(initialRuns);
@@ -116,6 +122,9 @@ export function WorkflowsPage({
 
   const selectedContactOptions =
     selectedTemplate?.fields.find((field) => field.id === "contactId" && field.kind === "contact")?.options ?? [];
+  const reviewFocusOptions = getSelectOptions(selectedTemplate, "reviewFocus");
+  const followUpTypeOptions = getSelectOptions(selectedTemplate, "followUpType");
+  const approvalAreaOptions = getSelectOptions(selectedTemplate, "approvalArea");
 
   async function buildPreview(): Promise<void> {
     if (apiClient.workflows === undefined || workspaceId === "") {
@@ -132,7 +141,9 @@ export function WorkflowsPage({
       workspaceId,
       templateId: selectedTemplateId,
       projectId,
-      ...(selectedTemplateId === "house_contact_follow_up" ? { contactId } : {})
+      ...(selectedTemplateId === "house_project_review" ? { reviewFocus } : {}),
+      ...(selectedTemplateId === "house_contact_follow_up" ? { contactId, followUpType, dueDate } : {}),
+      ...(selectedTemplateId === "house_approval_decision_review" ? { approvalArea } : {})
     });
 
     setLoading(false);
@@ -158,6 +169,9 @@ export function WorkflowsPage({
       templateId: preview.template.id,
       projectId: preview.projectId,
       ...(preview.contactId === null ? {} : { contactId: preview.contactId }),
+      ...(preview.template.id === "house_project_review" ? { reviewFocus } : {}),
+      ...(preview.template.id === "house_contact_follow_up" ? { followUpType, dueDate } : {}),
+      ...(preview.template.id === "house_approval_decision_review" ? { approvalArea } : {}),
       confirmed: true
     });
 
@@ -244,6 +258,12 @@ export function WorkflowsPage({
                   setPreview(null);
                   setResult(null);
                   setConfirmed(false);
+                  if (template.id === "house_project_review") {
+                    setReviewFocus("all");
+                  }
+                  if (template.id === "house_approval_decision_review") {
+                    setApprovalArea("all");
+                  }
                 }}
               >
                 <strong>{template.name}</strong>
@@ -274,10 +294,68 @@ export function WorkflowsPage({
           {selectedTemplateId === "house_contact_follow_up" ? (
             <label className="field-label">
               Contact
-              <select value={contactId} onChange={(event) => setContactId(event.target.value)}>
+              <select
+                value={contactId}
+                onChange={(event) => {
+                  const nextContactId = event.target.value;
+                  setContactId(nextContactId);
+                  setFollowUpType(defaultFollowUpTypeForContact(nextContactId));
+                }}
+              >
                 {selectedContactOptions.map((contact) => (
                   <option key={contact.id} value={contact.id}>
                     {contacts.find((known) => known.id === contact.id)?.name ?? contact.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+
+          {selectedTemplateId === "house_project_review" ? (
+            <label className="field-label">
+              Review focus
+              <select value={reviewFocus} onChange={(event) => setReviewFocus(event.target.value)}>
+                {reviewFocusOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+
+          {selectedTemplateId === "house_contact_follow_up" ? (
+            <>
+              <label className="field-label">
+                Follow-up type
+                <select value={followUpType} onChange={(event) => setFollowUpType(event.target.value)}>
+                  {followUpTypeOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field-label">
+                Optional due date
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(event) => setDueDate(event.target.value)}
+                  aria-describedby="workflow-due-date-help"
+                />
+                <small id="workflow-due-date-help">Leave blank if this follow-up is not dated yet.</small>
+              </label>
+            </>
+          ) : null}
+
+          {selectedTemplateId === "house_approval_decision_review" ? (
+            <label className="field-label">
+              Approval area
+              <select value={approvalArea} onChange={(event) => setApprovalArea(event.target.value)}>
+                {approvalAreaOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
                   </option>
                 ))}
               </select>
@@ -331,6 +409,7 @@ export function WorkflowsPage({
                     Project: {change.targetProjectName ?? change.targetProjectId ?? "not selected"}
                     {change.targetContactName === null ? "" : ` • Contact: ${change.targetContactName}`}
                     {change.tags.length === 0 ? "" : ` • Tags: ${change.tags.map((tag) => `@${tag}`).join(" ")}`}
+                    {change.dueDate === null ? "" : ` • Due: ${change.dueDate}`}
                   </small>
                 </li>
               ))}
@@ -412,4 +491,22 @@ export function WorkflowsPage({
       </OperatorWorkbench>
     </OperatorPage>
   );
+}
+
+function defaultFollowUpTypeForContact(contactId: string): string {
+  if (contactId === "container_mpg4y33l_1rugx8alx10") {
+    return "availability";
+  }
+  if (contactId === "container_mpg4y34c_1w7afibnvbq" || contactId === "container_mpg4y33y_0icdh4olyn8") {
+    return "quote";
+  }
+  return "approval";
+}
+
+function getSelectOptions(
+  template: GuidedWorkflowTemplateSummary | null,
+  fieldId: "reviewFocus" | "followUpType" | "approvalArea"
+): WorkflowSelectOption[] {
+  const field = template?.fields.find((candidate) => candidate.id === fieldId);
+  return field?.kind === "select" ? field.options : [];
 }

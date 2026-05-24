@@ -187,6 +187,74 @@ describe("GuidedWorkflowService", () => {
     });
   });
 
+  it("uses optional operator inputs for focused preview, follow-up type, due date, and approval area", async () => {
+    const service = createService();
+    const phillipa = HOUSE_RENOVATION_CONTACTS.find((contact) => contact.shortName === "Phillipa")!;
+
+    const focusedReview = service.preview({
+      workspaceId: WORKSPACE_ID,
+      templateId: "house_project_review",
+      projectId: HOUSE_RENOVATION_PROJECT_ID,
+      reviewFocus: "painting"
+    });
+    expect(focusedReview.plannedChanges.map((change) => change.title)).toEqual([
+      "Workflow review: House Renovation and Fit-Out 2026",
+      "Review spring painting weekend plan @review @painting"
+    ]);
+
+    const followUp = await service.execute({
+      workspaceId: WORKSPACE_ID,
+      templateId: "house_contact_follow_up",
+      projectId: HOUSE_RENOVATION_PROJECT_ID,
+      contactId: phillipa.id,
+      followUpType: "availability",
+      dueDate: "2026-06-01",
+      confirmed: true
+    });
+    expect(followUp.preview.plannedChanges[0]).toMatchObject({
+      title: "Confirm spring painting availability with Phillipa @painting",
+      dueDate: "2026-06-01"
+    });
+    expect(new TaskRepository(requireConnection()).getByItemId(followUp.actionResults[0].targetId!)).toMatchObject({
+      task: {
+        dueAt: "2026-06-01T00:00:00.000Z"
+      }
+    });
+
+    const approval = service.preview({
+      workspaceId: WORKSPACE_ID,
+      templateId: "house_approval_decision_review",
+      projectId: HOUSE_RENOVATION_PROJECT_ID,
+      approvalArea: "bathroom"
+    });
+    expect(approval.plannedChanges.map((change) => change.title)).toEqual([
+      "Approval review: House Renovation and Fit-Out 2026",
+      "Confirm bathroom approval path with strata @approval @bathroom",
+      "Record deferred decisions after approval review @decision"
+    ]);
+  });
+
+  it("blocks unsupported operator inputs before workflow writes", async () => {
+    const service = createService();
+
+    const result = await service.execute({
+      workspaceId: WORKSPACE_ID,
+      templateId: "house_contact_follow_up",
+      projectId: HOUSE_RENOVATION_PROJECT_ID,
+      contactId: HOUSE_RENOVATION_CONTACTS[0].id,
+      followUpType: "webhook",
+      dueDate: "June 1",
+      confirmed: true
+    });
+
+    expect(result.status).toBe("failed");
+    expect(result.preview.issues).toEqual([
+      "Choose a supported follow-up type: call, email, quote, approval, or availability.",
+      "Optional due date must use YYYY-MM-DD."
+    ]);
+    expect(new ItemRepository(requireConnection()).listByContainer(HOUSE_RENOVATION_PROJECT_ID)).toEqual([]);
+  });
+
   it("records a failed run without creating project data when preview is blocked", async () => {
     const service = createService();
 
