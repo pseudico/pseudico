@@ -52,7 +52,7 @@ export function HelpPage(): React.JSX.Element {
       <OperatorPageHeader
         eyebrow="Local help"
         id="help-page-title"
-        summary="Local Markdown guides, command references, onboarding steps, sample work routines, and the Workflow Lab boundary. No network connection or hosted account required."
+        summary="Local Markdown guides, command references, onboarding steps, sample work routines, and guided Workflows boundaries. No network connection or hosted account required."
         title="Help center and onboarding"
         actions={
         <Link to="/workspace" className="secondary-button">

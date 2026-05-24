@@ -247,14 +247,17 @@ Use maintenance tools only when you understand the expected result.
 | Import validation | Before importing JSON, CSV/TSV, Markdown, ENEX, or app exports. | Preview and validate before executing; service-only third-party foundations are not pilot UI importers. |
 | Corruption recovery | Database is locked, unavailable, or corrupt. | Stop writing, copy the workspace folder, restore from backup into a new folder. |
 
-### Workflow Lab boundary
+### Guided Workflows beta boundary
 
-The Workflow Lab is not pilot-supported daily automation. It is a local-only
-scaffold/reference surface for maintainers to inspect supported triggers,
-actions, validation errors, preview semantics, and run-history guardrails.
-Primary operators should not rely on it to create, edit, run, schedule, or audit
-workflows during the internal pilot. Use Today, tasks, lists, templates, and
-manual review instead.
+Workflows are now a small guided beta feature for the household-renovation QA
+workspace. Operators can choose a predefined workflow, fill a small form,
+preview the exact tasks/notes/links that will be created, explicitly confirm,
+and then review the result summary and run history.
+
+Workflows are not a broad automation engine. They do not run in the background,
+do not execute scripts, do not send messages, and do not use webhooks, cloud
+sync, telemetry, hosted accounts, or remote storage. If the preview is unclear,
+cancel and use normal tasks, notes, lists, and manual review instead.
 
 ## 9. Privacy and network expectations
 
@@ -316,10 +319,10 @@ Current limitations to explain honestly:
 - Public distribution, installer signing, update path, package metadata polish, and support packaging are still release-hardening concerns.
 - Advanced rich-text editing remains future work; Markdown-first editing is the current model.
 - Advanced saved-view builder UX and custom dashboard editing remain future work.
-- Browser capture production bridge, workflow scheduling, and the primary-operator workflow create/edit/run/history loop remain future work unless explicitly ticketed.
-- Workflow services have tests for local validation, activity/search behavior,
-  and loop guards, but the packaged Workflows surface is scaffold-only for the
-  internal pilot.
+- Browser capture production bridge, workflow scheduling, and user-authored
+  workflow builders remain future work unless explicitly ticketed.
+- Workflows support only predefined guided beta templates; broad automation,
+  arbitrary scripting, and background runs are excluded.
 - External live calendar sync is excluded.
 - Monthly/yearly recurrence, richer drag/drop calendar editing, and advanced planning UX remain future work.
 - Broader third-party import execution remains staged behind service-level validation and fixture coverage unless a packaged operator UI is explicitly added and reviewed.

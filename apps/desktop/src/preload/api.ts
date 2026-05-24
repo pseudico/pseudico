@@ -3848,6 +3848,124 @@ export type UpdatePrivacyNetworkSettingsInput = {
   browserCaptureEnabled?: boolean;
 };
 
+export type GuidedWorkflowTemplateId =
+  | "house_project_review"
+  | "house_contact_follow_up"
+  | "house_approval_decision_review";
+
+export type GuidedWorkflowFieldSummary =
+  | {
+      id: "projectId";
+      label: string;
+      kind: "project";
+      required: true;
+      defaultValue: string;
+      helpText: string;
+    }
+  | {
+      id: "contactId";
+      label: string;
+      kind: "contact";
+      required: true;
+      defaultValue: string;
+      helpText: string;
+      options: Array<{ id: string; label: string }>;
+    };
+
+export type GuidedWorkflowTemplateSummary = {
+  id: GuidedWorkflowTemplateId;
+  name: string;
+  purpose: string;
+  safeSummary: string;
+  fields: GuidedWorkflowFieldSummary[];
+  creates: string[];
+  doesNotDo: string[];
+};
+
+export type PreviewGuidedWorkflowInput = {
+  workspaceId?: string;
+  templateId: GuidedWorkflowTemplateId;
+  projectId?: string;
+  contactId?: string;
+};
+
+export type ExecuteGuidedWorkflowInput = PreviewGuidedWorkflowInput & {
+  confirmed: true;
+};
+
+export type GuidedWorkflowPlannedChangeSummary = {
+  id: string;
+  operation: "create" | "link";
+  objectType: "task" | "note" | "relationship";
+  title: string;
+  description: string;
+  targetProjectId: string | null;
+  targetProjectName: string | null;
+  targetContactId: string | null;
+  targetContactName: string | null;
+  tags: string[];
+  categoryName: string | null;
+};
+
+export type GuidedWorkflowPreviewSummary = {
+  workspaceId: string;
+  template: GuidedWorkflowTemplateSummary;
+  projectId: string;
+  projectName: string | null;
+  contactId: string | null;
+  contactName: string | null;
+  canRun: boolean;
+  issues: string[];
+  plannedChanges: GuidedWorkflowPlannedChangeSummary[];
+  confirmationLabel: string;
+};
+
+export type GuidedWorkflowCreatedLinkSummary = {
+  targetType: "item" | "relationship" | "workflow_run";
+  targetId: string;
+  title: string;
+  route: string;
+};
+
+export type GuidedWorkflowActionResultSummary = {
+  changeId: string;
+  status: "created" | "linked" | "skipped";
+  targetType: "item" | "relationship";
+  targetId: string | null;
+  title: string;
+};
+
+export type GuidedWorkflowExecutionSummary = {
+  preview: GuidedWorkflowPreviewSummary;
+  runId: string;
+  status: "completed" | "failed";
+  summary: string;
+  partialFailure: boolean;
+  createdLinks: GuidedWorkflowCreatedLinkSummary[];
+  actionResults: GuidedWorkflowActionResultSummary[];
+  errorMessage: string | null;
+  completedAt: string | null;
+};
+
+export type GuidedWorkflowRunHistoryEntrySummary = {
+  runId: string;
+  templateId: GuidedWorkflowTemplateId;
+  templateName: string;
+  status: "running" | "completed" | "failed";
+  projectName: string | null;
+  contactName: string | null;
+  plannedChangeCount: number;
+  completedChangeCount: number;
+  errorMessage: string | null;
+  createdAt: string;
+  completedAt: string | null;
+};
+
+export type ListGuidedWorkflowRunsInput = {
+  workspaceId?: string;
+  limit?: number;
+};
+
 export const LOCAL_WORK_OS_IPC_CHANNELS = {
   workspace: {
     createWorkspace: "local-work-os:workspace:create-workspace",
@@ -3914,6 +4032,12 @@ export const LOCAL_WORK_OS_IPC_CHANNELS = {
     validateTemplatePack: "local-work-os:templates:validate-template-pack",
     importTemplatePack: "local-work-os:templates:import-template-pack",
     chooseAndImportTemplatePack: "local-work-os:templates:choose-and-import-template-pack"
+  },
+  workflows: {
+    listTemplates: "local-work-os:workflows:list-guided-templates",
+    preview: "local-work-os:workflows:preview-guided-workflow",
+    execute: "local-work-os:workflows:execute-guided-workflow",
+    listRuns: "local-work-os:workflows:list-guided-runs"
   },
   notes: {
     createNote: "local-work-os:notes:create-note",
@@ -4428,6 +4552,22 @@ export type LocalWorkOsIpcContracts = {
   [LOCAL_WORK_OS_IPC_CHANNELS.templates.chooseAndImportTemplatePack]: {
     input: { workspaceId?: string } | undefined;
     result: ApiResult<TemplatePackImportSummary | null>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.workflows.listTemplates]: {
+    input: undefined;
+    result: ApiResult<GuidedWorkflowTemplateSummary[]>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.workflows.preview]: {
+    input: PreviewGuidedWorkflowInput;
+    result: ApiResult<GuidedWorkflowPreviewSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.workflows.execute]: {
+    input: ExecuteGuidedWorkflowInput;
+    result: ApiResult<GuidedWorkflowExecutionSummary>;
+  };
+  [LOCAL_WORK_OS_IPC_CHANNELS.workflows.listRuns]: {
+    input: ListGuidedWorkflowRunsInput | undefined;
+    result: ApiResult<GuidedWorkflowRunHistoryEntrySummary[]>;
   };
   [LOCAL_WORK_OS_IPC_CHANNELS.notes.createNote]: {
     input: CreateNoteInput;
@@ -5391,6 +5531,18 @@ export type LocalWorkOsApi = {
       input?: { workspaceId?: string }
     ) => Promise<ApiResult<TemplatePackImportSummary | null>>;
   };
+  workflows?: {
+    listTemplates: () => Promise<ApiResult<GuidedWorkflowTemplateSummary[]>>;
+    preview: (
+      input: PreviewGuidedWorkflowInput
+    ) => Promise<ApiResult<GuidedWorkflowPreviewSummary>>;
+    execute: (
+      input: ExecuteGuidedWorkflowInput
+    ) => Promise<ApiResult<GuidedWorkflowExecutionSummary>>;
+    listRuns: (
+      input?: ListGuidedWorkflowRunsInput
+    ) => Promise<ApiResult<GuidedWorkflowRunHistoryEntrySummary[]>>;
+  };
   notes: {
     create: (input: CreateNoteInput) => Promise<ApiResult<NoteSummary>>;
     update: (input: UpdateNoteInput) => Promise<ApiResult<NoteSummary>>;
@@ -6210,6 +6362,16 @@ export function createLocalWorkOsApi(
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.importTemplatePack, input),
       chooseAndImportTemplatePack: (input) =>
         invoke(LOCAL_WORK_OS_IPC_CHANNELS.templates.chooseAndImportTemplatePack, input)
+    },
+    workflows: {
+      listTemplates: () =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.workflows.listTemplates, undefined),
+      preview: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.workflows.preview, input),
+      execute: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.workflows.execute, input),
+      listRuns: (input) =>
+        invoke(LOCAL_WORK_OS_IPC_CHANNELS.workflows.listRuns, input)
     },
     notes: {
       create: (input) =>

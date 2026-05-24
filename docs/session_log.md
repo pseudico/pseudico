@@ -7429,1169 +7429,859 @@ Decisions made:
 Files changed: docs/session_log.md
 Open questions / risks: Merge may still be rejected by GitHub policy/check requirements; unrelated local dirty artifacts remain excluded.
 Next actions: Commit/push session-log reconciliation; merge PR #195 if accepted by GitHub; update Linear final state.
-## 2026-05-17T07:57:39.4040375+10:00
-Objective: Start PSE-216 project detail work-loop implementation.
+## 2026-05-17T07:55:54.5913026+10:00
+Objective: Record PSE-215 merge completion.
 Decisions made:
-- Recovered PSE-216 from Linear as next PSE-HUX issue after merged PSE-215.
-- Created clean worktree C:\tmp\Pseudico-pse-216 on codex/pse-216-project-work-loop from updated stacked base.
+- PR #195 squash-merged into codex/pse-214-settings-ia at 32ba65076127e4418445a833023ffe33090084f5.
+- Linear PSE-215 updated with final evidence and moved to Done.
 Files changed: docs/session_log.md
-Open questions / risks: Original checkout still has unrelated dirty artifacts; all PSE-216 code work will stay in clean worktree.
-Next actions: Read required docs/evidence; post Linear plan; inspect ProjectDetailPage and tests.
-## 2026-05-17T08:10:43.9696695+10:00
-Objective: Implement PSE-216 project detail work-first layout.
-Decisions made:
-- Added work-first project header, next-work/task/content/activity summary, linked context, and advanced project disclosure.
-- Kept existing project creation/feed/relationship/tabs/export/banner controls available without DB/service/IPC changes.
-Files changed: apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/renderer/projectsPage.test.tsx; docs/manual-qa/PSE-216-project-work-loop.md; docs/manual-qa/screenshots/PSE-216-2026-05-17T08-10-00/; docs/session_log.md
-Open questions / risks: Screenshot evidence uses renderer visual harness; packaged journey subset remains a PSE-220-quality regression check.
-Next actions: Rerun targeted tests/typecheck/lint; prepare PR; update Linear/GitHub.
-## 2026-05-17T08:39:49.2202535+10:00
-Objective: Verify PSE-216 project detail work-loop changes.
-Decisions made:
-- Targeted renderer test, lint, typecheck, and desktop build passed; build required escalated rerun after sandbox EPERM.
-- Captured four screenshot evidence states for empty, mixed-content, linked-contact, and advanced-open project detail.
-Files changed: docs/session_log.md; docs/manual-qa/screenshots/PSE-216-2026-05-17T08-10-00/
-Open questions / risks: Local screenshot capture used HTTP-served renderer harness; not a packaged app subset.
-Next actions: Stage scoped files; commit/push branch; open PR and update Linear.
+Open questions / risks: Post-merge session-log entry is local only; unrelated pre-existing dirty docs/screenshots remain outside PSE-215.
+Next actions: Proceed to PSE-216 from the updated HUX stack branch; keep unrelated artifacts out of next PR.
 
-## 2026-05-17T09:18:00+10:00
-Objective: Implement PSE-217 search trust UI core changes.
+## 2026-05-17T08:45:00+10:00
+Objective: Reconcile and merge PSE-216 PR for project detail primary work loop.
 Decisions made:
-- Added local scope/query/result confidence summary, type-grouped result sections, contact/link filters, fallback match highlights, and a clickable top-bar Search submit.
-- Kept changes renderer-only; no search engine, schema, service, DB, IPC, or filesystem behavior changed.
+- PR #196 was mergeable, non-draft, had no review threads, no requested reviewers, and no GitHub status checks reported.
+- Squash-merged PR #196 into codex/pse-214-settings-ia using head 2b3f54309052743cceb242d641e62f4f5af523fb.
 Files changed:
-- apps/desktop/src/renderer/pages/SearchPage.tsx
-- apps/desktop/src/renderer/shell/TopBar.tsx
-- apps/desktop/src/renderer/styles.css
-- apps/desktop/tests/renderer/projectsPage.test.tsx
 - docs/session_log.md
-Open questions / risks: Need screenshot evidence and broader verification before PR.
-Next actions: Capture visual evidence; run lint/typecheck/build; commit/push/PR.
+Open questions / risks: P2 screenshot evidence remains renderer harness-based; PSE-220 should include packaged regression evidence.
+Next actions: Update PR/Linear final state; confirm Linear Done; report git state.
+
+## 2026-05-17T09:00:00+10:00
+Objective: Audit completed PSE operator-readiness/HUX work before integrating to main.
+Decisions made:
+- Verified PSE-214, PSE-215, and PSE-216 are Done/merged; PSE-217, PSE-218, PSE-219, PSE-220 remain Spec Ready and are not being claimed complete.
+- Confirmed integration branch `codex/pse-214-settings-ia` is 12 commits ahead of main and 0 behind.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-213 Linear still says PR Open despite its audit being present in stacked integration branch; needs reconciliation if integration passes.
+Next actions: Review diff/security patterns; run verification; merge to main only if checks and GitHub state allow.
+
+## 2026-05-17T09:08:00+10:00
+Objective: Open main integration PR for completed operator-readiness/PSE-HUX stack.
+Decisions made:
+- Created PR #197 from `codex/pse-214-settings-ia` to `main` with explicit included/not-included ticket scope.
+- Chose merge-commit plan rather than squash to preserve stacked ticket commit ancestry if GitHub allows.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need final PR mergeability/status confirmation before merging main.
+Next actions: Check PR #197 status/reviews; merge if allowed; reconcile Linear/old draft PRs.
+
+## 2026-05-17T09:16:00+10:00
+Objective: Complete main merge reconciliation for completed operator-readiness/PSE-HUX stack.
+Decisions made:
+- Merged PR #197 into main with merge commit 468f0f3d4ed73a7f5aff85158724671c26ab6e30 and confirmed origin/main matches it.
+- Closed stale draft PR #193 as superseded/content integrated; moved PSE-213 to Done; left PSE-217/PSE-218/PSE-219/PSE-220 Spec Ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Remaining HUX work is real and unclaimed: search trust, guided restore, feedback/orientation, final acceptance review.
+Next actions: Work PSE-218/PSE-217/PSE-219/PSE-220 in sequence when requested; keep original dirty local files separate.
 
 ## 2026-05-17T09:24:00+10:00
-Objective: Verify PSE-217 search trust implementation and visual evidence.
+Objective: Start PSE-217 search visual trust implementation from latest main.
 Decisions made:
-- Captured Search UI screenshots for note-body token, project title, contact result, and empty state.
-- Verification passed: targeted renderer test, lint, typecheck, full test suite, build, and diff whitespace check.
+- Treat explicit user request as active issue PSE-217; start from origin/main rather than dirty original checkout.
+- Preserve prior completed stack on main and keep PSE-217 scoped to visible search trust.
 Files changed:
-- docs/manual-qa/PSE-217-search-visual-trust.md
-- docs/manual-qa/screenshots/PSE-217-2026-05-17T09-20-00/
 - docs/session_log.md
-Open questions / risks: Screenshot evidence uses renderer visual harness; PSE-220 should include final packaged regression.
-Next actions: Stage/commit/push; open PR; reconcile Linear/GitHub and merge if allowed.
+Open questions / risks: Need inspect current Search implementation and evidence before coding.
+Next actions: Read Linear/docs; create clean worktree; post Linear plan.
 
-## 2026-05-17T09:45+10
-Objective: Complete packaged Search UI evidence for PSE-217.
+## 2026-05-17T09:52+10
+Objective: Reconcile PSE-217 after merge.
 Decisions made:
-- Used packaged Electron/CDP evidence with newly created local note/task/link/file records.
-- Fixed route-param churn, stale loading display, and Enter-key top-bar search route reliability.
-Files changed: apps/desktop/src/renderer/pages/SearchPage.tsx; apps/desktop/src/renderer/shell/TopBar.tsx; docs/manual-qa/PSE-217-search-visual-trust.md; docs/manual-qa/PSE-217-packaged-search-summary.json
-Open questions / risks: P3 duplicate file result rows when item and attachment metadata both match.
-Next actions: run full checks; commit/push; open PR and reconcile Linear/GitHub.
-
-## 2026-05-17T09:47+10
-Objective: Finish PSE-217 local verification before publishing.
-Decisions made:
-- Full lint/typecheck/test/build passed after packaged evidence fixes.
-- Kept final packaged screenshot run only; removed failed intermediate generated screenshots.
-Files changed: apps/desktop/src/renderer/pages/SearchPage.tsx; apps/desktop/src/renderer/shell/TopBar.tsx; docs/manual-qa/PSE-217-search-visual-trust.md
-Open questions / risks: P3 duplicate file result rows documented for later relevance/deduplication.
-Next actions: stage/commit/push; create PR; update Linear and merge if allowed.
-
-## 2026-05-17T10:07+10
-Objective: Recover PSE-218 issue context and post implementation plan.
-Decisions made:
-- Treat PSE-207 raw-path restore friction as the primary product gap.
-- Keep work scoped to guided local backup/restore UI plus narrow IPC/tests/docs if needed.
+- PR #198 squash-merged to main at 7709b01a66255355a0ab0d331f283d46b9a64bfa.
+- Linear PSE-217 moved to Done with final evidence/tests/risks comment.
 Files changed: docs/session_log.md
-Open questions / risks: Folder picker/reveal IPC must not become broad unsafe filesystem access.
-Next actions: inspect backup IPC/UI; implement guided preview and success states; add tests/evidence.
+Open questions / risks: P3 search file-result deduplication follow-up recommended.
+Next actions: proceed to PSE-218 when requested; keep PSE-217 branch/worktree only for reference; no human action required for PSE-217.
 
-## 2026-05-17T10:33+10
-Objective: Implement and verify PSE-218 guided backup/restore flow.
+## 2026-05-17T09:56+10
+Objective: List unrelated/pre-existing dirty files in original checkout.
 Decisions made:
-- Added normal restore folder picker IPC plus narrow reveal helpers; kept advanced path/JSON restore secondary.
-- Packaged QA used advanced destination field for execution because native OS picker is not CDP-automatable.
-Files changed: apps/desktop/src/main/ipc/backupHandlers.ts; apps/desktop/src/main/ipc/registerBackupIpc.ts; apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/api/desktopApiClient.ts; apps/desktop/src/renderer/pages/SettingsPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/main/backupHandlers.test.ts; apps/desktop/tests/renderer/settingsPage.test.tsx; docs/OPERATOR_RUNBOOK.md; docs/manual-qa/PSE-218-guided-backup-restore.md; docs/manual-qa/PSE-218-packaged-backup-restore-summary.json; docs/manual-qa/screenshots/PSE-218-2026-05-17T00-32-11-101Z
-Open questions / risks: P2 picker click not captured due native dialog automation limits; IPC covered by tests.
-Next actions: rerun broad checks; commit/push/PR; update Linear and merge if allowed.
-
-## 2026-05-17T10:36+10
-Objective: Complete PSE-218 verification on current branch.
-Decisions made:
-- Rebuilt package after TypeScript fixes; package smoke passed on rebuilt win-unpacked app.
-- Retained final packaged evidence run as visual proof of guided restore states.
+- Checked git status in original checkout only; PSE-217 worktree was clean at handoff.
 Files changed: docs/session_log.md
-Open questions / risks: Evidence run used packaged UI plus advanced destination entry for dialog automation limit.
-Next actions: inspect git diff; commit and push; open/update PR.
+Open questions / risks: Original checkout remains on old PSE-215 branch with unrelated docs/screenshots/tool artifacts.
+Next actions: Do not clean/delete unless explicitly requested; use separate worktrees for next tickets.
 
-## 2026-05-17T10:40+10
-Objective: Tighten PSE-218 reveal safety before publishing.
+## 2026-05-17T09:58+10
+Objective: Classify whether original-checkout dirty files are functional.
 Decisions made:
-- Added backup folder existence/directory check before reveal.
-- Re-ran targeted backup/settings tests and full typecheck successfully.
-Files changed: apps/desktop/src/main/ipc/backupHandlers.ts; docs/session_log.md
-Open questions / risks: P2 native picker interaction remains manual/IPC-tested due automation limits.
-Next actions: stage/commit; push branch; create PR and reconcile Linear/GitHub.
-
-## 2026-05-17T10:42+10
-Objective: Commit PSE-218 guided restore implementation.
-Decisions made:
-- Staged only PSE-218 UI, IPC, tests, runbook, manual QA evidence, screenshots, and session log.
-- Created commit c6fa2dc3 for GitHub PR publishing.
+- Confirmed dirty paths are docs, screenshots, Playwright MCP state, and installer/tool artifacts only.
 Files changed: docs/session_log.md
-Open questions / risks: Need push, PR checks, Linear update, and merge-policy confirmation.
-Next actions: push branch; open PR; reconcile checks and Linear.
+Open questions / risks: Docs/evidence may matter for audit history but do not affect app runtime/build code.
+Next actions: Leave untouched unless user asks to clean, preserve, or reconcile them.
 
-## 2026-05-17T10:46+10
-Objective: Fix PR #199 CI preload channel coverage failure.
+## 2026-05-17T10:05+10
+Objective: Reconcile active linked issue from current checkout.
 Decisions made:
-- Updated preload API channel-count and backup routing assertions for the three new guided restore IPC channels.
-- Confirmed targeted desktop tests and full `pnpm test` now pass locally.
-Files changed: apps/desktop/tests/preload/api.test.ts; docs/session_log.md
-Open questions / risks: Need rerun CI after pushing amended PR branch.
-Next actions: commit/push fix; watch checks; update Linear and merge if allowed.
-
-## 2026-05-17T10:49+10
-Objective: Fix PR #199 CI typecheck failure.
-Decisions made:
-- Marked optional guided restore preload helpers as intentionally present in the routing test.
-- Confirmed targeted desktop tests and full typecheck now pass locally.
-Files changed: apps/desktop/tests/preload/api.test.ts; docs/session_log.md
-Open questions / risks: Need rerun GitHub Actions after push.
-Next actions: commit/push typecheck fix; watch checks; reconcile Linear/GitHub.
-
-## 2026-05-17T10:54+10
-Objective: Confirm PR #199 checks after CI fixes.
-Decisions made:
-- GitHub Actions `lint / typecheck / test / build` passed on head 235de334.
-- Remaining work is PR/Linear final reconciliation and merge if policy permits.
+- Resolved active checkout branch to completed PSE-215, not an unstarted next-ticket guess.
+- Verified Linear Done, PR #195 merged, and main integration PR #197 merged PSE-215 into main.
 Files changed: docs/session_log.md
-Open questions / risks: Adding this required log entry will trigger one final CI run.
-Next actions: commit/push log; re-confirm checks; merge and move Linear if allowed.
+Open questions / risks: Current original checkout remains dirty with unrelated docs/screenshots/tool artifacts and stale local origin/main.
+Next actions: Ask for or link PSE-218/PSE-219/PSE-220 before starting new work; use clean worktree.
 
-## 2026-05-17T11:03+10
-Objective: Start PSE-219 feedback/navigation orientation work.
+## 2026-05-17T10:12+10
+Objective: Update Linear with reconciliation result.
 Decisions made:
-- Confirmed PSE-217 and PSE-218 are Done; selected PSE-219 as next unstarted HUX ticket.
-- Created clean worktree from merged main and posted Linear plan.
+- Added PSE-215 comment confirming PR #195 and integration PR #197 are merged and no new code was needed.
+- Left next HUX tickets unstarted rather than inferring a new active issue from sequence alone.
 Files changed: docs/session_log.md
-Open questions / risks: Need keep changes renderer-scoped and avoid noisy notification chrome.
-Next actions: implement nav/toast/status improvements; add tests; capture screenshots.
+Open questions / risks: Original checkout still has pre-existing unrelated dirty docs/screenshots/tool artifacts.
+Next actions: Wait for explicit linked/active issue key before starting PSE-218/PSE-219/PSE-220; prefer clean worktree.
 
-## 2026-05-17T11:30+10
-Objective: Implement PSE-219 feedback and navigation polish.
+## 2026-05-17T10:00+10
+Objective: Start PSE-218 backup/restore operator UX ticket.
 Decisions made:
-- Capped visible toasts, added recoverable Settings activity, and fixed sidebar/top-bar orientation.
-- Captured built-Electron screenshots for Today, Dashboard, Settings, and Project Tags.
-Files changed: apps/desktop/src/renderer/*; apps/desktop/tests/*; docs/manual-qa/PSE-219-feedback-navigation.md; docs/session_log.md
-Open questions / risks: Package command still has linked-worktree symlink blocker; document as P2.
-Next actions: rerun final checks; remove temp runner; commit/push/PR.
-
-## 2026-05-17T11:37+10
-Objective: Complete PSE-219 local verification.
-Decisions made:
-- `pnpm lint`, `pnpm typecheck`, `pnpm test`, targeted desktop tests, and `pnpm build` passed.
-- `pnpm package` failed on electron-builder unsafe linked-worktree `.tsbuildinfo` symlink path; documented as P2 non-functional blocker.
-Files changed: docs/session_log.md; docs/manual-qa/PSE-219-feedback-navigation.md
-Open questions / risks: Need CI confirmation after push; package blocker may need separate tooling follow-up.
-Next actions: stage/commit/push; open PR; update Linear and merge if checks allow.
-
-## 2026-05-17T11:40+10
-Objective: Open PSE-219 PR.
-Decisions made:
-- Pushed branch `codex/pse-219-feedback-navigation` and opened PR #200.
-- PR description includes tests, screenshots, acceptance, architecture safety, and package P2 risk.
+- Start from latest origin/main in a separate clean worktree to avoid dirty original checkout artifacts.
 Files changed: docs/session_log.md
-Open questions / risks: Need GitHub checks to pass before merge; package issue remains follow-up.
-Next actions: commit/push log; update Linear; watch checks and merge if allowed.
+Open questions / risks: Need read Linear issue/comments and prior PSE-HUX evidence before implementation.
+Next actions: create PSE-218 worktree; post plan; inspect backup/settings code.
 
-## 2026-05-17T11:50+10
-Objective: Start PSE-220 final primary-operator UX gate.
+## 2026-05-17T11:46+10
+Objective: Confirm whether PSE-220 remains to do.
 Decisions made:
-- Created clean worktree `C:\tmp\Pseudico-pse-220` from latest `origin/main` at PSE-219 merge.
-- Confirmed PSE-220 is Spec Ready and reviewed linked PSE-213 through PSE-219 Linear outcomes/comments.
+- Linear shows PSE-220 exists and is unstarted in Spec Ready.
+- PSE-220 is the closing primary-operator UX acceptance/regression review after PSE-219.
 Files changed: docs/session_log.md
-Open questions / risks: Need gather latest screenshot evidence and avoid implementing new UX fixes.
-Next actions: post plan; review docs/artifacts; produce acceptance review and evidence.
+Open questions / risks: Need start from latest main and accumulated PSE-213 through PSE-219 evidence if proceeding.
+Next actions: confirm kickoff; create scoped branch; review prior ticket outputs.
 
-## 2026-05-17T12:19+10:00
-Objective: Complete PSE-220 evidence capture and regression fixes.
+## 2026-05-17T12:49+10:00
+Objective: Answer PSE-221 / packaging follow-up / next review timing.
 Decisions made:
-- Fixed P1 shell tab strip grid regression blocking main content after multiple tabs.
-- Fixed P1 container IPC event/input forwarding regression blocking contact detail preferences and contact rendering.
-- Fixed contact detail header layout so contact identity/fields are readable.
-Files changed: apps/desktop/src/renderer/styles.css; apps/desktop/src/main/ipc/registerContainerIpc.ts; apps/desktop/src/renderer/pages/ContactDetailPage.tsx; apps/desktop/tests/main/containerIpcRegistration.test.ts; docs/manual-qa/PSE-220-final-acceptance-summary.json; docs/manual-qa/screenshots/PSE-220-2026-05-17T02-17-15-998Z/*
-Open questions / risks: Package command still needs recheck after code fixes; earlier package failed on electron-builder/pnpm linked tsbuildinfo in worktree.
-Next actions: Write acceptance review; run validation; reconcile PR/Linear.
+- Linear search found no existing PSE-221 and no existing packaging/electron-builder follow-up.
+- Recommended creating packaging hardening as next release/tooling ticket before another full UX review.
+Files changed: docs/session_log.md
+Open questions / risks: Original checkout still has unrelated dirty files; session log append joins those local changes.
+Next actions: Create packaging follow-up if requested; run another review after packaging fix or next feature wave.
 
-## 2026-05-17T12:25+10:00
-Objective: Validate PSE-220 implementation and acceptance evidence.
+## 2026-05-17T13:04+10:00
+Objective: Create Linear ticket for pnpm/electron-builder packaging blocker.
 Decisions made:
-- pnpm lint, pnpm typecheck, targeted Vitest, pnpm test, and pnpm build passed.
-- pnpm package failed on known electron-builder/pnpm .tsbuildinfo unsafe-path packaging blocker.
-Files changed: docs/session_log.md; docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md; docs/README.md; apps/desktop/src/main/ipc/registerContainerIpc.ts; apps/desktop/src/renderer/pages/ContactDetailPage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/tests/main/containerIpcRegistration.test.ts; docs/manual-qa/*
-Open questions / risks: Packaging blocker remains P2 release/tooling follow-up.
-Next actions: Commit, push, open PR, update Linear.
+- Created PSE-221 as Spec Ready, High priority, related to PSE-220.
+- Ticket scopes root-cause investigation, package success, contents spot-check, packaged launch evidence, and docs updates.
+Files changed: docs/session_log.md
+Open questions / risks: None for ticket construction; implementation still must verify exact root cause.
+Next actions: Work PSE-221 when ready; do packaged-app verification after merge.
 
-## 2026-05-17 13:09 +10:00
-Objective: Begin PSE-221 packaging hardening from clean main worktree.
+## 2026-05-17T13:06+10:00
+Objective: Start PSE-221 packaging blocker implementation.
 Decisions made:
-- Branch codex/pse-221-packaging-hardening was created from origin/main d82461f3.
-- Use the clean worktree only; original checkout dirty files stay unrelated.
+- Will use a clean worktree from latest main to avoid unrelated dirty files in the original checkout.
+- Will treat package success and packaged-app smoke evidence as required before PR reconciliation.
+Files changed: docs/session_log.md
+Open questions / risks: Need verify exact electron-builder include path/root cause before selecting fix.
+Next actions: Fetch PSE-221; create branch/worktree; inspect packaging config.
+
+## 2026-05-17 14:20 +10:00
+Objective: Answer current main/package/review readiness after PSE-221.
+Decisions made:
+- Confirm package fix is merged to main; package artifacts remain generated, not committed.
+- Recommend fresh main checkout/build before another whole-product review.
 Files changed:
 - docs/session_log.md
-Open questions / risks: Need confirm root cause and package contents before fixing.
-Next actions: Read required docs; post Linear plan; reproduce/investigate package failure.
+Open questions / risks: Original checkout still has unrelated dirty files; use clean main worktree for review.
+Next actions: Optionally pull/checkout fresh main; run package smoke; begin review from merged main.
 
-## 2026-05-17 13:50 +10:00
-Objective: Implement and prove PSE-221 packaging fix.
+## 2026-05-17 14:22 +10:00
+Objective: Outline full repo/product review checklist.
 Decisions made:
-- Package from pnpm deploy staging instead of appRoot symlink graph.
-- Move TS build info out of package dist and exclude cache inputs.
-- Rebuild/copy better-sqlite3 from staging for Electron runtime.
-Files changed:
-- apps/desktop/package.json; apps/desktop/electron.vite.config.ts; apps/desktop/electron-builder.yml; apps/desktop/scripts/package-development.mjs; package tsconfigs; docs/manual-qa/*; docs/TESTING.md; docs/RELEASE_CANDIDATE_PACKAGING.md; .gitignore
-Open questions / risks: Staging deploy can warn/contact registry with cold store; signing remains out of scope.
-Next actions: Run full checks; commit/push/PR; reconcile Linear/GitHub.
-
-## 2026-05-17 14:10 +10:00
-Objective: Complete PSE-221 validation evidence.
-Decisions made:
-- Final package and packaged smoke passed after staging native rebuild plus dev-module restore.
-- Actual packaged UI screenshots captured for welcome and opened local workspace.
-Files changed:
-- docs/manual-qa/PSE-221-packaged-release-qa.md
-- docs/manual-qa/PSE-221-package-contents-check.json
-- docs/manual-qa/PSE-221-packaged-ui-evidence.json
-- docs/manual-qa/screenshots/PSE-221-2026-05-17T03-45-00/*
-Open questions / risks: P2 registry-warn during staging deploy is documented; no P0/P1 remain.
-Next actions: Stage/commit/push; open PR; update Linear; merge if checks allow.
-
-## 2026-05-17T18:04:33+10:00
-Objective: Recover active Linear issue and establish clean PSE-222 worktree.
-Decisions made:
-- Selected PSE-222 from the provided clean-main follow-up sequence after fetching full Linear details.
-- Created clean worktree from origin/main reviewed commit 5d2b69fd.
+- Recommend clean main worktree and operator-facing evidence, not dirty checkout review.
+- Cover repo health, architecture, UX loop, functionality, packaging, safety, docs, risks.
 Files changed:
 - docs/session_log.md
-Open questions / risks: Original file placeholder issue still needs reproduction.
-Next actions: Read required docs; inspect template/file/integrity code; post plan.
+Open questions / risks: Review scope can expand; keep findings classified P0-P3.
+Next actions: User can launch full review from clean main; optionally convert checklist into Linear ticket.
 
-## 2026-05-17T18:11:42+10:00
-Objective: Complete PSE-222 planning and begin implementation.
+## 2026-05-17 14:25 +10:00
+Objective: Expand full review checklist with deeper functionality coverage and verdict mechanics.
 Decisions made:
-- Posted Linear plan and moved PSE-222 to In Progress.
-- Chose non-file placeholder representation unless binary copy support exists, avoiding fake attachment rows.
+- Emphasize feature-by-feature exercise of repo meat, not only UX surfaces.
+- Define evidence-based verdicts and limits of AI judgment.
 Files changed:
 - docs/session_log.md
-Open questions / risks: Need verify tests/docs align with template placeholder semantics.
-Next actions: Patch TemplateService; add integrity/search/activity tests; update docs/evidence.
+Open questions / risks: A review can still miss edge cases without exhaustive data fixtures/manual OS-dialog checks.
+Next actions: Use expanded checklist as review prompt or Linear ticket basis.
 
-## 2026-05-17T18:20:23+10:00
-Objective: Implement PSE-222 template file placeholder fix.
+## 2026-05-17 14:28 +10:00
+Objective: Provide one reusable full-review prompt covering checklist sections.
 Decisions made:
-- Template file placeholders now materialize as clear notes, not orphan file items.
-- Unsafe placeholder attachment paths are rejected during validation.
-Files changed:
-- packages/features/src/templates/TemplateService.ts
-- packages/features/tests/containerTemplateService.test.ts
-- docs/TEMPLATE_FILE_FORMAT.md
-- docs/OPERATOR_RUNBOOK.md
-- docs/DATA_MODEL.md
-- docs/manual-qa/PSE-222-template-file-placeholder-integrity.md
-- docs/session_log.md
-Open questions / risks: Binary template attachment copying remains future scope.
-Next actions: Run lint/typecheck/test/build evidence; package/manual checks if feasible; prepare PR.
-
-## 2026-05-17T18:29:30+10:00
-Objective: Verify PSE-222 fix and package/runtime boundaries.
-Decisions made:
-- Treated clean-main JSON as original packaged reproduction and source/service regression as post-fix proof.
-- Recorded package smoke and release package check as runtime boundary evidence.
-Files changed:
-- docs/manual-qa/PSE-222-template-file-placeholder-integrity.md
-- docs/release/package-artifact-check.json
-- docs/session_log.md
-Open questions / risks: Packaging metadata warnings remain PSE-227 scope.
-Next actions: Review diff; commit; open PR/update Linear.
-
-## 2026-05-17T18:32:55+10:00
-Objective: Publish PSE-222 branch and PR, update Linear.
-Decisions made:
-- Opened GitHub PR #203 against main and linked it to Linear.
-- Moved PSE-222 to PR Open with summary, checks, evidence, caveats.
+- Package review scope as a single agent instruction with explicit Not reviewed handling.
+- Require deep feature-family exercise beyond headline screens.
 Files changed:
 - docs/session_log.md
-Open questions / risks: PR review/CI result pending; binary template attachment copy remains future scope.
-Next actions: Monitor PR review/CI; merge when approved.
+Open questions / risks: User should run from clean main worktree to avoid dirty checkout evidence confusion.
+Next actions: User can paste prompt into next review agent/thread; optionally create Linear review ticket.
 
-## 2026-05-17T18:37:00+10:00
-Objective: Review PR #203 for PSE-222 and prepare merge.
+## 2026-05-17T10:17+10
+Objective: Assess concern about uncommitted files in original checkout.
 Decisions made:
-- Reviewed GitHub diff, PR metadata, comments, and commit status before merge.
-- Accepted empty GitHub status list based on completed local checks and no PR comments.
+- Classified dirty state as docs/evidence/tool artifacts only; no app source/package files are modified.
+- Recommended preserving until user decides whether to archive, commit separately, or clean.
+Files changed: docs/session_log.md
+Open questions / risks: Some manual QA evidence may be useful history; deleting without review could lose audit artifacts.
+Next actions: Offer preservation/cleanup plan if requested; avoid destructive cleanup by default.
+
+## 2026-05-17 14:42:01 +10:00
+Objective: Establish clean-main review workspace for full readiness audit.
+Decisions made:
+- Current checkout is dirty on codex/pse-215-readability-sizing; review moved to clean detached origin/main at C:\tmp\Pseudico-main-review.
+- Fetched origin/main and selected commit 5d2b69fd for review.
 Files changed:
 - docs/session_log.md
-Open questions / risks: No P0/P1 blockers; CI statuses are not configured/reported on the PR head.
-Next actions: Amend/push session log; merge PR #203; update Linear.
+Open questions / risks: Full app exercise may be constrained by headless/package launch behavior.
+Next actions:
+- Read required docs.
+- Run engineering checks.
+- Capture app/package evidence.
 
-## 2026-05-17T18:43:43.0088718+10:00
-Objective: Start PSE-223 from clean latest main worktree.
+## 2026-05-17 14:42:36 +10:00
+Objective: Complete documentation intake for clean-main readiness review.
 Decisions made:
-- Selected PSE-223 as first non-completed issue after merged PSE-222 in the supplied sequence.
-- Created branch codex/pse-223-importer-packaged-qa from origin/main 97f79683.
+- Required docs and PSE-206/PSE-221 evidence are present on main.
+- Existing docs claim pilot-ready with caveats, not public release ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need verify current commands/package behavior independently rather than trusting prior docs.
+Next actions:
+- Run required command matrix.
+- Inspect architecture boundaries.
+- Exercise current app/package workflows.
+
+## 2026-05-17 15:00:48 +10:00
+Objective: Complete clean-main Pseudico readiness review evidence collection.
+Decisions made:
+- Required command matrix passes after sandbox/GUI escalations; reviewed detached origin/main 5d2b69fd.
+- Packaged app exercised with API workflows and screenshots; recommendation is internal pilot ready with caveats.
+- Logged P2 risks for file-template integrity, import/UI coverage caveats, docs staleness, and 10k Today memory.
+Files changed:
+- docs/session_log.md
+Open questions / risks: OS-native dialogs and every edge case were not fully automated; public release signing/update/legal not reviewed.
+Next actions:
+- File focused P2 tickets.
+- Keep generated evidence under C:\tmp\Pseudico-main-review\.review-evidence.
+- Reconcile readiness docs.
+## 2026-05-17T17:55:53.5288602+10:00
+Objective: Create Linear follow-up tickets from clean-main Pseudico review.
+Decisions made:
+- Mirrored recent PSE-218/PSE-221 ticket standard under PSE-195.
+- Created focused tickets PSE-222 through PSE-228 for P2 findings plus package/dialog polish.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Triage priorities and ownership still need confirmation.
+Next actions: Review and schedule the new Linear tickets; attach evidence paths during implementation.
+## 2026-05-17T17:59:36.5163778+10:00
+Objective: Draft reusable Codex prompt for PSE-222 through PSE-228 execution.
+Decisions made:
+- Adapted prior PSE-HUX prompt to review follow-up tickets and controlled merge workflow.
+- Added ticket-specific handling for templates, importers, workflows, docs, performance, packaging, and OS dialogs.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Prompt assumes active Linear issue context is available.
+Next actions: Use prompt per ticket; keep PRs scoped and evidence-backed.
+
+## 2026-05-17T18:40:31.3025941+10:00
+Objective: Start active linked Linear issue work loop for Pseudico.
+Decisions made:
+- Use Linear context first; stop if no active issue is discoverable.
 Files changed:
 - docs/session_log.md
 Open questions / risks:
-- Need importer inventory and packaged QA feasibility.
+- Active linked issue not yet resolved from context.
 Next actions:
-- Read required docs/evidence and post Linear plan.
+- Discover Linear tools and issue context.
 
-## 2026-05-17T18:51:45.2393978+10:00
-Objective: Establish PSE-223 implementation baseline.
+## 2026-05-17 20:47:09 +10:00
+Objective: Recover active linked Linear issue for clean-main follow-up work.
 Decisions made:
-- Installed dependencies in clean worktree after sandbox EPERM.
-- Began packaged-smoke importer coverage rather than adding new import features.
-Files changed:
-- apps/desktop/src/main/packageSmoke.ts
-- docs/session_log.md
-Open questions / risks:
-- Typecheck/test still pending after smoke extension.
-Next actions:
-- Fix compile issues and add importer matrix docs.
-
-## 2026-05-17T19:29:56.0438615+10:00
-Objective: Document PSE-223 packaged importer evidence.
-Decisions made:
-- Packaged smoke now covers local CSV/TSV, Markdown folder/note, EML, and ICS handlers.
-- Third-party importer docs now label service-only packaged status.
-Files changed:
-- apps/desktop/src/main/packageSmoke.ts
-- docs/manual-qa/PSE-223-packaged-importer-qa.md
-- docs/manual-qa/PSE-223-packaged-importer-qa-summary.json
-- docs/OPERATOR_RUNBOOK.md
-- docs/OPERATOR_READINESS_REPORT.md
-Open questions / risks:
-- OS-native dialog QA remains PSE-228, not claimed here.
-Next actions:
-- Run full checks and prepare PR.
-
-## 2026-05-17T19:35:03.0426277+10:00
-Objective: Complete PSE-223 verification before PR.
-Decisions made:
-- Full lint/typecheck/test/build/package/package:smoke/release checks pass after sandbox-related escalations.
-- Package metadata warnings remain documented PSE-227 scope.
+- Used Linear context; PSE-222/PSE-223 are Done and PSE-224+ are Spec Ready, but no active/linked issue is attached to this thread.
 Files changed:
 - docs/session_log.md
-Open questions / risks:
-- Packaged smoke is structured evidence; human OS-dialog proof still PSE-228.
-Next actions:
-- Commit, push branch, open PR.
+Open questions / risks: Need explicit issue key before changing code to avoid guessing scope.
+Next actions: Ask user for the Linear issue key; then create clean worktree from latest main.
 
-## 2026-05-17T19:38:59.3683665+10:00
-Objective: Resume and finish PSE-223 handoff.
+## 2026-05-17 20:56:25 +10:00
+Objective: Start PSE-224 on a clean latest-main worktree.
 Decisions made:
-- Continue from staged PSE-223 worktree rather than reimplementing.
+- Interpreted next sequence issue as PSE-224; set Linear issue In Progress.
+- Created C:\tmp\Pseudico-pse-224 on branch codex/pse-224-workflows-operator-ux from origin/main 16912ead.
 Files changed:
 - docs/session_log.md
-Open questions / risks:
-- Need commit, push, PR, and Linear update.
-Next actions:
-- Restage session log, commit, push, open PR.
+Open questions / risks: Product decision pending after workflow code/docs audit.
+Next actions: Read required docs; inspect workflow implementation; post scoped plan to Linear.
 
-## 2026-05-17T19:41:29.9578096+10:00
-- Objective: Finalize PSE-223 packaged importer QA handoff after PR creation.
-- Decisions made: PR #204 is ready for review; keep OS-native dialog QA and package metadata caveats in PSE-228/PSE-227.
+## 2026-05-18T06:44:36+10:00
+- Objective: Recover active Linear issue for reusable PSE-222..PSE-228 work loop.
+- Decisions made: Linear context surfaced multiple unstarted candidates (PSE-225..PSE-228); no single active/linked issue was available.
 - Files changed: docs/session_log.md
-- Open questions / risks: P2 OS-native dialogs not covered here; P3 Windows temp cleanup can be busy after smoke.
-- Next actions: update Linear; await PR review/CI; merge when approved.
+- Open questions / risks: Need explicit issue key before implementation to avoid guessing scope.
+- Next actions: User provides the active Linear issue key; then recover full issue/docs context; then create clean scoped branch/worktree.
 
-## 2026-05-17T19:47:16.9863280+10:00
-- Objective: Review PR #204 before merge and tighten smoke assertions.
-- Decisions made: Treat invalid-input, preview, attachment, and ICS activity regressions as smoke failures before merge.
-- Files changed: apps/desktop/src/main/packageSmoke.ts; docs/session_log.md
-- Open questions / risks: Need rerun package smoke and CI after push.
-- Next actions: rerun checks; push update; merge if green.
-
-## 2026-05-17 20:58:50 +10:00
-Objective: Complete PSE-224 planning after workflow audit.
+## 2026-05-18 08:46 +10:00
+Objective: Verify whether PSE-222 through PSE-228 and related follow-ups remain outstanding.
 Decisions made:
-- Selected scaffold-only pilot decision; no new workflow execution UI/IPC will be added.
-- Posted Linear plan covering evidence, risks, files, tests, and out-of-scope items.
+- Linear shows PSE-222, PSE-223, PSE-224, PSE-225, PSE-226, PSE-227, and PSE-228 are Done.
+- At least PSE-229 remains Backlog as the email native picker follow-up created from PSE-228; PSE-203 also remains Spec Ready.
 Files changed:
 - docs/session_log.md
-Open questions / risks: Need ensure all operator docs avoid overclaiming workflow readiness.
-Next actions: Relabel Workflows UI; update tests/docs; capture UI evidence.
+Open questions / risks: Need distinguish completed ticket sequence from broader backlog.
+Next actions: Tell operator sequence is done but backlog is not empty.
 
-## 2026-05-17 21:02:44 +10:00
-Objective: Implement PSE-224 scaffold-only workflow clarification.
+## 2026-05-18 08:49 +10:00
+Objective: Explain squash merge and whether current GitHub main is usable for handoff.
 Decisions made:
-- Relabeled Workflows as Workflow Lab/future scaffold and avoided adding new write IPC.
-- Updated operator/readiness/help docs to stop claiming pilot workflow automation.
-Files changed:
-- apps/desktop/src/renderer/pages/WorkflowsPage.tsx
-- apps/desktop/tests/renderer/workflowsPage.test.tsx
-- packages/core/src/i18n/en.ts
-- packages/features/src/help/HelpContent.ts
-- docs/* workflow/readiness/help files
-Open questions / risks: Need verify tests/build/package and capture actual UI screenshot.
-Next actions: Run targeted tests; fix failures; capture evidence.
-
-## 2026-05-17 21:14:48 +10:00
-Objective: Verify PSE-224 workflow scaffold change.
-Decisions made:
-- Treated packaging metadata warnings as existing PSE-227 caveat, not PSE-224 scope.
-- Captured Workflow Lab UI screenshot from built renderer and ran package smoke.
+- Clarify merge strategy affects Git history, not the final app files on main.
+- Distinguish source repo usability from a packaged/signed app handoff.
 Files changed:
 - docs/session_log.md
-- docs/manual-qa/PSE-224-workflow-scaffold-qa.md
-- docs/manual-qa/screenshots/PSE-224-workflow-scaffold/workflow-lab.png
-- docs/release/package-artifact-check.json
-Open questions / risks: Need commit/PR and Linear final update.
-Next actions: Review status; commit; open PR.
+Open questions / risks: Current repo can be built by a technical person, but no public installer/signed release artifact is implied.
+Next actions: None.
 
-## 2026-05-17 21:19:58 +10:00
-Objective: Publish PSE-224 branch and PR.
+## 2026-05-18 08:52 +10:00
+Objective: Begin PSE-229 and then audit PSE-203 status against merged evidence.
 Decisions made:
-- Opened draft PR #205; Linear moved to PR Open with evidence and checks summary.
-- CI is still in progress, so merge remains blocked pending GitHub result/review.
+- Treat PSE-229 as a scoped completion ticket for Windows email import native picker coverage.
+- Treat PSE-203 as an evidence/status audit, not automatic closure without checking Git/docs/Linear.
 Files changed:
 - docs/session_log.md
-Open questions / risks: CI status pending; PSE-227 packaging metadata warning remains out of scope.
-Next actions: Monitor CI; address review feedback; merge when approved.
-
-## 2026-05-18T06:47:50+10:00
-- Objective: Start PSE-225 docs reconciliation from clean main worktree.
-- Decisions made: Treat "next" as PSE-225; created clean branch codex/pse-225-doc-reconcile from origin/main d4411c9b; posted plan to Linear.
-- Files changed: docs/session_log.md
-- Open questions / risks: Docs may overclaim if source/package/manual evidence is not clearly separated.
-- Next actions: Audit stale readiness/performance/UX wording; update docs only; run lint/typecheck and path checks.
-
-## 2026-05-18T06:54:27+10:00
-- Objective: Complete PSE-225 documentation reconciliation and local verification.
-- Decisions made: Updated docs to internal-pilot-ready-with-caveats; closed OR-R2/OR-R4 with caveats; left OR-R3/PSE-226/PSE-228 caveats explicit.
-- Files changed: docs/OPERATOR_READINESS_REPORT.md; docs/PERFORMANCE_SCALE_QA.md; docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md; docs/OPERATOR_RUNBOOK.md; docs/RELEASE_CANDIDATE_PACKAGING.md; docs/session_log.md
-- Open questions / risks: No new packaged/manual run for PSE-225; OS-native dialogs and 10k Today memory remain follow-ups.
-- Next actions: Commit scoped docs; open PR; update Linear with evidence and risks.
-
-## 2026-05-18T06:57:53+10:00
-- Objective: Publish PSE-225 reconciliation PR and update Linear.
-- Decisions made: Opened PR #206 ready for review; set Linear PSE-225 to PR Open; left Done until merge/review.
-- Files changed: docs/session_log.md
-- Open questions / risks: PR mergeability shows pending/unknown from GitHub connector; CI/review outcome still needed.
-- Next actions: Reviewer checks PR; merge if CI/review pass; move Linear to Done after merge.
-
-## 2026-05-18T07:06:49+10:00
-- Objective: Explain OR-R3 options from operator perspective.
-- Decisions made: Keep guidance tight: run network monitor, owner-accept current evidence, or keep as blocker.
-- Files changed: docs/session_log.md
-- Open questions / risks: Owner must choose required confidence level for nontechnical handoff.
-- Next actions: User chooses OR-R3 option; update readiness docs/Linear if needed.
-
-## 2026-05-18T07:09:22+10:00
-- Objective: Apply OR-R3 Option B owner-accepted internal-pilot caveat.
-- Decisions made: OR-R3 accepted for internal pilot on automated/static evidence; packaged monitor still required before stronger handoff unless owner accepts again.
-- Files changed: docs/OPERATOR_READINESS_REPORT.md; docs/LOCAL_ONLY_SECURITY_REVIEW.md; docs/OPERATOR_RUNBOOK.md; docs/session_log.md
-- Open questions / risks: Nontechnical/public-release no-network proof remains unrun.
-- Next actions: Commit/push PR update; update Linear/PR note; run OR-R3 monitor before broader handoff.
-
-## 2026-05-18T07:21:14+10:00
-Objective: Begin PSE-226 from clean latest main and evaluate 10k Today memory caveat end-to-end.
-Decisions made:
-- Use fresh worktree C:\tmp\Pseudico-pse-226 on codex/pse-226-today-memory from origin/main.
-- Keep scope to performance evidence, bounded Today behavior or operator-facing caveat, docs, PR, and merge if safe.
-Files changed:
-- docs/session_log.md
-Open questions / risks: Need reproduce current 10k performance and determine whether code change is safer than documentation-only caveat.
-Next actions: Read issue/evidence; inspect Today/performance code; run targeted performance checks.
-
-## 2026-05-18T07:41:54+10:00
-Objective: Implement and evidence PSE-226 Today memory bounding.
-Decisions made:
-- Bounded packaged Today initial render to earliest 50 tasks per lane with visible full counts and Show 50 more.
-- Reproduced 1k/10k service benchmark and captured packaged 10k Today memory/screenshot evidence.
-Files changed:
-- apps/desktop/src/renderer/pages/TodayPage.tsx; packages/ui/src/components/TodayLane.tsx; packages/features/src/today/**; docs/performance/reports/pse-226-main-remeasure.json; docs/manual-qa/PSE-226-packaged-today-memory.md
-Open questions / risks: Very large lanes remain capped by design; 100k/every-hardware performance remains outside this ticket.
-Next actions: Run full checks; commit/push; open PR and merge if safe.
-
-## 2026-05-18T07:47:52+10:00
-Objective: Validate PSE-226 branch before PR.
-Decisions made:
-- Full lint/typecheck/test/build passed; package, package smoke, release package check, benchmark, and packaged Today memory QA passed.
-- Retained PSE-226 screenshot/JSON evidence and removed temporary QA harness from lint scope.
-Files changed:
-- docs/manual-qa/PSE-226-packaged-today-memory.md; docs/manual-qa/PSE-226-packaged-today-memory-summary.json; docs/manual-qa/screenshots/PSE-226-packaged-today-memory/10k-today-bounded.png; docs/release/package-artifact-check.json
-Open questions / risks: Package metadata warnings remain PSE-227, not PSE-226.
-Next actions: Commit; push/open PR; merge if review/CI state allows.
-
-## 2026-05-18T07:52:07+10:00
-Objective: Begin PSE-227 package metadata/release caveat polish from latest main.
-Decisions made:
-- PSE-226 was already merged and Linear Done; proceed to PSE-227 per queued instruction.
-- Use fresh worktree C:\tmp\Pseudico-pse-227 on codex/pse-227-package-metadata from origin/main.
-Files changed:
-- docs/session_log.md
-Open questions / risks: Need verify metadata warning source and avoid adding signing/update/release services.
-Next actions: Read packaging docs/config; post plan to Linear; implement smallest metadata/docs correction.
-
-## 2026-05-18 08:04 +10:00
-Objective: Implement PSE-227 package metadata and release caveat evidence.
-Decisions made:
-- Resolved missing description/author warnings via desktop package metadata.
-- Documented remaining package advisories as tooling-only/internal-pilot caveats.
-Files changed:
-- apps/desktop/package.json; scripts/check-release-package.mjs; docs/RELEASE_CANDIDATE_PACKAGING.md; docs/manual-qa/PSE-227-package-metadata-release-caveats.md; docs/release/package-artifact-check.json; docs/session_log.md
-Open questions / risks: P3 tooling advisories remain; public release still needs owner signing/installer/update decisions.
-Next actions: review diff; commit; open/merge PR.
-
-## 2026-05-18 08:08:48 +10:00
-Objective: Begin PSE-228 packaged OS-native dialog QA from latest merged main.
-Decisions made:
-- PSE-226 and PSE-227 are merged; use fresh worktree C:\tmp\Pseudico-pse-228.
-- Scope is evidence/docs only unless QA reveals a significant product blocker.
-Files changed:
-- docs/session_log.md
-Open questions / risks: Real OS dialogs may need manual/visible packaged-app handling; mark unexercised dialogs Not reviewed rather than implying pass.
-Next actions: Read dialog/import/export/backup docs; post plan to Linear; package and run QA.
-
-## 2026-05-18 08:40 +10:00
-Objective: Complete PSE-228 packaged OS-native dialog QA evidence and docs.
-Decisions made:
-- Proved native attach, Markdown folder, and restore target pickers; marked typed-path/workspace-relative flows and email native picker caveat explicitly.
-- Kept scope evidence/docs-only because no P0/P1 product blocker appeared.
-Files changed:
-- docs/manual-qa/PSE-228-packaged-os-dialog-qa.md; docs/manual-qa/PSE-228-packaged-dialog-qa-summary.json; docs/manual-qa/screenshots/PSE-228-2026-05-18T08-15-00/*; docs/OPERATOR_READINESS_REPORT.md; docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md; docs/RELEASE_CANDIDATE_PACKAGING.md; docs/OPERATOR_RUNBOOK.md; docs/session_log.md
-Open questions / risks: P2 email native picker remains Not reviewed; non-dialog flows should not be claimed as native picker coverage.
-Next actions: Run docs/package checks; commit/push; open and merge PR if clean.
-
-## 2026-05-18 08:37 +10:00
-Objective: Validate PSE-228 evidence/docs before PR.
-Decisions made:
-- Lint, typecheck, test, package, package smoke, release package check, and packaged dialog QA passed.
-- Initial sandboxed test hit Vitest spawn EPERM; rerun outside sandbox passed 230 files / 888 tests.
-Files changed:
-- docs/release/package-artifact-check.json; docs/session_log.md
-Open questions / risks: P2 email native picker remains a follow-up/caveat, not a merge blocker.
-Next actions: Review diff; commit/push; open/merge PR.
-
-## 2026-05-18 08:38 +10:00
-Objective: File PSE-228 follow-up for unproven email native picker coverage.
-Decisions made:
-- Created PSE-229 for Windows email import native picker coverage rather than expanding PSE-228 scope.
-- Treated it as P2/non-blocking because direct packaged `.eml` import passed and no data-safety failure appeared.
-Files changed:
-- docs/manual-qa/PSE-228-packaged-os-dialog-qa.md; docs/OPERATOR_READINESS_REPORT.md; docs/PRIMARY_OPERATOR_UX_ACCEPTANCE_REVIEW.md; docs/session_log.md
-Open questions / risks: PSE-229 should be closed or explicitly deferred before claiming native email picker coverage.
-Next actions: Final diff review; commit and PR.
-
-## 2026-05-18 08:55 +10:00
-Objective: Start PSE-229 implementation from latest merged main.
-Decisions made:
-- Created clean worktree C:\tmp\Pseudico-pse-229 on codex/pse-229-email-picker from origin/main.
-- Base includes PSE-228 merge SHA 208d8e85dbd468c437d21c206252fd6bad52d288.
-Files changed:
-- docs/session_log.md
-Open questions / risks: Need choose smallest operator-safe picker change without broad import redesign.
-Next actions: Inspect email import UI/IPC; add tests/evidence; package QA.
-
-## 2026-05-18 09:13 +10:00
-Objective: Implement and validate PSE-229 email native picker fix.
-Decisions made:
-- Split email import into separate EML file and email folder actions to avoid Windows mixed picker ambiguity.
-- Proved packaged Windows EML picker cancel/select, invalid path safety, visible Inbox result, and updated readiness/runbook/release docs.
-Files changed:
-- apps/desktop/src/preload/api.ts; apps/desktop/src/main/ipc/importHandlers.ts; apps/desktop/src/main/ipc/registerImportIpc.ts; apps/desktop/src/renderer/pages/SettingsPage.tsx; apps/desktop/tests/main/importHandlers.test.ts; docs/manual-qa/PSE-229-email-native-picker.md; docs/manual-qa/PSE-229-email-picker-summary.json; docs/manual-qa/screenshots/PSE-229-2026-05-18T09-05-00/*
-Open questions / risks: Maildir folder hands-on selection remains P2 if required for nontechnical handoff.
-Next actions: Review diff; commit/push; open PR and merge if CI is clean.
-
-## 2026-05-18 09:19 +10:00
-Objective: Final PSE-229 validation before PR.
-Decisions made:
-- Full lint/typecheck/test passed after final cleanup; package, package smoke, release package check, and packaged native EML picker QA passed.
-- Retained known package tooling warnings as PSE-227-documented non-runtime advisories.
-Files changed:
-- docs/release/package-artifact-check.json; docs/session_log.md
-Open questions / risks: Folder-style email imports have directory-only chooser but not a separate hands-on nontechnical run.
-Next actions: Stage/commit/push PSE-229; open PR and merge if CI passes.
-
-## 2026-05-18 09:30 +10:00
-Objective: Audit PSE-203 large-workspace UI performance ticket against merged git evidence.
-Decisions made:
-- Use clean audit worktree C:\tmp\Pseudico-pse-203-audit from latest origin/main after PSE-229 merge.
-- Check whether PSE-203 acceptance is already satisfied by tracked PSE-209/PSE-226 docs, scripts, screenshots, and PR history before changing Linear.
-Files changed:
-- docs/session_log.md
-Open questions / risks: Need avoid closing PSE-203 if acceptance requires a missing script/report rather than only later caveat docs.
-Next actions: Inspect performance docs, manual QA artifacts, scripts, git history, and update Linear with status.
-
-## 2026-05-18 09:31 +10:00
-Objective: Close PSE-203 audit with tracked git evidence.
-Decisions made:
-- Added a concise closure audit instead of rerunning packaged QA because PSE-209/PSE-226 evidence is already tracked and merged.
-- Verdict is internal-pilot 1k/10k readiness only; no public-release or 100k-workspace claim.
-Files changed:
-- docs/manual-qa/PSE-203-large-workspace-closure-audit.md; docs/session_log.md
-Open questions / risks: PSE-209 Linear status also appears stale even though its evidence is present.
-Next actions: Validate docs diff; commit/PR/merge audit; update Linear PSE-203.
-## 2026-05-18 20:42 +10:00
-Objective: Start PSE-232 implementation plan.
-Decisions made:
-- Created clean worktree C:\tmp\Pseudico-pse-232 on codex/pse-232-shell from origin/main.
-- Posted PSE-232 plan to Linear and moved issue to In Progress.
-Files changed:
-- docs/session_log.md
-Open questions / risks: Required ui-redesign docs are local untracked source artifacts, not present on origin/main.
-Next actions: Implement shell budget changes; add tests; capture production screenshots.
-
-## 2026-05-18 21:06 +10:00
-Objective: Complete PSE-232 shell implementation and visual evidence.
-Decisions made:
-- Use PSE-231 primitives as guardrails while changing only shell/nav/capture surfaces.
-- Preserve search/Quick Start budgets before compacting nav history, shortcut hints, and side labels.
-Files changed:
-- apps/desktop/src/renderer/shell/TopBar.tsx; apps/desktop/src/renderer/shell/Sidebar.tsx; apps/desktop/src/renderer/styles.css; packages/ui/src/forms/QuickAddForm.tsx; packages/ui/src/components/AppTabStrip.tsx; docs/manual-qa/PSE-232-shell-space-budget.md; docs/manual-qa/screenshots/PSE-232-shell/
-Open questions / risks: P2 uncommitted ui-redesign source docs remain outside origin/main; screenshot helper timed out only on Electron shutdown.
-Next actions: Rerun final checks; commit/push; open PR and reconcile Linear/GitHub.
-
-## 2026-05-18 21:13 +10:00
-Objective: Commit PSE-232 and attempt GitHub handoff.
-Decisions made:
-- Committed scoped shell changes as 8e3e803c on codex/pse-232-shell after lint/typecheck/test/build passed.
-- Push requires explicit approval because it uploads repository changes and screenshots to GitHub.
-Files changed:
-- docs/session_log.md
-Open questions / risks: Push/PR/merge/Linear final update are blocked until the user approves GitHub upload.
-Next actions: Get explicit push approval; push branch; open/update PR.
-## 2026-05-19T05:57:53
-Objective: Prepare clean PSE-233 implementation workspace.
-Decisions made:
-- Created isolated worktree at C:\tmp\Pseudico-pse233 from origin/main on codex/pse-233-today-planning.
-- Kept unrelated dirty files in original checkout out of scope.
-Files changed:
-- docs/session_log.md
-Open questions / risks: Need inspect PSE-232 merged outputs from clean worktree before coding.
-Next actions: Read Today route/primitives; post PSE-233 Linear plan; implement scoped Today UI.
-## 2026-05-19T06:10:38
-Objective: Implement PSE-233 Today space-budget UI slice.
-Decisions made:
-- Converted day planner to multiline lane capture with parse/destination feedback and Ctrl/Cmd+Enter submit.
-- Added container titles to Today view model and readable lane/card budgets with deterministic long-data fixture route.
-Files changed:
-- packages/ui/src/components/DailyPlannerEditor.tsx; packages/ui/src/components/TodayTaskCard.tsx; packages/features/src/today/*; apps/desktop/src/renderer/pages/*; apps/desktop/src/renderer/styles.css; tests
-Open questions / risks: Hidden fixture route is evidence-only; real workspace screenshots still preferred if harness time allows.
-Next actions: Run broader checks; capture 1440/1280 screenshots; document manual QA.
-## 2026-05-19T06:22:18
-Objective: Validate PSE-233 implementation and capture evidence.
-Decisions made:
-- Used hidden production renderer fixture route for deterministic long-data Today screenshots.
-- Confirmed lint/typecheck/test/build pass after targeted tests and native module rebuild for Node ABI.
-Files changed:
-- docs/manual-qa/PSE-233-today-space-budget.md; docs/manual-qa/screenshots/PSE-233-today/*; docs/session_log.md
-Open questions / risks: Screenshot fixture is not a live workspace submission path; documented as P2 caveat.
-Next actions: Commit/push branch; open PR; update Linear and reconcile merge policy.
-
-## 2026-05-19T06:25:06+10:00
-Objective: Commit PSE-233 Today planning implementation after validation.
-Decisions made: - Selected PSE-233 as first unblocked unfinished SBUX ticket; - Kept Today scope local-only and UI-focused; - Used hidden fixture route for production screenshot evidence.
-Files changed: apps/desktop/src/preload/api.ts; apps/desktop/src/renderer/App.tsx; apps/desktop/src/renderer/pages/TodayPage.tsx; apps/desktop/src/renderer/pages/TodaySpaceBudgetFixturePage.tsx; apps/desktop/src/renderer/styles.css; packages/features/src/today/TodayService.ts; packages/features/src/today/TodayViewModel.ts; packages/ui/src/components/DailyPlannerEditor.tsx; packages/ui/src/components/TodayTaskCard.tsx; tests; docs/manual-qa/PSE-233-today-space-budget.md
-Open questions / risks: P2 screenshot path uses fixture data rather than live workspace mutation; P3 reusable screenshot harness still needed.
-Next actions: commit; push branch; open/update PR.
-
-## 2026-05-19T06:32:00+10:00
-Objective: Open PSE-233 PR and prepare reconciliation.
-Decisions made: - Created ready-for-review PR #214; - Included tests, screenshot evidence, acceptance checklist, and local-only safety notes; - Kept merge pending CI/policy verification.
+Open questions / risks: Need determine whether PSE-203 was superseded by PSE-209/PSE-226 or still has unmet acceptance.
+Next actions: Read Linear context; create clean branch; inspect email picker code.
+## 2026-05-18 10:03:27 +10:00
+Objective: Inspect actual Pseudico scope/routes before UI redesign exploration.
+Decisions made: - Use an isolated Vite/React design-preview surface, not production route rewrites. - Base designs on implemented project/contact containers, Today, search, collections, timeline/calendar, dashboard, maintenance.
 Files changed: docs/session_log.md
-Open questions / risks: PR checks/review policy still need confirmation.
-Next actions: push log update; update Linear; inspect PR checks and merge blockers.
-
-- Timestamp: 2026-05-19T06:50:37.0804316+10:00
-- Objective: Isolate PSE-234 implementation branch/worktree from dirty primary checkout.
-- Decisions made: Created C:\tmp\Pseudico-pse-234 on origin/main after fetching PSE-233 squash merge; selected PSE-234 as first uncompleted unblocked child.
-- Files changed: docs/session_log.md
-- Open questions / risks: ui-redesign source docs exist in primary checkout as untracked artifacts, not origin/main; will use them as read-only evidence.
-- Next actions: inspect project detail code/tests; post Linear plan; implement scoped UI pass.
-
-- Timestamp: 2026-05-19T06:52:59.7240084+10:00
-- Objective: Post PSE-234 implementation plan and start ticket.
-- Decisions made: Linear plan posted; PSE-234 moved to In Progress; implementation remains renderer/UI-only with no storage/schema change.
-- Files changed: docs/session_log.md
-- Open questions / risks: Need evidence route/screenshots using production UI; ensure all core content types visible without over-scoping.
-- Next actions: patch project detail layout; add tests; capture manual QA evidence.
-
-## 2026-05-19T07:14:00+10:00
-Objective: Implement and evidence PSE-234 project detail mixed-content work container.
+Open questions / risks: Screenshot capture depends on local Edge/Chrome and Vite dev server reliability.
+Next actions: Build preview fixtures/components; add screenshot script; write docs.
+## 2026-05-18 10:17:31 +10:00
+Objective: Build isolated React design preview and capture UI redesign screenshots.
+Decisions made: - Used Vite-rendered preview pages with deterministic fixture data. - Used local headless Edge screenshot capture at 1440x1000 plus a 1280x800 check. - Replaced fragile symbolic glyphs with readable text labels.
+Files changed: apps/desktop/src/renderer/design-preview/*; scripts/capture-ui-redesign-screenshots.mjs; docs/ui-redesign/screenshots/*; docs/ui-redesign/preview/1280x800-check.png
+Open questions / risks: Preview is static and not wired to real IPC; docs still need final rationale and validation results.
+Next actions: Write workflow model and option docs; run lint/typecheck/test/build; update README.
+## 2026-05-18 10:24:17 +10:00
+Objective: Finalize UI redesign exploration docs and validation record.
+Decisions made: - Recommend Option 03 as starting point, borrowing Option 02 Today calm and Option 01 command/inspector discipline. - Record build failure as existing renderer alias issue, not preview-caused.
+Files changed: docs/ui-redesign/README.md; docs/ui-redesign/workflow-model.md; docs/ui-redesign/option-*.md; docs/session_log.md
+Open questions / risks: Production pnpm build fails resolving @local-work-os/core in renderer config; future implementation needs responsive workroom collapse.
+Next actions: Decide preferred option; split implementation tickets; fix production build alias separately.
+## 2026-05-18 14:09:10 +10:00
+Objective: Replace failed UI redesign pass with functional, legible, flat alternatives.
+Decisions made: - Researched Pagico functional patterns for containers, Today planner, plain-text entry, tabs, and readable projections. - Replaced rounded card concepts with Work Ledger, Daybook Composer, and Project Binder. - Prioritized multiline inputs and wrapping readable content.
+Files changed: apps/desktop/src/renderer/design-preview/*; docs/ui-redesign/*; docs/ui-redesign/screenshots/*; docs/ui-redesign/preview/1280x800-check.png
+Open questions / risks: Build still fails on existing renderer @local-work-os/core alias issue; binder layout needs future responsive collapse.
+Next actions: Review new screenshots; choose direction or combine Binder + Daybook + Ledger primitives; fix build alias separately.
+## 2026-05-18 14:45:03 +10:00
+Objective: Add three genuinely distinct new UI design versions with new option numbers.
+Decisions made: - Created Option 04 Command Flight Deck, Option 05 Object Workbench, and Option 06 Context Atlas. - Each option includes a criticism/redesign loop and distinct interaction model. - Screenshot script now captures option-04/05/06.
+Files changed: apps/desktop/src/renderer/design-preview/*; scripts/capture-ui-redesign-screenshots.mjs; docs/ui-redesign/*; docs/ui-redesign/screenshots/option-04/*; docs/ui-redesign/screenshots/option-05/*; docs/ui-redesign/screenshots/option-06/*
+Open questions / risks: Context Atlas is highest implementation/accessibility risk; production build still has existing renderer workspace-alias failure.
+Next actions: Review option-04/05/06 screenshots; choose strongest patterns; split implementation tickets.
+## 2026-05-18 15:25:26 +10:00
+Objective: Rebuild UI exploration directly from supplied Pagico reference structures.
+Decisions made: - Added Option 07 Dense Category Browser, Option 08 Timeline Studio, and Option 09 Project Multi-Window. - Used dark desktop chrome, tabs, category lanes, data table, timeline grid, and multi-window project panes while avoiding copied branding/assets. - Fixed timeline/internal text clipping before final capture.
+Files changed: apps/desktop/src/renderer/design-preview/*; scripts/capture-ui-redesign-screenshots.mjs; docs/ui-redesign/*; docs/ui-redesign/screenshots/option-07/*; docs/ui-redesign/screenshots/option-08/*; docs/ui-redesign/screenshots/option-09/*
+Open questions / risks: Option 09 responsive overlap needs real window-management design; production build still fails on existing renderer alias issue.
+Next actions: Review option-07/08/09; decide whether to implement category browser, timeline studio, or multi-window project workspace first.
+## 2026-05-18T16:22:38.3972164+10:00
+Objective: Add three colorways for the option-07/08/09 functional UI pass.
 Decisions made:
-- Kept project detail scoped to reusable SBUX item cards plus a three-column workbench with 1280px fallback.
-- Added a production renderer fixture route for long-data project detail screenshots.
-Files changed: apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/pages/ProjectDetailSpaceBudgetFixturePage.tsx; apps/desktop/src/renderer/App.tsx; apps/desktop/src/renderer/styles.css; packages/ui/src/components/ItemCard.tsx; apps/desktop/tests/renderer/projectsPage.test.tsx; docs/manual-qa/PSE-234-project-detail-space-budget.md
-Open questions / risks: P2 fixture route is isolated from the app shell for browser capture; shell layout was covered by PSE-232.
-Next actions: rerun checks; reconcile PR and Linear; merge if policy allows.
-
-## 2026-05-19T07:18:00+10:00
-Objective: Verify PSE-234 implementation before PR reconciliation.
+- Keep layout, input sizing, and density unchanged; add query-param colorways plus env-driven capture.
+- Generated 45 PNGs under docs/ui-redesign/colorways/.
+Files changed: apps/desktop/src/renderer/design-preview/UiRedesignPreviewApp.tsx; apps/desktop/src/renderer/design-preview/ui-redesign-preview.css; scripts/capture-ui-redesign-screenshots.mjs; docs/ui-redesign/README.md; docs/ui-redesign/colorways.md; docs/session_log.md; docs/ui-redesign/colorways/
+Open questions / risks: Colorways are palette-only; build remains blocked by existing @local-work-os/features/help alias resolution.
+Next actions: Review PNGs; pick palette or request palette tweaks; fix build alias separately.
+## 2026-05-18T18:51:45.8309248+10:00
+Objective: Diagnose illegibility in provided timeline screenshot.
 Decisions made:
-- Fixed lint by removing an unused quick-add formatter after simplifying project quick actions.
-- Captured 1440, 1280, and tall all-types production renderer evidence.
-Files changed: docs/manual-qa/screenshots/PSE-234-project-detail/; docs/session_log.md
-Open questions / risks: P2 browser evidence uses hidden route with live loading disabled; runtime app paths keep IPC-only writes.
-Next actions: stage/commit; push and open PR; update Linear and merge if allowed.
-
-## 2026-05-19T07:39:20.2228890+10:00
-Objective: Select and plan the next SBUX child ticket.
-Decisions made:
-- Selected PSE-235 because PSE-231..PSE-234 are Done with merged PR/final updates.
-- Created clean branch/worktree C:\tmp\Pseudico-pse-235 from origin/main.
-Files changed:
-- docs/session_log.md
-Open questions / risks: ui-redesign source docs remain untracked in original checkout, not origin/main.
-Next actions: Implement scoped search/collections UI pass; add tests; capture evidence.
-
-## 2026-05-19T07:48:38.1752535+10:00
-Objective: Implement PSE-235 search/collections space-budget pass.
-Decisions made:
-- Kept changes renderer/UI-only with fixture route for deterministic long-data evidence.
-- Added search preview and why-matched context without changing search indexing.
-Files changed:
-- apps/desktop/src/renderer/pages/SearchPage.tsx; apps/desktop/src/renderer/pages/CollectionsPage.tsx; apps/desktop/src/renderer/pages/SearchCollectionsSpaceBudgetFixturePage.tsx; apps/desktop/src/renderer/styles.css; packages/ui/src/components/SearchResultCard.tsx; packages/ui/src/components/SearchFilters.tsx; packages/ui/src/forms/CreateCollectionForm.tsx; tests
-Open questions / risks: Need production screenshots and full validation.
-Next actions: Capture visual evidence; run standard checks; prepare PR.
-
-## 2026-05-19T08:04:04.9099071+10:00
-Objective: Complete PSE-235 validation and visual evidence.
-Decisions made:
-- Used production-built renderer hidden fixture routes for deterministic screenshots.
-- Full standard validation passed after updating a legacy test assertion.
-Files changed:
-- docs/session_log.md; docs/manual-qa/PSE-235-search-collections-space-budget.md; docs/manual-qa/screenshots/PSE-235-search-collections/*
-Open questions / risks: Screenshot fixture is deterministic, not live workspace mutation evidence.
-Next actions: Review diff; commit/push; open/update PR and reconcile checks.
-
-### 2026-05-19T08:07:54.3651550+10:00
-- Objective: Open PSE-235 GitHub PR after implementation and validation.
-- Decisions made: Created ready PR #216 against main; kept screenshot fixture hidden from navigation.
-- Files changed: docs/session_log.md
-- Open questions / risks: Await GitHub checks/mergeability; possible branch protection or review requirement.
-- Next actions: Check PR status; merge if policy allows; update Linear final state.
-
-## 2026-05-19 08:20:07 +10:00
-- Objective: Select next unblocked SBUX ticket and isolate implementation branch.
-- Decisions made: Selected PSE-236; PSE-231..235 are Done with merged PR/final Linear updates; created clean worktree from origin/main.
-- Files changed: docs/session_log.md
-- Open questions / risks: Need verify local route structure and post Linear plan before coding.
-- Next actions: Read updated evidence docs; inspect timeline/calendar/pipeline code; implement scoped UI pass.
-
-
-## 2026-05-19 08:21:57 +10:00
-- Objective: Post PSE-236 implementation plan and start work.
-- Decisions made: Scope limited to renderer/UI timeline, calendar, pipeline budgets; Linear moved to In Progress.
-- Files changed: docs/session_log.md
-- Open questions / risks: Need implement evidence fixture and screenshot capture without introducing production navigation clutter.
-- Next actions: Patch UI/CSS/tests; run targeted checks; capture evidence.
-
-
-## 2026-05-19 11:22:04 +10:00
-- Objective: Recover after screenshot helper hang.
-- Decisions made: Foreground local static server caused delay; continue from PSE-236 worktree after cleanup check.
-- Files changed: docs/session_log.md
-- Open questions / risks: Need complete screenshot capture and validation without long-running foreground process.
-- Next actions: Stop helper servers; capture evidence; finish PR/Linear reconciliation.
-
-
-## 2026-05-19 11:26:37 +10:00
-- Objective: Capture PSE-236 visual evidence and document manual QA.
-- Decisions made: Use hidden production renderer fixture; add scrolled 1280 detail screenshots for timeline and calendar agenda.
-- Files changed: docs/manual-qa/PSE-236-planning-space-budget.md; docs/manual-qa/screenshots/PSE-236-planning/*; docs/session_log.md
-- Open questions / risks: Need full repo validation, PR, CI/merge reconciliation.
-- Next actions: Run standard checks; commit/push; open/update PR.
-
-## 2026-05-19T11:44:00.0862044+10:00
-- Objective: Post PSE-237 implementation plan and enter scoped branch work.
-- Decisions made: Use isolated worktree C:\tmp\Pseudico-pse-237 from origin/main; keep PSE-237 renderer/UI-only.
-- Files changed: docs/session_log.md
-- Open questions / risks: Required ui-redesign docs are local-only/untracked in primary checkout, not origin/main.
-- Next actions: Implement home/dashboard/projects budgets; add tests; capture evidence.
-## 2026-05-19T12:06:46.8971334+10:00
-- Objective: Complete PSE-237 implementation, tests, and manual evidence.
-- Decisions made: Keep changes renderer/UI-only; add deterministic production fixture and 1280x800 screenshots for space-budget QA.
-- Files changed: apps/desktop/src/renderer/*; apps/desktop/tests/renderer/*; docs/manual-qa/PSE-237-home-dashboard-projects-space-budget.md; docs/session_log.md
-- Open questions / risks: CI/PR merge policy still to reconcile after push.
-- Next actions: Commit; push; open PR and update Linear.
-
-## 2026-05-19T12:36:10+10:00
-Objective: Plan PSE-238 implementation after docs and prior SBUX evidence review.
-Decisions made:
-- Selected PSE-238 as next unblocked ticket; posted plan to Linear.
-- Created clean worktree C:\tmp\pseudico-pse238 on origin/main to avoid unrelated dirty files.
+- Identified root issues as column width, fixed cell heights, clipping, low hierarchy, and unusable wrapped labels.
 Files changed: docs/session_log.md
-Open questions / risks: Need keep changes UI-only and avoid maintenance over-promotion.
-Next actions: Implement contact/maintenance layout pass; add tests; capture screenshots.
-
-## 2026-05-19T12:55:00+10:00
-Objective: Implement PSE-238 contact and maintenance space-budget UI pass.
+Open questions / risks: Need redesign timeline behavior, not palette tweaks.
+Next actions: Define legibility rules; redesign timeline cells; recapture screenshots.
+## 2026-05-18T19:07:21.5400422+10:00
+Objective: Build timeline legibility from operator space budgets.
 Decisions made:
-- Contact detail now uses contact/profile, central mixed feed, and follow-up context budgets.
-- Maintenance surfaces use explicit settings/trash/workflow data attributes and readable path/action panels.
-Files changed: apps/desktop/src/renderer/pages/*; apps/desktop/src/renderer/styles.css; apps/desktop/tests/renderer/*; docs/manual-qa/*; docs/session_log.md
-Open questions / risks: Fixture screenshots are deterministic production renderer evidence, not live workspace mutation.
-Next actions: Run full validation; prepare PR/Linear final update; reconcile merge.
-
-## 2026-05-19T13:05:00+10:00
-Objective: Open and reconcile PSE-238 PR for contact/maintenance space budgets.
+- Added explicit space budget doc and rebuilt timeline preview with 330px row labels, 58px day columns, and date/status bars.
+- Recaptured 15 screenshots; lint/typecheck/test pass.
+Files changed: apps/desktop/src/renderer/design-preview/UiRedesignPreviewApp.tsx; apps/desktop/src/renderer/design-preview/ui-redesign-preview.css; docs/ui-redesign/operator-space-budget.md; docs/ui-redesign/README.md; docs/ui-redesign/screenshots/; docs/ui-redesign/preview/1280x800-check.png; docs/session_log.md
+Open questions / risks: Need apply the budget across all other surfaces, not only timeline; month/year timeline rules still separate.
+Next actions: Review new timeline screenshots; extend budget to Today/feed/search; revise colour only after spacing is acceptable.
+## 2026-05-18T19:12:46.8839845+10:00
+Objective: Extend timeline legibility lesson into page-level Pseudico designs.
 Decisions made:
-- Reused existing PR #219 for branch codex/pse-238-contacts-maintenance.
-- Kept PR ready-for-review while repository CI was still running.
+- Used official Pagico references for dashboard, Today, projects, tags/categories, kanban, mixed containers, search, and timeline analogues.
+- Added route-by-route space budgets and design patterns before any colour/style work.
+Files changed: docs/ui-redesign/pagico-informed-page-designs.md; docs/ui-redesign/README.md; docs/session_log.md
+Open questions / risks: These are design specs, not production implementation; still need rendered redesign iteration per page.
+Next actions: Convert budgets into preview screens; review with long fixture data; only then refine palettes.
+## 2026-05-18T19:28:05.0352302+10:00
+Objective: Deliver next rendered space-budgeted UI pass.
+Decisions made:
+- Added option-10 rendered screens for workspace, Today, project detail, search, and timeline using explicit operator space budgets.
+- Capture script can target option-10 only via UI_REDESIGN_OPTIONS=option-10; screenshots generated.
+Files changed: apps/desktop/src/renderer/design-preview/UiRedesignPreviewApp.tsx; apps/desktop/src/renderer/design-preview/uiRedesignFixtures.ts; apps/desktop/src/renderer/design-preview/ui-redesign-preview.css; scripts/capture-ui-redesign-screenshots.mjs; docs/ui-redesign/option-10-space-budgeted-operator-ui.md; docs/ui-redesign/README.md; docs/ui-redesign/screenshots/option-10/; docs/ui-redesign/preview/1280x800-check.png; docs/session_log.md
+Open questions / risks: Option-10 is structural, not final visual identity; contacts/maintenance need dedicated rendered screens later.
+Next actions: Review option-10 PNGs; tune visual identity after legibility approval; extend rendered coverage to contacts/settings/backup.
+## 2026-05-18T19:38:24.4518439+10:00
+Objective: Create Linear implementation tickets for space-budgeted UI vision.
+Decisions made:
+- Created parent PSE-230 and child tickets PSE-231 through PSE-239 using existing Problem/Evidence/Scope/Acceptance/QA/Done standard.
+- Added dependency ordering with primitives/shell first and final acceptance blocked by route tickets.
+Files changed: docs/ui-redesign/linear-implementation-plan.md; docs/session_log.md
+Open questions / risks: Tickets are Spec Ready; actual production implementation and screenshots still pending.
+Next actions: Start PSE-231; then PSE-232; implement route tickets before PSE-239 exit review.
+## 2026-05-18T19:39:55.3229643+10:00
+Objective: Explain how to launch Codex work from SBUX Linear tickets.
+Decisions made:
+- Recommend pointing Codex at PSE-230 for orientation only, then implementing one child ticket at a time starting PSE-231.
 Files changed: docs/session_log.md
-Open questions / risks: CI completion and merge policy still pending.
-Next actions: wait for checks; update Linear; merge if allowed.
-## 2026-05-19T13:32:47.3165901+10:00
-Objective: Start clean PSE-239 final acceptance branch.
+Open questions / risks: Asking one thread to do all tickets at once risks scope creep and weak review evidence.
+Next actions: Start PSE-231; after merge, start PSE-232; continue route tickets sequentially/parallel with clean scopes.
+## 2026-05-18T19:44:43.1074621+10:00
+Objective: Create reusable Codex prompt for SBUX Linear sequence.
 Decisions made:
-- Created clean worktree at C:\tmp\Pseudico-PSE-239 from origin/main after fetching PSE-238 merge.
-- Will keep original checkout dirty files out of the PSE-239 PR.
+- Prompt starts from PSE-230, selects the first unblocked unfinished child PSE-231 through PSE-239, and requires PR/Linear/merge reconciliation.
+- Added explicit space-budget, screenshot, local-only, and final reporting requirements.
+Files changed: docs/ui-redesign/sbux-codex-reusable-prompt.md; docs/session_log.md
+Open questions / risks: Prompt assumes Codex has Linear/GitHub access and merge permission; otherwise it must stop ready-for-review/blocked.
+Next actions: Use prompt in new Codex thread; first expected ticket is PSE-231 unless already done.
+
+## 2026-05-18 19:49:29 +10:00
+Objective: Select next SBUX Linear ticket and recover context.
+Decisions made:
+- Selected PSE-231 because PSE-230 is context-only and PSE-231 is first non-Done/non-Canceled child with no blockers.
+- PSE-232..PSE-239 remain blocked by PSE-231 and/or PSE-232.
 Files changed:
 - docs/session_log.md
-Open questions / risks: Need collect production UI evidence and keep PSE-239 docs-only/QA scoped.
-Next actions: inspect merged SBUX evidence; post Linear plan; implement acceptance review doc/screenshots.
-## 2026-05-19T13:33:47.2464346+10:00
-Objective: Post PSE-239 implementation plan and start issue.
+Open questions / risks: Working tree has pre-existing unrelated dirty/untracked files.
+Next actions: Create scoped branch; inspect UI primitives/tests; post Linear plan.
+
+## 2026-05-18 19:52:35 +10:00
+Objective: Clarify premature stop after PSE-231 setup.
 Decisions made:
-- Posted Linear plan and moved PSE-239 to In Progress.
-- Scope remains final QA/docs acceptance gate, not broad UI implementation.
+- Explained stop was an execution/session/tooling interruption, not a ticket-scope decision.
+- Keep selected issue as PSE-231 on existing scoped branch.
 Files changed:
 - docs/session_log.md
-Open questions / risks: Existing evidence has fixtures for most routes; Inbox-specific production evidence may be a gap.
-Next actions: write acceptance review; run validation; reconcile PR and Linear.
-## 2026-05-19T13:38:12.6658669+10:00
-Objective: Draft PSE-239 acceptance review and evidence check.
+Open questions / risks: Implementation, tests, PR, Linear/GitHub reconciliation still pending.
+Next actions: Continue PSE-231 implementation; post Linear plan; run verification.
+
+## 2026-05-18 19:54:00 +10:00
+Objective: Start PSE-231 execution.
 Decisions made:
-- Added final review verdict: pilot acceptable with caveats; ready for visual-identity pass, not release/handoff claim.
-- Tracked Inbox and packaged seeded-workspace screenshot gaps as P2, no P0/P1 found.
-Files changed:
-- docs/SPACE_BUDGET_OPERATOR_UI_ACCEPTANCE_REVIEW.md
-- docs/session_log.md
-Open questions / risks: Need standard validation and PR/Linear reconciliation.
-Next actions: run lint/typecheck/test/build; commit/push; open PR.
-## 2026-05-19T13:41:08.1547232+10:00
-Objective: Validate PSE-239 docs/evidence changes.
-Decisions made:
-- Evidence file check, lint, typecheck, test, and build passed; test/build needed sandbox-escalated reruns after EPERM subprocess failures.
-- Removed untracked pnpm temp files before commit.
-Files changed:
-- docs/SPACE_BUDGET_OPERATOR_UI_ACCEPTANCE_REVIEW.md
-- docs/session_log.md
-Open questions / risks: PR/CI/merge still pending; P2 Inbox evidence gap remains documented.
-Next actions: commit, push, open PR; update Linear and merge if checks allow.
-## 2026-05-19T13:42:04.4865249+10:00
-Objective: Commit PSE-239 acceptance review.
-Decisions made:
-- Committed scoped docs-only QA gate changes on codex/pse-239-space-budget-acceptance.
-- No production code, schema, IPC, or data-write changes included.
-Files changed:
-- docs/SPACE_BUDGET_OPERATOR_UI_ACCEPTANCE_REVIEW.md
-- docs/session_log.md
-Open questions / risks: Need push/PR/CI/merge reconciliation.
-Next actions: amend log into commit; push branch; open PR.
-## 2026-05-19T13:43:34.7421374+10:00
-Objective: Push branch and open PSE-239 PR.
-Decisions made:
-- Pushed codex/pse-239-space-budget-acceptance and opened PR #220 as ready for review.
-- PR is docs/QA only with P0/P1 none and P2 follow-up recommendations.
+- Posted implementation plan to Linear and moved PSE-231 to In Progress.
+- Scope remains shared UI primitives/fixtures only, not full route redesign.
 Files changed:
 - docs/session_log.md
-Open questions / risks: GitHub CI is in progress; mergeability not yet confirmed.
-Next actions: amend/push log; monitor checks; update Linear and merge if allowed.
+Open questions / risks: Need isolate changes from pre-existing dirty/untracked files.
+Next actions: Implement primitives; add tests/fixtures; produce screenshot evidence.
 
-## 2026-05-19T15:18:46.3070771+10:00
-Objective: Establish clean PSE-240 worktree from merged SBUX baseline.
+## 2026-05-18 20:09:30 +10:00
+Objective: Implement PSE-231 primitives and evidence.
 Decisions made:
-- Created C:\tmp\Pseudico-PSE240 on codex/pse-240-option10-production-parity from origin/main.
-- Original checkout has unrelated dirty/untracked files; keep PSE-240 work isolated.
+- Added shared space-budget primitives, deterministic long-data fixtures, and hidden production route fixture.
+- Renderer aliases now support production-route Vite evidence capture for workspace packages.
+Files changed:
+- packages/ui/src/components/SpaceBudgetPrimitives.tsx
+- packages/ui/src/fixtures/spaceBudgetFixtures.ts
+- apps/desktop/src/renderer/pages/SpaceBudgetPrimitiveDemoPage.tsx
+- apps/desktop/src/renderer/styles.css
+Open questions / risks: Need full standard validation and PR reconciliation.
+Next actions: Run lint/typecheck/test/build; attach/update evidence; commit/push/PR.
+
+## 2026-05-18 20:13:57 +10:00
+Objective: Complete PSE-231 verification.
+Decisions made:
+- Captured production route fixture screenshots at 1440x1000 and 1280x800.
+- Full validation passed after rerunning sandbox-blocked Vitest/build commands with approved escalation.
+Files changed:
+- docs/manual-qa/PSE-231-space-budget-primitives.md
+- docs/manual-qa/screenshots/PSE-231-space-budget-primitives/01-space-budget-primitives-1440x1000.png
+- docs/manual-qa/screenshots/PSE-231-space-budget-primitives/02-space-budget-primitives-1280x800.png
+- docs/session_log.md
+Open questions / risks: Need inspect git diff and separate unrelated pre-existing dirty files.
+Next actions: Stage intended files; commit; push/open PR.
+
+## 2026-05-18 20:34:55 +10:00
+Objective: Reconcile and merge PSE-231.
+Decisions made:
+- Rebuilt PR branch on latest main, force-updated PR #212 to one clean PSE-231 commit, and verified CI passed.
+- Squash-merged PR #212 and moved PSE-231 to Done with final Linear update.
 Files changed:
 - docs/session_log.md
-Open questions / risks: Need compare production screenshots to option-10 targets before coding.
-Next actions: Read required docs/code; post Linear plan; implement route parity.
+Open questions / risks: Local dirty docs/untracked artifacts remain pre-existing/unrelated; stash backup also remains.
+Next actions: Start PSE-232 as next SBUX ticket.
 
-## 2026-05-19T15:22:56.0931879+10:00
-Objective: Complete required context recovery and Linear planning for PSE-240.
+## 2026-05-18 20:37:46 +10:00
+Objective: Clarify PSE-231 output versus option-10 screenshots.
 Decisions made:
-- PSE-240 is In Progress; plan posted with option-10 screenshots as hard baselines.
-- PSE-240 work remains presentational/renderer-only unless tiny UI data shaping is unavoidable.
+- Explained PSE-231 was foundational primitives/fixture, not the option-10 route visual implementation.
+- Identified PSE-232..PSE-239 as the route-by-route production implementation sequence.
 Files changed:
 - docs/session_log.md
-Open questions / risks: docs/ui-redesign/* baselines are missing from origin/main and may need to be added from local evidence checkout.
-Next actions: Implement shell/route visual parity; add tests; capture production evidence.
-
-## 2026-05-19T15:28:52.8568528+10:00
-Objective: Implement first PSE-240 shell/route parity pass.
+Open questions / risks: Need ensure next tickets visibly converge production UI toward option-10, not only hidden fixtures.
+Next actions: Start PSE-232 shell work; later PSE-237 handles workspace home.
+## 2026-05-18 20:39 +10:00
+Objective: Select next SBUX ticket and recover Linear program context.
 Decisions made:
-- Added option-10 compact shell controls, Today count, narrow dark rail, and Today selected-task inspector.
-- Added missing option-10 docs/screenshots from local evidence checkout for required baselines.
+- PSE-231 is Done with merged PR #212/final Linear update.
+- Selected PSE-232 as first non-Done/non-Canceled child after PSE-231 with no blocker shown.
 Files changed:
-- apps/desktop/src/renderer/shell/TopBar.tsx; apps/desktop/src/renderer/pages/TodayPage.tsx; apps/desktop/src/renderer/styles.css; docs/ui-redesign/*; docs/session_log.md
-Open questions / risks: Need visual screenshot verification and possible CSS tuning.
-Next actions: Run targeted tests; capture production route screenshots; document evidence.
-
-## 2026-05-19T15:47:16.2235486+10:00
-Objective: Capture PSE-240 production-route visual evidence and document QA.
+- docs/session_log.md
+Open questions / risks: Current checkout has unrelated dirty/untracked artifacts; use a clean scoped worktree.
+Next actions: Read required docs; create PSE-232 branch/worktree; post Linear plan.
+## 2026-05-19T05:56:18
+Objective: Recover SBUX sequence context and select next ticket.
 Decisions made:
-- Used built Electron routes with local demo workspace plus long realistic seeded data, not fixture routes.
-- Added PSE-240 QA doc and acceptance-review addendum for corrected option-10 parity verdict.
+- Read PSE-230 and PSE-231..PSE-239; PSE-231/PSE-232 are Done with merged final updates.
+- Selected PSE-233 as first not-Done child unblocked by completed dependencies.
 Files changed:
-- apps/desktop/src/main/pse240Capture.ts; apps/desktop/src/main/index.ts; docs/manual-qa/PSE-240-option-10-production-parity.md; docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*; docs/SPACE_BUDGET_OPERATOR_UI_ACCEPTANCE_REVIEW.md; docs/session_log.md
-Open questions / risks: Need full validation and PR publication; Electron rebuild may require Node ABI rebuild before Vitest.
-Next actions: Run full checks; inspect diff; commit/push/open PR.
+- docs/session_log.md
+Open questions / risks: Local checkout has many unrelated dirty/untracked files on old PSE-231 branch.
+Next actions: Read required docs; create isolated PSE-233 branch/worktree; post Linear plan.
 
-## 2026-05-19T15:59:09.3265140+10:00
-Objective: Complete PSE-240 validation and current-code screenshot evidence.
-Decisions made:
-- Re-captured production route screenshots after final Workspace Home contact-panel fix.
-- Restored better-sqlite3 to Node ABI after Electron capture.
-Files changed: docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*; docs/session_log.md
-Open questions / risks: Env-gated capture harness remains QA-only; keep normal startup untouched.
-Next actions: Commit; open PR; update Linear/merge if allowed.
-
-## 2026-05-19T17:09:32.9167080+10:00
-Objective: Respond to screenshot review request for PSE-240 route areas.
-Decisions made:
-- Showed the final PSE-240 contact sheet plus full-size evidence paths.
-- Assessed cohesion across the captured production route family.
-Files changed: docs/session_log.md
-Open questions / risks: Cohesion assessment covers captured PSE-240 routes, not every secondary app surface.
-Next actions: Review screenshots visually; file optional polish follow-up only if desired.
-
-## 2026-05-19T17:15:46.3998246+10:00
-Objective: Start corrective pass for PSE-240 screenshot/UI failures.
-Decisions made:
-- Treat rounded panels, hidden text, and compressed content as functional defects.
-- Re-open route CSS/layout work from current PSE-240 evidence branch/worktree.
-Files changed: docs/session_log.md
-Open questions / risks: Need verify screenshots after patch, not rely on visual intent.
-Next actions: Inspect CSS; patch budgets; recapture evidence.
-
-## 2026-05-19 19:23 +10:00
-Objective: Correct PSE-240 functional UI regressions from screenshot review.
-Decisions made:
-- Forced option-10 target routes to square/no-pill surfaces and wrapping text.
-- Rebalanced project/workbench grids so content width wins before side panels.
-Files changed: apps/desktop/src/renderer/styles.css; apps/desktop/src/main/pse240Capture.ts; apps/desktop/src/main/index.ts; apps/desktop/tests/renderer/readabilityStyles.test.ts; docs/manual-qa/PSE-240-option-10-production-parity.md; docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*
-Open questions / risks: Native Electron capture needs ABI rebuild/restore around better-sqlite3.
-Next actions: Review final contact sheet; commit/push corrective branch; open PR if desired.
-
-## 2026-05-19 19:24 +10:00
-Objective: Validate final PSE-240 corrective screenshots and checks.
-Decisions made:
-- Kept final evidence on production routes at 1440x1000 and 1280x800.
-- Confirmed full test suite passes after ABI restore.
-Files changed: docs/session_log.md; docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*
-Open questions / risks: PR/review policy still determines merge timing.
-Next actions: Commit/push branch; open corrective PR; update Linear/GitHub if proceeding.
-
-## 2026-05-19 19:34 +10:00
-Objective: Start follow-up audit for pre-main/entry route visual regressions.
-Decisions made:
-- Created clean branch codex/pse-240-entry-route-fix from merged main.
-- Treat old-style and top-compressed pages as PSE-240 route-family defects, not polish.
-Files changed: docs/session_log.md
-Open questions / risks: Need identify exact entry/adjacent routes from capture evidence.
-Next actions: Audit routes; patch shared CSS/capture; validate screenshots.
-
-## 2026-05-19 19:49 +10:00
-Objective: Fix pre-main PSE-240 entry/adjacent route regressions.
-Decisions made:
-- Moved Welcome into persistent shell and flattened Welcome/Inbox/Projects surfaces.
-- Added production capture targets for Welcome, Inbox, and Projects list.
-Files changed: apps/desktop/src/renderer/App.tsx; apps/desktop/src/renderer/pages/WelcomePage.tsx; apps/desktop/src/renderer/styles.css; apps/desktop/src/main/pse240Capture.ts; apps/desktop/tests/renderer/readabilityStyles.test.ts; docs/manual-qa/PSE-240-option-10-production-parity.md; docs/manual-qa/screenshots/PSE-240-option-10-production-parity/*
-Open questions / risks: Capture still requires Electron/Node ABI rebuild cycle.
-Next actions: Commit/push; open PR; merge if allowed.
-- Timestamp: 2026-05-19 21:19:07 +10:00
-- Objective: Isolate PSE-241 implementation workspace from unrelated dirty checkout state.
-- Decisions made: Created worktree C:\tmp\pseudico-pse241 on codex/pse-241-full-app-ui-cohesion from origin/main.
+- Timestamp: 2026-05-19T06:49:15.8738764+10:00
+- Objective: Select next SBUX ticket from PSE-230 sequence and prepare end-to-end implementation.
+- Decisions made: PSE-231/PSE-232/PSE-233 verified Done with merged/final Linear updates; PSE-234 is first uncompleted candidate pending repo prep.
 - Files changed: docs/session_log.md
-- Open questions / risks: Original checkout has unrelated dirty/untracked files that must remain excluded.
-- Next actions: Read required repo docs/evidence from clean worktree; post Linear plan.
-- Timestamp: 2026-05-19 21:20:47 +10:00
-- Objective: Complete required pre-coding context recovery and Linear planning.
-- Decisions made: Posted PSE-241 recursive plan; moved PSE-241 to In Progress; treat missing full-ui-review directory as evidence gap.
-- Files changed: docs/session_log.md
-- Open questions / risks: Need implement truthful capture over actual production routes and avoid fixture-only evidence.
-- Next actions: Add route manifest/identity gate; add shared frame; migrate routes.
-- Timestamp: 2026-05-19 21:48:16 +10:00
-- Objective: Complete implementation and visual evidence pass for PSE-242 through PSE-247.
-- Decisions made: Added route manifest/identity capture, operator frame primitives, contact-detail layout, secondary route cohesion CSS, and final screenshot docs.
-- Files changed: apps/desktop/src/shared/productionRouteManifest.ts; apps/desktop/src/main/pse241Capture.ts; apps/desktop/src/renderer/components/OperatorPageFrame.tsx; apps/desktop/src/renderer/styles.css; docs/manual-qa/*PSE-24*.md
-- Open questions / risks: Remaining risks are P3 polish only; no P0/P1/P2 found in final screenshots.
-- Next actions: Run lint/test/build; publish PR; update Linear.
-- Timestamp: 2026-05-19 21:56:52 +10:00
-- Objective: Complete validation for PSE-241 full-app cohesion changes.
-- Decisions made: Rebuilt better-sqlite3 for Node ABI after Electron capture; full test suite passed after rerun.
-- Files changed: docs/session_log.md
-- Open questions / risks: Electron capture can switch native ABI; documented rebuild step in QA evidence.
-- Next actions: Commit/push branch; open PR; update Linear with final state.
+- Open questions / risks: Worktree has many pre-existing dirty/untracked files; need isolate PSE-234 changes before branching/PR.
+- Next actions: read required docs; inspect prior outputs; create scoped branch/worktree safely.
 
-## 2026-05-20T09:39:02.9643365+10:00
-Objective: Correct user-identified 1440px UI failures before lower-resolution work.
+## 2026-05-19T07:31:30.8965819+10:00
+Objective: Start SBUX ticket selection and implementation workflow.
 Decisions made:
-- Use 1440x1000 as the primary acceptance surface; defer 1280 fixes until 1440 is visually acceptable.
-- Treat existing 1280 captures as non-decisive evidence for this pass.
+- Will inspect PSE-230 then PSE-231..PSE-239 before choosing scope.
+- Will preserve existing dirty work until ownership is understood.
 Files changed:
 - docs/session_log.md
-Open questions / risks: Need user review of 1440 screenshots before lower-res tuning.
-Next actions: Review 1440 shots; fix remaining 1440 issues; then run targeted lower-res pass.
+Open questions / risks: Existing working tree has many pre-existing dirty/untracked files on PSE-231 branch.
+Next actions: Read Linear context; read required docs; select next unblocked ticket.
 
-## 2026-05-20T09:43:36.7627721+10:00
-Objective: Fix dead screenshot links in user-facing response.
+## 2026-05-19 08:17:29 +10:00
+- Objective: Start SBUX ticket selection and implementation workflow.
+- Decisions made: Use Linear/GitHub context before selecting scope; preserve local-only guardrails.
+- Files changed: docs/session_log.md
+- Open questions / risks: Need determine next unblocked PSE-231..239 and repo policy.
+- Next actions: Inspect Linear; read docs; plan selected ticket.
+
+
+## 2026-05-19T11:40:41.1600480+10:00
+- Objective: Select next SBUX ticket and recover PSE-230 context for implementation.
+- Decisions made: PSE-231..PSE-236 are Done with merged/final updates; PSE-237 is first uncompleted unblocked candidate.
+- Files changed: docs/session_log.md
+- Open questions / risks: Current checkout has unrelated dirty files; use isolated worktree/branch before coding.
+- Next actions: Read required docs; inspect prior evidence; post PSE-237 plan.
+
+## 2026-05-19T12:31:43+10:00
+Objective: Select next SBUX Linear ticket and recover program context.
 Decisions made:
-- Previous Markdown used Windows backslashes, which the client stripped; use forward-slash absolute paths instead.
-- Steering to 1440-first is correct and did not block work.
+- Using Linear PSE-230 sequence; PSE-231 through PSE-237 are Done with merged/final updates.
+- PSE-238 is the first not-Done child and its listed blockers are completed.
+Files changed: docs/session_log.md
+Open questions / risks: Need inspect local repo/docs and verify branch/PR state before coding.
+Next actions: Read required docs; inspect PSE-238 code surfaces; post plan to Linear.
+
+## 2026-05-19T13:20:00+10:00
+Objective: Clarify PSE-238 screenshots versus option-10 workspace-home expectation.
+Decisions made:
+- Identified user reference as option-10 design target, not PSE-238 contact/maintenance evidence.
+- Located actual PSE-237 workspace/home evidence for comparison.
+Files changed: docs/session_log.md
+Open questions / risks: Production visual language may not yet match the option-10 mockup closely enough.
+Next actions: Explain mismatch; offer visual parity follow-up or PSE-239 acceptance note.
+## 2026-05-19T14:26:00.8871712+10:00
+Objective: Show user the current SBUX home UI evidence.
+Decisions made:
+- Use PSE-237 production workspace-home screenshots at 1440x1000 and 1280x800.
+- No code or committed project files changed beyond session logging.
 Files changed:
 - docs/session_log.md
-Open questions / risks: User still needs to inspect full-resolution 1440 images.
-Next actions: Provide working 1440 image embeds; continue 1440-only fixes.
-
-## 2026-05-20T10:22:29.4039067+10:00
-Objective: Review 1440 screenshots after user flagged DOA Settings vertical nav.
+Open questions / risks: User may want a live app run or another surface after seeing static screenshots.
+Next actions: offer dashboard/projects/contact/search screenshots if needed.
+## 2026-05-19T14:39:20.3011270+10:00
+Objective: Create corrective Linear ticket for option-10 production parity.
 Decisions made:
-- Settings two-column/sticky nav caused 7 tabs to squeeze into vertical letters; forced full-width horizontal flex nav.
-- Added 1440-only capture switch to avoid wasting time on 1280 until 1440 passes.
+- Created PSE-240 under PSE-230 for option-10 rendered UI parity across production routes.
+- Made option-10 screenshots hard acceptance baselines, not inspiration.
 Files changed:
-- apps/desktop/src/renderer/styles.css; apps/desktop/src/main/pse241Capture.ts; docs/session_log.md
-Open questions / risks: Dashboard/topbar/box-heavy surfaces still need 1440 review/fixes.
-Next actions: Continue 1440 review; reduce box-heavy dashboard/task chrome; recapture targeted pages.
+- docs/session_log.md
+Open questions / risks: PSE-240 is broad; implementation prompt must keep scope and evidence strict.
+Next actions: Provide reusable kickoff prompt for PSE-240.
 
-## 2026-05-20 10:48:04 +10:00
-Objective: Re-audit all 1440 UI screenshots and fix obvious visual failures called out by reviewer.
-Decisions made: 1440 remains the only acceptance surface for this pass; treat vertical text, overflow, topbar crowding, and mis-sized cards as blockers.
-Files changed: pending
-Open questions / risks: every route may need shared CSS correction beyond the called-out examples.
-Next actions: audit screenshots; patch shared layout/CSS; recapture 1440 evidence
-
-## 2026-05-20 11:19:40 +10:00
-Objective: Complete 1440 corrective UI pass for reviewer-called visual failures.
-Decisions made: hide crowded shell overflow labels; force horizontal project-tag text; compact Today planner; remove dashboard inline snooze controls; hide outline previews that clipped.
-Files changed: apps/desktop/src/renderer/styles.css; packages/ui/src/forms/TaskQuickAdd.tsx; docs/session_log.md
-Open questions / risks: remaining visual taste issues may need another human-directed pass before PR.
-Next actions: show refreshed 1440 screenshots; await reviewer markup; then continue lower-res pass
-
-## 2026-05-20 11:31:21 +10:00
-Objective: Fix Settings nav vertical text hard failure from reviewer screenshot.
-Decisions made: treat vertical settings tabs as structural blocker, not cosmetic issue.
-Files changed: pending
-Open questions / risks: Settings layout CSS may be overridden by grid/container width rules.
-Next actions: inspect DOM/CSS; patch full-width horizontal nav; recapture 1440
-
-## 2026-05-20 11:37:34 +10:00
-Objective: Verify Settings tab vertical-text failure is fixed in refreshed 1440 evidence.
-Decisions made: base Settings rules now use one-column page layout and horizontal auto-fit section tabs; added hard guardrail against vertical writing.
-Files changed: apps/desktop/src/renderer/styles.css; docs/session_log.md
-Open questions / risks: reviewer may still want less boxed Settings cards, but vertical text blocker is removed.
-Next actions: show refreshed Settings screenshot; continue reviewer-led visual corrections; keep lower-res pass deferred
-
-## 2026-05-20 11:38:26 +10:00
-Objective: Fix app shell topbar/tab strip visual failure flagged by reviewer.
-Decisions made: shell chrome must be full-width, stable, and not waste left space or let Recent/tab controls overlap.
-Files changed: pending
-Open questions / risks: app tab behavior should remain available without dominating page work.
-Next actions: inspect shell CSS cascade; patch topbar/tab strip; recapture 1440
-
-## 2026-05-20 11:46:41 +10:00
-Objective: Verify topbar/tab strip shell chrome fix with refreshed 1440 capture.
-Decisions made: search now fills left-to-right; top actions compact; app tabs fixed-height single row with no Recent overlap artifact.
-Files changed: apps/desktop/src/renderer/styles.css; docs/session_log.md
-Open questions / risks: shell visual density may still need product taste review after route content fixes.
-Next actions: show refreshed Today screenshot; await reviewer markup; continue correcting visible route failures
-
-## 2026-05-20 11:47:30 +10:00
-Objective: Fix Project Detail left rail tab-preview clipping failure.
-Decisions made: narrow outline rail must not contain full feed preview text; use compact section summary only.
-Files changed: pending
-Open questions / risks: preserving tab selection while removing noisy previews from the rail.
-Next actions: inspect implementation; patch component/CSS; recapture Project Detail 1440
-
-## 2026-05-20 11:58:50 +10:00
-Objective: Verify Project Detail outline no longer clips full preview text.
-Decisions made: replaced full tab preview cards with compact section summary; primary feed owns readable item titles/previews.
-Files changed: apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; apps/desktop/src/renderer/styles.css; docs/session_log.md
-Open questions / risks: capture run timed out after refreshed Project Detail; later routes not recaptured in this run.
-Next actions: show Project Detail screenshot; await next reviewer mark-up; recapture all routes before final PR
-
-## 2026-05-20 11:59:54 +10:00
-Objective: Fix uneven snooze/date/remove control sizing in task cards.
-Decisions made: task action clusters need consistent button rhythm; date/apply row must align with preset buttons.
-Files changed: pending
-Open questions / risks: affects shared SnoozeMenu wherever embedded in cards.
-Next actions: patch SnoozeMenu classes/CSS; run checks; recapture 1440 evidence
-
-## 2026-05-20 12:16:11 +10:00
-Objective: Complete task action sizing fix for snooze/date/remove controls.
-Decisions made: SnoozeMenu actions now use explicit classes and a single-width vertical stack in task cards.
-Files changed: packages/ui/src/components/SnoozeMenu.tsx; apps/desktop/src/renderer/styles.css; docs/session_log.md
-Open questions / risks: screenshot refresh timed out before producing a new image; existing checks pass.
-Next actions: rerun focused capture; review Today/Dashboard cards; continue visible UI corrections
-
-## 2026-05-20 12:17:00 +10:00
-Objective: Explain root cause of vertical Settings text failure.
-Decisions made: vertical appearance is one-character wrapping from narrow containers plus broad text-wrap CSS, not intended vertical writing.
-Files changed: docs/session_log.md
-Open questions / risks: need remove broad wrapping guardrails and enforce min-width/nav layout before more visual passes.
-Next actions: patch root CSS cascade; add visual guard; recapture Settings
-
-## 2026-05-20 12:35:01 +10:00
-Objective: Fix root cause of vertical-looking text by removing one-character wrapping on controls.
-Decisions made: nav/button/tab labels must never use overflow-wrap:anywhere; enforce stable min widths for Settings tabs.
-Files changed: pending
-Open questions / risks: broad prior CSS may override route-specific fixes unless late guardrails are added.
-Next actions: inspect wrap rules; patch CSS; run checks and fresh capture
-
-## 2026-05-20 12:39:59 +10:00
-Objective: Confirm no-vertical-text Settings proof capture after CSS guardrail.
-Decisions made: added global control no-wrap guardrails and focused capture target support; evidence uses new uncached screenshot directory.
-Files changed: apps/desktop/src/renderer/styles.css; apps/desktop/src/main/pse241Capture.ts; docs/session_log.md
-Open questions / risks: lower-res behavior still deferred; old chat thumbnails may remain cached.
-Next actions: show fresh proof screenshot; continue UI review; rerun full route set later
-
-## 2026-05-20 12:40:39 +10:00
-Objective: Produce fresh screenshots validating the last five UI fixes.
-Decisions made: use focused capture target support to avoid stale thumbnails and long full-app capture timeouts.
-Files changed: docs/session_log.md
-Open questions / risks: screenshots validate 1440 only; lower-res pass remains deferred.
-Next actions: capture Settings, Today, Project Detail, Project Tags, Dashboard; show full-resolution evidence
-
-## 2026-05-20 12:46:01 +10:00
-Objective: Show fresh validation screenshots for the last five UI fixes.
-Decisions made: evidence directory PSE-241-last-5-fix-validation contains fresh 1440 captures for target routes.
-Files changed: docs/session_log.md
-Open questions / risks: screenshots are 1440 only and still need human review for remaining visual taste failures.
-Next actions: reviewer inspects validation images; address marked failures; then run lower-res pass
-
-## 2026-05-20 13:07:48 +10:00
-Objective: Publish validated PSE-241 visual fixes to GitHub and merge if policy allows.
-Decisions made: proceed with current worktree branch; use GitHub publish workflow; verify diff before staging.
-Files changed: pending
-Open questions / risks: repo checks/branch protection may block merge; unrelated dirty files must be excluded if present.
-Next actions: inspect status/diff; commit and push; open/comment/review/merge PR
-
-## 2026-05-20 13:11:09 +10:00
-- Objective: Prepare accepted PSE-241 visual corrections for GitHub PR/review/merge.
-- Decisions made: Scope reviewed as UI/capture/evidence/session-log only; 1440 evidence remains the accepted gate for this stage.
+## 2026-05-19T15:17:14.5958617+10:00
+Objective: Start PSE-240 end-to-end option-10 production parity work.
+Decisions made:
+- Use Linear/GitHub workflows; inspect issue/docs/evidence before coding.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Linear/GitHub access and repo baseline still to verify.
+Next actions: Read Linear context; inspect docs/screenshots; post plan to Linear.
+- Timestamp: 2026-05-19 21:17:51 +10:00
+- Objective: Start PSE-241 recursive full-app UI cohesion gate context recovery.
+- Decisions made: Use Linear/GitHub skills; read PSE-241..247 and SBUX parent/prior context before coding.
 - Files changed: docs/session_log.md
-- Open questions / risks: Merge depends on GitHub checks and repository policy.
-- Next actions: stage changes; commit and push; open/update PR.
+- Open questions / risks: Scope is large; need confirm current repo/PR state and capture harness feasibility.
+- Next actions: Read docs/screenshots; inspect routes; post plan to Linear.
+## 2026-05-20T06:21:31.5712904+10:00
+Objective: Start PSE-241 through PSE-247 corrective SBUX full-app UI cohesion reconciliation.
+Decisions made:
+- Use Linear/GitHub context first; no code changes until existing merged PR/evidence are verified.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need confirm local checkout, PR #224 merge state, evidence files, and tests in current repo.
+Next actions: Verify git state; inspect required docs/evidence; reconcile final status.
+## 2026-05-20T06:22:55.6504746+10:00
+Objective: Reconcile PSE-241/PSE-247 Linear and GitHub completion state.
+Decisions made:
+- Confirmed PR #224 merged at 78abcb31; no new code required.
+- Added a PSE-241 reconciliation comment instead of duplicating implementation work.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local checkout remains on old branch with unrelated dirty/untracked files.
+Next actions: Report final merged status and human action.
+## 2026-05-20T06:52:32.7395354+10:00
+Objective: Show PSE-247 full-app screenshot evidence for visual confirmation.
+Decisions made:
+- Exported merged PR #224 screenshot PNGs to C:\tmp for display without changing repo evidence.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Visual perfection still needs human inspection; evidence is from merged PR #224, not current old local branch.
+Next actions: Display contact sheet; provide individual screenshot paths on request.
+## 2026-05-20T06:52:51.4765222+10:00
+Objective: Retry screenshot export for visual display.
+Decisions made:
+- C:\tmp export was denied by sandbox; exported evidence under workspace .codex-output instead.
+Files changed:
+- .codex-output/docs/manual-qa/screenshots/PSE-247-full-app-visual-qa-gate/*
+- docs/session_log.md
+Open questions / risks: Screenshots are merged evidence; human still must judge “perfect”.
+Next actions: Show contact sheet and identify individual screenshot folder.
+## 2026-05-20T06:53:03.0531932+10:00
+Objective: Successfully export merged PSE-247 screenshots for display.
+Decisions made:
+- Used git archive file output after PowerShell pipe corrupted binary tar stream.
+Files changed:
+- .codex-output/docs/manual-qa/screenshots/PSE-247-full-app-visual-qa-gate/*
+- docs/session_log.md
+Open questions / risks: Human visual review still needed for “perfect”.
+Next actions: Show contact sheet and point to individual screenshots.
+## 2026-05-20T06:54:18.3650116+10:00
+Objective: Provide full-resolution individual PSE-247 screenshots instead of contact sheet.
+Decisions made:
+- Show individual 1440x1000 and 1280x800 route screenshots from exported merged evidence.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need human review of individual full-size screenshots for visual perfection.
+Next actions: Present per-route images; inspect any failed route on request.
+## 2026-05-20T08:06:50.3793373+10:00
+Objective: Start corrective visual pass from user screenshot review.
+Decisions made:
+- Treat reported rounded-box, misalignment, density, date-format, and overflow issues as P0/P1 misses.
+- Use isolated worktree from merged PR #224 state to avoid current dirty checkout.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need identify exact components/styles from merged state; screenshots indicate multiple route families affected.
+Next actions: Create worktree; inspect relevant pages/styles; implement shared fixes.
 
-## 2026-05-20 13:16:53 +10:00
-- Objective: Fix GitHub CI lint failures for PR #225.
-- Decisions made: Removed unused Search/Trash/MiniTimeline variables/import residue; kept Australian date formatting intact.
-- Files changed: apps/desktop/src/renderer/pages/SearchPage.tsx; apps/desktop/src/renderer/pages/TrashPage.tsx; packages/ui/src/components/widgets/MiniTimelineWidget.tsx; docs/session_log.md
-- Open questions / risks: Await rerun of GitHub CI after amended push.
-- Next actions: amend commit; push update; re-check PR checks.
+## 2026-05-22 08:04:22 +10:00
+Objective: Confirm understanding of realistic Pseudico functionality-testing walkthrough.
+Decisions made:
+- Treat upcoming turns as operator-perspective exploratory QA, not immediate bug-fixing.
+- Preserve evidence and issue detail for later Linear tickets.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need user's renovation notes and running app/workspace details in later turns.
+Next actions: Elaborate household project test scenario; then populate workspace; then execute functionality pass.
 
-## 2026-05-20 13:24:23 +10:00
-- Objective: Resolve remaining PR #225 CI test expectation failures.
-- Decisions made: Updated tests to assert Australian due dates and new single-column Settings no-vertical-text budget rule.
-- Files changed: packages/ui/tests/contactComponents.test.tsx; apps/desktop/tests/renderer/readabilityStyles.test.ts; docs/session_log.md
-- Open questions / risks: Full local pnpm test is blocked on broad Windows DB setup failures, but CI-targeted failing tests pass locally.
-- Next actions: amend/push; wait for CI; merge if green.
+## 2026-05-22 08:13:18 +10:00
+Objective: Convert renovation notes into realistic chronological Pseudico QA scenario.
+Decisions made:
+- Use one main project with subareas for strata, balcony, painting, electrical, bathroom, closets, and furniture.
+- Use NSW strata and local vendor context to set dependencies, risks, links, and dates.
+Files changed:
+- docs/manual-qa/household_renovation_walkthrough.md
+- docs/manual-qa/household_renovation_functionality_log.md
+- docs/session_log.md
+Open questions / risks: App launch/workspace creation path still to verify in next turn.
+Next actions: Create/open test workspace; input raw note and structured objects; capture initial screenshots.
+
+## 2026-05-22 08:28:53 +10:00
+Objective: Explain and triage stalled Pseudico dev-launch attempt.
+Decisions made:
+- Treat 7-minute launch hang as QA setup failure, not app functionality evidence yet.
+- Inspect logs/processes before continuing workspace entry.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Background pnpm/electron-vite processes may still be alive; process command-line inspection was sandbox-denied.
+Next actions: Stop/restart dev app cleanly; use a more bounded launch method; continue initial data entry after app is reachable.
+
+## 2026-05-22 08:34:20 +10:00
+Objective: Repair Pseudico QA launch path after stalled dev-launch attempt.
+Decisions made:
+- Use packaged app launch via remote debugging outside sandbox; pnpm dev background launch is unsuitable here.
+- Confirmed pnpm package:smoke passes only with GUI/display escalation.
+- Captured launch-proof screenshot from packaged app.
+Files changed:
+- .tmp/household-qa/launch-proof.mjs
+- docs/manual-qa/screenshots/household-renovation-2026/00-packaged-welcome-launch-proof.png
+- docs/session_log.md
+Open questions / risks: Future app launches for screenshots must request display-capable execution.
+Next actions: Use packaged-app CDP path to create household QA workspace; seed initial renovation project; capture populated state screenshots.
+
+## 2026-05-22 08:38:24 +10:00
+Objective: Create Linear ticket for reconciling Pseudico launch paths.
+Decisions made:
+- Created PSE-248 in Pseudico / Local Work OS - Local-Only Build.
+- Set priority High, status Spec Ready, labels for desktop/testing/docs/manual QA.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-248 should be resolved before more final QA relies on ad hoc launches.
+Next actions: Continue household QA using packaged-app launch path; avoid dev launch unless explicitly testing dev mode.
+
+## 2026-05-22 08:42:59 +10:00
+Objective: Advise whether retrying step 3 will repeat launch-path failure after fork reset.
+Decisions made:
+- Launch proof artifacts still exist locally, but durable docs may not mention PSE-248 after reset.
+- Safe retry requires explicit packaged-app/display-capable launch instruction.
+Files changed:
+- docs/session_log.md
+Open questions / risks: If prompt only says 'try again', agent may choose pnpm dev and repeat failure.
+Next actions: Retry with explicit launch constraints; then continue workspace population.
+
+## 2026-05-22 08:45:57 +10:00
+Objective: Start isolated implementation for PSE-248.
+Decisions made:
+- Created worktree .worktrees/pse-248-launch-paths from origin/main.
+- Keep existing mixed current checkout untouched; implement PR in isolated branch.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Git branch/worktree creation required elevated filesystem access to update refs.
+Next actions: Add launch helper script; update QA/runbook/release docs; verify.
+
+## 2026-05-22 08:56:42 +10:00
+Objective: Implement and verify PSE-248 launch-path reconciliation.
+Decisions made:
+- Added qa:packaged-launch helper with bounded packaged-app render check and metadata.
+- Updated QA, runbook, release docs, and PSE-248 manual evidence.
+- Verified package, package:smoke, launch helper, lint, typecheck, and tests; sandbox launch fails quickly with hint.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PR still needs commit, push, GitHub checks, and merge.
+Next actions: Stage intended PSE-248 files; commit/push; open PR and merge if green.
+
+## 2026-05-22 09:12:14 +10:00
+Objective: Complete PSE-248 GitHub PR review and merge.
+Decisions made:
+- Amended commit after self-review found markdown trailing whitespace.
+- PR #226 CI passed and was squash-merged to main.
+- Linear PSE-248 commented with evidence and marked Done.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local original checkout still has unrelated pre-existing changes; merged code is on remote main.
+Next actions: Resume household QA using pnpm qa:packaged-launch; avoid unbounded dev launches.
+
+## 2026-05-22 09:44:54 +10:00
+Objective: Create and populate realistic household renovation Pseudico workspace.
+Decisions made:
+- Created clean workspace House Renovation QA 2026 v2 under .tmp after partial seed attempts.
+- Seeded project with contacts, notes, links, lists, tasks, tags/categories, images, planning, and relationships via app API.
+Files changed:
+- docs/manual-qa/assets/house_renovation_assets_manifest.json
+- docs/manual-qa/seed_house_project_app.js
+- docs/manual-qa/household_renovation_functionality_log.md
+- docs/session_log.md
+Open questions / risks: Need UI-driven control testing next; initial pass found tag/search/Today metric issues.
+Next actions: Exercise buttons/forms/status changes; preserve screenshots; avoid fixing in this thread.
+
+## 2026-05-22 09:53:46 +10:00
+Objective: Exercise initial project UI controls and reversible workflows.
+Decisions made:
+- Kept added @test-entry strata follow-up as realistic spun-off task.
+- Reverted note edit, checklist completion, task completion, category change, and due-date postponement after testing.
+Files changed:
+- docs/manual-qa/household_renovation_functionality_log.md
+- docs/session_log.md
+Open questions / risks: Display settings save failure and Today metric inconsistencies need ticketing.
+Next actions: Advance project chronology; complete/defer work; test retrospective retrieval and completed-review flows.
+
+## 2026-05-22 10:01:47 +10:00
+Objective: Complete household renovation chronology and test retrospective review.
+Decisions made:
+- Advanced project to 19 completed and 5 active/deferred tasks with outcome and decision notes.
+- Used project feed/list/timeline/calendar/search/contact routes for review rather than fixing defects.
+- Logged search loading and contact-detail route blockers as ticket candidates.
+Files changed:
+- docs/manual-qa/household_renovation_functionality_log.md
+- docs/session_log.md
+Open questions / risks: Search retrieval and contact review are unreliable for completed-project audit workflows.
+Next actions: Prepare Turn 6 review pack, screenshot index, and concise Linear-ready ticket drafts.
+
+## 2026-05-22 10:07:08 +10:00
+Objective: Prepare household renovation QA review pack and ticket drafts.
+Decisions made:
+- Consolidated Turn 3-5 evidence into review pack, screenshot index, and Linear-ready drafts.
+- Prioritized contact route and search rendering ahead of lower-risk metadata/metric issues.
+- Did not create Linear issues or change product code in this thread.
+Files changed:
+- docs/manual-qa/household_renovation_functionality_log.md
+- docs/manual-qa/household_renovation_review_pack.md
+- docs/manual-qa/household_renovation_screenshot_index.md
+- docs/manual-qa/household_renovation_linear_ticket_drafts.md
+- docs/session_log.md
+Open questions / risks: Ticket priorities still need product-owner confirmation before scheduling.
+Next actions: Review artifacts; select tickets to create; start separate fix thread.
+
+## 2026-05-22 10:20:45 +10:00
+Objective: Create Linear tickets from household renovation QA findings.
+Decisions made:
+- Created six Spec Ready Linear bug issues in Pseudico / Local Work OS - Local-Only Build.
+- Used Urgent for contact-route blocker, High for search/settings/Today trust bugs, Medium for metadata/dedup polish bugs.
+- Added related-issue links to relevant prior Search, Today, Project, Contact, and preference work.
+Files changed:
+- docs/manual-qa/household_renovation_functionality_log.md
+- docs/manual-qa/household_renovation_linear_ticket_drafts.md
+- docs/session_log.md
+Open questions / risks: Priorities/estimates may need owner adjustment during backlog scheduling.
+Next actions: Pick PSE-249 or PSE-250 for the next fix thread; attach PR evidence when fixed.
+
+## 2026-05-22 10:22:11 +10:00
+Objective: Adapt historic recursive Codex prompt for HRQA Linear ticket sequence.
+Decisions made:
+- Reframed SBUX visual-cohesion program prompt around PSE-249 through PSE-254 functionality/retrieval bugs.
+- Preserved high-standard Linear/GitHub/PR/test/evidence expectations and local-only architecture guardrails.
+Files changed:
+- docs/session_log.md
+Open questions / risks: User may choose to run tickets individually or as a sequence; prompt recommends sequence and scoped PRs.
+Next actions: User can paste adapted prompt to Codex; start with PSE-249 or PSE-250.
+## 2026-05-22T10:26:44.5266551+10:00
+Objective: Start household-renovation QA corrective sequence PSE-249 through PSE-254.
+Decisions made:
+- Use Linear/GitHub workflows and recover repo/docs/evidence before coding.
+- Treat screenshots listed by user as hard failure evidence.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Linear/GitHub permissions and current repo state still unknown.
+Next actions: recover tickets; inspect docs/evidence; post plan to PSE-249.
+## 2026-05-22T10:32:07.8011204+10:00
+Objective: Completed context recovery and posted Linear plan for PSE-249..PSE-254.
+Decisions made:
+- Use isolated worktree branch codex/pse-249-254-household-qa-fixes from origin/main.
+- Posted full plan to PSE-249 and linked short notes on PSE-250..PSE-254.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing dirty files in original checkout are unrelated and must not be staged silently.
+Next actions: reproduce root causes; implement narrow fixes; add tests/evidence.
+
+## 2026-05-22T10:48:02.2590809+10:00
+Objective: Validate targeted tests for PSE-249 through PSE-254 household-renovation QA fixes.
+Decisions made:
+- Fixed renderer assertion for React server-rendered tag text.
+- Targeted search/project/today/contact tests now pass.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\.worktrees\pse-249-254-household-qa-fixes\apps\desktop\tests\renderer\projectsPage.test.tsx
+Open questions / risks: Broader typecheck/lint/build and manual packaged evidence still pending.
+Next actions: run broader checks; create evidence docs/screenshots; reconcile PR and Linear.
 
 ## 2026-05-22T11:12:27.8838904+10:00
 Objective: Package, document, and evidence household-renovation QA corrective fixes.
@@ -8608,17 +8298,37 @@ Files changed:
 Open questions / risks: Manual packaged screenshots for PSE-250/PSE-252/PSE-253 and save-persist proof for PSE-251 remain pending.
 Next actions: rerun verification after docs; create PR; update Linear with PR and evidence status.
 
-## 2026-05-22T11:16:45.2164810+10:00
+## 2026-05-22T11:16:31.9384795+10:00
 Objective: Publish household-renovation QA corrective PR and reconcile Linear.
 Decisions made:
 - Opened draft PR #227 because local checks pass but manual packaged evidence remains incomplete.
 - Updated PSE-249 through PSE-254 with PR, checks, evidence, status, and residual P2 risks.
 Files changed:
-- docs/session_log.md
+- C:\Users\AlastairLacey\Pseudico\.worktrees\pse-249-254-household-qa-fixes\docs\session_log.md
 Open questions / risks: GitHub CI is in progress; PR is draft and not mergeable until evidence gaps are closed.
 Next actions: complete missing screenshots; mark PR ready; merge only after CI/review policy allows.
 
-## 2026-05-22 12:21:48 +10:00
+## 2026-05-22T11:35:09.6679055+10:00
+Objective: Count and present captured household-renovation QA screenshots for review.
+Decisions made:
+- Found four captured screenshots in the PSE-249/PSE-251/PSE-254 evidence folders.
+- Will show absolute image paths inline for app review.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Remaining PSE-250/PSE-252/PSE-253 screenshots were not captured successfully.
+Next actions: reviewer inspects available screenshots; capture missing evidence later if needed.
+
+## 2026-05-22T11:41:42.0585068+10:00
+Objective: Analyze captured QA screenshots for visible layout/information defects.
+Decisions made:
+- Identified that route fixes are insufficient because contact/project relationship cards still show concatenated metadata and cramped/overlapping layout.
+- Classified visible issues as workflow-quality defects needing follow-up before acceptance.
+Files changed:
+- C:\Users\AlastairLacey\Pseudico\docs\session_log.md
+Open questions / risks: Need decide whether to fold visual/card fixes into PR #227 or create P1/P2 follow-up tickets.
+Next actions: report observed issues; propose corrective scope; capture new screenshots after fixes.
+
+## 2026-05-22 12:21:56 +10:00
 Objective: Apply screenshot-observation fixes for contact card information/layout issues in household-renovation QA.
 Decisions made:
 - Separated relationship titles from status chips and added explicit open-project action from contact relationships.
@@ -8628,222 +8338,322 @@ Files changed:
 Open questions / risks: New screenshots not captured in this pass; PR remains draft pending broader manual evidence.
 Next actions: Push UI polish; update PR/Linear; capture final packaged screenshots later.
 
-## 2026-05-22 17:45:20 +10:00
+## 2026-05-22 17:01:03 +10:00
+Objective: Clarify whether screenshot-observation fixes landed on main.
+Decisions made:
+- Confirmed fixes are committed/pushed to the PR branch, not merged to main.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PR remains draft/blocked pending broader evidence before merge.
+Next actions: Human reviews PR or requests merge-readiness/evidence capture.
+
+## 2026-05-22 17:03:51 +10:00
+Objective: Review PR #227 for merge readiness.
+Decisions made:
+- CI is passing and merge state is clean, but PR remains draft with documented P2 evidence gaps.
+- Recommended not merging until packaged manual screenshots/evidence are completed and draft status is cleared.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Minor diff-check blank EOF in PSE-249 evidence doc; no reviewer decision recorded.
+Next actions: Capture missing evidence; fix minor whitespace; mark PR ready when policy gates pass.
+
+## 2026-05-22 17:45:39 +10:00
 Objective: Prepare PR #227 for correct merge path.
 Decisions made:
 - Rebuilt packaged app and captured refreshed PSE-249/PSE-251/PSE-254 production-route screenshots.
 - Fixed project tags to render in the production work-first header, not only the advanced metadata area.
 Files changed:
-- apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; docs/manual-qa/PSE-249-contact-detail-route-fix.md; docs/manual-qa/PSE-251-project-display-settings-fix.md; docs/manual-qa/PSE-254-project-tag-header-display.md; docs/manual-qa/screenshots/PSE-249-contact-detail-route-fix/contact-direct-card-polished.png; docs/manual-qa/screenshots/PSE-249-contact-detail-route-fix/project-relationship-card-polished.png; docs/manual-qa/screenshots/PSE-251-project-display-settings-fix/project-display-settings-compact-persisted.png; docs/manual-qa/screenshots/PSE-254-project-tag-header-display/project-tags-real-tags.png; docs/session_log.md
-Open questions / risks: PSE-250/PSE-252/PSE-253 packaged evidence capture still times out after workspace refresh; do not merge while PR is draft.
+- apps/desktop/src/renderer/pages/ProjectDetailPage.tsx; docs/manual-qa/PSE-249-contact-detail-route-fix.md; docs/manual-qa/PSE-251-project-display-settings-fix.md; docs/manual-qa/PSE-254-project-tag-header-display.md; screenshots; docs/session_log.md
+Open questions / risks: PSE-250/PSE-252/PSE-253 packaged evidence capture still times out; PR should remain draft until evidence is completed.
 Next actions: Run checks; push merge-prep commit; keep PR draft unless remaining evidence is completed.
 
-## 2026-05-23 15:48:50 +10:00
-Objective: Restart corrective implementation from current main in a clean worktree.
+## 2026-05-22 18:08:07 +10:00
+Objective: Clarify PR #227 merge execution and user concern about long git output.
 Decisions made:
-- Root workspace is dirty/stale; use C:\tmp\Pseudico-pse255-260 on branch codex/pse-255-260-complete-exam-main based on main containing PSE-249..254.
-- Reapplied PSE-259/PSE-260 lint/test discovery excludes for disposable artifacts only.
+- Confirmed PR #227 merge completed before the interruption; merge commit was 8c4d06b5.
+- Acknowledged excessive/unclear local command output after merge.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local worktree state check was interrupted; remote PR is merged.
+Next actions: Stop extra git operations unless user requests verification.
+
+## 2026-05-23 00:00:00 +10:00
+Objective: Assess whether household QA covered every function as originally requested.
+Decisions made:
+- Answered candidly that the pass was broad realistic exploratory QA, not exhaustive all-functions coverage.
+- Distinguished covered project workflows from untested or lightly tested modules/functions.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Need a formal function-by-function coverage matrix before claiming exhaustive readiness.
+Next actions: Offer to build coverage matrix; run gap pass; convert remaining gaps into QA script/tickets.
+
+## 2026-05-23 13:44:46 +10:00
+Objective: Create complete functionality coverage matrix and deliberate pass plan.
+Decisions made:
+- Created a function-by-function matrix spanning shell, workspace, content, metadata, planning, maintenance, import/export, safety, and performance.
+- Marked household pass as Covered/Partial/Blocked/Not tested rather than overstating coverage.
+- Created a phased deliberate pass plan with evidence directories, reporting format, severity rules, and completion criteria.
+Files changed:
+- docs/manual-qa/complete_functionality_coverage_matrix.md
+- docs/manual-qa/complete_deliberate_pass_plan.md
+- docs/session_log.md
+Open questions / risks: Full pass should ideally follow fixes for PSE-249 through PSE-252 to avoid blocked rows.
+Next actions: Review matrix; choose whether to fix blockers first or begin baseline full pass.
+
+## 2026-05-23 13:59:30 +10:00
+Objective: Replace under-scoped coverage draft with complete Pseudico examination materials.
+Decisions made:
+- Acknowledged prior matrix was improperly shaped by chat/ticket context and superseded it.
+- Inventoried actual routes, renderer controls, preload/API namespaces, and feature modules from source/docs.
+- Created exhaustive matrix and execution protocol covering route truth, every visible control, save persistence, projections, visual states, local-only safety, imports/exports, maintenance, and performance.
+Files changed:
+- docs/manual-qa/pseudico_complete_system_inventory.md
+- docs/manual-qa/pseudico_exhaustive_functionality_matrix.md
+- docs/manual-qa/pseudico_complete_examination_execution_protocol.md
+- docs/session_log.md
+Open questions / risks: Matrix still requires execution; it is now a proper complete-pass plan, not evidence that Pseudico passed.
+Next actions: Start Phase 0 by launching packaged app and creating the complete-examination workspace.
+
+## 2026-05-23 14:16:20 +10:00
+Objective: Draft, critique, and optimize Codex prompt for complete Pseudico examination.
+Decisions made:
+- Created a reusable next-thread prompt with draft, critical review, and optimized version.
+- Centered three absolutes: preserve notes/screenshots, log dysfunction for tickets, fully test and internally validate functionality.
+- Explicitly separated complete examination from prior household exploratory pass and existing ticket scope.
+Files changed:
+- docs/manual-qa/pseudico_complete_examination_codex_prompt.md
+- docs/session_log.md
+Open questions / risks: Next thread must execute the matrix; prompt alone is not evidence of product readiness.
+Next actions: Start a new Codex thread with the optimized prompt; run Phase 0 workspace setup.
+
+## 2026-05-23T14:29:08.5003311+10:00
+Objective: Start complete Pseudico examination setup.
+Decisions made:
+- Read required context files before app operation.
+- Created separate 2026-05-23 evidence and screenshot structure.
+Files changed:
+- docs/manual-qa/complete-examination-2026-05-23/evidence.md
+- docs/manual-qa/complete-examination-2026-05-23/issue_candidates.md
+- docs/manual-qa/complete-examination-2026-05-23/screenshot_index.md
+- docs/manual-qa/complete-examination-2026-05-23/matrix_status.md
+Open questions / risks: Full manual matrix may exceed one interactive run; app launch/GUI control may need escalation.
+Next actions: Launch packaged app; create fresh workspace; begin Phase 0 evidence.
+
+## 2026-05-23T15:02:17.1327637+10:00
+Objective: Complete manual QA route/API pass and automated gate summary.
+Decisions made:
+- Recorded route screenshots/control inventories for all required routes at two viewports.
+- Classified incomplete/high-risk rows instead of fixing product code.
+- Treated failing lint/test gates as release-blocking evidence.
+Files changed:
+- docs/manual-qa/complete-examination-2026-05-23/evidence.md
+- docs/manual-qa/complete-examination-2026-05-23/issue_candidates.md
+- docs/manual-qa/complete-examination-2026-05-23/screenshot_index.md
+- docs/manual-qa/complete-examination-2026-05-23/matrix_status.md
+Open questions / risks: Several rows remain partial/blocked because native dialogs, destructive actions, drag/drop, and large-workspace fixtures were not safely executed.
+Next actions: Review issue candidates; create tickets; rerun gates from clean checkout.
+
+## 2026-05-23T15:02:52.2611654+10:00
+Objective: Finalize complete examination report handoff.
+Decisions made:
+- Classified Pseudico as release-blocked based on P1 manual and automated gate failures.
+- Preserved evidence pack rather than fixing issues in this thread.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Human must decide whether to create tickets from all CE candidates or first clean repo gate scope.
+Next actions: Create P1 tickets; review evidence screenshots; rerun QA from clean checkout after fixes.
+
+## 2026-05-23 14:20:00 +10:00
+Objective: Provide Linear ticket-formatting instruction addendum for complete examination thread.
+Decisions made:
+- Supplied concise guidance for converting complete-pass dysfunction notes into high-quality Linear issues.
+- Emphasized repro, evidence, severity, persistence/projection impact, scope, acceptance criteria, and fix-readiness.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Ticket quality depends on complete-pass evidence being specific and screenshot-linked.
+Next actions: Append addendum to the next-thread prompt before running complete examination.
+
+## 2026-05-23T15:20:05.4040974+10:00
+Objective: Correct Linear ticket titles to PSE identifiers.
+Decisions made:
+- Renamed PSE-255 through PSE-258 to start with their Linear PSE numbers.
+- Kept CE evidence ids inside descriptions as source evidence references.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Remaining CE issues PSE tickets not yet created in this correction turn.
+Next actions: Confirm naming convention; create remaining specific tickets if requested; update local evidence with Linear URLs.
+
+## 2026-05-23T15:29:31.8528802+10:00
+Objective: Create remaining complete-examination Linear tickets.
+Decisions made:
+- Created PSE-259 for CE-20260523-005 lint gate failure.
+- Created PSE-260 for CE-20260523-006 test gate failure.
+- Renamed both titles to start with their PSE identifiers.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Local issue evidence files do not yet include the new Linear URLs.
+Next actions: Confirm all six issue candidates are ticketed; optionally add URLs to evidence files; prioritize P1s.
+
+## 2026-05-23T15:31:21.9330945+10:00
+Objective: Adapt prior QA corrective prompt for PSE-255 through PSE-260.
+Decisions made:
+- Provide a complete reusable prompt for the complete-examination corrective sequence.
+- Include all six new PSE tickets and their evidence sources.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-255 overlaps prior PSE-249 and should be reconciled during execution.
+Next actions: User can run adapted prompt in a new implementation thread.
+
+## 2026-05-23 15:34:07 +10:00
+Objective: Start PSE-255..PSE-260 complete-examination corrective sequence.
+Decisions made:
+- Use Linear/GitHub workflows plus local repo checks; preserve existing dirty docs/evidence as unrelated until scoped.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing worktree is dirty on codex/pse-231; branch/PR scope may need isolation.
+Next actions: Recover Linear issues; inspect QA evidence; create scoped branch/plan.
+
+## 2026-05-23 15:36:52 +10:00
+Objective: Recover Linear/evidence context and isolate corrective branch.
+Decisions made:
+- PSE-259/PSE-260 first per release-gate order; PSE-255 overlaps open PSE-249; PSE-256..258 retain acceptance scope.
+- Created branch codex/pse-259-260-complete-exam-corrections with pre-existing dirty docs/evidence noted.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Existing branch contains unrelated dirty/untracked QA and docs from prior work.
+Next actions: Post Linear plan; inspect lint/test configs; run gates.
+
+## 2026-05-23 15:41:04 +10:00
+Objective: Show 1440px reference screenshots for seven main Pseudico panels.
+Decisions made:
+- Selected core top-level panels: Today, Inbox, Projects, Contacts, Collections, Search, Dashboard.
+- Used existing PSE-247 1440x1000 visual QA screenshots from the merged worktree evidence.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Main checkout does not currently contain the evidence files; screenshots are referenced from the PR worktree path.
+Next actions: User reviews visual target screens.
+
+## 2026-05-23 15:41:05 +10:00
+- Objective: Show user seven 1440x1000 UI reference screenshots for review.
+- Decisions made: Use merged PSE-241 visual-correction evidence paths from the worktree; no new captures needed.
+- Files changed: docs/session_log.md
+- Open questions / risks: If user wants a different definition of seven main panels, swap the route set.
+- Next actions: display screenshots; collect visual feedback; plan 1280 pass later.
+
+## 2026-05-23 15:45:48 +10:00
+Objective: Complete initial PSE-259 and diagnose PSE-260 root test gate.
+Decisions made:
+- Added lint/test excludes for disposable .tmp/.worktrees/generated/manual-QA helper artifacts, preserving product apps/packages/scripts linting.
+- Rebuilt alternate better-sqlite3 under C:\tmp; root tests still blocked by locked node_modules native binding from running Pseudico/Electron processes.
 Files changed:
 - eslint.config.js
 - vitest.config.ts
 - docs/session_log.md
-Open questions / risks: Original root remains dirty; native better-sqlite3 lock in root is unrelated to clean worktree gate.
-Next actions: Run clean-worktree lint/typecheck/test; inspect remaining product failures.
+Open questions / risks: Need app/process closure to replace locked better-sqlite3 binding and continue full pnpm test proof.
+Next actions: Inspect product defects; rerun gates after native binding lock clears.
 
-## 2026-05-23T16:04:08+10:00
-Objective: Complete PSE-255..260 corrective fixes and release-gate verification.
+## 2026-05-23T18:06:37.6484670+10:00
+Objective: Audit alpha-to-beta deploy readiness and verification blockers.
 Decisions made:
-- Kept clean main-based worktree; excluded only disposable/generated artifacts from lint/test discovery.
-- Normalized returned list/list-item summaries at IPC and supported CSV @tag notation.
-- Shortened only overlong portable bundle container filenames while preserving manifest source mapping.
-Files changed: .gitignore; eslint.config.js; vitest.config.ts; apps/desktop/src/main/ipc/listHandlers.ts; apps/desktop/tests/main/ipc-handlers.test.ts; apps/desktop/tests/renderer/projectsPage.test.tsx; packages/features/src/export/ExportService.ts; packages/features/src/import/CsvImportService.ts; docs/manual-qa/*; docs/session_log.md
-Open questions / risks: P2 packaged screenshot recapture still recommended before final release handoff.
-Next actions: Update Linear; create PR; reconcile GitHub merge policy.
+- Treat current state as internal-pilot capable but not beta test-deploy ready until gates pass.
+- Prioritize native test ABI/package locking, P1 manual QA bugs, and full packaged evidence.
+Files changed:
+- docs/session_log.md
+Open questions / risks: better-sqlite3 ABI mismatch blocks tests; running Local Work OS processes lock packaging; PSE-249..254 need disposition.
+Next actions: fix verification environment; close P1/P2 UX bugs; rerun package/test/manual QA gates.
 
-## 2026-05-23T16:08:00+10:00
-Objective: Verify complete-examination corrective branch gates.
+## 2026-05-23T18:17:31.1651485+10:00
+Objective: Review Linear ticket standard and create beta-readiness tickets.
 Decisions made:
-- Re-ran targeted tests, lint, typecheck, root test, and build after final cleanup.
-- Recorded per-ticket and complete-examination evidence docs; screenshot recapture remains a release sign-off risk.
-Files changed: docs/manual-qa/*; docs/session_log.md
-Open questions / risks: P2 packaged-app visual recapture and human review before merge if policy requires.
-Next actions: Commit/push branch; open PR; update Linear with PR and evidence.
+- Created Linear project for nontechnical beta readiness.
+- Reused PSE-249..254 instead of duplicating HRQA bug tickets.
+- Added beta workflow comments requiring PR/review/merge/evidence.
+Files changed:
+- docs/tickets/BETA_READINESS_TICKET_PACK.md
+- docs/session_log.md
+Open questions / risks: Actual fixes/PRs still pending; PSE-262 must unblock tests/package gates first.
+Next actions: start PSE-262; then close PSE-249/PSE-250; run complete packaged QA.
 
-## 2026-05-23T16:14:05+10:00
-Objective: Reconcile PR and Linear for PSE-255..260 corrective branch.
+## 2026-05-23T18:24:28.1134478+10:00
+Objective: Adapt prior corrective-sequence prompt for beta-readiness tickets.
 Decisions made:
-- Opened draft PR #228; CI passed but merge is blocked by missing packaged visual/manual evidence.
-- Posted implementation/test/evidence comments and CI updates to PSE-255 through PSE-260.
+- Preserve end-to-end Linear/GitHub workflow but add nontechnical beta safeguards.
+- Sequence PSE-262 before trust fixes and packaged QA/handoff gates.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Prompt may drive broad work; agents must keep PRs scoped and stop on policy blockers.
+Next actions: Use prompt to start PSE-262; then PSE-249/PSE-250; defer beta go/no-go until evidence passes.
+
+## 2026-05-23 18:53:39 +10:00
+Objective: Start nontechnical beta-readiness sequence context recovery.
+Decisions made:
+- Sequence accepted: recover context then work PSE-262 before HRQA fixes.
+- Linear/GitHub skills selected for ticket and PR reconciliation.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Scope is large; repository/Linear/GitHub state still unknown.
+Next actions: Recover tickets, read docs, post required Linear plan.
+## 2026-05-24T14:42:00.2111199+10:00
+Objective: Reassess beta readiness after completed corrective ticket runs.
+Decisions made:
+- Use origin/main plus Linear/GitHub evidence because the local checkout is stale and dirty.
+- Treat PSE-262 as complete, but keep HRQA packaged-evidence and full beta-pass gaps open.
+Files changed:
+- docs/session_log.md
+Open questions / risks: PSE-264/265/266 not run; PSE-267 and PSE-250/252/253 remain open; final clean artifact handoff not produced.
+Next actions: complete PSE-267; run PSE-264 full packaged functionality pass; produce PSE-265 handoff pack.
+## 2026-05-24T17:21:38.9920296+10:00
+Objective: Complete WF-001 workflow beta audit and pre-code plan.
+Decisions made:
+- Scope beta Workflows to three household-renovation guided templates only.
+- Use read-only preview, explicit confirmation, service-backed execution, and workflow_runs history.
+Files changed:
+- docs/WORKFLOWS_BETA_CONTRACT.md
+- docs/session_log.md
+Open questions / risks: Packaged screenshot evidence depends on runnable app and safe QA workspace copy.
+Next actions: Implement typed templates; add preview/execution service; connect IPC/UI.
+## 2026-05-24T17:44:39.1881712+10:00
+Objective: Implement guided Workflows beta slice and run verification.
+Decisions made:
+- Added predefined renovation templates, read-only preview, confirmed execution, and workflow_runs history.
+- Exposed Workflows IPC/UI only for guided templates; broad/background/script automation remains excluded.
+Files changed:
+- packages/features/src/workflows/GuidedWorkflowTemplates.ts
+- packages/features/src/workflows/GuidedWorkflowService.ts
+- apps/desktop/src/renderer/pages/WorkflowsPage.tsx
+- docs/session_log.md
+Open questions / risks: SQLite tests/package blocked by locked better-sqlite3 and running Local Work OS/Electron processes.
+Next actions: close running app processes; rerun pnpm test/package/package:smoke; capture packaged QA screenshots.
+
+## 2026-05-24T18:11:52.7927982+10:00
+Objective: Complete requested workflow verification/package/evidence steps.
+Decisions made:
+- Rebuilt better-sqlite3, fixed preview matcher, used a safe copy, and captured WF-006 restart/search evidence.
+Files changed: packages/features/tests/guidedWorkflowService.test.ts; docs/manual-qa/WF-006-guided-workflows-beta.md; docs/manual-qa/screenshots/WF-006-guided-workflows-beta-2026-05-24T08-10-32-915Z/
+Open questions / risks: Package rebuild can swap native ABI; rerun rebuild before Node-only tests if package is run again.
+Next actions: Review/stage intended workflow files; create Linear follow-ups for beta polish; optionally prune old unrelated QA artifacts.
+
+
+## 2026-05-24T18:13:42.0870769+10:00
+Objective: Advise whether workflow beta changes should be carried into git.
+Decisions made:
+- Recommended carrying implementation, tests, docs, and WF-006 evidence through git, but not blindly staging unrelated dirty files.
 Files changed: docs/session_log.md
-Open questions / risks: PR remains draft; no Linear issue moved Done because final visual evidence is outstanding.
-Next actions: Capture packaged screenshots/click-throughs; mark PR ready; merge after policy checks/review.
-## 2026-05-23 18:57:53 +10:00
-Objective: Isolate beta verification work on PSE-262 branch.
-Decisions made:
-- Created worktree branch codex/pse-262-beta-verification from origin/main (8c4d06b5).
-- Existing root checkout dirty files left untouched.
-Files changed:
-- docs/session_log.md
-Open questions / risks: PSE-262 root test/package failures still need reproduction.
-Next actions: Read required docs/scripts, post Linear plan, run targeted gate diagnostics.
+Open questions / risks: Repo has many pre-existing/unrelated dirty and untracked files; staging needs careful path selection.
+Next actions: Stage intended workflow paths only; review diff; commit or open PR when ready.
 
-## 2026-05-23 18:59:55 +10:00
-Objective: Post required beta/PSE-262 implementation plan to Linear.
+## 2026-05-24T18:20:42.1412049+10:00
+Objective: Review and commit guided Workflow beta changes.
 Decisions made:
-- PSE-262 marked In Progress and planned before broader beta QA.
-- HRQA PR #227 recognized as already merged but with P2 evidence gaps to reconcile later.
-Files changed:
-- docs/session_log.md
-Open questions / risks: Need verify actual root gate failures on isolated branch.
-Next actions: Diagnose native ABI, process cleanup, lint/test scope, then patch scripts/docs.
+- Fixed review findings: renderer bullet mojibake and IPC workspace-id trust; committed reviewed workflow scope only.
+Files changed: apps/desktop/src/main/ipc/workflowHandlers.ts; apps/desktop/src/renderer/pages/WorkflowsPage.tsx; docs/session_log.md
+Open questions / risks: Many unrelated local dirty/untracked files remain outside the commit.
+Next actions: Push/open PR if desired; leave unrelated worktree changes for their owners; create beta polish follow-ups if needed.
 
-## 2026-05-23 19:26:48 +10:00
-Objective: Complete PSE-262 gate fixes and verification evidence.
+## 2026-05-24T18:39:24.5606386+10:00
+Objective: Confirm git merge/handling status for guided Workflow beta.
 Decisions made:
-- Kept product tests in scope; increased slow smoke/performance setup timeouts instead of hiding failures.
-- Added scoped Windows cleanup for generated-package Local Work OS processes.
-Files changed:
-- apps/desktop/scripts/package-development.mjs
-- apps/desktop/scripts/run-package-smoke.mjs
-- vitest.config.ts
-- eslint.config.js
-- docs/manual-qa/PSE-262-verification-packaging-reproducibility.md
-Open questions / risks: Need PR creation/merge policy and Linear final update.
-Next actions: Review diff, commit/push/open PR, reconcile PSE-262 Linear.
-
-## 2026-05-23 19:42:27 +10:00
-Objective: Rebase PSE-262 branch onto latest main and rerun gates.
-Decisions made:
-- Resolved vitest config by keeping latest main exclusions plus PSE-262 timeout.
-- Preserved both main and PSE-262 session-log entries.
-Files changed:
-- vitest.config.ts
-- docs/session_log.md
-- docs/manual-qa/PSE-262-verification-packaging-reproducibility.md
-Open questions / risks: PR #229 still requires human review before merge.
-Next actions: Amend commit, force-push rebased branch, update Linear.
-
-## 2026-05-23 19:45:44 +10:00
-Objective: Open and reconcile PSE-262 PR/Linear status.
-Decisions made:
-- PR #229 opened/updated and left unmerged due human review requirement in OPERATING_PLAN.
-- Linear PSE-262 moved to Review with PR/evidence summary.
-Files changed:
-- docs/session_log.md
-Open questions / risks: CI status list is empty; human/Codex review still pending.
-Next actions: Human reviews PR #229; merge if approved; then continue PSE-263 reconciliation.
-
-## 2026-05-23 19:54:37 +10:00
-Objective: Continue from merged PSE-262 into PSE-263 HRQA reconciliation.
-Decisions made:
-- Created clean worktree branch codex/pse-263-hrqa-reconciliation from merged main.
-- PSE-263 scope is evidence reconciliation first, not broad new feature work.
-Files changed:
-- docs/session_log.md
-Open questions / risks: PSE-250/PSE-252/PSE-253 packaged evidence gaps may still require app QA capture.
-Next actions: Inspect merged PR #227 docs/screenshots; update child tickets; identify remaining evidence.
-
-## 2026-05-23 20:12:00 +10:00
-Objective: Reconcile merged HRQA PR #227 against PSE-263 beta gate.
-Decisions made:
-- PSE-249/PSE-251/PSE-254 have merged code, tests, and packaged evidence.
-- PSE-250/PSE-252/PSE-253 remain code-pass but P2 packaged-evidence incomplete.
-Files changed:
-- docs/manual-qa/PSE-263-hrqa-merged-reconciliation.md
-- docs/tickets/BETA_READINESS_TICKET_PACK.md
-- docs/session_log.md
-Open questions / risks: PSE-263 cannot truthfully close until Search/Today/balcony packaged evidence is captured or owner-accepted.
-Next actions: Update Linear statuses/comments; create/focus P2 evidence follow-up; then continue packaged evidence capture.
-
-## 2026-05-23 20:20:38 +10:00
-Objective: Convert remaining HRQA P2 packaged-evidence gaps into a specific Linear follow-up.
-Decisions made:
-- Created PSE-267 for Search/Today/balcony packaged evidence rather than burying gaps.
-- PSE-263 remains not done until PSE-267 evidence or owner acceptance resolves the gap.
-Files changed:
-- docs/manual-qa/PSE-263-hrqa-merged-reconciliation.md
-- docs/tickets/BETA_READINESS_TICKET_PACK.md
-- docs/session_log.md
-Open questions / risks: Need display-capable packaged capture path for production routes.
-Next actions: Update PSE-249/PSE-251/PSE-254 final state; set remaining tickets to QA/evidence capture.
-
-## 2026-05-23 20:04:51 +10:00
-Objective: Update Linear after HRQA merged reconciliation.
-Decisions made:
-- PSE-249/PSE-251/PSE-254 moved Done with final merged evidence comments.
-- PSE-250/PSE-252/PSE-253 and PSE-263 remain In Progress due PSE-267 evidence gap.
-Files changed:
-- docs/session_log.md
-Open questions / risks: Linear QA status is completed-type, so incomplete evidence tickets were kept In Progress.
-Next actions: Commit/push reconciliation docs; attempt packaged evidence capture if dependencies/package are available.
-
-## 2026-05-23 20:07:10 +10:00
-Objective: Commit PSE-263 reconciliation evidence docs.
-Decisions made:
-- Created a local docs-only commit for PSE-263 HRQA reconciliation and amended it before push.
-- No code/product behavior changed in this commit.
-Files changed:
-- docs/session_log.md
-- docs/tickets/BETA_READINESS_TICKET_PACK.md
-- docs/manual-qa/PSE-263-hrqa-merged-reconciliation.md
-Open questions / risks: Branch pushed/PR opened after this commit; PSE-267 evidence capture remains open.
-Next actions: Review/merge PR #230 if repository policy allows; continue PSE-267 capture.
-
-## 2026-05-23 20:09:35 +10:00
-Objective: Review and merge PSE-263 reconciliation PR, then continue to PSE-267.
-Decisions made:
-- Reviewed PR #230 and merged it as docs-only reconciliation (`d8d72fc7`).
-- Created branch codex/pse-267-hrqa-packaged-evidence from updated main.
-Files changed:
-- docs/session_log.md
-Open questions / risks: Remaining HRQA work is packaged evidence, not code closure.
-Next actions: Recover package/test environment; capture PSE-250/PSE-252/PSE-253 evidence.
-
-## 2026-05-23 20:29:45 +10:00
-Objective: Attempt PSE-267 packaged Search/Today evidence capture.
-Decisions made:
-- Fresh package and package smoke passed; copied household workspace used for safe QA.
-- Search route capture timed out/froze; Today route did not reach expected metric labels.
-Files changed:
-- docs/manual-qa/PSE-267-hrqa-packaged-evidence.md
-- docs/session_log.md
-Open questions / risks: P1 beta blocker: remaining HRQA packaged route evidence cannot be captured yet.
-Next actions: Update Linear with blocker; debug packaged Search/Today route behavior before PSE-264.
-
-## 2026-05-23 20:36:25 +10:00
-Objective: Commit and Linear-update PSE-267 packaged evidence blocker.
-Decisions made:
-- PSE-267, PSE-263, PSE-250, PSE-252, and PSE-253 Linear comments now record the blocker.
-- Local docs commit created for the failed packaged evidence attempt.
-Files changed:
-- docs/session_log.md
-- docs/tickets/BETA_READINESS_TICKET_PACK.md
-- docs/manual-qa/PSE-267-hrqa-packaged-evidence.md
-Open questions / risks: Branch not pushed yet; packaged Search/Today root cause still unknown.
-Next actions: Amend log into commit; push/open PR; continue root-cause debugging.
-## 2026-05-24T15:51:33.1522499+10:00
-Objective: Execute nontechnical beta handoff sequence from a clean candidate worktree.
-Decisions made:
-- Built and verified a fresh package from origin/main but stopped handoff at PSE-267 due Search route blocker.
-- Created PSE-268 as P1 beta blocker; drafted no-go handoff status instead of overclaiming beta readiness.
-Files changed:
-- docs/session_log.md
-- docs/BETA_HANDOFF_STATUS_2026-05-24.md
-- docs/NONTECHNICAL_BETA_HANDOFF_DRAFT.md
-Open questions / risks: PSE-268 blocks Search/HRQA evidence and therefore PSE-264/265/266 final beta Go.
-Next actions: fix PSE-268; rerun PSE-267; resume PSE-264 full packaged pass.
-
-## 2026-05-24T16:17:44.3911308+10:00
-Objective: Fix PSE-268, rerun HRQA evidence, and complete PSE-264/PSE-265/PSE-266 beta handoff artifacts.
-Decisions made:
-- Stabilized Search route defaults rather than hiding Search evidence; final verdict is Go-with-caveats for controlled internal beta.
-- Retained unsigned/no-installer/no-network-monitor caveats as owner-acceptance items, not public-release claims.
-Files changed:
-- apps/desktop/src/renderer/pages/SearchPage.tsx
-- apps/desktop/scripts/run-packaged-route-evidence.mjs
-- docs/BETA_HANDOFF_STATUS_2026-05-24.md
-- docs/NONTECHNICAL_BETA_HANDOFF_DRAFT.md
-- docs/manual-qa/PSE-264-complete-functionality-beta-pass.md
-- docs/manual-qa/PSE-266-final-beta-go-decision.md
-Open questions / risks: Packaged OS-level no-network monitor remains a P2 caveat before stronger public-release/local-only claims.
-Next actions: Update Linear/PR; push candidate branch; owner accepts caveats before sending testers.
+- Verified changes are locally committed on branch but not merged/pushed to a target branch.
+Files changed: docs/session_log.md
+Open questions / risks: Worktree still contains unrelated dirty/untracked files; target merge branch/PR remains unspecified.
+Next actions: Push branch/open PR; merge after review/CI; handle unrelated files separately.

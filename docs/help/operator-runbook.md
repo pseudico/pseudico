@@ -16,8 +16,8 @@ Use this guide when Pseudico is being handed to a nontechnical operator.
 - Move work into projects or contacts when context is clear.
 - Use tags, categories, and relationships to make work findable.
 - Use Today for current action, Dashboard for review, and Search when you know part of a title, note, tag, category, or context.
-- Treat Workflow Lab as scaffold-only during the internal pilot; use manual
-  tasks, lists, templates, and review routines for real work.
+- Use Workflows only for predefined guided beta routines; always read the
+  preview and confirm only when the planned tasks, notes, and links are clear.
 
 ## Recovery basics
 
@@ -35,5 +35,7 @@ Use this guide when Pseudico is being handed to a nontechnical operator.
 - Do not manually delete workspace attachment, backup, export, or data folders.
 - Do not restore over the only active copy of important work.
 - Do not enable optional network-facing features during handoff unless the relevant ticket includes privacy evidence.
+- Do not expect Workflows to run in the background, execute scripts, send
+  messages, or contact cloud services.
 
 See `docs/OPERATOR_RUNBOOK.md` for the full runbook and troubleshooting checklist.
