@@ -72,7 +72,7 @@
   "nav.workspace.summary": "Local workspace overview and health.",
   "nav.workspace.title": "Workspace Home",
   "nav.workflows.label": "Workflows",
-  "nav.workflows.summary": "Versioned local-only manual workflow definitions and validation.",
+  "nav.workflows.summary": "Safe guided local workflows with preview, confirmation, and run history.",
   "nav.workflows.title": "Workflows",
   "settings.locale.description": "Translation files are scaffolded now; English is the active locale until additional local resource files ship.",
   "settings.locale.placeholder": "Future localization preference",

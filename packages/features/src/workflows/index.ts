@@ -49,6 +49,25 @@ export type {
   WorkflowVariableResolutionContext
 } from "./WorkflowVariableResolver";
 export { WorkflowService } from "./WorkflowService";
+export {
+  GUIDED_WORKFLOW_TEMPLATES,
+  HOUSE_RENOVATION_CONTACTS,
+  HOUSE_RENOVATION_PROJECT_ID,
+  HOUSE_RENOVATION_PROJECT_NAME,
+  HOUSE_RENOVATION_WORKSPACE_ID,
+  getGuidedWorkflowTemplate,
+  getHouseRenovationContact,
+  listGuidedWorkflowTemplates
+} from "./GuidedWorkflowTemplates";
+export type {
+  GuidedWorkflowField,
+  GuidedWorkflowTemplate,
+  GuidedWorkflowTemplateId
+} from "./GuidedWorkflowTemplates";
+export {
+  GuidedWorkflowService,
+  guidedWorkflowsModuleContract
+} from "./GuidedWorkflowService";
 export type {
   WorkflowActionExecutionContext,
   WorkflowActionExecutionResult,
@@ -81,6 +100,17 @@ export type {
   WorkflowPreviewResult,
   WorkflowRunResult
 } from "./WorkflowService";
+export type {
+  ExecuteGuidedWorkflowInput,
+  GuidedWorkflowActionResult,
+  GuidedWorkflowCreatedLink,
+  GuidedWorkflowExecutionResult,
+  GuidedWorkflowInput,
+  GuidedWorkflowPlannedChange,
+  GuidedWorkflowPreview,
+  GuidedWorkflowRunHistoryEntry,
+  GuidedWorkflowServiceIdFactory
+} from "./GuidedWorkflowService";
 
 export const workflowsModuleContract: FeatureModuleContract = {
   module: "workflows",

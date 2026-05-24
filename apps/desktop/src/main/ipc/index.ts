@@ -37,6 +37,7 @@ import { registerTimelineIpc } from "./registerTimelineIpc";
 import { registerTodayIpc } from "./registerTodayIpc";
 import { registerTrashIpc } from "./registerTrashIpc";
 import { registerViewModeIpc } from "./registerViewModeIpc";
+import { registerWorkflowIpc } from "./registerWorkflowIpc";
 import { registerWorkspaceIpc } from "./registerWorkspaceIpc";
 import {
   assertRuntimeDataPathOutsideAppBundle,
@@ -85,6 +86,7 @@ export function registerDesktopIpc(
   registerTaskIpc(services.workspaceService);
   registerListIpc(services.workspaceService);
   registerTemplateIpc(services.workspaceService);
+  registerWorkflowIpc(services.workspaceService);
   registerNoteIpc(services.workspaceService);
   registerLinkIpc(services.workspaceService);
   registerLocationIpc(services.workspaceService);
