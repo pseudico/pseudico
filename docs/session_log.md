@@ -8701,3 +8701,30 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: GitHub check is pending after latest branch update.
 Next actions: Push log entry; wait for PR check; merge PR #236 if allowed.
+## 2026-05-27T10:12:45+10:00
+Objective: Start PSE-275 installer-grade beta packaging from verified main.
+Decisions made:
+- Fresh worktree/branch from origin/main bcec3a17; dirty stale checkout ignored.
+- No open GitHub PRs; plan posted to PSE-275 and PSE-261.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Unsigned installer caveat; native module packaging; manual smoke feasibility.
+Next actions: Implement NSIS/zip packaging; update manifest/docs; run validation.
+## 2026-05-27T10:39:37+10:00
+Objective: Implement PSE-275 Windows installer/archive beta packaging.
+Decisions made:
+- Added beta version 0.1.0-beta.1, NSIS installer, zip archive, and manifest checks.
+- Kept win-unpacked smoke path; unsigned/no-auto-update caveats documented.
+Files changed:
+- package.json; apps/desktop/package.json; apps/desktop/electron-builder.yml; apps/desktop/scripts/package-development.mjs; scripts/check-release-package.mjs; docs/*release*; docs/manual-qa/PSE-275-*.md/json
+Open questions / risks: Final clean-source rebuild/hashes still required; owner must accept unsigned installer.
+Next actions: Run full validation; commit/package from clean source; open PR.
+## 2026-05-27T10:41:58+10:00
+Objective: Complete core automated validation for PSE-275 changes.
+Decisions made:
+- Lint/typecheck/test/build and dependency/coverage/parity gates pass.
+- Preliminary installer/archive/package smoke and manual install smoke pass.
+Files changed:
+- docs/release/dependency-license-audit.json; docs/release/THIRD_PARTY_NOTICES.md; docs/session_log.md
+Open questions / risks: Need clean committed-source package rebuild and final manifest hashes.
+Next actions: Commit implementation; rebuild artifacts from clean commit; run final package gates.

@@ -50,8 +50,8 @@ try {
   await run(pnpm, ["build"], appRoot);
   await preparePackagingStaging();
   const electronVersion = await getElectronVersion();
-  await runElectronBuilderFromStaging(electronVersion);
   await rebuildStagedNativeModulesForPackagedElectron(electronVersion);
+  await runElectronBuilderFromStaging(electronVersion);
   await copyStagedNativeModulesToPackagedApp();
 } catch (error) {
   packageError = error;
@@ -150,13 +150,19 @@ async function stopPackagedAppProcesses() {
 }
 
 async function runElectronBuilderFromStaging(electronVersion) {
+  const targetArgs =
+    process.platform === "win32"
+      ? ["--win", "dir", "nsis", "zip"]
+      : ["--dir"];
+
   await run(
     electronBuilder,
     [
+      ...targetArgs,
       "--config",
       "electron-builder.yml",
-      "--dir",
       `--config.electronVersion=${electronVersion}`,
+      "--config.npmRebuild=false",
       "--config.directories.output=../dist-packaged"
     ],
     packageStagingRoot

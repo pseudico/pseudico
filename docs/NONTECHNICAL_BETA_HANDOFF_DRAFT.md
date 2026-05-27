@@ -1,4 +1,62 @@
-# Nontechnical beta tester handoff � 2026-05-24 internal beta candidate
+﻿# Nontechnical beta tester handoff — PSE-275 installer beta candidate
+
+Status: controlled internal beta handoff draft, not public GA. Final checksums must match `docs/release/package-artifact-check.json` from the clean final package build before sending.
+
+## What to distribute first
+
+Preferred Windows artifact: `apps/desktop/dist-packaged/Local Work OS-0.1.0-beta.1-win-x64.exe` (unsigned NSIS installer).
+
+Fallback artifact: `apps/desktop/dist-packaged/Local Work OS-0.1.0-beta.1-win-x64.zip` (extract the folder and run `Local Work OS.exe`).
+
+Also include:
+
+- this handoff note;
+- `docs/release/package-artifact-check.json` or a copied checksum note;
+- the explicit unsigned-app caveat below.
+
+## Expected Windows warning
+
+This beta is unsigned. Windows SmartScreen or “unknown publisher” warnings are expected. Only continue if the file name and SHA-256 checksum exactly match the owner-provided checksum.
+
+## Install / run
+
+Installer path:
+
+1. Save the installer somewhere local, for example Downloads.
+2. Run `Local Work OS-0.1.0-beta.1-win-x64.exe`.
+3. Choose the default per-user install unless the owner gives a different path.
+4. Launch **Local Work OS** from the installer finish screen, Start Menu, or install folder.
+
+Zip fallback path:
+
+1. Extract the full zip into a normal local folder outside any workspace folder.
+2. Run the extracted `Local Work OS.exe`.
+3. Do not move or delete files inside the extracted app folder while the app is running.
+
+## Workspace safety
+
+Create or open workspaces in a normal personal folder such as Documents or a dedicated test folder. Do **not** create a workspace inside the app install folder, extracted app folder, `resources`, or `app.asar.unpacked`.
+
+Before using real data or upgrading to a newer build, create an in-app backup from Settings and keep it outside the app install folder.
+
+## Manual upgrade / rollback
+
+There is no auto-update in this beta. To upgrade, back up the workspace, close the app, install or extract the newer build, then reopen the same workspace. To rollback, close the app, uninstall/remove the newer app, reinstall/re-extract the previous app, and open the same workspace folder. Uninstalling the app should not delete workspace folders.
+
+## Support / bug report template
+
+Send the owner:
+
+- artifact file name and SHA-256;
+- Windows version;
+- workspace path, if safe to share;
+- what you clicked;
+- what you expected;
+- what happened;
+- screenshots only if they do not reveal private data.
+
+---
+# Nontechnical beta tester handoff — 2026-05-24 internal beta candidate
 
 This note is the tester-facing handoff for a controlled **internal beta** of Local Work OS / Pseudico. It is suitable for nontechnical testers if the project owner accepts the caveats below.
 
