@@ -8746,3 +8746,12 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: Await owner/human review and unsigned beta distribution approval.
 Next actions: Update Linear final evidence; monitor/merge only with approval.
+## 2026-05-27T11:27:36+10:00
+Objective: Merge PR #237 for owner-approved PSE-275 beta deployment readiness.
+Decisions made:
+- User authorized merge; preserve unsigned/manual beta caveats and existing artifacts/evidence.
+- No artifact republish planned; CI/mergeability must be rechecked after this log commit.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI must pass on latest head; owner still controls actual beta distribution.
+Next actions: Commit/push log; verify checks; squash-merge PR and update Linear.
