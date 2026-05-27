@@ -1,20 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-27T00:37:13.640Z",
+  "generatedAt": "2026-05-27T00:45:36.177Z",
   "localOnly": true,
   "source": {
-    "commit": "bcec3a174b359ea0aaa259c2488f585540bbce23",
+    "commit": "aa6c452826472ef39c6e758801289c65091789b2",
     "branch": "codex/pse-275-installer-beta",
-    "clean": false,
-    "statusSummary": [
-      "M apps/desktop/electron-builder.yml",
-      " M apps/desktop/package.json",
-      " M apps/desktop/scripts/package-development.mjs",
-      " M docs/release/package-artifact-check.json",
-      " M docs/session_log.md",
-      " M package.json",
-      " M scripts/check-release-package.mjs"
-    ]
+    "clean": true,
+    "statusSummary": "clean"
   },
   "platform": {
     "os": "win32",
@@ -39,25 +31,25 @@
       "kind": "executable",
       "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
       "sizeBytes": 222973952,
-      "sha256": "ccafd90574012c71b50cdd38953a5a3462166758186aaf50a930d58522fc33f8"
+      "sha256": "5c94145de4971d8db337fd91fc073a2b73d8b9ec340a949bc2cc2a1ae9eebea4"
     },
     {
       "kind": "app.asar",
       "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
       "sizeBytes": 36259433,
-      "sha256": "fbbb99a2e1da5cd763e8e04c92ace9623c6d83aea28bbb12c1aac00e4c2ce01a"
+      "sha256": "e843990066cc9795e34d11c250043536df80b325f442fa015b7ea2565d7276d1"
     },
     {
       "kind": "windows-nsis-installer",
       "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\Local Work OS-0.1.0-beta.1-win-x64.exe",
-      "sizeBytes": 113358168,
-      "sha256": "27ec8e23779eac5861cf629c802463cce2406de1a9e85fac15b9e370485f15ae"
+      "sizeBytes": 113358526,
+      "sha256": "64987cd15f4007bb5d95a9f646e529127151f62c9505e1c9f8047568771af310"
     },
     {
       "kind": "windows-zip-archive",
       "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\Local Work OS-0.1.0-beta.1-win-x64.zip",
-      "sizeBytes": 156104229,
-      "sha256": "07b0662e567b587b3f5b43fe46151a33072223a133b59d992a3d029b580cf8e8"
+      "sizeBytes": 156104337,
+      "sha256": "0dcd7f78069cf69754139569fa819567a62e8ba5c762dbf6e64ab16c98f561ee"
     }
   ],
   "checks": [

@@ -8728,3 +8728,12 @@ Files changed:
 - docs/release/dependency-license-audit.json; docs/release/THIRD_PARTY_NOTICES.md; docs/session_log.md
 Open questions / risks: Need clean committed-source package rebuild and final manifest hashes.
 Next actions: Commit implementation; rebuild artifacts from clean commit; run final package gates.
+## 2026-05-27T10:50:51+10:00
+Objective: Rebuild final PSE-275 artifacts from clean committed source.
+Decisions made:
+- Package source commit aa6c4528 was clean at manifest generation.
+- Final NSIS, zip, win-unpacked, package smoke, installer smoke, uninstall/reinstall, and zip smoke passed.
+Files changed:
+- docs/release/package-artifact-check.json; docs/BETA_HANDOFF_STATUS_2026-05-27.md; docs/manual-qa/PSE-275-installer-beta-evidence.md; docs/manual-qa/PSE-275-installer-manual-smoke.json; docs/session_log.md
+Open questions / risks: Owner must approve unsigned/manual beta distribution and support path.
+Next actions: Commit final evidence; push branch; open PR.

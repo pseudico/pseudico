@@ -1,21 +1,21 @@
 {
   "ok": true,
   "exe": "C:/tmp/Pseudico-pse275-installed-beta/Local Work OS.exe",
-  "workspaceRoot": "C:/tmp/Pseudico-pse275-persistent-workspace",
-  "userDataDir": "C:/tmp/Pseudico-pse275-user-data",
+  "workspaceRoot": "C:/tmp/Pseudico-pse275-persistent-workspace-final",
+  "userDataDir": "C:/tmp/Pseudico-pse275-user-data-final",
   "first": {
     "workspace": {
-      "id": "workspace_mpnc13a4_28fursg0fr7",
-      "name": "PSE-275 Installer Smoke",
-      "rootPath": "C:\\tmp\\Pseudico-pse275-persistent-workspace",
-      "openedAt": "2026-05-27T00:34:56.860Z",
+      "id": "workspace_mpncgms8_0igxvzgqcqt",
+      "name": "PSE-275 Final Installer Smoke",
+      "rootPath": "C:\\tmp\\Pseudico-pse275-persistent-workspace-final",
+      "openedAt": "2026-05-27T00:47:01.976Z",
       "schemaVersion": 23
     },
-    "projectId": "container_mpnc13bt_05f92cs6n2b",
-    "contactId": "container_mpnc13c4_016bvyyvuq4",
-    "taskId": "item_mpnc13cy_08euwvpyy0f",
-    "noteId": "item_mpnc13d8_1yamjnk8qog",
-    "listId": "item_mpnc13dg_22sdsb9e45p",
+    "projectId": "container_mpncgmuo_13eurwhi1bd",
+    "contactId": "container_mpncgmvf_24phcia5ii1",
+    "taskId": "item_mpncgmvq_1l99ugubhiv",
+    "noteId": "item_mpncgmw0_21t8kk9q9xr",
+    "listId": "item_mpncgmw8_134brgm0f6f",
     "searchCount": 3,
     "todayKeys": [
       "backlogDays",
@@ -37,27 +37,27 @@
       "widgets"
     ],
     "backup": {
-      "id": "backup_mpnc13el_1yn8w98m33g",
-      "workspaceId": "workspace_mpnc13a4_28fursg0fr7",
-      "createdAt": "2026-05-27T00:34:57.016Z",
-      "relativePath": "backups/2026-05-27T00-34-57-015Z",
-      "databaseRelativePath": "backups/2026-05-27T00-34-57-015Z/local-work-os.sqlite",
-      "manifestRelativePath": "backups/2026-05-27T00-34-57-015Z/attachment-manifest.json",
+      "id": "backup_mpncgmxc_1yqpan9epel",
+      "workspaceId": "workspace_mpncgms8_0igxvzgqcqt",
+      "createdAt": "2026-05-27T00:47:02.154Z",
+      "relativePath": "backups/2026-05-27T00-47-02-154Z",
+      "databaseRelativePath": "backups/2026-05-27T00-47-02-154Z/local-work-os.sqlite",
+      "manifestRelativePath": "backups/2026-05-27T00-47-02-154Z/attachment-manifest.json",
       "attachmentCount": 0,
       "totalAttachmentBytes": 0,
       "databaseSizeBytes": 667648,
       "kind": "manual",
       "manifest": {
-        "id": "backup_mpnc13el_1yn8w98m33g",
+        "id": "backup_mpncgmxc_1yqpan9epel",
         "kind": "manual",
-        "workspaceId": "workspace_mpnc13a4_28fursg0fr7",
-        "workspaceName": "PSE-275 Installer Smoke",
-        "createdAt": "2026-05-27T00:34:57.016Z",
+        "workspaceId": "workspace_mpncgms8_0igxvzgqcqt",
+        "workspaceName": "PSE-275 Final Installer Smoke",
+        "createdAt": "2026-05-27T00:47:02.154Z",
         "database": {
           "sourceRelativePath": "data/local-work-os.sqlite",
-          "backupRelativePath": "backups/2026-05-27T00-34-57-015Z/local-work-os.sqlite",
+          "backupRelativePath": "backups/2026-05-27T00-47-02-154Z/local-work-os.sqlite",
           "sizeBytes": 667648,
-          "checksum": "0ef421c88039c3089e3cec05519f4c7035775c7b198d4d52130dfc7a7c6797d6"
+          "checksum": "93cf5010e04f655027838512f4dc37351417f6699aaaeea2a7ad2b46a93e4139"
         },
         "attachments": [],
         "attachmentCount": 0,
@@ -67,16 +67,16 @@
   },
   "reopen": {
     "workspace": {
-      "id": "workspace_mpnc13a4_28fursg0fr7",
-      "name": "PSE-275 Installer Smoke",
-      "rootPath": "C:\\tmp\\Pseudico-pse275-persistent-workspace",
-      "openedAt": "2026-05-27T00:34:57.938Z",
+      "id": "workspace_mpncgms8_0igxvzgqcqt",
+      "name": "PSE-275 Final Installer Smoke",
+      "rootPath": "C:\\tmp\\Pseudico-pse275-persistent-workspace-final",
+      "openedAt": "2026-05-27T00:47:02.856Z",
       "schemaVersion": 23
     },
     "searchCount": 3
   },
   "reinstallOpen": {
-    "workspaceId": "workspace_mpnc13a4_28fursg0fr7",
+    "workspaceId": "workspace_mpncgms8_0igxvzgqcqt",
     "searchCount": 3
   }
 }
