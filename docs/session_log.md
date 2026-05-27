@@ -8701,3 +8701,57 @@ Files changed:
 - docs/session_log.md
 Open questions / risks: GitHub check is pending after latest branch update.
 Next actions: Push log entry; wait for PR check; merge PR #236 if allowed.
+## 2026-05-27T10:12:45+10:00
+Objective: Start PSE-275 installer-grade beta packaging from verified main.
+Decisions made:
+- Fresh worktree/branch from origin/main bcec3a17; dirty stale checkout ignored.
+- No open GitHub PRs; plan posted to PSE-275 and PSE-261.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Unsigned installer caveat; native module packaging; manual smoke feasibility.
+Next actions: Implement NSIS/zip packaging; update manifest/docs; run validation.
+## 2026-05-27T10:39:37+10:00
+Objective: Implement PSE-275 Windows installer/archive beta packaging.
+Decisions made:
+- Added beta version 0.1.0-beta.1, NSIS installer, zip archive, and manifest checks.
+- Kept win-unpacked smoke path; unsigned/no-auto-update caveats documented.
+Files changed:
+- package.json; apps/desktop/package.json; apps/desktop/electron-builder.yml; apps/desktop/scripts/package-development.mjs; scripts/check-release-package.mjs; docs/*release*; docs/manual-qa/PSE-275-*.md/json
+Open questions / risks: Final clean-source rebuild/hashes still required; owner must accept unsigned installer.
+Next actions: Run full validation; commit/package from clean source; open PR.
+## 2026-05-27T10:41:58+10:00
+Objective: Complete core automated validation for PSE-275 changes.
+Decisions made:
+- Lint/typecheck/test/build and dependency/coverage/parity gates pass.
+- Preliminary installer/archive/package smoke and manual install smoke pass.
+Files changed:
+- docs/release/dependency-license-audit.json; docs/release/THIRD_PARTY_NOTICES.md; docs/session_log.md
+Open questions / risks: Need clean committed-source package rebuild and final manifest hashes.
+Next actions: Commit implementation; rebuild artifacts from clean commit; run final package gates.
+## 2026-05-27T10:50:51+10:00
+Objective: Rebuild final PSE-275 artifacts from clean committed source.
+Decisions made:
+- Package source commit aa6c4528 was clean at manifest generation.
+- Final NSIS, zip, win-unpacked, package smoke, installer smoke, uninstall/reinstall, and zip smoke passed.
+Files changed:
+- docs/release/package-artifact-check.json; docs/BETA_HANDOFF_STATUS_2026-05-27.md; docs/manual-qa/PSE-275-installer-beta-evidence.md; docs/manual-qa/PSE-275-installer-manual-smoke.json; docs/session_log.md
+Open questions / risks: Owner must approve unsigned/manual beta distribution and support path.
+Next actions: Commit final evidence; push branch; open PR.
+## 2026-05-27T10:56:28+10:00
+Objective: Open PSE-275 PR after final installer beta validation.
+Decisions made:
+- PR #237 opened against main; CI passed on initial head.
+- Repository policy keeps human final merge gate, so PR remains review-ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Await owner/human review and unsigned beta distribution approval.
+Next actions: Update Linear final evidence; monitor/merge only with approval.
+## 2026-05-27T11:27:36+10:00
+Objective: Merge PR #237 for owner-approved PSE-275 beta deployment readiness.
+Decisions made:
+- User authorized merge; preserve unsigned/manual beta caveats and existing artifacts/evidence.
+- No artifact republish planned; CI/mergeability must be rechecked after this log commit.
+Files changed:
+- docs/session_log.md
+Open questions / risks: CI must pass on latest head; owner still controls actual beta distribution.
+Next actions: Commit/push log; verify checks; squash-merge PR and update Linear.

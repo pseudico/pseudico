@@ -159,3 +159,13 @@ Before a public release candidate, verify:
 - electron-builder documentation: Auto Update — https://www.electron.build/auto-update.html
 - Microsoft Learn: Code signing options for Windows app developers — https://learn.microsoft.com/windows/apps/package-and-deploy/code-signing-options
 - Microsoft Learn: Azure Artifact Signing quickstart — https://learn.microsoft.com/azure/trusted-signing/quickstart
+
+## PSE-275 controlled beta distribution decision
+
+For the PSE-275 controlled Windows beta, the approved local distribution form is:
+
+1. unsigned NSIS installer for nontechnical install smoke and handoff;
+2. zip archive fallback for extract-and-run testing;
+3. `win-unpacked` retained only for package smoke and diagnostics.
+
+The beta remains manual-distribution-only. No auto-update, telemetry, hosted accounts, activation service, billing, cloud sync, or remote storage is approved. Public or broad Windows distribution still requires an owner-selected trusted code-signing path, support/legal review, and any required SmartScreen/reputation plan.

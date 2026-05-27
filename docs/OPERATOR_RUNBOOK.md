@@ -1,4 +1,4 @@
-# Pseudico Operator Runbook
+﻿# Pseudico Operator Runbook
 
 Status: draft handoff runbook for operator-readiness hardening.
 Audience: nontechnical local desktop operator with no developer nearby.
@@ -36,6 +36,14 @@ Do **not** use it as:
 ## 3. First-run checklist
 
 ### Which Pseudico build am I opening?
+
+### PSE-275 Windows beta installer/archive
+
+For the controlled `0.1.0-beta.1` Windows beta, use the owner-provided installer first: `Local Work OS-0.1.0-beta.1-win-x64.exe`. If the installer is unsuitable for the test machine, use the owner-provided zip archive: `Local Work OS-0.1.0-beta.1-win-x64.zip`.
+
+These artifacts are unsigned. SmartScreen or unknown-publisher warnings are expected; continue only when the file name and SHA-256 checksum match the owner-provided package manifest. There is no auto-update, so all upgrades are manual and require a workspace backup first.
+
+Keep workspace folders outside the install/extracted app folder. Uninstalling or deleting the app should not delete workspace folders, but backups are still required before upgrade or real-data import.
 
 For internal pilot QA and screenshots, use the unpacked packaged app, not a
 developer server:
@@ -169,7 +177,7 @@ Workspace export is for portable local data exchange and recovery testing. It is
 
 Restore into a clean, empty workspace folder whenever possible:
 
-1. Open **Settings → Backup & restore**.
+1. Open **Settings â†’ Backup & restore**.
 2. Select **Choose restore folder** and pick the folder that should become the
    restored workspace. Do not choose the currently open workspace folder.
 3. Select **Preview restore** on the backup you intend to recover.
@@ -202,7 +210,7 @@ For the internal pilot, treat imports as deliberate local file movement, not as
 daily capture:
 
 1. Create a manual backup first.
-2. Use **Settings → Imports & exports** only with files or folders you already
+2. Use **Settings â†’ Imports & exports** only with files or folders you already
    have on local disk.
 3. Preview CSV/TSV and Markdown folder imports before executing.
 4. After import, search for a known imported title/body token, check recent

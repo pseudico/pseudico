@@ -1,6 +1,6 @@
 {
   "name": "local-work-os",
-  "version": "0.0.0",
+  "version": "0.1.0-beta.1",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.25.0",
@@ -16,6 +16,7 @@
     "build": "pnpm -r --workspace-concurrency=1 build",
     "benchmark:large": "pnpm build && node scripts/run-large-workspace-benchmark.mjs",
     "package": "pnpm --filter @local-work-os/desktop package",
+    "package:beta": "pnpm package",
     "package:smoke": "pnpm --filter @local-work-os/desktop package:smoke",
     "qa:packaged-launch": "pnpm --filter @local-work-os/desktop qa:packaged-launch",
     "coverage:map": "node scripts/check-test-coverage-map.mjs",

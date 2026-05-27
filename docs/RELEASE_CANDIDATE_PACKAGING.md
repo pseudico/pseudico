@@ -233,3 +233,34 @@ Final controlled internal-beta candidate after the PSE-268 Search fix and PSE-26
 Final gates passed on Windows across the beta handoff and workflow-enabled candidate evidence: GitHub CI `lint / typecheck / test / build`, `pnpm package:smoke`, `pnpm release:package-check`, `pnpm audit:dependencies`, targeted guided Workflow service/renderer tests, HRQA packaged route evidence, and packaged guided Workflow evidence.
 
 Distribution remains internal-beta only: unsigned unpacked package, no installer, no auto-update, no public signing/notarization, and no public support/legal release process.
+
+## 2026-05-27 PSE-275 installer-grade beta target
+
+PSE-275 moves the controlled Windows beta from an unpacked-folder-only handoff to installer-grade beta artifacts while keeping the existing `win-unpacked` smoke target.
+
+Target artifacts produced by `pnpm package` on Windows:
+
+- NSIS installer: `apps/desktop/dist-packaged/Local Work OS-0.1.0-beta.1-win-x64.exe`
+- Zip archive: `apps/desktop/dist-packaged/Local Work OS-0.1.0-beta.1-win-x64.zip`
+- Unpacked smoke folder: `apps/desktop/dist-packaged/win-unpacked/`
+
+Release-source guardrail:
+
+- Build only from a clean branch/worktree based on latest reconciled `origin/main`.
+- Record the exact source commit in `docs/release/package-artifact-check.json` and the PSE-275 evidence doc.
+- Do not use the stale dirty checkout at `C:\Users\AlastairLacey\Pseudico` as release source.
+
+Packaging behavior:
+
+- `apps/desktop/electron-builder.yml` configures Windows `dir`, `nsis`, and `zip` targets.
+- `apps/desktop/scripts/package-development.mjs` deploys a self-contained production staging app, rebuilds `better-sqlite3` for the packaged Electron ABI before Electron Builder runs, builds `dir`/NSIS/zip artifacts, copies the rebuilt native module into `win-unpacked` as a final smoke-safety guard, and restores development Node native modules after packaging.
+- `pnpm release:package-check` now records the installer/archive artifacts as distribution artifacts, in addition to `Local Work OS.exe` and `app.asar`.
+
+Beta caveats:
+
+- Windows artifacts remain unsigned; Authenticode `NotSigned` / SmartScreen / unknown-publisher warnings are expected.
+- Auto-update remains disabled (`publish: null`); beta upgrades are manual and require backup-before-upgrade.
+- Distribution is manual/local only unless the owner separately approves a release channel.
+- This is not a public GA release.
+
+Manual PSE-275 evidence is recorded in `docs/manual-qa/PSE-275-installer-beta-evidence.md` and `docs/manual-qa/PSE-275-installer-manual-smoke.json`.

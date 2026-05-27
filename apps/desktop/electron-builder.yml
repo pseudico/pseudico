@@ -29,6 +29,20 @@ win:
   signAndEditExecutable: false
   target:
     - target: dir
+    - target: nsis
+      arch:
+        - x64
+    - target: zip
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  deleteAppDataOnUninstall: false
 
 mac:
   target:

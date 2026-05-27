@@ -127,3 +127,31 @@ The package smoke check now verifies that a packaged app can:
 Manual OS release QA should still install or launch the generated app on the
 target platform and repeat the workspace, attachment, backup, restart, and
 external-open checks from `docs/QA_SCRIPTS.md`.
+
+## PSE-275 Installer-grade beta packaging
+
+Current controlled beta version: `0.1.0-beta.1`.
+
+Windows beta packaging now uses `pnpm package` to produce:
+
+- `apps/desktop/dist-packaged/Local Work OS-0.1.0-beta.1-win-x64.exe` — unsigned NSIS installer for controlled beta handoff.
+- `apps/desktop/dist-packaged/Local Work OS-0.1.0-beta.1-win-x64.zip` — archive fallback for extract-and-run handoff.
+- `apps/desktop/dist-packaged/win-unpacked/` — retained for package smoke and diagnostics.
+
+Required beta validation before handoff:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm package
+pnpm package:smoke
+pnpm release:package-check
+pnpm audit:dependencies
+pnpm coverage:map
+pnpm qa:parity
+```
+
+This beta remains unsigned, manual-distribution-only, local-only, and has no auto-update feed. Public GA release still requires owner approval, signing/reputation decisions, legal/support decisions, and any additional no-unexpected-network evidence required by the owner.

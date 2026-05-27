@@ -1,0 +1,37 @@
+# Beta handoff status — 2026-05-27 PSE-275 installer beta
+
+## Verdict
+
+Ready for owner approval as a controlled internal Windows beta artifact set. This is not public GA.
+
+## Source
+
+- Base: origin/main bcec3a174b359ea0aaa259c2488f585540bbce23.
+- Package source: codex/pse-275-installer-beta aa6c452826472ef39c6e758801289c65091789b2.
+- Source tree status at package manifest generation: clean.
+
+## Candidate artifacts
+
+- executable: C:\tmp\Pseudico-pse-275-installer-beta\apps\desktop\dist-packaged\win-unpacked\Local Work OS.exe — SHA-256 5c94145de4971d8db337fd91fc073a2b73d8b9ec340a949bc2cc2a1ae9eebea4, 222973952 bytes
+- app.asar: C:\tmp\Pseudico-pse-275-installer-beta\apps\desktop\dist-packaged\win-unpacked\resources\app.asar — SHA-256 e843990066cc9795e34d11c250043536df80b325f442fa015b7ea2565d7276d1, 36259433 bytes
+- windows-nsis-installer: C:\tmp\Pseudico-pse-275-installer-beta\apps\desktop\dist-packaged\Local Work OS-0.1.0-beta.1-win-x64.exe — SHA-256 64987cd15f4007bb5d95a9f646e529127151f62c9505e1c9f8047568771af310, 113358526 bytes
+- windows-zip-archive: C:\tmp\Pseudico-pse-275-installer-beta\apps\desktop\dist-packaged\Local Work OS-0.1.0-beta.1-win-x64.zip — SHA-256 0dcd7f78069cf69754139569fa819567a62e8ba5c762dbf6e64ab16c98f561ee, 156104337 bytes
+
+## Status
+
+- Version: 0.1.0-beta.1
+- Installer: unsigned NSIS, per-user install, uninstall keeps workspace data by evidence.
+- Archive: zip fallback for extract-and-run beta testing.
+- Existing package-smoke target: win-unpacked retained.
+- Auto-update: disabled; no update feed.
+- Distribution: manual/local only.
+
+## Evidence
+
+- Manifest: docs/release/package-artifact-check.json
+- Manual smoke: docs/manual-qa/PSE-275-installer-beta-evidence.md
+- Smoke JSON: docs/manual-qa/PSE-275-installer-manual-smoke.json
+
+## Required owner action before sending
+
+Approve unsigned Windows beta distribution caveats, confirm support/bug intake path, and send only the exact artifact plus checksums. Do not describe this as a public release.

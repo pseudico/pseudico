@@ -1,7 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-24T10:06:13.327Z",
+  "generatedAt": "2026-05-27T00:45:36.177Z",
   "localOnly": true,
+  "source": {
+    "commit": "aa6c452826472ef39c6e758801289c65091789b2",
+    "branch": "codex/pse-275-installer-beta",
+    "clean": true,
+    "statusSummary": "clean"
+  },
   "platform": {
     "os": "win32",
     "release": "10.0.26200",
@@ -9,26 +15,41 @@
   },
   "package": {
     "productName": "Local Work OS",
-    "packageKind": "unpacked-dir",
-    "unpackedRoot": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked",
-    "resourcesRoot": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\resources",
-    "signingStatus": "unsigned Windows development package; signAndEditExecutable is false",
-    "installerStatus": "not produced by current dir target",
+    "version": "0.1.0-beta.1",
+    "packageKind": "windows-nsis-installer+zip-archive+unpacked-dir",
+    "distributionChannel": "manual/local beta handoff; no hosted release or auto-update feed",
+    "unpackedRoot": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\win-unpacked",
+    "resourcesRoot": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\win-unpacked\\resources",
+    "signingStatus": "unsigned Windows beta package; signAndEditExecutable is false; SmartScreen/unknown-publisher warnings expected",
+    "installerStatus": "NSIS installer produced for unsigned controlled beta",
+    "archiveStatus": "zip archive produced for controlled beta",
     "autoUpdateStatus": "disabled; electron-builder publish is null and no update feed is configured",
     "dataBoundary": "workspace data must live under the selected workspace folder or app userData, not inside dist-packaged resources"
   },
   "artifacts": [
     {
       "kind": "executable",
-      "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
+      "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe",
       "sizeBytes": 222973952,
-      "sha256": "6f4886ad03ab6f097d8adaceb419535d1c13eb5202ee53eaf76e629585d06cb9"
+      "sha256": "5c94145de4971d8db337fd91fc073a2b73d8b9ec340a949bc2cc2a1ae9eebea4"
     },
     {
       "kind": "app.asar",
-      "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
-      "sizeBytes": 36259422,
-      "sha256": "3d144627764840e218b27b2eee86bdfa9cf32bb663d25d30b90cc1612f968b66"
+      "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar",
+      "sizeBytes": 36259433,
+      "sha256": "e843990066cc9795e34d11c250043536df80b325f442fa015b7ea2565d7276d1"
+    },
+    {
+      "kind": "windows-nsis-installer",
+      "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\Local Work OS-0.1.0-beta.1-win-x64.exe",
+      "sizeBytes": 113358526,
+      "sha256": "64987cd15f4007bb5d95a9f646e529127151f62c9505e1c9f8047568771af310"
+    },
+    {
+      "kind": "windows-zip-archive",
+      "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\Local Work OS-0.1.0-beta.1-win-x64.zip",
+      "sizeBytes": 156104337,
+      "sha256": "0dcd7f78069cf69754139569fa819567a62e8ba5c762dbf6e64ab16c98f561ee"
     }
   ],
   "checks": [
@@ -36,28 +57,28 @@
       "name": "unpacked app directory exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked"
+        "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\win-unpacked"
       }
     },
     {
       "name": "packaged resources directory exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\resources"
+        "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\win-unpacked\\resources"
       }
     },
     {
       "name": "packaged executable exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe"
+        "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\win-unpacked\\Local Work OS.exe"
       }
     },
     {
       "name": "packaged app.asar exists",
       "passed": true,
       "details": {
-        "path": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar"
+        "path": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\win-unpacked\\resources\\app.asar"
       }
     },
     {
@@ -68,10 +89,24 @@
       }
     },
     {
-      "name": "unpacked dir target configured",
+      "name": "unpacked dir target configured for smoke",
       "passed": true,
       "details": {
         "expected": "electron-builder dir target"
+      }
+    },
+    {
+      "name": "Windows NSIS installer target configured",
+      "passed": true,
+      "details": {
+        "expected": "electron-builder win target nsis"
+      }
+    },
+    {
+      "name": "Windows zip archive target configured",
+      "passed": true,
+      "details": {
+        "expected": "electron-builder win target zip"
       }
     },
     {
@@ -92,14 +127,14 @@
       "name": "desktop package description metadata present",
       "passed": true,
       "details": {
-        "packageJson": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\package.json"
+        "packageJson": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\package.json"
       }
     },
     {
       "name": "desktop package author metadata present",
       "passed": true,
       "details": {
-        "packageJson": "C:\\tmp\\pse-269-review-merge\\apps\\desktop\\package.json"
+        "packageJson": "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\package.json"
       }
     },
     {
@@ -107,6 +142,34 @@
       "passed": true,
       "details": {
         "expected": "productName: Local Work OS"
+      }
+    },
+    {
+      "name": "beta version configured",
+      "passed": true,
+      "details": {
+        "rootVersion": "0.1.0-beta.1",
+        "desktopVersion": "0.1.0-beta.1"
+      }
+    },
+    {
+      "name": "Windows NSIS installer artifact exists",
+      "passed": true,
+      "details": {
+        "artifacts": [
+          "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\Local Work OS-0.1.0-beta.1-win-x64.exe",
+          "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\Local Work OS-0.1.0-beta.1-win-x64.zip"
+        ]
+      }
+    },
+    {
+      "name": "Windows zip archive artifact exists",
+      "passed": true,
+      "details": {
+        "artifacts": [
+          "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\Local Work OS-0.1.0-beta.1-win-x64.exe",
+          "C:\\tmp\\Pseudico-pse-275-installer-beta\\apps\\desktop\\dist-packaged\\Local Work OS-0.1.0-beta.1-win-x64.zip"
+        ]
       }
     }
   ],
@@ -116,6 +179,7 @@
     "Launch the packaged app manually and create/open a temporary workspace.",
     "Back up before upgrade and verify data remains under the workspace folder.",
     "Publish SHA-256 checksums next to any artifact handed to an operator.",
+    "Warn beta testers that unsigned Windows SmartScreen or unknown-publisher prompts are expected.",
     "Resolve owner decisions for public signing/notarization before public release."
   ]
 }

@@ -1,0 +1,82 @@
+{
+  "ok": true,
+  "exe": "C:/tmp/Pseudico-pse275-installed-beta/Local Work OS.exe",
+  "workspaceRoot": "C:/tmp/Pseudico-pse275-persistent-workspace-final",
+  "userDataDir": "C:/tmp/Pseudico-pse275-user-data-final",
+  "first": {
+    "workspace": {
+      "id": "workspace_mpncgms8_0igxvzgqcqt",
+      "name": "PSE-275 Final Installer Smoke",
+      "rootPath": "C:\\tmp\\Pseudico-pse275-persistent-workspace-final",
+      "openedAt": "2026-05-27T00:47:01.976Z",
+      "schemaVersion": 23
+    },
+    "projectId": "container_mpncgmuo_13eurwhi1bd",
+    "contactId": "container_mpncgmvf_24phcia5ii1",
+    "taskId": "item_mpncgmvq_1l99ugubhiv",
+    "noteId": "item_mpncgmw0_21t8kk9q9xr",
+    "listId": "item_mpncgmw8_134brgm0f6f",
+    "searchCount": 3,
+    "todayKeys": [
+      "backlogDays",
+      "completionSummary",
+      "dueToday",
+      "focusSummary",
+      "generatedAt",
+      "laneSummaries",
+      "localDate",
+      "overdueBacklog",
+      "planningSummary",
+      "preferences",
+      "ranges",
+      "tomorrowPreview",
+      "workspaceId"
+    ],
+    "dashboardKeys": [
+      "dashboard",
+      "widgets"
+    ],
+    "backup": {
+      "id": "backup_mpncgmxc_1yqpan9epel",
+      "workspaceId": "workspace_mpncgms8_0igxvzgqcqt",
+      "createdAt": "2026-05-27T00:47:02.154Z",
+      "relativePath": "backups/2026-05-27T00-47-02-154Z",
+      "databaseRelativePath": "backups/2026-05-27T00-47-02-154Z/local-work-os.sqlite",
+      "manifestRelativePath": "backups/2026-05-27T00-47-02-154Z/attachment-manifest.json",
+      "attachmentCount": 0,
+      "totalAttachmentBytes": 0,
+      "databaseSizeBytes": 667648,
+      "kind": "manual",
+      "manifest": {
+        "id": "backup_mpncgmxc_1yqpan9epel",
+        "kind": "manual",
+        "workspaceId": "workspace_mpncgms8_0igxvzgqcqt",
+        "workspaceName": "PSE-275 Final Installer Smoke",
+        "createdAt": "2026-05-27T00:47:02.154Z",
+        "database": {
+          "sourceRelativePath": "data/local-work-os.sqlite",
+          "backupRelativePath": "backups/2026-05-27T00-47-02-154Z/local-work-os.sqlite",
+          "sizeBytes": 667648,
+          "checksum": "93cf5010e04f655027838512f4dc37351417f6699aaaeea2a7ad2b46a93e4139"
+        },
+        "attachments": [],
+        "attachmentCount": 0,
+        "totalAttachmentBytes": 0
+      }
+    }
+  },
+  "reopen": {
+    "workspace": {
+      "id": "workspace_mpncgms8_0igxvzgqcqt",
+      "name": "PSE-275 Final Installer Smoke",
+      "rootPath": "C:\\tmp\\Pseudico-pse275-persistent-workspace-final",
+      "openedAt": "2026-05-27T00:47:02.856Z",
+      "schemaVersion": 23
+    },
+    "searchCount": 3
+  },
+  "reinstallOpen": {
+    "workspaceId": "workspace_mpncgms8_0igxvzgqcqt",
+    "searchCount": 3
+  }
+}

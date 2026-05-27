@@ -1,3 +1,18 @@
+﻿# 2026-05-27 PSE-275 installer-grade beta addendum
+
+Verdict pending final clean validation: PSE-275 adds a Windows unsigned NSIS installer and zip archive for controlled nontechnical beta distribution, while retaining the `win-unpacked` package-smoke target.
+
+Candidate artifacts:
+
+- `apps/desktop/dist-packaged/Local Work OS-0.1.0-beta.1-win-x64.exe`
+- `apps/desktop/dist-packaged/Local Work OS-0.1.0-beta.1-win-x64.zip`
+- `apps/desktop/dist-packaged/win-unpacked/Local Work OS.exe`
+
+Owner caveats remain: unsigned Windows artifacts, expected SmartScreen/unknown-publisher prompts, no auto-update, manual backup-before-upgrade, local/manual distribution only, no public GA claim, and no cloud/telemetry/hosted account behavior.
+
+Evidence files: `docs/release/package-artifact-check.json`, `docs/manual-qa/PSE-275-installer-beta-evidence.md`, and `docs/manual-qa/PSE-275-installer-manual-smoke.json`.
+
+---
 # 2026-05-24 Beta handoff addendum
 
 **Updated targeted verdict:** controlled nontechnical internal beta is now **Go with caveats** after PSE-268 was fixed and rerun. This addendum supersedes the older nontechnical-readiness verdict below only for the 2026-05-24 internal beta candidate; public release remains **No**.
