@@ -8737,3 +8737,12 @@ Files changed:
 - docs/release/package-artifact-check.json; docs/BETA_HANDOFF_STATUS_2026-05-27.md; docs/manual-qa/PSE-275-installer-beta-evidence.md; docs/manual-qa/PSE-275-installer-manual-smoke.json; docs/session_log.md
 Open questions / risks: Owner must approve unsigned/manual beta distribution and support path.
 Next actions: Commit final evidence; push branch; open PR.
+## 2026-05-27T10:56:28+10:00
+Objective: Open PSE-275 PR after final installer beta validation.
+Decisions made:
+- PR #237 opened against main; CI passed on initial head.
+- Repository policy keeps human final merge gate, so PR remains review-ready.
+Files changed:
+- docs/session_log.md
+Open questions / risks: Await owner/human review and unsigned beta distribution approval.
+Next actions: Update Linear final evidence; monitor/merge only with approval.
